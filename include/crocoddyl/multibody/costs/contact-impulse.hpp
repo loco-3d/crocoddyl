@@ -157,7 +157,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Modify the reference spatial contact impulse in the contact coordinates
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;

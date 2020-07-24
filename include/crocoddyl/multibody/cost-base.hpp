@@ -64,7 +64,7 @@ class CostModelAbstractTpl {
 
  protected:
   virtual void set_referenceImpl(const std::type_info&, const void*);
-  virtual void get_referenceImpl(const std::type_info&, void*);
+  virtual void get_referenceImpl(const std::type_info&, void*) const;
 
   boost::shared_ptr<StateMultibody> state_;
   boost::shared_ptr<ActivationModelAbstract> activation_;

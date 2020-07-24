@@ -188,7 +188,7 @@ void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, cons
 }
 
 template <typename Scalar>
-void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(VectorXs)) {
     VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(state_->get_nx());

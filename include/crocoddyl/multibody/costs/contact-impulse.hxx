@@ -102,7 +102,7 @@ void CostModelContactImpulseTpl<Scalar>::set_referenceImpl(const std::type_info&
 }
 
 template <typename Scalar>
-void CostModelContactImpulseTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelContactImpulseTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameForce)) {
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
     ref_map = fref_;

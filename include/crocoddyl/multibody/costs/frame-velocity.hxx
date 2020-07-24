@@ -98,7 +98,7 @@ void CostModelFrameVelocityTpl<Scalar>::set_referenceImpl(const std::type_info& 
 }
 
 template <typename Scalar>
-void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameMotion)) {
     FrameMotion& ref_map = *static_cast<FrameMotion*>(pv);
     ref_map = vref_;

@@ -191,7 +191,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Modify the reference spatial contact force in the contact coordinates
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;

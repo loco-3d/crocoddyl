@@ -85,7 +85,7 @@ void CostModelAbstractTpl<Scalar>::get_reference(T& ref) {
 }
 
 template <typename Scalar>
-void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) {
+void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) const {
   throw_pretty("It has not been implemented the set_referenceImpl() function");
 }
 
