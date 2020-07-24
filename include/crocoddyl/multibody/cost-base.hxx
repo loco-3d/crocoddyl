@@ -68,8 +68,8 @@ const std::size_t& CostModelAbstractTpl<Scalar>::get_nu() const {
 }
 
 template <typename Scalar>
-template <class T>
-void CostModelAbstractTpl<Scalar>::set_reference(T ref) {
+template <class ReferenceType>
+void CostModelAbstractTpl<Scalar>::set_reference(ReferenceType ref) {
   set_referenceImpl(typeid(ref), &ref);
 }
 
@@ -79,9 +79,11 @@ void CostModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, cons
 }
 
 template <typename Scalar>
-template <class T>
-void CostModelAbstractTpl<Scalar>::get_reference(T& ref) {
+template <class ReferenceType>
+ReferenceType CostModelAbstractTpl<Scalar>::get_reference() const {
+  ReferenceType ref;
   get_referenceImpl(typeid(ref), &ref);
+  return ref;
 }
 
 template <typename Scalar>
