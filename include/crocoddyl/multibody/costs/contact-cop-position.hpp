@@ -26,17 +26,17 @@ namespace crocoddyl {
  * @brief Define a center of pressure cost function
  *
  * It builds a cost function that bounds the center of pressure (cop) for one contact surface to
- * lie inside a certain geometric area defined around the reference contact frame. The cost residual 
+ * lie inside a certain geometric area defined around the reference contact frame. The cost residual
  * vector is described as \mathbf{r} = \mathbf{A} \cdot \mathbf{f} \geq \mathbf{0}, where \mathbf{A}=
- * \begin{bmatrix} 0 & 0 & X/2 & 0 & -1 & 0 \\ 0 & 0 & X/2 & 0 & 1 & 0 \\ 0 & 0 & Y/2 & 1 & 0 & 0 \\ 
- * 0 & 0 & Y/2 & -1 & 0 & 0 \end{bmatrix} is the inequality matrix and \mathbf{f} is the reference spatial 
- * contact force in the frame coordinate. The constraints for the cop to lie inside the convex hull of 
+ * \begin{bmatrix} 0 & 0 & X/2 & 0 & -1 & 0 \\ 0 & 0 & X/2 & 0 & 1 & 0 \\ 0 & 0 & Y/2 & 1 & 0 & 0 \\
+ * 0 & 0 & Y/2 & -1 & 0 & 0 \end{bmatrix} is the inequality matrix and \mathbf{f} is the reference spatial
+ * contact force in the frame coordinate. The constraints for the cop to lie inside the convex hull of
  * the foot, see eq.(18-19) of https://hal.archives-ouvertes.fr/hal-02108449/document can be written as:
- * \begin{align}\begin{split}\tau^x &\leq Yf^z \\-\tau^x &\leq Yf^z \\\tau^y &\leq Yf^z \\-\tau^y &\leq Yf^z 
+ * \begin{align}\begin{split}\tau^x &\leq Yf^z \\-\tau^x &\leq Yf^z \\\tau^y &\leq Yf^z \\-\tau^y &\leq Yf^z
  * \end{split}\end{align}$`
- * The cost is computed, from the residual vector \mathbf{r}, through an user defined activation model. 
- * Additionally, the contact frame id, the desired support region for the cop and the inequality matrix 
- * are handled within FrameCoPSupportTpl. The force vector \mathbf{f} and its derivatives are computed by 
+ * The cost is computed, from the residual vector \mathbf{r}, through an user defined activation model.
+ * Additionally, the contact frame id, the desired support region for the cop and the inequality matrix
+ * are handled within FrameCoPSupportTpl. The force vector \mathbf{f} and its derivatives are computed by
  * DifferentialActionModelContactFwdDynamicsTpl. These values are stored in a shared data (i.e.
  * DataCollectorContactTpl). Note that this cost function cannot be used with other action models.
  *
@@ -79,7 +79,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Initialize the cop cost model
-   * 
+   *
    * For this case the default nu is equal to `state->get_nv()`.
    *
    * @param[in] state        Multibody state
@@ -93,9 +93,9 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the cop cost model
    *
-   * For this case the default activation model is quadratic barrier, i.e. 
+   * For this case the default activation model is quadratic barrier, i.e.
    * `ActivationModelQuadraticBarrierTpl(ActivationBounds(0, inf))`.
-   * 
+   *
    * @param[in] state        Multibody state
    * @param[in] cop_support  ID of contact frame and support region of the cop
    * @param[in] nu           Dimension of control vector
@@ -103,10 +103,10 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support,
                                  const std::size_t& nu);
 
-    /**
+  /**
    * @brief Initialize the cop cost model
-   * 
-   * For this case the default activation model is quadratic barrier, i.e. 
+   *
+   * For this case the default activation model is quadratic barrier, i.e.
    * `ActivationModelQuadraticBarrierTpl(ActivationBounds(0, inf))` and is equal to `state->get_nv().
    *
    * @param[in] state        Multibody state
@@ -118,7 +118,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Compute the cop cost
    *
-   * The cop residual is computed based on the A matrix, the force vector is computed by 
+   * The cop residual is computed based on the A matrix, the force vector is computed by
    * DifferentialActionModelContactFwdDynamicsTpl and the results are stored in DataCollectorContactTpl.
    *
    * @param[in] data  cop data
@@ -131,7 +131,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Compute the derivatives of the cop cost
    *
-   * The cop derivatives are based on the force derivatives computed by 
+   * The cop derivatives are based on the force derivatives computed by
    * DifferentialActionModelContactFwdDynamicsTpl and stored in DataCollectorContactTpl.
    *
    * @param[in] data  cop data
@@ -144,7 +144,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Create the cop cost data
    *
-   * Each cost model has its own data that needs to be allocated. 
+   * Each cost model has its own data that needs to be allocated.
    * This function returns the allocated data for a predefined cost.
    *
    * @param[in] data  shared data (it should be of type DataCollectorContactTpl)
@@ -159,12 +159,12 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Return the cop 
+   * @brief Return the cop
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
-    /**
-   * @brief Modify the cop 
+  /**
+   * @brief Modify the cop
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 

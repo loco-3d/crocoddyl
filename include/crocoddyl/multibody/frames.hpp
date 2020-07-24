@@ -146,13 +146,9 @@ class FrameCoPSupportTpl {
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
  public:
-  explicit FrameCoPSupportTpl() : frame_(0), support_region_(Vector2s::Zero()) {
-    update_A();
-  }
+  explicit FrameCoPSupportTpl() : frame_(0), support_region_(Vector2s::Zero()) { update_A(); }
   FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value)
-      : frame_(value.get_frame()),
-        support_region_(value.get_support_region()),
-        A_(value.get_A()) {}
+      : frame_(value.get_frame()), support_region_(value.get_support_region()), A_(value.get_A()) {}
   FrameCoPSupportTpl(const FrameIndex& frame, const Vector2s& support_region)
       : frame_(frame), support_region_(support_region) {
     update_A();

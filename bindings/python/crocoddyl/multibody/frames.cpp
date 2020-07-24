@@ -91,15 +91,14 @@ void exposeFrames() {
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
 
-  bp::class_<FrameCoPSupport>(
-      "FrameCoPSupport",
-      "Frame foot geometry.\n\n"
-      "It defines the ID of the contact frame and the geometry of the contact surface",
-      bp::init<FrameIndex, Eigen::Vector2d>(
-          bp::args("self", "frame", "support_region"),
-          "Initialize the frame foot geometry.\n\n"
-          ":param frame: ID of the contact frame \n"
-          ":param support_region: dimension of the foot surface dim = (length, width) "))
+  bp::class_<FrameCoPSupport>("FrameCoPSupport",
+                              "Frame foot geometry.\n\n"
+                              "It defines the ID of the contact frame and the geometry of the contact surface",
+                              bp::init<FrameIndex, Eigen::Vector2d>(
+                                  bp::args("self", "frame", "support_region"),
+                                  "Initialize the frame foot geometry.\n\n"
+                                  ":param frame: ID of the contact frame \n"
+                                  ":param support_region: dimension of the foot surface dim = (length, width) "))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame CoP support."))
       .def("update_A", &FrameCoPSupport::update_A, "update the matrix that defines the support region")
       .add_property("frame",
