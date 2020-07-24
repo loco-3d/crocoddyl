@@ -103,7 +103,7 @@ void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_i
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameCoPSupport)) {
     FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
     ref_map = cop_support_;

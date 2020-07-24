@@ -82,9 +82,16 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataFrameVelocityTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
-        joint(model->get_state()->get_pinocchio()->frames[model->get_vref().frame].parent),
+        joint(model->get_state()
+                  ->get_pinocchio()
+                  ->frames[model->template get_reference<FrameMotionTpl<Scalar> >().frame]
+                  .parent),
         vr(pinocchio::MotionTpl<Scalar>::Zero()),
-        fXj(model->get_state()->get_pinocchio()->frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
+        fXj(model->get_state()
+                ->get_pinocchio()
+                ->frames[model->template get_reference<FrameMotionTpl<Scalar> >().frame]
+                .placement.inverse()
+                .toActionMatrix()),
         dv_dq(6, model->get_state()->get_nv()),
         dv_dv(6, model->get_state()->get_nv()),
         Arr_Rx(6, model->get_state()->get_nv()) {

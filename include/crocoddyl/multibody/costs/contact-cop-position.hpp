@@ -161,7 +161,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Modify the cop
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
