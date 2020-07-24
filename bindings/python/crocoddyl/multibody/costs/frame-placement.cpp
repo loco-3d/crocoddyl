@@ -74,8 +74,7 @@ void exposeCostFramePlacement() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelFramePlacement::get_Mref, bp::return_internal_reference<>()),
+      .add_property("reference", bp::make_function(&CostModelFramePlacement::get_reference<FramePlacement>),
                     &CostModelFramePlacement::set_reference<FramePlacement>, "reference frame placement")
       .add_property("Mref", bp::make_function(&CostModelFramePlacement::get_Mref, bp::return_internal_reference<>()),
                     &CostModelFramePlacement::set_Mref, "reference frame placement");

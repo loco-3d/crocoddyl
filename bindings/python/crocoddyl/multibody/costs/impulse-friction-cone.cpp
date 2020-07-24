@@ -58,8 +58,7 @@ void exposeCostImpulseFrictionCone() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelImpulseFrictionCone::get_fref, bp::return_internal_reference<>()),
+      .add_property("reference", bp::make_function(&CostModelImpulseFrictionCone::get_reference<FrameFrictionCone>),
                     &CostModelImpulseFrictionCone::set_reference<FrameFrictionCone>, "reference frame friction cone");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataImpulseFrictionCone> >();

@@ -68,8 +68,7 @@ void exposeCostContactImpulse() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelContactImpulse::get_fref, bp::return_internal_reference<>()),
+      .add_property("reference", bp::make_function(&CostModelContactImpulse::get_reference<FrameForce>),
                     &CostModelContactImpulse::set_reference<FrameForce>,
                     "reference spatial contact impulse in the contact coordinates")
       .add_property("fref", bp::make_function(&CostModelContactImpulse::get_fref, bp::return_internal_reference<>()),
