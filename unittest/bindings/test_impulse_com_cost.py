@@ -4,7 +4,6 @@ import example_robot_data
 
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
-
 # Create robot model and data
 ROBOT_MODEL = example_robot_data.loadICub().model
 ROBOT_DATA = ROBOT_MODEL.createData()

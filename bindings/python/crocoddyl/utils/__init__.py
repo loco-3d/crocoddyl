@@ -454,8 +454,8 @@ class StateCostModelDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u):
         data.Rx[:] = self.state.Jdiff(self.xref, x, crocoddyl.Jcomponent.second)[0]
         self.activation.calcDiff(data.activation, data.r)
-        data.Lx[:] = data.Rx.T * data.activation.Ar
-        data.Lxx[:, :] = data.Rx.T * data.activation.Arr * data.Rx
+        data.Lx[:] = np.dot(data.Rx.T, data.activation.Ar)
+        data.Lxx[:, :] = np.dot(data.Rx.T, np.dot(data.activation.Arr, data.Rx))
 
 
 class ControlCostModelDerived(crocoddyl.CostModelAbstract):
@@ -493,15 +493,13 @@ class CoMPositionCostModelDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u):
         self.activation.calcDiff(data.activation, data.r)
         data.Rx[:] = np.hstack([data.shared.pinocchio.Jcom, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
-        data.Lx[:] = np.vstack(
-            [data.shared.pinocchio.Jcom.T * data.activation.Ar,
-             pinocchio.utils.zero((self.state.nv, 1))])
+        data.Lx[:] = np.hstack([np.dot(data.shared.pinocchio.Jcom.T, data.activation.Ar), np.zeros(self.state.nv)])
         data.Lxx[:, :] = np.vstack([
             np.hstack([
-                data.shared.pinocchio.Jcom.T * data.activation.Arr * data.shared.pinocchio.Jcom,
-                pinocchio.utils.zero((self.state.nv, self.state.nv))
+                np.dot(data.shared.pinocchio.Jcom.T, np.dot(data.activation.Arr, data.shared.pinocchio.Jcom)),
+                np.zeros((self.state.nv, self.state.nv))
             ]),
-            pinocchio.utils.zero((self.state.nv, self.state.ndx))
+            np.zeros((self.state.nv, self.state.ndx))
         ])
 
 
@@ -527,12 +525,13 @@ class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
                                                     pinocchio.ReferenceFrame.LOCAL)
         data.J[:, :] = np.dot(data.rJf, data.fJf)
         self.activation.calcDiff(data.activation, data.r)
-        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, pinocchio.utils.zero((self.state.nv, 1))])
-        data.Lxx = np.vstack([
-            np.hstack([data.J.T * data.activation.Arr * data.J,
-                       pinocchio.utils.zero((self.state.nv, self.state.nv))]),
-            pinocchio.utils.zero((self.state.nv, self.state.ndx))
+        data.Rx[:] = np.hstack([data.J, np.zeros((self.activation.nr, self.state.nv))])
+        data.Lx[:] = np.hstack([np.dot(data.J.T, data.activation.Ar), np.zeros(self.state.nv)])
+        data.Lxx[:, :] = np.vstack([
+            np.hstack(
+                [np.dot(data.J.T, np.dot(data.activation.Arr, data.J)),
+                 np.zeros((self.state.nv, self.state.nv))]),
+            np.zeros((self.state.nv, self.state.ndx))
         ])
 
     def createData(self, collector):
@@ -572,12 +571,13 @@ class FrameTranslationCostModelDerived(crocoddyl.CostModelAbstract):
             pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.xref.frame,
                                        pinocchio.ReferenceFrame.LOCAL)[:3, :])
         self.activation.calcDiff(data.activation, data.r)
-        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
-        data.Lx = np.vstack([np.dot(data.J.T, data.activation.Ar), pinocchio.utils.zero((self.state.nv, 1))])
-        data.Lxx = np.vstack([
-            np.hstack([data.J.T * data.activation.Arr * data.J,
-                       pinocchio.utils.zero((self.state.nv, self.state.nv))]),
-            pinocchio.utils.zero((self.state.nv, self.state.ndx))
+        data.Rx[:] = np.hstack([data.J, np.zeros((self.activation.nr, self.state.nv))])
+        data.Lx[:] = np.hstack([np.dot(data.J.T, data.activation.Ar), np.zeros(self.state.nv)])
+        data.Lxx[:, :] = np.vstack([
+            np.hstack(
+                [np.dot(data.J.T, np.dot(data.activation.Arr, data.J)),
+                 np.zeros((self.state.nv, self.state.nv))]),
+            np.zeros((self.state.nv, self.state.ndx))
         ])
 
     def createData(self, collector):
@@ -602,25 +602,39 @@ class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
         self.Rref = Rref
 
     def calc(self, data, x, u):
-        data.rRf = self.Rref.oRf.transpose() * data.shared.pinocchio.oMf[self.Rref.frame].rotation
+        data.rRf[:, :] = np.dot(self.Rref.oRf.T, data.shared.pinocchio.oMf[self.Rref.frame].rotation)
         data.r = pinocchio.log3(data.rRf)
         self.activation.calc(data.activation, data.r)
         data.cost = data.activation.a
 
     def calcDiff(self, data, x, u):
         pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
-        data.rJf = pinocchio.Jlog3(data.rRf)
-        data.fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Rref.frame,
-                                              pinocchio.ReferenceFrame.LOCAL)[3:, :]
-        data.J = data.rJf * data.fJf
+        data.rJf[:, :] = pinocchio.Jlog3(data.rRf)
+        data.fJf[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Rref.frame,
+                                                    pinocchio.ReferenceFrame.LOCAL)[3:, :]
+        data.J[:, :] = np.dot(data.rJf, data.fJf)
         self.activation.calcDiff(data.activation, data.r)
-        data.Rx = np.hstack([data.J, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
-        data.Lx = np.vstack([data.J.T * data.activation.Ar, pinocchio.utils.zero((self.state.nv, 1))])
-        data.Lxx = np.vstack([
-            np.hstack([data.J.T * data.activation.Arr * data.J,
-                       pinocchio.utils.zero((self.state.nv, self.state.nv))]),
-            pinocchio.utils.zero((self.state.nv, self.state.ndx))
+        data.Rx[:] = np.hstack([data.J, np.zeros((self.activation.nr, self.state.nv))])
+        data.Lx[:] = np.hstack([np.dot(data.J.T, data.activation.Ar), np.zeros(self.state.nv)])
+        data.Lxx[:, :] = np.vstack([
+            np.hstack(
+                [np.dot(data.J.T, np.dot(data.activation.Arr, data.J)),
+                 np.zeros((self.state.nv, self.state.nv))]),
+            np.zeros((self.state.nv, self.state.ndx))
         ])
+
+    def createData(self, collector):
+        data = FrameRotationCostDataDerived(self, collector)
+        return data
+
+
+class FrameRotationCostDataDerived(crocoddyl.CostDataAbstract):
+    def __init__(self, model, collector):
+        crocoddyl.CostDataAbstract.__init__(self, model, collector)
+        self.rRf = np.eye(3)
+        self.rJf = np.zeros((3, 3))
+        self.fJf = np.zeros((3, model.state.nv))
+        self.J = np.zeros((3, model.state.nv))
 
 
 class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
@@ -631,8 +645,6 @@ class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
         else:
             crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
         self.vref = vref
-        self.joint = state.pinocchio.frames[vref.frame].parent
-        self.fXj = state.pinocchio.frames[vref.frame].placement.inverse().action
 
     def calc(self, data, x, u):
         data.r = (pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self.vref.frame) -
@@ -642,12 +654,23 @@ class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
 
     def calcDiff(self, data, x, u):
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.shared.pinocchio,
-                                                                           self.joint, pinocchio.ReferenceFrame.LOCAL)
+                                                                           data.joint, pinocchio.ReferenceFrame.LOCAL)
 
         self.activation.calcDiff(data.activation, data.r)
-        data.Rx = np.hstack([self.fXj * v_partial_dq, self.fXj * v_partial_dv])
-        data.Lx = data.Rx.T * data.activation.Ar
-        data.Lxx = data.Rx.T * data.activation.Arr * data.Rx
+        data.Rx[:] = np.hstack([np.dot(data.fXj, v_partial_dq), np.dot(data.fXj, v_partial_dv)])
+        data.Lx[:] = np.dot(data.Rx.T, data.activation.Ar)
+        data.Lxx[:, :] = np.dot(data.Rx.T, np.dot(data.activation.Arr, data.Rx))
+
+    def createData(self, collector):
+        data = FrameVelocityCostDataDerived(self, collector)
+        return data
+
+
+class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
+    def __init__(self, model, collector):
+        crocoddyl.CostDataAbstract.__init__(self, model, collector)
+        self.fXj = model.state.pinocchio.frames[model.vref.frame].placement.inverse().action
+        self.joint = model.state.pinocchio.frames[model.vref.frame].parent
 
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):

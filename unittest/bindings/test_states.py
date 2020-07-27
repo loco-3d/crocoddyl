@@ -9,7 +9,6 @@ import crocoddyl
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
 
-
 class StateAbstractTestCase(unittest.TestCase):
     NX = None
     NDX = None
@@ -24,10 +23,10 @@ class StateAbstractTestCase(unittest.TestCase):
         self.assertEqual(self.STATE.nv, self.STATE_DER.nv, "Wrong nv value.")
 
         # Checking the dimension of zero and random states
-        self.assertEqual(self.STATE.zero().shape, (self.NX,), "Wrong dimension of zero state.")
-        self.assertEqual(self.STATE.rand().shape, (self.NX,), "Wrong dimension of random state.")
-        self.assertEqual(self.STATE.lb.shape, (self.NX,), "Wrong dimension of lower bound.")
-        self.assertEqual(self.STATE.ub.shape, (self.NX,), "Wrong dimension of lower bound.")
+        self.assertEqual(self.STATE.zero().shape, (self.NX, ), "Wrong dimension of zero state.")
+        self.assertEqual(self.STATE.rand().shape, (self.NX, ), "Wrong dimension of random state.")
+        self.assertEqual(self.STATE.lb.shape, (self.NX, ), "Wrong dimension of lower bound.")
+        self.assertEqual(self.STATE.ub.shape, (self.NX, ), "Wrong dimension of lower bound.")
 
     def test_python_derived_diff(self):
         x0 = self.STATE.rand()

@@ -10,8 +10,6 @@ from crocoddyl.utils import (CoMPositionCostModelDerived, ControlCostModelDerive
                              FrameRotationCostModelDerived, FrameTranslationCostModelDerived,
                              FrameVelocityCostModelDerived, StateCostModelDerived)
 
-crocoddyl.switchToNumpyMatrix()
-
 
 class CostModelAbstractTestCase(unittest.TestCase):
     ROBOT_MODEL = None

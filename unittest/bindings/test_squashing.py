@@ -8,7 +8,6 @@ import pinocchio
 from crocoddyl.utils import (SquashingSmoothSatDerived)
 
 
-
 class SquashingModelAbstractTestCase(unittest.TestCase):
     SQUASHING = None
     SQUASHING_DER = None
