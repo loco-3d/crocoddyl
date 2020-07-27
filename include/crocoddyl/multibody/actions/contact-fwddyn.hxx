@@ -165,9 +165,9 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                                       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                                       const std::size_t& maxiter, const Scalar& tol) {
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter, const Scalar& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -182,7 +182,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(const boo
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
-  //Check the velocity input is zero
+  // Check the velocity input is zero
   assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
 
   d->multibody.actuation->tau = pinocchio::rnea(pinocchio_, d->pinocchio, q, v, VectorXs::Zero(state_->get_nv()));
@@ -201,7 +201,6 @@ bool DifferentialActionModelContactFwdDynamicsTpl<Scalar>::checkData(
   }
 }
 
-  
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;

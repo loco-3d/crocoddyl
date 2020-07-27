@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
   crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
-      boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel, "arm_kinova_manipulation_running_cg");
+      boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel,
+                                                        "arm_kinova_manipulation_running_cg");
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_terminalModel, terminalModel,
                                                         "arm_kinova_manipulation_terminal_cg");

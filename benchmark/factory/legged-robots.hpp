@@ -14,7 +14,6 @@
 #include <pinocchio/algorithm/model.hpp>
 #include <example-robot-data/path.hpp>
 
-
 #include "robot-ee-names.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -35,8 +34,9 @@ namespace crocoddyl {
 namespace benchmark {
 
 template <typename Scalar>
-void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
-                                        boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& terminalModel) {
+void build_contact_action_models(RobotEENames robotNames,
+                                 boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
+                                 boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& terminalModel) {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector2s Vector2s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -59,8 +59,7 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
 
   pinocchio::ModelTpl<double> modeld;
-  pinocchio::urdf::buildModel(robotNames.urdf_path,
-                              pinocchio::JointModelFreeFlyer(), modeld);
+  pinocchio::urdf::buildModel(robotNames.urdf_path, pinocchio::JointModelFreeFlyer(), modeld);
   modeld.lowerPositionLimit.head<7>().array() = -1;
   modeld.upperPositionLimit.head<7>().array() = 1.;
   pinocchio::srdf::loadReferenceConfigurations(modeld, robotNames.srdf_path, false);
@@ -70,10 +69,9 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
-  VectorXs default_state(model.nq+model.nv);
-  default_state << model.referenceConfigurations[robotNames.reference_conf],
-    VectorXs::Zero(model.nv);
-  
+  VectorXs default_state(model.nq + model.nv);
+  default_state << model.referenceConfigurations[robotNames.reference_conf], VectorXs::Zero(model.nv);
+
   boost::shared_ptr<ActuationModelFloatingBase> actuation = boost::make_shared<ActuationModelFloatingBase>(state);
 
   FramePlacement Mref(model.getFrameId(robotNames.ee_name),
@@ -83,7 +81,8 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
       boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> goalTrackingCost =
       boost::make_shared<CostModelFramePlacement>(state, Mref, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state, default_state, actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> xRegCost =
+      boost::make_shared<CostModelState>(state, default_state, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
 
   // Create a cost model per the running and terminal action model.
@@ -100,33 +99,24 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
   boost::shared_ptr<ContactModelMultiple> contact_models =
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  for(int i=0; i<robotNames.contact_names.size();++i) {
-    switch(robotNames.contact_types[i]) {
-    case Contact3D:
-    {
-      FrameTranslation contact_ref(model.getFrameId(robotNames.contact_names[i]),
-                                   Eigen::Vector3d::Zero());
-      boost::shared_ptr<ContactModelAbstract> support_contact =
-        boost::make_shared<ContactModel3D>(state, contact_ref, actuation->get_nu(),
-                                           Vector2s(Scalar(0.), Scalar(50.)));
-      contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
-      break;
-    }
-    case Contact6D:
-    {
-      FramePlacement contact_ref(model.getFrameId(robotNames.contact_names[i]),
-                                 pinocchio::SE3Tpl<Scalar>::Identity());
-      boost::shared_ptr<ContactModelAbstract> support_contact =
-        boost::make_shared<ContactModel6D>(state, contact_ref,
-                                           actuation->get_nu(),
-                                           Vector2s(Scalar(0.), Scalar(50.)));
-      contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
-      break;
-    }
-    default:
-    {
-      break;
-    }
+  for (int i = 0; i < robotNames.contact_names.size(); ++i) {
+    switch (robotNames.contact_types[i]) {
+      case Contact3D: {
+        FrameTranslation contact_ref(model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero());
+        boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel3D>(
+            state, contact_ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+        contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
+        break;
+      }
+      case Contact6D: {
+        FramePlacement contact_ref(model.getFrameId(robotNames.contact_names[i]),
+                                   pinocchio::SE3Tpl<Scalar>::Identity());
+        boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel6D>(
+            state, contact_ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+        contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
+        break;
+      }
+      default: { break; }
     }
   }
 
