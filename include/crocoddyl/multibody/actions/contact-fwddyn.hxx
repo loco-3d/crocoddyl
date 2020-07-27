@@ -181,8 +181,12 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(const boo
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
+  //Check the velocity input is zero
+  assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
+
   d->multibody.actuation->tau = pinocchio::rnea(pinocchio_, d->pinocchio, q, v, VectorXs::Zero(state_->get_nv()));
   actuation_->get_actuated(d->multibody.actuation, u);
+  d->multibody.actuation->tau.setZero();
 }
 
 template <typename Scalar>
