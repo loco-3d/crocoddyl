@@ -85,7 +85,7 @@ void exposeContactAbstract() {
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("jMf", bp::make_getter(&ContactDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    "local frame placement of the contact frame")
+                    bp::make_setter(&ContactDataAbstract::jMf), "local frame placement of the contact frame")
       .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::fXj), "action matrix from contact to local frames")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_internal_reference<>()),
