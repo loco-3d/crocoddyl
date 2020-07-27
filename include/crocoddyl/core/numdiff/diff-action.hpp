@@ -38,7 +38,9 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
-
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100, const Scalar& tol = 1e-9) {};
+  
   const boost::shared_ptr<Base>& get_model() const;
   const Scalar& get_disturbance() const;
   void set_disturbance(const Scalar& disturbance);
