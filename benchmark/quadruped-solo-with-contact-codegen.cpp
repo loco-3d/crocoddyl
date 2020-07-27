@@ -301,14 +301,57 @@ void print_benchmark(RobotEENames robot) {
 int main(int argc, char* argv[]) {
 
   //Quadruped Solo Benchmarks
-  RobotEENames quadrupedSolo("solo",{"FR_KFE", "FL_KFE","HL_KFE"},
+  std::cout<<"********************Quadruped Solo******************"<<std::endl;
+  RobotEENames quadrupedSolo("Solo",{"FR_KFE","HL_KFE"},
+                             {crocoddyl::Contact3D, crocoddyl::Contact3D},
                              EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/robots/solo.urdf",
                              EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/srdf/solo.srdf",
                              "HL_KFE",
                              "standing");
 
   print_benchmark(quadrupedSolo);
-  //
+
+  //Quadruped Anymal Benchmarks
+  std::cout<<"********************Quadruped Anymal******************"<<std::endl;
+  RobotEENames quadrupedAnymal("Anymal",{"RF_KFE", "LF_KFE","LH_KFE"},
+                               {crocoddyl::Contact3D, crocoddyl::Contact3D, crocoddyl::Contact3D},
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/robots/anymal.urdf",
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/srdf/anymal.srdf",
+                               "RH_KFE",
+                               "standing");
+
+  print_benchmark(quadrupedAnymal);
+
+  //Quadruped HyQ Benchmarks
+  std::cout<<"******************** Quadruped HyQ ******************"<<std::endl;
+  RobotEENames quadrupedHyQ("HyQ",{"rf_kfe_joint", "lf_kfe_joint","lh_kfe_joint"},
+                               {crocoddyl::Contact3D, crocoddyl::Contact3D, crocoddyl::Contact3D},
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf",
+                               "rh_kfe_joint",
+                               "standing");
+
+  print_benchmark(quadrupedHyQ);
+  
+  //Biped icub Benchmarks
+  std::cout<<"********************Biped iCub ***********************"<<std::endl;
+  RobotEENames bipedIcub("iCub",{"r_ankle_roll", "l_ankle_roll"},
+                         {crocoddyl::Contact6D, crocoddyl::Contact6D},
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf",
+                         "r_wrist_yaw",
+                         "half_sitting");
+  print_benchmark(bipedIcub);
+
+  //Biped icub Benchmarks
+  std::cout<<"********************Biped Talos***********************"<<std::endl;
+  RobotEENames bipedTalos("Talos",{"leg_right_6_joint", "leg_left_6_joint"},
+                         {crocoddyl::Contact6D, crocoddyl::Contact6D},
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
+                         "arm_right_7_joint",
+                         "half_sitting");
+  print_benchmark(bipedTalos);
 
   return 0;
 }
