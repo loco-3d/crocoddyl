@@ -47,7 +47,7 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data) {
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<CostDataAbstract> >(createData.ptr(), data);
+      return bp::call<boost::shared_ptr<CostDataAbstract> >(createData.ptr(), boost::ref(data));
     }
     return CostModelAbstract::createData(data);
   }
