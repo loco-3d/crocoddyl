@@ -7,7 +7,6 @@ import crocoddyl
 import pinocchio
 from crocoddyl.utils import (SquashingSmoothSatDerived)
 
-crocoddyl.switchToNumpyMatrix()
 
 
 class SquashingModelAbstractTestCase(unittest.TestCase):
