@@ -9,8 +9,6 @@ import crocoddyl
 import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, UnicycleModelDerived
 
-pinocchio.switchToNumpyMatrix()
-
 
 class ShootingProblemTestCase(unittest.TestCase):
     MODEL = None

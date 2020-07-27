@@ -10,7 +10,6 @@ import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived, UnicycleModelDerived
 
 
-
 class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL = None
     MODEL_DER = None

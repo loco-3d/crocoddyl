@@ -9,7 +9,6 @@ from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
 import example_robot_data
 
 
-
 class ActuationModelAbstractTestCase(unittest.TestCase):
     STATE = None
     ACTUATION = None
