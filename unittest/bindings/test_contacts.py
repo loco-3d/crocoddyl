@@ -10,7 +10,6 @@ import pinocchio
 from crocoddyl.utils import Contact3DModelDerived, Contact6DModelDerived
 
 
-
 class ContactModelAbstractTestCase(unittest.TestCase):
     ROBOT_MODEL = None
     ROBOT_STATE = None

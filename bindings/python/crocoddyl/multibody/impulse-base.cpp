@@ -54,6 +54,7 @@ void exposeImpulseAbstract() {
            "returns the allocated data for a predefined impulse.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
+      .def("createData", &ImpulseModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
           bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -74,7 +75,7 @@ void exposeImpulseAbstract() {
       .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("jMf", bp::make_getter(&ImpulseDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    "local frame placement of the impulse frame")
+                    bp::make_setter(&ImpulseDataAbstract::jMf), "local frame placement of the impulse frame")
       .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),

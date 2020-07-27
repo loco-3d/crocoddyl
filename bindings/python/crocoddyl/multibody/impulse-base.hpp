@@ -34,6 +34,17 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
     assert_pretty(static_cast<std::size_t>(force.size()) == ni_, "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
+
+  boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data) {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<ImpulseDataAbstract> >(createData.ptr(), boost::ref(data));
+    }
+    return ImpulseModelAbstract::createData(data);
+  }
+
+  boost::shared_ptr<ImpulseDataAbstract> default_createData(pinocchio::DataTpl<Scalar>* const data) {
+    return this->ImpulseModelAbstract::createData(data);
+  }
 };
 
 }  // namespace python
