@@ -14,6 +14,7 @@
 #include <pinocchio/algorithm/contact-dynamics.hpp>
 #include <pinocchio/algorithm/centroidal.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
