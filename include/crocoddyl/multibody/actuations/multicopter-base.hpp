@@ -63,6 +63,11 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
 
     data->tau.noalias() = tau_f_ * u;
   }
+  virtual void get_actuated(const boost::shared_ptr<Data>& data,
+                            Eigen::Ref<VectorXs>& u){
+    throw_pretty("get_actuated hasn't yet been implemented for multicopter-base")
+  }
+  
   virtual void calcDiff(const boost::shared_ptr<Data>& /*data*/, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.

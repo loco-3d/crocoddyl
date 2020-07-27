@@ -44,6 +44,15 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->tau = u;
   };
 
+  virtual void get_actuated(const boost::shared_ptr<Data>& data,
+                            Eigen::Ref<VectorXs>& u) {
+    if (static_cast<std::size_t>(u.size()) != nu_) {
+      throw_pretty("Invalid argument: "
+                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
+    u = data->tau;
+  };
+  
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
     // The derivatives has constant values which were set in createData.
