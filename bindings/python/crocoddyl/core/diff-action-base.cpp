@@ -51,7 +51,8 @@ void exposeDifferentialActionAbstract() {
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args("self"),
+      .def("createData", &DifferentialActionModelAbstract_wrap::createData,
+           &DifferentialActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"
            "allocated. This function returns the allocated data for a predefined\n"
