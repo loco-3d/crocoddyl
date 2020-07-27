@@ -849,12 +849,12 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
     def stoppingCriteria(self):
-        return sum([np.asscalar(q.T * q) for q in self.Qu])
+        return sum([np.dot(q.T, q) for q in self.Qu])
 
     def expectedImprovement(self):
-        d1 = sum([np.asscalar(q.T * k) for q, k in zip(self.Qu, self.k)])
-        d2 = sum([-np.asscalar(k.T * q * k) for q, k in zip(self.Quu, self.k)])
-        return np.matrix([d1, d2]).T
+        d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
+        d2 = sum([-np.dot(k.T, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
+        return np.array([d1, d2])
 
     def tryStep(self, stepLength=1):
         self.forwardPass(stepLength)
@@ -925,11 +925,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     def allocateData(self):
         models = self.problem.runningModels.tolist() + [self.problem.terminalModel]
-        self.Vxx = [a2m(np.zeros([m.state.ndx, m.state.ndx])) for m in models]
-        self.Vx = [a2m(np.zeros([m.state.ndx])) for m in models]
+        self.Vxx = [np.zeros([m.state.ndx, m.state.ndx]) for m in models]
+        self.Vx = [np.zeros([m.state.ndx]) for m in models]
 
-        self.Q = [a2m(np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu])) for m in self.problem.runningModels]
-        self.q = [a2m(np.zeros([m.state.ndx + m.nu])) for m in self.problem.runningModels]
+        self.Q = [np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu]) for m in self.problem.runningModels]
+        self.q = [np.zeros([m.state.ndx + m.nu]) for m in self.problem.runningModels]
         self.Qxx = [Q[:m.state.ndx, :m.state.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
         self.Qxu = [Q[:m.state.ndx, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
         self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
@@ -937,13 +937,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.Qx = [q[:m.state.ndx] for m, q in zip(self.problem.runningModels, self.q)]
         self.Qu = [q[m.state.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
 
-        self.K = [np.matrix(np.zeros([m.nu, m.state.ndx])) for m in self.problem.runningModels]
-        self.k = [a2m(np.zeros([m.nu])) for m in self.problem.runningModels]
+        self.K = [np.zeros([m.nu, m.state.ndx]) for m in self.problem.runningModels]
+        self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
 
         self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
         self.us_try = [np.nan] * self.problem.T
-        self.gaps = [a2m(np.zeros(self.problem.runningModels[0].state.ndx))
-                     ] + [a2m(np.zeros(m.state.ndx)) for m in self.problem.runningModels]
+        self.gaps = [np.zeros(self.problem.runningModels[0].state.ndx)
+                     ] + [np.zeros(m.state.ndx) for m in self.problem.runningModels]
 
     def backwardPass(self):
         self.Vx[-1][:] = self.problem.terminalData.Lx
@@ -958,11 +958,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
 
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
-            self.Qxx[t][:, :] = data.Lxx + data.Fx.T * self.Vxx[t + 1] * data.Fx
-            self.Qxu[t][:, :] = data.Lxu + data.Fx.T * self.Vxx[t + 1] * data.Fu
-            self.Quu[t][:, :] = data.Luu + data.Fu.T * self.Vxx[t + 1] * data.Fu
-            self.Qx[t][:] = data.Lx + data.Fx.T * self.Vx[t + 1]
-            self.Qu[t][:] = data.Lu + data.Fu.T * self.Vx[t + 1]
+            self.Qxx[t][:, :] = data.Lxx + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fx))
+            self.Qxu[t][:, :] = data.Lxu + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fu))
+            self.Quu[t][:, :] = data.Luu + np.dot(data.Fu.T, np.dot(self.Vxx[t + 1], data.Fu))
+            self.Qx[t][:] = data.Lx + np.dot(data.Fx.T, self.Vx[t + 1])
+            self.Qu[t][:] = data.Lu + np.dot(data.Fu.T, self.Vx[t + 1])
 
             if self.u_reg != 0:
                 self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
@@ -970,10 +970,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.computeGains(t)
 
             if self.u_reg == 0:
-                self.Vx[t][:] = self.Qx[t] - self.K[t].T * self.Qu[t]
+                self.Vx[t][:] = self.Qx[t] - np.dot(self.K[t].T, self.Qu[t])
             else:
-                self.Vx[t][:] = self.Qx[t] - 2 * self.K[t].T * self.Qu[t] + self.K[t].T * self.Quu[t] * self.k[t]
-            self.Vxx[t][:, :] = self.Qxx[t] - self.Qxu[t] * self.K[t]
+                self.Vx[t][:] = self.Qx[t] - 2 * np.dot(self.K[t].T, self.Qu[t])
+                self.Vx[t][:] += np.dot(self.K[t].T, np.dot(self.Quu[t], self.k[t]))
+            self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
             self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)  # ensure symmetric
 
             if self.x_reg != 0:
@@ -1100,26 +1101,26 @@ class FDDPDerived(DDPDerived):
         self.dg = 0.
         self.dq = 0.
         if not self.isFeasible:
-            self.dg -= np.asscalar(self.Vx[-1].T * self.gaps[-1])
-            self.dq += np.asscalar(self.gaps[-1].T * self.Vxx[-1] * self.gaps[-1])
+            self.dg -= np.dot(self.Vx[-1].T, self.gaps[-1])
+            self.dq += np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
         for t in range(self.problem.T):
-            self.dg += np.asscalar(self.Qu[t].T * self.k[t])
-            self.dq -= np.asscalar(self.k[t].T * self.Quu[t] * self.k[t])
+            self.dg += np.dot(self.Qu[t].T, self.k[t])
+            self.dq -= np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t]))
             if not self.isFeasible:
-                self.dg -= np.asscalar(self.Vx[t].T * self.gaps[t])
-                self.dq += np.asscalar(self.gaps[t].T * self.Vxx[t] * self.gaps[t])
+                self.dg -= np.dot(self.Vx[t].T, self.gaps[t])
+                self.dq += np.dot(self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
 
     def expectedImprovement(self):
         self.dv = 0.
         if not self.isFeasible:
             dx = self.problem.runningModels[-1].state.diff(self.xs_try[-1], self.xs[-1])
-            self.dv -= np.asscalar(self.gaps[-1].T * self.Vxx[-1] * dx)
+            self.dv -= np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], dx))
             for t in range(self.problem.T):
                 dx = self.problem.runningModels[t].state.diff(self.xs_try[t], self.xs[t])
-                self.dv -= np.asscalar(self.gaps[t].T * self.Vxx[t] * dx)
+                self.dv -= np.dot(self.gaps[t].T, np.dot(self.Vxx[t], dx))
         d1 = self.dg + self.dv
         d2 = self.dq - 2 * self.dv
-        return np.matrix([d1, d2]).T
+        return np.array([d1, d2])
 
     def calc(self):
         self.cost = self.problem.calc(self.xs, self.us)
@@ -1142,7 +1143,7 @@ class FDDPDerived(DDPDerived):
                 xtry[t] = xnext.copy()
             else:
                 xtry[t] = m.state.integrate(xnext, self.gaps[t] * (stepLength - 1))
-            utry[t] = us[t] - self.k[t] * stepLength - self.K[t] * m.state.diff(xs[t], xtry[t])
+            utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
                 m.calc(d, xtry[t], utry[t])
