@@ -61,6 +61,7 @@ void exposeContactAbstract() {
            "returns the allocated data for a predefined contact.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
+      .def("createData", &ContactModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
           bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -85,8 +86,8 @@ void exposeContactAbstract() {
                     "pinocchio data")
       .add_property("jMf", bp::make_getter(&ContactDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
                     "local frame placement of the contact frame")
-      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from contact to local frames")
+      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::fXj), "action matrix from contact to local frames")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),
