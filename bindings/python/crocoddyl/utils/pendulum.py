@@ -42,18 +42,21 @@ class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
         self.actLink = actLink
 
     def calc(self, data, x, u):
-        S = pinocchio.utils.zero((self.nv, self.nu))
-        if self.actLink == 1:
-            S[0] = 1
-        else:
-            S[1] = 1
-        data.tau = S * u
+        data.tau = data.S * u
 
     def calcDiff(self, data, x, u):
-        S = np.zeros((self.nv, self.nu))
-        if self.actLink == 1:
-            S[0] = 1
-        else:
-            S[1] = 1
+        data.dtau_du = data.S
 
-        data.dtau_du = S
+    def createData(self):
+        data = ActuationDataDoublePendulum(self)
+        return data
+
+
+class ActuationDataDoublePendulum(crocoddyl.ActuationDataAbstract):
+    def __init__(self, model):
+        crocoddyl.ActuationDataAbstract.__init__(self, model)
+        self.S = np.zeros((model.nv, model.nu))
+        if model.actLink == 1:
+            self.S[0] = 1
+        else:
+            self.S[1] = 1

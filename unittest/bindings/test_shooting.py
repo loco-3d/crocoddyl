@@ -7,7 +7,7 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, UnicycleDerived
+from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, UnicycleModelDerived
 
 pinocchio.switchToNumpyMatrix()
 
@@ -22,7 +22,7 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.xs = []
         self.us = []
         self.xs.append(state.rand())
-        for i in range(self.T):
+        for _ in range(self.T):
             self.xs.append(state.rand())
             self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
         self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
@@ -66,7 +66,7 @@ class ShootingProblemTestCase(unittest.TestCase):
 
 class UnicycleShootingTest(ShootingProblemTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
-    MODEL_DER = UnicycleDerived()
+    MODEL_DER = UnicycleModelDerived()
 
 
 class TalosArmShootingTest(ShootingProblemTestCase):
@@ -82,7 +82,7 @@ class TalosArmShootingTest(ShootingProblemTestCase):
     COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
-    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
+    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     MODEL_DER = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL_DER, 1e-3)
 
