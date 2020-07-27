@@ -14,23 +14,28 @@
 #include <pinocchio/algorithm/model.hpp>
 #include <example-robot-data/path.hpp>
 
+
+#include "robot-ee-names.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/multibody/contacts/contact-6d.hpp"
+#include "crocoddyl/multibody/contacts/contact-3d.hpp"
 
 namespace crocoddyl {
 namespace benchmark {
 
 template <typename Scalar>
-void build_quadruped_solo_action_models(RobotEENames robotNames, boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
+void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
                                         boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& terminalModel) {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector2s Vector2s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
@@ -43,23 +48,26 @@ void build_quadruped_solo_action_models(RobotEENames robotNames, boost::shared_p
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
   typedef typename crocoddyl::ActuationModelFloatingBaseTpl<Scalar> ActuationModelFloatingBase;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
+  typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
+  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
   typedef typename crocoddyl::CostModelFramePlacementTpl<Scalar> CostModelFramePlacement;
   typedef typename crocoddyl::CostModelCoMPositionTpl<Scalar> CostModelCoMPosition;
   typedef typename crocoddyl::CostModelStateTpl<Scalar> CostModelState;
   typedef typename crocoddyl::CostModelControlTpl<Scalar> CostModelControl;
+  typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
+  typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
 
   const std::string RF = "FR_KFE";
   const std::string LF = "FL_KFE";
   const std::string LH = "HL_KFE";
 
   pinocchio::ModelTpl<double> modeld;
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/robots/solo.urdf",
+  pinocchio::urdf::buildModel(robotNames.urdf_path,
                               pinocchio::JointModelFreeFlyer(), modeld);
   modeld.lowerPositionLimit.head<7>().array() = -1;
   modeld.upperPositionLimit.head<7>().array() = 1.;
-  pinocchio::srdf::loadReferenceConfigurations(modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/srdf/solo.srdf",
-                                               false);
+  pinocchio::srdf::loadReferenceConfigurations(modeld, robotNames.srdf_path, false);
 
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
@@ -67,12 +75,12 @@ void build_quadruped_solo_action_models(RobotEENames robotNames, boost::shared_p
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
   VectorXs default_state(model.nq+model.nv);
-  default_state << model.referenceConfigurations["standing"],
+  default_state << model.referenceConfigurations[robotNames.reference_conf],
     VectorXs::Zero(model.nv);
   
   boost::shared_ptr<ActuationModelFloatingBase> actuation = boost::make_shared<ActuationModelFloatingBase>(state);
 
-  FramePlacement Mref(model.getFrameId("HL_KFE"),
+  FramePlacement Mref(model.getFrameId(robotNames.ee_name),
                       pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))));
 
   boost::shared_ptr<CostModelAbstract> comCost =
@@ -93,24 +101,25 @@ void build_quadruped_solo_action_models(RobotEENames robotNames, boost::shared_p
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
 
-  //////////////////////////////////////////////////////////////////////////////////
-  typedef pinocchio::RigidContactModelTpl<Scalar,0> RigidContactModel;
-  typedef pinocchio::RigidContactDataTpl<Scalar,0> RigidContactData;
-  
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) contact_models;
+  boost::shared_ptr<ContactModelMultiple> contact_models =
+      boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  RigidContactModel ci_RF(pinocchio::CONTACT_3D,model.getFrameId(RF),pinocchio::LOCAL);
-  RigidContactModel ci_LF(pinocchio::CONTACT_3D,model.getFrameId(LF),pinocchio::LOCAL);
-  RigidContactModel ci_LH(pinocchio::CONTACT_3D,model.getFrameId(LH),pinocchio::LOCAL);
+  FrameTranslation RFref(model.getFrameId(LF), Eigen::Vector3d::Zero());
+  boost::shared_ptr<ContactModelAbstract> support_contact_RF =
+      boost::make_shared<ContactModel3D>(state, RFref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  contact_models->addContact(model.frames[model.getFrameId(RF)].name, support_contact_RF);
 
-  contact_models.push_back(ci_RF);
-  //contact_models.push_back(ci_LF);
-  contact_models.push_back(ci_LH);
+  FrameTranslation LFref(model.getFrameId(LF), Eigen::Vector3d::Zero());
+  boost::shared_ptr<ContactModelAbstract> support_contact_LF =
+      boost::make_shared<ContactModel3D>(state, LFref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  //contact_models->addContact(model.frames[model.getFrameId(LF)].name, support_contact_LF);
 
-  ///////////////////////////////////////////////////////////////////////////////
+  FrameTranslation LHref(model.getFrameId(LH), Eigen::Vector3d::Zero());
+  boost::shared_ptr<ContactModelAbstract> support_contact_LH =
+      boost::make_shared<ContactModel3D>(state, LHref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  contact_models->addContact(model.frames[model.getFrameId(LH)].name, support_contact_LH);
 
   // Next, we need to create an action model for running and terminal nodes
-
   boost::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
       boost::make_shared<DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
                                                                     runningCostModel);
@@ -118,8 +127,8 @@ void build_quadruped_solo_action_models(RobotEENames robotNames, boost::shared_p
       boost::make_shared<DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
                                                                     terminalCostModel);
 
-  runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
-  terminalModel = boost::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(1e-3));
+  runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(5e-3));
+  terminalModel = boost::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(5e-3));
 }
 
 }  // namespace benchmark
