@@ -58,10 +58,6 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
 
-  const std::string RF = "FR_KFE";
-  const std::string LF = "FL_KFE";
-  const std::string LH = "HL_KFE";
-
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(robotNames.urdf_path,
                               pinocchio::JointModelFreeFlyer(), modeld);
@@ -104,20 +100,35 @@ void build_contact_action_models(RobotEENames robotNames, boost::shared_ptr<croc
   boost::shared_ptr<ContactModelMultiple> contact_models =
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  FrameTranslation RFref(model.getFrameId(LF), Eigen::Vector3d::Zero());
-  boost::shared_ptr<ContactModelAbstract> support_contact_RF =
-      boost::make_shared<ContactModel3D>(state, RFref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(model.frames[model.getFrameId(RF)].name, support_contact_RF);
-
-  FrameTranslation LFref(model.getFrameId(LF), Eigen::Vector3d::Zero());
-  boost::shared_ptr<ContactModelAbstract> support_contact_LF =
-      boost::make_shared<ContactModel3D>(state, LFref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
-  //contact_models->addContact(model.frames[model.getFrameId(LF)].name, support_contact_LF);
-
-  FrameTranslation LHref(model.getFrameId(LH), Eigen::Vector3d::Zero());
-  boost::shared_ptr<ContactModelAbstract> support_contact_LH =
-      boost::make_shared<ContactModel3D>(state, LHref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(model.frames[model.getFrameId(LH)].name, support_contact_LH);
+  for(int i=0; i<robotNames.contact_names.size();++i) {
+    switch(robotNames.contact_types[i]) {
+    case Contact3D:
+    {
+      FrameTranslation contact_ref(model.getFrameId(robotNames.contact_names[i]),
+                                   Eigen::Vector3d::Zero());
+      boost::shared_ptr<ContactModelAbstract> support_contact =
+        boost::make_shared<ContactModel3D>(state, contact_ref, actuation->get_nu(),
+                                           Vector2s(Scalar(0.), Scalar(50.)));
+      contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
+      break;
+    }
+    case Contact6D:
+    {
+      FramePlacement contact_ref(model.getFrameId(robotNames.contact_names[i]),
+                                 pinocchio::SE3Tpl<Scalar>::Identity());
+      boost::shared_ptr<ContactModelAbstract> support_contact =
+        boost::make_shared<ContactModel6D>(state, contact_ref,
+                                           actuation->get_nu(),
+                                           Vector2s(Scalar(0.), Scalar(50.)));
+      contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
+      break;
+    }
+    default:
+    {
+      break;
+    }
+    }
+  }
 
   // Next, we need to create an action model for running and terminal nodes
   boost::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
