@@ -45,7 +45,7 @@ struct pseudoInverseAlgo<MatrixLike,false>
   typedef typename MatrixLike::RealScalar RealScalar;
   
   static MatrixLike run(const Eigen::MatrixBase<MatrixLike>& a,
-                                           const RealScalar & epsilon)
+                                           const RealScalar &)
   {
     return Eigen::MatrixBase<MatrixLike>::Zero(a.rows(), a.cols());
   }

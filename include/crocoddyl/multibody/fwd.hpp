@@ -299,6 +299,10 @@ typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
+enum ContactType { Contact3D, Contact6D, ContactUndefined };
+
+enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
+  
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
 typedef ContactDataMultipleTpl<double> ContactDataMultiple;

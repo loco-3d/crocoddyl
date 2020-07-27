@@ -21,8 +21,6 @@
 
 namespace crocoddyl {
 
-enum ImpulseType { Impulse3D, Impulse6D, Undefined };
-
 /**
  * @brief Define a contact impulse cost function
  *
@@ -177,7 +175,7 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
-    impulse_type = Undefined;
+    impulse_type = ImpulseUndefined;
 
     // Check that proper shared data has been passed
     DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
