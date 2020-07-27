@@ -118,6 +118,8 @@ class DifferentialActionModelAbstractTpl {
    */
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100, const Scalar& tol = Scalar(1e-9)) = 0;
   /**
    * @brief Return the dimension of the control input
    */
