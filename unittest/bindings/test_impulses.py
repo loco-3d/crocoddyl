@@ -7,9 +7,7 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import Impulse3DDerived, Impulse6DDerived
-
-pinocchio.switchToNumpyMatrix()
+from crocoddyl.utils import Impulse3DModelDerived, Impulse6DModelDerived
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):
@@ -111,7 +109,7 @@ class Impulse3DTest(ImpulseModelAbstractTestCase):
     # gains = pinocchio.utils.rand(2)
     frame = ROBOT_MODEL.getFrameId('lf_foot')
     IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame)
-    IMPULSE_DER = Impulse3DDerived(ROBOT_STATE, frame)
+    IMPULSE_DER = Impulse3DModelDerived(ROBOT_STATE, frame)
 
 
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
@@ -132,7 +130,7 @@ class Impulse6DTest(ImpulseModelAbstractTestCase):
 
     frame = ROBOT_MODEL.getFrameId('r_sole')
     IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame)
-    IMPULSE_DER = Impulse6DDerived(ROBOT_STATE, frame)
+    IMPULSE_DER = Impulse6DModelDerived(ROBOT_STATE, frame)
 
 
 class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
