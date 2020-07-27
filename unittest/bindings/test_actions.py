@@ -9,7 +9,6 @@ import crocoddyl
 import pinocchio
 from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived, UnicycleModelDerived
 
-pinocchio.switchToNumpyMatrix()
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):
@@ -19,7 +18,7 @@ class ActionModelAbstractTestCase(unittest.TestCase):
     def setUp(self):
         state = self.MODEL.state
         self.x = state.rand()
-        self.u = np.matrix(np.random.rand(self.MODEL.nu)).T
+        self.u = np.random.rand(self.MODEL.nu)
         self.DATA = self.MODEL.createData()
         self.DATA_DER = self.MODEL_DER.createData()
 
@@ -71,15 +70,15 @@ class UnicycleTest(ActionModelAbstractTestCase):
 
 
 class LQRTest(ActionModelAbstractTestCase):
-    NX = randint(1, 21)
-    NU = randint(1, NX)
+    NX = randint(2, 21)
+    NU = randint(2, NX)
     MODEL = crocoddyl.ActionModelLQR(NX, NU)
     MODEL_DER = LQRModelDerived(NX, NU)
 
 
 class DifferentialLQRTest(ActionModelAbstractTestCase):
-    NX = randint(1, 21)
-    NU = randint(1, NX)
+    NX = randint(2, 21)
+    NU = randint(2, NX)
     MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
     MODEL_DER = DifferentialLQRModelDerived(NX, NU)
 
@@ -114,8 +113,8 @@ class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
-    MODEL.armature = 0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T
-    MODEL_DER.set_armature(0.1 * np.matrix(np.ones(ROBOT_MODEL.nv)).T)
+    MODEL.armature = 0.1 * np.ones(ROBOT_MODEL.nv)
+    MODEL_DER.set_armature(0.1 * np.ones(ROBOT_MODEL.nv))
 
 
 class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
