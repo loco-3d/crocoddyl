@@ -25,9 +25,11 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  int nvFirstJoint;
 
   explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()) {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
+    nvFirstJoint = state->get_pinocchio()->joints[1].nv();
     if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
       std::cout << "Warning: the first joint should usually be of free-flyer type";
     };
@@ -51,9 +53,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   };
 
   virtual boost::shared_ptr<Data> createData() {
-    boost::shared_ptr<StateMultibody> state = boost::dynamic_pointer_cast<StateMultibody> (state_);
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).fill((Scalar)1.);
+    data->dtau_du.diagonal(-nvFirstJoint).fill((Scalar)1.);
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif
