@@ -46,8 +46,8 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
-  DEPRECATED("Use set_reference<MathbTpl<Scalare>::VectorXs>()", void set_uref(const VectorXs& uref_in);)
-  DEPRECATED("Use get_reference<MathbTpl<Scalare>::VectorXs>()", const VectorXs& get_uref() const;)
+  DEPRECATED("Use set_reference<MathbTpl<Scalare>::VectorXs>()", void set_uref(const VectorXs& uref_in));
+  DEPRECATED("Use get_reference<MathbTpl<Scalare>::VectorXs>()", const VectorXs& get_uref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);

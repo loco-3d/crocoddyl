@@ -51,8 +51,8 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in);)
-  DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const;)
+  DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in));
+  DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);

@@ -135,8 +135,8 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Used set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref);)
-  DEPRECATED("Used get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const;)
+  DEPRECATED("Used set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref));
+  DEPRECATED("Used get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const);
 
  protected:
   /**

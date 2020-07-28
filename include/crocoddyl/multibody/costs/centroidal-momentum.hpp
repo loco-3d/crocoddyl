@@ -54,8 +54,8 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
-  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector6s>()", void set_href(const Vector6s& mref_in);)
-  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector6s>()", const Vector6s& get_href() const;)
+  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector6s>()", void set_href(const Vector6s& mref_in));
+  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector6s>()", const Vector6s& get_href() const);
 
  protected:
   using Base::activation_;
