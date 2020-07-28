@@ -169,8 +169,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref);)
-  DEPRECATED("Use get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const;)
+  DEPRECATED("Use set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref));
+  DEPRECATED("Use get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const);
 
  protected:
   /**

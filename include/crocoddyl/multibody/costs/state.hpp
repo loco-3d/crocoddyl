@@ -51,8 +51,8 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::VectorXs>()", void set_xref(const VectorXs& xref_in);)
-  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::VectorXs>()", const VectorXs& get_xref() const;)
+  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::VectorXs>()", void set_xref(const VectorXs& xref_in));
+  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::VectorXs>()", const VectorXs& get_xref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);

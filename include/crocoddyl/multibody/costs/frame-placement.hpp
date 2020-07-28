@@ -52,8 +52,8 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<FramePlacementTpl<Scalar> >()", void set_Mref(const FramePlacement& Mref_in);)
-  DEPRECATED("Use get_reference<FramePlacementTpl<Scalar> >()", const FramePlacement& get_Mref() const;)
+  DEPRECATED("Use set_reference<FramePlacementTpl<Scalar> >()", void set_Mref(const FramePlacement& Mref_in));
+  DEPRECATED("Use get_reference<FramePlacementTpl<Scalar> >()", const FramePlacement& get_Mref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
