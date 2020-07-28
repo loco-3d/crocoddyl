@@ -12,9 +12,11 @@
 // Helper to deprecate functions and methods
 // See https://blog.samat.io/2017/02/27/Deprecating-functions-and-methods-in-Cplusplus/
 // For C++14
+#if __cplusplus >= 201402L
 #if defined(__has_cpp_attribute)
 #if __has_cpp_attribute(deprecated)
 #define DEPRECATED(msg, func) [[deprecated(msg)]] func
+#endif
 #endif
 // For everyone else
 #else
