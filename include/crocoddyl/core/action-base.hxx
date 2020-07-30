@@ -59,7 +59,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
       calc(data, x, u);
       calcDiff(data, x, u);
       state_->diff(x, data->xnext, dx);
-      du = -pseudoInverse(data->Fu) * data->Fx * dx;
+      du = -pseudoInverse(data->Fu) * dx;
       u += du;
       if (du.norm() <= tol) {
         break;
