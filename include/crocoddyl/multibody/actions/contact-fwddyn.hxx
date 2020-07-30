@@ -186,13 +186,12 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   // Check the velocity input is zero
   assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  pinocchio::computeJointJacobians(pinocchio_,d->pinocchio,q);
-  d->multibody.actuation->tau = pinocchio::rnea(pinocchio_, d->pinocchio, q,
-                                                VectorXs::Zero(state_->get_nv()),
-                                                VectorXs::Zero(state_->get_nv()));
-  
+  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
+  d->multibody.actuation->tau =
+      pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
+
   contacts_->calc(d->multibody.contacts, x);
-  //Eigen::Map<Eigen::MatrixXd> jc_view(d->multibody.contacts->Jc.template topRows<6>().data());
+  // Eigen::Map<Eigen::MatrixXd> jc_view(d->multibody.contacts->Jc.template topRows<6>().data());
   MatrixXs jc_view = d->multibody.contacts->Jc.template topRows<6>();
   d->pinocchio.lambda_c = pseudoInverse(jc_view).transpose() * d->multibody.actuation->tau.template head<6>();
   d->multibody.actuation->tau -= d->multibody.contacts->Jc.transpose() * d->pinocchio.lambda_c;

@@ -80,10 +80,6 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    */
   void set_disturbance(const Scalar& disturbance);
 
-  virtual void get_actuated(const boost::shared_ptr<ActuationDataAbstract>& data, Eigen::Ref<VectorXs>& u) {
-    throw_pretty("get_actuated hasn't yet been implemented for numdiff base")
-  }
-
  private:
   /**
    * @brief This is the model to compute the finite differentiation from

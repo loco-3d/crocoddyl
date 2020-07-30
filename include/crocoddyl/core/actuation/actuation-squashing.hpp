@@ -54,8 +54,6 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->dtau_du.noalias() = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
   };
 
-  virtual void get_actuated(const boost::shared_ptr<ActuationDataAbstract>& data, Eigen::Ref<VectorXs>& u) {}
-
   boost::shared_ptr<ActuationDataAbstract> createData() {
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };

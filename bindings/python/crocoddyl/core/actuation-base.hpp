@@ -45,11 +45,9 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
 
   boost::shared_ptr<ActuationDataAbstract> default_createData() { return this->ActuationModelAbstract::createData(); }
 
-  void get_actuated(const boost::shared_ptr<ActuationDataAbstract>& data,
-                    Eigen::Ref<Eigen::VectorXd>& u) {
+  void get_actuated(const boost::shared_ptr<ActuationDataAbstract>& data, Eigen::Ref<Eigen::VectorXd>& u) {
     assert_pretty(static_cast<std::size_t>(u.size()) == nu_, "u has wrong dimension");
-    return bp::call<void>(this->get_override("get_actuated").ptr(),
-                          data, (Eigen::VectorXd)u);
+    return bp::call<void>(this->get_override("get_actuated").ptr(), data, (Eigen::VectorXd)u);
   }
 };
 

@@ -31,11 +31,10 @@ void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<Di
   calc(data, x, unone_);
 }
 
-
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                             Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                             const std::size_t& maxiter, const Scalar& tol) {
+void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter, const Scalar& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -63,7 +62,6 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared
   }
 }
 
-  
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {

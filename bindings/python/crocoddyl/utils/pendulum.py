@@ -1,5 +1,4 @@
 import crocoddyl
-import pinocchio
 import numpy as np
 
 
