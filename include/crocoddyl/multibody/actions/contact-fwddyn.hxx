@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 #include <pinocchio/algorithm/compute-all-terms.hpp>
@@ -191,7 +192,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
                                                 VectorXs::Zero(state_->get_nv()));
   
   contacts_->calc(d->multibody.contacts, x);
-  d->pinocchio.lambda_c = psuedoInverse(d->multibody.contacts->Jc.template topRows<6>().transpose()) * d->multibody.actuation->tau.template head<6>();
+  //Eigen::Map<Eigen::MatrixXd> jc_view(d->multibody.contacts->Jc.template topRows<6>().data());
+  MatrixXs jc_view = d->multibody.contacts->Jc.template topRows<6>();
+  d->pinocchio.lambda_c = pseudoInverse(jc_view).transpose() * d->multibody.actuation->tau.template head<6>();
   d->multibody.actuation->tau -= d->multibody.contacts->Jc.transpose() * d->pinocchio.lambda_c;
 
   actuation_->get_actuated(d->multibody.actuation, u);
