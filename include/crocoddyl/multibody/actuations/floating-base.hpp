@@ -49,8 +49,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    std::size_t fb_nv = state->get_pinocchio()->joints[1].nv();
-    data->dtau_du.diagonal(-fb_nv).fill((Scalar)1.);
+    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).fill((Scalar)1.);
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif
