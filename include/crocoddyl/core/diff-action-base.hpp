@@ -16,6 +16,7 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 
@@ -120,7 +121,7 @@ class DifferentialActionModelAbstractTpl {
 
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9)) = 0;
+                           const Scalar& tol = Scalar(1e-9));
   /**
    * @brief Return the dimension of the control input
    */

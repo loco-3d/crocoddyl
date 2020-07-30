@@ -39,10 +39,6 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
-  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = 1e-9){};
-
   const MatrixXs& get_Fq() const;
   const MatrixXs& get_Fv() const;
   const MatrixXs& get_Fu() const;

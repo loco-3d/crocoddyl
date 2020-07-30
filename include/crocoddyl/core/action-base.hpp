@@ -49,7 +49,7 @@ class ActionModelAbstractTpl {
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
                            const Scalar& tol = Scalar(1e-9));
   VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x,
-                         const std::size_t& maxiter = 100, const Scalar& tol = 1e-9);
+                         const std::size_t& maxiter = 100, const Scalar& tol = Scalar(1e-9));
 
   const std::size_t& get_nu() const;
   const std::size_t& get_nr() const;
