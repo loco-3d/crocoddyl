@@ -26,12 +26,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv() - 6) {
-    pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
-    if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
-      throw_pretty("Invalid argument: "
-                   << "the first joint has to be free-flyer");
-    }
+  explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()) {
   };
   virtual ~ActuationModelFloatingBaseTpl(){};
 
@@ -50,10 +45,11 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
   };
-
   virtual boost::shared_ptr<Data> createData() {
+    typedef StateMultibodyTpl<Scalar> StateMultibody;
+    boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    data->dtau_du.diagonal(-6).fill((Scalar)1.);
+    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).fill((Scalar)1.);
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif
