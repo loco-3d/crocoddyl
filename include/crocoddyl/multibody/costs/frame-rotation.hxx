@@ -102,7 +102,7 @@ void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& 
 }
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameRotation)) {
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
     ref_map = Rref_;

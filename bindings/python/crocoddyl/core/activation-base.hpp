@@ -35,6 +35,17 @@ class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)r);
   }
+
+  boost::shared_ptr<ActivationDataAbstract> createData() {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<ActivationDataAbstract> >(createData.ptr());
+    }
+    return ActivationModelAbstract::createData();
+  }
+
+  boost::shared_ptr<ActivationDataAbstract> default_createData() {
+    return this->ActivationModelAbstract::createData();
+  }
 };
 
 }  // namespace python

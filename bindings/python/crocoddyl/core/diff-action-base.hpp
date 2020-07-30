@@ -47,6 +47,17 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
+
+  boost::shared_ptr<DifferentialActionDataAbstract> createData() {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<DifferentialActionDataAbstract> >(createData.ptr());
+    }
+    return DifferentialActionModelAbstract::createData();
+  }
+
+  boost::shared_ptr<DifferentialActionDataAbstract> default_createData() {
+    return this->DifferentialActionModelAbstract::createData();
+  }
 };
 
 }  // namespace python

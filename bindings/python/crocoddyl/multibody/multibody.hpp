@@ -42,6 +42,7 @@ void exposeCostFrameTranslation();
 void exposeCostFrameRotation();
 void exposeCostFrameVelocity();
 void exposeCostContactForce();
+void exposeCostContactCoPPosition();
 void exposeCostContactFrictionCone();
 void exposeCostContactImpulse();
 void exposeCostImpulseFrictionCone();

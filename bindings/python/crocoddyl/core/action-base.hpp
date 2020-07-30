@@ -45,6 +45,15 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
+
+  boost::shared_ptr<ActionDataAbstract> createData() {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<ActionDataAbstract> >(createData.ptr());
+    }
+    return ActionModelAbstract::createData();
+  }
+
+  boost::shared_ptr<ActionDataAbstract> default_createData() { return this->ActionModelAbstract::createData(); }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps, ActionModelAbstract::quasiStatic_x, 2, 4)

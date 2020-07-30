@@ -90,6 +90,26 @@ void exposeFrames() {
       .add_property("oRf", bp::make_getter(&FrameFrictionCone::oRf, bp::return_internal_reference<>()),
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
+
+  bp::class_<FrameCoPSupport>("FrameCoPSupport",
+                              "Frame foot geometry.\n\n"
+                              "It defines the ID of the contact frame and the geometry of the contact surface",
+                              bp::init<FrameIndex, Eigen::Vector2d>(
+                                  bp::args("self", "frame", "support_region"),
+                                  "Initialize the frame foot geometry.\n\n"
+                                  ":param frame: ID of the contact frame \n"
+                                  ":param support_region: dimension of the foot surface dim = (length, width) "))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame CoP support."))
+      .def("update_A", &FrameCoPSupport::update_A, "update the matrix that defines the support region")
+      .add_property("frame",
+                    bp::make_function(&FrameCoPSupport::get_frame, bp::return_value_policy<bp::return_by_value>()),
+                    &FrameCoPSupport::set_frame, "frame ID")
+      .add_property("support_region",
+                    bp::make_function(&FrameCoPSupport::get_support_region, bp::return_internal_reference<>()),
+                    &FrameCoPSupport::set_support_region, "support region")
+      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
+                    "inequality matrix")
+      .def(PrintableVisitor<FrameCoPSupport>());
 }
 
 }  // namespace python

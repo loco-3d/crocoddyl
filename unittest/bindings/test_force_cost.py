@@ -3,8 +3,6 @@ import example_robot_data
 import pinocchio
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
-crocoddyl.switchToNumpyMatrix()
-
 # Create robot model and data
 ROBOT_MODEL = example_robot_data.loadICub().model
 ROBOT_DATA = ROBOT_MODEL.createData()

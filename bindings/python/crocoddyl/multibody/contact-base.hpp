@@ -36,6 +36,17 @@ class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrappe
     assert_pretty(static_cast<std::size_t>(force.size()) == nc_, "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
+
+  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data) {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<ContactDataAbstract> >(createData.ptr(), boost::ref(data));
+    }
+    return ContactModelAbstract::createData(data);
+  }
+
+  boost::shared_ptr<ContactDataAbstract> default_createData(pinocchio::DataTpl<Scalar>* const data) {
+    return this->ContactModelAbstract::createData(data);
+  }
 };
 
 }  // namespace python

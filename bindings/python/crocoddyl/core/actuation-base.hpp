@@ -35,6 +35,15 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
     assert_pretty(static_cast<std::size_t>(u.size()) == nu_, "u has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
+
+  boost::shared_ptr<ActuationDataAbstract> createData() {
+    if (boost::python::override createData = this->get_override("createData")) {
+      return bp::call<boost::shared_ptr<ActuationDataAbstract> >(createData.ptr());
+    }
+    return ActuationModelAbstract::createData();
+  }
+
+  boost::shared_ptr<ActuationDataAbstract> default_createData() { return this->ActuationModelAbstract::createData(); }
 };
 
 }  // namespace python

@@ -24,14 +24,12 @@ void exposeImpulseMultiple() {
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
   typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
-  bp::to_python_converter<std::map<std::string, ImpulseItemPtr, std::less<std::string>,
-                                   std::allocator<std::pair<const std::string, ImpulseItemPtr> > >,
-                          map_to_dict<std::string, ImpulseItemPtr, false> >();
-  bp::to_python_converter<std::map<std::string, ImpulseDataPtr, std::less<std::string>,
-                                   std::allocator<std::pair<const std::string, ImpulseDataPtr> > >,
-                          map_to_dict<std::string, ImpulseDataPtr, false> >();
-  dict_to_map<std::string, ImpulseItemPtr>().from_python();
-  dict_to_map<std::string, ImpulseDataPtr>().from_python();
+  StdMapPythonVisitor<std::string, ImpulseItemPtr, std::less<std::string>,
+                      std::allocator<std::pair<const std::string, ImpulseItemPtr> >,
+                      true>::expose("StdMap_ImpulseItem");
+  StdMapPythonVisitor<std::string, ImpulseDataPtr, std::less<std::string>,
+                      std::allocator<std::pair<const std::string, ImpulseDataPtr> >,
+                      true>::expose("StdMap_ImpulseData");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem> >();
 

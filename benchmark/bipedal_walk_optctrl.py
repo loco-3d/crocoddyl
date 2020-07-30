@@ -37,7 +37,7 @@ def runDDPSolveBenchmark(xs, us, problem):
     ddp = crocoddyl.SolverDDP(problem)
 
     duration = []
-    for i in range(T):
+    for _ in range(T):
         c_start = time.time()
         ddp.solve(xs, us, MAXITER, False, 0.1)
         c_end = time.time()
@@ -51,7 +51,7 @@ def runDDPSolveBenchmark(xs, us, problem):
 
 def runShootingProblemCalcBenchmark(xs, us, problem):
     duration = []
-    for i in range(T):
+    for _ in range(T):
         c_start = time.time()
         problem.calc(xs, us)
         c_end = time.time()
@@ -65,7 +65,7 @@ def runShootingProblemCalcBenchmark(xs, us, problem):
 
 def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     duration = []
-    for i in range(T):
+    for _ in range(T):
         c_start = time.time()
         problem.calcDiff(xs, us)
         c_end = time.time()
