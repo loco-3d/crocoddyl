@@ -5,7 +5,6 @@ SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
 SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)")
 SET(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
-SET(CMAKE_CXX_COMPILER /usr/bin/clang++-8)
 
 # Check if the submodule cmake have been initialized
 IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
@@ -43,10 +42,10 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
-OPTION(BUILD_EXAMPLES "Build the examples" OFF)
+OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -60,7 +59,7 @@ PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
 APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
-ADD_PROJECT_DEPENDENCY(pinocchio 2.4.2 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.2")
+ADD_PROJECT_DEPENDENCY(pinocchio 2.4.3 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.3")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.2.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
