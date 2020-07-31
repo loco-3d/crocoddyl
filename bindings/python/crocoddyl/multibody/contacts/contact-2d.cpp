@@ -70,7 +70,7 @@ void exposeContact2D() {
           "Create 2D contact data.\n\n"
           ":param model: 2D contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("v", bp::make_getter(&ContactData3D::v, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("v", bp::make_getter(&ContactData2D::v, bp::return_value_policy<bp::return_by_value>()),
                     "spatial velocity of the contact body")
       .add_property("a", bp::make_getter(&ContactData2D::a, bp::return_value_policy<bp::return_by_value>()),
                     "spatial acceleration of the contact body")

@@ -74,6 +74,9 @@ struct FrameForceTpl;
 template <typename Scalar>
 struct FrameFrictionConeTpl;
 
+template <typename Scalar>
+struct FrameCoPSupportTpl;
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -150,6 +153,11 @@ class CostModelImpulseFrictionConeTpl;
 template <typename Scalar>
 struct CostDataImpulseFrictionConeTpl;
 
+template <typename Scalar>
+class CostModelContactCoPPositionTpl;
+template <typename Scalar>
+struct CostDataContactCoPPositionTpl;
+
 // impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;
@@ -164,6 +172,11 @@ class ContactModelMultipleTpl;
 template <typename Scalar>
 struct ContactDataMultipleTpl;
 
+template <typename Scalar>
+class ContactModel2DTpl;
+template <typename Scalar>
+struct ContactData2DTpl;  
+  
 template <typename Scalar>
 class ContactModel3DTpl;
 template <typename Scalar>
@@ -252,6 +265,7 @@ typedef FramePlacementTpl<double> FramePlacement;
 typedef FrameMotionTpl<double> FrameMotion;
 typedef FrameForceTpl<double> FrameForce;
 typedef FrameFrictionConeTpl<double> FrameFrictionCone;
+typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
@@ -272,6 +286,8 @@ typedef CostModelStateTpl<double> CostModelState;
 typedef CostDataStateTpl<double> CostDataState;
 typedef CostModelFrameVelocityTpl<double> CostModelFrameVelocity;
 typedef CostDataFrameVelocityTpl<double> CostDataFrameVelocity;
+typedef CostModelContactCoPPositionTpl<double> CostModelContactCoPPosition;
+typedef CostDataContactCoPPositionTpl<double> CostDataContactCoPPosition;
 typedef CostModelContactFrictionConeTpl<double> CostModelContactFrictionCone;
 typedef CostDataContactFrictionConeTpl<double> CostDataContactFrictionCone;
 typedef CostModelContactForceTpl<double> CostModelContactForce;
@@ -291,6 +307,8 @@ typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
 typedef ContactDataMultipleTpl<double> ContactDataMultiple;
+typedef ContactModel2DTpl<double> ContactModel2D;
+typedef ContactData2DTpl<double> ContactData2D;
 typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
