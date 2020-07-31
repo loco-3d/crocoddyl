@@ -66,9 +66,7 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
 
 void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   // create the model
-  if (action_type ==
-      DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed)
-    return;
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed) return;
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
@@ -79,14 +77,13 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   Eigen::VectorXd x = model->get_state()->rand();
   x.tail(model->get_state()->get_nv()).setZero();
   Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
-  model->quasiStatic(data,u,x);
+  model->quasiStatic(data, u, x);
 
   model->calc(data, x, u);
 
   // Checking that calc returns a cost value
   BOOST_CHECK(data->xout.norm() <= 1e-8);
 }
-
 
 void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type action_type) {
   // create the model

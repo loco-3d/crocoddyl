@@ -109,6 +109,8 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
     Kinv.setZero();
     df_dx.setZero();
     df_du.setZero();
+    pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
+    pinocchio.lambda_c.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
