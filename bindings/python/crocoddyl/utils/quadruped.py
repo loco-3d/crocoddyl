@@ -565,7 +565,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
             xs.extend(s.xs[:-1])
             us.extend(s.us)
             if bounds:
-                models = s.problem.runningModels + [s.problem.terminalModel]
+                models = s.problem.runningModels.tolist() + [s.problem.terminalModel]
                 for m in models:
                     us_lb += [m.u_lb]
                     us_ub += [m.u_ub]
@@ -575,7 +575,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         rmodel = solver.problem.runningModels[0].state.pinocchio
         xs, us = solver.xs, solver.us
         if bounds:
-            models = solver.problem.runningModels + [solver.problem.terminalModel]
+            models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
             for m in models:
                 us_lb += [m.u_lb]
                 us_ub += [m.u_ub]
