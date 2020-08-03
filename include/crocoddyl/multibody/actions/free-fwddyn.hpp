@@ -11,6 +11,10 @@
 
 #include <stdexcept>
 
+#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT
+#include <pinocchio/codegen/cppadcg.hpp>
+#endif
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
