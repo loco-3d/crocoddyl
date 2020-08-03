@@ -27,24 +27,24 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  d->vw = d->v.angular();
-  d->vv = d->v.linear();
+  const Vector3s& vw = d->v.angular();
+  const Vector3s& vv = d->v.linear();
 
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
 
   d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  d->a0[0] = d->a.linear()[0] + d->vw.cross(d->vv)[0];
-  d->a0[1] = d->a.linear()[2] + d->vw.cross(d->vv)[2];
+  d->a0[0] = d->a.linear()[0] + vw[1]*vv[2] - vw[2]*vv[1];
+  d->a0[1] = d->a.linear()[1] + vw[0]*vv[1] - vw[1]*vv[0];
 
   if (gains_[0] != 0.) {
     d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[0];
     d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[2];
   }
   if (gains_[1] != 0.) {
-    d->a0[0] += gains_[1] * d->vv[0];
-    d->a0[1] += gains_[1] * d->vv[2];
+    d->a0[0] += gains_[1] * vv[0];
+    d->a0[1] += gains_[1] * vv[2];
   }
 }
 
@@ -61,17 +61,18 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
 
-  d->da0_dx.leftCols(nv).row(0) = (d->fXjda_dq.template topRows<3>() +
-                                  d->vw_skew * d->fXjdv_dq.template topRows<3>() -
-                                  d->vv_skew * d->fXjdv_dq.template bottomRows<3>()).row(0);
-  d->da0_dx.leftCols(nv).row(1) = (d->fXjda_dq.template topRows<3>() +
-                                  d->vw_skew * d->fXjdv_dq.template topRows<3>() -
-                                  d->vv_skew * d->fXjdv_dq.template bottomRows<3>()).row(2);
+  d->da0_dx.leftCols(nv).row(0).noalias() = d->fXjda_dq.template topRows<3>().row(0) +
+                                  d->vw_skew.row(0) * d->fXjdv_dq.template topRows<3>() -
+                                  d->vv_skew.row(0) * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_dx.leftCols(nv).row(1).noalias() = d->fXjda_dq.template topRows<3>().row(2) +
+                                  d->vw_skew.row(2) * d->fXjdv_dq.template topRows<3>() -
+                                  d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
   typename MathBase::MatrixXs vw2D(3,2);
+  d->vw_skew.col(1).setZero();
   vw2D.col(0) = d->vw_skew.col(0);
   vw2D.col(1) = d->vw_skew.col(2);
-  d->da0_dx.rightCols(nv).row(0) = (d->fXjda_dv.template topRows<3>() + vw2D * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>()).row(0);
-  d->da0_dx.rightCols(nv).row(1) = (d->fXjda_dv.template topRows<3>() + vw2D * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>()).row(2);
+  d->da0_dx.rightCols(nv).row(0).noalias() = d->fXjda_dv.template topRows<3>().row(0) + vw2D.row(0) * d->Jc - d->vv_skew.row(0) * d->fJf.template bottomRows<3>();
+  d->da0_dx.rightCols(nv).row(1).noalias() = d->fXjda_dv.template topRows<3>().row(2) + vw2D.row(2) * d->Jc - d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
@@ -99,7 +100,9 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
-  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector2s::Zero()));
+  VectorXs force_bis(3);
+  force_bis << force[0],0.0,force[1];
+  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force_bis, Vector3s::Zero()));
 }
 
 template <typename Scalar>
