@@ -11,7 +11,7 @@
 
 #include <stdexcept>
 
-#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT
+#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT  // TODO(cmastalli): Removed after merging Pinocchio v.2.4.8
 #include <pinocchio/codegen/cppadcg.hpp>
 #endif
 
@@ -21,16 +21,6 @@
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
-
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/cholesky.hpp>
-#include <pinocchio/algorithm/aba-derivatives.hpp>
-#include <pinocchio/algorithm/aba.hpp>
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
