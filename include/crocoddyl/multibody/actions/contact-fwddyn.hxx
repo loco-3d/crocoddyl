@@ -193,12 +193,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   contacts_->calc(d->multibody.contacts, x);
   // Allocates memory
   MatrixXs jc_view = d->multibody.contacts->Jc.template leftCols<6>();
-
-  for (int k = 0; k < maxiter; ++k) {
-    d->pinocchio.lambda_c.noalias() =
-        pseudoInverse(jc_view).transpose() * d->multibody.actuation->tau.template head<6>();
-    d->multibody.actuation->tau -= d->multibody.contacts->Jc.transpose() * d->pinocchio.lambda_c;
-  }
+  d->pinocchio.lambda_c.noalias() =
+      pseudoInverse(jc_view).transpose() * d->multibody.actuation->tau.template head<6>();
+  d->multibody.actuation->tau -= d->multibody.contacts->Jc.transpose() * d->pinocchio.lambda_c;
 
   actuation_->get_actuated(d->multibody.actuation, u);
 
