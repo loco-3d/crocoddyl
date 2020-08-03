@@ -92,17 +92,7 @@ void exposeCostFrameVelocity() {
           bp::args("self", "model", "data"),
           "Create frame velocity cost data.\n\n"
           ":param model: frame Velocity cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint), "joint index")
-      .add_property("vr", bp::make_getter(&CostDataFrameVelocity::vr, bp::return_value_policy<bp::return_by_value>()),
-                    "error velocity of the frame")
-      .add_property("fXj",
-                    bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from contact to local frames")
-      .add_property("dv_dq", bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_internal_reference<>()),
-                    "Jacobian of the spatial body velocity")
-      .add_property("dv_dv", bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_internal_reference<>()),
-                    "Jacobian of the spatial body velocity");
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 }
 
 }  // namespace python

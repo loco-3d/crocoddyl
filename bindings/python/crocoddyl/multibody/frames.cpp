@@ -56,13 +56,16 @@ void exposeFrames() {
   bp::class_<FrameMotion>("FrameMotion",
                           "Frame motion describe using Pinocchio.\n\n"
                           "It defines a frame motion (tangent of SE(3) point) for a given frame ID",
-                          bp::init<FrameIndex, pinocchio::Motion>(bp::args("self", "frame", "oMf"),
-                                                                  "Initialize the frame motion.\n\n"
-                                                                  ":param frame: frame ID\n"
-                                                                  ":param oMf: Frame motion w.r.t. the origin"))
+                          bp::init<FrameIndex, pinocchio::Motion, bp::optional<pinocchio::ReferenceFrame> >(
+                              bp::args("self", "frame", "oMf", "reference"),
+                              "Initialize the frame motion.\n\n"
+                              ":param frame: frame ID\n"
+                              ":param oMf: Frame motion w.r.t. the origin\n"
+                              ":param reference: Reference frame (default LOCAL)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame motion."))
       .def_readwrite("frame", &FrameMotion::frame, "frame ID")
       .add_property("oMf", bp::make_getter(&FrameMotion::oMf, bp::return_internal_reference<>()), "frame motion")
+      .def_readwrite("reference", &FrameMotion::reference, "reference frame")
       .def(PrintableVisitor<FrameMotion>());
 
   bp::class_<FrameForce>("FrameForce",
