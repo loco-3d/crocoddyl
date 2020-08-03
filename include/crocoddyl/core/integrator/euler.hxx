@@ -197,7 +197,7 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  differential_->quasiStatic(d->differential, u, x);
+  differential_->quasiStatic(d->differential, u, x, maxiter, tol);
 }
 
 }  // namespace crocoddyl

@@ -65,7 +65,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
 
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = 1e-9);
+                           const Scalar& tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;

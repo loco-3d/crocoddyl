@@ -14,8 +14,8 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/contact-dynamics.hpp>
 #include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
@@ -168,7 +168,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
 template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter, const Scalar& tol) {
+    const Eigen::Ref<const VectorXs>& x, const std::size_t&, const Scalar&) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -181,7 +181,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
       static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
   // Check the velocity input is zero
   assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
