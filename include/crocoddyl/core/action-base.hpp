@@ -45,9 +45,33 @@ class ActionModelAbstractTpl {
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
+   * for \f$\mathbf{f(q,v=0,u)=0}\f$
+   *
+   * @param[in] data    Differential action data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
                            const Scalar& tol = Scalar(1e-9));
+
+  /**
+   * @copybrief quasicStatic()
+   *
+   * @copydetails quasicStatic()
+   *
+   * @param[in] data    Differential action data
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   * @return Quasic static commands
+   */
   VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x,
                          const std::size_t& maxiter = 100, const Scalar& tol = Scalar(1e-9));
 
