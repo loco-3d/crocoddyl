@@ -26,8 +26,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()) {
-  };
+  explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state)
+      : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()){};
   virtual ~ActuationModelFloatingBaseTpl(){};
 
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
