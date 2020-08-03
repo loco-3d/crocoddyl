@@ -99,7 +99,7 @@ void build_contact_action_models(RobotEENames robotNames,
   boost::shared_ptr<ContactModelMultiple> contact_models =
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  for (int i = 0; i < robotNames.contact_names.size(); ++i) {
+  for (std::size_t i = 0; i < robotNames.contact_names.size(); ++i) {
     switch (robotNames.contact_types[i]) {
       case Contact3D: {
         FrameTranslation contact_ref(model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero());

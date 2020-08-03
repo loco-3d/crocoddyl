@@ -71,8 +71,6 @@ void print_benchmark(RobotEENames robot) {
   for (unsigned int i = 0; i < N; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem->get_runningDatas()[i];
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& cg_model = cg_problem->get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& cg_data = cg_problem->get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
   // Check that code-generated action model is the same as original.
@@ -299,7 +297,7 @@ void print_benchmark(RobotEENames robot) {
             << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
   // Quadruped Solo Benchmarks
   std::cout << "********************Quadruped Solo******************" << std::endl;
   RobotEENames quadrupedSolo("Solo", {"FR_KFE", "HL_KFE"}, {crocoddyl::Contact3D, crocoddyl::Contact3D},
