@@ -223,11 +223,11 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Avoids data casting at runtime
     FrameForce fref = model->template get_reference<FrameForce>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           contact_type = Contact3D;

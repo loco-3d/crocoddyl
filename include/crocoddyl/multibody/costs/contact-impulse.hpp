@@ -187,11 +187,11 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Avoids data casting at runtime
     FrameForce fref = model->template get_reference<FrameForce>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_impulse = false;
     for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
          it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           impulse_type = Impulse3D;
