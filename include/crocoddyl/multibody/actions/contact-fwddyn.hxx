@@ -190,20 +190,20 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
 
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()));
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
-  d->multibody.actuation->tau =
+  d->pinocchio.tau =
       pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
 
-  contacts_->calc(d->multibody.contacts, x);
-  // Allocates memory
-  MatrixXs jc_view = d->multibody.contacts->Jc.leftCols(state_->get_nv() - nu_);
-  if (jc_view.size() != 0) {
-    d->pinocchio.lambda_c.noalias() =
-        pseudoInverse(jc_view).transpose() * d->multibody.actuation->tau.head(state_->get_nv() - nu_);
-    d->multibody.actuation->tau.noalias() -= d->multibody.contacts->Jc.transpose() * d->pinocchio.lambda_c;
-  }
-  actuation_->get_actuated(d->multibody.actuation, u);
+  VectorXs x_tmp(state_->get_nq() + state_->get_nv());
+  x_tmp << q, VectorXs::Zero(state_->get_nv());
 
-  d->multibody.actuation->tau.setZero();
+  actuation_->calc(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+  actuation_->calcDiff(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+  contacts_->calc(d->multibody.contacts, x_tmp);
+  // Allocates memory
+  MatrixXs jc_view(state_->get_nv(), nu_ + contacts_->get_nc());
+  jc_view << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.transpose();
+  u = (pseudoInverse(jc_view) * d->pinocchio.tau).head(nu_);
+  d->pinocchio.tau.setZero();
 }
 
 template <typename Scalar>

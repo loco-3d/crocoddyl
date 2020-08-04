@@ -52,9 +52,6 @@ class ActuationModelAbstractTpl {
   const std::size_t& get_nu() const { return nu_; };
   const boost::shared_ptr<StateAbstract>& get_state() const { return state_; };
 
-  virtual void get_actuated(const boost::shared_ptr<ActuationDataAbstract>&, Eigen::Ref<VectorXs>&){
-      throw_pretty("get_actuated not yet implemented for this actuation type.")};
-
  protected:
   std::size_t nu_;
   boost::shared_ptr<StateAbstract> state_;

@@ -155,10 +155,17 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
   // Check the velocity input is zero
   assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  d->multibody.actuation->tau =
+  d->pinocchio.tau =
       pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
-  actuation_->get_actuated(d->multibody.actuation, u);
-  d->multibody.actuation->tau.setZero();
+
+  VectorXs x_tmp(state_->get_nq() + state_->get_nv());
+  x_tmp << q, VectorXs::Zero(state_->get_nv());
+
+  actuation_->calc(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+  actuation_->calcDiff(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+
+  u = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
+  d->pinocchio.tau.setZero();
 }
 
 template <typename Scalar>
