@@ -202,11 +202,11 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Get the active 6d contact (avoids data casting at runtime)
     FrameCoPSupport cop_support = model->template get_reference<FrameCoPSupport>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_frame()].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_id()].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == cop_support.get_frame()) {
+      if (it->second->frame == cop_support.get_id()) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           throw_pretty("Domain error: a 6d contact model is required in " + frame_name +

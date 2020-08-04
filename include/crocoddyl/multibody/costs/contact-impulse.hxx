@@ -49,10 +49,10 @@ void CostModelContactImpulseTpl<Scalar>::calc(const boost::shared_ptr<CostDataAb
   // We transform the impulse to the contact frame
   switch (d->impulse_type) {
     case Impulse3D:
-      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.oFf).linear();
+      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.force).linear();
       break;
     case Impulse6D:
-      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.oFf).toVector();
+      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.force).toVector();
       break;
     default:
       break;
