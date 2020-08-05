@@ -13,7 +13,7 @@
 #define NUM_THREADS 1
 #endif
 
-#ifdef BUILD_WITH_CODEGEN_SUPPORT
+#ifdef CROCODDYL_WITH_CODEGEN
 #include "crocoddyl/core/codegen/action-base.hpp"
 #endif
 
@@ -80,7 +80,7 @@ void print_benchmark(RobotEENames robot) {
   ddp.setCandidate(xs, us, false);
   boost::shared_ptr<crocoddyl::ActionDataAbstract> runningData = runningModel->createData();  
 
-#ifdef BUILD_WITH_CODEGEN_SUPPORT
+#ifdef CROCODDYL_WITH_CODEGEN
   // Code generation of the running an terminal models
   typedef CppAD::AD<CppAD::cg::CG<double> > ADScalar;
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
@@ -125,7 +125,7 @@ void print_benchmark(RobotEENames robot) {
   assert_pretty(cg_runningData->Luu.isApprox(runningData->Luu), "Problem in Luu");
   assert_pretty(cg_runningData->Fx.isApprox(runningData->Fx), "Problem in Fx");
   assert_pretty(cg_runningData->Fu.isApprox(runningData->Fu), "Problem in Fu");
-#endif //BUILD_WITH_CODEGEN_SUPPORT
+#endif //CROCODDYL_WITH_CODEGEN
   
   /*******************************************************************************/
   /*********************************** TIMINGS ***********************************/
@@ -215,7 +215,7 @@ void print_benchmark(RobotEENames robot) {
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
 
-#ifdef BUILD_WITH_CODEGEN_SUPPORT  
+#ifdef CROCODDYL_WITH_CODEGEN  
   
   /*******************************************************************************/
   /*************************** CODE GENERATION TIMINGS ***************************/
@@ -299,7 +299,7 @@ void print_benchmark(RobotEENames robot) {
   std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
-#endif //BUILD_WITH_CODEGEN_SUPPORT
+#endif //CROCODDYL_WITH_CODEGEN
 }
 
 int main() {
