@@ -10,6 +10,7 @@
 #define CROCODDYL_ARM_FACTORY_HPP_
 
 #include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
 #include <example-robot-data/path.hpp>
 

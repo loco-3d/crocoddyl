@@ -22,6 +22,7 @@
 
 #include "factory/legged-robots.hpp"
 #include "factory/arm.hpp"
+#include "factory/arm-kinova.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1))
 #define AVG(vec) (vec.mean())
@@ -34,6 +35,8 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
+  }  else if (robot.robot_name == "Kinova_arm") {
+    crocoddyl::benchmark::build_arm_kinova_action_models(runningModel, terminalModel);
   } else {
     crocoddyl::benchmark::build_contact_action_models(robot, runningModel, terminalModel);
   }
@@ -47,7 +50,7 @@ void print_benchmark(RobotEENames robot) {
   Eigen::VectorXd default_state(state->get_nq() + state->get_nv());
   boost::shared_ptr<crocoddyl::IntegratedActionModelEulerTpl<double> > rm =
     boost::static_pointer_cast<crocoddyl::IntegratedActionModelEulerTpl<double> >(runningModel);
-  if(robot.robot_name=="Talos_arm") {
+  if(robot.robot_name=="Talos_arm" || robot.robot_name=="Kinova_arm") {
     boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> > dm =
       boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
                                                                                                    rm->get_differential());
@@ -83,6 +86,8 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(ad_runningModel, ad_terminalModel);
+  }  else if (robot.robot_name == "Kinova_arm") {
+    crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);    
   } else { 
     crocoddyl::benchmark::build_contact_action_models(robot, ad_runningModel, ad_terminalModel);
   }
@@ -307,7 +312,15 @@ int main() {
                             "half_sitting");
 
   print_benchmark(talosArm4Dof);
+  // Arm Manipulation Benchmarks
+  std::cout << "********************  Kinova Arm  ******************" << std::endl;
+  RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
+                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", "gripper_left_joint",
+                            "arm_up");
 
+  print_benchmark(kinovaArm);
+
+  
   // Quadruped Solo Benchmarks
   std::cout << "********************Quadruped Solo******************" << std::endl;
   contact_names.clear();
