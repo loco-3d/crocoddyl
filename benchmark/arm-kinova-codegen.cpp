@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
 #define NUM_THREADS WITH_NTHREADS
 #else
@@ -109,12 +109,12 @@ int main(int argc, char* argv[]) {
   // calcDiff timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -133,12 +133,12 @@ int main(int argc, char* argv[]) {
   // calc timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -158,12 +158,12 @@ int main(int argc, char* argv[]) {
   /************************* DIFFERENTIAL ACTION TIMINGS *************************/
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -188,12 +188,12 @@ int main(int argc, char* argv[]) {
   // ABA timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -223,12 +223,12 @@ int main(int argc, char* argv[]) {
   // ABA derivatives timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -295,12 +295,12 @@ int main(int argc, char* argv[]) {
   cg_problem->calc(xs, us);
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
@@ -319,12 +319,12 @@ int main(int argc, char* argv[]) {
   // calc timings
   for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration.setZero();
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
 #endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
       for (unsigned int j = 0; j < N; ++j) {
