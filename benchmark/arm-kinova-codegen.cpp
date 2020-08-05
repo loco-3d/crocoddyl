@@ -8,7 +8,7 @@
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS WITH_NTHREADS
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #else
 #define NUM_THREADS 1
 #endif
