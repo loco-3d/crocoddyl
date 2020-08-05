@@ -45,7 +45,8 @@ void build_arm_kinova_action_models(boost::shared_ptr<crocoddyl::ActionModelAbst
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf", modeld);
-  pinocchio::srdf::loadReferenceConfigurations(modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", false);
+  pinocchio::srdf::loadReferenceConfigurations(
+      modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", false);
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
 
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =

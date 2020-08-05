@@ -35,7 +35,7 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
-  }  else if (robot.robot_name == "Kinova_arm") {
+  } else if (robot.robot_name == "Kinova_arm") {
     crocoddyl::benchmark::build_arm_kinova_action_models(runningModel, terminalModel);
   } else {
     crocoddyl::benchmark::build_contact_action_models(robot, runningModel, terminalModel);
@@ -49,20 +49,19 @@ void print_benchmark(RobotEENames robot) {
 
   Eigen::VectorXd default_state(state->get_nq() + state->get_nv());
   boost::shared_ptr<crocoddyl::IntegratedActionModelEulerTpl<double> > rm =
-    boost::static_pointer_cast<crocoddyl::IntegratedActionModelEulerTpl<double> >(runningModel);
-  if(robot.robot_name=="Talos_arm" || robot.robot_name=="Kinova_arm") {
+      boost::static_pointer_cast<crocoddyl::IntegratedActionModelEulerTpl<double> >(runningModel);
+  if (robot.robot_name == "Talos_arm" || robot.robot_name == "Kinova_arm") {
     boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> > dm =
-      boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
-                                                                                                   rm->get_differential());
+        boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
+            rm->get_differential());
     default_state << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
-      Eigen::VectorXd::Zero(state->get_nv());
-  }
-  else {
+        Eigen::VectorXd::Zero(state->get_nv());
+  } else {
     boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> > dm =
-      boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> >(
-                                                                                                   rm->get_differential());
+        boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> >(
+            rm->get_differential());
     default_state << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
-      Eigen::VectorXd::Zero(state->get_nv());
+        Eigen::VectorXd::Zero(state->get_nv());
   }
   Eigen::VectorXd x0(default_state);
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
@@ -78,7 +77,7 @@ void print_benchmark(RobotEENames robot) {
   }
   crocoddyl::SolverFDDP ddp(problem);
   ddp.setCandidate(xs, us, false);
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningData = runningModel->createData();  
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningData = runningModel->createData();
 
 #ifdef CROCODDYL_WITH_CODEGEN
   // Code generation of the running an terminal models
@@ -86,19 +85,18 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(ad_runningModel, ad_terminalModel);
-  }  else if (robot.robot_name == "Kinova_arm") {
-    crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);    
-  } else { 
+  } else if (robot.robot_name == "Kinova_arm") {
+    crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);
+  } else {
     crocoddyl::benchmark::build_contact_action_models(robot, ad_runningModel, ad_terminalModel);
   }
-  
+
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel,
                                                         robot.robot_name + "_running_cg");
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_terminalModel, terminalModel,
                                                         robot.robot_name + "_terminal_cg");
-
 
   // Defining the shooting problem for both cases: with and without code generation
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > cg_runningModels(N, cg_runningModel);
@@ -125,8 +123,8 @@ void print_benchmark(RobotEENames robot) {
   assert_pretty(cg_runningData->Luu.isApprox(runningData->Luu), "Problem in Luu");
   assert_pretty(cg_runningData->Fx.isApprox(runningData->Fx), "Problem in Fx");
   assert_pretty(cg_runningData->Fu.isApprox(runningData->Fu), "Problem in Fu");
-#endif //CROCODDYL_WITH_CODEGEN
-  
+#endif  // CROCODDYL_WITH_CODEGEN
+
   /*******************************************************************************/
   /*********************************** TIMINGS ***********************************/
   Eigen::ArrayXd duration(T);
@@ -185,7 +183,6 @@ void print_benchmark(RobotEENames robot) {
               << ")" << std::endl;
   }
 
-
   /*******************************************************************************/
   /******************* DDP BACKWARD AND FORWARD PASSES TIMINGS *******************/
   // Backward pass timings
@@ -215,8 +212,8 @@ void print_benchmark(RobotEENames robot) {
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
 
-#ifdef CROCODDYL_WITH_CODEGEN  
-  
+#ifdef CROCODDYL_WITH_CODEGEN
+
   /*******************************************************************************/
   /*************************** CODE GENERATION TIMINGS ***************************/
   /*******************************************************************************/
@@ -299,7 +296,7 @@ void print_benchmark(RobotEENames robot) {
   std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
-#endif //CROCODDYL_WITH_CODEGEN
+#endif  // CROCODDYL_WITH_CODEGEN
 }
 
 int main() {
@@ -307,20 +304,20 @@ int main() {
   std::cout << "********************Talos 4DoF Arm******************" << std::endl;
   std::vector<std::string> contact_names;
   std::vector<crocoddyl::ContactType> contact_types;
-  RobotEENames talosArm4Dof("Talos_arm", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
-                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "gripper_left_joint",
-                            "half_sitting");
+  RobotEENames talosArm4Dof(
+      "Talos_arm", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "gripper_left_joint", "half_sitting");
 
   print_benchmark(talosArm4Dof);
   // Arm Manipulation Benchmarks
   std::cout << "********************  Kinova Arm  ******************" << std::endl;
-  RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
-                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", "gripper_left_joint",
-                            "arm_up");
+  RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types,
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", "gripper_left_joint",
+                         "arm_up");
 
   print_benchmark(kinovaArm);
 
-  
   // Quadruped Solo Benchmarks
   std::cout << "********************Quadruped Solo******************" << std::endl;
   contact_names.clear();
@@ -345,10 +342,10 @@ int main() {
   contact_types.push_back(crocoddyl::Contact3D);
   contact_types.push_back(crocoddyl::Contact3D);
   contact_types.push_back(crocoddyl::Contact3D);
-  RobotEENames quadrupedAnymal(
-      "Anymal",  contact_names, contact_types,
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/robots/anymal.urdf",
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/srdf/anymal.srdf", "RH_KFE", "standing");
+  RobotEENames quadrupedAnymal("Anymal", contact_names, contact_types,
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/robots/anymal.urdf",
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/srdf/anymal.srdf", "RH_KFE",
+                               "standing");
 
   print_benchmark(quadrupedAnymal);
 
@@ -361,8 +358,8 @@ int main() {
   contact_names.push_back("lh_kfe_joint");
   contact_types.push_back(crocoddyl::Contact3D);
   contact_types.push_back(crocoddyl::Contact3D);
-  contact_types.push_back(crocoddyl::Contact3D);  
-  RobotEENames quadrupedHyQ("HyQ",  contact_names, contact_types,
+  contact_types.push_back(crocoddyl::Contact3D);
+  RobotEENames quadrupedHyQ("HyQ", contact_names, contact_types,
                             EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
                             EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf", "rh_kfe_joint", "standing");
 
@@ -377,10 +374,9 @@ int main() {
   contact_types.push_back(crocoddyl::Contact6D);
   contact_types.push_back(crocoddyl::Contact6D);
 
-  RobotEENames bipedIcub("iCub",  contact_names, contact_types,
-                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
-                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf", "r_wrist_yaw",
-                         "half_sitting");
+  RobotEENames bipedIcub(
+      "iCub", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf", "r_wrist_yaw", "half_sitting");
   print_benchmark(bipedIcub);
 
   // Biped icub Benchmarks
@@ -393,8 +389,7 @@ int main() {
   contact_types.push_back(crocoddyl::Contact6D);
 
   RobotEENames bipedTalos(
-      "Talos",  contact_names, contact_types,
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
+      "Talos", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
       EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting");
   print_benchmark(bipedTalos);
 
