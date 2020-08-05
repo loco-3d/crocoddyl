@@ -69,10 +69,18 @@ OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation su
 
 OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" OFF)
 IF(BUILD_WITH_MULTITHREADS)
-  SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
+  INCLUDE(ProcessorCount)
+  ProcessorCount(NPROCESSOR)
+  IF(NOT NPROCESSOR EQUAL 0)
+    MATH(EXPR NPROCESSOR ${NPROCESSOR}/2)
+    SET(BUILD_WITH_NTHREADS ${NPROCESSOR} CACHE STRING "Number of threads")
+  ELSE()
+    SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads") # Default setting
+  ENDIF()
+  
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
   IF(NOT BUILD_WITH_NTHREADS MATCHES "^[0-9]+$")
-    SET(BUILD_WITH_NTHREADS 4)
+    SET(BUILD_WITH_NTHREADS 4) # Default setting 4.
     MESSAGE(WARNING "the number of threads have to be an interger value, set to ${BUILD_WITH_NTHREADS}")
   ENDIF()
 ENDIF()
