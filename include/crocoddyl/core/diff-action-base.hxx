@@ -53,7 +53,7 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
     for (std::size_t i = 0; i < maxiter; ++i) {
       calc(data, x, u);
       calcDiff(data, x, u);
-      du = -pseudoInverse(data->Fu) * data->xout;
+      du.noalias() = -pseudoInverse(data->Fu) * data->xout;
       u += du;
       if (du.norm() <= tol) {
         break;
