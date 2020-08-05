@@ -7,7 +7,8 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived, UnicycleModelDerived
+from crocoddyl.utils import (DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived,
+                             UnicycleModelDerived)
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):

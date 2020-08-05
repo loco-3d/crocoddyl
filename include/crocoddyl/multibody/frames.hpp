@@ -155,7 +155,7 @@ struct FrameFrictionConeTpl {
 };
 
 template <typename _Scalar>
-class FrameCoPSupportTpl {
+struct FrameCoPSupportTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

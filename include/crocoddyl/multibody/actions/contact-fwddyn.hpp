@@ -52,6 +52,9 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
+                           const Scalar& tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelFloatingBase>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
@@ -106,6 +109,8 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
     Kinv.setZero();
     df_dx.setZero();
     df_du.setZero();
+    pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
+    pinocchio.lambda_c.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;

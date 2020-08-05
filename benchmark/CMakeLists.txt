@@ -12,7 +12,8 @@ SET(${PROJECT_NAME}_BENCHMARK
 IF(BUILD_WITH_CODEGEN_SUPPORT)
   SET(${PROJECT_NAME}_CODEGEN_BENCHMARK
     arm-manipulation-codegen
-    bipedal-with-contact-codegen
+    arm-kinova-codegen
+    legged-robots-codegen
     )
   LIST(APPEND ${PROJECT_NAME}_BENCHMARK ${${PROJECT_NAME}_CODEGEN_BENCHMARK})
 ENDIF()

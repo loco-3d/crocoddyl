@@ -39,8 +39,13 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     data->tau.tail(nu_) = u;
   };
 
+#ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
+#else
+  virtual void calcDiff(const boost::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>& /*x*/,
+                        const Eigen::Ref<const VectorXs>& /*u*/) {
+#endif
     // The derivatives has constant values which were set in createData.
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");

@@ -32,6 +32,37 @@ void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<Di
 }
 
 template <typename Scalar>
+void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter, const Scalar& tol) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  const std::size_t& ndx = state_->get_ndx();
+  VectorXs dx = VectorXs::Zero(ndx);
+  if (nu_ == 0) {
+    // TODO(cmastalli): create a method for autonomous systems
+  } else {
+    VectorXs du = VectorXs::Zero(nu_);
+    for (std::size_t i = 0; i < maxiter; ++i) {
+      calc(data, x, u);
+      calcDiff(data, x, u);
+      du.noalias() = -pseudoInverse(data->Fu) * data->xout;
+      u += du;
+      if (du.norm() <= tol) {
+        break;
+      }
+    }
+  }
+}
+
+template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);

@@ -16,14 +16,14 @@
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 #include "crocoddyl/core/codegen/action-base.hpp"
-#include "factory/biped.hpp"
+#include "factory/arm-kinova.hpp"
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1))
+#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (double(vec.size()) - 1.))
 #define AVG(vec) (vec.mean())
 
 int main(int argc, char* argv[]) {
   unsigned int N = 100;  // number of nodes
-  unsigned int T = 1e3;  // number of trials
+  unsigned int T = 5e4;  // number of trials
   if (argc > 1) {
     T = atoi(argv[1]);
   }
@@ -31,24 +31,26 @@ int main(int argc, char* argv[]) {
   // Building the running and terminal models
   typedef CppAD::AD<CppAD::cg::CG<double> > ADScalar;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
-  crocoddyl::benchmark::build_biped_action_models(runningModel, terminalModel);
+  crocoddyl::benchmark::build_arm_kinova_action_models(runningModel, terminalModel);
 
   // Code generation of the running an terminal models
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
-  crocoddyl::benchmark::build_biped_action_models(ad_runningModel, ad_terminalModel);
+  crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_runningModel, runningModel,
-                                                        "biped_with_contact_running_cg");
+                                                        "arm_kinova_manipulation_running_cg");
   boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
       boost::make_shared<crocoddyl::ActionModelCodeGen>(ad_terminalModel, terminalModel,
-                                                        "biped_with_contact_terminal_cg");
+                                                        "arm_kinova_manipulation_terminal_cg");
 
   // Get the initial state
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(runningModel->get_state());
   std::cout << "NQ: " << state->get_nq() << std::endl;
   std::cout << "Number of nodes: " << N << std::endl << std::endl;
-  Eigen::VectorXd x0(state->rand());
+  Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
+  Eigen::VectorXd x0(state->get_nx());
+  x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 
   // Defining the shooting problem for both cases: with and without code generation
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
@@ -182,6 +184,78 @@ int main(int argc, char* argv[]) {
   }
 
   /*******************************************************************************/
+  /*************************** PINOCCHIO ABA TIMINGS *****************************/
+  // ABA timings
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+    duration.setZero();
+#ifdef WITH_MULTITHREADING
+    omp_set_num_threads(ithread + 1);
+#endif
+    for (unsigned int i = 0; i < T; ++i) {
+      crocoddyl::Timer timer;
+#ifdef WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+      for (unsigned int j = 0; j < N; ++j) {
+        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m =
+            boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d =
+            boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
+        boost::shared_ptr<crocoddyl::DifferentialActionDataFreeFwdDynamics> dd =
+            boost::static_pointer_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics>(d->differential);
+        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm =
+            boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->get_differential());
+
+        Eigen::Ref<Eigen::VectorXd> q = xs[j].head(state->get_nq());
+        Eigen::Ref<Eigen::VectorXd> v = xs[j].tail(state->get_nv());
+        pinocchio::aba(dm->get_pinocchio(), dd->pinocchio, q, v, us[j]);
+      }
+      duration[i] = timer.get_us_duration();
+    }
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded aba [us]:       \t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
+  }
+
+  // ABA derivatives timings
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+    duration.setZero();
+#ifdef WITH_MULTITHREADING
+    omp_set_num_threads(ithread + 1);
+#endif
+    for (unsigned int i = 0; i < T; ++i) {
+      crocoddyl::Timer timer;
+#ifdef WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+      for (unsigned int j = 0; j < N; ++j) {
+        boost::shared_ptr<crocoddyl::IntegratedActionModelEuler> m =
+            boost::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(problem->get_runningModels()[j]);
+        boost::shared_ptr<crocoddyl::IntegratedActionDataEuler> d =
+            boost::static_pointer_cast<crocoddyl::IntegratedActionDataEuler>(problem->get_runningDatas()[j]);
+        boost::shared_ptr<crocoddyl::DifferentialActionDataFreeFwdDynamics> dd =
+            boost::static_pointer_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics>(d->differential);
+        boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm =
+            boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamics>(m->get_differential());
+
+        Eigen::Ref<Eigen::VectorXd> q = xs[j].head(state->get_nq());
+        Eigen::Ref<Eigen::VectorXd> v = xs[j].tail(state->get_nv());
+        pinocchio::computeABADerivatives(dm->get_pinocchio(), dd->pinocchio, q, v, us[j]);
+      }
+      duration[i] = timer.get_us_duration();
+    }
+    avg[ithread] = AVG(duration);
+    stddev[ithread] = STDDEV(duration);
+    std::cout << ithread + 1 << " threaded aba-derivs [us]:\t" << avg[ithread] << " +- " << stddev[ithread]
+              << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
+              << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
+              << ")" << std::endl;
+  }
+
+  /*******************************************************************************/
   /******************* DDP BACKWARD AND FORWARD PASSES TIMINGS *******************/
   // Backward pass timings
   ddp.calcDiff();
@@ -284,7 +358,7 @@ int main(int argc, char* argv[]) {
   // Forward pass timings
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    cg_ddp.forwardPass(0.5);
+    cg_ddp.forwardPass(0.005);
     duration[i] = timer.get_us_duration();
   }
   avg_fp = AVG(duration);

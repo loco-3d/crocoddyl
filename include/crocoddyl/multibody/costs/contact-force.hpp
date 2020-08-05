@@ -21,8 +21,6 @@
 
 namespace crocoddyl {
 
-enum ContactType { Contact3D, Contact6D, Undefined };
-
 /**
  * @brief Define a contact force cost function
  *
@@ -213,7 +211,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-    contact_type = Undefined;
+    contact_type = ContactUndefined;
 
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);

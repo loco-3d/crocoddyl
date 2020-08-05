@@ -190,6 +190,10 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   typedef typename crocoddyl::CostModelCoMPositionTpl<Scalar> CostModelCoMPosition;
   typedef typename crocoddyl::CostModelContactForceTpl<Scalar> CostModelContactForce;
   typedef typename crocoddyl::CostModelCentroidalMomentumTpl<Scalar> CostModelCentroidalMomentum;
+  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
+  typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
+  typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
   typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
   typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;

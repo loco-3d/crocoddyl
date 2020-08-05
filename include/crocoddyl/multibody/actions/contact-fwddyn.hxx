@@ -7,12 +7,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 #include <pinocchio/algorithm/compute-all-terms.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/contact-dynamics.hpp>
 #include <pinocchio/algorithm/centroidal.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
@@ -161,6 +163,47 @@ template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>& x, const std::size_t&, const Scalar&) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  // Static casting the data
+  DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
+      static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+#ifndef NDEBUG
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+#endif
+
+  // Check the velocity input is zero
+  assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
+
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()));
+  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
+  d->pinocchio.tau =
+      pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
+
+  VectorXs x_tmp(state_->get_nq() + state_->get_nv());
+  x_tmp << q, VectorXs::Zero(state_->get_nv());
+
+  actuation_->calc(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+  actuation_->calcDiff(d->multibody.actuation, x_tmp, VectorXs::Zero(nu_));
+  contacts_->calc(d->multibody.contacts, x_tmp);
+  // Allocates memory
+  MatrixXs jc_view(state_->get_nv(), nu_ + contacts_->get_nc());
+  jc_view << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.transpose();
+  u = (pseudoInverse(jc_view) * d->pinocchio.tau).head(nu_);
+  d->pinocchio.tau.setZero();
 }
 
 template <typename Scalar>
