@@ -1,16 +1,14 @@
 import numpy.core.multiarray
 import os
-import sys
 
 import numpy as np
 
 import pinocchio
 from pinocchio.utils import rand,zero
-import crocoddyl
-import matplotlib.pylab as plt
+from crocoddyl import (FrameTranslation,ContactModel2D)
 from numpy.linalg import norm, solve
+from example_robot_data import loadSolo
 
-sys.path.append("/local/src/crocoddyl/unittest/")
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
 pinocchio.switchToNumpyMatrix()
 
@@ -24,22 +22,20 @@ NUMDIFF_MODIFIER = 1e4
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------
 # Load collision model
-URDF_FILENAME = "solo.urdf"
-SRDF_FILENAME = "solo.srdf"
-SRDF_SUBPATH = "/solo_description/srdf/" + SRDF_FILENAME
-URDF_SUBPATH = "/solo_description/robots/" + URDF_FILENAME
+robot = loadSolo()
 
-modelPath = "/opt/openrobots/share/example-robot-data/robots"
-rmodel, geomModel, visualModel = pinocchio.buildModelsFromUrdf(modelPath + URDF_SUBPATH, modelPath,pinocchio.JointModelFreeFlyer())
+robot.model.armature[6:] = 1.
+qmin = robot.model.lowerPositionLimit
+qmin[:7] = -1
+robot.model.lowerPositionLimit = qmin
+qmax = robot.model.upperPositionLimit
+qmax[:7] = 1
+robot.model.upperPositionLimit = qmax
 
-
+rmodel = robot.model
 rdata = rmodel.createData()
-state = crocoddyl.StateMultibody(rmodel)
-actuation = crocoddyl.ActuationModelFloatingBase(state)
 
-
-pinocchio.loadReferenceConfigurations(rmodel,modelPath + SRDF_SUBPATH, False)
-q = rmodel.referenceConfigurations["standing"]
+q = pinocchio.randomConfiguration(rmodel)
 v = rand(rmodel.nv)
 x = m2a(np.concatenate([q, v]))
 u = m2a(rand(rmodel.nv - 6))
@@ -51,8 +47,8 @@ pinocchio.computeForwardKinematicsDerivatives(rmodel, rdata, q, v, zero(rmodel.n
 
 FRcontact = 'FR_FOOT'
 FRId = rmodel.getFrameId(FRcontact)
-frameFR = crocoddyl.FrameTranslation(FRId, rdata.oMf[FRId].translation)
-contactModel = crocoddyl.ContactModel2D(state, frameFR, actuation.nu, np.matrix([1, 4]).T)
+frameFR = FrameTranslation(FRId, rdata.oMf[FRId].translation)
+contactModel = ContactModel2D(state, frameFR, actuation.nu, np.matrix([1, 4]).T)
 
 contactData = contactModel.createData(rdata)
 contactModel.calc(contactData, x)

@@ -39,8 +39,8 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->a0[1] = d->a.linear()[1] + vw[0]*vv[1] - vw[1]*vv[0];
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[0];
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[2];
+    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation()[0] - xref_.oxf[0]);
+    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation()[2] - xref_.oxf[2]);
   }
   if (gains_[1] != 0.) {
     d->a0[0] += gains_[1] * vv[0];
@@ -96,9 +96,10 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
-  VectorXs force_bis(3);
+  Vector3s force_bis(3);
   force_bis << force[0],0.0,force[1];
-  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force_bis, Vector3s::Zero()));
+  data->f.linear() = d->jMf.rotation() * force_bis;
+  data->f.angular() = d->jMf.translation().cross(data->f.linear());
 }
 
 template <typename Scalar>
