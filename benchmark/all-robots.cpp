@@ -19,6 +19,7 @@
 
 #include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/core/utils/file-io.hpp"
 
 #include "factory/legged-robots.hpp"
 #include "factory/arm.hpp"
@@ -125,6 +126,19 @@ void print_benchmark(RobotEENames robot) {
   assert_pretty(cg_runningData->Fu.isApprox(runningData->Fu), "Problem in Fu");
 #endif  // CROCODDYL_WITH_CODEGEN
 
+  /******************************* create csv file *******************************/
+  const std::string csv_filename = "/tmp/" + robot.robot_name + "_" + std::to_string(state->get_nq()) + "DoF.bench";
+  CsvStream csv(csv_filename);
+  csv << "fn_name"
+      << "nthreads"
+      << "with_cg"
+      << "mean"
+      << "stddev"
+      << "max"
+      << "min"
+      << "mean_per_nodes"
+      << "stddev_per_nodes" << csv.endl;
+
   /*******************************************************************************/
   /*********************************** TIMINGS ***********************************/
   Eigen::ArrayXd duration(T);
@@ -157,6 +171,8 @@ void print_benchmark(RobotEENames robot) {
               << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
               << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
+    csv << "calcDiff" << (ithread + 1) << false << avg[ithread] << stddev[ithread] << duration.maxCoeff()
+        << duration.minCoeff() << avg[ithread] * (ithread + 1) / N << stddev[ithread] * (ithread + 1) / N << csv.endl;
   }
 
   // calc timings
@@ -181,6 +197,8 @@ void print_benchmark(RobotEENames robot) {
               << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
               << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
+    csv << "calc" << (ithread + 1) << false << avg[ithread] << stddev[ithread] << duration.maxCoeff()
+        << duration.minCoeff() << avg[ithread] * (ithread + 1) / N << stddev[ithread] * (ithread + 1) / N << csv.endl;
   }
 
   /*******************************************************************************/
@@ -199,6 +217,9 @@ void print_benchmark(RobotEENames robot) {
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_bp / N << " +- " << stddev_bp / N << ")"
             << std::endl;
 
+  csv << "backwardPass" << 1 << false << avg_bp << stddev_bp << duration.maxCoeff() << duration.minCoeff()
+      << avg_bp / N << stddev_bp / N << csv.endl;
+
   // Forward pass timings
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
@@ -211,6 +232,9 @@ void print_benchmark(RobotEENames robot) {
   std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
+
+  csv << "forwardPass" << 1 << false << avg_fp << stddev_fp << duration.maxCoeff() << duration.minCoeff() << avg_fp / N
+      << stddev_fp / N << csv.endl;
 
 #ifdef CROCODDYL_WITH_CODEGEN
 
@@ -244,6 +268,8 @@ void print_benchmark(RobotEENames robot) {
               << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
               << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
+    csv << "calcDiff" << (ithread + 1) << true << avg[ithread] << stddev[ithread] << duration.maxCoeff()
+        << duration.minCoeff() << avg[ithread] * (ithread + 1) / N << stddev[ithread] * (ithread + 1) / N << csv.endl;
   }
 
   // calc timings
@@ -268,6 +294,8 @@ void print_benchmark(RobotEENames robot) {
               << " (max: " << duration.maxCoeff() << ", min: " << duration.minCoeff()
               << ", per nodes: " << avg[ithread] * (ithread + 1) / N << " +- " << stddev[ithread] * (ithread + 1) / N
               << ")" << std::endl;
+    csv << "calc" << (ithread + 1) << true << avg[ithread] << stddev[ithread] << duration.maxCoeff()
+        << duration.minCoeff() << avg[ithread] * (ithread + 1) / N << stddev[ithread] * (ithread + 1) / N << csv.endl;
   }
 
   /*******************************************************************************/
@@ -284,6 +312,8 @@ void print_benchmark(RobotEENames robot) {
   std::cout << "backwardPass [us]:\t\t" << avg_bp << " +- " << stddev_bp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_bp / N << " +- " << stddev_bp / N << ")"
             << std::endl;
+  csv << "backwardPass" << 1 << true << avg_bp << stddev_bp << duration.maxCoeff() << duration.minCoeff() << avg_bp / N
+      << stddev_bp / N << csv.endl;
 
   // Forward pass timings
   for (unsigned int i = 0; i < T; ++i) {
@@ -296,6 +326,10 @@ void print_benchmark(RobotEENames robot) {
   std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N << " +- " << stddev_fp / N << ")"
             << std::endl;
+
+  csv << "forwardPass" << 1 << true << avg_fp << stddev_fp << duration.maxCoeff() << duration.minCoeff() << avg_fp / N
+      << stddev_fp / N << csv.endl;
+
 #endif  // CROCODDYL_WITH_CODEGEN
 }
 
