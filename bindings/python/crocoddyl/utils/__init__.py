@@ -12,8 +12,8 @@ def m2a(m):
     return np.array(m).squeeze()
 
 
-def rev_enumerate(l):
-    return reversed(list(enumerate(l)))
+def rev_enumerate(lname):
+    return reversed(list(enumerate(lname)))
 
 
 def absmax(A):

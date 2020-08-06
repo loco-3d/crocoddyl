@@ -5,8 +5,8 @@ from .solver import SolverAbstract
 from .utils import raiseIfNan
 
 
-def rev_enumerate(l):
-    return reversed(list(enumerate(l)))
+def rev_enumerate(lname):
+    return reversed(list(enumerate(lname)))
 
 
 class SolverDDP(SolverAbstract):
