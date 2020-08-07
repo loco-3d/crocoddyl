@@ -78,11 +78,26 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   x.tail(model->get_state()->get_nv()).setZero();
   Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
   model->quasiStatic(data, u, x);
-
   model->calc(data, x, u);
 
-  // Checking that calc returns a cost value
+  // Checking that the acceleration is zero as supposed to be in a quasi static condition
   BOOST_CHECK(data->xout.norm() <= 1e-8);
+
+  // Check for inactive contacts
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos) {
+    boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> m =
+        boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamics>(model);
+    m->get_contacts()->changeContactStatus("lf", false);
+
+    model->quasiStatic(data, u, x);
+    model->calc(data, x, u);
+
+    // Checking that the acceleration is zero as supposed to be in a quasi static condition
+    BOOST_CHECK(data->xout.norm() <= 1e-8);
+  }
 }
 
 void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type action_type) {

@@ -8,8 +8,6 @@
 
 #include "diff_action.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
@@ -104,9 +102,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialActionModelFactory::create_freeFwdDynamics(
-    StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
+boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
+DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type state_type,
+                                                       ActuationModelTypes::Type actuation_type) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
@@ -129,9 +128,9 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
+boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
 DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type, bool with_friction) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation;
   boost::shared_ptr<crocoddyl::ContactModelMultiple> contact;
