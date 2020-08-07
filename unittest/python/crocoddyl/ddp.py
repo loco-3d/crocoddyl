@@ -2,11 +2,7 @@ import numpy as np
 import scipy.linalg as scl
 
 from .solver import SolverAbstract
-from .utils import raiseIfNan
-
-
-def rev_enumerate(lname):
-    return reversed(list(enumerate(lname)))
+from .utils import raiseIfNan, rev_enumerate
 
 
 class SolverDDP(SolverAbstract):

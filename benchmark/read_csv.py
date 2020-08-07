@@ -64,7 +64,7 @@ for filename in filenames:
         continue
     benchname = splitext(basename(filename))[0]
     seq = parseCsvFile(filename)
-    benches.__dict__[benchname] = seq
+    setattr(benches, benchname, seq)
     print(benchname)
     print(seq)
     print("********************")
