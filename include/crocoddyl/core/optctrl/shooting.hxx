@@ -171,12 +171,10 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-  std::size_t i;
-
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
-  for (i = 0; i < T_; ++i) {
+  for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
     } else {
@@ -229,6 +227,34 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
   xs.resize(T_ + 1);
   rollout(us, xs);
   return xs;
+}
+
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::quasiStatic(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs) {
+  if (xs.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "xs has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+  if (us.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+  for (std::size_t i = 0; i < T_; ++i) {
+    running_models_[i]->quasiStatic(running_datas_[i], xs[i], us[i]);
+  }
+}
+
+template <typename Scalar>
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::quasiStatic_xs(
+    const std::vector<VectorXs>& xs) {
+  std::vector<VectorXs> us;
+  us.resize(T_);
+  quasiStatic(xs, us);
+  return us;
 }
 
 template <typename Scalar>
