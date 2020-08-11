@@ -44,6 +44,7 @@ void exposeMultibody() {
   exposeCostContactFrictionCone();
   exposeCostImpulseCoM();
   exposeCostImpulseFrictionCone();
+  exposeCostImpulseCoPPosition();
   exposeContact3D();
   exposeContact6D();
   exposeImpulse3D();
