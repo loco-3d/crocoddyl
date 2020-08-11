@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS WITH_NTHREADS
-#endif  // WITH_MULTITHREADING
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
+#endif  // CROCODDYL_WITH_MULTITHREADING
 
 namespace crocoddyl {
 
@@ -140,7 +140,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
@@ -173,7 +173,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 
   std::size_t i;
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
   for (i = 0; i < T_; ++i) {

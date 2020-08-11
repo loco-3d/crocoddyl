@@ -8,6 +8,10 @@ Let's store vector as 1-d array and matrices as 2-d arrays. Multiplication is do
 '''
 
 
+def rev_enumerate(lname):
+    return reversed(list(enumerate(lname)))
+
+
 def raiseIfNan(A, error=None):
     if error is None:
         error = scl.LinAlgError("NaN in array")

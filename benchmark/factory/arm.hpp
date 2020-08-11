@@ -10,6 +10,7 @@
 #define CROCODDYL_ARM_FACTORY_HPP_
 
 #include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
 #include <example-robot-data/path.hpp>
 
@@ -45,6 +46,8 @@ void build_arm_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", modeld);
+  pinocchio::srdf::loadReferenceConfigurations(modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
+                                               false);
 
   pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
   std::vector<pinocchio::JointIndex> locked_joints;
