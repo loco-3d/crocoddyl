@@ -48,6 +48,12 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+#ifndef NDEBUG
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+#endif
+
+  // Check the velocity input is zero
+  assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
 
   const std::size_t& ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
