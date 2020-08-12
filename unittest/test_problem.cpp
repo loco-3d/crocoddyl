@@ -254,6 +254,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
+    xs[i].tail(model->get_state()->get_nv()) *= 0;
     us[i] = Eigen::VectorXd::Zero(model->get_nu());
   }
 
@@ -261,7 +262,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   problem.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
-    Eigen::VectorXd u(model->get_nu());
+    Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
     BOOST_CHECK((u - us[i]).isMuchSmallerThan(1.0, 1e-7));
   }
@@ -285,6 +286,7 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
   std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
+    xs[i].tail(model->get_state()->get_nv()) *= 0;
     us[i] = Eigen::VectorXd::Zero(model->get_nu());
   }
 
@@ -292,7 +294,7 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
   problem.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
-    Eigen::VectorXd u(model->get_nu());
+    Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
     BOOST_CHECK((u - us[i]).isMuchSmallerThan(1.0, 1e-7));
   }
