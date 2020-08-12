@@ -112,10 +112,10 @@ class ShootingProblemTpl {
   /**
    * @brief Compute the quasic static commands given a state trajectory
    *
-   * @param[in] xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    * @param[out] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   * @param[in]  xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    */
-  void quasiStatic(const std::vector<VectorXs>& xs, std::vector<VectorXs>& us);
+  void quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs);
 
   /**
    * @copybrief quasiStatic

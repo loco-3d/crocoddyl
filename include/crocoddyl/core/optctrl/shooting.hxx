@@ -230,7 +230,7 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::quasiStatic(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs) {
+void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs) {
   if (xs.size() != T_) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_) + ")");
@@ -244,7 +244,7 @@ void ShootingProblemTpl<Scalar>::quasiStatic(const std::vector<VectorXs>& us, st
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    running_models_[i]->quasiStatic(running_datas_[i], xs[i], us[i]);
+    running_models_[i]->quasiStatic(running_datas_[i], us[i], xs[i]);
   }
 }
 
@@ -253,7 +253,7 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
     const std::vector<VectorXs>& xs) {
   std::vector<VectorXs> us;
   us.resize(T_);
-  quasiStatic(xs, us);
+  quasiStatic(us, xs);
   return us;
 }
 
