@@ -158,9 +158,9 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
   d->pinocchio.tau =
       pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
 
-  d->x_static.head(state_->get_nq()) = q;
-  actuation_->calc(d->multibody.actuation, d->x_static, VectorXs::Zero(nu_));
-  actuation_->calcDiff(d->multibody.actuation, d->x_static, VectorXs::Zero(nu_));
+  d->tmp_xstatic.head(state_->get_nq()) = q;
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
 
   u.noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
