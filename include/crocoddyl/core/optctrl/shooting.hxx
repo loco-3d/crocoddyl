@@ -253,6 +253,9 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
     const std::vector<VectorXs>& xs) {
   std::vector<VectorXs> us;
   us.resize(T_);
+  for (std::size_t i = 0; i < T_; ++i) {
+    us[i] = VectorXs::Zero(running_models_[i]->get_nu());
+  }
   quasiStatic(us, xs);
   return us;
 }
