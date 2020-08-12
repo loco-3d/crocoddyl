@@ -129,12 +129,8 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
   BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Fu - data->Fu).isMuchSmallerThan(1.0, 1e-7));
   BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lu - data->Lu).isMuchSmallerThan(1.0, 1e-7));
   BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lxu - data->Lxu).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Luu - data->Luu).isMuchSmallerThan(1.0, 1e-7));
 }
 
 void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type) {
@@ -178,12 +174,8 @@ void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_ty
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
   BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Fu - data->Fu).isMuchSmallerThan(1.0, 1e-7));
   BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lu - data->Lu).isMuchSmallerThan(1.0, 1e-7));
   BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lxu - data->Lxu).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Luu - data->Luu).isMuchSmallerThan(1.0, 1e-7));
 }
 
 void test_rollout(ActionModelTypes::Type action_model_type) {
