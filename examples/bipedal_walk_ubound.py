@@ -69,10 +69,7 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     xs = [talos_legs.model.defaultState] * (ddp[i].problem.T + 1)
-    us = [
-        m.quasiStatic(d, talos_legs.model.defaultState)
-        for m, d in list(zip(ddp[i].problem.runningModels, ddp[i].problem.runningDatas))
-    ]
+    us = ddp[i].problem.quasiStatic([talos_legs.model.defaultState] * ddp[i].problem.T)
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
