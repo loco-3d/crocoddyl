@@ -72,10 +72,7 @@ else:
 
 # Solving the problem with the both solvers
 xs = [anymal.model.defaultState] * (boxfddp.problem.T + 1)
-us = [
-    m.quasiStatic(d, anymal.model.defaultState)
-    for m, d in list(zip(boxfddp.problem.runningModels, boxfddp.problem.runningDatas))
-]
+us = boxddp.problem.quasiStatic([anymal.model.defaultState] * boxddp.problem.T)
 
 print('*** SOLVE with Box-FDDP ***')
 boxfddp.th_stop = 1e-7

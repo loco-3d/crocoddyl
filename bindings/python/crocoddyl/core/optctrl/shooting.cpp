@@ -66,6 +66,10 @@ void exposeShootingProblem() {
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence (size T)")
+      .def("quasiStatic", &ShootingProblem::quasiStatic_xs, bp::args("self", "xs"),
+           "Compute the quasi static commands given a state trajectory.\n\n"
+           "Generally speaking, it uses Newton-Raphson method for computing the quasi static commands.\n"
+           ":param xs: time-discrete state trajectory (size T)")
       .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>, boost::shared_ptr<ActionDataAbstract>)>(
           "circularAppend", &ShootingProblem::circularAppend, bp::args("self", "model", "data"),
           "Circular append the model and data onto the end running node.\n\n"

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_ACTION_FACTORY_HPP_
-#define CROCODDYL_ACTION_FACTORY_HPP_
+#ifndef CROCODDYL_DIFF_ACTION_FACTORY_HPP_
+#define CROCODDYL_DIFF_ACTION_FACTORY_HPP_
 
 #include "state.hpp"
 #include "actuation.hpp"
@@ -66,4 +66,4 @@ class DifferentialActionModelFactory {
 }  // namespace unittest
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_ACTION_FACTORY_HPP_
+#endif  // CROCODDYL_DIFF_ACTION_FACTORY_HPP_
