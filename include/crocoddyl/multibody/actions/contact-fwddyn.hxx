@@ -181,12 +181,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   DifferentialActionDataContactFwdDynamicsTpl<Scalar>* d =
       static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-#ifndef NDEBUG
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
-#endif
 
   // Check the velocity input is zero
-  assert_pretty(v.isZero(), "The velocity input should be zero for quasi-static to work.");
+  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
 
   const std::size_t& nv = state_->get_nv();
   const std::size_t& nc = contacts_->get_nc();
