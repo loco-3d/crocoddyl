@@ -20,8 +20,10 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(
 template <typename _Scalar>
 CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                                                         const FrameCoPSupport& cop_support)
-    : Base(state, boost::make_shared<ActivationModelQuadraticBarrier>(
-                      ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))), 0),
+    : Base(state,
+           boost::make_shared<ActivationModelQuadraticBarrier>(
+               ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
+           0),
       cop_support_(cop_support) {}
 
 template <typename Scalar>
