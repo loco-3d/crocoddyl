@@ -12,6 +12,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
+#include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 
 #include <pinocchio/multibody/fwd.hpp>
@@ -152,6 +153,25 @@ struct FrameFrictionConeTpl {
 
   FrameIndex id;
   FrictionCone cone;
+};
+
+template <typename _Scalar>
+struct FrameWrenchConeTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef WrenchConeTpl<Scalar> WrenchCone;
+
+  explicit FrameWrenchConeTpl() : frame(0), oRf(WrenchCone()) {}
+  FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& value) : frame(value.frame), oRf(value.oRf) {}
+  FrameWrenchConeTpl(const FrameIndex& frame, const WrenchCone& oRf) : frame(frame), oRf(oRf) {}
+  friend std::ostream& operator<<(std::ostream& os, const FrameWrenchConeTpl& X) {
+    os << "frame: " << X.frame << std::endl << " cone: " << std::endl << X.oRf << std::endl;
+    return os;
+  }
+
+  FrameIndex frame;
+  WrenchCone oRf;
 };
 
 template <typename _Scalar>

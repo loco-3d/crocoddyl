@@ -17,6 +17,7 @@ namespace python {
 
 void exposeFrames();
 void exposeFrictionCone();
+void exposeWrenchCone();
 void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
@@ -42,10 +43,12 @@ void exposeCostFrameTranslation();
 void exposeCostFrameRotation();
 void exposeCostFrameVelocity();
 void exposeCostContactForce();
+void exposeCostContactWrenchCone();
 void exposeCostContactCoPPosition();
 void exposeCostContactFrictionCone();
 void exposeCostContactImpulse();
 void exposeCostImpulseFrictionCone();
+void exposeCostImpulseWrenchCone();
 void exposeCostImpulseCoPPosition();
 void exposeCostImpulseCoM();
 void exposeContact3D();
