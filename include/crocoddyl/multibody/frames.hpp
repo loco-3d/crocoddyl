@@ -162,16 +162,16 @@ struct FrameWrenchConeTpl {
   typedef _Scalar Scalar;
   typedef WrenchConeTpl<Scalar> WrenchCone;
 
-  explicit FrameWrenchConeTpl() : frame(0), oRf(WrenchCone()) {}
-  FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& value) : frame(value.frame), oRf(value.oRf) {}
-  FrameWrenchConeTpl(const FrameIndex& frame, const WrenchCone& oRf) : frame(frame), oRf(oRf) {}
+  explicit FrameWrenchConeTpl() : id(0), cone(WrenchCone()) {}
+  FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& value) : id(value.id), cone(value.cone) {}
+  FrameWrenchConeTpl(const FrameIndex& id, const WrenchCone& cone) : id(id), cone(cone) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameWrenchConeTpl& X) {
-    os << "frame: " << X.frame << std::endl << " cone: " << std::endl << X.oRf << std::endl;
+    os << "frame: " << X.id << std::endl << " cone: " << std::endl << X.cone << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  WrenchCone oRf;
+  FrameIndex id;
+  WrenchCone cone;
 };
 
 template <typename _Scalar>

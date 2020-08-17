@@ -61,9 +61,6 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<FrameFrictionConeTpl<Scalar> >()", void set_fref(const FrameFrictionCone& fref));
-  DEPRECATED("Use get_reference<FrameFrictionConeTpl<Scalar> >()", const FrameFrictionCone& get_fref() const);
-
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
@@ -135,6 +132,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
   MatrixXs Arr_Ru;
+  MatrixXs Arr_Rx;
   bool more_than_3_constraints;
   using Base::activation;
   using Base::cost;

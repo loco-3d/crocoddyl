@@ -84,8 +84,8 @@ void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
   data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
 
   d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
-
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
   data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
   data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
 }
@@ -113,16 +113,6 @@ void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
-}
-
-template <typename Scalar>
-const FrameFrictionConeTpl<Scalar>& CostModelContactFrictionConeTpl<Scalar>::get_fref() const {
-  return fref_;
-}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::set_fref(const FrameFrictionCone& fref_in) {
-  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

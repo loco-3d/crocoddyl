@@ -16,16 +16,16 @@ CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameWrenchCone& fref)
     : Base(state, activation, 0), fref_(fref) {
-  if (activation_->get_nr() != fref_.oRf.get_nf() + 1) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to " << fref_.oRf.get_nf() + 1);
+                 << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
 }
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameWrenchCone& fref)
-    : Base(state, fref.oRf.get_nf() + 1, 0), fref_(fref) {}
+    : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {}
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::~CostModelImpulseWrenchConeTpl() {}
@@ -38,7 +38,7 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDat
 
   // Compute the residual of the wrench cone. Note that we need to transform the force
   // to the contact frame
-  data->r.noalias() = fref_.oRf.get_A() * d->impulse->jMf.actInv(d->impulse->f).toVector();
+  data->r.noalias() = fref_.cone.get_A() * d->impulse->jMf.actInv(d->impulse->f).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -52,7 +52,7 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->impulse->df_dx;
-  const MatrixX6s& A = fref_.oRf.get_A();
+  const MatrixX6s& A = fref_.cone.get_A();
 
   activation_->calcDiff(data->activation, data->r);
   data->Rx.noalias() = A * df_dx;
@@ -84,16 +84,6 @@ void CostModelImpulseWrenchConeTpl<Scalar>::get_referenceImpl(const std::type_in
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
   }
-}
-
-template <typename Scalar>
-const FrameWrenchConeTpl<Scalar>& CostModelImpulseWrenchConeTpl<Scalar>::get_fref() const {
-  return fref_;
-}
-
-template <typename Scalar>
-void CostModelImpulseWrenchConeTpl<Scalar>::set_fref(const FrameWrenchCone& fref_in) {
-  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

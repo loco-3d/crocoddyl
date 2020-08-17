@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,6 +45,10 @@ class WrenchConeTpl {
   const Vector2s& get_box() const;
   const Scalar& get_mu() const;
   const std::size_t& get_nf() const;
+
+  void set_rot(Matrix3s rot);
+  void set_box(Vector2s box);
+  void set_mu(Scalar mu);
 
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);

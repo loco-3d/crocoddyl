@@ -61,9 +61,6 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  DEPRECATED("Use set_reference<FrameWrenchConeTpl<Scalar> >()", void set_fref(const FrameWrenchCone& fref));
-  DEPRECATED("Use get_reference<FrameWrenchConeTpl<Scalar> >()", const FrameWrenchCone& get_fref() const);
-
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
@@ -106,11 +103,11 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Avoids data casting at runtime
     FrameWrenchCone fref = model->template get_reference<FrameWrenchCone>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           found_contact = true;
@@ -135,6 +132,7 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
 
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
   MatrixXs Arr_Ru;
+  MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
   using Base::Lu;

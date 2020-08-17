@@ -83,11 +83,11 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const 
   A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, 1.;
   
   Matrix6s c_R_o = Matrix6s::Zero();
-  c_R_o.topLeftCorner(3,3) = rot_;
-  c_R_o.bottomRightCorner(3,3) = rot_;
+  c_R_o.topLeftCorner(3,3) = rot_.transpose();
+  c_R_o.bottomRightCorner(3,3) = rot_.transpose();
   
   MatrixX6s A_local = A_;
-  A_ = A_local * c_R_o;
+  A_ = (A_local * c_R_o).eval();
   ub_.setZero();
   lb_.setOnes();
   lb_ *= -std::numeric_limits<Scalar>::max();
@@ -126,6 +126,21 @@ const Scalar& WrenchConeTpl<Scalar>::get_mu() const {
 template <typename Scalar>
 const std::size_t& WrenchConeTpl<Scalar>::get_nf() const {
   return nf_;
+}
+
+template <typename Scalar>
+void WrenchConeTpl<Scalar>::set_rot(Matrix3s rot) {
+  update(rot, mu_, box_);
+}
+
+template <typename Scalar>
+void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
+  update(rot_, mu_, box);
+}
+
+template <typename Scalar>
+void WrenchConeTpl<Scalar>::set_mu(Scalar mu)  {
+  update(rot_, mu, box_);
 }
 
 template <typename Scalar>

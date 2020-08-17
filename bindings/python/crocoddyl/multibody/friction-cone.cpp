@@ -38,20 +38,20 @@ void exposeFrictionCone() {
       .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_internal_reference<>()),
                     "inequality upper bound")
       .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
-                    "normal vector")
+                    bp::make_function(&FrictionCone::set_nsurf, bp::return_internal_reference<>()), "normal vector")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
-                    "friction coefficient")
+                    bp::make_function(&FrictionCone::set_mu, bp::return_internal_reference<>()), "friction coefficient")
       .add_property("nf", bp::make_function(&FrictionCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
                     "number of facets")
       .add_property("inner_appr",
                     bp::make_function(&FrictionCone::get_inner_appr, bp::return_value_policy<bp::return_by_value>()),
-                    "type of cone approxition")
+                    bp::make_function(&FrictionCone::set_inner_appr, bp::return_internal_reference<>()), "type of cone approxition")
       .add_property("min_nforce",
                     bp::make_function(&FrictionCone::get_min_nforce, bp::return_value_policy<bp::return_by_value>()),
-                    "minimum normal force")
+                    bp::make_function(&FrictionCone::set_min_nforce, bp::return_internal_reference<>()), "minimum normal force")
       .add_property("max_nforce",
                     bp::make_function(&FrictionCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
-                    "maximum normal force");
+                    bp::make_function(&FrictionCone::set_max_nforce, bp::return_internal_reference<>()), "maximum normal force");
 }
 
 }  // namespace python
