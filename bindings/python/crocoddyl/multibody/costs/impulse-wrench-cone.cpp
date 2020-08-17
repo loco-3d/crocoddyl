@@ -30,26 +30,26 @@ void exposeCostImpulseWrenchCone() {
           ":param state: state of the multibody system\n"
           ":param fref: frame Wrench cone"))
       .def<void (CostModelImpulseWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&,
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelImpulseWrenchCone::calc, bp::args("self", "data", "x", "u"),
           "Compute the impulse Wrench cost.\n\n"
           ":param data: cost data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input")
       .def<void (CostModelImpulseWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (CostModelImpulseWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&,
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelImpulseWrenchCone::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the impulse Wrench cone cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
       .def<void (CostModelImpulseWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelImpulseWrenchCone::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),

@@ -35,13 +35,13 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                         const FrameWrenchCone& fref,
-                                                                         const std::size_t& nu)
+                                                                     const FrameWrenchCone& fref,
+                                                                     const std::size_t& nu)
     : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                         const FrameWrenchCone& fref)
+                                                                     const FrameWrenchCone& fref)
     : Base(state, fref.cone.get_nf() + 1), fref_(fref) {}
 
 template <typename Scalar>
@@ -49,8 +49,8 @@ CostModelContactWrenchConeTpl<Scalar>::~CostModelContactWrenchConeTpl() {}
 
 template <typename Scalar>
 void CostModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>&,
-                                                   const Eigen::Ref<const VectorXs>&) {
+                                                 const Eigen::Ref<const VectorXs>&,
+                                                 const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the residual of the wrench cone. Note that we need to transform the wrench
@@ -64,8 +64,8 @@ void CostModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDat
 
 template <typename Scalar>
 void CostModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>&,
-                                                       const Eigen::Ref<const VectorXs>&) {
+                                                     const Eigen::Ref<const VectorXs>&,
+                                                     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -73,7 +73,7 @@ void CostModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
   const MatrixX6s& A = fref_.cone.get_A();
 
   activation_->calcDiff(data->activation, data->r);
-  
+
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
 

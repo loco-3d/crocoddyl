@@ -52,7 +52,7 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const 
   rot_ = rot;
   mu_ = mu;
   box_ = box_size;
-  
+
   mu_ = mu_ / sqrt(Scalar(2.));
   A_.setZero();
 
@@ -81,11 +81,11 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const 
   A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, 1.;
   A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, 1.;
   A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, 1.;
-  
+
   Matrix6s c_R_o = Matrix6s::Zero();
-  c_R_o.topLeftCorner(3,3) = rot_.transpose();
-  c_R_o.bottomRightCorner(3,3) = rot_.transpose();
-  
+  c_R_o.topLeftCorner(3, 3) = rot_.transpose();
+  c_R_o.bottomRightCorner(3, 3) = rot_.transpose();
+
   MatrixX6s A_local = A_;
   A_ = (A_local * c_R_o).eval();
   ub_.setZero();
@@ -139,7 +139,7 @@ void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_mu(Scalar mu)  {
+void WrenchConeTpl<Scalar>::set_mu(Scalar mu) {
   update(rot_, mu, box_);
 }
 

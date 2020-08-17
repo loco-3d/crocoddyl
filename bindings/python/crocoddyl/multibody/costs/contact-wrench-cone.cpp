@@ -46,26 +46,26 @@ void exposeCostContactWrenchCone() {
           ":param state: state of the multibody system\n"
           ":param fref: frame wrench cone"))
       .def<void (CostModelContactWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&,
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelContactWrenchCone::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact wrench cone cost.\n\n"
           ":param data: cost data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input")
       .def<void (CostModelContactWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (CostModelContactWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&,
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactWrenchCone::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact wrench cone cost.\n\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
       .def<void (CostModelContactWrenchCone::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelContactWrenchCone::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
@@ -80,7 +80,7 @@ void exposeCostContactWrenchCone() {
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactWrenchCone> >();
 
   bp::class_<CostDataContactWrenchCone, bp::bases<CostDataAbstract> >(
-      "CostDataContactWrenchCone", "Data for contact cwrench cone cost.\n\n",
+      "CostDataContactWrenchCone", "Data for contact wrench cone cost.\n\n",
       bp::init<CostModelContactWrenchCone*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),
           "Create contact wrench cone cost data.\n\n"

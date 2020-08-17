@@ -157,20 +157,19 @@ void exposeFrames() {
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
 
-  bp::class_<FrameWrenchCone>(
-      "FrameWrenchCone",
-      "Frame wrench cone.\n\n"
-      "It defines a wrench cone for a given frame ID",
-      bp::init<FrameIndex, WrenchCone>(bp::args("self", "id", "cone"),
-                                      "Initialize the frame wrench cone.\n\n"
-                                      ":param id: frame ID\n"
-                                      ":param cone: Frame wrench cone w.r.t. the origin"))
+  bp::class_<FrameWrenchCone>("FrameWrenchCone",
+                              "Frame wrench cone.\n\n"
+                              "It defines a wrench cone for a given frame ID",
+                              bp::init<FrameIndex, WrenchCone>(bp::args("self", "id", "cone"),
+                                                               "Initialize the frame wrench cone.\n\n"
+                                                               ":param id: frame ID\n"
+                                                               ":param cone: Frame wrench cone w.r.t. the origin"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame wrench cone."))
       .def_readwrite("id", &FrameWrenchCone::id, "frame ID")
       .add_property("cone", bp::make_getter(&FrameWrenchCone::cone, bp::return_internal_reference<>()),
                     bp::make_setter(&FrameWrenchCone::cone), "frame friction cone")
       .def(PrintableVisitor<FrameWrenchCone>());
-    
+
   bp::class_<FrameCoPSupport>("FrameCoPSupport",
                               "Frame foot geometry.\n\n"
                               "It defines the ID of the contact frame and the geometry of the contact surface",

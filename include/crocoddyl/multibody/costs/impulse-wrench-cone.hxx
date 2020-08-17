@@ -24,7 +24,7 @@ CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                         const FrameWrenchCone& fref)
+                                                                     const FrameWrenchCone& fref)
     : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {}
 
 template <typename Scalar>
@@ -32,8 +32,8 @@ CostModelImpulseWrenchConeTpl<Scalar>::~CostModelImpulseWrenchConeTpl() {}
 
 template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>&,
-                                                   const Eigen::Ref<const VectorXs>&) {
+                                                 const Eigen::Ref<const VectorXs>&,
+                                                 const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the residual of the wrench cone. Note that we need to transform the force
@@ -47,8 +47,8 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDat
 
 template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>&,
-                                                       const Eigen::Ref<const VectorXs>&) {
+                                                     const Eigen::Ref<const VectorXs>&,
+                                                     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->impulse->df_dx;
@@ -56,7 +56,7 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
 
   activation_->calcDiff(data->activation, data->r);
   data->Rx.noalias() = A * df_dx;
- 
+
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
   data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
 }

@@ -19,7 +19,7 @@ class SimpleBipedGaitProblem:
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
         self.firstStep = True
         # Defining the friction coefficient and normal
-        self.mu = 0.7 
+        self.mu = 0.7
         self.nsurf = np.array([0., 0., 1.])
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):

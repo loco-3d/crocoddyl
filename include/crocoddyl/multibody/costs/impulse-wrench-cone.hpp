@@ -46,8 +46,7 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixX6s MatrixX6s;
 
   CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation,
-                                  const FrameWrenchCone& fref);
+                                boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref);
   CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref);
   virtual ~CostModelImpulseWrenchConeTpl();
 
@@ -84,8 +83,7 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data) {
+  CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
     // Check that proper shared data has been passed
     DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {

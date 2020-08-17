@@ -45,13 +45,12 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixX6s MatrixX6s;
 
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref,
-                                  const std::size_t& nu);
+                                boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref,
+                                const std::size_t& nu);
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                  boost::shared_ptr<ActivationModelAbstract> activation,
-                                  const FrameWrenchCone& fref);
+                                boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref);
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref,
-                                  const std::size_t& nu);
+                                const std::size_t& nu);
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref);
   virtual ~CostModelContactWrenchConeTpl();
 
@@ -91,8 +90,9 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataContactWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
-        Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv())
-        {
+        Arr_Rx(model->get_activation()->get_nr()),
+        Arr_Ru(model->get_activation()->get_nr(), model->get_nu()) {
+    Arr_Rx.setZero();
     Arr_Ru.setZero();
 
     // Check that proper shared data has been passed
@@ -131,8 +131,8 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
-  MatrixXs Arr_Ru;
   MatrixXs Arr_Rx;
+  MatrixXs Arr_Ru;
   using Base::activation;
   using Base::cost;
   using Base::Lu;

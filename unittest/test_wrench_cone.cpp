@@ -49,7 +49,7 @@ void test_force_along_wrench_cone_normal() {
   wrench.head(3) = random_real_in_range(0., 100.) * cone_rotation.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
-  
+
   // The activation value has to be zero since the wrench is inside the wrench cone
   BOOST_CHECK(data->a_value == 0.);
 }
@@ -81,7 +81,7 @@ void test_negative_force_along_wrench_cone_normal() {
   for (std::size_t i = 0; i < cone.get_nf(); ++i) {
     BOOST_CHECK(r(i) > 0.);
   }
-  
+
   // The activation value has to be positive since the wrench is outside the wrench cone
   activation.calc(data, r);
   BOOST_CHECK(data->a_value > 0.);

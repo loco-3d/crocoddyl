@@ -21,7 +21,7 @@ CONTACT_6D_r = crocoddyl.ContactModel6D(
     ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
     pinocchio.utils.rand(2))
 CONTACT_6D_l = crocoddyl.ContactModel6D(
-    ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random()), ACTUATION.nu, 
+    ROBOT_STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random()), ACTUATION.nu,
     pinocchio.utils.rand(2))
 
 CONTACTS.addContact("r_sole_contact", CONTACT_6D_r)
@@ -31,13 +31,13 @@ COSTS = crocoddyl.CostModelSum(ROBOT_STATE, ACTUATION.nu)
 COSTS.addCost(
     "r_sole_wrench_cone",
     crocoddyl.CostModelContactWrenchCone(ROBOT_STATE, activation,
-                                           crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('r_sole'), wrenchCone),
-                                           ACTUATION.nu), 1.)
+                                         crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('r_sole'), wrenchCone),
+                                         ACTUATION.nu), 1.)
 COSTS.addCost(
     "l_sole_wrench_cone",
     crocoddyl.CostModelContactWrenchCone(ROBOT_STATE, activation,
-                                           crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('l_sole'), wrenchCone),
-                                           ACTUATION.nu), 1.)
+                                         crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('l_sole'), wrenchCone),
+                                         ACTUATION.nu), 1.)
 MODEL = crocoddyl.DifferentialActionModelContactFwdDynamics(ROBOT_STATE, ACTUATION, CONTACTS, COSTS, 0., True)
 DATA = MODEL.createData()
 
@@ -70,13 +70,11 @@ COSTS = crocoddyl.CostModelSum(ROBOT_STATE, 0)
 COSTS.addCost(
     "r_sole_wrench_cone",
     crocoddyl.CostModelImpulseWrenchCone(ROBOT_STATE, activation,
-                                           crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('r_sole'),
-                                                                       wrenchCone)), 1.)
+                                         crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('r_sole'), wrenchCone)), 1.)
 COSTS.addCost(
     "l_sole_wrench_cone",
     crocoddyl.CostModelImpulseWrenchCone(ROBOT_STATE, activation,
-                                           crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('l_sole'),
-                                                                       wrenchCone)), 1.)
+                                         crocoddyl.FrameWrenchCone(ROBOT_MODEL.getFrameId('l_sole'), wrenchCone)), 1.)
 MODEL = crocoddyl.ActionModelImpulseFwdDynamics(ROBOT_STATE, IMPULSES, COSTS, 0., 0., True)
 DATA = MODEL.createData()
 
