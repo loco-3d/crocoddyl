@@ -18,7 +18,6 @@
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -90,7 +89,7 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataContactWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
-        Arr_Rx(model->get_activation()->get_nr()),
+        Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
         Arr_Ru(model->get_activation()->get_nr(), model->get_nu()) {
     Arr_Rx.setZero();
     Arr_Ru.setZero();

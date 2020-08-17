@@ -18,7 +18,6 @@
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -83,7 +82,10 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+  CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
+    Arr_Rx.setZero();
+
     // Check that proper shared data has been passed
     DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -119,7 +121,7 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;
-
+  MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
   using Base::Lx;

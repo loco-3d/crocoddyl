@@ -57,8 +57,9 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
   activation_->calcDiff(data->activation, data->r);
   data->Rx.noalias() = A * df_dx;
 
+  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>
