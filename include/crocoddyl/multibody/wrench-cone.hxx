@@ -39,7 +39,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
     : A_(cone.get_A()),
       ub_(cone.get_ub()),
       lb_(cone.get_lb()),
-      rot_(cone.get_rot()),
+      R_(cone.get_R()),
       box_(cone.get_box()),
       mu_(cone.get_mu()),
       nf_(cone.get_nf()) {}
@@ -49,7 +49,7 @@ WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const Vector2s& box_size) {
-  rot_ = rot;
+  R_ = rot;
   mu_ = mu;
   box_ = box_size;
 
@@ -83,11 +83,10 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const 
   A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(1.);
 
   Matrix6s c_R_o = Matrix6s::Zero();
-  c_R_o.topLeftCorner(3, 3) = rot_.transpose();
-  c_R_o.bottomRightCorner(3, 3) = rot_.transpose();
+  c_R_o.topLeftCorner(3, 3) = R_.transpose();
+  c_R_o.bottomRightCorner(3, 3) = R_.transpose();
 
-  MatrixX6s A_local = A_;
-  A_ = (A_local * c_R_o).eval();
+  A_ = (A_ * c_R_o).eval();
   ub_.setZero();
   lb_.setOnes();
   lb_ *= -std::numeric_limits<Scalar>::max();
@@ -109,8 +108,8 @@ const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_lb() co
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_rot() const {
-  return rot_;
+const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R() const {
+  return R_;
 }
 
 template <typename Scalar>
@@ -129,23 +128,23 @@ const std::size_t& WrenchConeTpl<Scalar>::get_nf() const {
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_rot(Matrix3s rot) {
-  update(rot, mu_, box_);
+void WrenchConeTpl<Scalar>::set_R(Matrix3s R) {
+  update(R, mu_, box_);
 }
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
-  update(rot_, mu_, box);
+  update(R_, mu_, box);
 }
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(Scalar mu) {
-  update(rot_, mu, box_);
+  update(R_, mu, box_);
 }
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X) {
-  os << "       rot: " << X.get_rot() << std::endl;
+  os << "         R: " << X.get_R() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
   os << "       box: " << X.get_box().transpose() << std::endl;
   os << "        nf: " << X.get_nf() << std::endl;

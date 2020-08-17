@@ -32,21 +32,21 @@ class WrenchConeTpl {
   typedef typename MathBase::Quaternions Quaternions;
 
   explicit WrenchConeTpl();
-  WrenchConeTpl(const Matrix3s& rot, const Scalar& mu, const Vector2s& box_size, std::size_t nf = 16);
+  WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf = 16);
   WrenchConeTpl(const WrenchConeTpl<Scalar>& cone);
   ~WrenchConeTpl();
 
-  void update(const Matrix3s& rot, const Scalar& mu, const Vector2s& box_size);
+  void update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size);
 
   const MatrixX6s& get_A() const;
   const VectorXs& get_lb() const;
   const VectorXs& get_ub() const;
-  const Matrix3s& get_rot() const;
+  const Matrix3s& get_R() const;
   const Vector2s& get_box() const;
   const Scalar& get_mu() const;
   const std::size_t& get_nf() const;
 
-  void set_rot(Matrix3s rot);
+  void set_R(Matrix3s R);
   void set_box(Vector2s box);
   void set_mu(Scalar mu);
 
@@ -57,7 +57,7 @@ class WrenchConeTpl {
   MatrixX6s A_;
   VectorXs ub_;
   VectorXs lb_;
-  Matrix3s rot_;
+  Matrix3s R_;
   Vector2s box_;
   Scalar mu_;
   std::size_t nf_;

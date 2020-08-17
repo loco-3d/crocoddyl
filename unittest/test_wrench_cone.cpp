@@ -20,7 +20,7 @@ void test_constructor() {
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
   crocoddyl::WrenchCone cone(cone_rotation, mu, cone_box);
 
-  BOOST_CHECK((cone.get_rot() - cone_rotation).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone.get_R() - cone_rotation).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK(cone.get_mu() == mu / sqrt(2.));
   BOOST_CHECK(cone.get_nf() == 16);
   BOOST_CHECK((cone.get_box() - cone_box).isMuchSmallerThan(1.0, 1e-9));
