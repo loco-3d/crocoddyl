@@ -19,14 +19,14 @@ void exposeWrenchCone() {
                              "Initialize the linearize friction cone.\n\n"
                              ":param R: rotation matrix that defines the cone orientation\n"
                              ":param mu: friction coefficient\n"
-                             ":param box: X, Y distance between the origin and edge of the link\n"
+                             ":param box: dimension of the foot surface dim = (length, width)\n"
                              ":param nf: number of facets\n"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the friction cone."))
       .def("update", &WrenchCone::update, bp::args("self", "rot", "mu", "box"),
            "Update the linear inequality (matrix and bounds).\n\n"
            ":param rot: rotation matrix that defines the cone orientation\n"
            ":param mu: friction coefficient\n"
-           ":param box: X, Y distance between the origin and edge of the link\n")
+           ":param box: dimension of the foot surface dim = (length, width)\n")
       .add_property("A", bp::make_function(&WrenchCone::get_A, bp::return_internal_reference<>()), "inequality matrix")
       .add_property("lb", bp::make_function(&WrenchCone::get_lb, bp::return_internal_reference<>()),
                     "inequality lower bound")
