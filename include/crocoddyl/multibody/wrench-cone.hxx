@@ -64,23 +64,23 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& rot, const Scalar& mu, const 
   // center of the rectangular foot contact area (X, Y), with axes parallel to
   // those of the world frame.
 
-  A_.row(0).head(3) << 1., 0., -mu_;
-  A_.row(1).head(3) << -1., 0., -mu_;
-  A_.row(2).head(3) << 0., 1., -mu_;
-  A_.row(3).head(3) << 0., -1., -mu_;
-  A_.row(4).head(3) << 0., 0., -1.;
-  A_.row(5).segment(2, 3) << -box_(1), 1., 0.;
-  A_.row(6).segment(2, 3) << -box_(1), -1., 0.;
-  A_.row(7).segment(2, 3) << -box_(0), 0., 1.;
-  A_.row(8).segment(2, 3) << -box_(0), 0., -1.;
-  A_.row(9) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, -1.;
-  A_.row(10) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, -1.;
-  A_.row(11) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, -1.;
-  A_.row(12) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, -1.;
-  A_.row(13) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, 1.;
-  A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, 1.;
-  A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, 1.;
-  A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, 1.;
+  A_.row(0).head(3) << Scalar(1.), Scalar(0.), -mu_;
+  A_.row(1).head(3) << Scalar(-1.), Scalar(0.), -mu_;
+  A_.row(2).head(3) << Scalar(0.), Scalar(1.), -mu_;
+  A_.row(3).head(3) << Scalar(0.), Scalar(-1.), -mu_;
+  A_.row(4).head(3) << Scalar(0.), Scalar(0.), -1.;
+  A_.row(5).segment(2, 3) << -box_(1), Scalar(1.), Scalar(0.);
+  A_.row(6).segment(2, 3) << -box_(1), Scalar(-1.), Scalar(0.);
+  A_.row(7).segment(2, 3) << -box_(0), Scalar(0.), Scalar(1.);
+  A_.row(8).segment(2, 3) << -box_(0), Scalar(0.), Scalar(-1.);
+  A_.row(9) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(-1.);
+  A_.row(10) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(-1.);
+  A_.row(11) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(-1.);
+  A_.row(12) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(-1.);
+  A_.row(13) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(1.);
+  A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(1.);
+  A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(1.);
+  A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(1.);
 
   Matrix6s c_R_o = Matrix6s::Zero();
   c_R_o.topLeftCorner(3, 3) = rot_.transpose();
