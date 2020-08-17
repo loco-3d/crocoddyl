@@ -73,7 +73,10 @@ void exposeCostImpulseWrenchCone() {
       .add_property(
           "impulse",
           bp::make_getter(&CostDataImpulseWrenchCone::impulse, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataImpulseWrenchCone::impulse), "impulse data associated with the current cost");
+          bp::make_setter(&CostDataImpulseWrenchCone::impulse), "impulse data associated with the current cost")
+      .add_property("Arr_Rx", bp::make_getter(&CostDataImpulseWrenchCone::Arr_Rx, bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataImpulseWrenchCone::Arr_Rx),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)");
 }
 
 }  // namespace python

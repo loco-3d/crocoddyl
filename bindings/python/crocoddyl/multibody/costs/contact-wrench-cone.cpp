@@ -86,12 +86,16 @@ void exposeCostContactWrenchCone() {
           "Create contact wrench cone cost data.\n\n"
           ":param model: contact wrench cone cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Arr_Ru", bp::make_getter(&CostDataContactWrenchCone::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
       .add_property(
           "contact",
           bp::make_getter(&CostDataContactWrenchCone::contact, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataContactWrenchCone::contact), "contact data associated with the current cost");
+          bp::make_setter(&CostDataContactWrenchCone::contact), "contact data associated with the current cost")
+      .add_property("Arr_Rx", bp::make_getter(&CostDataContactWrenchCone::Arr_Rx, bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataContactWrenchCone::Arr_Rx),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
+      .add_property("Arr_Ru", bp::make_getter(&CostDataContactWrenchCone::Arr_Ru, bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataContactWrenchCone::Arr_Ru),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python
