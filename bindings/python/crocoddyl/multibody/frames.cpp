@@ -185,8 +185,9 @@ void exposeFrames() {
       .add_property("support_region",
                     bp::make_function(&FrameCoPSupport::get_support_region, bp::return_internal_reference<>()),
                     bp::make_function(&FrameCoPSupport::set_support_region), "support region")
-      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
-                    "inequality matrix")
+      //   .add_property("A", bp::make_function(&FrameCoPSupport::get_A, bp::return_internal_reference<>()),
+      //                 "inequality matrix") // TODO(cmastalli) we cannot expose due to a compilation error with
+      //                 Matrix46
       .add_property(
           "frame",
           bp::make_function(&FrameCoPSupport::get_id,
