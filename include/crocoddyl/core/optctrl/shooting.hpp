@@ -105,8 +105,25 @@ class ShootingProblemTpl {
    * @copybrief rollout
    *
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    */
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+
+  /**
+   * @brief Compute the quasic static commands given a state trajectory
+   *
+   * @param[out] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   * @param[in]  xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
+   */
+  void quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs);
+
+  /**
+   * @copybrief quasiStatic
+   *
+   * @param[in] xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
+   * @return the time-discrete quasic static commands \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   */
+  std::vector<VectorXs> quasiStatic_xs(const std::vector<VectorXs>& xs);
 
   /**
    * @brief Circular append of the model and data onto the end running node

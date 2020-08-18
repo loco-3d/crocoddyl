@@ -138,7 +138,7 @@ else:
 
 # Solving it with the DDP algorithm
 xs = [rmodel.defaultState] * (ddp.problem.T + 1)
-us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.problem.runningModels, ddp.problem.runningDatas))]
+us = ddp.problem.quasiStatic([rmodel.defaultState] * ddp.problem.T)
 ddp.solve(xs, us, 500, False, 0.1)
 
 # Visualizing the solution in gepetto-viewer

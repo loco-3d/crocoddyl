@@ -31,6 +31,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_actions
   # test_integrators
   test_diff_actions
+  test_problem
   test_friction_cone
   test_boxqp
   test_solvers

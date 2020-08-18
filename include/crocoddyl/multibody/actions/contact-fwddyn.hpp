@@ -104,11 +104,15 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
              model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
         df_dx(model->get_contacts()->get_nc_total(), model->get_state()->get_ndx()),
-        df_du(model->get_contacts()->get_nc_total(), model->get_nu()) {
+        df_du(model->get_contacts()->get_nc_total(), model->get_nu()),
+        tmp_xstatic(model->get_state()->get_nx()),
+        tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
     Kinv.setZero();
     df_dx.setZero();
     df_du.setZero();
+    tmp_xstatic.setZero();
+    tmp_Jstatic.setZero();
     pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
     pinocchio.lambda_c.setZero();
   }
@@ -119,6 +123,8 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   MatrixXs Kinv;
   MatrixXs df_dx;
   MatrixXs df_du;
+  VectorXs tmp_xstatic;
+  MatrixXs tmp_Jstatic;
 
   using Base::cost;
   using Base::Fu;
