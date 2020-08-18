@@ -80,7 +80,7 @@ def runDDPSolveBenchmark(xs, us, problem):
     if CALLBACKS:
         ddp.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
-    for i in range(T):
+    for _ in range(T):
         c_start = time.time()
         ddp.solve(xs, us, MAXITER, False, 0.1)
         c_end = time.time()
@@ -94,7 +94,7 @@ def runDDPSolveBenchmark(xs, us, problem):
 
 def runShootingProblemCalcBenchmark(xs, us, problem):
     duration = []
-    for i in range(T):
+    for _ in range(T):
         c_start = time.time()
         problem.calc(xs, us)
         c_end = time.time()

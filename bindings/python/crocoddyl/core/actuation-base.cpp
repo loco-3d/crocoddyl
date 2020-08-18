@@ -39,7 +39,8 @@ void exposeActuationAbstract() {
            ":param data: actuation data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
-      .def("createData", &ActuationModelAbstract_wrap::createData, bp::args("self"),
+      .def("createData", &ActuationModelAbstract_wrap::createData, &ActuationModelAbstract_wrap::default_createData,
+           bp::args("self"),
            "Create the actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"

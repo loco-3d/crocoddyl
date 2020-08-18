@@ -17,10 +17,9 @@
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
-
-enum ContactType { Contact3D, Contact6D, Undefined };
 
 /**
  * @brief Define a contact force cost function
@@ -168,17 +167,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  /**
-   * @brief Return the reference spatial contact force in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
-   */
-  const FrameForce& get_fref() const;
-
-  /**
-   * @brief Modify the reference spatial contact force in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
-   */
-  void set_fref(const FrameForce& fref);
+  DEPRECATED("Use set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref));
+  DEPRECATED("Use get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const);
 
  protected:
   /**
@@ -191,7 +181,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Modify the reference spatial contact force in the contact coordinates
    * \f${}^o\underline{\boldsymbol{\lambda}}_c^{reference}\f$
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
@@ -221,7 +211,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-    contact_type = Undefined;
+    contact_type = ContactUndefined;
 
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
@@ -230,12 +220,12 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    const FrameForce& fref = model->get_fref();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_fref().frame].name;
+    FrameForce fref = model->template get_reference<FrameForce>();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           contact_type = Contact3D;

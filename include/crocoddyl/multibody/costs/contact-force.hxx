@@ -71,10 +71,10 @@ void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbst
   // We transform the force to the contact frame
   switch (d->contact_type) {
     case Contact3D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).linear();
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).linear();
       break;
     case Contact6D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).toVector();
       break;
     default:
       break;
@@ -132,7 +132,7 @@ void CostModelContactForceTpl<Scalar>::set_referenceImpl(const std::type_info& t
 }
 
 template <typename Scalar>
-void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameForce)) {
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
     ref_map = fref_;

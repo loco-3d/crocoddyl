@@ -41,7 +41,7 @@ class DisplayAbstract:
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
-        models = solver.problem.runningModels + [solver.problem.terminalModel]
+        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
         if numpy_conversion:
@@ -165,14 +165,14 @@ class GepettoDisplay(DisplayAbstract):
         if len(self.frameTrajNames) == 0:
             return None
         fs = []
-        models = solver.problem.runningModels + [solver.problem.terminalModel]
-        datas = solver.problem.runningDatas + [solver.problem.terminalData]
+        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
+        datas = solver.problem.runningDatas.tolist() + [solver.problem.terminalData]
         for i, data in enumerate(datas):
             model = models[i]
             if hasattr(data, "differential"):
                 if isinstance(data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics):
                     fc = []
-                    for key, contact in data.differential.multibody.contacts.contacts.items():
+                    for key, contact in data.differential.multibody.contacts.contacts.todict().items():
                         if model.differential.contacts.contacts[key].active:
                             oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
                             fiMo = pinocchio.SE3(contact.pinocchio.oMi[contact.joint].rotation.T,
@@ -180,28 +180,28 @@ class GepettoDisplay(DisplayAbstract):
                             force = fiMo.actInv(contact.f)
                             nsurf = np.array([0., 0., 1.])
                             mu = 0.7
-                            for k, c in model.differential.costs.costs.items():
+                            for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                    if contact.joint == self.robot.model.frames[c.cost.reference.frame].parent:
-                                        nsurf = c.cost.reference.oRf.nsurf
-                                        mu = c.cost.reference.oRf.mu
+                                    if contact.joint == self.robot.model.frames[c.cost.reference.id].parent:
+                                        nsurf = c.cost.reference.cone.nsurf
+                                        mu = c.cost.reference.cone.mu
                                         continue
                             fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
-                for key, impulse in data.multibody.impulses.impulses.items():
+                for key, impulse in data.multibody.impulses.impulses.todict().items():
                     if model.impulses.impulses[key].active:
                         oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
                         fiMo = pinocchio.SE3(impulse.pinocchio.oMi[impulse.joint].rotation.T, impulse.jMf.translation)
                         force = fiMo.actInv(impulse.f)
                         nsurf = np.array([0., 0., 1.])
                         mu = 0.7
-                        for k, c in model.costs.costs.items():
+                        for k, c in model.costs.costs.todict().items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if impulse.joint == self.robot.model.frames[c.cost.frame].parent:
-                                    nsurf = c.cost.friction_cone.nsurf
-                                    mu = c.cost.friction_cone.mu
+                                if impulse.joint == self.robot.model.frames[c.cost.id].parent:
+                                    nsurf = c.cost.cone.nsurf
+                                    mu = c.cost.cone.mu
                                     continue
                         fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
                 fs.append(fc)
@@ -211,8 +211,8 @@ class GepettoDisplay(DisplayAbstract):
         if len(self.frameTrajNames) == 0:
             return None
         ps = {fr: [] for fr in self.frameTrajNames}
-        models = solver.problem.runningModels + [solver.problem.terminalModel]
-        datas = solver.problem.runningDatas + [solver.problem.terminalData]
+        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
+        datas = solver.problem.runningDatas.tolist() + [solver.problem.terminalData]
         for key, p in ps.items():
             frameId = int(key)
             for i, data in enumerate(datas):
@@ -221,7 +221,7 @@ class GepettoDisplay(DisplayAbstract):
                     if hasattr(data.differential, "pinocchio"):
                         # Update the frame placement if there is not contact.
                         # Note that, in non-contact cases, the action model does not compute it for efficiency reason
-                        if len(data.differential.multibody.contacts.contacts.items()) == 0:
+                        if len(data.differential.multibody.contacts.contacts.todict().items()) == 0:
                             pinocchio.updateFramePlacement(model.differential.pinocchio, data.differential.pinocchio,
                                                            frameId)
                         pose = data.differential.pinocchio.oMf[frameId]
@@ -330,7 +330,7 @@ class MeshcatDisplay(DisplayAbstract):
         if not dts:
             dts = [0.] * len(xs)
 
-        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        S = 1 if self.rate <= 0 else max(len(xs) // self.rate, 1)
         for i, x in enumerate(xs):
             if not i % S:
                 self.robot.display(x[:self.robot.nq])

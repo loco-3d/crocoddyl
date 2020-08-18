@@ -67,6 +67,7 @@ void exposeCostAbstract() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
+      .def("createData", &CostModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
           bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),

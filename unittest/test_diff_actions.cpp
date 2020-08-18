@@ -64,6 +64,42 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
+void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
+  // create the model
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed) return;
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+
+  // create the corresponding data object and set the cost to nan
+  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+
+  // Getting the cost value computed by calc()
+  Eigen::VectorXd x = model->get_state()->rand();
+  x.tail(model->get_state()->get_nv()).setZero();
+  Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
+  model->quasiStatic(data, u, x);
+  model->calc(data, x, u);
+
+  // Checking that the acceleration is zero as supposed to be in a quasi static condition
+  BOOST_CHECK(data->xout.norm() <= 1e-8);
+
+  // Check for inactive contacts
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos) {
+    boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> m =
+        boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamics>(model);
+    m->get_contacts()->changeContactStatus("lf", false);
+
+    model->quasiStatic(data, u, x);
+    model->calc(data, x, u);
+
+    // Checking that the acceleration is zero as supposed to be in a quasi static condition
+    BOOST_CHECK(data->xout.norm() <= 1e-8);
+  }
+}
+
 void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type action_type) {
   // create the model
   DifferentialActionModelFactory factory;
@@ -114,6 +150,7 @@ void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_quasi_static, action_type)));
   framework::master_test_suite().add(ts);
 }
 

@@ -19,12 +19,8 @@ void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
   typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
-  bp::to_python_converter<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> >,
-                          vector_to_list<ActionModelPtr, false> >();
-  bp::to_python_converter<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> >,
-                          vector_to_list<ActionDataPtr, false> >();
-  list_to_vector().from_python<std::vector<ActionModelPtr, std::allocator<ActionModelPtr> > >();
-  list_to_vector().from_python<std::vector<ActionDataPtr, std::allocator<ActionDataPtr> > >();
+  StdVectorPythonVisitor<ActionModelPtr, std::allocator<ActionModelPtr>, true>::expose("StdVec_ActionModel");
+  StdVectorPythonVisitor<ActionDataPtr, std::allocator<ActionDataPtr>, true>::expose("StdVec_ActionData");
 
   bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
 
@@ -70,6 +66,10 @@ void exposeShootingProblem() {
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence (size T)")
+      .def("quasiStatic", &ShootingProblem::quasiStatic_xs, bp::args("self", "xs"),
+           "Compute the quasi static commands given a state trajectory.\n\n"
+           "Generally speaking, it uses Newton-Raphson method for computing the quasi static commands.\n"
+           ":param xs: time-discrete state trajectory (size T)")
       .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>, boost::shared_ptr<ActionDataAbstract>)>(
           "circularAppend", &ShootingProblem::circularAppend, bp::args("self", "model", "data"),
           "Circular append the model and data onto the end running node.\n\n"

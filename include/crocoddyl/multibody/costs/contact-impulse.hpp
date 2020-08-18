@@ -17,10 +17,9 @@
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
-
-enum ImpulseType { Impulse3D, Impulse6D, Undefined };
 
 /**
  * @brief Define a contact impulse cost function
@@ -134,17 +133,8 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  /**
-   * @brief Return the reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
-   */
-  const FrameForce& get_fref() const;
-
-  /**
-   * @brief Modify the reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
-   */
-  void set_fref(const FrameForce& fref);
+  DEPRECATED("Used set_reference<FrameForceTpl<Scalar> >()", void set_fref(const FrameForce& fref));
+  DEPRECATED("Used get_reference<FrameForceTpl<Scalar> >()", const FrameForce& get_fref() const);
 
  protected:
   /**
@@ -157,7 +147,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Modify the reference spatial contact impulse in the contact coordinates
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
@@ -185,7 +175,7 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
-    impulse_type = Undefined;
+    impulse_type = ImpulseUndefined;
 
     // Check that proper shared data has been passed
     DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
@@ -194,12 +184,12 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
     }
 
     // Avoids data casting at runtime
-    const FrameForce& fref = model->get_fref();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[model->get_fref().frame].name;
+    FrameForce fref = model->template get_reference<FrameForce>();
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_impulse = false;
     for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
          it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           impulse_type = Impulse3D;

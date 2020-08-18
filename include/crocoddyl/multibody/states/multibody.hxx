@@ -14,27 +14,20 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model)
-    : Base(model->nq + model->nv, 2 * model->nv),
-      pinocchio_(model),
-      x0_(VectorXs::Zero(model->nq + model->nv)),
-      joint_type_(Simple) {
+    : Base(model->nq + model->nv, 2 * model->nv), pinocchio_(model), x0_(VectorXs::Zero(model->nq + model->nv)) {
   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
   // Instead simple represents any joint that can model within the Euclidean manifold.
   // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff.
-  std::size_t nq0 = 0;
-  if (model->joints[1].shortname() == "JointModelFreeFlyer") {
-    joint_type_ = FreeFlyer;
-    // Define internally the free-flyer limits
-    nq0 = 7;
-    lb_.template head<7>() = -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(7);
-    ub_.template head<7>() = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(7);
-  } else if (model->joints[1].shortname() == "JointModelSphericalZYX") {
-    joint_type_ = Spherical;
-  }
 
+  // Define internally the limits of the first joint
+
+  const std::size_t nq0 = model->joints[1].nq();
+
+  lb_.head(nq0) = -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
+  ub_.head(nq0) = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
   lb_.segment(nq0, nq_ - nq0) = pinocchio_->lowerPositionLimit.tail(nq_ - nq0);
   ub_.segment(nq0, nq_ - nq0) = pinocchio_->upperPositionLimit.tail(nq_ - nq0);
   lb_.tail(nv_) = -pinocchio_->velocityLimit;

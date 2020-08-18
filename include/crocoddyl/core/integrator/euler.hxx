@@ -181,4 +181,23 @@ void IntegratedActionModelEulerTpl<Scalar>::set_differential(
   Base::set_u_ub(differential_->get_u_ub());
 }
 
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                        Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                                                        const std::size_t& maxiter, const Scalar& tol) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  // Static casting the data
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+
+  differential_->quasiStatic(d->differential, u, x, maxiter, tol);
+}
+
 }  // namespace crocoddyl

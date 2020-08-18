@@ -12,6 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -50,12 +51,12 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const VectorXs& get_xref() const;
-  void set_xref(const VectorXs& xref_in);
+  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::VectorXs>()", void set_xref(const VectorXs& xref_in));
+  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::VectorXs>()", const VectorXs& get_xref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
