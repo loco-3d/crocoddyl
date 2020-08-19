@@ -82,24 +82,41 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nx = model->get_state()->get_nx();
 
-    dx_rk4 = VectorXs::Zero(ndx);
+    const std::size_t& nu = model->get_nu();
+
+    dx = VectorXs::Zero(ndx);
     integral = VectorXs::Zero(4);
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
-    dx = std::vector<VectorXs>(4, VectorXs::Zero(nx));
-    
+    dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
+    dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dy_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dy_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    df_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    df_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndu));
+
+    dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
+    dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
+
   }
   ~IntegratedActionDataEulerTpl() {}
 
-  VectorXs dx_rk4;
+  VectorXs dx;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>> differential;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
-  std::vector<VectorXs> dx;
+  std::vector<VectorXs> dx_rk4;
 
   std::vector<MatrixXs> dki_dx;
+  std::vector<MatrixXs> dki_du;
   std::vector<MatrixXs> dy_dx;
+  std::vector<MatrixXs> dy_du;
+  std::vector<MatrixXs> df_dy;
+
+  std::vector<VectorXs> dli_dx;
+  std::vector<VectorXs> dli_du;
 
   using Base::cost;
   using Base::Fu;

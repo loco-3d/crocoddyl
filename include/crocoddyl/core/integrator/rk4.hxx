@@ -58,9 +58,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   d->y[0] = x;
   differential_->calc(d->differential[0], d->y[0], u);
   d->ki[0] << y[0].tail(nv), d->differential[0].xout;
+  d->integral[0] = d->differential[0].cost;
   for (std::size_t i = 1; i < 4; ++i) {
-    d->dx[i].noalias() = time_step_ * rk4_c_[i] * d->ki[i - 1];
-    differential_->get_state()->integrate(x, d->dx[i], d->y[i]);
+    d->dx_rk4[i].noalias() = time_step_ * rk4_c_[i] * d->ki[i - 1];
+    differential_->get_state()->integrate(x, d->dx_rk4[i], d->y[i]);
     differential_->calc(d->differential[i], d->y[i], u);
     d->ki[i] << y[i].tail(nv), d->differential[i].xout;
     d->integral[i] = d->differential[i].cost;
@@ -68,7 +69,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 
   // Computing the next state (discrete time)
   if (enable_integration_) {
-    d->dx_rk4 = (d->ki[0] + 2 * d->ki[1] + 2 * d->ki[2] + d->ki[3]) * time_step_ / 6;
+    d->dx = (d->ki[0] + 2 * d->ki[1] + 2 * d->ki[2] + d->ki[3]) * time_step_ / 6;
     differential_->get_state()->integrate(x, d->dx, d->xnext);
     d->cost = (d->integral[0] + 2 * d->integral[1] + 2 * d->integral[2] + d->integral[3]) * time_step_ / 6;
   } else {
@@ -103,21 +104,42 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential[0], d->y[0], u);
-  d->dki_dx[0] = d->differential[0].Fx;
+  d->dki_dx[0].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
+  d->dki_dx[0].bottomRows(nv).noalias() = d->differential[0].Fx;
+  d->dki_du[0].bottomRows(nv).noalias() = d->differential[0].Fu;
+
+  d->li_dx[0] = d->differential[0].Lx;
+  d->li_du[0] = d->differential[0].Lu;
 
   for (std::size_t i = 1; i < 4; ++i) {
     differential_->calcDiff(d->differential[i], d->y[i], u);
+    d->df_dx[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
+    d->df_dx[i].bottomRows(nv).noalias() = d->differential[i].Fx;
+
     d->dy_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
-    differential_->get_state()->JintegrateTransport(x, d->dx[i], d->dy_dx[i], second);
-    differential_->get_state()->Jintegrate(x, d->dx[i], d->dy_dx[i], d->dy_dx[i], first, addto);
-    d->dki_dx[i].noalias() = d->differential[i].Fx * d->dy_dx[i];
+    differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dy_dx[i], second);
+    differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dy_dx[i], d->dy_dx[i], first, addto);
+    d->dki_dx[i].noalias() = d->df_dx[i] * d->dy_dx[i];
+
+    d->dy_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
+    differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dy_du[i], second);
+    d->df_du[i]-bottomRows(nv).noalias() = d->differential[i].Fu;
+    d->dki_du[i].noalias() = d->df_du[i] * d->dy_du[i];
+
+    d->li_dx[i].noalias() = d->differential[i].Lx * d->dy_dx[i];
+    d->li_du[i].noalias() = d->differential[i].Lu * d->dy_du[i];
   }
 
   if (enable_integration_) {
     d->Fx.noalias() = time_step_ / 6 * (d->dki_dx[0] + 2 * d->dki_dx[1] + 2 * d->dki_dx[2] + d->dki_dx[3]);
-
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+    
+    d->Fu.noalias() = time_step_ / 6 * (d->dki_du[0] + 2 * d->dki_du[1] + 2 * d->dki_du[2] + d->dki_du[3]);
+    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
+
+    d->Lx = time_step_ / 6 * (d->li_dx[0] + 2 * d->li_dx[1] + 2 * d->li_dx[2] + d->li_dx[3]);
+    d->Lu = time_step_ / 6 * (d->li_du[0] + 2 * d->li_du[1] + 2 * d->li_du[2] + d->li_du[3]);
 
   } else {
     // TODO
