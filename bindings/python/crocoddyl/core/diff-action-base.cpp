@@ -58,6 +58,17 @@ void exposeDifferentialActionAbstract() {
            "allocated. This function returns the allocated data for a predefined\n"
            "DAM.\n"
            ":return DAM data.")
+      .def("quasiStatic", &DifferentialActionModelAbstract_wrap::quasiStatic_x,
+           DifferentialActionModel_quasiStatic_wraps(
+               bp::args("self", "data", "x", "maxiter", "tol"),
+               "Compute the quasic-static control given a state.\n\n"
+               "It runs an iterative Newton step in order to compute the quasic-static regime\n"
+               "given a state configuration.\n"
+               ":param data: action data\n"
+               ":param x: discrete-time state vector\n"
+               ":param maxiter: maximum allowed number of iterations\n"
+               ":param tol: stopping tolerance criteria (default 1e-9)\n"
+               ":return u: quasic-static control"))
       .add_property("nu",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu,
                                       bp::return_value_policy<bp::return_by_value>()),
