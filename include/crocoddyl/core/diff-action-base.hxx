@@ -63,6 +63,16 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
+typename MathBaseTpl<Scalar>::VectorXs DifferentialActionModelAbstractTpl<Scalar>::quasiStatic_x(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x, const std::size_t& maxiter,
+    const Scalar& tol) {
+  VectorXs u(nu_);
+  u.setZero();
+  quasiStatic(data, u, x, maxiter, tol);
+  return u;
+}
+
+template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
