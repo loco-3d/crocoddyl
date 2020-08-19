@@ -82,19 +82,24 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nx = model->get_state()->get_nx();
 
-    dx = VectorXs::Zero(ndx);
+    dx_rk4 = VectorXs::Zero(ndx);
     integral = VectorXs::Zero(4);
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
+    dx = std::vector<VectorXs>(4, VectorXs::Zero(nx));
     
   }
   ~IntegratedActionDataEulerTpl() {}
 
-  VectorXs dx;
+  VectorXs dx_rk4;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>> differential;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
+  std::vector<VectorXs> dx;
+
+  std::vector<MatrixXs> dki_dx;
+  std::vector<MatrixXs> dy_dx;
 
   using Base::cost;
   using Base::Fu;
