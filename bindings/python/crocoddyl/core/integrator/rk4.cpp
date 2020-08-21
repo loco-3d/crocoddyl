@@ -16,19 +16,23 @@ namespace python {
 void exposeIntegratedActionRK4() {
   bp::class_<IntegratedActionModelRK4, bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelRK4",
-      "Sympletic RK4 integrator for differential action models.\n\n"
-      "This class implements a sympletic RK4 integrator (a.k.a semi-implicit\n"
+      "RK4 integrator for differential action models.\n\n"
+      "This class implements an RK4 integrator (a.k.a semi-implicit\n"
       "integrator) give a differential action model, i.e.:\n"
-      "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)).",
+      "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)) with \n"
+      "k0 = f(x, u) \n"
+      "k1 = f(x + dt / 2 * k1, u) \n"
+      "k2 = f(x + dt / 2 * k2, u) \n"
+      "k3 = f(x + dt * k2, u) \n",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
-          "Initialize the sympletic RK4 integrator.\n\n"
+          "Initialize the RK4 integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                              const Eigen::Ref<const Eigen::VectorXd>&,
+                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &IntegratedActionModelRK4::calc, bp::args("self", "data", "x", "u"),
           "Compute the time-discrete evolution of a differential action model.\n\n"
           "It describes the time-discrete evolution of action model.\n"
@@ -36,11 +40,11 @@ void exposeIntegratedActionRK4() {
           ":param x: state vector\n"
           ":param u: control input")
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                              const Eigen::Ref<const Eigen::VectorXd>&,
+                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK4::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the time-discrete derivatives of a differential action model.\n\n"
           "It computes the time-discrete partial derivatives of a differential\n"
@@ -51,10 +55,9 @@ void exposeIntegratedActionRK4() {
           ":param x: state vector\n"
           ":param u: control input\n")
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"),
-           "Create the RK4 integrator data.")
+      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
       .add_property("differential",
                     bp::make_function(&IntegratedActionModelRK4::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -66,10 +69,10 @@ void exposeIntegratedActionRK4() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
   bp::class_<IntegratedActionDataRK4, bp::bases<ActionDataAbstract> >(
-      "IntegratedActionDataRK4", "Sympletic RK4 integrator data.",
+      "IntegratedActionDataRK4", "RK4 integrator data.",
       bp::init<IntegratedActionModelRK4*>(bp::args("self", "model"),
-                                            "Create sympletic RK4 integrator data.\n\n"
-                                            ":param model: sympletic RK4 integrator model"))
+                                          "Create RK4 integrator data.\n\n"
+                                          ":param model: RK4 integrator model"))
       .add_property(
           "differential",
           bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),

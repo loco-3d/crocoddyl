@@ -99,11 +99,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   const std::size_t& nv = differential_->get_state()->get_nv();
 
-  // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   differential_->calcDiff(d->differential[0], d->y[0], u);
-  
+
   d->dki_dy[0].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
   d->dki_dy[0].bottomRows(nv).noalias() = d->differential[0]->Fx;
   d->dyi_dx[0].diagonal().array() = (Scalar)1;
@@ -206,9 +205,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar& dt) {
 
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  // to do!
-  std::cout << "CALLED!" << std::endl;
-
   const std::size_t& nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
