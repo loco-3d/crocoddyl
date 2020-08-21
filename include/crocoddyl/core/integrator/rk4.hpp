@@ -86,25 +86,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     for (std::size_t i = 0; i < 4; ++i) {
       differential.push_back(
           boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>(model->get_differential()->createData()));
-      // ki.push_back(VectorXs::Zero(ndx));
-      // y.push_back(VectorXs::Zero(nx));
-      // dx_rk4.push_back(VectorXs::Zero(ndx));
-
-      // dki_dx.push_back(MatrixXs::Zero(ndx, ndx));
-      // dki_du.push_back(MatrixXs::Zero(ndx, nu));
-      // dyi_dx.push_back(MatrixXs::Zero(ndx, ndx));
-      // dyi_du.push_back(MatrixXs::Zero(ndx, nu));
-      // dki_dy.push_back(MatrixXs::Zero(ndx, ndx));
-
-      // dli_dx.push_back(VectorXs::Zero(ndx));
-      // dli_du.push_back(VectorXs::Zero(nu));
-      // ddli_ddx.push_back(MatrixXs::Zero(ndx, ndx));
-      // ddli_ddu.push_back(MatrixXs::Zero(nu, nu));
-      // ddli_dxdu.push_back(MatrixXs::Zero(ndx, nu));
-      // Luu_partialx.push_back(MatrixXs::Zero(nu, nu));
     }
-    // differential = std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>>(
-    //     4, model->get_differential()->createData());
 
     dx = VectorXs::Zero(ndx);
     integral = {0, 0, 0, 0};
