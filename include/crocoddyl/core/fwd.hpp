@@ -100,6 +100,11 @@ class IntegratedActionModelEulerTpl;
 template <typename Scalar>
 struct IntegratedActionDataEulerTpl;
 
+template <typename Scalar>
+class IntegratedActionModelRK4Tpl;
+template <typename Scalar>
+struct IntegratedActionDataRK4Tpl;
+
 // state
 template <typename Scalar>
 class StateVectorTpl;
@@ -185,6 +190,8 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
+typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
+typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
 
 typedef StateVectorTpl<double> StateVector;
 

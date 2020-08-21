@@ -13,6 +13,8 @@
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 
+namespace crocoddyl {
+
 template <typename _Scalar>
 class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
  public:
@@ -21,7 +23,7 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionModelAbstractTpl<Scalar> Base;
-  typedef IntegratedActionDataEulerTpl<Scalar> Data;
+  typedef IntegratedActionDataRK4Tpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -66,7 +68,7 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
+struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -76,31 +78,55 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
-    differential = std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>>(
-        4, model->get_differential()->createData());
+  explicit IntegratedActionDataRK4Tpl(Model<Scalar>* const model) : Base(model) {
     const std::size_t& ndx = model->get_state()->get_ndx();
     const std::size_t& nx = model->get_state()->get_nx();
 
     const std::size_t& nu = model->get_nu();
+    for (std::size_t i = 0; i < 4; ++i) {
+      differential.push_back(
+          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>(model->get_differential()->createData()));
+      // ki.push_back(VectorXs::Zero(ndx));
+      // y.push_back(VectorXs::Zero(nx));
+      // dx_rk4.push_back(VectorXs::Zero(ndx));
+
+      // dki_dx.push_back(MatrixXs::Zero(ndx, ndx));
+      // dki_du.push_back(MatrixXs::Zero(ndx, nu));
+      // dyi_dx.push_back(MatrixXs::Zero(ndx, ndx));
+      // dyi_du.push_back(MatrixXs::Zero(ndx, nu));
+      // dki_dy.push_back(MatrixXs::Zero(ndx, ndx));
+
+      // dli_dx.push_back(VectorXs::Zero(ndx));
+      // dli_du.push_back(VectorXs::Zero(nu));
+      // ddli_ddx.push_back(MatrixXs::Zero(ndx, ndx));
+      // ddli_ddu.push_back(MatrixXs::Zero(nu, nu));
+      // ddli_dxdu.push_back(MatrixXs::Zero(ndx, nu));
+      // Luu_partialx.push_back(MatrixXs::Zero(nu, nu));
+    }
+    // differential = std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>>(
+    //     4, model->get_differential()->createData());
 
     dx = VectorXs::Zero(ndx);
-    integral = VectorXs::Zero(4);
+    integral = {0, 0, 0, 0};
+
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
     dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
+
     dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
     dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dy_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dy_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    df_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    df_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndu));
+    dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dyi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
-
+    ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
   }
-  ~IntegratedActionDataEulerTpl() {}
+  ~IntegratedActionDataRK4Tpl() {}
 
   VectorXs dx;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>> differential;
@@ -111,12 +137,16 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
 
   std::vector<MatrixXs> dki_dx;
   std::vector<MatrixXs> dki_du;
-  std::vector<MatrixXs> dy_dx;
-  std::vector<MatrixXs> dy_du;
-  std::vector<MatrixXs> df_dy;
+  std::vector<MatrixXs> dyi_dx;
+  std::vector<MatrixXs> dyi_du;
+  std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
   std::vector<VectorXs> dli_du;
+  std::vector<MatrixXs> ddli_ddx;
+  std::vector<MatrixXs> ddli_ddu;
+  std::vector<MatrixXs> ddli_dxdu;
+  std::vector<MatrixXs> Luu_partialx;
 
   using Base::cost;
   using Base::Fu;
@@ -135,6 +165,6 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/core/integrator/euler.hxx"
+#include "crocoddyl/core/integrator/rk4.hxx"
 
 #endif  // CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
