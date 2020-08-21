@@ -21,8 +21,8 @@ void exposeIntegratedActionRK4() {
       "given a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)) with \n"
       "k0 = f(x, u) \n"
-      "k1 = f(x + dt / 2 * k1, u) \n"
-      "k2 = f(x + dt / 2 * k2, u) \n"
+      "k1 = f(x + dt / 2 * k0, u) \n"
+      "k2 = f(x + dt / 2 * k1, u) \n"
       "k3 = f(x + dt * k2, u) \n",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
