@@ -4,7 +4,7 @@ from example_robot_data import getModelPath, readParamsFromSrdf
 import pinocchio
 from pinocchio.robot_wrapper import RobotWrapper
 
-pinocchio.switchToNumpyMatrix()
+# pinocchio.switchToNumpyMatrix()
 
 
 def loadTalosArm(modelPath=None, freeFloating=False):
