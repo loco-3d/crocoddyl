@@ -1,0 +1,2 @@
+import crocoddyl
+import crocoddyl_legacy

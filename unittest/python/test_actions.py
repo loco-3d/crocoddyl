@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from crocoddyl import ActionModelNumDiff, ActionModelUnicycle, ActionModelUnicycleVar
+from crocoddyl_legacy import ActionModelNumDiff, ActionModelUnicycle, ActionModelUnicycleVar
 from testutils import NUMDIFF_MODIFIER, assertNumDiff
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from crocoddyl import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
+from crocoddyl_legacy import ActionModelNumDiff, DifferentialActionModelLQR, IntegratedActionModelRK4, a2m, m2a
 from numpy.random import rand
 from testutils import assertNumDiff, df_dx
 

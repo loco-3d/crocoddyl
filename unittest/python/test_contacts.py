@@ -2,13 +2,13 @@ import numpy as np
 from numpy.linalg import eig, norm, pinv
 
 import pinocchio
-from crocoddyl import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D,
+from crocoddyl_legacy import (ActionModelNumDiff, ActuationModelFreeFloating, CallbackDDPLogger, ContactModel3D,
                        ContactModel6D, ContactModelMultiple, CostModelControl, CostModelForce,
                        CostModelForceLinearCone, CostModelFrameTranslation, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, DifferentialActionModelNumDiff,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, SolverKKT, StatePinocchio, a2m, absmax,
                        loadTalosArm, m2a)
-from crocoddyl.utils import EPS
+from crocoddyl_legacy.utils import EPS
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
 

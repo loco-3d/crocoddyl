@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
+from crocoddyl_legacy import (ActionModelNumDiff, ActivationModelInequality, ActivationModelWeightedQuad, CostModelCoM,
                        CostModelControl, CostModelFramePlacement, CostModelFrameRotation, CostModelFrameTranslation,
                        CostModelFrameVelocity, CostModelFrameVelocityLinear, CostModelNumDiff, CostModelState,
                        CostModelSum, DifferentialActionModelFullyActuated, DifferentialActionModelNumDiff,

@@ -97,6 +97,7 @@ class IntegratedActionModelRK4:
         self.nv = self.differential.nv
         self.timeStep = timeStep
         self.rk4_inc = [0.5, 0.5, 1.]
+        self.enable_integration = (self.timeStep > 0.)
 
     def createData(self):
         return IntegratedActionDataRK4(self)

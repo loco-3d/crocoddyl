@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 from numpy.linalg import eig, inv, norm
 
-from crocoddyl import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
+from crocoddyl_legacy import (ActionModelLQR, ActionModelUnicycle, ActionModelUnicycleVar, ShootingProblem, SolverDDP,
                        SolverFDDP, SolverKKT)
 
 

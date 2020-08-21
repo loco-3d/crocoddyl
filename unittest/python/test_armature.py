@@ -13,7 +13,7 @@ Any stronger test here is welcome.
 import numpy as np
 
 import pinocchio
-from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
+from crocoddyl_legacy import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
                        CostModelCoM, CostModelControl, CostModelFramePlacement, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, IntegratedActionModelEuler, ShootingProblem,
                        SolverDDP, StatePinocchio, a2m, loadTalosLegs, m2a)
