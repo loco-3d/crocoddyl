@@ -118,7 +118,7 @@ void exposeShootingProblem() {
                     "dimension of the tangent space of the state manifold")
       .add_property("nu_max",
                     bp::make_function(&ShootingProblem::get_nu_max, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the maximun control vector");
+                    "dimension of the maximum control vector");
 }
 
 }  // namespace python
