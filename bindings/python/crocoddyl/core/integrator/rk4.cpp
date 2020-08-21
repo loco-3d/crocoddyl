@@ -17,8 +17,8 @@ void exposeIntegratedActionRK4() {
   bp::class_<IntegratedActionModelRK4, bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelRK4",
       "RK4 integrator for differential action models.\n\n"
-      "This class implements an RK4 integrator (a.k.a semi-implicit\n"
-      "integrator) give a differential action model, i.e.:\n"
+      "This class implements an RK4 integrator\n"
+      "given a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)) with \n"
       "k0 = f(x, u) \n"
       "k1 = f(x + dt / 2 * k1, u) \n"
@@ -46,9 +46,9 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK4::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the time-discrete derivatives of a differential action model.\n\n"
-          "It computes the time-discrete partial derivatives of a differential\n"
-          "action model. It assumes that calc has been run first.\n"
+          "Compute the time-discrete derivatives of the integrated action model.\n\n"
+          "It computes the time-discrete partial derivatives of the integration action.\n"
+          "It assumes that calc has been run first.\n"
           "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
           ":param data: action data\n"

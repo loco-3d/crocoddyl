@@ -51,7 +51,7 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Control dimension
   using Base::state_;               //!< Model of the state
@@ -89,7 +89,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     }
 
     dx = VectorXs::Zero(ndx);
-    integral = {0, 0, 0, 0};
+    integral = std::vector<Scalar>(4, Scalar(0.));
 
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
