@@ -134,6 +134,21 @@ class DifferentialActionModelAbstractTpl {
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
                            const Scalar& tol = Scalar(1e-9));
+
+  /**
+   * @copybrief quasicStatic()
+   *
+   * @copydetails quasicStatic()
+   *
+   * @param[in] data    Differential action data
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   * @return Quasic static commands
+   */
+  VectorXs quasiStatic_x(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x,
+                         const std::size_t& maxiter = 100, const Scalar& tol = Scalar(1e-9));
+
   /**
    * @brief Return the dimension of the control input
    */
