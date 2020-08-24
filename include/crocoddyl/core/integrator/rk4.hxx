@@ -146,7 +146,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       
       d->Luu_partialx[i].noalias() = d->differential[i]->Lxu.transpose() * d->dyi_du[i];
       d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-      d->ddli_ddu[i] = d->differential[i]->Luu + d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
+      d->ddli_ddu[i].noalias() = d->differential[i]->Luu + d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
                        d->dyi_du[i].transpose() * d->Lxx_partialu[i];
       
       d->ddli_dxdu[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
