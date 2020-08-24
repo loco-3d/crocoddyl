@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,8 +68,9 @@ void exposeSolverKKT() {
       .add_property("primaldual",
                     make_function(&SolverKKT::get_primaldual, bp::return_value_policy<bp::copy_const_reference>()),
                     "primaldual")
-      .add_property("lambdas", make_function(&SolverKKT::get_lambdas, bp::return_value_policy<bp::copy_const_reference>()),
-                    "lambdas")    
+      .add_property("lambdas",
+                    make_function(&SolverKKT::get_lambdas, bp::return_value_policy<bp::copy_const_reference>()),
+                    "lambdas")
       .add_property("dxs", make_function(&SolverKKT::get_dxs, bp::return_value_policy<bp::copy_const_reference>()),
                     "dxs")
       .add_property("dus", make_function(&SolverKKT::get_dus, bp::return_value_policy<bp::copy_const_reference>()),
