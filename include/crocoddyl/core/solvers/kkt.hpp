@@ -37,6 +37,7 @@ class SolverKKT : public SolverAbstract {
   const Eigen::VectorXd& get_primaldual() const;
   const std::vector<Eigen::VectorXd>& get_dxs() const;
   const std::vector<Eigen::VectorXd>& get_dus() const;
+  const std::vector<Eigen::VectorXd>& get_lambdas() const;
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;
   const std::size_t& get_nu() const;

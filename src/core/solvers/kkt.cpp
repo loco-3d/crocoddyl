@@ -168,6 +168,8 @@ const std::vector<Eigen::VectorXd>& SolverKKT::get_dxs() const { return dxs_; }
 
 const std::vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
 
+const std::vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const { return lambdas_; }
+  
 const std::size_t& SolverKKT::get_nx() const { return nx_; }
 
 const std::size_t& SolverKKT::get_ndx() const { return ndx_; }
