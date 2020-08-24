@@ -26,7 +26,7 @@ SET(${PROJECT_NAME}_PYTHON_FILES
   )
 
 FOREACH(python ${${PROJECT_NAME}_PYTHON_FILES})
-  PYTHON_BUILD(../crocoddyl ${python})
+  PYTHON_BUILD(../crocoddyl_legacy ${python})
   # INSTALL(FILES ${python} DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/legacy)
 ENDFOREACH(python ${${PROJECT_NAME}_PYTHON_FILES})
 

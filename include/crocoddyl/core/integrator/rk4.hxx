@@ -110,10 +110,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   if (enable_integration_) {
     d->dki_dy[0].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
-    d->dki_dy[0].bottomRows(nv).noalias() = d->differential[0]->Fx;
+    d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
     d->dyi_dx[0].diagonal().array() = (Scalar)1;
     d->dki_dx[0] = d->dki_dy[0];
-    d->dki_du[0].bottomRows(nv).noalias() = d->differential[0]->Fu;
+    d->dki_du[0].bottomRows(nv) = d->differential[0]->Fu;
 
     d->dli_dx[0] = d->differential[0]->Lx;
     d->dli_du[0] = d->differential[0]->Lu;
@@ -125,7 +125,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     for (std::size_t i = 1; i < 4; ++i) {
       differential_->calcDiff(d->differential[i], d->y[i], u);
       d->dki_dy[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
-      d->dki_dy[i].bottomRows(nv).noalias() = d->differential[i]->Fx;
+      d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
@@ -138,13 +138,19 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       d->dki_du[i].bottomRows(nv) += d->differential[i]->Fu;
 
       d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
-      d->dli_du[i].noalias() = d->differential[i]->Lu.transpose() + d->differential[i]->Lx.transpose() * d->dyi_du[i];
-      d->ddli_ddx[i] = d->dyi_dx[i].transpose() * d->differential[i]->Lxx * d->dyi_dx[i];
-      d->Luu_partialx[i] = d->differential[i]->Lxu.transpose() * d->dyi_du[i];
+      d->dli_du[i].noalias() = d->differential[i]->Lu.transpose();
+      d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
+
+      d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
+      d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
+      
+      d->Luu_partialx[i].noalias() = d->differential[i]->Lxu.transpose() * d->dyi_du[i];
+      d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
       d->ddli_ddu[i] = d->differential[i]->Luu + d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
-                       d->dyi_du[i].transpose() * d->differential[i]->Lxx * d->dyi_du[i];
-      d->ddli_dxdu[i] = d->dyi_dx[i].transpose() * d->differential[i]->Lxu +
-                        d->dyi_dx[i].transpose() * d->differential[i]->Lxx * d->dyi_du[i];
+                       d->dyi_du[i].transpose() * d->Lxx_partialu[i];
+      
+      d->ddli_dxdu[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
+      d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
     }
 
     d->Fx.noalias() = time_step_ / Scalar(6.) *

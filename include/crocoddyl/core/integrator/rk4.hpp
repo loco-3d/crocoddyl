@@ -107,6 +107,8 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
     ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    Lxx_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    Lxx_partialu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
   }
   ~IntegratedActionDataRK4Tpl() {}
 
@@ -129,6 +131,8 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   std::vector<MatrixXs> ddli_ddu;
   std::vector<MatrixXs> ddli_dxdu;
   std::vector<MatrixXs> Luu_partialx;
+  std::vector<MatrixXs> Lxx_partialx;
+  std::vector<MatrixXs> Lxx_partialu;
 
   using Base::cost;
   using Base::Fu;
