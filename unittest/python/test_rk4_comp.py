@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 import pinocchio
 import example_robot_data
