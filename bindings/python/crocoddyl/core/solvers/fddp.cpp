@@ -38,7 +38,7 @@ void exposeSolverFDDP() {
                "during the numerical optimization.\n"
                ":param init_xs: initial guess for state trajectory with T+1 elements (default [])\n"
                ":param init_us: initial guess for control trajectory with T elements (default []).\n"
-               ":param maxiter: maximun allowed number of iterations (default 100).\n"
+               ":param maxiter: maximum allowed number of iterations (default 100).\n"
                ":param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout) (default "
                "False).\n"
                ":param regInit: initial guess for the regularization value. Very low values are typical\n"

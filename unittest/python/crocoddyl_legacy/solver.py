@@ -31,7 +31,7 @@ class SolverAbstract:
         From an initial guess init_xs,init_us (feasible or not), iterate over computeDirection and tryStep until
         stoppingCriteria is below threshold. It also describes the globalization strategy used during the numerical
         optimization.
-        :param maxiter: maximun allowed number of iterations.
+        :param maxiter: maximum allowed number of iterations.
         :param init_xs: initial guess for state trajectory with T+1 elements.
         :param init_us: initial guess for control trajectory with T elements.
         :param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout).
