@@ -77,8 +77,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     differential_->get_state()->integrate(x, d->dx, d->xnext);
     d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] + Scalar(2.) * d->integral[2] + d->integral[3]) *
               time_step_ / Scalar(6.);
-    // std::cout << "This is dx: \n" << d->dx << std::endl;
-    // std::cout << "This is xnext: \n" << d->xnext << std::endl;
   } else {
     d->dx.setZero();
     d->xnext = x;
