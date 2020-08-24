@@ -28,7 +28,7 @@ void exposeIntegratedActionRK4() {
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
           "Initialize the RK4 integrator.\n\n"
           ":param diffModel: differential action model\n"
-          ":param stepTime: step time\n"
+          ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&,
@@ -77,6 +77,13 @@ void exposeIntegratedActionRK4() {
           "differential",
           bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
           "differential action data")
+      .add_property("ki",
+                    bp::make_getter(&IntegratedActionDataRK4::ki, bp::return_value_policy<bp::return_by_value>()),
+                    "List with the RK4 terms")
+    .add_property("y",
+                    bp::make_getter(&IntegratedActionDataRK4::ki, bp::return_value_policy<bp::return_by_value>()),
+                    "List with the RK4 terms")
+                    
       .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
                     "state rate.");
 }
