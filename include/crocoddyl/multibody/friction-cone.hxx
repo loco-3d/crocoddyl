@@ -71,7 +71,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, b
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
 
   Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
