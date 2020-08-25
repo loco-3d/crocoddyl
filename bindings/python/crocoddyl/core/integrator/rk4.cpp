@@ -46,8 +46,7 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK4::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the time-discrete derivatives of the integrated action model.\n\n"
-          "It computes the time-discrete partial derivatives of the integration action.\n"
+          "Computes the derivatives of the integrated action model wrt state and control. \n\n"
           "It assumes that calc has been run first.\n"
           "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
