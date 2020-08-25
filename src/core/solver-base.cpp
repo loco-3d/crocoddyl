@@ -2,6 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,20 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     if (xs_warm.size() != T + 1) {
       throw_pretty("Warm start state has wrong dimension, got " << xs_warm.size() << " expecting " << (T + 1));
     }
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::size_t& nx = problem_->get_runningModels()[t]->get_state()->get_nx();
+      if (static_cast<std::size_t>(xs_warm[t].size()) != nx) {
+        throw_pretty("Invalid argument: "
+                     << "xs_init[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) +
+                            ")");
+      }
+    }
+    const std::size_t& nx = problem_->get_terminalModel()->get_state()->get_nx();
+    if (static_cast<std::size_t>(xs_warm[T].size()) != nx) {
+      throw_pretty("Invalid argument: "
+                   << "xs_init[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) +
+                          ")");
+    }
     std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
   }
 
@@ -62,6 +77,14 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
   } else {
     if (us_warm.size() != T) {
       throw_pretty("Warm start control has wrong dimension, got " << us_warm.size() << " expecting " << T);
+    }
+    const std::size_t& nu = problem_->get_nu_max();
+    for (std::size_t t = 0; t < T; ++t) {
+      if (static_cast<std::size_t>(us_warm[t].size()) > nu) {
+        throw_pretty("Invalid argument: "
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " + std::to_string(nu) +
+                            ")");
+      }
     }
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
