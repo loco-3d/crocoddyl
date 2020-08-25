@@ -1,8 +1,8 @@
 from os.path import dirname, join
 
 import numpy as np
-from crocoddyl_legacy import loadTalos
-from crocoddyl_legacy.locomotion import ContactSequenceWrapper
+from crocoddyl import loadTalos
+from crocoddyl.locomotion import ContactSequenceWrapper
 from multicontact_api import ContactSequenceHumanoid
 
 MUSCOD_CS_OUTPUT_FILENAME = join(dirname(__file__), "data/test_locomotion.xml")

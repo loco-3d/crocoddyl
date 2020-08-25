@@ -4,8 +4,8 @@ import numpy as np
 from numpy.linalg import inv, norm, pinv
 
 import pinocchio
-from crocoddyl_legacy import loadTalosArm
-from crocoddyl_legacy.utils import EPS
+from crocoddyl import loadTalosArm
+from crocoddyl.utils import EPS
 from pinocchio import aba, rnea
 from pinocchio.utils import cross, rand, skew, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx

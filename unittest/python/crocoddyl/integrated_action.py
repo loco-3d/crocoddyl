@@ -93,11 +93,6 @@ class IntegratedActionModelRK4(crocoddyl.ActionModelAbstract):
         self.differential = differential
         self.timeStep = timeStep
         self.rk4_inc = [0.5, 0.5, 1.]
-        self.nx = self.differential.state.nx
-        self.ndx = self.differential.state.ndx
-        self.nq = self.differential.state.nq
-        self.nv = self.differential.state.nv
-        self.enable_integration = (self.timeStep > 0.)
 
     def createData(self):
         return IntegratedActionDataRK4(self)

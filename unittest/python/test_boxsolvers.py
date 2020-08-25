@@ -1,8 +1,8 @@
 import numpy as np
 
-from crocoddyl_legacy import (DifferentialActionModelLQR, IntegratedActionModelEuler, ShootingProblem, SolverBoxDDP,
+from crocoddyl import (DifferentialActionModelLQR, IntegratedActionModelEuler, ShootingProblem, SolverBoxDDP,
                        SolverBoxKKT, SolverDDP, SolverKKT)
-from crocoddyl_legacy.qpsolvers import quadprogWrapper
+from crocoddyl.qpsolvers import quadprogWrapper
 
 # --- TEST DDP vs KKT LQR ---
 # ---------------------------------------------------

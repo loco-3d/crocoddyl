@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl_legacy import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
+from crocoddyl import (ActivationModelWeightedQuad, ActuationModelFreeFloating, ContactModel6D, ContactModelMultiple,
                        CostModelControl, CostModelFrameTranslation, CostModelState, CostModelSum,
                        DifferentialActionModelFloatingInContact, DifferentialActionModelFullyActuated,
                        IntegratedActionModelEuler, ShootingProblem, SolverDDP, StatePinocchio, a2m, loadTalosArm)

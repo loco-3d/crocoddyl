@@ -2,9 +2,9 @@ import numpy as np
 from numpy.linalg import norm
 
 import pinocchio
-from crocoddyl_legacy import (ActionModelImpact, ActionModelNumDiff, CostModelImpactCoM, CostModelSum, ImpulseModel6D,
+from crocoddyl import (ActionModelImpact, ActionModelNumDiff, CostModelImpactCoM, CostModelSum, ImpulseModel6D,
                        ImpulseModelMultiple, a2m, loadTalosArm, loadTalosLegs)
-from crocoddyl_legacy.impact import CostModelImpactWholeBody
+from crocoddyl.impact import CostModelImpactWholeBody
 from pinocchio.utils import zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq
 

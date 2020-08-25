@@ -1,6 +1,6 @@
 import numpy as np
-from crocoddyl_legacy import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
-from crocoddyl_legacy.utils import EPS
+from crocoddyl import ActivationModelQuad, ActivationModelSmoothAbs, ActivationModelWeightedQuad
+from crocoddyl.utils import EPS
 from testutils import assertNumDiff
 
 # Comment:
