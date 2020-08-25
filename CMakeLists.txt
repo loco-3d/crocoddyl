@@ -155,7 +155,7 @@ IF(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
-  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME}_legacy)
+  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Build the unit tests
