@@ -167,7 +167,7 @@ void exposeFrames() {
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame wrench cone."))
       .def_readwrite("id", &FrameWrenchCone::id, "frame ID")
       .add_property("cone", bp::make_getter(&FrameWrenchCone::cone, bp::return_internal_reference<>()),
-                    bp::make_setter(&FrameWrenchCone::cone), "frame friction cone")
+                    bp::make_setter(&FrameWrenchCone::cone), "frame wrench cone")
       .def(PrintableVisitor<FrameWrenchCone>());
 
   bp::class_<FrameCoPSupport>(
