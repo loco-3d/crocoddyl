@@ -2,6 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,11 +78,11 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     if (us_warm.size() != T) {
       throw_pretty("Warm start control has wrong dimension, got " << us_warm.size() << " expecting " << T);
     }
+    const std::size_t& nu = problem_->get_nu_max();
     for (std::size_t t = 0; t < T; ++t) {
-      const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
-      if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
+      if (static_cast<std::size_t>(us_warm[t].size()) > nu) {
         throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) + "]  has wrong dimension (it should be " + std::to_string(nu) +
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " + std::to_string(nu) +
                             ")");
       }
     }
