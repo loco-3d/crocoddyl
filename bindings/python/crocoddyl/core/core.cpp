@@ -23,6 +23,7 @@ void exposeCore() {
   exposeActuationSquashing();
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
+  exposeIntegratedActionRK4();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
