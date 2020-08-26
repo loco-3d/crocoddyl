@@ -13,16 +13,17 @@ namespace crocoddyl {
 namespace python {
 
 void exposeWrenchCone() {
-  bp::class_<WrenchCone>("WrenchCone", "Model of the wrench cone as lb <= Af <= ub",
-                         bp::init<Eigen::Matrix3d, double, Eigen::Vector2d, bp::optional<std::size_t, double, double > >(
-                             bp::args("self", "R", "mu", "box", "nf", "min_nforce", "max_nforce"),
-                             "Initialize the linearize wrench cone.\n\n"
-                             ":param R: rotation matrix that defines the cone orientation\n"
-                             ":param mu: friction coefficient\n"
-                             ":param box: dimension of the foot surface dim = (length, width)\n"
-                             ":param nf: number of facets\n"
-                             ":param min_nforce: minimum normal force (default 0.)\n"
-                             ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
+  bp::class_<WrenchCone>(
+      "WrenchCone", "Model of the wrench cone as lb <= Af <= ub",
+      bp::init<Eigen::Matrix3d, double, Eigen::Vector2d, bp::optional<std::size_t, double, double> >(
+          bp::args("self", "R", "mu", "box", "nf", "min_nforce", "max_nforce"),
+          "Initialize the linearize wrench cone.\n\n"
+          ":param R: rotation matrix that defines the cone orientation\n"
+          ":param mu: friction coefficient\n"
+          ":param box: dimension of the foot surface dim = (length, width)\n"
+          ":param nf: number of facets\n"
+          ":param min_nforce: minimum normal force (default 0.)\n"
+          ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the wrench cone."))
       .def("update", &WrenchCone::update, bp::args("self", "R", "mu", "box", "min_nforce", "max_nforce"),
            "Update the linear inequality (matrix and bounds).\n\n"

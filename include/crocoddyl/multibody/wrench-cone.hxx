@@ -21,7 +21,8 @@ WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16) {
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf, const Scalar& min_nforce, const Scalar& max_nforce)
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf,
+                                     const Scalar& min_nforce, const Scalar& max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
     nf_ = 16;
@@ -30,7 +31,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const 
   A_.resize(nf_ + 1, 6);
   ub_.resize(nf_ + 1);
   lb_.resize(nf_ + 1);
-  
+
   // compute the matrix
   update(R, mu, box_size, min_nforce, max_nforce);
 }
@@ -51,7 +52,8 @@ template <typename Scalar>
 WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, const Scalar& min_nforce, const Scalar& max_nforce) {
+void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size,
+                                   const Scalar& min_nforce, const Scalar& max_nforce) {
   R_ = R;
   mu_ = mu;
   box_ = box_size;
@@ -69,7 +71,7 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Ve
     max_nforce_ = std::numeric_limits<Scalar>::max();
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
   }
-  
+
   A_.row(0).head(3) << Scalar(1.), Scalar(0.), -mu_;
   A_.row(1).head(3) << Scalar(-1.), Scalar(0.), -mu_;
   A_.row(2).head(3) << Scalar(0.), Scalar(1.), -mu_;
@@ -98,7 +100,7 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Ve
   lb_.setOnes();
   lb_ *= -std::numeric_limits<Scalar>::max();
   ub_(4) = -min_nforce_;
-  lb_(4) = -max_nforce_;  
+  lb_(4) = -max_nforce_;
 }
 
 template <typename Scalar>
