@@ -191,11 +191,12 @@ class SimpleBipedGaitProblem:
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e6)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
-            frictionCone = crocoddyl.CostModelContactFrictionCone(
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
-            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
@@ -232,7 +233,6 @@ class SimpleBipedGaitProblem:
         """ Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
-        :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
         """
@@ -248,11 +248,12 @@ class SimpleBipedGaitProblem:
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
-            frictionCone = crocoddyl.CostModelContactFrictionCone(
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
-            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)

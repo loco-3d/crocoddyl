@@ -33,6 +33,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_diff_actions
   test_problem
   test_friction_cone
+  test_wrench_cone
   test_boxqp
   test_solvers
 )

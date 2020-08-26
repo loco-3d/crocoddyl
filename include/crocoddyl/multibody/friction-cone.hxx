@@ -141,6 +141,31 @@ const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const {
 }
 
 template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_nsurf(Vector3s nsurf) {
+  update(nsurf, mu_, inner_appr_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_mu(Scalar mu) {
+  update(nsurf_, mu, inner_appr_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_inner_appr(bool inner_appr) {
+  update(nsurf_, mu_, inner_appr, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_min_nforce(Scalar min_nforce) {
+  update(nsurf_, mu_, inner_appr_, min_nforce, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_max_nforce(Scalar max_nforce) {
+  update(nsurf_, mu_, inner_appr_, min_nforce_, max_nforce);
+}
+
+template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X) {
   os << "    normal: " << X.get_nsurf().transpose() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
