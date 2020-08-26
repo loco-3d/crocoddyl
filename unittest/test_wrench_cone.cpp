@@ -8,6 +8,7 @@
 
 #include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "pinocchio/math/quaternion.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -32,7 +33,8 @@ void test_constructor() {
 
 void test_force_along_wrench_cone_normal() {
   // Create the wrench cone
-  Eigen::Quaterniond q = Eigen::Quaterniond::UnitRandom();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
   Eigen::Matrix3d cone_rotation = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
@@ -56,7 +58,8 @@ void test_force_along_wrench_cone_normal() {
 
 void test_negative_force_along_wrench_cone_normal() {
   // Create the wrench cone
-  Eigen::Quaterniond q = Eigen::Quaterniond::UnitRandom();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
   Eigen::Matrix3d cone_rotation = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
