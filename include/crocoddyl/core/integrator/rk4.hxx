@@ -109,9 +109,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   differential_->calcDiff(d->differential[0], x, u);
 
   if (enable_integration_) {
-    d->dki_dy[0].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
     d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
-    d->dyi_dx[0].diagonal().array() = (Scalar)1;
     d->dki_dx[0] = d->dki_dy[0];
     d->dki_du[0].bottomRows(nv) = d->differential[0]->Fu;
 
@@ -124,7 +122,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
     for (std::size_t i = 1; i < 4; ++i) {
       differential_->calcDiff(d->differential[i], d->y[i], u);
-      d->dki_dy[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;

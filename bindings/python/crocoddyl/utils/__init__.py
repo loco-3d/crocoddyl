@@ -489,7 +489,6 @@ class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
         data.Lx[:] = data.differential[0].Lx
         data.Lu[:] = data.differential[0].Lu
 
-        data.dy_dx[0] = np.identity(nv * 2)
         data.dy_du[0] = np.zeros((ndx, nu))
         data.dki_dx[0] = data.dki_dy[0]
 
@@ -557,7 +556,7 @@ class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
 
-        nx, ndx, nu = model.state.nx, model.state.ndx, model.nu
+        nx, ndx, nv, nu = model.state.nx, model.state.ndx, model.state.nv, model.nu
         self.differential = [None] * 4
 
         for i in range(4):
@@ -596,6 +595,8 @@ class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
         self.ddli_ddu = [np.zeros([nu, nu])] * 4
         self.ddli_dxdu = [np.zeros([ndx, nu])] * 4
         self.Luu_partialx = [np.zeros([nu, nu])] * 4
+
+        self.dy_dx[0][:, :] = np.identity(nv * 2)
 
 
 class StateCostModelDerived(crocoddyl.CostModelAbstract):

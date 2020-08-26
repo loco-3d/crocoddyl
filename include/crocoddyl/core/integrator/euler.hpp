@@ -83,7 +83,7 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t& ndx = model->get_state()->get_ndx();
     dx = VectorXs::Zero(ndx);
   }
-  ~IntegratedActionDataEulerTpl() {}
+  virtual ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
