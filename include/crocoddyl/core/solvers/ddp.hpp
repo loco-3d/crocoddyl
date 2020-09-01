@@ -136,7 +136,7 @@ class SolverDDP : public SolverAbstract {
    */
   virtual void computeGains(const std::size_t& t);
   
-  std::vector<Eigen::MatrixXd> computeKp(const std::size_t& t, const Eigen::MatrixXd& dWp);
+  void computeKp(const std::size_t& t, Eigen::MatrixXd& dWp, Eigen::MatrixXd& dKp);
 
   /**
    * @brief Increase the state and control regularization values by a `regfactor_` factor

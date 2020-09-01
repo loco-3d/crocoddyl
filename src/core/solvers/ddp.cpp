@@ -252,91 +252,7 @@ void SolverDDP::backwardPass() {
     }
   }
 }
-/*
-void SolverDDP::backwardPassRiccatiTarget(const Eigen::Vector3d& diff_theta, const int& endEffectorId,const double& runningCost,const double& terminalCost) {
-  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
-  const boost::shared_ptr<ActionModelAbstract>& m_T = problem_->get_terminalModel();
-  Vxx_.back() = d_T->Lxx;
-  const std::size_t& nq = m_T->get_state()->get_nq();
-  const std::size_t& nx = m_T->get_state()->get_nx();
-  std::vector<Eigen::VectorXd> xs = this->get_xs();
-  const std::size_t& T = problem_->get_T();
-  Eigen::VectorXd q_t = xs[T].head(nq);
-  Eigen::MatrixXd state_Jacobian = Eigen::MatrixXd::Zero(3, nx);
 
-  IntegratedActionModelEuler me_T = static_cast<IntegratedActionModelEuler>(*m_T);
-  boost::shared_ptr<DifferentialActionModelAbstract> md_T = me_T.get_differential();
-  DifferentialModelFreeFlyer mff_T = static_cast<DifferentialModelFreeFlyer>(*md_T);
-
-  state_Jacobian.leftCols(nq) = pinocchio::computeFrameJacobian(mff_T.get_model(),*d_T,q_t,endEffectorId,pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED).topRows(3);
-  Vx_.back() = - terminalCost * state_Jacobian.transpose() * diff_theta;
-
-  if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal().array() += xreg_;
-  }
-
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const std::size_t& nu = m->get_nu();
-    
-    q_t = xs[t].head(nq);
-    state_Jacobian.leftCols(nq) = pinocchio::computeFrameJacobian(*m,*d,q_t,endEffectorId,pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED).topRows(3);
-
-    Qxx_[t] = d->Lxx;
-    Qx_[t] = - runningCost * state_Jacobian.transpose() * diff_theta;
-    FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
-    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
-    if (nu != 0) {
-      Qxu_[t] = d->Lxu;
-      Quu_[t] = d->Luu;
-      Qu_[t] = Eigen::Matrix::Zero(nu,1);
-      FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
-      Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
-      Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
-      Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
-
-      if (!std::isnan(ureg_)) {
-        Quu_[t].diagonal().array() += ureg_;
-      }
-    }
-
-    computeGains(t);
-
-    Vx_[t] = Qx_[t];
-    Vxx_[t] = Qxx_[t];
-    if (nu != 0) {
-      if (std::isnan(ureg_)) {
-        Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
-      } else {
-        Quuk_[t].noalias() = Quu_[t] * k_[t];
-        Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
-        Vx_[t].noalias() -= 2 * (K_[t].transpose() * Qu_[t]);
-      }
-      Vxx_[t].noalias() -= Qxu_[t] * K_[t];
-    }
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal().array() += xreg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-
-    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw_pretty("backward_error");
-    }
-    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw_pretty("backward_error");
-    }
-  }
-}
-*/
 void SolverDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
@@ -394,18 +310,14 @@ void SolverDDP::computeGains(const std::size_t& t) {
   }
 }
 
-std::vector<Eigen::MatrixXd> SolverDDP::computeKp(const std::size_t& t, const Eigen::MatrixXd& dWp) {
-  std::vector<Eigen::MatrixXd> vect_matrix;
+void SolverDDP::computeKp(const std::size_t& t, Eigen::MatrixXd& dWp, Eigen::MatrixXd& dKp) { 
   const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
   const int nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     Eigen::MatrixXd invQuuFuT = d->Fu.transpose();
     Quu_llt_[t].solveInPlace(invQuuFuT);
-    Eigen::MatrixXd dup = invQuuFuT * dWp;
-    vect_matrix.push_back(dup);
-    Eigen::MatrixXd ddW = (d->Fx.transpose() - Qxu_[t] * invQuuFuT) * dWp;
-    vect_matrix.push_back(ddW);
-    return vect_matrix;
+    dKp = invQuuFuT * dWp;
+    dWp.noalias() = (d->Fx.transpose() - Qxu_[t] * invQuuFuT) * dWp;
   }
 }
 
