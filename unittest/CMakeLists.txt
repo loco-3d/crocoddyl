@@ -31,7 +31,9 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_actions
   # test_integrators
   test_diff_actions
+  test_problem
   test_friction_cone
+  test_wrench_cone
   test_boxqp
   test_solvers
 )
@@ -75,6 +77,5 @@ ENDFOREACH(NAME ${${PROJECT_NAME}_CPP_TESTS})
 IF(BUILD_WITH_CODEGEN_SUPPORT)
   FOREACH(TEST_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
     TARGET_LINK_LIBRARIES(${TEST_NAME} ${CMAKE_DL_LIBS})
-  ENDFOREACH(BENCHMARK_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
+  ENDFOREACH()
 ENDIF()
-

@@ -14,9 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model)
-    : Base(model->nq + model->nv, 2 * model->nv),
-      pinocchio_(model),
-      x0_(VectorXs::Zero(model->nq + model->nv)) {
+    : Base(model->nq + model->nv, 2 * model->nv), pinocchio_(model), x0_(VectorXs::Zero(model->nq + model->nv)) {
   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 
   // In a multibody system, we could define the first joint using Lie groups.
@@ -27,7 +25,6 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelT
     // Define internally the free-flyer limits by removing the first joint DOFs
 
   const std::size_t nq0 = model->joints[1].nq();
-  
   lb_.head(nq0) = -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
   ub_.head(nq0) = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
   lb_.segment(nq0, nq_ - nq0) = pinocchio_->lowerPositionLimit.tail(nq_ - nq0);

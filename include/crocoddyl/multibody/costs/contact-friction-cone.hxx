@@ -16,9 +16,9 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref, const std::size_t& nu)
     : Base(state, activation, nu), fref_(fref) {
-  if (activation_->get_nr() != fref_.oRf.get_nf() + 1) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to " << fref_.oRf.get_nf() + 1);
+                 << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
 }
 
@@ -27,9 +27,9 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref)
     : Base(state, activation), fref_(fref) {
-  if (activation_->get_nr() != fref_.oRf.get_nf() + 1) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to " << fref_.oRf.get_nf() + 1);
+                 << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
 }
 
@@ -37,12 +37,12 @@ template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref,
                                                                          const std::size_t& nu)
-    : Base(state, fref.oRf.get_nf() + 1, nu), fref_(fref) {}
+    : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref)
-    : Base(state, fref.oRf.get_nf() + 1), fref_(fref) {}
+    : Base(state, fref.cone.get_nf() + 1), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::~CostModelContactFrictionConeTpl() {}
@@ -55,7 +55,7 @@ void CostModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<CostD
 
   // Compute the residual of the friction cone. Note that we need to transform the force
   // to the contact frame
-  data->r.noalias() = fref_.oRf.get_A() * d->contact->jMf.actInv(d->contact->f).linear();
+  data->r.noalias() = fref_.cone.get_A() * d->contact->jMf.actInv(d->contact->f).linear();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -70,7 +70,7 @@ void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
 
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
-  const MatrixX3s& A = fref_.oRf.get_A();
+  const MatrixX3s& A = fref_.cone.get_A();
 
   activation_->calcDiff(data->activation, data->r);
   if (d->more_than_3_constraints) {
@@ -84,8 +84,8 @@ void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<C
   data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
 
   d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
-
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
+  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
   data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
   data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
 }
@@ -113,16 +113,6 @@ void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
-}
-
-template <typename Scalar>
-const FrameFrictionConeTpl<Scalar>& CostModelContactFrictionConeTpl<Scalar>::get_fref() const {
-  return fref_;
-}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::set_fref(const FrameFrictionCone& fref_in) {
-  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

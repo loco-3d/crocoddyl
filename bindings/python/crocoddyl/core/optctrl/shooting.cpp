@@ -66,6 +66,10 @@ void exposeShootingProblem() {
            "Integrate the dynamics given a control sequence.\n\n"
            "Rollout the dynamics give a sequence of control commands\n"
            ":param us: time-discrete control sequence (size T)")
+      .def("quasiStatic", &ShootingProblem::quasiStatic_xs, bp::args("self", "xs"),
+           "Compute the quasi static commands given a state trajectory.\n\n"
+           "Generally speaking, it uses Newton-Raphson method for computing the quasi static commands.\n"
+           ":param xs: time-discrete state trajectory (size T)")
       .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>, boost::shared_ptr<ActionDataAbstract>)>(
           "circularAppend", &ShootingProblem::circularAppend, bp::args("self", "model", "data"),
           "Circular append the model and data onto the end running node.\n\n"
@@ -114,7 +118,7 @@ void exposeShootingProblem() {
                     "dimension of the tangent space of the state manifold")
       .add_property("nu_max",
                     bp::make_function(&ShootingProblem::get_nu_max, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the maximun control vector");
+                    "dimension of the maximum control vector");
 }
 
 }  // namespace python

@@ -32,18 +32,18 @@ template <typename Scalar>
 void ContactModel6DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.frame);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.frame, pinocchio::LOCAL, d->Jc);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id, pinocchio::LOCAL, d->Jc);
 
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.frame);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
   d->a0 = d->a.toVector();
 
   if (gains_[0] != 0.) {
-    d->rMf = Mref_.oMf.inverse() * d->pinocchio->oMf[Mref_.frame];
+    d->rMf = Mref_.placement.inverse() * d->pinocchio->oMf[Mref_.id];
     d->a0 += gains_[0] * pinocchio::log6(d->rMf).toVector();
   }
   if (gains_[1] != 0.) {
-    d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.frame);
+    d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
     d->a0 += gains_[1] * d->v.toVector();
   }
 }

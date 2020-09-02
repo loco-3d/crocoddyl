@@ -48,6 +48,12 @@ class FrictionConeTpl {
   const Scalar& get_min_nforce() const;
   const Scalar& get_max_nforce() const;
 
+  void set_nsurf(Vector3s nf);
+  void set_mu(Scalar mu);
+  void set_inner_appr(bool inner_appr);
+  void set_min_nforce(Scalar min_nforce);
+  void set_max_nforce(Scalar max_nforce);
+
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);
 

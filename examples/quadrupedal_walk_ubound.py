@@ -56,10 +56,7 @@ else:
     boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 xs = [robot_model.defaultState] * (boxddp.problem.T + 1)
-us = [
-    m.quasiStatic(d, robot_model.defaultState)
-    for m, d in list(zip(boxddp.problem.runningModels, boxddp.problem.runningDatas))
-]
+us = boxddp.problem.quasiStatic([anymal.model.defaultState] * boxddp.problem.T)
 
 # Solve the DDP problem
 boxddp.solve(xs, us, 100, False, 0.1)

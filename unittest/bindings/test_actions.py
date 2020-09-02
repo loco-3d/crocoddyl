@@ -7,7 +7,8 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived, UnicycleModelDerived
+from crocoddyl.utils import (DifferentialFreeFwdDynamicsModelDerived, DifferentialLQRModelDerived, LQRModelDerived,
+                             UnicycleModelDerived, IntegratedActionModelRK4Derived)
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):
@@ -127,6 +128,35 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
 
 
+class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    COST_SUM = crocoddyl.CostModelSum(STATE)
+    COST_SUM.addCost(
+        'gripperPose',
+        crocoddyl.CostModelFramePlacement(
+            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
+        1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+    DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
+    MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
+
+
+class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.loadANYmal().model
+    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+    ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
+    COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE, ACTUATION.nu), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE, ACTUATION.nu), 1e-7)
+    DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+    MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
+    MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
+
+
 if __name__ == '__main__':
     test_classes_to_run = [
         UnicycleTest,
@@ -135,6 +165,8 @@ if __name__ == '__main__':
         TalosArmFreeFwdDynamicsTest,
         TalosArmFreeFwdDynamicsWithArmatureTest,
         AnymalFreeFwdDynamicsTest,
+        AnymalIntegratedRK4Test,
+        TalosArmIntegratedRK4Test,
     ]
     loader = unittest.TestLoader()
     suites_list = []

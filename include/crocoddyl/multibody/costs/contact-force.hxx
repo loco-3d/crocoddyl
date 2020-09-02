@@ -71,10 +71,10 @@ void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbst
   // We transform the force to the contact frame
   switch (d->contact_type) {
     case Contact3D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).linear();
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).linear();
       break;
     case Contact6D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.oFf).toVector();
+      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).toVector();
       break;
     default:
       break;

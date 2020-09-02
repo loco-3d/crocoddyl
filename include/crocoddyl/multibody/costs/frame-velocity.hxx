@@ -11,6 +11,7 @@
 
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
+#include <pinocchio/algorithm/frames-derivatives.hpp>
 
 namespace crocoddyl {
 
@@ -55,8 +56,9 @@ void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
-  d->vr = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, vref_.frame) - vref_.oMf;
-  data->r = d->vr.toVector();
+  data->r = (pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, vref_.id, vref_.reference) -
+             vref_.motion)
+                .toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -69,14 +71,12 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
-                                         d->dv_dq, d->dv_dv);
+  const std::size_t& nv = state_->get_nv();
+  pinocchio::getFrameVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, vref_.id, vref_.reference,
+                                         data->Rx.leftCols(nv), data->Rx.rightCols(nv));
 
   // Compute the derivatives of the frame velocity
-  const std::size_t& nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
-  data->Rx.leftCols(nv).noalias() = d->fXj * d->dv_dq;
-  data->Rx.rightCols(nv).noalias() = d->fXj * d->dv_dv;
   data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
   d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
   data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;

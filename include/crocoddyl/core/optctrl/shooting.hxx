@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS WITH_NTHREADS
-#endif  // WITH_MULTITHREADING
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
+#endif  // CROCODDYL_WITH_MULTITHREADING
 
 namespace crocoddyl {
 
@@ -140,7 +140,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
@@ -171,12 +171,10 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-  std::size_t i;
-
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
-  for (i = 0; i < T_; ++i) {
+  for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
     } else {
@@ -232,6 +230,37 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs) {
+  if (xs.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "xs has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+  if (us.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+  for (std::size_t i = 0; i < T_; ++i) {
+    running_models_[i]->quasiStatic(running_datas_[i], us[i], xs[i]);
+  }
+}
+
+template <typename Scalar>
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::quasiStatic_xs(
+    const std::vector<VectorXs>& xs) {
+  std::vector<VectorXs> us;
+  us.resize(T_);
+  for (std::size_t i = 0; i < T_; ++i) {
+    us[i] = VectorXs::Zero(running_models_[i]->get_nu());
+  }
+  quasiStatic(us, xs);
+  return us;
+}
+
+template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbstract> model,
                                                 boost::shared_ptr<ActionDataAbstract> data) {
   if (!model->checkData(data)) {
@@ -248,7 +277,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
   }
   if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not bigger than the maximun nu")
+                 << "nu node is greater than the maximum nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -271,7 +300,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
   }
   if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not bigger than the maximun nu")
+                 << "nu node is greater than the maximum nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -304,7 +333,7 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
   }
   if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not bigger than the maximun nu")
+                 << "nu node is greater than the maximum nu")
   }
 
   if (i == T_) {
@@ -332,7 +361,7 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
   }
   if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not bigger than the maximun nu")
+                 << "nu node is greater than the maximum nu")
   }
 
   if (i == T_ + 1) {
@@ -411,7 +440,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
     }
     if (model->get_nu() > nu_max_) {
       throw_pretty("Invalid argument: "
-                   << "nu node is not bigger than the maximun nu")
+                   << "nu node is greater than the maximum nu")
     }
   }
 

@@ -21,8 +21,6 @@
 
 namespace crocoddyl {
 
-enum ContactType { Contact3D, Contact6D, Undefined };
-
 /**
  * @brief Define a contact force cost function
  *
@@ -213,7 +211,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     Arr_Ru.setZero();
-    contact_type = Undefined;
+    contact_type = ContactUndefined;
 
     // Check that proper shared data has been passed
     DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
@@ -223,11 +221,11 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Avoids data casting at runtime
     FrameForce fref = model->template get_reference<FrameForce>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.frame].name;
+    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == fref.frame) {
+      if (it->second->frame == fref.id) {
         ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
         if (d3d != NULL) {
           contact_type = Contact3D;

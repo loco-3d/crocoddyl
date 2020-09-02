@@ -173,7 +173,7 @@ else:
 
 # Solving it with the DDP algorithm
 xs = [rmodel.defaultState] * (ddp.problem.T + 1)
-us = [m.quasiStatic(d, rmodel.defaultState) for m, d in list(zip(ddp.problem.runningModels, ddp.problem.runningDatas))]
+us = ddp.problem.quasiStatic([rmodel.defaultState] * ddp.problem.T)
 ddp.th_stop = 1e-7
 ddp.solve(xs, us, 500, False, 1e-9)
 
