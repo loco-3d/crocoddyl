@@ -32,7 +32,7 @@
 
 #define SMOOTH(s) for (size_t _smooth = 0; _smooth < s; ++_smooth)
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1))
+#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / ((double)vec.size() - 1))
 #define AVG(vec) (vec.mean())
 
 int main(int argc, char* argv[]) {

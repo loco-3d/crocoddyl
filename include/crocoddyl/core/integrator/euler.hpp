@@ -40,6 +40,10 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
+                           const Scalar& tol = Scalar(1e-9));
+
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   const Scalar& get_dt() const;
 
@@ -47,7 +51,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Control dimension
   using Base::state_;               //!< Model of the state
@@ -79,7 +83,7 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t& ndx = model->get_state()->get_ndx();
     dx = VectorXs::Zero(ndx);
   }
-  ~IntegratedActionDataEulerTpl() {}
+  virtual ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;

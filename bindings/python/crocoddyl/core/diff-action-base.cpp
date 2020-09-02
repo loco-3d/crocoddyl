@@ -31,14 +31,9 @@ void exposeDifferentialActionAbstract() {
           ":param nu: dimension of control vector\n"
           ":param nr: dimension of cost-residual vector (default 1)"))
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
-           "Compute the state evolution and cost value.\n\n"
-           "First, it describes the time-continuous evolution of our dynamical system\n"
-           "in which along predefined integrated action self we might obtain the\n"
-           "next discrete state. Indeed it computes the time derivatives of the\n"
-           "state from a predefined dynamical system. Additionally it computes the\n"
-           "cost value associated to this state and control pair.\n"
+           "Compute the system acceleration and cost value.\n\n"
            ":param data: differential action data\n"
-           ":param x: state vector\n"
+           ":param x: state tuple\n"
            ":param u: control input")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -56,12 +51,24 @@ void exposeDifferentialActionAbstract() {
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &DifferentialActionModelAbstract_wrap::createData, bp::args("self"),
+      .def("createData", &DifferentialActionModelAbstract_wrap::createData,
+           &DifferentialActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the differential action data.\n\n"
            "Each differential action model has its own data that needs to be\n"
            "allocated. This function returns the allocated data for a predefined\n"
            "DAM.\n"
            ":return DAM data.")
+      .def("quasiStatic", &DifferentialActionModelAbstract_wrap::quasiStatic_x,
+           DifferentialActionModel_quasiStatic_wraps(
+               bp::args("self", "data", "x", "maxiter", "tol"),
+               "Compute the quasic-static control given a state.\n\n"
+               "It runs an iterative Newton step in order to compute the quasic-static regime\n"
+               "given a state configuration.\n"
+               ":param data: action data\n"
+               ":param x: discrete-time state vector\n"
+               ":param maxiter: maximum allowed number of iterations\n"
+               ":param tol: stopping tolerance criteria (default 1e-9)\n"
+               ":return u: quasic-static control"))
       .add_property("nu",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu,
                                       bp::return_value_policy<bp::return_by_value>()),

@@ -11,12 +11,17 @@
 
 #include <stdexcept>
 
+#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT  // TODO(cmastalli): Removed after merging Pinocchio v.2.4.8
+#include <pinocchio/codegen/cppadcg.hpp>
+#endif
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -47,6 +52,10 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
+                           const Scalar& tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
@@ -88,11 +97,13 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()),
-        dtau_dx(model->get_nu(), model->get_state()->get_ndx()) {
+        dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
+        tmp_xstatic(model->get_state()->get_nx()) {
     costs->shareMemory(this);
     Minv.setZero();
     u_drift.setZero();
     dtau_dx.setZero();
+    tmp_xstatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
@@ -101,6 +112,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   MatrixXs Minv;
   VectorXs u_drift;
   MatrixXs dtau_dx;
+  VectorXs tmp_xstatic;
 
   using Base::cost;
   using Base::Fu;

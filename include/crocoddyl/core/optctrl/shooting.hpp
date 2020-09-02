@@ -105,8 +105,25 @@ class ShootingProblemTpl {
    * @copybrief rollout
    *
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    */
   std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+
+  /**
+   * @brief Compute the quasic static commands given a state trajectory
+   *
+   * @param[out] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   * @param[in]  xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
+   */
+  void quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs);
+
+  /**
+   * @copybrief quasiStatic
+   *
+   * @param[in] xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
+   * @return the time-discrete quasic static commands \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
+   */
+  std::vector<VectorXs> quasiStatic_xs(const std::vector<VectorXs>& xs);
 
   /**
    * @brief Circular append of the model and data onto the end running node
@@ -202,9 +219,9 @@ class ShootingProblemTpl {
   const std::size_t& get_ndx() const;
 
   /**
-   * @brief Return the dimension of the control vector
+   * @brief Return the maximum dimension of the control vector
    */
-  const std::size_t& get_nu() const;
+  const std::size_t& get_nu_max() const;
 
  protected:
   Scalar cost_;                                                          //!< Total cost
@@ -216,7 +233,7 @@ class ShootingProblemTpl {
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;    //!< Running action data
   std::size_t nx_;                                                       //!< State dimension
   std::size_t ndx_;                                                      //!< State rate dimension
-  std::size_t nu_;                                                       //!< Control dimension
+  std::size_t nu_max_;                                                   //!< Maximum control dimension
 
  private:
   void allocateData();

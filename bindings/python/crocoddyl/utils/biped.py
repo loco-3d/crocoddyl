@@ -191,15 +191,16 @@ class SimpleBipedGaitProblem:
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e6)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
-            frictionCone = crocoddyl.CostModelContactFrictionCone(
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
-            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e6)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
@@ -232,7 +233,6 @@ class SimpleBipedGaitProblem:
         """ Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
-        :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
         """
@@ -248,18 +248,19 @@ class SimpleBipedGaitProblem:
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
-            frictionCone = crocoddyl.CostModelContactFrictionCone(
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
-                crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
-            costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
-                footVel = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
+                footVel = crocoddyl.FrameMotion(i.id, pinocchio.Motion.Zero())
                 impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, footVel, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_impulseVel", impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_impulseVel", impulseFootVelCost, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
         stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
@@ -293,9 +294,9 @@ class SimpleBipedGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                xref = crocoddyl.FrameTranslation(i.id, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
         stateWeights = np.array([1.] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
                                             self.rmodel.defaultState, 0)

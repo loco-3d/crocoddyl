@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS WITH_NTHREADS
-#endif  // WITH_MULTITHREADING
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
+#endif  // CROCODDYL_WITH_MULTITHREADING
 
 namespace crocoddyl {
 
@@ -24,16 +24,12 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_(running_models[0]->get_nu()) {
-  // This routine is needed if we define an autonomous action model in the first node
-  if (nu_ == 0) {
-    for (std::size_t i = 1; i < T_; ++i) {
-      const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-      const std::size_t& nu = model->get_nu();
-      if (nu > 0) {
-        nu_ = nu;
-        break;
-      }
+      nu_max_(running_models[0]->get_nu()) {
+  for (std::size_t i = 1; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::size_t& nu = model->get_nu();
+    if (nu_max_ < nu) {
+      nu_max_ = nu;
     }
   }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
@@ -49,10 +45,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     if (model->get_state()->get_ndx() != ndx_) {
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
-    }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
     }
   }
   if (terminal_model_->get_state()->get_nx() != nx_) {
@@ -81,7 +73,14 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_(running_models[0]->get_nu()) {
+      nu_max_(running_models[0]->get_nu()) {
+  for (std::size_t i = 1; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::size_t& nu = model->get_nu();
+    if (nu_max_ < nu) {
+      nu_max_ = nu;
+    }
+  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
@@ -103,10 +102,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
-    }
     if (!model->checkData(data)) {
       throw_pretty("Invalid argument: "
                    << "action data in " << i << " node is not consistent with the action model")
@@ -126,7 +121,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(const ShootingProblemTpl<Scalar>&
       terminal_model_(problem.get_terminalModel()),
       terminal_data_(problem.get_terminalData()),
       running_models_(problem.get_runningModels()),
-      running_datas_(problem.get_runningDatas()) {}
+      running_datas_(problem.get_runningDatas()),
+      nx_(problem.get_nx()),
+      ndx_(problem.get_ndx()),
+      nu_max_(problem.get_nu_max()) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
@@ -142,7 +140,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
@@ -173,12 +171,10 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
 
-  std::size_t i;
-
-#ifdef WITH_MULTITHREADING
+#ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for
 #endif
-  for (i = 0; i < T_; ++i) {
+  for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
     } else {
@@ -234,6 +230,37 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs) {
+  if (xs.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "xs has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+  if (us.size() != T_) {
+    throw_pretty("Invalid argument: "
+                 << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
+  }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for
+#endif
+  for (std::size_t i = 0; i < T_; ++i) {
+    running_models_[i]->quasiStatic(running_datas_[i], us[i], xs[i]);
+  }
+}
+
+template <typename Scalar>
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::quasiStatic_xs(
+    const std::vector<VectorXs>& xs) {
+  std::vector<VectorXs> us;
+  us.resize(T_);
+  for (std::size_t i = 0; i < T_; ++i) {
+    us[i] = VectorXs::Zero(running_models_[i]->get_nu());
+  }
+  quasiStatic(us, xs);
+  return us;
+}
+
+template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbstract> model,
                                                 boost::shared_ptr<ActionDataAbstract> data) {
   if (!model->checkData(data)) {
@@ -248,9 +275,9 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is greater than the maximum nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -271,9 +298,9 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is greater than the maximum nu")
   }
 
   for (std::size_t i = 0; i < T_ - 1; ++i) {
@@ -289,7 +316,8 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i > T_ + 1) {
     throw_pretty("Invalid argument: "
-                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+                 << "i is bigger than the allocated horizon (it should be less than or equal to " +
+                        std::to_string(T_ + 1) + ")");
   }
   if (!model->checkData(data)) {
     throw_pretty("Invalid argument: "
@@ -303,12 +331,12 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu node is not consistent with the other nodes")
+                 << "nu node is greater than the maximum nu")
   }
 
-  if (i == T_ + 1) {
+  if (i == T_) {
     terminal_model_ = model;
     terminal_data_ = data;
   } else {
@@ -331,9 +359,9 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
     throw_pretty("Invalid argument: "
                  << "ndx is not consistent with the other nodes")
   }
-  if (model->get_nu() != 0 && model->get_nu() != nu_) {
+  if (model->get_nu() > nu_max_) {
     throw_pretty("Invalid argument: "
-                 << "nu is not consistent with the other nodes")
+                 << "nu node is greater than the maximum nu")
   }
 
   if (i == T_ + 1) {
@@ -400,9 +428,6 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
-  T_ = models.size();
-  running_models_.clear();
-  running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     if (model->get_state()->get_nx() != nx_) {
@@ -413,10 +438,17 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
-    if (model->get_nu() != 0 && model->get_nu() != nu_) {
+    if (model->get_nu() > nu_max_) {
       throw_pretty("Invalid argument: "
-                   << "nu in " << i << " node is not consistent with the other nodes")
+                   << "nu node is greater than the maximum nu")
     }
+  }
+
+  T_ = models.size();
+  running_models_.clear();
+  running_datas_.clear();
+  for (std::size_t i = 0; i < T_; ++i) {
+    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_.push_back(model->createData());
   }
 }
@@ -446,8 +478,8 @@ const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu() const {
-  return nu_;
+const std::size_t& ShootingProblemTpl<Scalar>::get_nu_max() const {
+  return nu_max_;
 }
 
 }  // namespace crocoddyl

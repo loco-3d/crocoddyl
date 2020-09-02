@@ -16,6 +16,8 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 
+#include <pinocchio/utils/static-if.hpp>
+
 namespace crocoddyl {
 
 template <typename _Scalar>
@@ -34,12 +36,13 @@ struct ActivationBoundsTpl {
                    << "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
                           std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
     }
-    if (beta < 0 || beta > 1.) {
+    if (beta < Scalar(0) || beta > Scalar(1.)) {
       throw_pretty("Invalid argument: "
                    << "The range of beta is between 0 and 1");
     }
+    using std::isfinite;
     for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
-      if (std::isfinite(lb(i)) && std::isfinite(ub(i))) {
+      if (isfinite(lb(i)) && isfinite(ub(i))) {
         if (lb(i) - ub(i) > 0) {
           throw_pretty("Invalid argument: "
                        << "The lower and upper bounds are badly defined; ub has to be bigger / equals to lb");
@@ -47,17 +50,17 @@ struct ActivationBoundsTpl {
       }
     }
 
-    if (beta >= 0 && beta <= 1.) {
-      VectorXs m = (Scalar)0.5 * (lower + upper);
-      VectorXs d = (Scalar)0.5 * (upper - lower);
+    if (beta >= Scalar(0) && beta <= Scalar(1.)) {
+      VectorXs m = Scalar(0.5) * (lower + upper);
+      VectorXs d = Scalar(0.5) * (upper - lower);
       lb = m - beta * d;
       ub = m + beta * d;
     } else {
-      beta = 1.;
+      beta = Scalar(1.);
     }
   }
   ActivationBoundsTpl(const ActivationBoundsTpl& bounds) : lb(bounds.lb), ub(bounds.ub), beta(bounds.beta) {}
-  ActivationBoundsTpl() : beta(1.) {}
+  ActivationBoundsTpl() : beta(Scalar(1.)) {}
 
   VectorXs lb;
   VectorXs ub;
@@ -90,8 +93,8 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-    d->rlb_min_ = (r - bounds_.lb).array().min(0.);
-    d->rub_max_ = (r - bounds_.ub).array().max(0.);
+    d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
+    d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
     data->a_value =
         Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() + Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
   };
@@ -104,8 +107,13 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
-    data->Arr.diagonal() =
-        (((r - bounds_.lb).array() <= 0.) + ((r - bounds_.ub).array() >= 0.)).matrix().template cast<Scalar>();
+
+    using pinocchio::internal::if_then_else;
+    for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
+      data->Arr.diagonal()[i] = if_then_else(
+          pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), Scalar(1.),
+          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i], Scalar(0.), Scalar(1.), Scalar(0.)));
+    }
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {

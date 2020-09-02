@@ -74,6 +74,12 @@ struct FrameForceTpl;
 template <typename Scalar>
 struct FrameFrictionConeTpl;
 
+template <typename Scalar>
+struct FrameWrenchConeTpl;
+
+template <typename Scalar>
+struct FrameCoPSupportTpl;
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -128,9 +134,19 @@ template <typename Scalar>
 struct CostDataContactFrictionConeTpl;
 
 template <typename Scalar>
+class CostModelContactWrenchConeTpl;
+template <typename Scalar>
+struct CostDataContactWrenchConeTpl;
+
+template <typename Scalar>
 class CostModelContactForceTpl;
 template <typename Scalar>
 struct CostDataContactForceTpl;
+
+template <typename Scalar>
+class CostModelContactImpulseTpl;
+template <typename Scalar>
+struct CostDataContactImpulseTpl;
 
 template <typename Scalar>
 class CostModelControlTpl;
@@ -144,6 +160,21 @@ template <typename Scalar>
 class CostModelImpulseFrictionConeTpl;
 template <typename Scalar>
 struct CostDataImpulseFrictionConeTpl;
+
+template <typename Scalar>
+class CostModelImpulseWrenchConeTpl;
+template <typename Scalar>
+struct CostDataImpulseWrenchConeTpl;
+
+template <typename Scalar>
+class CostModelContactCoPPositionTpl;
+template <typename Scalar>
+struct CostDataContactCoPPositionTpl;
+
+template <typename Scalar>
+class CostModelImpulseCoPPositionTpl;
+template <typename Scalar>
+struct CostDataImpulseCoPPositionTpl;
 
 // impulse
 template <typename Scalar>
@@ -172,6 +203,8 @@ struct ContactData6DTpl;
 // friction
 template <typename Scalar>
 class FrictionConeTpl;
+template <typename Scalar>
+class WrenchConeTpl;
 
 // state
 template <typename Scalar>
@@ -240,6 +273,7 @@ typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
 typedef ContactDataNumDiffTpl<double> ContactDataNumDiff;
 
 typedef FrictionConeTpl<double> FrictionCone;
+typedef WrenchConeTpl<double> WrenchCone;
 
 typedef FrameTranslationTpl<double> FrameTranslation;
 typedef FrameRotationTpl<double> FrameRotation;
@@ -247,6 +281,8 @@ typedef FramePlacementTpl<double> FramePlacement;
 typedef FrameMotionTpl<double> FrameMotion;
 typedef FrameForceTpl<double> FrameForce;
 typedef FrameFrictionConeTpl<double> FrameFrictionCone;
+typedef FrameWrenchConeTpl<double> FrameWrenchCone;
+typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
@@ -267,19 +303,32 @@ typedef CostModelStateTpl<double> CostModelState;
 typedef CostDataStateTpl<double> CostDataState;
 typedef CostModelFrameVelocityTpl<double> CostModelFrameVelocity;
 typedef CostDataFrameVelocityTpl<double> CostDataFrameVelocity;
+typedef CostModelContactCoPPositionTpl<double> CostModelContactCoPPosition;
+typedef CostDataContactCoPPositionTpl<double> CostDataContactCoPPosition;
 typedef CostModelContactFrictionConeTpl<double> CostModelContactFrictionCone;
 typedef CostDataContactFrictionConeTpl<double> CostDataContactFrictionCone;
+typedef CostModelContactWrenchConeTpl<double> CostModelContactWrenchCone;
+typedef CostDataContactWrenchConeTpl<double> CostDataContactWrenchCone;
 typedef CostModelContactForceTpl<double> CostModelContactForce;
 typedef CostDataContactForceTpl<double> CostDataContactForce;
+typedef CostModelContactImpulseTpl<double> CostModelContactImpulse;
+typedef CostDataContactImpulseTpl<double> CostDataContactImpulse;
 typedef CostModelControlTpl<double> CostModelControl;
 typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;
 typedef CostModelImpulseFrictionConeTpl<double> CostModelImpulseFrictionCone;
 typedef CostDataImpulseFrictionConeTpl<double> CostDataImpulseFrictionCone;
+typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;
+typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;
+typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;
+typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;
 
 typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
+
+enum ContactType { Contact3D, Contact6D, ContactUndefined };
+enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
 
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;

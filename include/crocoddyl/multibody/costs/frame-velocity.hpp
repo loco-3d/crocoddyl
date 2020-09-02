@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -50,12 +51,12 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-  const FrameMotion& get_vref() const;
-  void set_vref(const FrameMotion& vref_in);
+  DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in));
+  DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const);
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
   using Base::nu_;
@@ -80,15 +81,7 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataFrameVelocityTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),
-        joint(model->get_state()->get_pinocchio()->frames[model->get_vref().frame].parent),
-        vr(pinocchio::MotionTpl<Scalar>::Zero()),
-        fXj(model->get_state()->get_pinocchio()->frames[model->get_vref().frame].placement.inverse().toActionMatrix()),
-        dv_dq(6, model->get_state()->get_nv()),
-        dv_dv(6, model->get_state()->get_nv()),
-        Arr_Rx(6, model->get_state()->get_nv()) {
-    dv_dq.setZero();
-    dv_dv.setZero();
+      : Base(model, data), Arr_Rx(6, model->get_state()->get_nv()) {
     Arr_Rx.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
@@ -101,11 +94,6 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;
-  pinocchio::JointIndex joint;
-  pinocchio::MotionTpl<Scalar> vr;
-  typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
-  Matrix6xs dv_dq;
-  Matrix6xs dv_dv;
   Matrix6xs Arr_Rx;
 
   using Base::activation;

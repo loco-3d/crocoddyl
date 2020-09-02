@@ -16,9 +16,7 @@ namespace python {
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
-  bp::to_python_converter<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> >,
-                          vector_to_list<CallbackAbstractPtr, false> >();
-  list_to_vector().from_python<std::vector<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr> > >();
+  StdVectorPythonVisitor<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
 
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
@@ -43,7 +41,7 @@ void exposeSolverAbstract() {
            "during the numerical optimization.\n"
            ":param init_xs: initial guess for state trajectory with T+1 elements (default [])\n"
            ":param init_us: initial guess for control trajectory with T elements (default []).\n"
-           ":param maxiter: maximun allowed number of iterations (default 100).\n"
+           ":param maxiter: maximum allowed number of iterations (default 100).\n"
            ":param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout) (default "
            "False).\n"
            ":param regInit: initial guess for the regularization value. Very low\n"

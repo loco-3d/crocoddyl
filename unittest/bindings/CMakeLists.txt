@@ -9,9 +9,11 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   impulses
   force_cost
   friction_cone_cost
+  wrench_cone_cost
   momemtum_cost
   impulse_com_cost
   squashing
+  cop_cost
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})

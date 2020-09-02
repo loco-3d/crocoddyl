@@ -35,7 +35,7 @@ void SolverBoxFDDP::allocateData() {
 
   const std::size_t& T = problem_->get_T();
   Quu_inv_.resize(T);
-  const std::size_t& nu = problem_->get_nu();
+  const std::size_t& nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }

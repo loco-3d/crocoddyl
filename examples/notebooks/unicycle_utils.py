@@ -14,7 +14,6 @@ def plotUnicycle(x):
 
 
 def plotUnicycleSolution(xs, figIndex=1, show=True):
-    import matplotlib.pylab as plt
     plt.figure(figIndex, figsize=(6.4, 6.4))
     for x in xs:
         plotUnicycle(x)

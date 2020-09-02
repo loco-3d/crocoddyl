@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -76,10 +77,21 @@ void exposeCostControl() {
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .add_property("reference", bp::make_function(&CostModelControl::get_uref, bp::return_internal_reference<>()),
+      .def("createData", &CostModelControl::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+           bp::args("self", "data"),
+           "Create the control cost data.\n\n"
+           "Each cost model has its own data that needs to be allocated. This function\n"
+           "returns the allocated data for a predefined cost.\n"
+           ":param data: shared data\n"
+           ":return cost data.")
+      .add_property("reference", &CostModelControl::get_reference<Eigen::VectorXd>,
                     &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector")
-      .add_property("uref", bp::make_function(&CostModelControl::get_uref, bp::return_internal_reference<>()),
-                    &CostModelControl::set_uref, "reference control");
+      .add_property("uref",
+                    bp::make_function(&CostModelControl::get_reference<Eigen::VectorXd>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelControl::set_reference<Eigen::VectorXd>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference control vector");
 }
 
 }  // namespace python

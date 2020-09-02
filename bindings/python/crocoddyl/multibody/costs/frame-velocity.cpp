@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -74,11 +75,14 @@ void exposeCostFrameVelocity() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .add_property("reference",
-                    bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
+      .add_property("reference", &CostModelFrameVelocity::get_reference<FrameMotion>,
                     &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
-      .add_property("vref", bp::make_function(&CostModelFrameVelocity::get_vref, bp::return_internal_reference<>()),
-                    &CostModelFrameVelocity::set_vref, "reference frame velocity");
+      .add_property("vref",
+                    bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    bp::make_function(&CostModelFrameVelocity::set_reference<FrameMotion>,
+                                      deprecated<>("Deprecated. Use reference.")),
+                    "reference frame velocity");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameVelocity> >();
 
@@ -88,17 +92,7 @@ void exposeCostFrameVelocity() {
           bp::args("self", "model", "data"),
           "Create frame velocity cost data.\n\n"
           ":param model: frame Velocity cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("joint", bp::make_getter(&CostDataFrameVelocity::joint), "joint index")
-      .add_property("vr", bp::make_getter(&CostDataFrameVelocity::vr, bp::return_value_policy<bp::return_by_value>()),
-                    "error velocity of the frame")
-      .add_property("fXj",
-                    bp::make_getter(&CostDataFrameVelocity::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from contact to local frames")
-      .add_property("dv_dq", bp::make_getter(&CostDataFrameVelocity::dv_dq, bp::return_internal_reference<>()),
-                    "Jacobian of the spatial body velocity")
-      .add_property("dv_dv", bp::make_getter(&CostDataFrameVelocity::dv_dv, bp::return_internal_reference<>()),
-                    "Jacobian of the spatial body velocity");
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 }
 
 }  // namespace python

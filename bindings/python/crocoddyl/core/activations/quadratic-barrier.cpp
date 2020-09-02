@@ -35,8 +35,8 @@ void exposeActivationQuadraticBarrier() {
       "The activation is zero when r is between the lower (lb) and upper (ub) bounds, beta\n"
       "determines how much of the total range is not activated. This is the activation\n"
       "equations:\n"
-      "a(r) = 0.5 * ||r||^2 for lb < r < ub\n"
-      "a(r) = 0. for lb >= r >= ub.",
+      "a(r) = 0.5 * ||r||^2 for lb > r > ub\n"
+      "a(r) = 0. for lb <= r <= ub.",
       bp::init<ActivationBounds>(bp::args("self", "bounds"),
                                  "Initialize the activation model.\n\n"
                                  ":param bounds: activation bounds"))

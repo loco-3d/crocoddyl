@@ -434,9 +434,9 @@ class SimpleQuadrupedalGaitProblem:
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
-                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                xref = crocoddyl.FrameTranslation(i.id, i.placement.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e6)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * 6 + [1.] *
                                 (self.rmodel.nv - 6))
@@ -537,9 +537,9 @@ class SimpleQuadrupedalGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                xref = crocoddyl.FrameTranslation(i.id, i.placement.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e7)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e7)
         stateWeights = np.array([1.] * 6 + [10.] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
                                             self.rmodel.defaultState, 0)
@@ -565,7 +565,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
             xs.extend(s.xs[:-1])
             us.extend(s.us)
             if bounds:
-                models = s.problem.runningModels + [s.problem.terminalModel]
+                models = s.problem.runningModels.tolist() + [s.problem.terminalModel]
                 for m in models:
                     us_lb += [m.u_lb]
                     us_ub += [m.u_ub]
@@ -575,7 +575,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         rmodel = solver.problem.runningModels[0].state.pinocchio
         xs, us = solver.xs, solver.us
         if bounds:
-            models = solver.problem.runningModels + [solver.problem.terminalModel]
+            models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
             for m in models:
                 us_lb += [m.u_lb]
                 us_ub += [m.u_ub]

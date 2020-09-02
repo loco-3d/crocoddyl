@@ -33,8 +33,8 @@ void exposeActivationAbstract() {
            "It computes the partial derivatives of the residual vector function\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelAbstract_wrap::createData, bp::args("self"),
-           "Create the activation data.\n\n")
+      .def("createData", &ActivationModelAbstract_wrap::createData, &ActivationModelAbstract_wrap::default_createData,
+           bp::args("self"), "Create the activation data.\n\n")
       .add_property(
           "nr",
           bp::make_function(&ActivationModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),

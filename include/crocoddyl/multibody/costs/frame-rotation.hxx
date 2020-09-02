@@ -17,7 +17,7 @@ template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameRotation& Rref, const std::size_t& nu)
-    : Base(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
+    : Base(state, activation, nu), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -28,7 +28,7 @@ template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameRotation& Rref)
-    : Base(state, activation), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {
+    : Base(state, activation), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -38,12 +38,12 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref, const std::size_t& nu)
-    : Base(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
+    : Base(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()) {}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref)
-    : Base(state, 3), Rref_(Rref), oRf_inv_(Rref.oRf.transpose()) {}
+    : Base(state, 3), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()) {}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}
@@ -54,8 +54,8 @@ void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame placement w.r.t. the reference frame
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.frame);
-  d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[Rref_.frame].rotation();
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.id);
+  d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[Rref_.id].rotation();
   d->r = pinocchio::log3(d->rRf);
   data->r = d->r;  // this is needed because we overwrite it
 
@@ -73,7 +73,7 @@ void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
 
   // // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Rref_.id, pinocchio::LOCAL, d->fJf);
   d->J.noalias() = d->rJf * d->fJf.template bottomRows<3>();
 
   // Compute the derivatives of the frame placement
@@ -95,14 +95,14 @@ template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameRotation)) {
     Rref_ = *static_cast<const FrameRotation*>(pv);
-    oRf_inv_ = Rref_.oRf.transpose();
+    oRf_inv_ = Rref_.rotation.transpose();
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }
 }
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameRotation)) {
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
     ref_map = Rref_;
@@ -119,7 +119,7 @@ const FrameRotationTpl<Scalar>& CostModelFrameRotationTpl<Scalar>::get_Rref() co
 template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::set_Rref(const FrameRotation& Rref_in) {
   Rref_ = Rref_in;
-  oRf_inv_ = Rref_.oRf.transpose();
+  oRf_inv_ = Rref_.rotation.transpose();
 }
 
 }  // namespace crocoddyl

@@ -27,13 +27,13 @@ gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
 # Setting up all tasks
 GAITPHASES = \
     [{'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}}]
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 ddp = [None] * len(GAITPHASES)
@@ -44,6 +44,7 @@ for i, phase in enumerate(GAITPHASES):
             ddp[i] = crocoddyl.SolverDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
+            ddp[i].th_stop = 1e-7
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
@@ -66,10 +67,7 @@ for i, phase in enumerate(GAITPHASES):
 
     # Solving the problem with the DDP solver
     xs = [talos_legs.model.defaultState] * (ddp[i].problem.T + 1)
-    us = [
-        m.quasiStatic(d, talos_legs.model.defaultState)
-        for m, d in list(zip(ddp[i].problem.runningModels, ddp[i].problem.runningDatas))
-    ]
+    us = ddp[i].problem.quasiStatic([talos_legs.model.defaultState] * ddp[i].problem.T)
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase

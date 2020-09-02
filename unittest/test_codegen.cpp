@@ -38,6 +38,9 @@
 #include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
+
 #include "factory/solver.hpp"
 #include "unittest_common.hpp"
 
@@ -83,9 +86,16 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar> DifferentialActionModelFreeFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
 
+  typedef typename crocoddyl::ActivationBoundsTpl<Scalar> ActivationBounds;
+  typedef typename crocoddyl::ActivationModelQuadraticBarrierTpl<Scalar> ActivationModelQuadraticBarrier;
+  typedef typename crocoddyl::ActivationModelWeightedQuadraticBarrierTpl<Scalar>
+      ActivationModelWeightedQuadraticBarrier;
+
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", modeld);
+  pinocchio::srdf::loadReferenceConfigurations(modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
+                                               false);
 
   pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
   std::vector<pinocchio::JointIndex> locked_joints{5, 6, 7};
@@ -113,11 +123,37 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state);
 
+  VectorXs lowlim = (model.lowerPositionLimit);
+  VectorXs uplim = (model.upperPositionLimit);
+  VectorXs xlb(model.nq + model.nv), xub(model.nq + model.nv);
+  xlb << lowlim, -VectorXs::Ones(model.nv);
+  xub << uplim, VectorXs::Ones(model.nv);
+
+  // xlb.tail(model.nv) *= Scalar(-1) * std::numeric_limits<Scalar>::max();
+  // xub.tail(model.nv) *= std::numeric_limits<Scalar>::max();
+
+  VectorXs xweights(model.nv + model.nv);
+  xweights.head(model.nv).fill(Scalar(10.));
+  xweights.tail(model.nv).fill(Scalar(100.));
+
+  ActivationBounds bounds(xlb, xub);
+  boost::shared_ptr<ActivationModelQuadraticBarrier> activation_bounded =
+      boost::make_shared<ActivationModelQuadraticBarrier>(bounds);
+  boost::shared_ptr<ActivationModelWeightedQuadraticBarrier> weighted_activation_bounded =
+      boost::make_shared<ActivationModelWeightedQuadraticBarrier>(bounds, xweights);
+
+  boost::shared_ptr<CostModelAbstract> jointLimitCost = boost::make_shared<CostModelState>(state, activation_bounded);
+
+  boost::shared_ptr<CostModelAbstract> jointLimitCost2 =
+      boost::make_shared<CostModelState>(state, weighted_activation_bounded);
+
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
   runningCostModel->addCost("gripperTrans", goalTranslationCost, Scalar(1));
   runningCostModel->addCost("gripperRot", goalRotationCost, Scalar(1));
   runningCostModel->addCost("gripperVel", goalVelocityCost, Scalar(1));
+  runningCostModel->addCost("jointLim", jointLimitCost, Scalar(1e3));
+  runningCostModel->addCost("jointLim2", jointLimitCost2, Scalar(1e3));
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
 
@@ -154,12 +190,16 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   typedef typename crocoddyl::CostModelCoMPositionTpl<Scalar> CostModelCoMPosition;
   typedef typename crocoddyl::CostModelContactForceTpl<Scalar> CostModelContactForce;
   typedef typename crocoddyl::CostModelCentroidalMomentumTpl<Scalar> CostModelCentroidalMomentum;
+  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
+  typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
+  typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
-  typedef typename crocoddyl::FrameForceTpl<Scalar> FrameForce;
   typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
   typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
+  typedef typename crocoddyl::FrameForceTpl<Scalar> FrameForce;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef typename crocoddyl::ActuationModelFloatingBaseTpl<Scalar> ActuationModelFloatingBase;
   typedef typename crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<Scalar>
@@ -194,7 +234,7 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   boost::shared_ptr<CostModelAbstract> comCost =
       boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelContactForce>(
-      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), actuation->get_nu());
+      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), 6, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state, actuation->get_nu());
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
 

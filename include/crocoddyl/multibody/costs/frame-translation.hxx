@@ -53,8 +53,8 @@ void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostData
                                                 const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the frame translation w.r.t. the reference frame
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  data->r = d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf;
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  data->r = d->pinocchio->oMf[xref_.id].translation() - xref_.translation;
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -69,8 +69,8 @@ void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<Cost
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame Jacobian at the error point
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
-  d->J = d->pinocchio->oMf[xref_.frame].rotation() * d->fJf.template topRows<3>();
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
+  d->J = d->pinocchio->oMf[xref_.id].rotation() * d->fJf.template topRows<3>();
 
   // Compute the derivatives of the frame placement
   const std::size_t& nv = state_->get_nv();
@@ -96,7 +96,7 @@ void CostModelFrameTranslationTpl<Scalar>::set_referenceImpl(const std::type_inf
 }
 
 template <typename Scalar>
-void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
+void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameTranslation)) {
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);
     ref_map = xref_;

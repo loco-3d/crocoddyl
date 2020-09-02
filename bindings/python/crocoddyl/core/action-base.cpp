@@ -53,7 +53,8 @@ void exposeActionAbstract() {
       .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                          const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &ActionModelAbstract_wrap::createData, bp::args("self"),
+      .def("createData", &ActionModelAbstract_wrap::createData, &ActionModelAbstract_wrap::default_createData,
+           bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"

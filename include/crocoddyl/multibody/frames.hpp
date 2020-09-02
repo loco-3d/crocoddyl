@@ -12,8 +12,10 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
+#include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 
+#include <pinocchio/multibody/fwd.hpp>
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/spatial/force.hpp>
@@ -29,16 +31,18 @@ struct FrameTranslationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
 
-  explicit FrameTranslationTpl() : frame(0), oxf(Vector3s::Zero()) {}
-  FrameTranslationTpl(const FrameTranslationTpl<Scalar>& value) : frame(value.frame), oxf(value.oxf) {}
-  FrameTranslationTpl(const FrameIndex& frame, const Vector3s& oxf) : frame(frame), oxf(oxf) {}
+  explicit FrameTranslationTpl() : id(0), translation(Vector3s::Zero()) {}
+  FrameTranslationTpl(const FrameTranslationTpl<Scalar>& value) : id(value.id), translation(value.translation) {}
+  FrameTranslationTpl(const FrameIndex& id, const Vector3s& translation) : id(id), translation(translation) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
-    os << "      frame: " << X.frame << std::endl << "translation: " << std::endl << X.oxf.transpose() << std::endl;
+    os << "         id: " << X.id << std::endl
+       << "translation: " << std::endl
+       << X.translation.transpose() << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  Vector3s oxf;
+  FrameIndex id;
+  Vector3s translation;
 };
 
 template <typename _Scalar>
@@ -48,16 +52,16 @@ struct FrameRotationTpl {
   typedef _Scalar Scalar;
   typedef typename MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
-  explicit FrameRotationTpl() : frame(0), oRf(Matrix3s::Identity()) {}
-  FrameRotationTpl(const FrameRotationTpl<Scalar>& value) : frame(value.frame), oRf(value.oRf) {}
-  FrameRotationTpl(const FrameIndex& frame, const Matrix3s& oRf) : frame(frame), oRf(oRf) {}
+  explicit FrameRotationTpl() : id(0), rotation(Matrix3s::Identity()) {}
+  FrameRotationTpl(const FrameRotationTpl<Scalar>& value) : id(value.id), rotation(value.rotation) {}
+  FrameRotationTpl(const FrameIndex& id, const Matrix3s& rotation) : id(id), rotation(rotation) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameRotationTpl<Scalar>& X) {
-    os << "   frame: " << X.frame << std::endl << "rotation: " << std::endl << X.oRf << std::endl;
+    os << "      id: " << X.id << std::endl << "rotation: " << std::endl << X.rotation << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  Matrix3s oRf;
+  FrameIndex id;
+  Matrix3s rotation;
 };
 
 template <typename _Scalar>
@@ -67,16 +71,16 @@ struct FramePlacementTpl {
   typedef _Scalar Scalar;
   typedef pinocchio::SE3Tpl<Scalar> SE3;
 
-  explicit FramePlacementTpl() : frame(0), oMf(SE3::Identity()) {}
-  FramePlacementTpl(const FramePlacementTpl<Scalar>& value) : frame(value.frame), oMf(value.oMf) {}
-  FramePlacementTpl(const FrameIndex& frame, const SE3& oMf) : frame(frame), oMf(oMf) {}
+  explicit FramePlacementTpl() : id(0), placement(SE3::Identity()) {}
+  FramePlacementTpl(const FramePlacementTpl<Scalar>& value) : id(value.id), placement(value.placement) {}
+  FramePlacementTpl(const FrameIndex& id, const SE3& placement) : id(id), placement(placement) {}
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
-    os << "    frame: " << X.frame << std::endl << "placement: " << std::endl << X.oMf << std::endl;
+    os << "       id: " << X.id << std::endl << "placement: " << std::endl << X.placement << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  pinocchio::SE3Tpl<Scalar> oMf;
+  FrameIndex id;
+  pinocchio::SE3Tpl<Scalar> placement;
 };
 
 template <typename _Scalar>
@@ -86,16 +90,31 @@ struct FrameMotionTpl {
   typedef _Scalar Scalar;
   typedef pinocchio::MotionTpl<Scalar> Motion;
 
-  explicit FrameMotionTpl() : frame(0), oMf(Motion::Zero()) {}
-  FrameMotionTpl(const FrameMotionTpl<Scalar>& value) : frame(value.frame), oMf(value.oMf) {}
-  FrameMotionTpl(const FrameIndex& frame, const Motion& oMf) : frame(frame), oMf(oMf) {}
+  explicit FrameMotionTpl() : id(0), motion(Motion::Zero()), reference(pinocchio::LOCAL) {}
+  FrameMotionTpl(const FrameMotionTpl<Scalar>& value)
+      : id(value.id), motion(value.motion), reference(value.reference) {}
+  FrameMotionTpl(const FrameIndex& id, const Motion& motion, pinocchio::ReferenceFrame reference = pinocchio::LOCAL)
+      : id(id), motion(motion), reference(reference) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameMotionTpl<Scalar>& X) {
-    os << " frame: " << X.frame << std::endl << "motion: " << std::endl << X.oMf << std::endl;
+    os << "       id: " << X.id << std::endl;
+    os << "   motion: " << std::endl << X.motion;
+    switch (X.reference) {
+      case pinocchio::WORLD:
+        os << "reference: WORLD" << std::endl;
+        break;
+      case pinocchio::LOCAL:
+        os << "reference: LOCAL" << std::endl;
+        break;
+      case pinocchio::LOCAL_WORLD_ALIGNED:
+        os << "reference: LOCAL_WORLD_ALIGNED" << std::endl;
+        break;
+    }
     return os;
   }
 
-  FrameIndex frame;
-  pinocchio::MotionTpl<Scalar> oMf;
+  FrameIndex id;
+  pinocchio::MotionTpl<Scalar> motion;
+  pinocchio::ReferenceFrame reference;
 };
 
 template <typename _Scalar>
@@ -105,16 +124,16 @@ struct FrameForceTpl {
   typedef _Scalar Scalar;
   typedef pinocchio::ForceTpl<Scalar> Force;
 
-  explicit FrameForceTpl() : frame(0), oFf(Force::Zero()) {}
-  FrameForceTpl(const FrameForceTpl<Scalar>& value) : frame(value.frame), oFf(value.oFf) {}
-  FrameForceTpl(const FrameIndex& frame, const Force& oFf) : frame(frame), oFf(oFf) {}
+  explicit FrameForceTpl() : id(0), force(Force::Zero()) {}
+  FrameForceTpl(const FrameForceTpl<Scalar>& value) : id(value.id), force(value.force) {}
+  FrameForceTpl(const FrameIndex& id, const Force& force) : id(id), force(force) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameForceTpl<Scalar>& X) {
-    os << "frame: " << X.frame << std::endl << "force: " << std::endl << X.oFf << std::endl;
+    os << "   id: " << X.id << std::endl << "force: " << std::endl << X.force << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  pinocchio::ForceTpl<Scalar> oFf;
+  FrameIndex id;
+  pinocchio::ForceTpl<Scalar> force;
 };
 
 template <typename _Scalar>
@@ -124,16 +143,78 @@ struct FrameFrictionConeTpl {
   typedef _Scalar Scalar;
   typedef FrictionConeTpl<Scalar> FrictionCone;
 
-  explicit FrameFrictionConeTpl() : frame(0), oRf(FrictionCone()) {}
-  FrameFrictionConeTpl(const FrameFrictionConeTpl<Scalar>& value) : frame(value.frame), oRf(value.oRf) {}
-  FrameFrictionConeTpl(const FrameIndex& frame, const FrictionCone& oRf) : frame(frame), oRf(oRf) {}
+  explicit FrameFrictionConeTpl() : id(0), cone(FrictionCone()) {}
+  FrameFrictionConeTpl(const FrameFrictionConeTpl<Scalar>& value) : id(value.id), cone(value.cone) {}
+  FrameFrictionConeTpl(const FrameIndex& id, const FrictionCone& cone) : id(id), cone(cone) {}
   friend std::ostream& operator<<(std::ostream& os, const FrameFrictionConeTpl& X) {
-    os << "frame: " << X.frame << std::endl << " cone: " << std::endl << X.oRf << std::endl;
+    os << "  id: " << X.id << std::endl << "cone: " << std::endl << X.cone << std::endl;
     return os;
   }
 
-  FrameIndex frame;
-  FrictionCone oRf;
+  FrameIndex id;
+  FrictionCone cone;
+};
+
+template <typename _Scalar>
+struct FrameWrenchConeTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef WrenchConeTpl<Scalar> WrenchCone;
+
+  explicit FrameWrenchConeTpl() : id(0), cone(WrenchCone()) {}
+  FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& value) : id(value.id), cone(value.cone) {}
+  FrameWrenchConeTpl(const FrameIndex& id, const WrenchCone& cone) : id(id), cone(cone) {}
+  friend std::ostream& operator<<(std::ostream& os, const FrameWrenchConeTpl& X) {
+    os << "frame: " << X.id << std::endl << " cone: " << std::endl << X.cone << std::endl;
+    return os;
+  }
+
+  FrameIndex id;
+  WrenchCone cone;
+};
+
+template <typename _Scalar>
+struct FrameCoPSupportTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef typename MathBaseTpl<Scalar>::Vector2s Vector2s;
+  typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
+  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
+
+ public:
+  explicit FrameCoPSupportTpl() : id_(0), box_(Vector2s::Zero()) { update_A(); }
+  FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& value)
+      : id_(value.get_id()), box_(value.get_box()), A_(value.get_A()) {}
+  FrameCoPSupportTpl(const FrameIndex& id, const Vector2s& box) : id_(id), box_(box) { update_A(); }
+  friend std::ostream& operator<<(std::ostream& os, const FrameCoPSupportTpl<Scalar>& X) {
+    os << " id: " << X.get_id() << std::endl << "box: " << std::endl << X.get_box() << std::endl;
+    return os;
+  }
+
+  // Define the inequality matrix A to implement A * f >= 0. Compare eq.(18-19) in
+  // https://hal.archives-ouvertes.fr/hal-02108449/document
+  void update_A() {
+    A_ << Scalar(0), Scalar(0), box_[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
+        box_[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0), box_[1] / Scalar(2), Scalar(1),
+        Scalar(0), Scalar(0), Scalar(0), Scalar(0), box_[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
+  }
+
+  void set_id(FrameIndex id) { id_ = id; }
+  void set_box(const Vector2s& box) {
+    box_ = box;
+    update_A();
+  }
+
+  const FrameIndex& get_id() const { return id_; }
+  const Vector2s& get_box() const { return box_; }
+  const Matrix46& get_A() const { return A_; }
+
+ private:
+  FrameIndex id_;  //!< contact frame ID
+  Vector2s box_;   //!< cop support region = (length, width)
+  Matrix46 A_;     //!< inequality matrix
 };
 
 }  // namespace crocoddyl

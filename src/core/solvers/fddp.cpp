@@ -146,29 +146,6 @@ void SolverFDDP::updateExpectedImprovement() {
   }
 }
 
-double SolverFDDP::calcDiff() {
-  if (iter_ == 0) problem_->calc(xs_, us_);
-  cost_ = problem_->calcDiff(xs_, us_);
-  if (!is_feasible_) {
-    const Eigen::VectorXd& x0 = problem_->get_x0();
-    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
-
-    const std::size_t& T = problem_->get_T();
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-    for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
-    }
-  } else if (!was_feasible_) {
-    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
-      it->setZero();
-    }
-  }
-  return cost_;
-}
-
 void SolverFDDP::forwardPass(const double& steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "

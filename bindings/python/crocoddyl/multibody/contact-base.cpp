@@ -48,6 +48,12 @@ void exposeContactAbstract() {
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state\n"
            ":param df_du: Jacobian of the force with respect to the control")
+      .def("setZeroForce", &ContactModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
+           "Set zero the spatial force.\n\n"
+           ":param data: contact data")
+      .def("setZeroForceDiff", &ContactModelAbstract_wrap::setZeroForceDiff, bp::args("self", "data"),
+           "Set zero the derivatives of the spatial force.\n\n"
+           ":param data: contact data")
       .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact data.\n\n"
@@ -55,6 +61,7 @@ void exposeContactAbstract() {
            "returns the allocated data for a predefined contact.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
+      .def("createData", &ContactModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
           bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -78,9 +85,9 @@ void exposeContactAbstract() {
       .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("jMf", bp::make_getter(&ContactDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    "local frame placement of the contact frame")
-      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from contact to local frames")
+                    bp::make_setter(&ContactDataAbstract::jMf), "local frame placement of the contact frame")
+      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::fXj), "action matrix from contact to local frames")
       .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),

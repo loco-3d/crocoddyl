@@ -12,7 +12,7 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
-
+#include <pinocchio/utils/static-if.hpp>
 namespace crocoddyl {
 
 template <typename _Scalar>
@@ -56,8 +56,14 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
     data->Ar.array() *= weights_.array();
-    data->Arr.diagonal() =
-        (((r - bounds_.lb).array() <= Scalar(0.)) + ((r - bounds_.ub).array() >= 0.)).matrix().template cast<Scalar>();
+
+    using pinocchio::internal::if_then_else;
+    for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
+      data->Arr.diagonal()[i] = if_then_else(
+          pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), Scalar(1.),
+          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i], Scalar(0.), Scalar(1.), Scalar(0.)));
+    }
+
     data->Arr.diagonal().array() *= weights_.array();
   };
 

@@ -25,19 +25,18 @@ template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+
+  d->Jc = d->fJf.template topRows<3>();
   d->vw = d->v.angular();
   d->vv = d->v.linear();
-
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
-  d->Jc = d->fJf.template topRows<3>();
-
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
   d->a0 = d->a.linear() + d->vw.cross(d->vv);
 
   if (gains_[0] != 0.) {
-    d->a0 += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf);
+    d->a0 += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation);
   }
   if (gains_[1] != 0.) {
     d->a0 += gains_[1] * d->vv;
@@ -63,7 +62,7 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       d->fXjda_dv.template topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
+    d->oRf = d->pinocchio->oMf[xref_.id].rotation();
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
