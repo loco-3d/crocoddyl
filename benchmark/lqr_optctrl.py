@@ -1,5 +1,5 @@
 import crocoddyl
-from crocoddyl.utils import LQRDerived
+from crocoddyl.utils import LQRModelDerived
 import numpy as np
 import os
 import sys
@@ -84,7 +84,7 @@ avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
 print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
 
 print('Python:')
-xs, us, problem = createProblem(LQRDerived)
+xs, us, problem = createProblem(LQRModelDerived)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
 print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
 avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
