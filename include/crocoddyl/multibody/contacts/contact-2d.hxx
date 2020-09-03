@@ -25,22 +25,22 @@ template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL);
   const Vector3s& vw = d->v.angular();
   const Vector3s& vv = d->v.linear();
 
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
 
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
   d->a0[0] = d->a.linear()[0] + vw[1] * vv[2] - vw[2] * vv[1];
   d->a0[1] = d->a.linear()[1] + vw[0] * vv[1] - vw[1] * vv[0];
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation()[0] - xref_.oxf[0]);
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation()[2] - xref_.oxf[2]);
+    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[0] - xref_.translation[0]);
+    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[2] - xref_.translation[2]);
   }
   if (gains_[1] != 0.) {
     d->a0[0] += gains_[1] * vv[0];
@@ -78,7 +78,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
+    d->oRf = d->pinocchio->oMf[xref_.id].rotation();
     typename MathBase::Matrix2s oRf2D;
     oRf2D(0, 0) = d->oRf(0, 0);
     oRf2D(1, 0) = d->oRf(2, 0);
