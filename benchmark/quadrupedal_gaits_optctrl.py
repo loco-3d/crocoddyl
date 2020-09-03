@@ -8,8 +8,6 @@ import sys
 import time
 import subprocess
 
-crocoddyl.switchToNumpyMatrix()
-
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
 CALLBACKS = False
@@ -69,9 +67,7 @@ def createProblem(gait_phase):
                                             value['groundKnots'], value['flyingKnots'])
 
     xs = [robot_model.defaultState] * (len(problem.runningModels) + 1)
-    us = [
-        m.quasiStatic(d, robot_model.defaultState) for m, d in list(zip(problem.runningModels, problem.runningDatas))
-    ]
+    us = problem.quasiStatic([robot_model.defaultState] * problem.T)
     return xs, us, problem
 
 
