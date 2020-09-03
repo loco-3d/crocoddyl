@@ -71,7 +71,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, b
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
 
   Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
@@ -138,6 +138,31 @@ const Scalar& FrictionConeTpl<Scalar>::get_min_nforce() const {
 template <typename Scalar>
 const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_nsurf(Vector3s nsurf) {
+  update(nsurf, mu_, inner_appr_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_mu(Scalar mu) {
+  update(nsurf_, mu, inner_appr_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_inner_appr(bool inner_appr) {
+  update(nsurf_, mu_, inner_appr, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_min_nforce(Scalar min_nforce) {
+  update(nsurf_, mu_, inner_appr_, min_nforce, max_nforce_);
+}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::set_max_nforce(Scalar max_nforce) {
+  update(nsurf_, mu_, inner_appr_, min_nforce_, max_nforce);
 }
 
 template <typename Scalar>

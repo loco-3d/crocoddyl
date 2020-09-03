@@ -30,13 +30,13 @@ gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
 # Setting up all tasks
 GAITPHASES = \
     [{'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}},
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
      {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 25, 'supportKnots': 1}}]
+                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}}]
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 ddp = [None] * len(GAITPHASES)
@@ -44,9 +44,10 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            ddp[i] = crocoddyl.SolverBoxDDP(
+            ddp[i] = crocoddyl.SolverBoxFDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
+            ddp[i].th_stop = 1e-7
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')

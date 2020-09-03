@@ -29,7 +29,7 @@ IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     time_step2_ = time_step_ * time_step_;
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
-  if (time_step == 0.) {
+  if (time_step == Scalar(0.)) {
     enable_integration_ = false;
   }
 }

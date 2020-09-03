@@ -157,23 +157,41 @@ void exposeFrames() {
                     "frame friction cone")
       .def(PrintableVisitor<FrameFrictionCone>());
 
-  bp::class_<FrameCoPSupport>("FrameCoPSupport",
-                              "Frame foot geometry.\n\n"
-                              "It defines the ID of the contact frame and the geometry of the contact surface",
-                              bp::init<FrameIndex, Eigen::Vector2d>(
-                                  bp::args("self", "id", "support_region"),
-                                  "Initialize the frame foot geometry.\n\n"
-                                  ":param id: ID of the contact frame \n"
-                                  ":param support_region: dimension of the foot surface dim = (length, width)"))
+  bp::class_<FrameWrenchCone>("FrameWrenchCone",
+                              "Frame wrench cone.\n\n"
+                              "It defines a wrench cone for a given frame ID",
+                              bp::init<FrameIndex, WrenchCone>(bp::args("self", "id", "cone"),
+                                                               "Initialize the frame wrench cone.\n\n"
+                                                               ":param id: frame ID\n"
+                                                               ":param cone: Frame wrench cone w.r.t. the origin"))
+      .def(bp::init<>(bp::args("self"), "Default initialization of the frame wrench cone."))
+      .def_readwrite("id", &FrameWrenchCone::id, "frame ID")
+      .add_property("cone", bp::make_getter(&FrameWrenchCone::cone, bp::return_internal_reference<>()),
+                    bp::make_setter(&FrameWrenchCone::cone), "frame wrench cone")
+      .def(PrintableVisitor<FrameWrenchCone>());
+
+  bp::class_<FrameCoPSupport>(
+      "FrameCoPSupport",
+      "Frame foot geometry.\n\n"
+      "It defines the ID of the contact frame and the geometry of the contact surface",
+      bp::init<FrameIndex, Eigen::Vector2d>(bp::args("self", "id", "box"),
+                                            "Initialize the frame foot geometry.\n\n"
+                                            ":param id: ID of the contact frame \n"
+                                            ":param box: dimension of the foot surface dim = (length, width)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the frame CoP support."))
       .def("update_A", &FrameCoPSupport::update_A, "update the matrix that defines the support region")
       .add_property("id", bp::make_function(&FrameCoPSupport::get_id, bp::return_value_policy<bp::return_by_value>()),
                     &FrameCoPSupport::set_id, "frame ID")
+      .add_property("box", bp::make_function(&FrameCoPSupport::get_box, bp::return_internal_reference<>()),
+                    bp::make_function(&FrameCoPSupport::set_box), "box size used to define the sole")
       .add_property("support_region",
-                    bp::make_function(&FrameCoPSupport::get_support_region, bp::return_internal_reference<>()),
-                    bp::make_function(&FrameCoPSupport::set_support_region), "support region")
-      .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
-                    "inequality matrix")
+                    bp::make_function(&FrameCoPSupport::get_box,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use box.")),
+                    bp::make_function(&FrameCoPSupport::set_box, deprecated<>("Deprecated. Use box.")),
+                    "box size used to define the sole")
+      //   .add_property("A", bp::make_function(&FrameCoPSupport::get_A, bp::return_internal_reference<>()),
+      //                 "inequality matrix") // TODO(cmastalli) we cannot expose due to a compilation error with
+      //                 Matrix46
       .add_property(
           "frame",
           bp::make_function(&FrameCoPSupport::get_id,

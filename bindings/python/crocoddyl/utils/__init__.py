@@ -437,6 +437,168 @@ class IntegratedActionDataEulerDerived(crocoddyl.ActionDataAbstract):
         self.differential = model.differential.createData(self)
 
 
+class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
+    def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
+        crocoddyl.ActionModelAbstract.__init__(self, diffModel.state, diffModel.nu, diffModel.nr)
+        self.differential = diffModel
+        self.timeStep = timeStep
+        self.rk4_inc = [0.5, 0.5, 1.]
+        self.nx = self.differential.state.nx
+        self.ndx = self.differential.state.ndx
+        self.nq = self.differential.state.nq
+        self.nv = self.differential.state.nv
+        self.enable_integration = (self.timeStep > 0.)
+
+    def createData(self):
+        return IntegratedActionDataRK4Derived(self)
+
+    def calc(self, data, x, u=None):
+        nq, dt = self.nq, self.timeStep
+
+        data.y[0] = x
+        for i in range(3):
+            self.differential.calc(data.differential[i], data.y[i], u)
+            data.acc[i] = data.differential[i].xout
+            data.int[i] = data.differential[i].cost
+            data.ki[i] = np.concatenate([data.y[i][nq:], data.acc[i]])
+            data.y[i + 1] = self.differential.state.integrate(x, data.ki[i] * self.rk4_inc[i] * dt)
+
+        self.differential.calc(data.differential[3], data.y[3], u)
+        data.acc[3] = data.differential[3].xout
+        data.int[3] = data.differential[3].cost
+        data.ki[3] = np.concatenate([data.y[3][nq:], data.acc[3]])
+        if (self.enable_integration):
+            data.dx = (data.ki[0] + 2. * data.ki[1] + 2. * data.ki[2] + data.ki[3]) * dt / 6
+            data.xnext = self.differential.state.integrate(x, data.dx)
+            data.cost = (data.int[0] + 2 * data.int[1] + 2 * data.int[2] + data.int[3]) * dt / 6
+        else:
+            data.dx = np.zeros([self.ndx])
+            data.xnext = x
+            data.cost = data.differential[0].cost
+
+        return data.xnext, data.cost
+
+    def calcDiff(self, data, x, u):
+        ndx, nu, nv, dt = self.ndx, self.nu, self.nv, self.timeStep
+        for i in range(4):
+            self.differential.calcDiff(data.differential[i], data.y[i], u)
+            data.dki_dy[i] = np.bmat([[np.zeros([nv, nv]), np.identity(nv)], [data.differential[i].Fx]])
+
+        data.dki_du[0] = np.vstack([np.zeros([nv, nu]), data.differential[0].Fu])
+
+        data.Lx[:] = data.differential[0].Lx
+        data.Lu[:] = data.differential[0].Lu
+
+        data.dy_du[0] = np.zeros((ndx, nu))
+        data.dki_dx[0] = data.dki_dy[0]
+
+        data.dli_dx[0] = data.differential[0].Lx
+        data.dli_du[0] = data.differential[0].Lu
+
+        data.ddli_ddx[0] = data.differential[0].Lxx
+        data.ddli_ddu[0] = data.differential[0].Luu
+        data.ddli_dxdu[0] = data.differential[0].Lxu
+
+        if (self.enable_integration):
+            for i in range(1, 4):
+                c = self.rk4_inc[i - 1] * dt
+                dyi_dx, dyi_ddx = self.state.Jintegrate(x, c * data.ki[i - 1])
+
+                # ---------Finding the derivative wrt u--------------
+                data.dy_du[i] = c * np.dot(dyi_ddx, data.dki_du[i - 1])
+                data.dki_du[i] = np.vstack([
+                    c * data.dki_du[i - 1][nv:, :],
+                    data.differential[i].Fu + np.dot(data.differential[i].Fx, data.dy_du[i])
+                ])
+
+                data.dli_du[i] = data.differential[i].Lu + np.dot(data.differential[i].Lx, data.dy_du[i])
+
+                data.Luu_partialx[i] = np.dot(data.differential[i].Lxu.T, data.dy_du[i])
+                data.ddli_ddu[i] = data.differential[i].Luu + data.Luu_partialx[i].T + data.Luu_partialx[i] + np.dot(
+                    data.dy_du[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
+
+                # ---------Finding the derivative wrt x--------------
+                data.dy_dx[i] = dyi_dx + c * np.dot(dyi_ddx, data.dki_dx[i - 1])
+                data.dki_dx[i] = np.dot(data.dki_dy[i], data.dy_dx[i])
+
+                data.dli_dx[i] = np.dot(data.differential[i].Lx, data.dy_dx[i])
+                data.ddli_ddx[i] = np.dot(data.dy_dx[i].T, np.dot(data.differential[i].Lxx, data.dy_dx[i]))
+                data.ddli_dxdu[i] = np.dot(data.dy_dx[i].T, data.differential[i].Lxu) + np.dot(
+                    data.dy_dx[i].T, np.dot(data.differential[i].Lxx, data.dy_du[i]))
+
+            dxnext_dx, dxnext_ddx = self.state.Jintegrate(x, data.dx)
+            ddx_dx = (data.dki_dx[0] + 2. * data.dki_dx[1] + 2. * data.dki_dx[2] + data.dki_dx[3]) * dt / 6
+            data.ddx_du = (data.dki_du[0] + 2. * data.dki_du[1] + 2. * data.dki_du[2] + data.dki_du[3]) * dt / 6
+            data.Fx[:] = dxnext_dx + np.dot(dxnext_ddx, ddx_dx)
+            data.Fu[:] = np.dot(dxnext_ddx, data.ddx_du)
+
+            data.Lx[:] = (data.dli_dx[0] + 2. * data.dli_dx[1] + 2. * data.dli_dx[2] + data.dli_dx[3]) * dt / 6
+            data.Lu[:] = (data.dli_du[0] + 2. * data.dli_du[1] + 2. * data.dli_du[2] + data.dli_du[3]) * dt / 6
+
+            data.Lxx[:] = (data.ddli_ddx[0] + 2. * data.ddli_ddx[1] + 2. * data.ddli_ddx[2] +
+                           data.ddli_ddx[3]) * dt / 6
+            data.Luu[:] = (data.ddli_ddu[0] + 2. * data.ddli_ddu[1] + 2. * data.ddli_ddu[2] +
+                           data.ddli_ddu[3]) * dt / 6
+            data.Lxu[:] = (data.ddli_dxdu[0] + 2. * data.ddli_dxdu[1] + 2. * data.ddli_dxdu[2] +
+                           data.ddli_dxdu[3]) * dt / 6
+            data.Lux = data.Lxu.T
+        else:
+            data.Fx, _ = self.state.Jintegrate(x, data.dx)
+            data.Fu = np.zeros([self.ndx, self.nu])
+            data.Lu = data.differential[0].Lx
+            data.Lu = data.differential[0].Lu
+            data.Lxx = data.differential[0].Lxx
+            data.Luu = data.differential[0].Luu
+            data.Lxu = data.differential[0].Lxu
+
+
+class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
+    def __init__(self, model):
+        crocoddyl.ActionDataAbstract.__init__(self, model)
+
+        nx, ndx, nv, nu = model.state.nx, model.state.ndx, model.state.nv, model.nu
+        self.differential = [None] * 4
+
+        for i in range(4):
+            self.differential[i] = model.differential.createData()
+        self.int = [np.nan] * 4
+        self.ki = [np.zeros([ndx])] * 4
+
+        self.F = np.zeros([ndx, ndx + nu])
+        self.xnext = np.zeros([nx])
+        self.cost = np.nan
+
+        self.Lx = np.zeros(ndx)
+        self.Lu = np.zeros(nu)
+        self.Lxx = np.zeros([ndx, ndx])
+        self.Lxu = np.zeros([ndx, nu])
+        self.Luu = np.zeros([nu, nu])
+        self.Fx = self.F[:, :ndx]
+        self.Fu = self.F[:, ndx:]
+
+        # Quantities for derivatives
+        self.dx = [np.zeros([ndx])] * 4
+        self.y = [np.zeros([nx])] * 4
+        self.acc = [np.zeros([nu])] * 4
+
+        self.dki_dy = [np.zeros([ndx, ndx])] * 4
+        self.dki_dx = [np.zeros([ndx, ndx])] * 4
+        self.dy_dx = [np.zeros([ndx, ndx])] * 4
+        self.dki_du = [np.zeros([ndx, nu])] * 4
+        self.dy_du = [np.zeros([ndx, nu])] * 4
+
+        self.ddx_du = np.zeros([ndx, nu])
+        self.dli_dx = [np.zeros([ndx])] * 4
+        self.dli_du = [np.zeros([nu])] * 4
+
+        self.ddli_ddx = [np.zeros([ndx, ndx])] * 4
+        self.ddli_ddu = [np.zeros([nu, nu])] * 4
+        self.ddli_dxdu = [np.zeros([ndx, nu])] * 4
+        self.Luu_partialx = [np.zeros([nu, nu])] * 4
+
+        self.dy_dx[0][:, :] = np.identity(nv * 2)
+
+
 class StateCostModelDerived(crocoddyl.CostModelAbstract):
     def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
