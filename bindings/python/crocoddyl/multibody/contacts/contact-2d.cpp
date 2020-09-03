@@ -16,7 +16,8 @@ void exposeContact2D() {
   bp::class_<ContactModel2D, bp::bases<ContactModelAbstract> >(
       "ContactModel2D",
       "Rigid 2D contact model.\n\n"
-      "It defines a rigid 2D contact models (point contact) based on acceleration-based holonomic constraints, in x,z directions.\n"
+      "It defines a rigid 2D contact models (point contact) based on acceleration-based holonomic constraints, in x,z "
+      "directions.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
