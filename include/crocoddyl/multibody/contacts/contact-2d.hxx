@@ -79,7 +79,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
-    MathBase::Matrix2s oRf2D;
+    typename MathBase::Matrix2s oRf2D;
     oRf2D(0, 0) = d->oRf(0, 0);
     oRf2D(1, 0) = d->oRf(2, 0);
     oRf2D(0, 1) = d->oRf(0, 2);
