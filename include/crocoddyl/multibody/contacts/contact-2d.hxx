@@ -25,22 +25,22 @@ template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
   const Vector3s& vw = d->v.angular();
   const Vector3s& vv = d->v.linear();
 
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
 
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.frame);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
   d->a0[0] = d->a.linear()[0] + vw[1]*vv[2] - vw[2]*vv[1];
   d->a0[1] = d->a.linear()[1] + vw[0]*vv[1] - vw[1]*vv[0];
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[0];
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.frame].translation() - xref_.oxf)[2];
+    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation)[0];
+    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation)[2];
   }
   if (gains_[1] != 0.) {
     d->a0[0] += gains_[1] * vv[0];
@@ -60,24 +60,30 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
-      
-  d->da0_dx.leftCols(nv).row(0).noalias() = d->fXjda_dq.row(0) +
-      d->vw_skew.row(0) * d->fXjdv_dq.template topRows<3>() -
-      d->vv_skew.row(0) * d->fXjdv_dq.template bottomRows<3>();
-  d->da0_dx.leftCols(nv).row(1).noalias() = d->fXjda_dq.row(2) +
-      d->vw_skew.row(2) * d->fXjdv_dq.template topRows<3>() -
-      d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
 
-  d->da0_dx.rightCols(nv).row(0).noalias() = d->fXjda_dv.row(0) + d->vw_skew.row(0) * d->fJf.template topRows<3>() - d->vv_skew.row(0) * d->fJf.template bottomRows<3>();
-  d->da0_dx.rightCols(nv).row(1).noalias() = d->fXjda_dv.row(2) + d->vw_skew.row(2) * d->fJf.template topRows<3>() - d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
-  
+  d->da0_dx.leftCols(nv).row(0) = d->fXjda_dq.row(0);
+  d->da0_dx.leftCols(nv).row(0).noalias() += d->vw_skew.row(0) * d->fXjdv_dq.template topRows<3>();
+  d->da0_dx.leftCols(nv).row(0).noalias() -= d->vv_skew.row(0) * d->fXjdv_dq.template bottomRows<3>();
+
+  d->da0_dx.leftCols(nv).row(1) = d->fXjda_dq.row(2);
+  d->da0_dx.leftCols(nv).row(1).noalias() += d->vw_skew.row(2) * d->fXjdv_dq.template topRows<3>();
+  d->da0_dx.leftCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
+
+  d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(0);
+  d->da0_dx.rightCols(nv).row(0).noalias() += d->vw_skew.row(0) * d->fJf.template topRows<3>();
+  d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(0) * d->fJf.template bottomRows<3>();
+
+  d->da0_dx.rightCols(nv).row(1) = d->fXjda_dv.row(2);
+  d->da0_dx.rightCols(nv).row(1).noalias() += d->vw_skew.row(2) * d->fJf.template topRows<3>();
+  d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
+
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[xref_.frame].rotation();
-    MatrixXs oRf2D(2,2);
-    oRf2D(0,0) = d->oRf(0,0);
-    oRf2D(1,0) = d->oRf(2,0);
-    oRf2D(0,1) = d->oRf(0,2);
-    oRf2D(1,1) = d->oRf(2,2);
+    d->oRf = d->pinocchio->oMf[xref_.id].rotation();
+    typename MathBase::MatrixXs oRf2D(2,2);
+    oRf2D(0, 0) = d->oRf(0, 0);
+    oRf2D(1, 0) = d->oRf(2, 0);
+    oRf2D(0, 1) = d->oRf(0, 2);
+    oRf2D(1, 1) = d->oRf(2, 2);
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * oRf2D * d->Jc;
   }
   if (gains_[1] != 0.) {
