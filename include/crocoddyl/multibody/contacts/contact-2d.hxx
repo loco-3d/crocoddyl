@@ -36,7 +36,7 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 
   d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
   d->a0[0] = d->a.linear()[0] + vw[1] * vv[2] - vw[2] * vv[1];
-  d->a0[1] = d->a.linear()[1] + vw[0] * vv[1] - vw[1] * vv[0];
+  d->a0[1] = d->a.linear()[2] + vw[0] * vv[1] - vw[1] * vv[0];
 
   if (gains_[0] != 0.) {
     d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[0] - xref_.translation[0]);
