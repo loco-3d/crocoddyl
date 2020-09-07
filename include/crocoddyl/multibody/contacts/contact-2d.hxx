@@ -70,7 +70,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_dx.leftCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
 
   d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(0);
-  typename MathBase::MatrixXs vw_skew2D(1,2);
+  typename MathBase::RowVector2s vw_skew2D;
   vw_skew2D(0,0) = d->vw_skew(0,0);
   vw_skew2D(0,1) = d->vw_skew(0,2);
   d->da0_dx.rightCols(nv).row(0).noalias() += vw_skew2D * d->Jc;
