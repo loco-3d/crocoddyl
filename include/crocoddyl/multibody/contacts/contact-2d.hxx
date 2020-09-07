@@ -70,11 +70,16 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_dx.leftCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
 
   d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(0);
-  d->da0_dx.rightCols(nv).row(0).noalias() += d->vw_skew.row(0) * d->fJf.template topRows<3>();
+  typename MathBase::MatrixXs vw_skew2D(1,2);
+  vw_skew2D(0,0) = d->vw_skew(0,0);
+  vw_skew2D(0,1) = d->vw_skew(0,2);
+  d->da0_dx.rightCols(nv).row(0).noalias() += vw_skew2D * d->Jc;
   d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(0) * d->fJf.template bottomRows<3>();
 
   d->da0_dx.rightCols(nv).row(1) = d->fXjda_dv.row(2);
-  d->da0_dx.rightCols(nv).row(1).noalias() += d->vw_skew.row(2) * d->fJf.template topRows<3>();
+  vw_skew2D(0,0) = d->vw_skew(2,0);
+  vw_skew2D(0,1) = d->vw_skew(2,2);
+  d->da0_dx.rightCols(nv).row(1).noalias() += vw_skew2D * d->Jc;
   d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
