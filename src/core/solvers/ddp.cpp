@@ -170,7 +170,11 @@ double SolverDDP::calcDiff() {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
-      if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= 1e-9) could_be_feasible = false;
+      if(could_be_feasible) {
+        if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= 1e-9) {
+          could_be_feasible = false;
+        }
+      }
     }
     is_feasible_ = could_be_feasible;
 
