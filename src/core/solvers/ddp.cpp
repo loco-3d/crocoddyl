@@ -164,11 +164,16 @@ double SolverDDP::calcDiff() {
     const std::size_t& T = problem_->get_T();
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+
+    bool could_be_feasible = true;
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
+      if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= 1e-9) could_be_feasible = false;
     }
+    is_feasible_ = could_be_feasible;
+
   } else if (!was_feasible_) {  // closing the gaps
     for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
