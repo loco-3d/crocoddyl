@@ -19,6 +19,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
+      th_gaptol_(1e-9),
       th_stepdec_(0.5),
       th_stepinc_(0.01),
       was_feasible_(false) {
@@ -171,7 +172,7 @@ double SolverDDP::calcDiff() {
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
       if(could_be_feasible) {
-        if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= 1e-9) {
+        if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
           could_be_feasible = false;
         }
       }
@@ -406,6 +407,8 @@ const double& SolverDDP::get_th_stepinc() const { return th_stepinc_; }
 
 const double& SolverDDP::get_th_grad() const { return th_grad_; }
 
+const double& SolverDDP::get_th_gaptol() const { return th_gaptol_; }
+
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
@@ -494,4 +497,13 @@ void SolverDDP::set_th_grad(const double& th_grad) {
   th_grad_ = th_grad;
 }
 
+void SolverDDP::set_th_gaptol(const double& th_gaptol) {
+  if (0. > th_gaptol) {
+    throw_pretty("Invalid argument: "
+                 << "th_gaptol value has to be positive.");
+  }
+  th_gaptol_ = th_gaptol;
+}
+
+  
 }  // namespace crocoddyl
