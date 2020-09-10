@@ -35,6 +35,8 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
+  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit);
+  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit);
 }
 
 template <typename Scalar>
