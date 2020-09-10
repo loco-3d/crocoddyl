@@ -191,6 +191,11 @@ template <typename Scalar>
 struct ContactDataMultipleTpl;
 
 template <typename Scalar>
+class ContactModel2DTpl;
+template <typename Scalar>
+struct ContactData2DTpl;
+
+template <typename Scalar>
 class ContactModel3DTpl;
 template <typename Scalar>
 struct ContactData3DTpl;
@@ -327,12 +332,14 @@ typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
-enum ContactType { Contact3D, Contact6D, ContactUndefined };
+enum ContactType { Contact2D, Contact3D, Contact6D, ContactUndefined };
 enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
 
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
 typedef ContactDataMultipleTpl<double> ContactDataMultiple;
+typedef ContactModel2DTpl<double> ContactModel2D;
+typedef ContactData2DTpl<double> ContactData2D;
 typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
