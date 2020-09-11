@@ -19,6 +19,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
+      th_gaptol_(1e-9),
       th_stepdec_(0.5),
       th_stepinc_(0.01),
       was_feasible_(false) {
@@ -157,10 +158,14 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 double SolverDDP::calcDiff() {
   if (iter_ == 0) problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
+
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
     problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
-
+    bool could_be_feasible = true;
+    if (fs_[0].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
+      could_be_feasible = false;
+    }
     const std::size_t& T = problem_->get_T();
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
@@ -168,7 +173,14 @@ double SolverDDP::calcDiff() {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
+      if(could_be_feasible) {
+        if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
+          could_be_feasible = false;
+        }
+      }
     }
+    is_feasible_ = could_be_feasible;
+
   } else if (!was_feasible_) {  // closing the gaps
     for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
@@ -189,7 +201,6 @@ void SolverDDP::backwardPass() {
   if (!is_feasible_) {
     Vx_.back().noalias() += Vxx_.back() * fs_.back();
   }
-
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
@@ -397,6 +408,8 @@ const double& SolverDDP::get_th_stepinc() const { return th_stepinc_; }
 
 const double& SolverDDP::get_th_grad() const { return th_grad_; }
 
+const double& SolverDDP::get_th_gaptol() const { return th_gaptol_; }
+
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
@@ -483,6 +496,14 @@ void SolverDDP::set_th_grad(const double& th_grad) {
                  << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
+}
+
+void SolverDDP::set_th_gaptol(const double& th_gaptol) {
+  if (0. > th_gaptol) {
+    throw_pretty("Invalid argument: "
+                 << "th_gaptol value has to be positive.");
+  }
+  th_gaptol_ = th_gaptol;
 }
 
 }  // namespace crocoddyl
