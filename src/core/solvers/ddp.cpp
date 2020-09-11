@@ -158,15 +158,17 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 double SolverDDP::calcDiff() {
   if (iter_ == 0) problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
+
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
     problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
-
+    bool could_be_feasible = true;
+    if (fs_[0].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
+      could_be_feasible = false;
+    }
     const std::size_t& T = problem_->get_T();
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-
-    bool could_be_feasible = true;
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -199,7 +201,6 @@ void SolverDDP::backwardPass() {
   if (!is_feasible_) {
     Vx_.back().noalias() += Vxx_.back() * fs_.back();
   }
-
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
@@ -505,5 +506,4 @@ void SolverDDP::set_th_gaptol(const double& th_gaptol) {
   th_gaptol_ = th_gaptol;
 }
 
-  
 }  // namespace crocoddyl
