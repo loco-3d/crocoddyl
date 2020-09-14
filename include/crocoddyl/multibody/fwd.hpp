@@ -305,7 +305,8 @@ typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;
 typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;
 typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;
 typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;
-
+typedef CostModelPairCollisionsTpl<double> CostModelPairCollisions;
+typedef CostDataPairCollisionsTpl<double> CostDataPairCollisions;
 typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
