@@ -48,6 +48,7 @@ void exposeCostContactImpulse();
 void exposeCostImpulseFrictionCone();
 void exposeCostImpulseCoPPosition();
 void exposeCostImpulseCoM();
+void exposeCostPairCollisions();
 void exposeContact3D();
 void exposeContact6D();
 void exposeImpulse3D();
