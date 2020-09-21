@@ -32,10 +32,10 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
-  
+
   d->vw = d->v.angular();
   d->vv = d->v.linear();
-  
+
   d->a0[0] = d->a.linear()[0] + d->vw[1] * d->vv[2] - d->vw[2] * d->vv[1];
   d->a0[1] = d->a.linear()[2] + d->vw[0] * d->vv[1] - d->vw[1] * d->vv[0];
 
