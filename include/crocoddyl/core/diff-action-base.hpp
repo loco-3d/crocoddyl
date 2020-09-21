@@ -40,7 +40,7 @@ namespace crocoddyl {
  * ndx}\f$, \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nu}\f$ are the Jacobians of the dynamics;
  * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectely.
+ * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectively.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -59,7 +59,7 @@ class DifferentialActionModelAbstractTpl {
   /**
    * @brief Initialize the differential action model
    *
-   * @param[in] state  State Dimension of state configuration tuple
+   * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
    */
