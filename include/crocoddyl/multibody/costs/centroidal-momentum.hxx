@@ -17,7 +17,7 @@ template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href, const std::size_t& nu)
-    : Base(state, activation, nu), href_(href) {
+    : Base(state, activation, nu), href_(href), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -28,7 +28,7 @@ template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href)
-    : Base(state, activation), href_(href) {
+    : Base(state, activation), href_(href), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -38,12 +38,12 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href, const std::size_t& nu)
-    : Base(state, 6, nu), href_(href) {}
+    : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href)
-    : Base(state, 6), href_(href) {}
+    : Base(state, 6), href_(href), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::~CostModelCentroidalMomentumTpl() {}
@@ -70,8 +70,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
 
   activation_->calcDiff(data->activation, data->r);
-  pinocchio::getCentroidalDynamicsDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv,
-                                              Rv);
+  pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into
   // account. So we need to update the com frame as well.

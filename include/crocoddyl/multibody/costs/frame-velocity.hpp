@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -145,7 +146,8 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FrameMotion vref_;  //!< Reference frame velocity
+  FrameMotion vref_;                                                      //!< Reference frame velocity
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>

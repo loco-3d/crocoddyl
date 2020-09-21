@@ -12,6 +12,7 @@
 #include "state.hpp"
 #include "activation.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/numdiff/cost.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
 

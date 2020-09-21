@@ -12,11 +12,11 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
     : state_(state), nu_(nu), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateMultibody> state)
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state)
     : state_(state), nu_(state->get_nv()), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
@@ -177,7 +177,7 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Sc
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >& CostModelSumTpl<Scalar>::get_state() const {
+const boost::shared_ptr<StateAbstractTpl<Scalar> >& CostModelSumTpl<Scalar>::get_state() const {
   return state_;
 }
 

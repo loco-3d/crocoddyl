@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -146,8 +147,9 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FramePlacement Mref_;                //!< Reference frame placement
-  pinocchio::SE3Tpl<Scalar> oMf_inv_;  //!< Inverse reference placement
+  FramePlacement Mref_;                                                   //!< Reference frame placement
+  pinocchio::SE3Tpl<Scalar> oMf_inv_;                                     //!< Inverse reference placement
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>

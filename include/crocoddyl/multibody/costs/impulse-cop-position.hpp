@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -165,6 +166,7 @@ struct CostDataImpulseCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -186,7 +188,8 @@ struct CostDataImpulseCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Get the active 6d impulse (avoids data casting at runtime)
     FrameCoPSupport cop_support = model->template get_reference<FrameCoPSupport>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[cop_support.get_id()].name;
+    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
+    std::string frame_name = state->get_pinocchio()->frames[cop_support.get_id()].name;
     bool found_impulse = false;
     for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
          it != d->impulses->impulses.end(); ++it) {

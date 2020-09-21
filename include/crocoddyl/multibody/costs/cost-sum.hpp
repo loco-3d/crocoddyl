@@ -13,7 +13,8 @@
 #include <map>
 #include <utility>
 
-#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/multibody/fwd.hpp"  //TODO(cmastalli) remove after moving files
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 
@@ -61,7 +62,7 @@ class CostModelSumTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataSumTpl<Scalar> CostDataSum;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
@@ -78,7 +79,7 @@ class CostModelSumTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  CostModelSumTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu);
 
   /**
    * @brief Initialize the cost-sum model
@@ -87,7 +88,7 @@ class CostModelSumTpl {
    *
    * @param[in] state  State of the multibody system
    */
-  explicit CostModelSumTpl(boost::shared_ptr<StateMultibody> state);
+  explicit CostModelSumTpl(boost::shared_ptr<StateAbstract> state);
   ~CostModelSumTpl();
 
   /**
@@ -167,7 +168,7 @@ class CostModelSumTpl {
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the stack of cost models
@@ -207,14 +208,14 @@ class CostModelSumTpl {
   bool getCostStatus(const std::string& name) const;
 
  private:
-  boost::shared_ptr<StateMultibody> state_;  //!< State description
-  CostModelContainer costs_;                 //!< Stack of cost items
-  std::size_t nu_;                           //!< Dimension of the control input
-  std::size_t nr_;                           //!< Dimension of the active residual vector
-  std::size_t nr_total_;                     //!< Dimension of the total residual vector
-  std::vector<std::string> active_;          //!< Names of the active cost items
-  std::vector<std::string> inactive_;        //!< Names of the inactive cost items
-  VectorXs unone_;                           //!< No control vector
+  boost::shared_ptr<StateAbstract> state_;  //!< State description
+  CostModelContainer costs_;                //!< Stack of cost items
+  std::size_t nu_;                          //!< Dimension of the control input
+  std::size_t nr_;                          //!< Dimension of the active residual vector
+  std::size_t nr_total_;                    //!< Dimension of the total residual vector
+  std::vector<std::string> active_;         //!< Names of the active cost items
+  std::vector<std::string> inactive_;       //!< Names of the inactive cost items
+  VectorXs unone_;                          //!< No control vector
 };
 
 template <typename _Scalar>

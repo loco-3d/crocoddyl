@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
@@ -39,7 +39,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
@@ -56,9 +55,8 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] activation  Activation model
    * @param[in] uref        Reference control input
    */
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                      const VectorXs& uref);
-
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                      boost::shared_ptr<ActivationModelAbstract> activation, const VectorXs& uref);
   /**
    * @brief Initialize the control cost model
    *
@@ -68,7 +66,8 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
    */
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                      boost::shared_ptr<ActivationModelAbstract> activation);
 
   /**
    * @brief Initialize the control cost model
@@ -79,8 +78,8 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                      const std::size_t& nu);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
 
   /**
    * @brief Initialize the control cost model
@@ -91,7 +90,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] uref        Reference control input
    */
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& uref);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& uref);
 
   /**
    * @brief Initialize the control cost model
@@ -103,7 +102,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model control vector
    */
-  explicit CostModelControlTpl(boost::shared_ptr<StateMultibody> state);
+  explicit CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state);
 
   /**
    * @brief Initialize the control cost model
@@ -114,7 +113,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t& nu);
   virtual ~CostModelControlTpl();
 
   /**

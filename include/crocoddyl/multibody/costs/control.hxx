@@ -11,7 +11,7 @@
 
 namespace crocoddyl {
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const VectorXs& uref)
     : Base(state, activation, static_cast<std::size_t>(uref.size())), uref_(uref) {
@@ -22,12 +22,12 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibod
 }
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation)
     : Base(state, activation), uref_(VectorXs::Zero(activation->get_nr())) {}
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state,
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const std::size_t& nu)
     : Base(state, activation, nu), uref_(VectorXs::Zero(nu)) {
@@ -38,15 +38,17 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibod
 }
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& uref)
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                                 const VectorXs& uref)
     : Base(state, static_cast<std::size_t>(uref.size()), static_cast<std::size_t>(uref.size())), uref_(uref) {}
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state)
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, state->get_nv()), uref_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                                 const std::size_t& nu)
     : Base(state, nu, nu), uref_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>

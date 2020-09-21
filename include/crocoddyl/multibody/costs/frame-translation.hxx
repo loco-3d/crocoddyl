@@ -17,7 +17,7 @@ template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameTranslation& xref, const std::size_t& nu)
-    : Base(state, activation, nu), xref_(xref) {
+    : Base(state, activation, nu), xref_(xref), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -28,7 +28,7 @@ template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameTranslation& xref)
-    : Base(state, activation), xref_(xref) {
+    : Base(state, activation), xref_(xref), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -38,12 +38,12 @@ CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const FrameTranslation& xref, const std::size_t& nu)
-    : Base(state, 3, nu), xref_(xref) {}
+    : Base(state, 3, nu), xref_(xref), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const FrameTranslation& xref)
-    : Base(state, 3), xref_(xref) {}
+    : Base(state, 3), xref_(xref), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::~CostModelFrameTranslationTpl() {}
@@ -53,7 +53,7 @@ void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostData
                                                 const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the frame translation w.r.t. the reference frame
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  pinocchio::updateFramePlacement(*pin_model_.get(), *d->pinocchio, xref_.id);
   data->r = d->pinocchio->oMf[xref_.id].translation() - xref_.translation;
 
   // Compute the cost
@@ -69,7 +69,7 @@ void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<Cost
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame Jacobian at the error point
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
   d->J = d->pinocchio->oMf[xref_.id].rotation() * d->fJf.template topRows<3>();
 
   // Compute the derivatives of the frame placement
