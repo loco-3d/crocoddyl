@@ -28,10 +28,14 @@ namespace crocoddyl {
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{A}\boldsymbol{\lambda}\f$, where
  * \f$\mathbf{A}\in~\mathbb{R}^{nr\times nc}\f$ describes the linearized friction cone,
  * \f$\boldsymbol{\lambda}\in~\mathbb{R}^{nc}\f$ is the spatial contact forces computed by
- * `DifferentialActionModelContactFwdDynamicsTpl`, and `nr`, `nf` are the number of cone facets and dimension of the
+ * `DifferentialActionModelContactFwdDynamicsTpl`, and `nr`, `nc` are the number of cone facets and dimension of the
  * contact, respectively.
  *
- * Both cost and residual derivatives are computed analytically.
+ * Both cost and residual derivatives are computed analytically, where th force vector \f$\boldsymbol{\lambda}\f$ and
+ * its derivatives \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
+ * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
+ * `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
+ * DataCollectorContactTpl). Note that this cost function cannot be used with other action models.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *

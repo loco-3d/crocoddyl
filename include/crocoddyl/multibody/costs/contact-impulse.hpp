@@ -24,20 +24,18 @@ namespace crocoddyl {
 /**
  * @brief Define a contact impulse cost function
  *
- * It builds a cost function that tracks a desired spatial impulse in the contact coordinates
- * \f${}^o\underline{\boldsymbol{\Lambda}}_c\in\mathbb{R}^{nc}\f$, i.e. the cost residual vector is described as:
- * \f{equation*}{ \mathbf{r} = {}^o\underline{\boldsymbol{\Lambda}}_c -
- * {}^o\underline{\boldsymbol{\Lambda}}_c^{reference},\f} where
- * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$ is the reference spatial contact impulse in the frame
- * coordinate \f$c\f$, and \f$nc\f$ defines the dimension of constrained space \f$(nc < 6)\f$. The cost is computed,
- * from the residual vector \f$\mathbf{r}\in\mathbb{R}^{nc}\f$, through an user defined activation model. Additionally,
- * the reference impulse vector is defined using FrameForceTpl even for cases where \f$nc < 6\f$.
+ * This cost function defines a residual vector \f$\mathbf{r}=\boldsymbol{\lambda}-\boldsymbol{\lambda}^*\f$,
+ * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial impulses,
+ * respetively. The current spatial impulses \f$\boldsymbol{\lambda}\in\mathbb{R}^{ni}\f$is computed by
+ * `DifferentialActionModelContactFwdDynamicsTpl`, with `ni` as the dimension of the impulse.
  *
- * The impulse vector \f${}^o\underline{\boldsymbol{\Lambda}}_c\f$ and its derivatives
- * \f$\left(\frac{\partial{}^o\underline{\boldsymbol{\Lambda}}_c}{\partial\mathbf{x}},
- * \frac{\partial{}^o\underline{\boldsymbol{\Lambda}}_c}{\partial\mathbf{u}}\right)\f$ are computed by
- * ActionModelImpulseFwdDynamicsTpl. These values are stored in a shared data (i.e.
+ * Both cost and residual derivatives are computed analytically, where th force vector \f$\boldsymbol{\lambda}\f$ and
+ * its derivatives \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
+ * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
+ * `ActionModelImpulseFwdDynamicsTpl`. These values are stored in a shared data (i.e.
  * DataCollectorImpulseTpl). Note that this cost function cannot be used with other action models.
+ * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
+ * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
  * \sa ActionModelImpulseFwdDynamicsTpl, DataCollectorImpulseTpl, ActivationModelAbstractTpl
  */
@@ -61,13 +59,13 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the contact impulse model
+   * @brief Initialize the contact impulse cost model
    *
    * Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
    * @param[in] state       Multibody state
    * @param[in] activation  Activation model
-   * @param[in] fref        Reference spatial contact impulse in the contact coordinates
+   * @param[in] fref        Reference spatial contact impulse \f$\boldsymbol{\lambda}^*\f$
    */
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                              boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref);
@@ -75,25 +73,23 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the contact impulse cost model
    *
-   * For this case the default activation model is quadratic, i.e. `ActivationModelQuadTpl(nr)`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    * Note that the `nr`, defined in the activation model, has to be lower / equals than 6.
    *
-   * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
-   * @param[in] nr          Dimension of residual vector
+   * @param[in] state  Multibody state
+   * @param[in] fref   Reference spatial contact impulse \f$\boldsymbol{\lambda}^*\f$
+   * @param[in] nr     Dimension of residual vector
    */
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
 
   /**
    * @brief Initialize the contact impulse cost model
    *
-   * For this case the default activation model is quadratic, i.e. `ActivationModelQuadTpl(nr)`, and `nr` is
-   * equals to 6.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$), and `nr`
+   * is 6.
    *
-   * @param[in] state       Multibody state
-   * @param[in] fref        Reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
+   * @param[in] state  Multibody state
+   * @param[in] fref   Reference spatial contact impulse \f$\boldsymbol{\lambda}^*\f$
    */
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   virtual ~CostModelContactImpulseTpl();
@@ -104,7 +100,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * The impulse vector is computed by ActionModelImpulseFwdDynamicsTpl and stored in DataCollectorImpulseTpl.
    *
    * @param[in] data  Contact impulse data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -116,7 +112,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * The impulse derivatives are computed by ActionModelImpulseFwdDynamicsTpl and stored in DataCollectorImpulseTpl.
    *
    * @param[in] data  Contact impulse data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -124,9 +120,6 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Create the contact impulse cost data
-   *
-   * Each cost model has its own data that needs to be allocated. This function returns the allocated data for a
-   * predefined cost.
    *
    * @param[in] data  shared data (it should be of type DataCollectorImpulseTpl)
    * @return the cost data.
@@ -138,14 +131,12 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Return the reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
+   * @brief Return the reference spatial impulse \f$\boldsymbol{\lambda}^*\f$
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
   /**
-   * @brief Modify the reference spatial contact impulse in the contact coordinates
-   * \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
+   * @brief Modify the reference spatial impulse \f$\boldsymbol{\lambda}^*\f$
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
@@ -155,8 +146,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  protected:
-  FrameForce fref_;  //!< Reference spatial contact impulse in the contact coordinates
-                     //!< \f${}^o\underline{\boldsymbol{\Lambda}}_c^{reference}\f$
+  FrameForce fref_;  //!< Reference spatial impulse \f$\boldsymbol{\lambda}^*\f$
 };
 
 template <typename _Scalar>

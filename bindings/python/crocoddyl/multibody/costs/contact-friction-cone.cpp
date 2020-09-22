@@ -35,14 +35,14 @@ void exposeCostContactFrictionCone() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, int>(
           bp::args("self", "state", "fref", "nu"),
           "Initialize the contact friction cone cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2)..\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param fref: frame friction cone\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone>(
           bp::args("self", "state", "fref"),
           "Initialize the contact friction cone cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2)., and nu is obtained from "
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
           "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param fref: frame friction cone"))
