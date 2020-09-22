@@ -17,6 +17,8 @@ namespace python {
 void exposeCostCoMPosition() {
   bp::class_<CostModelCoMPosition, bp::bases<CostModelAbstract> >(
       "CostModelCoMPosition",
+      "This cost function defines a residual vector as r = c - cref, with c and cref as the current and reference "
+      "CoM position, respetively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::Vector3d, int>(
           bp::args("self", "state", "activation", "cref", "nu"),
           "Initialize the CoM position cost model.\n\n"

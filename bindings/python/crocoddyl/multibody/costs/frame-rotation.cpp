@@ -17,6 +17,8 @@ namespace python {
 void exposeCostFrameRotation() {
   bp::class_<CostModelFrameRotation, bp::bases<CostModelAbstract> >(
       "CostModelFrameRotation",
+      "This cost function defines a residual vector as r = R - Rref, with R and Rref as the current and reference "
+      "frame rotations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation, int>(
           bp::args("self", "state", "activation", "Rref", "nu"),
           "Initialize the frame rotation cost model.\n\n"

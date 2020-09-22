@@ -18,6 +18,8 @@ void exposeCostCentroidalMomentum() {
   typedef Eigen::Matrix<double, 6, 1> Vector6d;
   bp::class_<CostModelCentroidalMomentum, bp::bases<CostModelAbstract> >(
       "CostModelCentroidalMomentum",
+      "This cost function defines a residual vector as r = h - href, with h and href as the current and reference "
+      "centroidal momenta, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Vector6d, int>(
           bp::args("self", "state", "activation", "href", "nu"),
           "Initialize the centroidal momentum cost model.\n\n"

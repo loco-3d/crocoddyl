@@ -17,7 +17,7 @@ void exposeCostImpulseCoM() {
   bp::class_<CostModelImpulseCoM, bp::bases<CostModelAbstract> >(
       "CostModelImpulseCoM",
       "This cost function defines a residual vector as r = Jcom * (vnext-v), with Jcom as the CoM Jacobian, and vnext "
-      "the velocity after impact and v the velocity before impact.",
+      "the velocity after impact and v the velocity before impact, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the CoM position cost model for impulse dynamics.\n\n"

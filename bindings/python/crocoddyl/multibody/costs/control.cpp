@@ -17,6 +17,8 @@ namespace python {
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
       "CostModelControl",
+      "This cost function defines a residual vector as r = u - uref, with u and uref as the current and reference "
+      "control, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "activation", "uref"),
           "Initialize the control cost model.\n\n"

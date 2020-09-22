@@ -17,6 +17,8 @@ namespace python {
 void exposeCostFramePlacement() {
   bp::class_<CostModelFramePlacement, bp::bases<CostModelAbstract> >(
       "CostModelFramePlacement",
+      "This cost function defines a residual vector as r = p - pref, with p and pref as the current and reference "
+      "frame placements, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FramePlacement, int>(
           bp::args("self", "state", "activation", "Mref", "nu"),
           "Initialize the frame placement cost model.\n\n"

@@ -17,6 +17,8 @@ namespace python {
 void exposeCostFrameVelocity() {
   bp::class_<CostModelFrameVelocity, bp::bases<CostModelAbstract> >(
       "CostModelFrameVelocity",
+      "This cost function defines a residual vector as r = v - vref, with v and vref as the current and reference "
+      "frame velocities, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameMotion, int>(
           bp::args("self", "state", "activation", "vref", "nu"),
           "Initialize the frame velocity cost model.\n\n"

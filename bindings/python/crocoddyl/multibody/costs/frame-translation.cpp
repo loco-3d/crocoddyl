@@ -17,6 +17,8 @@ namespace python {
 void exposeCostFrameTranslation() {
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
       "CostModelFrameTranslation",
+      "This cost function defines a residual vector as r = t - tref, with t and tref as the current and reference "
+      "frame translations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameTranslation, int>(
           bp::args("self", "state", "activation", "xref", "nu"),
           "Initialize the frame translation cost model.\n\n"

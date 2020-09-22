@@ -17,6 +17,8 @@ namespace python {
 void exposeCostState() {
   bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
       "CostModelState",
+      "This cost function defines a residual vector as r = x - xref, with x and xref as the current and reference "
+      "state, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd, int>(
           bp::args("self", "state", "activation", "xref", "nu"),
           "Initialize the state cost model.\n\n"
