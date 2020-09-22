@@ -70,7 +70,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * The default value for `nu` is equals to StateAbstractTpl::get_nv().
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
@@ -80,7 +80,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * The default activation model is quadratic, i.e. ActivationModelQuadTpl::ActivationModelQuadTpl().
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
    * @param[in] state  State of the multibody system
    * @param[in] nr     Dimension of residual vector
@@ -91,8 +91,8 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * The default activation model is quadratic, i.e. ActivationModelQuadTpl::ActivationModelQuadTpl().
-   * Furthermore, the default value for `nu` is StateAbstractTpl::get_nv().
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state  State of the multibody system
    * @param[in] nr     Dimension of residual vector
