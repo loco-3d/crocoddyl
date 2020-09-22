@@ -128,6 +128,7 @@ class CostModelAbstractTpl {
    * and second order derivatives). However, it is possible to specialized this function is we need to create
    * additional data, for instance, to avoid dynamic memory allocation.
    *
+   * @param data  Data collector
    * @return the cost data
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
