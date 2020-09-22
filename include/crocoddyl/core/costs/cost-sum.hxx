@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 

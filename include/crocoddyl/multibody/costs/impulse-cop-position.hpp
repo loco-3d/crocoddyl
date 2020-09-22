@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COP_POSITION_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"

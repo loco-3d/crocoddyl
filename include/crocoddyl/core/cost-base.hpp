@@ -6,14 +6,13 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
-#define CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#ifndef CROCODDYL_CORE_COST_BASE_HPP_
+#define CROCODDYL_CORE_COST_BASE_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/multibody/fwd.hpp"  //TODO(cmastalli) remove after moving files to core folder
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
@@ -247,6 +246,6 @@ struct CostDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/cost-base.hxx"
+#include "crocoddyl/core/cost-base.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#endif  // CROCODDYL_CORE_COST_BASE_HPP_

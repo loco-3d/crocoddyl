@@ -82,21 +82,9 @@ struct FrameCoPSupportTpl;
 
 // cost
 template <typename Scalar>
-class CostModelAbstractTpl;
-template <typename Scalar>
-struct CostDataAbstractTpl;
-
-template <typename Scalar>
 class CostModelFrameTranslationTpl;
 template <typename Scalar>
 struct CostDataFrameTranslationTpl;
-
-template <typename Scalar>
-struct CostItemTpl;
-template <typename Scalar>
-class CostModelSumTpl;
-template <typename Scalar>
-struct CostDataSumTpl;
 
 template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
@@ -289,13 +277,8 @@ typedef FrameFrictionConeTpl<double> FrameFrictionCone;
 typedef FrameWrenchConeTpl<double> FrameWrenchCone;
 typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
-typedef CostModelAbstractTpl<double> CostModelAbstract;
-typedef CostDataAbstractTpl<double> CostDataAbstract;
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;
-typedef CostItemTpl<double> CostItem;
-typedef CostModelSumTpl<double> CostModelSum;
-typedef CostDataSumTpl<double> CostDataSum;
 typedef CostModelCentroidalMomentumTpl<double> CostModelCentroidalMomentum;
 typedef CostDataCentroidalMomentumTpl<double> CostDataCentroidalMomentum;
 typedef CostModelCoMPositionTpl<double> CostModelCoMPosition;

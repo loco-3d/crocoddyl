@@ -90,6 +90,19 @@ struct SquashingDataAbstractTpl;
 template <typename Scalar>
 class SquashingModelSmoothSatTpl;
 
+// cost
+template <typename Scalar>
+class CostModelAbstractTpl;
+template <typename Scalar>
+struct CostDataAbstractTpl;
+
+template <typename Scalar>
+struct CostItemTpl;
+template <typename Scalar>
+class CostModelSumTpl;
+template <typename Scalar>
+struct CostDataSumTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
@@ -199,6 +212,11 @@ typedef DataCollectorActuationTpl<double> DataCollectorActuation;
 
 typedef ActionDataAbstractTpl<double> ActionDataAbstract;
 typedef ActionModelAbstractTpl<double> ActionModelAbstract;
+typedef CostModelAbstractTpl<double> CostModelAbstract;
+typedef CostDataAbstractTpl<double> CostDataAbstract;
+typedef CostItemTpl<double> CostItem;
+typedef CostModelSumTpl<double> CostModelSum;
+typedef CostDataSumTpl<double> CostDataSum;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;

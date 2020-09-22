@@ -22,7 +22,7 @@
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"

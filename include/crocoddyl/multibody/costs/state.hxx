@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

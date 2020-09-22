@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_WRENCH_CONE_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"

@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {

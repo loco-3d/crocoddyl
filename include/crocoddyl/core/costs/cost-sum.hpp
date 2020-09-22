@@ -6,17 +6,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#ifndef CROCODDYL_CORE_COSTS_COST_SUM_HPP_
+#define CROCODDYL_CORE_COSTS_COST_SUM_HPP_
 
 #include <string>
 #include <map>
 #include <utility>
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/multibody/fwd.hpp"  //TODO(cmastalli) remove after moving files
+#include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
 
 namespace crocoddyl {
 
@@ -332,6 +331,6 @@ struct CostDataSumTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/costs/cost-sum.hxx"
+#include "crocoddyl/core/costs/cost-sum.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#endif  // CROCODDYL_CORE_COSTS_COST_SUM_HPP_

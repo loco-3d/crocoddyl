@@ -16,6 +16,7 @@
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"

@@ -11,9 +11,9 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {

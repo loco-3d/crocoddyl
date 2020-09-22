@@ -11,11 +11,11 @@
 #include <memory>
 #include <utility>
 #include <string>
-#include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 namespace python {
