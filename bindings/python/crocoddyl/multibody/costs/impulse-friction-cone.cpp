@@ -16,6 +16,8 @@ namespace python {
 void exposeCostImpulseFrictionCone() {
   bp::class_<CostModelImpulseFrictionCone, bp::bases<CostModelAbstract> >(
       "CostModelImpulseFrictionCone",
+      "This cost function defines a residual vector as r = A*f, where A, f describe the linearized friction cone and "
+      "the spatial impulse, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone>(
           bp::args("self", "state", "activation", "fref"),
           "Initialize the impulse friction cone cost model.\n\n"
@@ -24,9 +26,8 @@ void exposeCostImpulseFrictionCone() {
           ":param fref: frame friction cone"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone>(
           bp::args("self", "state", "fref"),
-          "Initialize the impulse force cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "Initialize the impulse friction cone cost model.\n\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param fref: frame friction cone"))
       .def<void (CostModelImpulseFrictionCone::*)(const boost::shared_ptr<CostDataAbstract>&,
