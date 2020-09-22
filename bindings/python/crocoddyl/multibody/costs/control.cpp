@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
