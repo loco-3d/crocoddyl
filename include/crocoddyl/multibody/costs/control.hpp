@@ -15,6 +15,22 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Control cost
+ *
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respetively. Note
+ * that the dimension of the residual vector is obtained from `nu`.
+ *
+ * Both cost and residual derivatives are computed analytically.
+ * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
+ * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ *
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
+ *
+ * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
  public:
@@ -31,18 +47,93 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the control cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] uref        Reference control input
+   */
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                       const VectorXs& uref);
+
+  /**
+   * @brief Initialize the control cost model
+   *
+   * The default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)` with `nu` obtained by
+   * `ActivationAbstractTpl::get_nr()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   */
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
+
+  /**
+   * @brief Initialize the control cost model
+   *
+   * The default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] nu          Dimension of the control vector
+   */
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
                       const std::size_t& nu);
+
+  /**
+   * @brief Initialize the control cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The
+   * default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] uref        Reference control input
+   */
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& uref);
+
+  /**
+   * @brief Initialize the control cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The
+   * default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)` with `nu` defined by
+   * `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model control vector
+   */
   explicit CostModelControlTpl(boost::shared_ptr<StateMultibody> state);
+
+  /**
+   * @brief Initialize the control cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The
+   * default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] nu          Dimension of the control vector
+   */
   CostModelControlTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
   virtual ~CostModelControlTpl();
 
+  /**
+   * @brief Compute the control cost
+   *
+   * @param[in] data  Control cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the control cost
+   *
+   * @param[in] data  Control cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -50,7 +141,14 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   DEPRECATED("Use get_reference<MathbTpl<Scalare>::VectorXs>()", const VectorXs& get_uref() const);
 
  protected:
+  /**
+   * @brief Modify the control reference
+   */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
+  /**
+   * @brief Return the state control
+   */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
@@ -59,7 +157,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  VectorXs uref_;
+  VectorXs uref_;  //!< Reference control input
 };
 
 }  // namespace crocoddyl
