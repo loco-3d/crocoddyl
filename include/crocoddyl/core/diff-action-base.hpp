@@ -66,9 +66,10 @@ class DifferentialActionModelAbstractTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
+   * @param[in] ng     Number of constraints
    */
   DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
-                                     const std::size_t& nr = 0);
+                                     const std::size_t& nr = 0, const std::size_t& ng = 0);
   virtual ~DifferentialActionModelAbstractTpl();
 
   /**
@@ -164,6 +165,11 @@ class DifferentialActionModelAbstractTpl {
   const std::size_t& get_nr() const;
 
   /**
+   * @brief Return the number of constraints
+   */
+  const std::size_t& get_ng() const;
+
+  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
@@ -196,6 +202,7 @@ class DifferentialActionModelAbstractTpl {
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
+  std::size_t ng_;                          //!< Number of constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs u_lb_;                           //!< Lower control limits
@@ -225,7 +232,9 @@ struct DifferentialActionDataAbstractTpl {
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
-        Luu(model->get_nu(), model->get_nu()) {
+        Luu(model->get_nu(), model->get_nu()),
+        Gx(model->get_ng(), model->get_state()->get_ndx()),
+        Gu(model->get_ng(), model->get_nu()) {
     xout.setZero();
     r.setZero();
     Fx.setZero();
@@ -235,6 +244,8 @@ struct DifferentialActionDataAbstractTpl {
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
+    Gx.setZero();
+    Gu.setZero();
   }
   virtual ~DifferentialActionDataAbstractTpl() {}
 
@@ -243,11 +254,13 @@ struct DifferentialActionDataAbstractTpl {
   MatrixXs Fx;    //!< Jacobian of the dynamics
   MatrixXs Fu;    //!< Jacobian of the dynamics
   VectorXs r;     //!< Cost residual
-  VectorXs Lx;    //!< Jacobian of the cost function
-  VectorXs Lu;    //!< Jacobian of the cost function
-  MatrixXs Lxx;   //!< Hessian of the cost function
-  MatrixXs Lxu;   //!< Hessian of the cost function
-  MatrixXs Luu;   //!< Hessian of the cost function
+  VectorXs Lx;    //!< Jacobian of the cost
+  VectorXs Lu;    //!< Jacobian of the cost
+  MatrixXs Lxx;   //!< Hessian of the cost
+  MatrixXs Lxu;   //!< Hessian of the cost
+  MatrixXs Luu;   //!< Hessian of the cost
+  MatrixXs Gx;    //!< Jacobian of the constraint
+  MatrixXs Gu;    //!< Jacobian of the constraint
 };
 
 }  // namespace crocoddyl

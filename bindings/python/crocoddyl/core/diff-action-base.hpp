@@ -19,8 +19,9 @@ namespace python {
 class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstract,
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
-  DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, int nu, int nr = 1)
-      : DifferentialActionModelAbstract(state, nu, nr), bp::wrapper<DifferentialActionModelAbstract>() {}
+  DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
+                                       const std::size_t& nr = 1, const std::size_t& ng = 0)
+      : DifferentialActionModelAbstract(state, nu, nr, ng), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
