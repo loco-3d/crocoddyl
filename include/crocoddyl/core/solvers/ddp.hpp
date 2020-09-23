@@ -189,7 +189,7 @@ class SolverDDP : public SolverAbstract {
    * @brief Return the threshold for accepting a gap as non-zero
    */
   const double& get_th_gaptol() const;
-  
+
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
    */
@@ -279,7 +279,7 @@ class SolverDDP : public SolverAbstract {
    * @brief Modify the threshold for accepting a gap as non-zero
    */
   void set_th_gaptol(const double& th_gaptol);
-  
+
  protected:
   double regfactor_;  //!< Regularization factor used to decrease / increase it
   double regmin_;     //!< Minimum allowed regularization value

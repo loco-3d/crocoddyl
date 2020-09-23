@@ -17,6 +17,8 @@ namespace python {
 void exposeCostControl() {
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
       "CostModelControl",
+      "This cost function defines a residual vector as r = u - uref, with u and uref as the current and reference "
+      "control, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "activation", "uref"),
           "Initialize the control cost model.\n\n"
@@ -26,33 +28,33 @@ void exposeCostControl() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the control cost model.\n\n"
-          "For this case the default uref is the zeros state, i.e. np.zero(nu), where nu is equals to activation.nr.\n"
+          "The default reference control is obtained from np.zero(nu), with nu obtained from activation.nr.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the control cost model.\n\n"
-          "For this case the default uref is the zeros state, i.e. np.zero(nu).\n"
+          "The default reference control is obtained from np.zero(nu).\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd>(
           bp::args("self", "state", "uref"),
           "Initialize the control cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(uref.size()).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param uref: reference control"))
       .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the control cost model.\n\n"
-          "For this case the default uref is the zeros vector, i.e. np.zero(model.nv), and\n"
-          "activation is quadratic, i.e. crocoddyl.ActivationModelQuad(model.nv), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2). The default reference "
+          "control is obtained from np.zero(state.nv).\n"
           ":param state: state of the multibody system"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
           bp::args("self", "state", "nu"),
           "Initialize the control cost model.\n\n"
-          "For this case the default uref is the zeros vector and the default activation\n"
-          "model is quadratic, i.e. crocoddyl.ActivationModelQuad(nu)\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2). The default reference "
+          "control is obtained from np.zero(nu)\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector"))
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,

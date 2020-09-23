@@ -17,8 +17,10 @@ namespace python {
 void exposeCostState() {
   bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
       "CostModelState",
+      "This cost function defines a residual vector as r = x - xref, with x and xref as the current and reference "
+      "state, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd, int>(
-          bp::args("self", "state", "activation", "xref", " nu=model.nv"),
+          bp::args("self", "state", "activation", "xref", "nu"),
           "Initialize the state cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
@@ -27,49 +29,49 @@ void exposeCostState() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd, int>(
           bp::args("self", "state", "xref", "nu"),
           "Initialize the state cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference state\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "activation", "xref"),
           "Initialize the state cost model.\n\n"
-          "For this case the default nu values is model.nv.\n"
+          "The default nu value is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param xref: reference state"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::VectorXd>(
           bp::args("self", "state", "xref"),
           "Initialize the state cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx),\n"
-          "and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference state"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the state cost model.\n\n"
-          "For this case the default xref is the zeros state, i.e. state.zero().\n"
+          "The default reference state is obtained from state.zero().\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
           bp::args("self", "state", "nu"),
           "Initialize the state cost model.\n\n"
-          "For this case the default xref is the zeros state, i.e. state.zero(), and the default activation\n"
-          "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx)\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2). The default reference state "
+          "is obtained from state.zero().\n"
           ":param state: state of the multibody system\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the state cost model.\n\n"
-          "For this case the default xref is the zeros state, i.e. state.zero(), and nu is equals to model.nv.\n"
+          "The default reference state is obtained from state.zero(), and nu from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the state cost model.\n\n"
-          "For this case the default xref is the zeros state, i.e. state.zero(), the default activation\n"
-          "model is quadratic, i.e. crocoddyl.ActivationModelQuad(state.ndx), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2). The default reference state "
+          "is obtained from state.zero(), and nu from state.nv.\n"
           ":param state: state of the multibody system"))
       .def<void (CostModelState::*)(
           const boost::shared_ptr<CostDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,

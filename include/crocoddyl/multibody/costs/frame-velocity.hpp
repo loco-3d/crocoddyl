@@ -18,6 +18,23 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Frame velocity cost
+ *
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{v}-\mathbf{v}^*\f$, where
+ * \f$\mathbf{v},\mathbf{v}^*\in~T_{\mathbf{p}}~\mathbb{SE(3)}\f$ are the current and reference frame velocities,
+ * respectively. Note that the tangent vector is described by the frame placement \f$\mathbf{p}\f$, and the dimension
+ * of the residual vector is 6.
+ *
+ * Both cost and residual derivatives are computed analytically.
+ * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
+ * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
+ *
+ * As described in `CostModelAbstractTpl`, the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
+ *
+ * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
  public:
@@ -36,26 +53,90 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix3s Matrix3s;
 
+  /**
+   * @brief Initialize the frame velocity cost model
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] Fref        Reference frame velocity
+   * @param[in] nu          Dimension of the control vector
+   */
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref,
                             const std::size_t& nu);
+
+  /**
+   * @brief Initialize the frame velocity cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] Fref        Reference frame velocity
+   */
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref);
-  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref, const std::size_t& nu);
-  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& vref);
+
+  /**
+   * @brief Initialize the frame velocity cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] Fref   Reference frame velocity
+   * @param[in] nu     Dimension of the control vector
+   */
+  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& Fref, const std::size_t& nu);
+
+  /**
+   * @brief Initialize the frame velocity cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] Fref   Reference frame velocity
+   */
+  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& Fref);
   virtual ~CostModelFrameVelocityTpl();
 
+  /**
+   * @brief Compute the frame velocity cost
+   *
+   * @param[in] data  Frame velocity cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the frame velocity cost
+   *
+   * @param[in] data  Frame velocity cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the frame velocity cost data
+   */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in));
   DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const);
 
  protected:
+  /**
+   * @brief Modify the frame velocity reference
+   */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
+  /**
+   * @brief Return the frame velocity reference
+   */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
@@ -64,7 +145,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FrameMotion vref_;
+  FrameMotion vref_;  //!< Reference frame velocity
 };
 
 template <typename _Scalar>

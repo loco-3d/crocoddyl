@@ -17,6 +17,8 @@ namespace python {
 void exposeCostContactImpulse() {
   bp::class_<CostModelContactImpulse, bp::bases<CostModelAbstract> >(
       "CostModelContactImpulse",
+      "This cost function defines a residual vector as r = f-fref, where f,fref describe the current and reference "
+      "the spatial impulses, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameForce>(
           bp::args("self", "state", "activation", "fref"),
           "Initialize the contact impulse cost model.\n\n"
@@ -27,8 +29,7 @@ void exposeCostContactImpulse() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce, int>(
           bp::args("self", "state", "fref", "nr"),
           "Initialize the contact impulse cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(nr).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           "Note that the nr is lower / equals than 6.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference spatial contact impulse in the contact coordinates\n"
@@ -36,8 +37,7 @@ void exposeCostContactImpulse() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameForce>(
           bp::args("self", "state", "fref"),
           "Initialize the contact impulse cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference spatial contact impulse in the contact coordinates"))
       .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,

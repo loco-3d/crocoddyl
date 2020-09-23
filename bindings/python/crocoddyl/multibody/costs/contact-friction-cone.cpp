@@ -16,6 +16,8 @@ namespace python {
 void exposeCostContactFrictionCone() {
   bp::class_<CostModelContactFrictionCone, bp::bases<CostModelAbstract> >(
       "CostModelContactFrictionCone",
+      "This cost function defines a residual vector as r = A*f, where A, f describe the linearized friction cone and "
+      "the spatial force, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone, int>(
           bp::args("self", "state", "activation", "fref", "nu"),
           "Initialize the contact friction cone cost model.\n\n"
@@ -26,23 +28,22 @@ void exposeCostContactFrictionCone() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone>(
           bp::args("self", "state", "activation", "fref"),
           "Initialize the contact friction cone cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu value is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param fref: frame friction cone"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, int>(
           bp::args("self", "state", "fref", "nu"),
           "Initialize the contact friction cone cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param fref: frame friction cone\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone>(
           bp::args("self", "state", "fref"),
           "Initialize the contact friction cone cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param fref: frame friction cone"))
       .def<void (CostModelContactFrictionCone::*)(const boost::shared_ptr<CostDataAbstract>&,
