@@ -28,6 +28,7 @@ void exposeIntegratedActionEuler();
 void exposeIntegratedActionRK4();
 void exposeCostAbstract();
 void exposeCostSum();
+void exposeCostControl();
 void exposeActionNumDiff();
 void exposeDifferentialActionNumDiff();
 void exposeActivationNumDiff();

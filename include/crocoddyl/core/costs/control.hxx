@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
 
 namespace crocoddyl {
 template <typename Scalar>

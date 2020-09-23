@@ -26,6 +26,7 @@ void exposeCore() {
   exposeIntegratedActionRK4();
   exposeCostAbstract();
   exposeCostSum();
+  exposeCostControl();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();

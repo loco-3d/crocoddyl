@@ -6,10 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
-#define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#ifndef CROCODDYL_CORE_COSTS_CONTROL_HPP_
+#define CROCODDYL_CORE_COSTS_CONTROL_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
@@ -164,6 +164,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/costs/control.hxx"
+#include "crocoddyl/core/costs/control.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
+#endif  // CROCODDYL_CORE_COSTS_CONTROL_HPP_

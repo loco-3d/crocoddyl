@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
+#include "python/crocoddyl/core/core.hpp"
+#include "crocoddyl/core/costs/control.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {

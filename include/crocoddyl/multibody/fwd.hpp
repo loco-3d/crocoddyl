@@ -137,9 +137,6 @@ template <typename Scalar>
 struct CostDataContactImpulseTpl;
 
 template <typename Scalar>
-class CostModelControlTpl;
-
-template <typename Scalar>
 class CostModelFrameRotationTpl;
 template <typename Scalar>
 struct CostDataFrameRotationTpl;
@@ -301,7 +298,6 @@ typedef CostModelContactForceTpl<double> CostModelContactForce;
 typedef CostDataContactForceTpl<double> CostDataContactForce;
 typedef CostModelContactImpulseTpl<double> CostModelContactImpulse;
 typedef CostDataContactImpulseTpl<double> CostDataContactImpulse;
-typedef CostModelControlTpl<double> CostModelControl;
 typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;
 typedef CostModelImpulseFrictionConeTpl<double> CostModelImpulseFrictionCone;
 typedef CostDataImpulseFrictionConeTpl<double> CostDataImpulseFrictionCone;
