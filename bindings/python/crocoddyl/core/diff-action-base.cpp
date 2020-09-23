@@ -31,15 +31,17 @@ void exposeDifferentialActionAbstract() {
       "A differential action model is the time-continuous version of an action model. Each\n"
       "node, in our optimal control problem, is described through an action model. Every\n"
       "time that we want describe a problem, we need to provide ways of computing the\n"
-      "dynamics, cost functions and their derivatives. These computations are mainly carrying\n"
-      "on inside calc() and calcDiff(), respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
-          bp::args("self", "state", "nu", "nr"),
+      "dynamics, cost functions, constraints and their derivatives. These computations are\n"
+      "mainly carrying on inside calc() and calcDiff(), respectively.",
+      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, bp::optional<std::size_t, std::size_t, std::size_t> >(
+          bp::args("self", "state", "nu", "nr", "ng", "nh"),
           "Initialize the differential action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state\n"
           ":param nu: dimension of control vector\n"
-          ":param nr: dimension of cost-residual vector (default 1)"))
+          ":param nr: dimension of cost-residual vector (default 1)\n"
+          ":param ng: number of inequality constraints (default 0)\n"
+          ":param nh: number of equality constraints (default 0)"))
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the system acceleration and cost value.\n\n"
            ":param data: differential action data\n"
@@ -97,6 +99,14 @@ void exposeDifferentialActionAbstract() {
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
+      .add_property("ng",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_ng,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "number of inequality constraints")
+      .add_property("nh",
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nh,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "number of equality constraints")
       .add_property("state",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -149,7 +159,19 @@ void exposeDifferentialActionAbstract() {
       .add_property("Lxu", bp::make_getter(&DifferentialActionDataAbstract::Lxu, bp::return_internal_reference<>()),
                     bp::make_setter(&DifferentialActionDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&DifferentialActionDataAbstract::Luu, bp::return_internal_reference<>()),
-                    bp::make_setter(&DifferentialActionDataAbstract::Luu), "Hessian of the cost");
+                    bp::make_setter(&DifferentialActionDataAbstract::Luu), "Hessian of the cost")
+      .add_property("g", bp::make_getter(&DifferentialActionDataAbstract::g, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::g), "Inequality constraint values")
+      .add_property("Gx", bp::make_getter(&DifferentialActionDataAbstract::Gx, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::Gx), "Jacobian of the inequality constraint")
+      .add_property("Gu", bp::make_getter(&DifferentialActionDataAbstract::Gu, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::Gu), "Jacobian of the inequality constraint")
+      .add_property("h", bp::make_getter(&DifferentialActionDataAbstract::h, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::h), "Equality constraint values")
+      .add_property("Hx", bp::make_getter(&DifferentialActionDataAbstract::Hx, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::Hx), "Jacobian of the equality constraint")
+      .add_property("Hu", bp::make_getter(&DifferentialActionDataAbstract::Hu, bp::return_internal_reference<>()),
+                    bp::make_setter(&DifferentialActionDataAbstract::Hu), "Jacobian of the equality constraint");
 }
 
 }  // namespace python
