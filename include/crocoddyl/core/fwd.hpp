@@ -75,6 +75,8 @@ template <typename Scalar>
 struct ActivationDataSmoothAbsTpl;
 
 template <typename Scalar>
+struct ActivationThresholdTpl;
+template <typename Scalar>
 class ActivationModelCollisionTpl;
 template <typename Scalar>
 struct ActivationDataCollisionTpl;
@@ -195,6 +197,7 @@ typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
 typedef ActivationModelSmoothAbsTpl<double> ActivationModelSmoothAbs;
 typedef ActivationDataSmoothAbsTpl<double> ActivationDataSmoothAbs;
+typedef ActivationThresholdTpl<double> ActivationThreshold;
 typedef ActivationModelCollisionTpl<double> ActivationModelCollision;
 typedef ActivationDataCollisionTpl<double> ActivationDataCollision;
 typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;
