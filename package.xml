@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>crocoddyl</name>
-  <version>1.4.0</version>
+  <version>1.5.0</version>
   <description>Crocoddyl optimal control library</description>
   <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm.
   Please check the README.md at the repository URL for additional detail. -->
