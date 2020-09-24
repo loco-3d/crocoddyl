@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"

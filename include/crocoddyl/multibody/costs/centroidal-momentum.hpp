@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
@@ -144,7 +145,8 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  Vector6s href_;  //!< Reference centroidal momentum
+  Vector6s href_;                                                         //!< Reference centroidal momentum
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>

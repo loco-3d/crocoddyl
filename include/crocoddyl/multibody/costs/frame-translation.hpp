@@ -11,7 +11,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -146,7 +147,8 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FrameTranslation xref_;  //!< Reference frame translation
+  FrameTranslation xref_;                                                 //!< Reference frame translation
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>

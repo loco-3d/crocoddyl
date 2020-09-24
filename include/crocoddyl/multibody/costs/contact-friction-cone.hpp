@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_FRICTION_CONE_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
@@ -170,6 +171,7 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
@@ -189,7 +191,8 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
 
     // Avoids data casting at runtime
     FrameFrictionCone fref = model->template get_reference<FrameFrictionCone>();
-    std::string frame_name = model->get_state()->get_pinocchio()->frames[fref.id].name;
+    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
+    std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
     bool found_contact = false;
     for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
          it != d->contacts->contacts.end(); ++it) {

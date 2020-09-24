@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/core/cost-base.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -26,31 +26,30 @@ void exposeCostAbstract() {
       "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
       "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, int>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param activation: Activation model\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
-          "The default nu value is obtained from state.nv.\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param activation: Activation model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, int, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, int, int>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param nr: dimension of residual vector\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, int>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and the default nu value is "
           "obtained from state.nv.\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param nr: dimension of cost vector"))
       .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
@@ -79,7 +78,7 @@ void exposeCostAbstract() {
       .add_property(
           "state",
           bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
-          "state of the multibody system")
+          "state description")
       .add_property(
           "activation",
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),

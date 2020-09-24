@@ -6,14 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_COST_BASE_HPP_
-#define CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#ifndef CROCODDYL_CORE_COST_BASE_HPP_
+#define CROCODDYL_CORE_COST_BASE_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
@@ -50,7 +50,7 @@ class CostModelAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
@@ -64,7 +64,7 @@ class CostModelAbstractTpl {
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
                        const std::size_t& nu);
 
   /**
@@ -75,7 +75,7 @@ class CostModelAbstractTpl {
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -86,7 +86,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr, const std::size_t& nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr, const std::size_t& nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -98,7 +98,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr);
   virtual ~CostModelAbstractTpl();
 
   /**
@@ -152,7 +152,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const boost::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the activation model
@@ -187,7 +187,7 @@ class CostModelAbstractTpl {
    */
   virtual void get_referenceImpl(const std::type_info&, void*) const;
 
-  boost::shared_ptr<StateMultibody> state_;                //!< State description
+  boost::shared_ptr<StateAbstract> state_;                 //!< State description
   boost::shared_ptr<ActivationModelAbstract> activation_;  //!< Activation model
   std::size_t nu_;                                         //!< Control dimension
   VectorXs unone_;                                         //!< No control vector
@@ -246,6 +246,6 @@ struct CostDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/cost-base.hxx"
+#include "crocoddyl/core/cost-base.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COST_BASE_HPP_
+#endif  // CROCODDYL_CORE_COST_BASE_HPP_

@@ -16,6 +16,7 @@
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
@@ -27,7 +28,7 @@
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/core/costs/control.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 

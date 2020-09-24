@@ -19,7 +19,7 @@ template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameMotion& vref, const std::size_t& nu)
-    : Base(state, activation, nu), vref_(vref) {
+    : Base(state, activation, nu), vref_(vref), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -30,7 +30,7 @@ template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameMotion& vref)
-    : Base(state, activation), vref_(vref) {
+    : Base(state, activation), vref_(vref), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -40,12 +40,12 @@ CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<S
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameMotion& vref, const std::size_t& nu)
-    : Base(state, 6, nu), vref_(vref) {}
+    : Base(state, 6, nu), vref_(vref), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameMotion& vref)
-    : Base(state, 6), vref_(vref) {}
+    : Base(state, 6), vref_(vref), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::~CostModelFrameVelocityTpl() {}
@@ -56,8 +56,7 @@ void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbs
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
-  data->r = (pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, vref_.id, vref_.reference) -
-             vref_.motion)
+  data->r = (pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, vref_.id, vref_.reference) - vref_.motion)
                 .toVector();
 
   // Compute the cost
@@ -72,7 +71,7 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
   // Get the partial derivatives of the local frame velocity
   Data* d = static_cast<Data*>(data.get());
   const std::size_t& nv = state_->get_nv();
-  pinocchio::getFrameVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, vref_.id, vref_.reference,
+  pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio, vref_.id, vref_.reference,
                                          data->Rx.leftCols(nv), data->Rx.rightCols(nv));
 
   // Compute the derivatives of the frame velocity

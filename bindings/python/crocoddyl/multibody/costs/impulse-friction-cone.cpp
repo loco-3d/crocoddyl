@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/impulse-friction-cone.hpp"
 
 namespace crocoddyl {

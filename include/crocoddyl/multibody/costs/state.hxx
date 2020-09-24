@@ -6,13 +6,13 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref, const std::size_t& nu)
     : Base(state, activation, nu), xref_(xref) {
@@ -24,10 +24,15 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref)
     : Base(state, activation), xref_(xref) {
@@ -39,11 +44,16 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref,
-                                             const std::size_t& nu)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                             const VectorXs& xref, const std::size_t& nu)
     : Base(state, state->get_ndx(), nu), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -53,10 +63,16 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                             const VectorXs& xref)
     : Base(state, state->get_ndx()), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -66,10 +82,15 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const std::size_t& nu)
     : Base(state, activation, nu), xref_(state->zero()) {
@@ -81,10 +102,16 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                             const std::size_t& nu)
     : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -94,10 +121,15 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state,
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation)
     : Base(state, activation), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
@@ -108,10 +140,15 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> state)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, state->get_ndx()), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -120,6 +157,11 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<StateMultibody> s
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
+  }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
   }
 }
 
@@ -150,22 +192,23 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
   activation_->calcDiff(data->activation, data->r);
 
-  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& pin_model = state_->get_pinocchio();
-  typedef Eigen::Block<MatrixXs> MatrixBlock;
-  for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model->njoints; ++i) {
-    const MatrixBlock& RxBlock =
-        data->Rx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]);
-
-    data->Lx.segment(pin_model->idx_vs[i], pin_model->nvs[i]).noalias() =
-        RxBlock.transpose() * data->activation->Ar.segment(pin_model->idx_vs[i], pin_model->nvs[i]);
-
-    data->Lxx.block(pin_model->idx_vs[i], pin_model->idx_vs[i], pin_model->nvs[i], pin_model->nvs[i]).noalias() =
-        RxBlock.transpose() *
-        data->activation->Arr.diagonal().segment(pin_model->idx_vs[i], pin_model->nvs[i]).asDiagonal() * RxBlock;
+  if (pin_model_) {
+    typedef Eigen::Block<MatrixXs> MatrixBlock;
+    for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model_->njoints; ++i) {
+      const MatrixBlock& RxBlock =
+          data->Rx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i]);
+      data->Lx.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]).noalias() =
+          RxBlock.transpose() * data->activation->Ar.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]);
+      data->Lxx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i]).noalias() =
+          RxBlock.transpose() *
+          data->activation->Arr.diagonal().segment(pin_model_->idx_vs[i], pin_model_->nvs[i]).asDiagonal() * RxBlock;
+    }
+    data->Lx.tail(state_->get_nv()) = data->activation->Ar.tail(state_->get_nv());
+    data->Lxx.diagonal().tail(state_->get_nv()) = data->activation->Arr.diagonal().tail(state_->get_nv());
+  } else {
+    data->Lx = data->activation->Ar;
+    data->Lxx.diagonal() = data->activation->Arr.diagonal();
   }
-  data->Lx.tail(state_->get_nv()) = data->activation->Ar.tail(state_->get_nv());
-
-  data->Lxx.diagonal().tail(state_->get_nv()) = data->activation->Arr.diagonal().tail(state_->get_nv());
 }
 
 template <typename Scalar>
