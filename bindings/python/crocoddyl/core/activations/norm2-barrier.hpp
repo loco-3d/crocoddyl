@@ -23,30 +23,30 @@ void exposeActivationCollision() {
                                    ":param threshold: threshold of activation (positive, default: 0.3)"))
       .add_property("threshold", &ActivationThreshold::threshold, "threshold");
   
-  bp::class_<ActivationModelCollision, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelCollision",
-      "Collision pair activation model.\n\n"
-      "This model activates quadratically if the distance (norm of residual vector) between the"
-      " objects is inferior to a tunable threshold. In extenso, the result is 0 if distance > threshold" 
-      " and 0.5 *(||r|| - threshold)^2 if distance < threshold",
+  bp::class_<ActivationModelNorm2Barrier, bp::bases<ActivationModelAbstract> >(
+      "ActivationModelNorm2Barrier",
+      "Norm2 activation model, with barrier.\n\n"
+      "This model activates quadratically if the norm2 of the residual vector r"
+      " is inferior to a tunable threshold. In extenso, the result is 0 if norm > threshold" 
+      " and 0.5 *(||r|| - threshold)^2 if norm < threshold",
       bp::init<int, ActivationThreshold>(bp::args("self", "nr", "threshold"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector\n"
                     ":param threshold: activation threshold"))
-      .def("calc", &ActivationModelCollision::calc, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelNorm2Barrier::calc, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelCollision::calcDiff, bp::args("self", "data", "r"),
+      .def("calcDiff", &ActivationModelNorm2Barrier::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of the collision function.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelCollision::createData, bp::args("self"),
+      .def("createData", &ActivationModelNorm2Barrier::createData, bp::args("self"),
            "Create the collision activation data.\n\n")
       .add_property("threshold",
-                    bp::make_function(&ActivationModelCollision::get_threshold,
+                    bp::make_function(&ActivationModelNorm2Barrier::get_threshold,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&ActivationModelCollision::set_threshold),
+                    bp::make_function(&ActivationModelNorm2Barrier::set_threshold),
                     "threshold");
 }
 

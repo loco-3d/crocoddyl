@@ -36,7 +36,7 @@ struct ActivationThresholdTpl {
 };
 
 template <typename _Scalar>
-class ActivationModelCollisionTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -51,9 +51,9 @@ class ActivationModelCollisionTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   // TODO: Magic number, check with Teguh/Nicolas/Crocoddyl Team 
-  explicit ActivationModelCollisionTpl(const std::size_t nr, const ActivationThreshold threshold) : 
+  explicit ActivationModelNorm2BarrierTpl(const std::size_t nr, const ActivationThreshold threshold) : 
     Base(nr), threshold_(threshold) {};
-  virtual ~ActivationModelCollisionTpl(){};
+  virtual ~ActivationModelNorm2BarrierTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
