@@ -31,26 +31,49 @@ namespace crocoddyl {
  * function, i.e.
  * \f[
  * \begin{aligned}
- * &\delta\mathbf{x}^+ = \mathbf{f_{x}}\delta\mathbf{x}+\mathbf{f_{u}}\delta\mathbf{u}, &\textrm{(dynamics)}\\
- * &l(\delta\mathbf{x},\delta\mathbf{u}) = \begin{bmatrix}1 \\ \delta\mathbf{x} \\ \delta\mathbf{u}\end{bmatrix}^T
- * \begin{bmatrix}0 & \mathbf{l_x}^T & \mathbf{l_u}^T \\ \mathbf{l_x} & \mathbf{l_{xx}} & \mathbf{l_{ux}}^T \\
- * \mathbf{l_u} & \mathbf{l_{ux}} & \mathbf{l_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{x} \\
- * \delta\mathbf{u}\end{bmatrix}, &\textrm{(cost)}
+ * &\mathbf{x}_{k+1} = \mathbf{f}(\mathbf{x}_k,\mathbf{u}_k), &\textrm{(dynamics)}\\
+ * &l(\mathbf{x}_k,\mathbf{u}_k) = a(\mathbf{r}(\mathbf{x}_k,\mathbf{u}_k)), &\textrm{(cost)}\\
+ * &\mathbf{g}(\mathbf{x}_k,\mathbf{u}_k)<\mathbf{0}, &\textrm{(inequality constraints)}\\
+ * &\mathbf{h}(\mathbf{x}_k,\mathbf{u}_k)=\mathbf{0}, &\textrm{(equality constraints)}
  * \end{aligned}
  * \f]
- * where the state \f$\mathbf{x}\in\mathcal{X}\f$ lies in the state manifold
- * described with a `nx`-tuple, its rate \f$\delta\mathbf{x}\in T_{\mathbf{x}}\mathcal{X}\f$ is a tangent vector to
- * this manifold with `ndx` dimension, and \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is the input commands. Note that the we
- * could describe a linear or linearized action system, where the cost has a quadratic form.
+ * where
+ *  - the state \f$\mathbf{x}\in\mathcal{X}\f$ lies in the state manifold described with a `nx`-tuple and its tangent
+ * vector is defined as \f$\delta\mathbf{x}\in T_{\mathbf{x}}\mathcal{X}\f$ (vector with `ndx` dimension),
+ *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean vector
+ *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
+ * `ActivationModelAbstractTpl`),
+ *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
+ * equality vector functions, respectively.
  *
- * The main computations are carrying out in `calc` and `calcDiff`. `calc` computes the next state and cost and
- * `calcDiff` computes the derivatives of the dynamics and cost function. Concretely speaking, `calcDiff` builds a
- * linear-quadratic approximation of an action model, where the dynamics and cost functions have linear and
- * quadratic forms, respectively. \f$\mathbf{f_x}\in\mathbb{R}^{nv\times ndx}\f$,
- * \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nu}\f$ are the Jacobians of the dynamics;
- * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
- * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectively.
+ * The computation of these equations are carrying out inside `calc()` function. In short, this function computes the
+ * system acceleration, cost and constraints values (also called constraints violations). This procedure is equivalent
+ * to running a forward pass of the action model.
+ *
+ * However, during numerical optimization, we also need to run backward passes of the action model. These calculations
+ * are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the action model,
+ * i.e.: \f[ \begin{aligned}
+ * &\delta\mathbf{x}_{k+1} = \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k, &\textrm{(dynamics)}\\
+ * &l(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
+ * \delta\mathbf{u}_k\end{bmatrix}^T
+ * \begin{bmatrix}0 & \mathbf{l_x}^T & \mathbf{l_u}^T \\ \mathbf{l_x} & \mathbf{l_{xx}} & \mathbf{l_{ux}}^T \\
+ * \mathbf{l_u} & \mathbf{l_{ux}} & \mathbf{l_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
+ * \delta\mathbf{u}_k\end{bmatrix}, &\textrm{(cost)}\\
+ * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)<\mathbf{0}, &\textrm{(inequality constraint)}\\
+ * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)=\mathbf{0}, &\textrm{(equality constraint)}
+ * \end{aligned}
+ * \f]
+ * where
+ *  - \f$\mathbf{f_x}\in\mathbb{R}^{ndx\times ndx}\f$ and \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ are the
+ * Jacobians of the dynamics,
+ *  - \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$ and \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the cost
+ * function,
+ *  - \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
+ * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the cost function,
+ *  - \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$ and \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the
+ * Jacobians of the inequality constraints, and
+ *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the
+ * Jacobians of the equality constraints.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -71,10 +94,11 @@ class ActionModelAbstractTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
-   * @param[in] ng     Number of constraints
+   * @param[in] ng     Number of inequality constraints
+   * @param[in] nh     Number of equality constraints
    */
   ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0,
-                         const std::size_t& ng = 0);
+                         const std::size_t& ng = 0, const std::size_t& nh = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -170,9 +194,14 @@ class ActionModelAbstractTpl {
   const std::size_t& get_nr() const;
 
   /**
-   * @brief Return the number of constraints
+   * @brief Return the number of inequality constraints
    */
   const std::size_t& get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  const std::size_t& get_nh() const;
 
   /**
    * @brief Return the state
@@ -207,7 +236,8 @@ class ActionModelAbstractTpl {
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
-  std::size_t ng_;                          //!< Number of constraints
+  std::size_t ng_;                          //!< Number of inequality constraints
+  std::size_t nh_;                          //!< Number of equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs u_lb_;                           //!< Lower control limits
@@ -241,8 +271,12 @@ struct ActionDataAbstractTpl {
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
+        g(model->get_ng()),
         Gx(model->get_ng(), model->get_state()->get_ndx()),
-        Gu(model->get_ng(), model->get_nu()) {
+        Gu(model->get_ng(), model->get_nu()),
+        h(model->get_nh()),
+        Hx(model->get_nh(), model->get_state()->get_ndx()),
+        Hu(model->get_nh(), model->get_nu()) {
     xnext.setZero();
     Fx.setZero();
     Fu.setZero();
@@ -252,8 +286,12 @@ struct ActionDataAbstractTpl {
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
+    g.setZero();
     Gx.setZero();
     Gu.setZero();
+    h.setZero();
+    Hx.setZero();
+    Hu.setZero();
   }
   virtual ~ActionDataAbstractTpl() {}
 
@@ -267,8 +305,12 @@ struct ActionDataAbstractTpl {
   MatrixXs Lxx;    //!< Hessian of the cost
   MatrixXs Lxu;    //!< Hessian of the cost
   MatrixXs Luu;    //!< Hessian of the cost
-  MatrixXs Gx;     //!< Jacobian of the constraint
-  MatrixXs Gu;     //!< Jacobian of the constraint
+  VectorXs g;      //!< Inequality constraint values
+  MatrixXs Gx;     //!< Jacobian of the inequality constraint
+  MatrixXs Gu;     //!< Jacobian of the inequality constraint
+  VectorXs h;      //!< Equality constraint values
+  MatrixXs Hx;     //!< Jacobian of the equality constraint
+  MatrixXs Hu;     //!< Jacobian of the equality constraint
 };
 
 }  // namespace crocoddyl

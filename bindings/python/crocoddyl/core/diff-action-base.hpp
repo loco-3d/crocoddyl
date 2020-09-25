@@ -20,8 +20,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                                              public bp::wrapper<DifferentialActionModelAbstract> {
  public:
   DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& nu,
-                                       const std::size_t& nr = 1, const std::size_t& ng = 0)
-      : DifferentialActionModelAbstract(state, nu, nr, ng), bp::wrapper<DifferentialActionModelAbstract>() {}
+                                       const std::size_t& nr = 1, const std::size_t& ng = 0, const std::size_t& nh = 0)
+      : DifferentialActionModelAbstract(state, nu, nr, ng, nh), bp::wrapper<DifferentialActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {

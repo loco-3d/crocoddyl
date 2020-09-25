@@ -13,10 +13,11 @@ namespace crocoddyl {
 template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state,
                                                        const std::size_t& nu, const std::size_t& nr,
-                                                       const std::size_t& ng)
+                                                       const std::size_t& ng, const std::size_t& nh)
     : nu_(nu),
       nr_(nr),
       ng_(ng),
+      nh_(nh),
       state_(state),
       unone_(MathBase::VectorXs::Zero(nu)),
       u_lb_(MathBase::VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
@@ -105,6 +106,11 @@ const std::size_t& ActionModelAbstractTpl<Scalar>::get_nr() const {
 template <typename Scalar>
 const std::size_t& ActionModelAbstractTpl<Scalar>::get_ng() const {
   return ng_;
+}
+
+template <typename Scalar>
+const std::size_t& ActionModelAbstractTpl<Scalar>::get_nh() const {
+  return nh_;
 }
 
 template <typename Scalar>
