@@ -14,14 +14,6 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationCollision() {
-  bp::class_<ActivationThreshold>("ActivationThreshold",
-                               "Activation threshold.\n\n"
-                               "The threshold is the barrier of activation.",
-                               bp::init<bp::optional<double> >(
-                                   bp::args("self", "threshold"),
-                                   "Initialize the activation threshold.\n\n"
-                                   ":param threshold: threshold of activation (positive, default: 0.3)"))
-      .add_property("threshold", &ActivationThreshold::threshold, "threshold");
   
   bp::class_<ActivationModelNorm2Barrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModelNorm2Barrier",

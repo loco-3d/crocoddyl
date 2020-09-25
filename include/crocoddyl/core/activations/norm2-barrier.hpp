@@ -18,24 +18,6 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-struct ActivationThresholdTpl {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-
-  ActivationThresholdTpl (const Scalar& threshold_ = (Scalar)0.3)
-      : threshold(threshold_) {
-    if (threshold < Scalar(0)) {
-      throw_pretty("Invalid argument: "
-                   << "The threshold should be positive or 0");
-    }
-  }
-  ActivationThresholdTpl(const ActivationThresholdTpl& bounds) : threshold(bounds.threshold) {}
-
-  Scalar threshold;
-};
-
-template <typename _Scalar>
 class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -45,13 +27,12 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef ActivationDataCollisionTpl<Scalar> Data;
-  typedef ActivationThresholdTpl<Scalar> ActivationThreshold;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   // TODO: Magic number, check with Teguh/Nicolas/Crocoddyl Team 
-  explicit ActivationModelNorm2BarrierTpl(const std::size_t nr, const ActivationThreshold threshold) : 
+  explicit ActivationModelNorm2BarrierTpl(const std::size_t nr, const Scalar& threshold = Scalar(0.3) ) : 
     Base(nr), threshold_(threshold) {};
   virtual ~ActivationModelNorm2BarrierTpl(){};
 
@@ -63,8 +44,8 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     distance_ = r.norm();
-    if(distance_ < threshold_.threshold) {
-      data->a_value = 0.5 * std::pow(distance_ - threshold_.threshold, 2);
+    if(distance_ < threshold_) {
+      data->a_value = 0.5 * std::pow(distance_ - threshold_, 2);
     }
     else {
       data->a_value = 0.0;
@@ -78,10 +59,10 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     
-    if(distance_ < threshold_.threshold) {
-      data->Ar = (distance_ - threshold_.threshold) / distance_ * r;
-      data->Arr.diagonal() = (MatrixXs::Identity(nr_, nr_) * (distance_ - threshold_.threshold) / distance_ + 
-                              threshold_.threshold * r * r.transpose() / std::pow(distance_, 3)).diagonal();
+    if(distance_ < threshold_) {
+      data->Ar = (distance_ - threshold_) / distance_ * r;
+      data->Arr.diagonal() = (MatrixXs::Identity(nr_, nr_) * (distance_ - threshold_) / distance_ + 
+                              threshold_ * r * r.transpose() / std::pow(distance_, 3)).diagonal();
     }
     else {
       data->Ar.setZero();
@@ -93,12 +74,12 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
   
-  const ActivationThreshold& get_threshold() const { return threshold_; };
-  void set_threshold(const ActivationThreshold& threshold) { threshold_ = threshold; };
+  const Scalar& get_threshold() const { return threshold_; };
+  void set_threshold(const Scalar& threshold) { threshold_ = threshold; };
 
  protected:
   using Base::nr_;
-  ActivationThreshold threshold_;
+  Scalar threshold_;
   Scalar distance_;
 };
 
