@@ -29,7 +29,7 @@ CostModelPairCollisionsTpl<Scalar>::CostModelPairCollisionsTpl(
                                                          boost::shared_ptr<GeometryModel> geom_model,
                                                          const pinocchio::PairIndex& pair_id,
                                                          const pinocchio::JointIndex& joint_id)
-    : Base(state, activation, nu), geom_model_(geom_model), pair_id_(pair_id), joint_id_(joint_id), p1_{}
+    : Base(state, activation, nu), geom_model_(geom_model), pair_id_(pair_id), joint_id_(joint_id)
 {}
 
 template <typename Scalar>
@@ -48,13 +48,9 @@ void CostModelPairCollisionsTpl<Scalar>::calc(const boost::shared_ptr<CostDataAb
   // We need to find a way to only recompute what is needed
   pinocchio::computeDistances(pin_model, *d->pinocchio, *geom_model_.get(), d->geom_data, q);
 
-  const auto& distance_result = d->geom_data.distanceResults[pair_id_];
-
-  p1_ = distance_result.nearest_points[0]; 
-  auto p2 = distance_result.nearest_points[1];
-        
   //calculate residual
-  data->r = p1_ - p2;
+  data->r = d->geom_data.distanceResults[pair_id_].nearest_points[0] -
+    d->geom_data.distanceResults[pair_id_].nearest_points[1];
 
   activation_->calc(d->activation, d->r);
   d->cost = d->activation->a_value;
@@ -79,7 +75,7 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   const pinocchio::SE3Tpl<Scalar>& oMi = d->pinocchio->oMi[joint_id_];
 
   // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
-  auto p1_local_world = p1_ - oMi.translation();
+  auto p1_local_world = d->geom_data.distanceResults[pair_id_].nearest_points[0] - oMi.translation();
   typename std::remove_reference_t<decltype(*d->pinocchio)>::Matrix6x J(6, pin_model.nv); 
   J.setZero();
   pinocchio::getJointJacobian(pin_model, *d->pinocchio, joint_id_, pinocchio::LOCAL_WORLD_ALIGNED, J);
