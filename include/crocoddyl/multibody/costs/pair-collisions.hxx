@@ -83,7 +83,7 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
         
   // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
   auto p1_local_world = p1_ - oMi.translation();
-  typename std::remove_reference_t<decltype(pin_data)>::Matrix6x J(6, pin_model.nv); 
+  typename boost::remove_reference_t<decltype(pin_data)>::Matrix6x J(6, pin_model.nv); 
   J.setZero();
   pinocchio::getJointJacobian(pin_model, pin_data, joint_id_, pinocchio::LOCAL_WORLD_ALIGNED, J);
   
