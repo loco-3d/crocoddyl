@@ -164,7 +164,7 @@ struct CostDataImpulseCoPPositionTpl;
 template <typename Scalar>
 class CostModelPairCollisionsTpl;
 template <typename Scalar>
-class CostDataPairCollisionsTpl;
+struct CostDataPairCollisionsTpl;
 
 // impulse
 template <typename Scalar>
