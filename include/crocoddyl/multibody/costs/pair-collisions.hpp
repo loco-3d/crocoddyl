@@ -67,8 +67,6 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
   boost::shared_ptr<pinocchio::GeometryModel > geom_model_;
   pinocchio::PairIndex pair_id_;
   pinocchio::JointIndex joint_id_;
-
-  Vector3s p1_; // Used by calcDiff
 };
 
 template <typename _Scalar>
