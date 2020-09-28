@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,25 +26,26 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  const Vector3s& vw = d->v.angular();
-  const Vector3s& vv = d->v.linear();
-
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
-
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->a0[0] = d->a.linear()[0] + vw[1]*vv[2] - vw[2]*vv[1];
-  d->a0[1] = d->a.linear()[1] + vw[0]*vv[1] - vw[1]*vv[0];
+  
+  d->vw = d->v.angular();
+  d->vv = d->v.linear();
+  
+  d->a0[0] = d->a.linear()[0] + d->vw[1] * d->vv[2] - d->vw[2] * d->vv[1];
+  d->a0[1] = d->a.linear()[2] + d->vw[0] * d->vv[1] - d->vw[1] * d->vv[0];
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation)[0];
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation)[2];
+    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[0] - xref_.translation[0]);
+    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[2] - xref_.translation[2]);
   }
   if (gains_[1] != 0.) {
-    d->a0[0] += gains_[1] * vv[0];
-    d->a0[1] += gains_[1] * vv[2];
+    d->a0[0] += gains_[1] * d->vv[0];
+    d->a0[1] += gains_[1] * d->vv[2];
   }
 }
 
@@ -79,7 +80,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.id].rotation();
-    typename MathBase::MatrixXs oRf2D(2,2);
+    typename MathBase::Matrix2s oRf2D;
     oRf2D(0, 0) = d->oRf(0, 0);
     oRf2D(1, 0) = d->oRf(2, 0);
     oRf2D(0, 1) = d->oRf(0, 2);
@@ -102,9 +103,10 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
-  VectorXs force_bis(3);
-  force_bis << force[0],0.0,force[1];
-  data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force_bis, Vector3s::Zero()));
+  Vector3s force_bis(3);
+  force_bis << force[0], 0.0, force[1];
+  data->f.linear() = d->jMf.rotation() * force_bis;
+  data->f.angular() = d->jMf.translation().cross(data->f.linear());
 }
 
 template <typename Scalar>

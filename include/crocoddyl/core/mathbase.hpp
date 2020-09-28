@@ -23,8 +23,10 @@ struct MathBaseTpl {
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2s;
   typedef Eigen::Matrix<Scalar, 3, 1> Vector3s;
   typedef Eigen::Matrix<Scalar, 6, 1> Vector6s;
+  typedef Eigen::Matrix<Scalar, 2, 2> Matrix2s;
   typedef Eigen::Matrix<Scalar, 3, 3> Matrix3s;
   typedef Eigen::Matrix<Scalar, 6, 6> Matrix6s;
+  typedef Eigen::Matrix<Scalar, 1, 2> RowVector2s;
 
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3s;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 6> MatrixX6s;

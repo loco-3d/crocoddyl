@@ -13,7 +13,7 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationCollision() {
+void exposeActivationNorm2Barrier() {
   
   bp::class_<ActivationModelNorm2Barrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModelNorm2Barrier",

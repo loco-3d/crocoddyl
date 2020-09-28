@@ -1,24 +1,17 @@
 
-<img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
-
-Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
-===============================================
-
-
-<table >
-  <tr>
-    <td align="left"><img src="https://cmastalli.github.io/assets/img/publications/highly_dynamic_maneuvers.png" width="10000"/></td>
-    <td align="right"><img src="https://i.imgur.com/RQR2Ovx.gif"/> <img src="https://i.imgur.com/kTW0ePh.gif"/></td>
-  </tr>
-</table>
-
+<p align="center">
+  <img src="./doc/images/crocoddyl_logo.png" width="800" alt="Crocoddyl Logo" align="center"/>
+</p>
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
+
+<img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
 
 **[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence.
 Its solvers are based on novel and efficient Differential Dynamic Programming (DDP) algorithms.
 **Crocoddyl** computes optimal trajectories along with optimal feedback gains.
 It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
+
 
 The source code is released under the [BSD 3-Clause license](LICENSE).
 
@@ -44,6 +37,14 @@ If you want to follow the current developments, you can directly refer to the [d
 **Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
 
 ## Crocoddyl features
+<table >
+  <tr>
+    <td align="left"><img src="https://cmastalli.github.io/assets/img/publications/highly_dynamic_maneuvers.png" width="10000"/></td>
+    <td align="right"><img src="https://i.imgur.com/RQR2Ovx.gif"/> <img src="https://i.imgur.com/kTW0ePh.gif"/></td>
+  </tr>
+</table>
+
+
 **Crocoddyl** is versatible:
 
  * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods

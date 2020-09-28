@@ -5,7 +5,6 @@ SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
 SET(PROJECT_DESCRIPTION "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)")
 SET(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
-SET(CMAKE_CXX_COMPILER /usr/bin/clang++-8)
 
 # Check if the submodule cmake have been initialized
 IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
@@ -61,7 +60,7 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 
 # Add the different required and optional dependencies
-ADD_PROJECT_DEPENDENCY(pinocchio 2.4.3 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.3")
+ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.2.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
