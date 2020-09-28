@@ -50,7 +50,7 @@ void CostModelPairCollisionsTpl<Scalar>::calc(const boost::shared_ptr<CostDataAb
                                               const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   Data* d  = static_cast<Data*>(data.get());
 
-  const const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const pinocchio::ModelTpl<Scalar>& pin_model = *state_->get_pinocchio().get();
 
   // This function calls forwardKinematics on the whole body
@@ -72,7 +72,7 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
 
   Data* d  = static_cast<Data*>(data.get());
 
-  const const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const pinocchio::ModelTpl<Scalar>& pin_model = *state_->get_pinocchio().get();
   const std::size_t& nv = state_->get_nv();
   //pinocchio::updateFramePlacement(pin_model, *d->pinocchio, Mref_.id);
