@@ -88,7 +88,8 @@ struct CostDataPairCollisionsTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataPairCollisionsTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         geom_data(pinocchio::GeometryData(model->get_geomModel())),
-        J(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+        J(Matrix6xs::Zero(6, model->get_state()->get_nv())),
+        Arr_J(MatrixXs::Zero(model->get_activation()->get_nr(), model->get_state()->get_nv())) {
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -100,8 +101,10 @@ struct CostDataPairCollisionsTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::GeometryData geom_data;
   pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix3xs J;
 
+  Matrix6xs J;
+  MatrixXs Arr_J;
+  
   using Base::shared;
   using Base::activation;
   using Base::cost;
