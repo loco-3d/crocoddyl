@@ -15,10 +15,6 @@
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/geometry.hpp>
 
-#include <iostream>
-#include <string>
-#include <sstream>
-
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -32,6 +28,20 @@ CostModelPairCollisionsTpl<Scalar>::CostModelPairCollisionsTpl(
     : Base(state, activation, nu), geom_model_(geom_model), pair_id_(pair_id), joint_id_(joint_id)
 {}
 
+
+template <typename Scalar>
+CostModelPairCollisionsTpl<Scalar>::CostModelPairCollisionsTpl(
+                                                         boost::shared_ptr<StateMultibody> state,
+                                                         const Scalar& threshold,
+                                                         const std::size_t& nu,
+                                                         boost::shared_ptr<GeometryModel> geom_model,
+                                                         const pinocchio::PairIndex& pair_id,
+                                                         const pinocchio::JointIndex& joint_id)
+  : Base(state, boost::make_shared<ActivationModelNorm2Barrier>(3,threshold), nu),
+    geom_model_(geom_model),
+    pair_id_(pair_id), joint_id_(joint_id)
+{}
+  
 template <typename Scalar>
 CostModelPairCollisionsTpl<Scalar>::~CostModelPairCollisionsTpl() {}
 
@@ -59,15 +69,14 @@ void CostModelPairCollisionsTpl<Scalar>::calc(const boost::shared_ptr<CostDataAb
 template <typename Scalar>
 void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  calc(data, x, u); // The results of calc are needed here
 
   Data* d  = static_cast<Data*>(data.get());
 
   const const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const pinocchio::ModelTpl<Scalar>& pin_model = *state_->get_pinocchio().get();
- 
-  pinocchio::computeJointJacobians(pin_model, *d->pinocchio, q); // Needed by getJointJacobian
-  pinocchio::updateFramePlacements(pin_model, *d->pinocchio);
+  const std::size_t& nv = state_->get_nv();
+  //pinocchio::updateFramePlacement(pin_model, *d->pinocchio, Mref_.id);
+  //pinocchio::updateFramePlacements(pin_model, *d->pinocchio);
 
   // --- Calculate the jacobian on p1 ---
         
@@ -75,25 +84,22 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   const pinocchio::SE3Tpl<Scalar>& oMi = d->pinocchio->oMi[joint_id_];
 
   // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
-  auto p1_local_world = d->geom_data.distanceResults[pair_id_].nearest_points[0] - oMi.translation();
-  typename boost::remove_reference_t<decltype(*d->pinocchio)>::Matrix6x J(6, pin_model.nv); 
-  J.setZero();
-  pinocchio::getJointJacobian(pin_model, *d->pinocchio, joint_id_, pinocchio::LOCAL_WORLD_ALIGNED, J);
+  Vector3s p1_local_world = d->geom_data.distanceResults[pair_id_].nearest_points[0] - oMi.translation();
+  d->J.setZero();
+  pinocchio::getJointJacobian(pin_model, *d->pinocchio, joint_id_,
+                              pinocchio::LOCAL_WORLD_ALIGNED, d->J);
   
   // Calculate the Jacobian at p1
-  d->J = J.topRows(3) + pinocchio::skew(p1_local_world).transpose() * (J.bottomRows(3)); 
+  d->J.template topRows<3>().noalias() += pinocchio::skew(p1_local_world).transpose() * (d->J.template bottomRows<3>());
   
   // --- Compute the cost derivatives ---
   activation_->calcDiff(d->activation, d->r);
 
-  // a, b for horizontal stacking
-  // a,
-  // b for vertical stacking
-  d->Rx << d->J, MatrixXs::Zero(activation_->get_nr(), state_->get_nv());
-  d->Lx << d->J.transpose() * d->activation->Ar,
-          MatrixXs::Zero(state_->get_nv(), 1);
-  d->Lxx << d->J.transpose() * d->activation->Arr * d->J, MatrixXs::Zero(state_->get_nv(), state_->get_nv()),
-          MatrixXs::Zero(state_->get_nv(), state_->get_ndx());
+  d->Rx.template topRows<3>().noalias() = d->J.template topRows<3>();
+  d->Lx.head(state_->get_nv()).noalias() =
+    d->J.template topRows<3>().transpose() * d->activation->Ar;
+  d->Arr_J.noalias() = d->activation->Arr * d->J.template topRows<3>();
+  d->Lxx.topLeftCorner(nv, nv).noalias() = d->J.template topRows<3>().transpose() * d->Arr_J;
 }
 
 template <typename Scalar>

@@ -48,6 +48,14 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
                              boost::shared_ptr<GeometryModel> geom_model,
                              const pinocchio::PairIndex& pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
                              const pinocchio::JointIndex& joint_id); // Used to calculate the Jac at the joint
+
+  CostModelPairCollisionsTpl(boost::shared_ptr<StateMultibody> state,
+                             const Scalar& threshold,
+                             const std::size_t& nu,
+                             boost::shared_ptr<GeometryModel> geom_model,
+                             const pinocchio::PairIndex& pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
+                             const pinocchio::JointIndex& joint_id); // Used to calculate the Jac at the joint
+  
   virtual ~CostModelPairCollisionsTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -67,7 +75,6 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
   boost::shared_ptr<pinocchio::GeometryModel > geom_model_;
   pinocchio::PairIndex pair_id_;
   pinocchio::JointIndex joint_id_;
-
 };
 
 template <typename _Scalar>
@@ -89,7 +96,8 @@ struct CostDataPairCollisionsTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataPairCollisionsTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         geom_data(pinocchio::GeometryData(model->get_geomModel())),
-        J(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+        J(Matrix6xs::Zero(6, model->get_state()->get_nv())),
+        Arr_J(MatrixXs::Zero(model->get_activation()->get_nr(), model->get_state()->get_nv())) {
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -101,8 +109,10 @@ struct CostDataPairCollisionsTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::GeometryData geom_data;
   pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix3xs J;
 
+  Matrix6xs J;
+  MatrixXs Arr_J;
+  
   using Base::shared;
   using Base::activation;
   using Base::cost;
