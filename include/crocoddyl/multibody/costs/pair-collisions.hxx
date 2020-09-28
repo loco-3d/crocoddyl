@@ -94,8 +94,8 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   
   // --- Compute the cost derivatives ---
   activation_->calcDiff(d->activation, d->r);
-
-  d->Rx.template topRows<3>().noalias() = d->J.template topRows<3>();
+  
+  d->Rx.topLeftCorner(3,nv).noalias() = d->J.template topRows<3>();
   d->Lx.head(state_->get_nv()).noalias() =
     d->J.template topRows<3>().transpose() * d->activation->Ar;
   d->Arr_J.noalias() = d->activation->Arr * d->J.template topRows<3>();
