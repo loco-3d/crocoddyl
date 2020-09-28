@@ -48,6 +48,14 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
                              boost::shared_ptr<GeometryModel> geom_model,
                              const pinocchio::PairIndex& pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
                              const pinocchio::JointIndex& joint_id); // Used to calculate the Jac at the joint
+
+  CostModelPairCollisionsTpl(boost::shared_ptr<StateMultibody> state,
+                             const Scalar& threshold,
+                             const std::size_t& nu,
+                             boost::shared_ptr<GeometryModel> geom_model,
+                             const pinocchio::PairIndex& pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
+                             const pinocchio::JointIndex& joint_id); // Used to calculate the Jac at the joint
+  
   virtual ~CostModelPairCollisionsTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,

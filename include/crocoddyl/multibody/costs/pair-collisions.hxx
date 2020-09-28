@@ -28,6 +28,20 @@ CostModelPairCollisionsTpl<Scalar>::CostModelPairCollisionsTpl(
     : Base(state, activation, nu), geom_model_(geom_model), pair_id_(pair_id), joint_id_(joint_id)
 {}
 
+
+template <typename Scalar>
+CostModelPairCollisionsTpl<Scalar>::CostModelPairCollisionsTpl(
+                                                         boost::shared_ptr<StateMultibody> state,
+                                                         const Scalar& threshold,
+                                                         const std::size_t& nu,
+                                                         boost::shared_ptr<GeometryModel> geom_model,
+                                                         const pinocchio::PairIndex& pair_id,
+                                                         const pinocchio::JointIndex& joint_id)
+  : Base(state, boost::make_shared<ActivationModelNorm2Barrier>(3,threshold), nu),
+    geom_model_(geom_model),
+    pair_id_(pair_id), joint_id_(joint_id)
+{}
+  
 template <typename Scalar>
 CostModelPairCollisionsTpl<Scalar>::~CostModelPairCollisionsTpl() {}
 
