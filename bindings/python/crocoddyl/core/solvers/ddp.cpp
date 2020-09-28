@@ -17,6 +17,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_computeDirections, SolverDDP::c
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep, 0, 1)
 
 void exposeSolverDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverDDP> >();
+
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
       "DDP solver.\n\n"

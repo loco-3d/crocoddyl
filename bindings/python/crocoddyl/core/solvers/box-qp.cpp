@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxQP() {
+  bp::register_ptr_to_python<boost::shared_ptr<BoxQPSolution> >();
+
   bp::class_<BoxQPSolution>("BoxQPSolution", "Solution data of the box QP.\n\n",
                             bp::init<Eigen::MatrixXd, Eigen::VectorXd, std::vector<size_t>, std::vector<size_t> >(
                                 bp::args("self", "Hff_inv", "x", "free_idx", "clamped_idx"),
@@ -31,6 +33,8 @@ void exposeSolverBoxQP() {
       .add_property("clamped_idx",
                     bp::make_getter(&BoxQPSolution::clamped_idx, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes");
+
+  bp::register_ptr_to_python<boost::shared_ptr<BoxQP> >();
 
   bp::class_<BoxQP>("BoxQP",
                     "Projected-Newton QP for only bound constraints.\n\n"
