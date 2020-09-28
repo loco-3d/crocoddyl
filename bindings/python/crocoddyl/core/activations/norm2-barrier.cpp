@@ -8,12 +8,12 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/collision.hpp"
+#include "crocoddyl/core/activations/norm2-barrier.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationCollision() {
+void exposeActivationNorm2Barrier() {
   
   bp::class_<ActivationModelNorm2Barrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModelNorm2Barrier",
@@ -21,7 +21,7 @@ void exposeActivationCollision() {
       "This model activates quadratically if the norm2 of the residual vector r"
       " is inferior to a tunable threshold. In extenso, the result is 0 if norm > threshold" 
       " and 0.5 *(||r|| - threshold)^2 if norm < threshold",
-      bp::init<int, ActivationThreshold>(bp::args("self", "nr", "threshold"),
+      bp::init<int, double>(bp::args("self", "nr", "threshold"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector\n"
                     ":param threshold: activation threshold"))

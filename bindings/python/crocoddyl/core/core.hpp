@@ -40,7 +40,7 @@ void exposeActivationWeightedQuad();
 void exposeActivationQuadraticBarrier();
 void exposeActivationWeightedQuadraticBarrier();
 void exposeActivationSmoothAbs();
-void exposeActivationCollision();
+void exposeActivationNorm2Barrier();
 void exposeSolverDDP();
 void exposeSolverKKT();
 void exposeSolverFDDP();
