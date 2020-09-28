@@ -40,7 +40,6 @@ void exposeCore() {
   exposeActivationSmoothAbs();
   exposeActivationNorm2Barrier();
   exposeSolverKKT();
-  exposeActivationCollision();
   exposeSolverDDP();
   exposeSolverFDDP();
   exposeSolverBoxQP();
