@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, Airbus
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,14 +19,13 @@ namespace python {
 void exposeCostPairCollisions() {
   bp::class_<CostModelPairCollisions, bp::bases<CostModelAbstract> >(
       "CostModelPairCollisions",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int, pinocchio::GeometryModel&, pinocchio::GeometryData&, pinocchio::PairIndex, pinocchio::JointIndex>(
-          bp::args("self", "state", "activation", "nu"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int, boost::shared_ptr<pinocchio::GeometryModel> , pinocchio::PairIndex, pinocchio::JointIndex>(
+                                                                                                                                                                                              bp::args("self", "state", "activation", "nu", "geom_model","pair_id","joint_id"),
           "Initialize the frame placement cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector\n"
           ":param geom_model: Pinocchio geometric model\n"
-          ":param geom_data: Pinocchio geometric data\n"
           ":param pair_id: Collision pair id in the geometric model\n"
           ":param joint_id: Joint id in the Pinocchio model (for Jac calculation)"))
       .def<void (CostModelPairCollisions::*)(const boost::shared_ptr<CostDataAbstract>&,

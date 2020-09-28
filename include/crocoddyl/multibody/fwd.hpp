@@ -198,8 +198,8 @@ struct ContactDataMultipleTpl;
 template <typename Scalar>
 class ContactModel2DTpl;
 template <typename Scalar>
-struct ContactData2DTpl;  
-  
+struct ContactData2DTpl;
+
 template <typename Scalar>
 class ContactModel3DTpl;
 template <typename Scalar>
@@ -333,13 +333,12 @@ typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;
 typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;
 typedef CostModelPairCollisionsTpl<double> CostModelPairCollisions;
 typedef CostDataPairCollisionsTpl<double> CostDataPairCollisions;
-
 typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
-enum ContactType { Contact3D, Contact6D, ContactUndefined };
+enum ContactType { Contact2D, Contact3D, Contact6D, ContactUndefined };
 enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
 
 typedef ContactItemTpl<double> ContactItem;

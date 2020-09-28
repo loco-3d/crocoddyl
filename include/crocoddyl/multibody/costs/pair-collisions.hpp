@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, Airbus
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,12 +9,13 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_PAIR_COLLISIONS_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_PAIR_COLLISIONS_HPP_
 
-#include "crocoddyl/core/activations/collision.hpp"
+#include "crocoddyl/core/activations/norm2-barrier.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/multibody/fwd.hpp>
+#include <pinocchio/multibody/geometry.hpp>
 #include <pinocchio/multibody/fcl.hpp>
 
 #include <string>
@@ -33,19 +34,20 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelCollisionTpl<Scalar> Activation;
+  typedef ActivationModelNorm2BarrierTpl<Scalar> Activation;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef pinocchio::GeometryModel GeometryModel;
+  
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   CostModelPairCollisionsTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation,
-                          const std::size_t& nu,
-                          const pinocchio::GeometryModel& geom_model,
-                          pinocchio::GeometryData& geom_data,
-                          const pinocchio::PairIndex pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
-                          const pinocchio::JointIndex joint_id); // Used to calculate the Jac at the joint
+                             boost::shared_ptr<ActivationModelAbstract> activation,
+                             const std::size_t& nu,
+                             boost::shared_ptr<GeometryModel> geom_model,
+                             const pinocchio::PairIndex& pair_id, // const std::size_t col_id, // The id of the pair of colliding objects
+                             const pinocchio::JointIndex& joint_id); // Used to calculate the Jac at the joint
   virtual ~CostModelPairCollisionsTpl();
 
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -54,18 +56,18 @@ class CostModelPairCollisionsTpl : public CostModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
+  const pinocchio::GeometryModel& get_geomModel() const;  
+
  protected:
   
   using Base::activation_;
   using Base::state_;
 
  private:
-  const pinocchio::GeometryModel& geom_model_;
-  pinocchio::GeometryData& geom_data_;
-  const pinocchio::PairIndex pair_id_;
-  const pinocchio::JointIndex joint_id_;
+  boost::shared_ptr<pinocchio::GeometryModel > geom_model_;
+  pinocchio::PairIndex pair_id_;
+  pinocchio::JointIndex joint_id_;
 
-  Vector3s p1_; // Used by calcDiff
 };
 
 template <typename _Scalar>
@@ -85,19 +87,20 @@ struct CostDataPairCollisionsTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataPairCollisionsTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), J(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+      : Base(model, data),
+        geom_data(pinocchio::GeometryData(model->get_geomModel())),
+        J(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
     }
-
     // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
+    pinocchio = d->pinocchio;    
   }
 
+  pinocchio::GeometryData geom_data;
   pinocchio::DataTpl<Scalar>* pinocchio;
-  
   Matrix3xs J;
 
   using Base::shared;

@@ -52,6 +52,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   const std::size_t& nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
+  std::cout << "vv_skew 3d = " << d->vv_skew << std::endl;
+  std::cout << "vw_skew 3d = " << d->vw_skew << std::endl;
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
@@ -69,6 +71,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
     d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->fXj.template topRows<3>() * d->v_partial_dq;
     d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->fXj.template topRows<3>() * d->a_partial_da;
   }
+  std::cout << "3D a0 row 0 = " << d->da0_dx.row(0) << std::endl;
+  std::cout << "3D a0 row 2 = " << d->da0_dx.row(2) << std::endl;
 }
 
 template <typename Scalar>
