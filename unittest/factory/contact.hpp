@@ -20,7 +20,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ContactModelTypes {
-  enum Type { ContactModel3D, ContactModel6D, NbContactModelTypes };
+  enum Type { ContactModel2D, ContactModel3D, ContactModel6D, NbContactModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

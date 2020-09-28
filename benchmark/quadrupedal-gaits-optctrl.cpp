@@ -48,13 +48,9 @@ int main(int argc, char* argv[]) {
 
   // Initial State
   const std::size_t& N = ddp.get_problem()->get_T();
-  std::vector<Eigen::VectorXd> xs(N + 1, x0);
-  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(problem->get_runningModels()[0]->get_nu()));
-  for (std::size_t i = 0; i < N; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem->get_runningDatas()[i];
-    model->quasiStatic(data, us[i], x0);
-  }
+  std::vector<Eigen::VectorXd> xs(N, x0);
+  std::vector<Eigen::VectorXd> us = problem->quasiStatic_xs(xs);
+  xs.push_back(x0);
 
   // Solving the optimal control problem
   Eigen::ArrayXd duration(T);
