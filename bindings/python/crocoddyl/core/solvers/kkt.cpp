@@ -17,6 +17,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_computeDirections, SolverKKT::c
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_trySteps, SolverKKT::tryStep, 0, 1)
 
 void exposeSolverKKT() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverKKT> >();
+
   bp::class_<SolverKKT, bp::bases<SolverAbstract> >(
       "SolverKKT",
       "KKT solver.\n\n"
