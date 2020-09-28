@@ -12,6 +12,7 @@
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/norm2-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -36,6 +37,9 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
     case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
       os << "ActivationModelWeightedQuadraticBarrier";
       break;
+    case ActivationModelTypes::ActivationModelNorm2Barrier:
+      os << "ActivationModelNorm2Barrier";
+      break;
     case ActivationModelTypes::NbActivationModelTypes:
       os << "NbActivationModelTypes";
       break;
@@ -54,7 +58,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
   Eigen::VectorXd weights = 0.1 * Eigen::VectorXd::Random(nr);
-
+  double threshold = 0.3;
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
       activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
@@ -71,6 +75,10 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
     case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
       activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
           crocoddyl::ActivationBounds(lb, ub), weights);
+      break;
+    case ActivationModelTypes::ActivationModelNorm2Barrier:
+      activation = boost::make_shared<crocoddyl::ActivationModelNorm2Barrier>(
+                                                                              nr, 0.3);
       break;
     default:
       throw_pretty(__FILE__ ":\n Construct wrong ActivationModelTypes::Type");
