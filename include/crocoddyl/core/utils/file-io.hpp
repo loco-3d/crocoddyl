@@ -26,7 +26,7 @@ class CsvStream {
   CsvStream(const std::string filename, const std::string separator = ",")
       : fs_(), is_first_(true), separator_(separator), escape_seq_("\""), special_chars_("\"") {
     fs_.exceptions(std::ios::failbit | std::ios::badbit);
-    fs_.open(filename);
+    fs_.open(filename.c_str());
   }
 
   ~CsvStream() {
