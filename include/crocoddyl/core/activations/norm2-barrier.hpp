@@ -32,7 +32,7 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
   typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   // TODO: Magic number, check with Teguh/Nicolas/Crocoddyl Team 
-  explicit ActivationModelNorm2BarrierTpl(const std::size_t nr, const Scalar& threshold = Scalar(0.3) ) : 
+  explicit ActivationModelNorm2BarrierTpl(const std::size_t nr, const Scalar& threshold ) : 
     Base(nr), threshold_(threshold) {};
   virtual ~ActivationModelNorm2BarrierTpl(){};
 
@@ -43,12 +43,12 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-    distance_ = r.norm();
-    if(distance_ < threshold_) {
-      data->a_value = 0.5 * std::pow(distance_ - threshold_, 2);
+    d->distance_ = r.norm();
+    if(d->distance_ < threshold_) {
+      data->a_value = Scalar(0.5) * (d->distance_ - threshold_) * (d->distance_ - threshold_);
     }
     else {
-      data->a_value = 0.0;
+      data->a_value = Scalar(0.0);
     }
   };
 
@@ -59,10 +59,11 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     
-    if(distance_ < threshold_) {
-      data->Ar = (distance_ - threshold_) / distance_ * r;
-      data->Arr.diagonal() = (MatrixXs::Identity(nr_, nr_) * (distance_ - threshold_) / distance_ + 
-                              threshold_ * r * r.transpose() / std::pow(distance_, 3)).diagonal();
+    if(d->distance_ < threshold_) {
+      data->Ar = (d->distance_ - threshold_) / d->distance_ * r;
+      data->Arr.diagonal() = threshold_ * r.array().square() / std::pow(d->distance_, 3);
+      data->Arr.diagonal().array() += (d->distance_ - threshold_) / d->distance_;
+      //data->Arr.diagonal() = (MatrixXs::Identity(nr_, nr_) * (d->distance_ - threshold_) / d->distance_ + threshold_ * r * r.transpose() / std::pow(d->distance_, 3)).diagonal();
     }
     else {
       data->Ar.setZero();
@@ -80,7 +81,6 @@ class ActivationModelNorm2BarrierTpl : public ActivationModelAbstractTpl<_Scalar
  protected:
   using Base::nr_;
   Scalar threshold_;
-  Scalar distance_;
 };
 
 template <typename _Scalar>
@@ -95,9 +95,12 @@ struct ActivationDataCollisionTpl : public ActivationDataAbstractTpl<_Scalar> {
 
   template <typename Activation>
   explicit ActivationDataCollisionTpl(Activation* const activation)
-      : Base(activation)
+    : Base(activation),
+      distance_(Scalar(0))
   {}
 
+  Scalar distance_;
+  
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;
