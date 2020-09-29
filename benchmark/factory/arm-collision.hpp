@@ -142,12 +142,12 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
 
-  for(int i=0;i,box_sizes.size();++i) {
+  for(int i=0;i<box_sizes.size();++i) {
     runningCostModel->addCost("obstacle"+std::to_string(i), obstacleCosts[i], Scalar(1e4));
   }
   
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  for(int i=0;i,box_sizes.size();++i) {
+  for(int i=0;i<box_sizes.size();++i) {
     terminalCostModel->addCost("obstacle"+std::to_string(i), obstacleCosts[i], Scalar(1e4));
   }  
 

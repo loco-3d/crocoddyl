@@ -1,11 +1,11 @@
 SET(${PROJECT_NAME}_BENCHMARK
-  #boxqp
-  #unicycle-optctrl
-  #lqr-optctrl
-  #arm-manipulation-optctrl
-  #arm-manipulation-timings
-  #quadrupedal-gaits-optctrl
-  #bipedal-timings
+  boxqp
+  unicycle-optctrl
+  lqr-optctrl
+  arm-manipulation-optctrl
+  arm-manipulation-timings
+  quadrupedal-gaits-optctrl
+  bipedal-timings
   )
 
 
