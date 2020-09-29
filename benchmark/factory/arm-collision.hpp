@@ -68,11 +68,12 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   Eigen::Vector3d pos_body(-0.025,0,-.225);
   pinocchio::FrameIndex pin_link_id = model.getFrameId(link_name);
   pinocchio::JointIndex pin_joint_id = model.getJointId(link_name); //arm_left_4_joint in pinocchio
-    
+
   pinocchio::GeomIndex ig_arm = geomModel.addGeometryObject(pinocchio::GeometryObject("simple_arm", pin_link_id, model.frames[model.getFrameId("arm_left_4_link")].parent, boost::shared_ptr<hpp::fcl::Capsule>(new hpp::fcl::Capsule(0, capsule_length)), pinocchio::SE3(Eigen::Matrix3d::Identity(),pos_body)),model);
 
 
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::Vector3d) box_poses, box_sizes;
+  PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::Vector2d) capsule_sizes;
   std::vector<double> obs_radius;
   //Table, green cube, yellow cube
   box_poses.push_back(Eigen::Vector3d(-0.3,-0.1,0.75));
@@ -84,6 +85,10 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   box_sizes.push_back(Eigen::Vector3d(0.05,0.05, 0.05));
   box_sizes.push_back(Eigen::Vector3d(0.05,0.05, 0.05));
 
+  capsule_sizes.push_back(Eigen::Vector2d(.3, .02));
+  capsule_sizes.push_back(Eigen::Vector2d(0.05, 0.1));
+  capsule_sizes.push_back(Eigen::Vector2d(0.05, 0.1));
+  
   obs_radius.push_back(0.005);
   obs_radius.push_back(0.05);
   obs_radius.push_back(0.05);
@@ -98,7 +103,7 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
        pinocchio::GeometryObject("simple_obs"+std::to_string(i),
                                  model.getFrameId("universe"),
                                  model.frames[model.getFrameId("universe")].parent,
-                                 boost::shared_ptr<hpp::fcl::Box>(new hpp::fcl::Box(2*box_sizes[i])),
+                                 boost::shared_ptr<hpp::fcl::Capsule>(new hpp::fcl::Capsule(capsule_sizes[i](0), capsule_sizes[i](1))),
                                  pinocchio::SE3(Eigen::Matrix3d::Identity(), box_poses[i])),
        model);    
     geomModel.addCollisionPair(pinocchio::CollisionPair(ig_arm,ig_obs));
