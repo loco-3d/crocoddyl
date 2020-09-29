@@ -30,8 +30,8 @@
 #define AVG(vec) (vec.mean())
 
 void print_benchmark(RobotEENames robot) {
-  unsigned int N = 10;  // number of nodes
-  unsigned int T = 1e1;  // number of trials
+  unsigned int N = 100;  // number of nodes
+  unsigned int T = 1e3;  // number of trials
 
   // Building the running and terminal models
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
@@ -357,89 +357,89 @@ int main() {
 
   print_benchmark(talosArm4DofwCollision);
   
-  // // Arm Manipulation Benchmarks
-  // std::cout << "********************  Kinova Arm  ******************" << std::endl;
-  // RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types,
-  //                        EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
-  //                        EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", "gripper_left_joint",
-  //                        "arm_up");
+  // Arm Manipulation Benchmarks
+  std::cout << "********************  Kinova Arm  ******************" << std::endl;
+  RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types,
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
+                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", "gripper_left_joint",
+                         "arm_up");
 
-  // print_benchmark(kinovaArm);
+  print_benchmark(kinovaArm);
 
-  // // Quadruped Solo Benchmarks
-  // std::cout << "********************Quadruped Solo******************" << std::endl;
-  // contact_names.clear();
-  // contact_types.clear();
-  // contact_names.push_back("FR_KFE");
-  // contact_names.push_back("HL_KFE");
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // RobotEENames quadrupedSolo("Solo", contact_names, contact_types,
-  //                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/robots/solo.urdf",
-  //                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/srdf/solo.srdf", "HL_KFE", "standing");
+  // Quadruped Solo Benchmarks
+  std::cout << "********************Quadruped Solo******************" << std::endl;
+  contact_names.clear();
+  contact_types.clear();
+  contact_names.push_back("FR_KFE");
+  contact_names.push_back("HL_KFE");
+  contact_types.push_back(crocoddyl::Contact3D);
+  contact_types.push_back(crocoddyl::Contact3D);
+  RobotEENames quadrupedSolo("Solo", contact_names, contact_types,
+                             EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/robots/solo.urdf",
+                             EXAMPLE_ROBOT_DATA_MODEL_DIR "/solo_description/srdf/solo.srdf", "HL_KFE", "standing");
 
-  // print_benchmark(quadrupedSolo);
+  print_benchmark(quadrupedSolo);
 
-  // // Quadruped Anymal Benchmarks
-  // std::cout << "********************Quadruped Anymal******************" << std::endl;
-  // contact_names.clear();
-  // contact_types.clear();
-  // contact_names.push_back("RF_KFE");
-  // contact_names.push_back("LF_KFE");
-  // contact_names.push_back("LH_KFE");
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // RobotEENames quadrupedAnymal("Anymal", contact_names, contact_types,
-  //                              EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/robots/anymal.urdf",
-  //                              EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/srdf/anymal.srdf", "RH_KFE",
-  //                              "standing");
+  // Quadruped Anymal Benchmarks
+  std::cout << "********************Quadruped Anymal******************" << std::endl;
+  contact_names.clear();
+  contact_types.clear();
+  contact_names.push_back("RF_KFE");
+  contact_names.push_back("LF_KFE");
+  contact_names.push_back("LH_KFE");
+  contact_types.push_back(crocoddyl::Contact3D);
+  contact_types.push_back(crocoddyl::Contact3D);
+  contact_types.push_back(crocoddyl::Contact3D);
+  RobotEENames quadrupedAnymal("Anymal", contact_names, contact_types,
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/robots/anymal.urdf",
+                               EXAMPLE_ROBOT_DATA_MODEL_DIR "/anymal_b_simple_description/srdf/anymal.srdf", "RH_KFE",
+                               "standing");
 
-  // print_benchmark(quadrupedAnymal);
+  print_benchmark(quadrupedAnymal);
 
-  // // Quadruped HyQ Benchmarks
-  // std::cout << "******************** Quadruped HyQ ******************" << std::endl;
-  // contact_names.clear();
-  // contact_types.clear();
-  // contact_names.push_back("rf_kfe_joint");
-  // contact_names.push_back("lf_kfe_joint");
-  // contact_names.push_back("lh_kfe_joint");
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // contact_types.push_back(crocoddyl::Contact3D);
-  // RobotEENames quadrupedHyQ("HyQ", contact_names, contact_types,
-  //                           EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
-  //                           EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf", "rh_kfe_joint", "standing");
+  // Quadruped HyQ Benchmarks
+  std::cout << "******************** Quadruped HyQ ******************" << std::endl;
+  contact_names.clear();
+  contact_types.clear();
+  contact_names.push_back("rf_kfe_joint");
+  contact_names.push_back("lf_kfe_joint");
+  contact_names.push_back("lh_kfe_joint");
+  contact_types.push_back(crocoddyl::Contact3D);
+  contact_types.push_back(crocoddyl::Contact3D);
+  contact_types.push_back(crocoddyl::Contact3D);
+  RobotEENames quadrupedHyQ("HyQ", contact_names, contact_types,
+                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
+                            EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf", "rh_kfe_joint", "standing");
 
-  // print_benchmark(quadrupedHyQ);
+  print_benchmark(quadrupedHyQ);
 
-  // // Biped icub Benchmarks
-  // std::cout << "********************Biped iCub ***********************" << std::endl;
-  // contact_names.clear();
-  // contact_types.clear();
-  // contact_names.push_back("r_ankle_roll");
-  // contact_names.push_back("l_ankle_roll");
-  // contact_types.push_back(crocoddyl::Contact6D);
-  // contact_types.push_back(crocoddyl::Contact6D);
+  // Biped icub Benchmarks
+  std::cout << "********************Biped iCub ***********************" << std::endl;
+  contact_names.clear();
+  contact_types.clear();
+  contact_names.push_back("r_ankle_roll");
+  contact_names.push_back("l_ankle_roll");
+  contact_types.push_back(crocoddyl::Contact6D);
+  contact_types.push_back(crocoddyl::Contact6D);
 
-  // RobotEENames bipedIcub(
-  //     "iCub", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
-  //     EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf", "r_wrist_yaw", "half_sitting");
-  // print_benchmark(bipedIcub);
+  RobotEENames bipedIcub(
+      "iCub", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf", "r_wrist_yaw", "half_sitting");
+  print_benchmark(bipedIcub);
 
-  // // Biped icub Benchmarks
-  // std::cout << "********************Biped Talos***********************" << std::endl;
-  // contact_names.clear();
-  // contact_types.clear();
-  // contact_names.push_back("leg_right_6_joint");
-  // contact_names.push_back("leg_left_6_joint");
-  // contact_types.push_back(crocoddyl::Contact6D);
-  // contact_types.push_back(crocoddyl::Contact6D);
+  // Biped icub Benchmarks
+  std::cout << "********************Biped Talos***********************" << std::endl;
+  contact_names.clear();
+  contact_types.clear();
+  contact_names.push_back("leg_right_6_joint");
+  contact_names.push_back("leg_left_6_joint");
+  contact_types.push_back(crocoddyl::Contact6D);
+  contact_types.push_back(crocoddyl::Contact6D);
 
-  // RobotEENames bipedTalos(
-  //     "Talos", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-  //     EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting");
-  // print_benchmark(bipedTalos);
+  RobotEENames bipedTalos(
+      "Talos", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting");
+  print_benchmark(bipedTalos);
 
   return 0;
 }
