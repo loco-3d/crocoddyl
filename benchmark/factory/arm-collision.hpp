@@ -97,6 +97,7 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   double RADIUS = 0.09;
   
   int num_obs = box_poses.size();
+  //int num_obs = 1;
   // Add obstacles in the world
   for(int i=0;i<num_obs;++i) {
     pinocchio::GeomIndex ig_obs = geomModel.addGeometryObject(
@@ -129,7 +130,7 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   std::vector<boost::shared_ptr<CostModelAbstract> > obstacleCosts;
 
 
-  for(int i=0;i<box_sizes.size(); ++i) {
+  for(int i=0;i<num_obs; ++i) {
     obstacleCosts.push_back(boost::make_shared<CostModelPairCollisions>(
           state, RADIUS+obs_radius[i]+add_threshold,
           actuation->get_nu(),
@@ -147,12 +148,12 @@ void build_arm_action_models_w_collision(boost::shared_ptr<crocoddyl::ActionMode
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
 
-  for(int i=0;i<box_sizes.size();++i) {
+  for(int i=0;i<num_obs;++i) {
     runningCostModel->addCost("obstacle"+std::to_string(i), obstacleCosts[i], Scalar(1e4));
   }
   
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  for(int i=0;i<box_sizes.size();++i) {
+  for(int i=0;i<num_obs;++i) {
     terminalCostModel->addCost("obstacle"+std::to_string(i), obstacleCosts[i], Scalar(1e4));
   }  
 
