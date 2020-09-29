@@ -11,11 +11,11 @@
 #include <memory>
 #include <utility>
 #include <string>
-#include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -50,22 +50,22 @@ void exposeCostSum() {
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
-  bp::class_<CostModelSum>("CostModelSum", bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+  bp::class_<CostModelSum>("CostModelSum", bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
                                                bp::args("self", "state", "nu"),
                                                "Initialize the total cost model.\n\n"
-                                               ":param state: state of the multibody system\n"
+                                               ":param state: state description\n"
                                                ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param nu: dimension of control vector\n"
           ":param withResiduals: true if the cost function has residuals"))
-      .def(bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
-                                                        "Initialize the total cost model.\n\n"
-                                                        "For this case the default nu is equals to model.nv.\n"
-                                                        ":param state: state of the multibody system"))
+      .def(bp::init<boost::shared_ptr<StateAbstract> >(bp::args("self", "state"),
+                                                       "Initialize the total cost model.\n\n"
+                                                       "For this case the default nu is equals to model.nv.\n"
+                                                       ":param state: state description"))
       .def("addCost", &CostModelSum::addCost,
            CostModelSum_addContact_wrap(bp::args("self", "name", "cost", "weight", "active"),
                                         "Add a cost item.\n\n"

@@ -17,6 +17,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_computeDirections, SolverDDP::c
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep, 0, 1)
 
 void exposeSolverDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverDDP> >();
+
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
       "DDP solver.\n\n"
@@ -123,8 +125,7 @@ void exposeSolverDDP() {
                     "threshold for accepting step which gradients is lower than this value")
       .add_property("th_gaptol",
                     bp::make_function(&SolverDDP::get_th_gaptol, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_th_gaptol),
-                    "threshold for accepting a gap as non-zero")
+                    bp::make_function(&SolverDDP::set_th_gaptol), "threshold for accepting a gap as non-zero")
       .add_property("alphas",
                     bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values");

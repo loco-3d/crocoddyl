@@ -12,7 +12,7 @@
 
 #include <boost/function.hpp>
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
 
 namespace crocoddyl {
 

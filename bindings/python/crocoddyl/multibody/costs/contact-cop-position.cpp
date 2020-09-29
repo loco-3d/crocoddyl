@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/contact-cop-position.hpp"
 
 namespace crocoddyl {
@@ -21,19 +20,19 @@ void exposeCostContactCoPPosition() {
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
-          ":param cop_support: contact frame ID and cop support region\n"
+          ":param cop_support: contact frame Id and cop support region\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport>(
           bp::args("self", "state", "activation", "cop_support"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
-          ":param cop_support: contact frame ID and cop support region"))
+          ":param cop_support: contact frame Id and cop support region"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport, int>(
           bp::args("self", "state", "cop_support", "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
-          ":param cop_support: contact frame ID and cop support region\n"
+          ":param cop_support: contact frame Id and cop support region\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport>(
           bp::args("self", "state", "cop_support"),
@@ -46,7 +45,7 @@ void exposeCostContactCoPPosition() {
           "calc", &CostModelContactCoPPosition::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact CoP position cost.\n\n"
           ":param data: cost data\n"
-          ":param x: state vector\n"
+          ":param x: state point\n"
           ":param u: control input")
       .def<void (CostModelContactCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&,
@@ -54,7 +53,7 @@ void exposeCostContactCoPPosition() {
           "calcDiff", &CostModelContactCoPPosition::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact CoP position cost.\n\n"
           ":param data: action data\n"
-          ":param x: state vector\n"
+          ":param x: state point\n"
           ":param u: control input\n")
       .def("createData", &CostModelContactCoPPosition::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),

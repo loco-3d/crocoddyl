@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxDDP> >();
+
   bp::class_<SolverBoxDDP, bp::bases<SolverDDP> >(
       "SolverBoxDDP",
       "Box-constrained DDP solver.\n\n"

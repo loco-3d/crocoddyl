@@ -16,6 +16,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, SolverFDDP::solve, 0, 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections, SolverDDP::computeDirection, 0, 1)
 
 void exposeSolverFDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverFDDP> >();
+
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
       "SolverFDDP",
       "Feasibility-prone DDP (FDDP) solver.\n\n"

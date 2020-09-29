@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/impulse-com.hpp"
 
 namespace crocoddyl {
@@ -16,19 +15,19 @@ namespace python {
 void exposeCostImpulseCoM() {
   bp::class_<CostModelImpulseCoM, bp::bases<CostModelAbstract> >(
       "CostModelImpulseCoM",
-      "Penalize the impulse on the CoM as the sum-of-square of ||Jcom * (vnext-v)||,\n"
-      "with vnext the velocity after impact and v the velocity before impact.",
+      "This cost function defines a residual vector as r = Jcom * (vnext-v), with Jcom as the CoM Jacobian, and vnext "
+      "the velocity after impact and v the velocity before impact, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the CoM position cost model for impulse dynamics.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the CoM position cost model for impulse dynamics.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system"))
       .def<void (CostModelImpulseCoM::*)(
           const boost::shared_ptr<CostDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,

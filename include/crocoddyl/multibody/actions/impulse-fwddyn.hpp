@@ -14,11 +14,11 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 
 #include <pinocchio/algorithm/compute-all-terms.hpp>

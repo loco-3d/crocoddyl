@@ -23,24 +23,28 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for differential action model
  *
- * A differential action model describes a time-continuous action model with a first-order ODE, i.e.
+ * A differential action model is the time-continuous version of an action model, i.e.
  * \f[
- * \dot{\mathbf{v}} = \mathbf{f}(\mathbf{q}, \mathbf{v}, \mathbf{u})
+ * \begin{aligned}
+ * &\dot{\mathbf{v}} = \mathbf{f}(\mathbf{q}, \mathbf{v}, \mathbf{u}), &\textrm{(dynamics)}\\
+ * &l(\mathbf{x},\mathbf{u}) = \int_0^{\delta t} a(\mathbf{r}(\mathbf{x},\mathbf{u}))\,dt, &\textrm{(cost)}
+ * \end{aligned}
  * \f]
  * where the configuration \f$\mathbf{q}\in\mathcal{Q}\f$ lies in the configuration manifold described with a
  * `nq`-tuple, the velocity \f$\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ its a tangent vector to this manifold with
- * `nv` dimension, and \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is the input commands. Both, configuration and velocity,
- * describes the system space \f$\mathbf{x}\in\mathbf{X}\f$ which lies in the state manifold. Note that the
- * acceleration \f$\dot{\mathbf{v}}\in T_{\mathbf{q}}\mathcal{Q}\f$ lies also in the tangent space of the configuration
- * manifold.
+ * `nv` dimension, \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is the input commands, \f$\mathbf{r}\f$ and \f$a\f$ is a residual
+ * and activation functions (see `ActivationModelAbstractTpl`). Both configuration and velocity describe the system
+ * space \f$\mathbf{x}\in\mathbf{X}\f$ which lies in the state manifold. Note that the acceleration
+ * \f$\dot{\mathbf{v}}\in T_{\mathbf{q}}\mathcal{Q}\f$ lies also in the tangent space of the configuration manifold.
  *
- * `calc` computes the acceleration and cost and `calcDiff` computes the derivatives of the dynamics and cost function.
- * Concretely speaking, `calcDiff` builds a linear-quadratic approximation of the differential action, where the
- * dynamics and cost functions have linear and quadratic forms, respectively. \f$\mathbf{f_x}\in\mathbb{R}^{nv\times
- * ndx}\f$, \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nu}\f$ are the Jacobians of the dynamics;
+ * The main computations are carrying out in `calc` and `calcDiff`. `calc` computes the acceleration and cost and
+ * `calcDiff` computes the derivatives of the dynamics and cost function. Concretely speaking, `calcDiff` builds a
+ * linear-quadratic approximation of the differential action, where the dynamics and cost functions have linear and
+ * quadratic forms, respectively. \f$\mathbf{f_x}\in\mathbb{R}^{nv\times ndx}\f$,
+ * \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nu}\f$ are the Jacobians of the dynamics;
  * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectely.
+ * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectively.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -59,7 +63,7 @@ class DifferentialActionModelAbstractTpl {
   /**
    * @brief Initialize the differential action model
    *
-   * @param[in] state  State Dimension of state configuration tuple
+   * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
    */
@@ -80,8 +84,8 @@ class DifferentialActionModelAbstractTpl {
   /**
    * @brief Compute the derivatives of the dynamics and cost functions
    *
-   * It computes the partial derivatives of the dynamical system and the cost function. It assumes that calc has been
-   * run first. This function builds a quadratic approximation of the time-continuous action model (i.e. dynamical
+   * It computes the partial derivatives of the dynamical system and the cost function. It assumes that `calc()` has
+   * been run first. This function builds a quadratic approximation of the time-continuous action model (i.e. dynamical
    * system and cost function).
    *
    * @param[in] data  Differential action data
@@ -123,7 +127,7 @@ class DifferentialActionModelAbstractTpl {
    * @brief Computes the quasic static commands
    *
    * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
-   * for \f$\mathbf{f(q,v=0,u)=0}\f$
+   * for \f$\mathbf{f}(\mathbf{q},\mathbf{v}=\mathbf{0},\mathbf{u})=\mathbf{0}\f$
    *
    * @param[in] data    Differential action data
    * @param[out] u      Quasic static commands
@@ -234,16 +238,16 @@ struct DifferentialActionDataAbstractTpl {
   }
   virtual ~DifferentialActionDataAbstractTpl() {}
 
-  Scalar cost;
-  VectorXs xout;
-  MatrixXs Fx;
-  MatrixXs Fu;
-  VectorXs r;
-  VectorXs Lx;
-  VectorXs Lu;
-  MatrixXs Lxx;
-  MatrixXs Lxu;
-  MatrixXs Luu;
+  Scalar cost;    //!< cost value
+  VectorXs xout;  //!< evolution state
+  MatrixXs Fx;    //!< Jacobian of the dynamics
+  MatrixXs Fu;    //!< Jacobian of the dynamics
+  VectorXs r;     //!< Cost residual
+  VectorXs Lx;    //!< Jacobian of the cost function
+  VectorXs Lu;    //!< Jacobian of the cost function
+  MatrixXs Lxx;   //!< Hessian of the cost function
+  MatrixXs Lxu;   //!< Hessian of the cost function
+  MatrixXs Luu;   //!< Hessian of the cost function
 };
 
 }  // namespace crocoddyl

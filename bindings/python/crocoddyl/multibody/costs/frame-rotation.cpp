@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -17,6 +16,8 @@ namespace python {
 void exposeCostFrameRotation() {
   bp::class_<CostModelFrameRotation, bp::bases<CostModelAbstract> >(
       "CostModelFrameRotation",
+      "This cost function defines a residual vector as r = R - Rref, with R and Rref as the current and reference "
+      "frame rotations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation, int>(
           bp::args("self", "state", "activation", "Rref", "nu"),
           "Initialize the frame rotation cost model.\n\n"
@@ -27,23 +28,22 @@ void exposeCostFrameRotation() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation>(
           bp::args("self", "state", "activation", "Rref"),
           "Initialize the frame rotation cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu value is obtained from model.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Rref: reference frame rotation"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation, int>(
           bp::args("self", "state", "Rref", "nu"),
           "Initialize the frame rotation cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param Rref: reference frame rotation\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation>(
           bp::args("self", "state", "Rref"),
           "Initialize the frame rotation cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param Rref: reference frame rotation"))
       .def<void (CostModelFrameRotation::*)(const boost::shared_ptr<CostDataAbstract>&,

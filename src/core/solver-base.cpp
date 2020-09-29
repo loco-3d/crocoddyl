@@ -82,8 +82,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     for (std::size_t t = 0; t < T; ++t) {
       if (static_cast<std::size_t>(us_warm[t].size()) > nu) {
         throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " + std::to_string(nu) +
-                            ")");
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " +
+                            std::to_string(nu) + ")");
       }
     }
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());

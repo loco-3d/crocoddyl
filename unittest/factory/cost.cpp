@@ -8,7 +8,7 @@
 
 #include "cost.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/core/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 // #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
@@ -17,7 +17,7 @@
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/costs/contact-wrench-cone.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

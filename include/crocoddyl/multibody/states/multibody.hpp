@@ -22,12 +22,14 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef StateAbstractTpl<Scalar> Base;
+  typedef pinocchio::ModelTpl<Scalar> PinocchioModel;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   enum JointType { FreeFlyer = 0, Spherical, Simple };
 
-  explicit StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model);
+  explicit StateMultibodyTpl(boost::shared_ptr<PinocchioModel> model);
+  StateMultibodyTpl();
   virtual ~StateMultibodyTpl();
 
   virtual VectorXs zero() const;
@@ -45,7 +47,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
-  const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >& get_pinocchio() const;
+  const boost::shared_ptr<PinocchioModel>& get_pinocchio() const;
 
  protected:
   using Base::has_limits_;
@@ -57,7 +59,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pinocchio_;
+  boost::shared_ptr<PinocchioModel> pinocchio_;
   VectorXs x0_;
   JointType joint_type_;
 };
