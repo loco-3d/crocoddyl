@@ -84,7 +84,7 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   const pinocchio::SE3Tpl<Scalar>& oMi = d->pinocchio->oMi[joint_id_];
 
   // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
-  Vector3s p1_local_world = d->geom_data.distanceResults[pair_id_].nearest_points[0] - oMi.translation();
+  const Vector3s p1_local_world = d->geom_data.distanceResults[pair_id_].nearest_points[0] - oMi.translation();
   d->J.setZero();
   pinocchio::getJointJacobian(pin_model, *d->pinocchio, joint_id_,
                               pinocchio::LOCAL_WORLD_ALIGNED, d->J);
@@ -94,7 +94,7 @@ void CostModelPairCollisionsTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   
   // --- Compute the cost derivatives ---
   activation_->calcDiff(d->activation, d->r);
-  
+
   d->Rx.topLeftCorner(3,nv).noalias() = d->J.template topRows<3>();
   d->Lx.head(state_->get_nv()).noalias() =
     d->J.template topRows<3>().transpose() * d->activation->Ar;
