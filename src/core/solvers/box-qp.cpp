@@ -36,7 +36,14 @@ BoxQP::BoxQP(const std::size_t nx, std::size_t maxiter, const double th_acceptst
     std::cerr << "Warning: reg value has to be positive." << std::endl;
   }
 
+  // Initialized the values of vectors
+  x_.setZero();
+  xnew_.setZero();
+  g_.setZero();
+  dx_.setZero();
+
   // Reserve the space and compute alphas
+  solution_.x = Eigen::VectorXd::Zero(nx);
   solution_.clamped_idx.reserve(nx_);
   solution_.free_idx.reserve(nx_);
   const std::size_t& n_alphas_ = 10;
