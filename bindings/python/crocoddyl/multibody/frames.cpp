@@ -16,7 +16,6 @@
 
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
-
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FramePlacement)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameForce)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameMotion)
@@ -213,10 +212,10 @@ void exposeFrames() {
 
   pinocchio::python::StdAlignedVectorPythonVisitor<FrameRotation, true>::expose("StdVec_FrameRotation");
 
-  pinocchio::python::StdAlignedVectorPythonVisitor<FrameTranslation, true>::expose("StdVec_FrameTranslation");  
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameTranslation, true>::expose("StdVec_FrameTranslation");
   pinocchio::python::StdAlignedVectorPythonVisitor<FrameForce, true>::expose("StdVec_FrameForce");
 
-  pinocchio::python::StdAlignedVectorPythonVisitor<FrameMotion, true>::expose("StdVec_FrameMotion");  
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameMotion, true>::expose("StdVec_FrameMotion");
 }
 
 }  // namespace python
