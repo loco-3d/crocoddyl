@@ -43,7 +43,7 @@ struct FrameTranslationTpl {
 
   template <typename OtherScalar>
   bool operator==(const FrameTranslationTpl<OtherScalar>& other) const {
-    return id == other.id && translation == other.translation.template cast<Scalar>();
+    return id == other.id && translation == other.translation;
   }
 
   FrameIndex id;
@@ -67,7 +67,7 @@ struct FrameRotationTpl {
 
   template <typename OtherScalar>
   bool operator==(const FrameRotationTpl<OtherScalar>& other) const {
-    return id == other.id && rotation == other.rotation.template cast<Scalar>();
+    return id == other.id && rotation == other.rotation;
   }
 
   FrameIndex id;
@@ -87,7 +87,7 @@ struct FramePlacementTpl {
 
   template <typename OtherScalar>
   bool operator==(const FramePlacementTpl<OtherScalar>& other) const {
-    return id == other.id && placement == other.placement.template cast<Scalar>();
+    return id == other.id && placement == other.placement;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
@@ -130,7 +130,7 @@ struct FrameMotionTpl {
 
   template <typename OtherScalar>
   bool operator==(const FrameMotionTpl<OtherScalar>& other) const {
-    return id == other.id && motion == other.motion.template cast<Scalar>() && reference == other.reference;
+    return id == other.id && motion == other.motion && reference == other.reference;
   }
 
   FrameIndex id;
@@ -155,7 +155,7 @@ struct FrameForceTpl {
 
   template <typename OtherScalar>
   bool operator==(const FrameForceTpl<OtherScalar>& other) const {
-    return id == other.id && force == other.force.template cast<Scalar>();
+    return id == other.id && force == other.force;
   }
 
   FrameIndex id;
