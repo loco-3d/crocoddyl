@@ -6,10 +6,20 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <eigenpy/memory.hpp>
+#include <eigenpy/eigen-to-python.hpp>
+
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
+
+#include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
+
+
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FramePlacement)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameForce)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameMotion)
 
 namespace crocoddyl {
 namespace python {
@@ -198,6 +208,15 @@ void exposeFrames() {
                             deprecated<bp::return_value_policy<bp::return_by_value> >("Deprecated. Use id.")),
           bp::make_function(&FrameCoPSupport::set_id, deprecated<>("Deprecated. Use id.")), "frame ID")
       .def(PrintableVisitor<FrameCoPSupport>());
+
+  pinocchio::python::StdAlignedVectorPythonVisitor<FramePlacement, true>::expose("StdVec_FramePlacement");
+
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameRotation, true>::expose("StdVec_FrameRotation");
+
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameTranslation, true>::expose("StdVec_FrameTranslation");  
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameForce, true>::expose("StdVec_FrameForce");
+
+  pinocchio::python::StdAlignedVectorPythonVisitor<FrameMotion, true>::expose("StdVec_FrameMotion");  
 }
 
 }  // namespace python
