@@ -319,9 +319,12 @@ void SolverDDP::computeGains(const std::size_t& t) {
       throw_pretty("backward_error");
     }
     K_[t].topRows(nu).noalias() = Qxu_[t].leftCols(nu).transpose();
-    Quu_llt_[t].solveInPlace(K_[t].topRows(nu));
+
+    Eigen::Block<Eigen::MatrixXd> K = K_[t].topRows(nu);
+    Quu_llt_[t].solveInPlace(K);
     k_[t].head(nu) = Qu_[t].head(nu);
-    Quu_llt_[t].solveInPlace(k_[t].head(nu));
+    Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
+    Quu_llt_[t].solveInPlace(k);
   }
 }
 
