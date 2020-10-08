@@ -162,7 +162,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t& nu = m->get_nu();
-      
+
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {

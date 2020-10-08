@@ -219,11 +219,11 @@ void SolverDDP::backwardPass() {
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
     if (nu != 0) {
       Qxu_[t].leftCols(nu) = d->Lxu;
-      Quu_[t].topLeftCorner(nu,nu) = d->Luu;
+      Quu_[t].topLeftCorner(nu, nu) = d->Luu;
       Qu_[t].head(nu) = d->Lu;
       FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
       Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
-      Quu_[t].topLeftCorner(nu,nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
       Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
 
       if (!std::isnan(ureg_)) {
@@ -239,8 +239,7 @@ void SolverDDP::backwardPass() {
       if (std::isnan(ureg_)) {
         Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
       } else {
-        Quuk_[t].head(nu).noalias() =
-          Quu_[t].topLeftCorner(nu,nu) * k_[t].head(nu);
+        Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
         Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
         Vx_[t].noalias() -= 2 * (K_[t].topRows(nu).transpose() * Qu_[t].head(nu));
       }
@@ -282,7 +281,7 @@ void SolverDDP::forwardPass(const double& steplength) {
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (m->get_nu() != 0) {
       const std::size_t& nu = m->get_nu();
-      
+
       us_try_[t].head(nu).noalias() = us_[t].head(nu);
       us_try_[t].head(nu).noalias() -= k_[t].head(nu) * steplength;
       us_try_[t].head(nu).noalias() -= K_[t].topRows(nu) * dx_[t];
@@ -314,7 +313,7 @@ void SolverDDP::forwardPass(const double& steplength) {
 void SolverDDP::computeGains(const std::size_t& t) {
   const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
-    Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu,nu));
+    Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
       throw_pretty("backward_error");

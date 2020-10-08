@@ -68,9 +68,6 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
       boost::static_pointer_cast<crocoddyl::SolverKKT>(solver_factory.create(solver_type, action_type, T));
 
-  //boost::shared_ptr<crocoddyl::SolverAbstract> solverMultipleActions =
-  //  boost::static_pointer_cast<crocoddyl::SolverKKTMultipleActions>(solver_factory.create(solver_type, action_type, T));
-
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = solver->get_problem();
 

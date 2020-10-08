@@ -39,23 +39,24 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
 ActionModelFactory::ActionModelFactory() {}
 ActionModelFactory::~ActionModelFactory() {}
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(ActionModelTypes::Type type, bool secondInstance) const {
+boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(ActionModelTypes::Type type,
+                                                                             bool secondInstance) const {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
   switch (type) {
     case ActionModelTypes::ActionModelUnicycle:
       action = boost::make_shared<crocoddyl::ActionModelUnicycle>();
       break;
     case ActionModelTypes::ActionModelLQRDriftFree:
-      if(secondInstance) {
-          action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, true);
-        } else {
+      if (secondInstance) {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, true);
+      } else {
         action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, true);
       }
       break;
     case ActionModelTypes::ActionModelLQR:
-      if(secondInstance) {
-          action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, false);
-        } else {
+      if (secondInstance) {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, false);
+      } else {
         action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, false);
       }
       break;

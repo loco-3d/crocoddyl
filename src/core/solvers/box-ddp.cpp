@@ -55,17 +55,17 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
     du_lb_.head(nu) = problem_->get_runningModels()[t]->get_u_lb() - us_[t].head(nu);
     du_ub_.head(nu) = problem_->get_runningModels()[t]->get_u_ub() - us_[t].head(nu);
 
-    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t].topLeftCorner(nu,nu), Qu_[t].head(nu),
-                                               du_lb_.head(nu), du_ub_.head(nu), k_[t].head(nu));
+    const BoxQPSolution& boxqp_sol =
+        qp_.solve(Quu_[t].topLeftCorner(nu, nu), Qu_[t].head(nu), du_lb_.head(nu), du_ub_.head(nu), k_[t].head(nu));
 
     // Compute controls
-    Quu_inv_[t].topLeftCorner(nu,nu).setZero();
+    Quu_inv_[t].topLeftCorner(nu, nu).setZero();
     for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
       for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
         Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
       }
     }
-    K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu,nu) * Qxu_[t].leftCols(nu).transpose();
+    K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu, nu) * Qxu_[t].leftCols(nu).transpose();
     k_[t].topRows(nu).noalias() = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
@@ -90,7 +90,7 @@ void SolverBoxDDP::forwardPass(const double& steplength) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
     const std::size_t& nu = m->get_nu();
-    
+
     xs_try_[t] = xnext_;
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (nu != 0) {

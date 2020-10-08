@@ -257,7 +257,7 @@ void SolverKKT::allocateData() {
   nu_ = 0;
   const std::size_t& nx = problem_->get_nx();
   const std::size_t& ndx = problem_->get_ndx();
-  //const std::size_t& nu = problem_->get_nu_max();
+  // const std::size_t& nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();

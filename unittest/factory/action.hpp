@@ -39,7 +39,8 @@ class ActionModelFactory {
   explicit ActionModelFactory();
   ~ActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type, bool secondInstance=false) const;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type,
+                                                           bool secondInstance = false) const;
 };
 
 }  // namespace unittest
