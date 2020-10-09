@@ -16,9 +16,14 @@
 
 #include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameTranslation)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameRotation)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FramePlacement)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameForce)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameMotion)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameFrictionCone)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameWrenchCone)
+EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameCoPSupport)
 
 namespace crocoddyl {
 namespace python {
