@@ -134,9 +134,10 @@ void SolverFDDP::updateExpectedImprovement() {
   }
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    if (models[t]->get_nu() != 0) {
-      dg_ += Qu_[t].dot(k_[t]);
-      dq_ -= k_[t].dot(Quuk_[t]);
+    const std::size_t& nu = models[t]->get_nu();
+    if (nu != 0) {
+      dg_ += Qu_[t].head(nu).dot(k_[t].head(nu));
+      dq_ -= k_[t].head(nu).dot(Quuk_[t].head(nu));
     }
     if (!is_feasible_) {
       dg_ -= Vx_[t].dot(fs_[t]);
@@ -160,12 +161,13 @@ void SolverFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::size_t& nu = m->get_nu();
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (m->get_nu() != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t]);
+      if (nu != 0) {
+        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t].head(nu));
       } else {
         m->calc(d, xs_try_[t]);
       }
@@ -193,11 +195,12 @@ void SolverFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::size_t& nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (m->get_nu() != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t]);
+      if (nu != 0) {
+        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t].head(nu));
       } else {
         m->calc(d, xs_try_[t]);
       }

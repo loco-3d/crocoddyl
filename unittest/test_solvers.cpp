@@ -103,8 +103,10 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
 
   // check solutions against each other
   for (unsigned int t = 0; t < T; ++t) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = solver->get_problem()->get_runningModels()[t];
+    const std::size_t& nu = model->get_nu();
     BOOST_CHECK((solver->get_xs()[t] - kkt.get_xs()[t]).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((solver->get_us()[t] - kkt.get_us()[t]).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((solver->get_us()[t].head(nu) - kkt.get_us()[t]).isMuchSmallerThan(1.0, 1e-9));
   }
   BOOST_CHECK((solver->get_xs()[T] - kkt.get_xs()[T]).isMuchSmallerThan(1.0, 1e-9));
 }
