@@ -13,7 +13,6 @@
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "unittest_common.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -55,7 +54,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
   Eigen::VectorXd weights = 0.1 * Eigen::VectorXd::Random(nr);
-  double eps = random_real_in_range(1., 5.);
+  double eps = abs(Eigen::VectorXd::Random(1)[0]);
 
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
