@@ -113,9 +113,7 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
 
   template <typename Activation>
   explicit ActivationDataSmoothAbsTpl(Activation* const activation)
-      : Base(activation), a(VectorXs::Zero(activation->get_nr())) {
-    Arr.diagonal().array() = Scalar(2);
-  }
+      : Base(activation), a(VectorXs::Zero(activation->get_nr())) {}
 
   VectorXs a;
   using Base::Arr;
