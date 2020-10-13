@@ -17,6 +17,18 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Smooth-abs activation
+ *
+ * This activation function describes a smooth representation of an absolute activation (1-norm) for each element of a
+ * residual vector, i.e. \f[ \begin{equation} sum^nr_{i=0} \sqrt{\epsilon + \|r_i\|^2} \end{equation} \f] where
+ * \f$\epsilon\f$ defines the smoothing factor, \f$r_i\f$ is the scalar residual for the \f$i\f$ constraints, \f$nr\f$
+ * is the dimension of the residual vector.
+ *
+ * The computation of the function and it derivatives are carried out in `calc()` and `caldDiff()`, respectively.
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
@@ -30,9 +42,23 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the smooth-abs activation model
+   *
+   * The default `eps` value is defined as 1.
+   *
+   * @param[in] nr   Dimension of the residual vector
+   * @param[in] eps  Smoothing factor (default: 1.)
+   */
   explicit ActivationModelSmoothAbsTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps){};
   virtual ~ActivationModelSmoothAbsTpl(){};
 
+  /**
+   * @brief Compute the smooth-abs function
+   *
+   * @param[in] data  Smooth-abs activation data
+   * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
+   */
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
@@ -44,6 +70,12 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->a_value = d->a.sum();
   };
 
+  /**
+   * @brief Compute the derivatives of the smooth-abs function
+   *
+   * @param[in] data  Smooth-abs activation data
+   * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
@@ -55,13 +87,18 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->Arr.diagonal() = d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
   };
 
+  /**
+   * @brief Create the smooth-abs activation data
+   *
+   * @return the activation data
+   */
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
  protected:
-  using Base::nr_;
-  Scalar eps_;
+  using Base::nr_;  //!< Dimension of the residual vector
+  Scalar eps_;      //!< Smoothing factor
 };
 
 template <typename _Scalar>
