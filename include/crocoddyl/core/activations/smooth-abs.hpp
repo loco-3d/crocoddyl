@@ -30,7 +30,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr){};
+  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps){};
   virtual ~ActivationModelSmoothAbsTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -40,7 +40,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-    d->a = (r.array().cwiseAbs2().array() + Scalar(1)).array().cwiseSqrt();
+    d->a = (r.array().cwiseAbs2().array() + eps_).array().cwiseSqrt();
     data->a_value = d->a.sum();
   };
 
@@ -61,6 +61,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
 
  protected:
   using Base::nr_;
+  Scalar eps_;
 };
 
 template <typename _Scalar>

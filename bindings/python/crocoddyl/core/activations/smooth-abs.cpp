@@ -18,10 +18,11 @@ void exposeActivationSmoothAbs() {
       "ActivationModelSmoothAbs",
       "Smooth-absolute activation model.\n\n"
       "It describes a smooth representation of an absolute activation (1-norm), i.e.\n"
-      "sqrt{1 + ||r||^2}.",
-      bp::init<int>(bp::args("self", "nr"),
-                    "Initialize the activation model.\n\n"
-                    ":param nr: dimension of the cost-residual vector"))
+      "sqrt{eps + ||r||^2}.",
+      bp::init<int, bp::optional<double> >(bp::args("self", "nr", "eps"),
+                                           "Initialize the activation model.\n\n"
+                                           ":param nr: dimension of the cost-residual vector\n"
+                                           ":param eps: smoothing factor (default: 1.)"))
       .def("calc", &ActivationModelSmoothAbs::calc, bp::args("self", "data", "r"),
            "Compute the sqrt{1 + ||r||^2}.\n\n"
            ":param data: activation data\n"
