@@ -317,7 +317,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                                             boost::shared_ptr<ActionDataAbstract> data) {
-  if (i > T_ + 1) {
+  if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be less than or equal to " +
                         std::to_string(T_ + 1) + ")");
@@ -350,9 +350,9 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
-  if (i > T_ + 1) {
+  if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
-                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_) + ")");
+                 << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_ + 1) + ")");
   }
   if (model->get_state()->get_nx() != nx_) {
     throw_pretty("Invalid argument: "
@@ -367,7 +367,7 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
                  << "nu node is greater than the maximum nu")
   }
 
-  if (i == T_ + 1) {
+  if (i == T_) {
     terminal_model_ = model;
     terminal_data_ = terminal_model_->createData();
   } else {
