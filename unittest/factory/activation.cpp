@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       os << "ActivationModelSmooth2Norm";
-      break;      
+      break;
     case ActivationModelTypes::ActivationModelWeightedQuad:
       os << "ActivationModelWeightedQuad";
       break;
@@ -69,7 +69,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       activation = boost::make_shared<crocoddyl::ActivationModelSmooth2Norm>(nr, eps);
-      break;      
+      break;
     case ActivationModelTypes::ActivationModelWeightedQuad:
       activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
       break;
