@@ -19,6 +19,7 @@ struct ActivationModelTypes {
   enum Type {
     ActivationModelQuad,
     ActivationModelSmoothAbs,
+    ActivationModelSmooth2Norm,
     ActivationModelWeightedQuad,
     ActivationModelQuadraticBarrier,
     ActivationModelWeightedQuadraticBarrier,
