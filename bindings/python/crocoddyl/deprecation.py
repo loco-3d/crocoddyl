@@ -1,5 +1,5 @@
 from . import libcrocoddyl_pywrap as _crocoddyl
-from .deprecated import deprecated, DeprecatedWarning
+from .deprecated import deprecated
 
 
 class ActivationModelSmoothAbs(_crocoddyl.ActivationModelSmooth1Norm):
