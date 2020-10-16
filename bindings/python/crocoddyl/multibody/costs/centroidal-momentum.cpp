@@ -86,6 +86,8 @@ void exposeCostCentroidalMomentum() {
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference centroidal momentum");
 
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataCentroidalMomentum> >();
+
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
       "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",
       bp::init<CostModelCentroidalMomentum*, DataCollectorAbstract*>(
