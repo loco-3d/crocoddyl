@@ -44,32 +44,34 @@ void SolverBoxFDDP::allocateData() {
 }
 
 void SolverBoxFDDP::computeGains(const std::size_t& t) {
-  if (problem_->get_runningModels()[t]->get_nu() > 0) {
+  const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
+  if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
       SolverFDDP::computeGains(t);
       return;
     }
 
-    du_lb_ = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
-    du_ub_ = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
+    du_lb_.head(nu) = problem_->get_runningModels()[t]->get_u_lb() - us_[t].head(nu);
+    du_ub_.head(nu) = problem_->get_runningModels()[t]->get_u_ub() - us_[t].head(nu);
 
-    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t]);
+    const BoxQPSolution& boxqp_sol =
+        qp_.solve(Quu_[t].topLeftCorner(nu, nu), Qu_[t].head(nu), du_lb_.head(nu), du_ub_.head(nu), k_[t].head(nu));
 
     // Compute controls
-    Quu_inv_[t].setZero();
+    Quu_inv_[t].topLeftCorner(nu, nu).setZero();
     for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
       for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
         Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
       }
     }
-    K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
-    k_[t].noalias() = -boxqp_sol.x;
+    K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu, nu) * Qxu_[t].leftCols(nu).transpose();
+    k_[t].topRows(nu).noalias() = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)
     for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
-      Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
+      Qu_[t].head(nu)(boxqp_sol.clamped_idx[i]) = 0.;
     }
   }
 }
@@ -88,15 +90,16 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::size_t& nu = m->get_nu();
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (m->get_nu() != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      if (nu != 0) {
+        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
         if (m->get_has_control_limits()) {  // clamp control
-          us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+          us_try_[t].head(nu) = us_try_[t].head(nu).cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
         }
-        m->calc(d, xs_try_[t], us_try_[t]);
+        m->calc(d, xs_try_[t], us_try_[t].head(nu));
       } else {
         m->calc(d, xs_try_[t]);
       }
@@ -124,15 +127,15 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-
+      const std::size_t& nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (m->get_nu() != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+      if (nu != 0) {
+        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
         if (m->get_has_control_limits()) {  // clamp control
-          us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+          us_try_[t].head(nu) = us_try_[t].head(nu).cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
         }
-        m->calc(d, xs_try_[t], us_try_[t]);
+        m->calc(d, xs_try_[t], us_try_[t].head(nu));
       } else {
         m->calc(d, xs_try_[t]);
       }

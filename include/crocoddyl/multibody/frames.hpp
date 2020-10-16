@@ -41,6 +41,11 @@ struct FrameTranslationTpl {
     return os;
   }
 
+  template <typename OtherScalar>
+  bool operator==(const FrameTranslationTpl<OtherScalar>& other) const {
+    return id == other.id && translation == other.translation;
+  }
+
   FrameIndex id;
   Vector3s translation;
 };
@@ -60,6 +65,11 @@ struct FrameRotationTpl {
     return os;
   }
 
+  template <typename OtherScalar>
+  bool operator==(const FrameRotationTpl<OtherScalar>& other) const {
+    return id == other.id && rotation == other.rotation;
+  }
+
   FrameIndex id;
   Matrix3s rotation;
 };
@@ -74,6 +84,12 @@ struct FramePlacementTpl {
   explicit FramePlacementTpl() : id(0), placement(SE3::Identity()) {}
   FramePlacementTpl(const FramePlacementTpl<Scalar>& value) : id(value.id), placement(value.placement) {}
   FramePlacementTpl(const FrameIndex& id, const SE3& placement) : id(id), placement(placement) {}
+
+  template <typename OtherScalar>
+  bool operator==(const FramePlacementTpl<OtherScalar>& other) const {
+    return id == other.id && placement == other.placement;
+  }
+
   friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
     os << "       id: " << X.id << std::endl << "placement: " << std::endl << X.placement << std::endl;
     return os;
@@ -112,6 +128,11 @@ struct FrameMotionTpl {
     return os;
   }
 
+  template <typename OtherScalar>
+  bool operator==(const FrameMotionTpl<OtherScalar>& other) const {
+    return id == other.id && motion == other.motion && reference == other.reference;
+  }
+
   FrameIndex id;
   pinocchio::MotionTpl<Scalar> motion;
   pinocchio::ReferenceFrame reference;
@@ -130,6 +151,11 @@ struct FrameForceTpl {
   friend std::ostream& operator<<(std::ostream& os, const FrameForceTpl<Scalar>& X) {
     os << "   id: " << X.id << std::endl << "force: " << std::endl << X.force << std::endl;
     return os;
+  }
+
+  template <typename OtherScalar>
+  bool operator==(const FrameForceTpl<OtherScalar>& other) const {
+    return id == other.id && force == other.force;
   }
 
   FrameIndex id;
