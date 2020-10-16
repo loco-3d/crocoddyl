@@ -1,5 +1,6 @@
 from .libcrocoddyl_pywrap import *
 from .libcrocoddyl_pywrap import __version__
+from .deprecation import *
 
 import pinocchio
 import numpy as np
