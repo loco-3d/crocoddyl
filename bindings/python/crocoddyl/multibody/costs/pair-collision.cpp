@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
+#include "python/crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/costs/pair-collisions.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 #include <pinocchio/multibody/fwd.hpp>

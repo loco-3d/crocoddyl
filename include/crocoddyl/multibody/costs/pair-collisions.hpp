@@ -11,7 +11,8 @@
 
 #include "crocoddyl/core/activations/norm2-barrier.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include <pinocchio/multibody/fwd.hpp>
