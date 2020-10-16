@@ -9,6 +9,8 @@
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
 
+#include "crocoddyl/core/utils/deprecate.hpp"
+
 namespace crocoddyl {
 
 // action
@@ -70,9 +72,9 @@ template <typename Scalar>
 struct ActivationDataWeightedQuadTpl;
 
 template <typename Scalar>
-class ActivationModelSmoothAbsTpl;
+class ActivationModelSmooth1NormTpl;
 template <typename Scalar>
-struct ActivationDataSmoothAbsTpl;
+struct ActivationDataSmooth1NormTpl;
 
 template <typename Scalar>
 class ActivationModelSmooth2NormTpl;
@@ -193,8 +195,10 @@ typedef ActivationModelWeightedQuadraticBarrierTpl<double> ActivationModelWeight
 typedef ActivationModelQuadTpl<double> ActivationModelQuad;
 typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
-typedef ActivationModelSmoothAbsTpl<double> ActivationModelSmoothAbs;
-typedef ActivationDataSmoothAbsTpl<double> ActivationDataSmoothAbs;
+DEPRECATED("Use ActivationModelSmooth1Norm", typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmoothAbs;)
+DEPRECATED("Use ActivationDataSmooth1Norm", typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmoothAbs;)
+typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmooth1Norm;
+typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmooth1Norm;
 typedef ActivationModelSmooth2NormTpl<double> ActivationModelSmooth2Norm;
 typedef ActivationDataSmooth2NormTpl<double> ActivationDataSmooth2Norm;
 typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;

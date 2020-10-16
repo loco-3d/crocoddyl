@@ -1,13 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
-#define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_
 
 #include <stdexcept>
 
@@ -30,7 +30,7 @@ namespace crocoddyl {
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -38,7 +38,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataSmoothAbsTpl<Scalar> Data;
+  typedef ActivationDataSmooth1NormTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -50,8 +50,9 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
    * @param[in] nr   Dimension of the residual vector
    * @param[in] eps  Smoothing factor (default: 1.)
    */
-  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps){};
-  virtual ~ActivationModelSmoothAbsTpl(){};
+  explicit ActivationModelSmooth1NormTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.))
+      : Base(nr), eps_(eps){};
+  virtual ~ActivationModelSmooth1NormTpl(){};
 
   /**
    * @brief Compute the smooth-abs function
@@ -102,7 +103,7 @@ class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataSmooth1NormTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -112,7 +113,7 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <typename Activation>
-  explicit ActivationDataSmoothAbsTpl(Activation* const activation)
+  explicit ActivationDataSmooth1NormTpl(Activation* const activation)
       : Base(activation), a(VectorXs::Zero(activation->get_nr())) {}
 
   VectorXs a;
@@ -121,4 +122,4 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_

@@ -8,14 +8,14 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/smooth-abs.hpp"
+#include "crocoddyl/core/activations/smooth-1norm.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationSmoothAbs() {
-  bp::class_<ActivationModelSmoothAbs, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelSmoothAbs",
+void exposeActivationSmooth1Norm() {
+  bp::class_<ActivationModelSmooth1Norm, bp::bases<ActivationModelAbstract> >(
+      "ActivationModelSmooth1Norm",
       "Smooth-absolute activation model.\n\n"
       "It describes a smooth representation of an absolute activation (1-norm), i.e.\n"
       "sum^nr_{i=0} sqrt{eps + ||ri||^2}, where ri is the scalar residual for the i constraints,\n."
@@ -24,15 +24,15 @@ void exposeActivationSmoothAbs() {
                                            "Initialize the activation model.\n\n"
                                            ":param nr: dimension of the residual vector\n"
                                            ":param eps: smoothing factor (default: 1.)"))
-      .def("calc", &ActivationModelSmoothAbs::calc, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelSmooth1Norm::calc, bp::args("self", "data", "r"),
            "Compute the smooth-abs function.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelSmoothAbs::calcDiff, bp::args("self", "data", "r"),
+      .def("calcDiff", &ActivationModelSmooth1Norm::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of a smooth-abs function.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelSmoothAbs::createData, bp::args("self"),
+      .def("createData", &ActivationModelSmooth1Norm::createData, bp::args("self"),
            "Create the smooth-abs activation data.\n\n");
 }
 
