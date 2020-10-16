@@ -51,9 +51,14 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] eps  Smoothing factor (default: 1.)
    */
   explicit ActivationModelSmooth1NormTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps) {
-    if (eps <= Scalar(0.)) {
+    if (eps < Scalar(0.)) {
       throw_pretty("Invalid argument: "
                    << "eps should be a positive value");
+    }
+    if (eps == Scalar(0.)) {
+      std::cerr
+          << "Warning: eps=0 leads to derivatives discontinuoties in the origin, it becomes the absolute function"
+          << std::endl;
     }
   };
   virtual ~ActivationModelSmooth1NormTpl(){};
