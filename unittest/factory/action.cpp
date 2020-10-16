@@ -39,17 +39,26 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
 ActionModelFactory::ActionModelFactory() {}
 ActionModelFactory::~ActionModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(ActionModelTypes::Type type) const {
+boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(ActionModelTypes::Type type,
+                                                                             bool secondInstance) const {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
   switch (type) {
     case ActionModelTypes::ActionModelUnicycle:
       action = boost::make_shared<crocoddyl::ActionModelUnicycle>();
       break;
     case ActionModelTypes::ActionModelLQRDriftFree:
-      action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, true);
+      if (secondInstance) {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, true);
+      } else {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, true);
+      }
       break;
     case ActionModelTypes::ActionModelLQR:
-      action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, false);
+      if (secondInstance) {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, false);
+      } else {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, false);
+      }
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ActionModelTypes::Type given");
