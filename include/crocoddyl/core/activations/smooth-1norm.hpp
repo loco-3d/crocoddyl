@@ -58,7 +58,7 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
     }
     if (eps == Scalar(0.)) {
       std::cerr
-          << "Warning: eps=0 leads to derivatives discontinuoties in the origin, it becomes the absolute function"
+          << "Warning: eps=0 leads to derivatives discontinuities in the origin, it becomes the absolute function"
           << std::endl;
     }
   };
