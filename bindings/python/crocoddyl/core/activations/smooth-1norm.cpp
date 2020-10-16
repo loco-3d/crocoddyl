@@ -34,6 +34,16 @@ void exposeActivationSmooth1Norm() {
            ":param r: residual vector \n")
       .def("createData", &ActivationModelSmooth1Norm::createData, bp::args("self"),
            "Create the smooth-abs activation data.\n\n");
+
+  bp::register_ptr_to_python<boost::shared_ptr<ActivationDataSmooth1Norm> >();
+
+  bp::class_<ActivationDataSmooth1Norm, bp::bases<ActivationDataAbstract> >(
+      "ActivationDataSmooth1Norm", "Data for smooth-abs activation.\n\n",
+      bp::init<ActivationModelSmooth1Norm*>(bp::args("self", "model"),
+                                            "Create smooth-abs activation data.\n\n"
+                                            ":param model: smooth-abs activation model"))
+      .add_property("a", bp::make_getter(&ActivationDataSmooth1Norm::a, bp::return_internal_reference<>()),
+                    "sqrt{eps + ||ri||^2} value");
 }
 
 }  // namespace python
