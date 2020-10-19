@@ -38,7 +38,7 @@ struct CostItemTpl {
 };
 
 /**
- * @brief Sumation of individual cost models
+ * @brief Summation of individual cost models
  *
  * This class serves to manage a set of added cost models. The cost functions might active or inactive, with this
  * approach we avoid dynamic allocation of memory. Each cost model is added through `addCost`, where the weight and its
