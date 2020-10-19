@@ -67,11 +67,11 @@ void exposeCostSum() {
                                                        ":param state: state description"))
       .def("addCost", &CostModelSum::addCost,
            CostModelSum_addCost_wrap(bp::args("self", "name", "cost", "weight", "active"),
-                                        "Add a cost item.\n\n"
-                                        ":param name: cost name\n"
-                                        ":param cost: cost model\n"
-                                        ":param weight: cost weight\n"
-                                        ":param active: True if the cost is activated (default true)"))
+                                     "Add a cost item.\n\n"
+                                     ":param name: cost name\n"
+                                     ":param cost: cost model\n"
+                                     ":param weight: cost weight\n"
+                                     ":param active: True if the cost is activated (default true)"))
       .def("removeCost", &CostModelSum::removeCost, bp::args("self", "name"),
            "Remove a cost item.\n\n"
            ":param name: cost name")
