@@ -20,7 +20,7 @@
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addContact_wrap, CostModelSum::addCost, 3, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addCost_wrap, CostModelSum::addCost, 3, 4)
 
 void exposeCostSum() {
   // Register custom converters between std::map and Python dict
@@ -46,7 +46,6 @@ void exposeCostSum() {
                     "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight")
       .def_readwrite("active", &CostItem::active, "cost status");
-  ;
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
@@ -67,7 +66,7 @@ void exposeCostSum() {
                                                        "For this case the default nu is equals to model.nv.\n"
                                                        ":param state: state description"))
       .def("addCost", &CostModelSum::addCost,
-           CostModelSum_addContact_wrap(bp::args("self", "name", "cost", "weight", "active"),
+           CostModelSum_addCost_wrap(bp::args("self", "name", "cost", "weight", "active"),
                                         "Add a cost item.\n\n"
                                         ":param name: cost name\n"
                                         ":param cost: cost model\n"
