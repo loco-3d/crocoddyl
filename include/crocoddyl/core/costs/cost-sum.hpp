@@ -51,7 +51,7 @@ struct CostItemTpl {
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
  * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively.
  *
- * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelSumTpl {
@@ -180,7 +180,7 @@ class CostModelSumTpl {
   const std::size_t& get_nu() const;
 
   /**
-   * @brief Return the dimension of the actived residual vector
+   * @brief Return the dimension of the active residual vector
    */
   const std::size_t& get_nr() const;
 
