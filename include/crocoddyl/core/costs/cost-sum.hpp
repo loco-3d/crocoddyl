@@ -123,7 +123,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -133,7 +133,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -146,7 +146,7 @@ class CostModelSumTpl {
    * @param data  Data collector
    * @return the cost data
    */
-  boost::shared_ptr<CostDataSumTpl<Scalar> > createData(DataCollectorAbstract* const data);
+  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
 
   /**
    * @copybrief calc()
@@ -154,7 +154,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point
    */
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @copybrief calcDiff()
@@ -162,7 +162,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point
    */
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state
