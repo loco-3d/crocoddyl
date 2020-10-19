@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,78 +9,34 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_
 
-#include <stdexcept>
-
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/activations/smooth-1norm.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
-template <typename _Scalar>
-class ActivationModelSmoothAbsTpl : public ActivationModelAbstractTpl<_Scalar> {
+template <typename Scalar>
+class ActivationModelSmoothAbsTpl : public ActivationModelSmooth1NormTpl<Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef ActivationModelAbstractTpl<Scalar> Base;
-  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataSmoothAbsTpl<Scalar> Data;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef ActivationModelSmooth1NormTpl<Scalar> Base;
 
-  explicit ActivationModelSmoothAbsTpl(const std::size_t& nr) : Base(nr){};
-  virtual ~ActivationModelSmoothAbsTpl(){};
-
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
-    if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
-    }
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-
-    d->a = (r.array().cwiseAbs2().array() + Scalar(1)).array().cwiseSqrt();
-    data->a_value = d->a.sum();
-  };
-
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
-    if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
-    }
-
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-    data->Ar = r.cwiseProduct(d->a.cwiseInverse());
-    data->Arr.diagonal() = d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
-  };
-
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-  };
-
- protected:
-  using Base::nr_;
+  DEPRECATED("Use ActivationModelSmooth1Norm",
+             explicit ActivationModelSmoothAbsTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.))
+             : Base(nr, eps){};)
 };
 
-template <typename _Scalar>
-struct ActivationDataSmoothAbsTpl : public ActivationDataAbstractTpl<_Scalar> {
+template <typename Scalar>
+struct ActivationDataSmoothAbsTpl : public ActivationDataSmooth1NormTpl<Scalar> {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef _Scalar Scalar;
-  typedef ActivationDataAbstractTpl<Scalar> Base;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef ActivationDataSmooth1NormTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationDataSmoothAbsTpl(Activation* const activation)
-      : Base(activation), a(VectorXs::Zero(activation->get_nr())) {
-    Arr.diagonal().array() = Scalar(2);
-  }
-
-  VectorXs a;
-  using Base::Arr;
+  DEPRECATED("Use ActivationDataSmooth1Norm", explicit ActivationDataSmoothAbsTpl(Activation* const activation)
+             : Base(activation){};)
 };
 
 }  // namespace crocoddyl
