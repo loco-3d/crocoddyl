@@ -16,7 +16,6 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
