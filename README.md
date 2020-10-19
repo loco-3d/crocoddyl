@@ -156,7 +156,7 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 ## Citing Crocoddyl
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
-```tex
+```bibtex
 @inproceedings{mastalli20crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
   and Naveau, Maximilien and Carpentier, Justin, Righetti, Ludovic and Vijayakumar, Sethu and Mansard, Nicolas},
@@ -166,7 +166,7 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 }
 ```
 and the following one to reference this website:
-```tex
+```bibtex
 @misc{crocoddylweb,
    author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
    title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
