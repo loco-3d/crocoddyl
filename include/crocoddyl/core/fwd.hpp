@@ -212,6 +212,13 @@ class ConstraintModelAbstractTpl;
 template <typename Scalar>
 struct ConstraintDataAbstractTpl;
 
+template <typename Scalar>
+struct ConstraintItemTpl;
+template <typename Scalar>
+class ConstraintModelManagerTpl;
+template <typename Scalar>
+struct ConstraintDataManagerTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
@@ -339,6 +346,9 @@ DEPRECATED("Use ResidualModelControl with CostModelResidual", typedef CostModelC
 
 typedef ConstraintModelAbstractTpl<double> ConstraintModelAbstract;
 typedef ConstraintDataAbstractTpl<double> ConstraintDataAbstract;
+typedef ConstraintItemTpl<double> ConstraintItem;
+typedef ConstraintModelManagerTpl<double> ConstraintModelManager;
+typedef ConstraintDataManagerTpl<double> ConstraintDataManager;
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 
