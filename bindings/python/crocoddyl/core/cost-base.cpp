@@ -26,7 +26,7 @@ void exposeCostAbstract() {
       "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
       "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, int>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
@@ -37,14 +37,14 @@ void exposeCostAbstract() {
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: Activation model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, int, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param nr: dimension of residual vector\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and the default nu value is "
