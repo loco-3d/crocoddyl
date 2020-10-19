@@ -59,8 +59,7 @@ void exposeCostSum() {
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state description\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
+          ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateAbstract> >(bp::args("self", "state"),
                                                        "Initialize the total cost model.\n\n"
                                                        "For this case the default nu is equals to model.nv.\n"
@@ -104,7 +103,7 @@ void exposeCostSum() {
            ":return total cost data.")
       .add_property("state",
                     bp::make_function(&CostModelSum::get_state, bp::return_value_policy<bp::return_by_value>()),
-                    "state of the multibody system")
+                    "state description")
       .add_property("costs",
                     bp::make_function(&CostModelSum::get_costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs")
