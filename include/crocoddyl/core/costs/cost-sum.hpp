@@ -38,7 +38,7 @@ struct CostItemTpl {
 };
 
 /**
- * @brief Sumation of individual cost models
+ * @brief Summation of individual cost models
  *
  * This class serves to manage a set of added cost models. The cost functions might active or inactive, with this
  * approach we avoid dynamic allocation of memory. Each cost model is added through `addCost`, where the weight and its
@@ -51,7 +51,7 @@ struct CostItemTpl {
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
  * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively.
  *
- * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelSumTpl {
@@ -123,7 +123,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -133,7 +133,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -146,7 +146,7 @@ class CostModelSumTpl {
    * @param data  Data collector
    * @return the cost data
    */
-  boost::shared_ptr<CostDataSumTpl<Scalar> > createData(DataCollectorAbstract* const data);
+  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
 
   /**
    * @copybrief calc()
@@ -154,7 +154,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point
    */
-  void calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @copybrief calcDiff()
@@ -162,7 +162,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point
    */
-  void calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state
@@ -180,7 +180,7 @@ class CostModelSumTpl {
   const std::size_t& get_nu() const;
 
   /**
-   * @brief Return the dimension of the actived residual vector
+   * @brief Return the dimension of the active residual vector
    */
   const std::size_t& get_nr() const;
 

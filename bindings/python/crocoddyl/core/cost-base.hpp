@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_COST_BASE_HPP_
 
 #include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -32,15 +33,27 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0), "u has wrong dimension");
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    if (static_cast<std::size_t>(u.size()) != nu_) {
+      throw_pretty("Invalid argument: "
+                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    assert_pretty((static_cast<std::size_t>(u.size()) == nu_ || nu_ == 0), "u has wrong dimension");
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    if (static_cast<std::size_t>(u.size()) != nu_) {
+      throw_pretty("Invalid argument: "
+                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
