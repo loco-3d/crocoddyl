@@ -61,6 +61,8 @@ void exposeCostAbstract() {
                                                                                   bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
+           "It computes the partial derivatives of the cost function.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n")

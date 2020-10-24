@@ -29,6 +29,7 @@ void exposeActivationQuad() {
       .def("calcDiff", &ActivationModelQuad::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of a quadratic function.\n\n"
            "Note that the Hessian is constant, so we don't write again this value.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuad::createData, bp::args("self"),

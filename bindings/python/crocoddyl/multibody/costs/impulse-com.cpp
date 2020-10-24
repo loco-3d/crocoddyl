@@ -43,6 +43,7 @@ void exposeCostImpulseCoM() {
                                          const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelImpulseCoM::calcDiff, bp::args("self", "data", "x"),
           "Compute the derivatives of the CoM position cost for impulse dynamics.\n\n"
+          "It assumes that that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n")
       .def<void (CostModelImpulseCoM::*)(const boost::shared_ptr<CostDataAbstract>&,

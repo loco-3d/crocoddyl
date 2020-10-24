@@ -31,6 +31,7 @@ void exposeSquashingAbstract() {
            ":param s: squashing input")
       .def("calcDiff", pure_virtual(&SquashingModelAbstract_wrap::calcDiff), bp::args("self", "data", "s"),
            "Compute the derivative of the squashing function.\n\n"
+           "It assumes that calc has been run first.\n"
            ":param data: squashing data\n"
            ":param u: squashing input")
       .def("createData", &SquashingModelAbstract_wrap::createData, bp::args("self"), "Create the squashing data.\n\n")

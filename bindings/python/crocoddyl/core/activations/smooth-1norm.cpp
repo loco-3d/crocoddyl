@@ -30,6 +30,7 @@ void exposeActivationSmooth1Norm() {
            ":param r: residual vector")
       .def("calcDiff", &ActivationModelSmooth1Norm::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of a smooth-abs function.\n\n"
+           "It assumes that calc has been run first.\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelSmooth1Norm::createData, bp::args("self"),

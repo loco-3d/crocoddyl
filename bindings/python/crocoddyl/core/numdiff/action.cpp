@@ -38,6 +38,7 @@ void exposeActionNumDiff() {
           "calcDiff", &ActionModelNumDiff::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the dynamics and cost functions.\n\n"
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
+          "It assumes that calc has been run first.\n"
           ":param data: NumDiff action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")

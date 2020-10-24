@@ -60,6 +60,7 @@ void exposeCostContactWrenchCone() {
                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactWrenchCone::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact wrench cone cost.\n\n"
+          "It assumes that that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")

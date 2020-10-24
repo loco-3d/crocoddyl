@@ -75,6 +75,7 @@ void exposeImpulseMultiple() {
            "Compute the derivatives of the impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
+           "It assumes that that calc has been run first.\n"
            ":param data: impulse data\n"
            ":param x: state vector\n")
       .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args("self", "data", "vnext"),
