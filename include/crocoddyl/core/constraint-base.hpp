@@ -32,6 +32,8 @@ namespace crocoddyl {
  * a linear approximation of the constraint function with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
  * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
+ * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -82,6 +84,9 @@ class ConstraintModelAbstractTpl {
 
   /**
    * @brief Compute the Jacobian of the constraint
+   *
+   * It computes the Jacobian of the constraint function. It assumes that `calc()` has
+   * been run first.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
