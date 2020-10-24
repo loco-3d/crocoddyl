@@ -43,7 +43,9 @@ void exposeConstraintAbstract() {
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&ConstraintModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
-           "Compute the derivatives of the constraint function and its residuals.\n\n"
+           "Compute the Jacobians of the constraint function.\n\n"
+           "It computes the Jacobians of the constraint function.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: constraint data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
