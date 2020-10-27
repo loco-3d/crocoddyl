@@ -256,17 +256,6 @@ class CostModelImpulseCoPPositionTpl;
 template <typename Scalar>
 using CostDataImpulseCoPPositionTpl = CostDataResidualTpl<Scalar>;
 
-// constraints
-template <typename Scalar>
-class ConstraintModelFramePlacementEqualityTpl;
-template <typename Scalar>
-struct ConstraintDataFramePlacementEqualityTpl;
-
-template <typename Scalar>
-class ConstraintModelFrameVelocityEqualityTpl;
-template <typename Scalar>
-struct ConstraintDataFrameVelocityEqualityTpl;
-
 // impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;
