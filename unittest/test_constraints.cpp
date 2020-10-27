@@ -240,7 +240,6 @@ bool init_function() {
                                            StateModelTypes::all[state_type]);
     }
   }
-
   return true;
 }
 
