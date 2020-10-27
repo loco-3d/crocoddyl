@@ -256,6 +256,12 @@ class CostModelImpulseCoPPositionTpl;
 template <typename Scalar>
 using CostDataImpulseCoPPositionTpl = CostDataResidualTpl<Scalar>;
 
+// constraints
+template <typename Scalar>
+class ConstraintModelFramePlacementEqualityTpl;
+template <typename Scalar>
+struct ConstraintDataFramePlacementEqualityTpl;
+
 // impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;
@@ -468,6 +474,9 @@ DEPRECATED("Use ResidualDataContactCoPPosition", typedef CostDataResidualTpl<dou
 DEPRECATED("Use ResidualModelContactWrenchCone with CostModelResidual",
            typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;)
 DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<double> CostDataImpulseWrenchCone;)
+
+typedef ConstraintModelFramePlacementEqualityTpl<double> ConstraintModelFramePlacementEquality;
+typedef ConstraintDataFramePlacementEqualityTpl<double> ConstraintDataFramePlacementEquality;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
