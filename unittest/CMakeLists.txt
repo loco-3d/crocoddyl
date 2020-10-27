@@ -27,6 +27,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_costs_noFF
   test_costs_collision
   test_cost_sum
+  test_constraints
   test_contacts
   test_controls
   test_impulses
