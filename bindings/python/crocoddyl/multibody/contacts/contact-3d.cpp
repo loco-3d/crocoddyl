@@ -42,6 +42,7 @@ void exposeContact3D() {
            "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n")
       .def("updateForce", &ContactModel3D::updateForce, bp::args("self", "data", "force"),

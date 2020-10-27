@@ -33,6 +33,7 @@ void exposeImpulse3D() {
            "Compute the derivatives of the 3D impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n")
       .def("updateForce", &ImpulseModel3D::updateForce, bp::args("self", "data", "force"),
