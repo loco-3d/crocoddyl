@@ -105,6 +105,10 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
+  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+  BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
+  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+  BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
 
   // Computing the action derivatives
   x = model->get_state()->rand();
@@ -121,6 +125,8 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
+  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
 }
 
 void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_type) {
