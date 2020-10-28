@@ -7,8 +7,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
-#define CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
+#ifndef CROCODDYL_CORE_NUMDIFF_COST_HPP_
+#define CROCODDYL_CORE_NUMDIFF_COST_HPP_
 
 #include <boost/function.hpp>
 #include "crocoddyl/multibody/fwd.hpp"
@@ -186,6 +186,6 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/numdiff/cost.hxx"
+#include "crocoddyl/core/numdiff/cost.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
+#endif  // CROCODDYL_CORE_NUMDIFF_COST_HPP_
