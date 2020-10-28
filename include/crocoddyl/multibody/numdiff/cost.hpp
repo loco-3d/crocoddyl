@@ -29,17 +29,17 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&)> ReevaluationFunction;
 
   /**
-   * @brief Construct a new CostModelNumDiff object from a CostModelAbstract.
+   * @brief Initialize the numdiff cost model
    *
    * @param model
    */
   explicit CostModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
   /**
-   * @brief Default destructor of the CostModelNumDiff object
+   * @brief Initialize the numdiff cost model
    */
   virtual ~CostModelNumDiffTpl();
 
@@ -58,29 +58,23 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Create a Data object
    *
-   * @param data is the DataCollector used by the original model.
-   * @return boost::shared_ptr<CostModelAbstract>
+   * @param data  Data collector used by the original model
+   * @return the cost data
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Get the model_ object
-   *
-   * @return CostModelAbstract&
+   * @brief Return the original cost model
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return const Scalar&
+   * @brief Return the disturbance value used by the numdiff routine
    */
   const Scalar& get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance value used by the numdiff routine
    */
   void set_disturbance(const Scalar& disturbance);
 
