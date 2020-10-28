@@ -72,7 +72,8 @@ void exposeIntegratedActionEuler() {
            ":param A: matrix to multiply (dim na x state.ndx)\n"
            ":return product between A and the Jacobian of the dynamics with respect the control (dim na x nu)")
       .def("multiplyFuTransposeBy", &IntegratedActionModelEuler::multiplyFuTransposeBy, bp::args("self", "Fu", "A"),
-           "Compute the product between the transpose of the Jacobian of the dynamics wrt control and the given matrix A.\n\n"
+           "Compute the product between the transpose of the Jacobian of the dynamics wrt control and the given "
+           "matrix A.\n\n"
            "It assumes that calcDiff has been run first.\n"
            ":param Fu: Jacobian matrix of the dynamics with respect to the control\n"
            ":param A: matrix to multiply (dim state.ndx x na)\n"
