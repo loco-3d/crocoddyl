@@ -99,8 +99,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
       d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     }
     // constraint
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    data->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    data->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
     d->dx(ix) = 0.0;
   }
   data->Fx /= disturbance_;
