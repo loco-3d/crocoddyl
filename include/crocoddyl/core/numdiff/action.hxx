@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()),
+    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()),
       model_(model),
       disturbance_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
@@ -41,6 +41,8 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
   model_->calc(d->data_0, x, u);
   data->cost = d->data_0->cost;
   data->xnext = d->data_0->xnext;
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
 }
 
 template <typename Scalar>
@@ -54,6 +56,8 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
   model_->calc(d->data_0, x);
   data->cost = d->data_0->cost;
   data->xnext = d->data_0->xnext;
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
 }
 
 template <typename Scalar>
@@ -74,6 +78,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   const Scalar c0 = d->data_0->cost;
   data->xnext = d->data_0->xnext;
   data->cost = d->data_0->cost;
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
 
   assertStableStateFD(x);
 
@@ -83,15 +89,18 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     d->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
-
+    // dynamics
     const VectorXs& xn = d->data_x[ix]->xnext;
     const Scalar c = d->data_x[ix]->cost;
     model_->get_state()->diff(xn0, xn, d->Fx.col(ix));
-
+    // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     if (get_with_gauss_approx() > 0) {
       d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     }
+    // constraint
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
     d->dx(ix) = 0.0;
   }
   data->Fx /= disturbance_;
@@ -101,15 +110,18 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = disturbance_;
     model_->calc(d->data_u[iu], x, u + d->du);
-
+    // dynamics
     const VectorXs& xn = d->data_u[iu]->xnext;
     const Scalar c = d->data_u[iu]->cost;
     model_->get_state()->diff(xn0, xn, d->Fu.col(iu));
-
+    // cost
     data->Lu(iu) = (c - c0) / disturbance_;
     if (get_with_gauss_approx() > 0) {
       d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / disturbance_;
     }
+    // constraint
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
     d->du(iu) = 0.0;
   }
   data->Fu /= disturbance_;
@@ -137,6 +149,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   const Scalar c0 = d->data_0->cost;
   data->xnext = d->data_0->xnext;
   data->cost = d->data_0->cost;
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
 
   assertStableStateFD(x);
 
@@ -147,11 +161,14 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
     const Scalar c = d->data_x[ix]->cost;
-
+    // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     if (get_with_gauss_approx() > 0) {
       d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     }
+    // constraint
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
     d->dx(ix) = 0.0;
   }
 

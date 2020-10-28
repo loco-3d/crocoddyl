@@ -15,7 +15,7 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
                                                                              const bool with_gauss_approx)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
+    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
   if (with_gauss_approx_ && nr_ == 1) throw_pretty("No Gauss approximation possible with nr = 1");
@@ -40,6 +40,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
   model_->calc(d->data_0, x, u);
   data->cost = d->data_0->cost;
   data->xout = d->data_0->xout;
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
 }
 
 template <typename Scalar>
@@ -53,6 +55,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
   model_->calc(d->data_0, x);
   data->cost = d->data_0->cost;
   data->xout = d->data_0->xout;
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
 }
 
 template <typename Scalar>
@@ -73,6 +77,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   const Scalar c0 = d->data_0->cost;
   data->xout = d->data_0->xout;
   data->cost = d->data_0->cost;
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
 
   assertStableStateFD(x);
 
@@ -82,13 +88,17 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     d->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
-
+    // dynamics
     const VectorXs& xn = d->data_x[ix]->xout;
     const Scalar c = d->data_x[ix]->cost;
     data->Fx.col(ix) = (xn - xn0) / disturbance_;
-
+    // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
+    d->dx(ix) = 0.0;
+    // constraint
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
     d->dx(ix) = 0.0;
   }
 
@@ -97,13 +107,16 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = disturbance_;
     model_->calc(d->data_u[iu], x, u + d->du);
-
+    // dynamics
     const VectorXs& xn = d->data_u[iu]->xout;
     const Scalar c = d->data_u[iu]->cost;
     data->Fu.col(iu) = (xn - xn0) / disturbance_;
-
+    // cost
     data->Lu(iu) = (c - c0) / disturbance_;
     d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / disturbance_;
+    // constraint
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
     d->du(iu) = 0.0;
   }
 
@@ -130,6 +143,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   const Scalar c0 = d->data_0->cost;
   data->xout = d->data_0->xout;
   data->cost = d->data_0->cost;
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
 
   assertStableStateFD(x);
 
@@ -140,10 +155,14 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
     const Scalar c = d->data_x[ix]->cost;
-
+    // dynamics
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     d->dx(ix) = 0.0;
+    // constraint
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
+    d->du(iu) = 0.0;
   }
 
   if (with_gauss_approx_) {
