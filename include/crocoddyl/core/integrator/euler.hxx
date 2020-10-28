@@ -54,6 +54,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
+  d->g = d->differential->g;
+  d->h = d->differential->h;
 }
 
 template <typename Scalar>
@@ -71,6 +73,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
+  d->g = d->differential->g;
+  d->h = d->differential->h;
 }
 
 template <typename Scalar>
@@ -112,6 +116,10 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
   control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
   d->Luu *= time_step_;
+  d->Gx = d->differential->Gx;
+  d->Gu = d->differential->Gu;
+  d->Hx = d->differential->Hx;
+  d->Hu = d->differential->Hu;
 }
 
 template <typename Scalar>
@@ -127,6 +135,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
   d->Lx = d->differential->Lx;
   d->Lxx = d->differential->Lxx;
+  d->Gx = d->differential->Gx;
+  d->Hx = d->differential->Hx;
 }
 
 template <typename Scalar>
