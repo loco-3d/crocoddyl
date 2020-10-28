@@ -78,6 +78,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
+  d->g = d->differential[0]->g;
+  d->h = d->differential[0]->h;
 }
 
 template <typename Scalar>
@@ -96,6 +98,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
+  d->g = d->differential[0]->g;
+  d->h = d->differential[0]->h;
 }
 
 template <typename Scalar>
@@ -224,6 +228,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                      (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] + Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
   d->Lxu.noalias() = time_step_ / Scalar(6.) *
                      (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
+  d->Gx = d->differential[0]->Gx;
+  d->Gu = d->differential[0]->Gu;
+  d->Hx = d->differential[0]->Hx;
+  d->Hu = d->differential[0]->Hu;
 }
 
 template <typename Scalar>
@@ -239,6 +247,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
   d->Lxx = k0_data->Lxx;
+  d->Gx = d->differential[0]->Gx;
+  d->Hx = d->differential[0]->Hx;
 }
 
 template <typename Scalar>
