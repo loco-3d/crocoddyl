@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/numdiff/cost.hpp"
+#include "crocoddyl/core/numdiff/cost.hpp"
 
 namespace crocoddyl {
 
