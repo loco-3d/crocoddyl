@@ -262,6 +262,11 @@ class ConstraintModelFramePlacementEqualityTpl;
 template <typename Scalar>
 struct ConstraintDataFramePlacementEqualityTpl;
 
+template <typename Scalar>
+class ConstraintModelFrameVelocityEqualityTpl;
+template <typename Scalar>
+struct ConstraintDataFrameVelocityEqualityTpl;
+
 // impulse
 template <typename Scalar>
 class ImpulseModelAbstractTpl;
@@ -477,6 +482,8 @@ DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<doub
 
 typedef ConstraintModelFramePlacementEqualityTpl<double> ConstraintModelFramePlacementEquality;
 typedef ConstraintDataFramePlacementEqualityTpl<double> ConstraintDataFramePlacementEquality;
+typedef ConstraintModelFrameVelocityEqualityTpl<double> ConstraintModelFrameVelocityEquality;
+typedef ConstraintDataFrameVelocityEqualityTpl<double> ConstraintDataFrameVelocityEquality;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;

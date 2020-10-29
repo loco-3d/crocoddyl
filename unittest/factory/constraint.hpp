@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ConstraintModelTypes {
-  enum Type { ConstraintModelFramePlacementEquality, NbConstraintModelTypes };
+  enum Type { ConstraintModelFramePlacementEquality, ConstraintModelFrameVelocityEquality, NbConstraintModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
