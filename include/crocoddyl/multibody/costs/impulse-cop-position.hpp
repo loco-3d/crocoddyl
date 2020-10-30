@@ -70,11 +70,8 @@ class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef ActivationBoundsTpl<Scalar> ActivationBounds;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
   /**
@@ -167,13 +164,7 @@ struct CostDataImpulseCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::Matrix3s Matrix3s;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
-  typedef typename MathBase::Matrix6s Matrix6s;
-  typedef typename MathBase::Vector6s Vector6s;
 
   template <template <typename Scalar> class Model>
   CostDataImpulseCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)

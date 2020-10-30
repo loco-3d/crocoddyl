@@ -34,15 +34,10 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameForceTpl<Scalar> FrameForce;
-  typedef WrenchConeTpl<Scalar> WrenchCone;
   typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
-  typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::MatrixX6s MatrixX6s;
 
   CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
@@ -62,7 +57,6 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
 
   using Base::activation_;
   using Base::state_;
-  //   using Base::unone_;
 
  private:
   FrameWrenchCone fref_;
@@ -79,7 +73,6 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 

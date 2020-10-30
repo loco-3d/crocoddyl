@@ -52,10 +52,8 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
-  typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -161,9 +159,6 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
   CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
