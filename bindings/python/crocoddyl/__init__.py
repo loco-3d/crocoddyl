@@ -461,6 +461,21 @@ def plotConvergence(costs, muLM, muV, gamma, theta, alpha, figIndex=1, show=True
         plt.show()
 
 
+def plotDynamicFeasibility(gaps, typeOfNorm=None, figIndex=1, show=True, figTitle=""):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+    plt.figure(figIndex, figsize=(6.4, 8))
+
+    plt.ylabel("dynamic feasibility")
+    plt.xlabel("iteration")
+    feasibility = [np.linalg.norm(f.tolist(), typeOfNorm) for f in gaps]
+    plt.plot(feasibility)
+    if show:
+        plt.show()
+
+
 def saveOCSolution(filename, xs, us, ks=None, Ks=None):
     import pickle
     data = {"xs": xs, "us": us, "ks": ks, "Ks": Ks}
