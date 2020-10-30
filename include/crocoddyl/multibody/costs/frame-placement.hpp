@@ -23,7 +23,7 @@ namespace crocoddyl {
  * @brief Frame placement cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{p}\ominus\mathbf{p}^*\f$, where
- * \f$\mathbf{p},\mathbf{p}^*\in~\mathbb{SE(3)}\f$ are the current and reference frame placements, respetively. Note
+ * \f$\mathbf{p},\mathbf{p}^*\in~\mathbb{SE(3)}\f$ are the current and reference frame placements, respectively. Note
  * that the dimension of the residual vector is 6.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -51,7 +51,6 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   typedef FramePlacementTpl<Scalar> FramePlacement;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the frame placement cost model
