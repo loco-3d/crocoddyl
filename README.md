@@ -159,7 +159,7 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
 ```bibtex
 @inproceedings{mastalli20crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
-  and Naveau, Maximilien and Carpentier, Justin, Righetti, Ludovic and Vijayakumar, Sethu and Mansard, Nicolas},
+  and Naveau, Maximilien and Carpentier, Justin and Righetti, Ludovic and Vijayakumar, Sethu and Mansard, Nicolas},
   title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
   booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
   year={2020}
