@@ -59,7 +59,7 @@ void exposeSolverDDP() {
       .def("tryStep", &SolverDDP::tryStep,
            SolverDDP_trySteps(bp::args("self", "stepLength"),
                               "Rollout the system with a predefined step length.\n\n"
-                              ":param stepLength: step length\n"
+                              ":param stepLength: step length (default 1)\n"
                               ":returns the cost improvement."))
       .def("stoppingCriteria", &SolverDDP::stoppingCriteria, bp::args("self"),
            "Return a sum of positive parameters whose sum quantifies the DDP termination.")
