@@ -54,7 +54,7 @@ void exposeSolverAbstract() {
            "(xs, us) of T+1 and T elements, respectively.\n"
            ":params recalc: true for recalculating the derivatives at current state and control.\n"
            ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths.")
-      .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", " stepLength"),
+      .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", "stepLength"),
            "Try a predefined step length and compute its cost improvement.\n\n"
            "It uses the search direction found by computeDirection to try a\n"
            "determined step length; so you need to run first computeDirection.\n"

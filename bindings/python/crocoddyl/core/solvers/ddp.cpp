@@ -57,7 +57,7 @@ void exposeSolverDDP() {
                ":params recalc: true for recalculating the derivatives at current state and control.\n"
                ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths."))
       .def("tryStep", &SolverDDP::tryStep,
-           SolverDDP_trySteps(bp::args("self", " stepLength=1"),
+           SolverDDP_trySteps(bp::args("self", "stepLength"),
                               "Rollout the system with a predefined step length.\n\n"
                               ":param stepLength: step length\n"
                               ":returns the cost improvement."))
@@ -78,7 +78,7 @@ void exposeSolverDDP() {
            "Run the backward pass (Riccati sweep)\n\n"
            "It assumes that the Jacobian and Hessians of the optimal control problem have been\n"
            "compute. These terms are computed by running calc.")
-      .def("forwardPass", &SolverDDP::forwardPass, bp::args("self", " stepLength=1"),
+      .def("forwardPass", &SolverDDP::forwardPass, bp::args("self", "stepLength"),
            "Run the forward pass or rollout\n\n"
            "It rollouts the action model given the computed policy (feedforward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"

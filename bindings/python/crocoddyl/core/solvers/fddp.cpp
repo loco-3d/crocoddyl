@@ -20,7 +20,7 @@ void exposeSolverFDDP() {
 
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
       "SolverFDDP",
-      "Feasibility-prone DDP (FDDP) solver.\n\n"
+      "Feasibility-driven DDP (FDDP) solver.\n\n"
       "The FDDP solver computes an optimal trajectory and control commands by iterates\n"
       "running backward and forward passes. The backward-pass updates locally the\n"
       "quadratic approximation of the problem and computes descent direction,\n"
