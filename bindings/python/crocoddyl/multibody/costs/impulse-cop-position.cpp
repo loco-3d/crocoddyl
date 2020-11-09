@@ -51,7 +51,12 @@ void exposeCostImpulseCoPPosition() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelImpulseCoPPosition::get_reference<FrameCoPSupport>,
-                    &CostModelImpulseCoPPosition::set_reference<FrameCoPSupport>, "reference foot geometry");
+                    &CostModelImpulseCoPPosition::set_reference<FrameCoPSupport>, "reference foot geometry and index")
+      .add_property("reference_box", &CostModelImpulseCoPPosition::get_reference<MathBaseTpl<double>::Vector2s>,
+                    &CostModelImpulseCoPPosition::set_reference<MathBaseTpl<double>::Vector2s>,
+                    "reference foot geometry")
+      .add_property("reference_id", &CostModelImpulseCoPPosition::get_reference<FrameIndex>,
+                    &CostModelImpulseCoPPosition::set_reference<FrameIndex>, "reference index");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataImpulseCoPPosition> >();
 

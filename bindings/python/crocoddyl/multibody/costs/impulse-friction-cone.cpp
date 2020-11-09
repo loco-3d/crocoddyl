@@ -60,7 +60,12 @@ void exposeCostImpulseFrictionCone() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelImpulseFrictionCone::get_reference<FrameFrictionCone>,
-                    &CostModelImpulseFrictionCone::set_reference<FrameFrictionCone>, "reference frame friction cone");
+                    &CostModelImpulseFrictionCone::set_reference<FrameFrictionCone>,
+                    "reference friction cone and index")
+      .add_property("reference_cone", &CostModelImpulseFrictionCone::get_reference<FrictionCone>,
+                    &CostModelImpulseFrictionCone::set_reference<FrictionCone>, "reference friction cone")
+      .add_property("reference_id", &CostModelImpulseFrictionCone::get_reference<FrameIndex>,
+                    &CostModelImpulseFrictionCone::set_reference<FrameIndex>, "reference index");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataImpulseFrictionCone> >();
 

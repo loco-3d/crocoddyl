@@ -96,8 +96,12 @@ template <typename Scalar>
 void CostModelContactImpulseTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameForce)) {
     fref_ = *static_cast<const FrameForce*>(pv);
+  } else if (ti == typeid(pinocchio::ForceTpl<Scalar>)) {
+    fref_.force = *static_cast<const pinocchio::ForceTpl<Scalar>*>(pv);
+  } else if (ti == typeid(FrameIndex)) {
+    fref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameForce / Force / FrameIndex)");
   }
 }
 
@@ -106,8 +110,14 @@ void CostModelContactImpulseTpl<Scalar>::get_referenceImpl(const std::type_info&
   if (ti == typeid(FrameForce)) {
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
     ref_map = fref_;
+  } else if (ti == typeid(pinocchio::ForceTpl<Scalar>)) {
+    pinocchio::ForceTpl<Scalar>& ref_map = *static_cast<pinocchio::ForceTpl<Scalar>*>(pv);
+    ref_map = fref_.force;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = fref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameForce / Force / FrameIndex)");
   }
 }
 

@@ -77,7 +77,11 @@ void exposeCostFrameVelocity() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelFrameVelocity::get_reference<FrameMotion>,
-                    &CostModelFrameVelocity::set_reference<FrameMotion>, "reference frame velocity")
+                    &CostModelFrameVelocity::set_reference<FrameMotion>, "reference motion and index")
+      .add_property("reference_motion", &CostModelFrameVelocity::get_reference<pinocchio::Motion>,
+                    &CostModelFrameVelocity::set_reference<pinocchio::Motion>, "reference motion")
+      .add_property("reference_id", &CostModelFrameVelocity::get_reference<FrameIndex>,
+                    &CostModelFrameVelocity::set_reference<FrameIndex>, "reference index")
       .add_property("vref",
                     bp::make_function(&CostModelFrameVelocity::get_reference<FrameMotion>,
                                       deprecated<>("Deprecated. Use reference.")),

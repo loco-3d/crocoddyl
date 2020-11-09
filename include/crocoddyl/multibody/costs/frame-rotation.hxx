@@ -99,8 +99,13 @@ void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& 
   if (ti == typeid(FrameRotation)) {
     Rref_ = *static_cast<const FrameRotation*>(pv);
     oRf_inv_ = Rref_.rotation.transpose();
+  } else if (ti == typeid(Matrix3s)) {
+    Rref_.rotation = *static_cast<const Matrix3s*>(pv);
+    oRf_inv_ = Rref_.rotation.transpose();
+  } else if (ti == typeid(FrameIndex)) {
+    Rref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation / Matrix3s / FrameIndex)");
   }
 }
 
@@ -109,8 +114,14 @@ void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& 
   if (ti == typeid(FrameRotation)) {
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
     ref_map = Rref_;
+  } else if (ti == typeid(Matrix3s)) {
+    Matrix3s& ref_map = *static_cast<Matrix3s*>(pv);
+    ref_map = Rref_.rotation;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = Rref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameRotation / Matrix3s / FrameIndex)");
   }
 }
 

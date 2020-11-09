@@ -72,8 +72,12 @@ template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameWrenchCone)) {
     fref_ = *static_cast<const FrameWrenchCone*>(pv);
+  } else if (ti == typeid(WrenchCone)) {
+    fref_.cone = *static_cast<const WrenchCone*>(pv);
+  } else if (ti == typeid(FrameIndex)) {
+    fref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone / WrenchCone / FrameIndex)");
   }
 }
 
@@ -82,8 +86,14 @@ void CostModelImpulseWrenchConeTpl<Scalar>::get_referenceImpl(const std::type_in
   if (ti == typeid(FrameWrenchCone)) {
     FrameWrenchCone& ref_map = *static_cast<FrameWrenchCone*>(pv);
     ref_map = fref_;
+  } else if (ti == typeid(WrenchCone)) {
+    WrenchCone& ref_map = *static_cast<WrenchCone*>(pv);
+    ref_map = fref_.cone;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = fref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone / WrenchCone / FrameIndex)");
   }
 }
 

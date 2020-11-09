@@ -71,7 +71,12 @@ void exposeCostContactImpulse() {
            ":return cost data.")
       .add_property("reference", &CostModelContactImpulse::get_reference<FrameForce>,
                     &CostModelContactImpulse::set_reference<FrameForce>,
+                    "reference spatial contact impulse in the contact coordinates and index")
+      .add_property("reference_force", &CostModelContactImpulse::get_reference<pinocchio::Force>,
+                    &CostModelContactImpulse::set_reference<pinocchio::Force>,
                     "reference spatial contact impulse in the contact coordinates")
+      .add_property("reference_id", &CostModelContactImpulse::get_reference<FrameIndex>,
+                    &CostModelContactImpulse::set_reference<FrameIndex>, "reference index")
       .add_property("fref",
                     bp::make_function(&CostModelContactImpulse::get_reference<FrameForce>,
                                       deprecated<>("Deprecated. Use reference.")),

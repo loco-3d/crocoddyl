@@ -90,8 +90,12 @@ template <typename Scalar>
 void CostModelFrameTranslationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameTranslation)) {
     xref_ = *static_cast<const FrameTranslation*>(pv);
+  } else if (ti == typeid(Vector3s)) {
+    xref_.translation = *static_cast<const Vector3s*>(pv);
+  } else if (ti == typeid(FrameIndex)) {
+    xref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation / Vector3s / FrameIndex)");
   }
 }
 
@@ -100,8 +104,14 @@ void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_inf
   if (ti == typeid(FrameTranslation)) {
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);
     ref_map = xref_;
+  } else if (ti == typeid(Vector3s)) {
+    Vector3s& ref_map = *static_cast<Vector3s*>(pv);
+    ref_map = xref_.translation;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = xref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation / Vector3s / FrameIndex)");
   }
 }
 

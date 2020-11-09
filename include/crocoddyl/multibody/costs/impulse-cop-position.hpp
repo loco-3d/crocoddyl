@@ -73,6 +73,7 @@ class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
+  typedef typename MathBase::Vector2s Vector2s;
 
   /**
    * @brief Initialize the impulse CoP cost model

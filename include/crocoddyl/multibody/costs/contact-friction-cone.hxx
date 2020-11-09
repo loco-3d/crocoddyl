@@ -100,8 +100,12 @@ template <typename Scalar>
 void CostModelContactFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameFrictionCone)) {
     fref_ = *static_cast<const FrameFrictionCone*>(pv);
+  } else if (ti == typeid(FrictionCone)) {
+    fref_.cone = *static_cast<const FrictionCone*>(pv);
+  } else if (ti == typeid(FrameIndex)) {
+    fref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone / Friction Cone / FrameIndex)");
   }
 }
 
@@ -110,8 +114,14 @@ void CostModelContactFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
   if (ti == typeid(FrameFrictionCone)) {
     FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
     ref_map = fref_;
+  } else if (ti == typeid(FrictionCone)) {
+    FrictionCone& ref_map = *static_cast<FrictionCone*>(pv);
+    ref_map = fref_.cone;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = fref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone / Friction Cone / FrameIndex)");
   }
 }
 

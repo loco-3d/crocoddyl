@@ -99,8 +99,13 @@ void CostModelFramePlacementTpl<Scalar>::set_referenceImpl(const std::type_info&
   if (ti == typeid(FramePlacement)) {
     Mref_ = *static_cast<const FramePlacement*>(pv);
     oMf_inv_ = Mref_.placement.inverse();
+  } else if (ti == typeid(pinocchio::SE3Tpl<Scalar>)) {
+    Mref_.placement = *static_cast<const pinocchio::SE3Tpl<Scalar>*>(pv);
+    oMf_inv_ = Mref_.placement.inverse();
+  } else if (ti == typeid(FrameIndex)) {
+    Mref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
+    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement / SE3 / FrameIndex)");
   }
 }
 
@@ -109,8 +114,14 @@ void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info&
   if (ti == typeid(FramePlacement)) {
     FramePlacement& ref_map = *static_cast<FramePlacement*>(pv);
     ref_map = Mref_;
+  } else if (ti == typeid(pinocchio::SE3Tpl<Scalar>)) {
+    pinocchio::SE3Tpl<Scalar>& ref_map = *static_cast<pinocchio::SE3Tpl<Scalar>*>(pv);
+    ref_map = Mref_.placement;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = Mref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
+    throw_pretty("Invalid argument: incorrect type (it should be FramePlacement / SE3 / FrameIndex)");
   }
 }
 

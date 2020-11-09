@@ -59,7 +59,11 @@ void exposeCostImpulseWrenchCone() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelImpulseWrenchCone::get_reference<FrameWrenchCone>,
-                    &CostModelImpulseWrenchCone::set_reference<FrameWrenchCone>, "reference frame Wrench cone");
+                    &CostModelImpulseWrenchCone::set_reference<FrameWrenchCone>, "reference Wrench cone and index")
+      .add_property("reference_cone", &CostModelImpulseWrenchCone::get_reference<WrenchCone>,
+                    &CostModelImpulseWrenchCone::set_reference<WrenchCone>, "reference wrench cone")
+      .add_property("reference_id", &CostModelImpulseWrenchCone::get_reference<FrameIndex>,
+                    &CostModelImpulseWrenchCone::set_reference<FrameIndex>, "reference index");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataImpulseWrenchCone> >();
 

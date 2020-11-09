@@ -75,7 +75,11 @@ void exposeCostContactWrenchCone() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelContactWrenchCone::get_reference<FrameWrenchCone>,
-                    &CostModelContactWrenchCone::set_reference<FrameWrenchCone>, "reference frame wrench cone");
+                    &CostModelContactWrenchCone::set_reference<FrameWrenchCone>, "reference wrench cone and index")
+      .add_property("reference_cone", &CostModelContactWrenchCone::get_reference<WrenchCone>,
+                    &CostModelContactWrenchCone::set_reference<WrenchCone>, "reference wrench cone")
+      .add_property("reference_id", &CostModelContactWrenchCone::get_reference<FrameIndex>,
+                    &CostModelContactWrenchCone::set_reference<FrameIndex>, "reference index");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactWrenchCone> >();
 

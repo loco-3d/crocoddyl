@@ -77,7 +77,11 @@ void exposeCostFrameTranslation() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelFrameTranslation::get_reference<FrameTranslation>,
-                    &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation")
+                    &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference translation and index")
+      .add_property("reference_translation", &CostModelFrameTranslation::get_reference<Eigen::Vector3d>,
+                    &CostModelFrameTranslation::set_reference<Eigen::Vector3d>, "reference translation")
+      .add_property("reference_id", &CostModelFrameTranslation::get_reference<FrameIndex>,
+                    &CostModelFrameTranslation::set_reference<FrameIndex>, "reference index")
       .add_property("xref",
                     bp::make_function(&CostModelFrameTranslation::get_reference<FrameTranslation>,
                                       deprecated<>("Deprecated. Use reference.")),

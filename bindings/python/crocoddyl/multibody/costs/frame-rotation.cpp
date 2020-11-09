@@ -77,7 +77,11 @@ void exposeCostFrameRotation() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelFrameRotation::get_reference<FrameRotation>,
-                    &CostModelFrameRotation::set_reference<FrameRotation>, "reference frame rotation")
+                    &CostModelFrameRotation::set_reference<FrameRotation>, "reference rotation and index")
+      .add_property("reference_rotation", &CostModelFrameRotation::get_reference<Eigen::Matrix3d>,
+                    &CostModelFrameRotation::set_reference<Eigen::Matrix3d>, "reference rotation")
+      .add_property("reference_id", &CostModelFrameRotation::get_reference<FrameIndex>,
+                    &CostModelFrameRotation::set_reference<FrameIndex>, "reference index")
       .add_property("Rref",
                     bp::make_function(&CostModelFrameRotation::get_reference<FrameRotation>,
                                       deprecated<>("Deprecated. Use reference.")),

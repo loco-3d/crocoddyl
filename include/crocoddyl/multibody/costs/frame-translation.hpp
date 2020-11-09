@@ -51,6 +51,7 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector3s Vector3s;
 
   /**
    * @brief Initialize the frame translation cost model

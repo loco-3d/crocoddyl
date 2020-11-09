@@ -77,7 +77,11 @@ void exposeCostFramePlacement() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelFramePlacement::get_reference<FramePlacement>,
-                    &CostModelFramePlacement::set_reference<FramePlacement>, "reference frame placement")
+                    &CostModelFramePlacement::set_reference<FramePlacement>, "reference placement and index")
+      .add_property("reference_placement", &CostModelFramePlacement::get_reference<pinocchio::SE3>,
+                    &CostModelFramePlacement::set_reference<pinocchio::SE3>, "reference placement")
+      .add_property("reference_id", &CostModelFramePlacement::get_reference<FrameIndex>,
+                    &CostModelFramePlacement::set_reference<FrameIndex>, "reference index")
       .add_property("Mref",
                     bp::make_function(&CostModelFramePlacement::get_reference<FramePlacement>,
                                       deprecated<>("Deprecated. Use reference.")),

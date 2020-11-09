@@ -91,7 +91,12 @@ void exposeCostContactForce() {
            ":return cost data.")
       .add_property("reference", &CostModelContactForce::get_reference<FrameForce>,
                     &CostModelContactForce::set_reference<FrameForce>,
+                    "reference contact force in the contact coordinates and index")
+      .add_property("reference_force", &CostModelContactForce::get_reference<pinocchio::Force>,
+                    &CostModelContactForce::set_reference<pinocchio::Force>,
                     "reference spatial contact force in the contact coordinates")
+      .add_property("reference_id", &CostModelContactForce::get_reference<FrameIndex>,
+                    &CostModelContactForce::set_reference<FrameIndex>, "reference index")
       .add_property("fref",
                     bp::make_function(&CostModelContactForce::get_reference<FrameForce>,
                                       deprecated<>("Deprecated. Use reference.")),

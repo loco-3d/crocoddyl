@@ -91,8 +91,14 @@ template <typename Scalar>
 void CostModelFrameVelocityTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameMotion)) {
     vref_ = *static_cast<const FrameMotion*>(pv);
+  } else if (ti == typeid(pinocchio::MotionTpl<Scalar>)) {
+    vref_.motion = *static_cast<const pinocchio::MotionTpl<Scalar>*>(pv);
+  } else if (ti == typeid(pinocchio::ReferenceFrame)) {
+    vref_.reference = *static_cast<const pinocchio::ReferenceFrame*>(pv);
+  } else if (ti == typeid(FrameIndex)) {
+    vref_.id = *static_cast<const FrameIndex*>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion / Motion / FrameIndex)");
   }
 }
 
@@ -101,8 +107,17 @@ void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& 
   if (ti == typeid(FrameMotion)) {
     FrameMotion& ref_map = *static_cast<FrameMotion*>(pv);
     ref_map = vref_;
+  } else if (ti == typeid(pinocchio::MotionTpl<Scalar>)) {
+    pinocchio::MotionTpl<Scalar>& ref_map = *static_cast<pinocchio::MotionTpl<Scalar>*>(pv);
+    ref_map = vref_.motion;
+  } else if (ti == typeid(pinocchio::ReferenceFrame)) {
+    pinocchio::ReferenceFrame& ref_map = *static_cast<pinocchio::ReferenceFrame*>(pv);
+    ref_map = vref_.reference;
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = vref_.id;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameMotion / Motion / FrameIndex)");
   }
 }
 
