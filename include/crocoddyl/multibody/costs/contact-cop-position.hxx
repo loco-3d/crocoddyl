@@ -97,8 +97,12 @@ template <typename Scalar>
 void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameCoPSupport)) {
     cop_support_ = *static_cast<const FrameCoPSupport*>(pv);
+  } else if (ti == typeid(Vector2s)) {
+    cop_support_.set_box(*static_cast<const Vector2s*>(pv));
+  } else if (ti == typeid(FrameIndex)) {
+    cop_support_.set_id(*static_cast<const FrameIndex*>(pv));
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport / Vector2s / FrameIndex)");
   }
 }
 
@@ -107,8 +111,15 @@ void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_i
   if (ti == typeid(FrameCoPSupport)) {
     FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
     ref_map = cop_support_;
+  } else if (ti == typeid(Vector2s)) {
+    Eigen::Map<Vector2s> ref_map(static_cast<Vector2s*>(pv)->data());
+    ref_map[0] = cop_support_.get_box()[0];
+    ref_map[1] = cop_support_.get_box()[1];
+  } else if (ti == typeid(FrameIndex)) {
+    FrameIndex& ref_map = *static_cast<FrameIndex*>(pv);
+    ref_map = cop_support_.get_id();
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport / Vector2s / FrameIndex)");
   }
 }
 

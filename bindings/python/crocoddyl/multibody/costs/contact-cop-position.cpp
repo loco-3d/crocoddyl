@@ -64,7 +64,11 @@ void exposeCostContactCoPPosition() {
            ":param data: shared data\n"
            ":return cost data.")
       .add_property("reference", &CostModelContactCoPPosition::get_reference<FrameCoPSupport>,
-                    &CostModelContactCoPPosition::set_reference<FrameCoPSupport>, "reference foot geometry");
+                    &CostModelContactCoPPosition::set_reference<FrameCoPSupport>, "reference foot geometry")
+      .add_property("reference_box", &CostModelContactCoPPosition::get_reference<MathBaseTpl<double>::Vector2s>,
+                    &CostModelContactCoPPosition::set_reference<MathBaseTpl<double>::Vector2s>, "reference box")
+      .add_property("reference_id", &CostModelContactCoPPosition::get_reference<FrameIndex>,
+                    &CostModelContactCoPPosition::set_reference<FrameIndex>, "reference index");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataContactCoPPosition> >();
 
