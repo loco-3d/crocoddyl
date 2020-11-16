@@ -1,13 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS
+// Copyright (C) 2020 CTU, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
-//
-// Copyright (c) 2020 CNRS, INRIA
-//
-// Copyright (c) CTU
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "diff_action.hpp"
@@ -94,25 +91,28 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
                                       ActuationModelTypes::ActuationModelSquashingFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
-      action = 
-          create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull, false);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                         ActuationModelTypes::ActuationModelFull, false);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
-      action = 
-          create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, ActuationModelTypes::ActuationModelFloatingBase, false);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+                                         ActuationModelTypes::ActuationModelFloatingBase, false);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
-      action = 
-          create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, ActuationModelTypes::ActuationModelFloatingBase, false);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
+                                         ActuationModelTypes::ActuationModelFloatingBase, false);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
-      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      action =
+          create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
-      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ, ActuationModelTypes::ActuationModelFloatingBase);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+                                         ActuationModelTypes::ActuationModelFloatingBase);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
-      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos, ActuationModelTypes::ActuationModelFloatingBase);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
+                                         ActuationModelTypes::ActuationModelFloatingBase);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
@@ -148,8 +148,9 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
 }
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
-DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type, 
-        ActuationModelTypes::Type actuation_type, bool with_friction) const {
+DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type,
+                                                          ActuationModelTypes::Type actuation_type,
+                                                          bool with_friction) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
@@ -166,16 +167,18 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                                    state,
-                                    crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                                              Eigen::Vector3d::Zero()),
-                                    actuation->get_nu()));
+      contact->addContact(
+          "lf", boost::make_shared<crocoddyl::ContactModel3D>(
+                    state,
+                    crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
+                                                Eigen::Vector3d::Zero()),
+                    actuation->get_nu()));
       if (with_friction) {
         cost->addCost("lf_cone",
                       boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
                           state, activation,
-                          crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"), cone),
+                          crocoddyl::FrameFrictionCone(
+                              state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"), cone),
                           actuation->get_nu()),
                       0.1);
       }
