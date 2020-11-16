@@ -4,6 +4,10 @@
 // Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
+//
+// Copyright (c) 2020 CNRS, INRIA
+//
+// Copyright (c) CTU
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
@@ -29,7 +33,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
           "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
           ":param state: multibody state\n"
-          ":param actuation: floating-base actuation model\n"
+          ":param actuation: actuation model\n"
           ":param contacts: multiple contact model\n"
           ":param costs: stack of cost functions\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"

@@ -4,6 +4,10 @@
 // Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
+//
+// Copyright (c) 2020 CNRS, INRIA
+//
+// Copyright (c) CTU
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"

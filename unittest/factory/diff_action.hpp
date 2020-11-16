@@ -4,6 +4,10 @@
 // Copyright (C) 2018-2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
+//
+// Copyright (c) 2020 CNRS, INRIA
+//
+// Copyright (c) CTU
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_DIFF_ACTION_FACTORY_HPP_
