@@ -14,7 +14,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/costs/cost-sum.hpp"
@@ -33,13 +33,13 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-  typedef ActuationModelFloatingBaseTpl<Scalar> ActuationModelFloatingBase;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   DifferentialActionModelContactFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                               boost::shared_ptr<ActuationModelFloatingBase> actuation,
+                                               boost::shared_ptr<ActuationModelAbstract> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
                                                const Scalar& JMinvJt_damping = Scalar(0.),
@@ -56,7 +56,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                            const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
                            const Scalar& tol = Scalar(1e-9));
 
-  const boost::shared_ptr<ActuationModelFloatingBase>& get_actuation() const;
+  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
@@ -76,7 +76,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   using Base::unone_;               //!< Neutral state
 
  private:
-  boost::shared_ptr<ActuationModelFloatingBase> actuation_;
+  boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<ContactModelMultiple> contacts_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;

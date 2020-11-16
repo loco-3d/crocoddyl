@@ -22,7 +22,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelContactFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelFloatingBase> actuation,
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     const Scalar& JMinvJt_damping, const bool& enable_force)
     : Base(state, actuation->get_nu(), costs->get_nr()),
@@ -219,7 +219,7 @@ pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActuationModelFloatingBaseTpl<Scalar> >&
+const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }

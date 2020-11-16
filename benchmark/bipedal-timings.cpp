@@ -26,6 +26,7 @@
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/multibody/costs/control.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
