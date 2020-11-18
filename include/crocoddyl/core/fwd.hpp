@@ -65,6 +65,9 @@ template <typename Scalar>
 class ActivationModelQuadTpl;
 
 template <typename Scalar>
+class ActivationModelQuadFlatTpl;
+
+template <typename Scalar>
 class ActivationModelWeightedQuadTpl;
 template <typename Scalar>
 struct ActivationDataWeightedQuadTpl;
@@ -191,6 +194,7 @@ typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarri
 typedef ActivationBoundsTpl<double> ActivationBounds;
 typedef ActivationModelWeightedQuadraticBarrierTpl<double> ActivationModelWeightedQuadraticBarrier;
 typedef ActivationModelQuadTpl<double> ActivationModelQuad;
+typedef ActivationModelQuadFlatTpl<double> ActivationModelQuadFlat;
 typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
 typedef ActivationModelSmoothAbsTpl<double> ActivationModelSmoothAbs;
