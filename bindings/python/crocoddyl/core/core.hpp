@@ -39,6 +39,8 @@ void exposeActionUnicycle();
 void exposeActionLQR();
 void exposeDifferentialActionLQR();
 void exposeActivationQuad();
+void exposeActivationQuadFlat();
+void exposeActivationQuadLog();
 void exposeActivationWeightedQuad();
 void exposeActivationQuadraticBarrier();
 void exposeActivationWeightedQuadraticBarrier();

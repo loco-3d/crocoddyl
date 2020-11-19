@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
-#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
 
 #include <stdexcept>
 #include "crocoddyl/core/fwd.hpp"
@@ -18,7 +18,7 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelQuadLogTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -29,16 +29,16 @@ class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelQuadFlatTpl(const std::size_t& nr,const Scalar& sigma2)
+  explicit ActivationModelQuadLogTpl(const std::size_t& nr,const Scalar& sigma2)
      : Base(nr), sigma2_(sigma2){};
-  virtual ~ActivationModelQuadFlatTpl(){};
+  virtual ~ActivationModelQuadLogTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    data->a_value = (Scalar(1.0) - exp((-r.transpose() * r)[0] / sigma2_));
+    data->a_value = log(Scalar(1.0) + (r.transpose() * r)[0] / sigma2_);
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -46,9 +46,9 @@ class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    a0_ = Scalar(2.0) / sigma2_ * exp((-r.transpose() * r)[0] / sigma2_);
+    a0_ = Scalar(2.0) / (Scalar(1.0) + (r.transpose() * r)[0] / sigma2_) / sigma2_;
     data->Ar = a0_ * r;
-    data->Arr.diagonal() = - Scalar(2.0) * a0_ / sigma2_ * (r * r.transpose()).diagonal();
+    data->Arr.diagonal() = - a0_*a0_  * (r * r.transpose()).diagonal();
     data->Arr.diagonal().array() += a0_;
   };
 
