@@ -9,6 +9,7 @@
 #include "activation.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/activations/quadratic-flat.hpp"
+#include "crocoddyl/core/activations/quadratic-log.hpp"
 #include "crocoddyl/core/activations/smooth-abs.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
@@ -28,6 +29,9 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
       break;
     case ActivationModelTypes::ActivationModelQuadFlat:
       os << "ActivationModelQuadFlat";
+      break;
+    case ActivationModelTypes::ActivationModelQuadLog:
+      os << "ActivationModelQuadLog";
       break;
     case ActivationModelTypes::ActivationModelSmoothAbs:
       os << "ActivationModelSmoothAbs";
@@ -70,6 +74,9 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
       break;
     case ActivationModelTypes::ActivationModelQuadFlat:
       activation = boost::make_shared<crocoddyl::ActivationModelQuadFlat>(nr,sigma2);
+      break;
+    case ActivationModelTypes::ActivationModelQuadLog:
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadLog>(nr,sigma2);
       break;
     case ActivationModelTypes::ActivationModelSmoothAbs:
       activation = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr);

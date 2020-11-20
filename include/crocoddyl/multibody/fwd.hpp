@@ -87,6 +87,11 @@ template <typename Scalar>
 struct CostDataFrameTranslationTpl;
 
 template <typename Scalar>
+class CostModelControlGravTpl;
+template <typename Scalar>
+struct CostDataControlGravTpl;
+
+template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
 template <typename Scalar>
 struct CostDataCentroidalMomentumTpl;
@@ -281,6 +286,8 @@ typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;
+typedef CostModelControlGravTpl<double> CostModelControlGrav;
+typedef CostDataControlGravTpl<double> CostDataControlGrav;
 typedef CostModelCentroidalMomentumTpl<double> CostModelCentroidalMomentum;
 typedef CostDataCentroidalMomentumTpl<double> CostDataCentroidalMomentum;
 typedef CostModelCoMPositionTpl<double> CostModelCoMPosition;

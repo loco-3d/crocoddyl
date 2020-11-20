@@ -18,6 +18,8 @@ namespace unittest {
 struct ActivationModelTypes {
   enum Type {
     ActivationModelQuad,
+    ActivationModelQuadFlat,
+    ActivationModelQuadLog,
     ActivationModelSmoothAbs,
     ActivationModelWeightedQuad,
     ActivationModelQuadraticBarrier,
