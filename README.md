@@ -52,7 +52,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
  * numerical differentiation support
- * automatic differentiation support via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
+ * automatic differentiation support via **[CppAD](https://github.com/coin-or/CppAD)**
 
 **Crocoddyl** is efficient and flexible:
 
@@ -61,7 +61,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * Python bindings (including models and solvers abstractions)
  * C++ 98/11/14/17/20 compliant
  * extensively tested
- * automatic code generation support via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
+ * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
 
 ### Installation through robotpkg
 
