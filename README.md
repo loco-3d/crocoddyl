@@ -116,6 +116,7 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+* [eigenpy](https://github.com/stack-of-tasks/eigenpy)
 * [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
