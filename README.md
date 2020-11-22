@@ -184,7 +184,7 @@ Please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pino
    year={2019}
 }
 ```
-The rest of the publications describes different component of **Crocoddyl**:
+The rest of the publications describes different components of **Crocoddyl**:
 
 
 ### Publications
