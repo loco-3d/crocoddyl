@@ -52,7 +52,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
  * numerical differentiation support
- * automatic differentiation support
+ * automatic differentiation support via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
 
 **Crocoddyl** is efficient and flexible:
 
@@ -61,7 +61,7 @@ If you want to follow the current developments, you can directly refer to the [d
  * Python bindings (including models and solvers abstractions)
  * C++ 98/11/14/17/20 compliant
  * extensively tested
- * automatic code generation support
+ * automatic code generation support via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
 
 ### Installation through robotpkg
 
@@ -174,7 +174,15 @@ and the following one to reference this website:
    year = {2019}
 }
 ```
-
+Please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which largely contributes to make **Crocoddyl** an efficient and versatile framework:
+```bibtex
+@inproceedings{carpentier2019pinocchio,
+   title={The Pinocchio C++ library -- A fast and flexible implementation of rigid body dynamics algorithms and their analytical derivatives},
+   author={Carpentier, Justin and Saurel, Guilhem and Buondonno, Gabriele and Mirabel, Joseph and Lamiraux, Florent and Stasse, Olivier and Mansard, Nicolas},
+   booktitle={IEEE International Symposium on System Integrations (SII)},
+   year={2019}
+}
+```
 The rest of the publications describes different component of **Crocoddyl**:
 
 
