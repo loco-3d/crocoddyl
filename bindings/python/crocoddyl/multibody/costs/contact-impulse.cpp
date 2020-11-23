@@ -55,6 +55,7 @@ void exposeCostContactImpulse() {
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactImpulse::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact impulse cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n")

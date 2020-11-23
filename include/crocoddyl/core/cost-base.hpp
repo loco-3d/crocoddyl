@@ -16,7 +16,6 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
@@ -39,6 +38,8 @@ namespace crocoddyl {
  * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$, \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$, \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
  * Jacobians and Hessians, respectively.
+ * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -113,6 +114,8 @@ class CostModelAbstractTpl {
 
   /**
    * @brief Compute the Jacobian and Hessian of cost and its residual vector
+   *
+   * It computes the Jacobian and Hessian of the cost function. It assumes that `calc()` has been run first.
    *
    * @param[in] data  Cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

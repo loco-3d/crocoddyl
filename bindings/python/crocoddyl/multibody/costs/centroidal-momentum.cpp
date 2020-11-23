@@ -63,6 +63,7 @@ void exposeCostCentroidalMomentum() {
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the centroidal momentum cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
@@ -85,6 +86,8 @@ void exposeCostCentroidalMomentum() {
                     bp::make_function(&CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference centroidal momentum");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataCentroidalMomentum> >();
 
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
       "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",

@@ -87,6 +87,7 @@ void exposeCostState() {
                                     const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelState::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the state cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")

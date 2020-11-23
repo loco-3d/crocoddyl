@@ -20,7 +20,7 @@
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addContact_wrap, CostModelSum::addCost, 3, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addCost_wrap, CostModelSum::addCost, 3, 4)
 
 void exposeCostSum() {
   // Register custom converters between std::map and Python dict
@@ -46,7 +46,6 @@ void exposeCostSum() {
                     "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight")
       .def_readwrite("active", &CostItem::active, "cost status");
-  ;
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
@@ -60,19 +59,18 @@ void exposeCostSum() {
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state description\n"
-          ":param nu: dimension of control vector\n"
-          ":param withResiduals: true if the cost function has residuals"))
+          ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateAbstract> >(bp::args("self", "state"),
                                                        "Initialize the total cost model.\n\n"
                                                        "For this case the default nu is equals to model.nv.\n"
                                                        ":param state: state description"))
       .def("addCost", &CostModelSum::addCost,
-           CostModelSum_addContact_wrap(bp::args("self", "name", "cost", "weight", "active"),
-                                        "Add a cost item.\n\n"
-                                        ":param name: cost name\n"
-                                        ":param cost: cost model\n"
-                                        ":param weight: cost weight\n"
-                                        ":param active: True if the cost is activated (default true)"))
+           CostModelSum_addCost_wrap(bp::args("self", "name", "cost", "weight", "active"),
+                                     "Add a cost item.\n\n"
+                                     ":param name: cost name\n"
+                                     ":param cost: cost model\n"
+                                     ":param weight: cost weight\n"
+                                     ":param active: True if the cost is activated (default true)"))
       .def("removeCost", &CostModelSum::removeCost, bp::args("self", "name"),
            "Remove a cost item.\n\n"
            ":param name: cost name")
@@ -93,6 +91,7 @@ void exposeCostSum() {
                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the total cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
@@ -105,7 +104,7 @@ void exposeCostSum() {
            ":return total cost data.")
       .add_property("state",
                     bp::make_function(&CostModelSum::get_state, bp::return_value_policy<bp::return_by_value>()),
-                    "state of the multibody system")
+                    "state description")
       .add_property("costs",
                     bp::make_function(&CostModelSum::get_costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs")

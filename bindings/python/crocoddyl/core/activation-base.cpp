@@ -48,7 +48,7 @@ void exposeActivationAbstract() {
                                          "Create common data shared between AMs.\n\n"
                                          "The action data uses the model in order to first process it.\n"
                                          ":param model: action model"))
-      .add_property("a",
+      .add_property("a_value",
                     bp::make_getter(&ActivationDataAbstract::a_value, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
       .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),

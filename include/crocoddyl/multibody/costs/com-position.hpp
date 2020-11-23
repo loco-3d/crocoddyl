@@ -46,11 +46,9 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the CoM position cost model
@@ -151,12 +149,7 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix3xs Matrix3xs;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
-  typedef typename MathBase::Matrix6s Matrix6s;
-  typedef typename MathBase::Vector6s Vector6s;
 
   template <template <typename Scalar> class Model>
   CostDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)

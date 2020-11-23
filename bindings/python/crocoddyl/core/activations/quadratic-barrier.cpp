@@ -48,6 +48,7 @@ void exposeActivationQuadraticBarrier() {
            "Compute the derivatives of inequality activation.\n\n"
            ":param data: activation data\n"
            "Note that the Hessian is constant, so we don't write again this value.\n"
+           "It assumes that calc has been run first.\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuadraticBarrier::createData, bp::args("self"),
            "Create the weighted quadratic action data.")

@@ -47,9 +47,9 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK4::calcDiff, bp::args("self", "data", "x", "u"),
           "Computes the derivatives of the integrated action model wrt state and control. \n\n"
-          "It assumes that calc has been run first.\n"
           "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n")

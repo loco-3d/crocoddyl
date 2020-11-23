@@ -41,10 +41,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef CostModelAbstractTpl<Scalar> Base;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the control cost model

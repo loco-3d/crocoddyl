@@ -45,6 +45,8 @@ namespace crocoddyl {
  * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
  * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectively.
+ * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */

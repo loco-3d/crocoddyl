@@ -57,7 +57,7 @@ void test_unconstrained_qp() {
   boxqp.set_reg(0.);
 
   Eigen::MatrixXd H = Eigen::MatrixXd::Random(nx, nx);
-  Eigen::MatrixXd hessian = H.transpose() * H;
+  Eigen::MatrixXd hessian = H.transpose() * H + nx * Eigen::MatrixXd::Identity(nx, nx);
   hessian = 0.5 * (hessian + hessian.transpose()).eval();
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
   Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);

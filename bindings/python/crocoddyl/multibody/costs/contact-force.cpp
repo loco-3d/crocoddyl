@@ -75,6 +75,7 @@ void exposeCostContactForce() {
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactForce::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact force cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n")

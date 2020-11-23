@@ -20,11 +20,11 @@ struct ActivationModelTypes {
     ActivationModelQuad,
     ActivationModelQuadFlat,
     ActivationModelQuadLog,
-    ActivationModelSmoothAbs,
+    ActivationModelSmooth1Norm,
+    ActivationModelSmooth2Norm,
     ActivationModelWeightedQuad,
     ActivationModelQuadraticBarrier,
     ActivationModelWeightedQuadraticBarrier,
-    ActivationModelNorm2Barrier,
     NbActivationModelTypes
   };
   static std::vector<Type> init_all() {
