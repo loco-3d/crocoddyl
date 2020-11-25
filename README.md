@@ -62,7 +62,7 @@ conda install crocoddyl -c conda-forge
 
  * cache friendly,
  * multi-thread friendly
- * Python bindings (including models and solvers abstractions)
+ * Python bindings (including models and solvers abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
  * C++ 98/11/14/17/20 compliant
  * extensively tested
  * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
@@ -120,8 +120,11 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+* [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
 * [eigenpy](https://github.com/stack-of-tasks/eigenpy)
+* [Boost](https://www.boost.org/)
 * [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
+* [OpenMP](https://www.openmp.org/) (optional for multi-threading installation)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for examples)
@@ -179,15 +182,8 @@ and the following one to reference this website:
    year = {2019}
 }
 ```
-Please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which largely contributes to make **Crocoddyl** an efficient and versatile framework:
-```bibtex
-@inproceedings{carpentier2019pinocchio,
-   title={The Pinocchio C++ library -- A fast and flexible implementation of rigid body dynamics algorithms and their analytical derivatives},
-   author={Carpentier, Justin and Saurel, Guilhem and Buondonno, Gabriele and Mirabel, Joseph and Lamiraux, Florent and Stasse, Olivier and Mansard, Nicolas},
-   booktitle={IEEE International Symposium on System Integrations (SII)},
-   year={2019}
-}
-```
+Please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
+
 The rest of the publications describes different components of **Crocoddyl**:
 
 
