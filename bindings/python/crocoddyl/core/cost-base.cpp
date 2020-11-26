@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/core/cost-base.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -17,32 +17,39 @@ void exposeCostAbstract() {
 
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
       "CostModelAbstract",
-      "Abstract multibody cost model using Pinocchio.\n\n"
-      "It defines a template of cost model whose residual and derivatives can be retrieved from\n"
-      "Pinocchio data, through the calc and calcDiff functions, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, int>(
+      "Abstract multibody cost models.\n\n"
+      "In Crocoddyl, a cost model is defined by the scalar activation function a(.) and by the residual\n"
+      " function r(.) as follows:\n"
+      "    cost = a(r(x, u)),\n"
+      "where the residual function depends on the state point x, which lies in the state manifold\n"
+      "described with a nq-tuple, its velocity xd that belongs to the tangent space with nv dimension,\n"
+      "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
+      "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
+      "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param activation: Activation model\n"
-          ":param nu: dimension of control vector (default model.nv)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
+          ":param nu: dimension of control vector (default state.nv)"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
-          ":param state: state of the multibody system\n"
+          ":param state: state description\n"
           ":param activation: Activation model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, int, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
-          ":param state: state of the multibody system\n"
-          ":param nr: dimension of cost vector\n"
-          ":param nu: dimension of control vector (default model.nv)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
+          ":param state: state description\n"
+          ":param nr: dimension of residual vector\n"
+          ":param nu: dimension of control vector (default state.nv)"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e. crocoddyl.ActivationModelQuad(nr).\n"
-          ":param state: state of the multibody system\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and the default nu value is "
+          "obtained from state.nv.\n"
+          ":param state: state description\n"
           ":param nr: dimension of cost vector"))
       .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
@@ -54,6 +61,8 @@ void exposeCostAbstract() {
                                                                                   bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
+           "It computes the partial derivatives of the cost function.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
@@ -71,7 +80,7 @@ void exposeCostAbstract() {
       .add_property(
           "state",
           bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
-          "state of the multibody system")
+          "state description")
       .add_property(
           "activation",
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
@@ -93,7 +102,7 @@ void exposeCostAbstract() {
                     "shared data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
-                    "terminal data")
+                    "activation data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),

@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/numdiff/cost.hpp"
+#include "crocoddyl/core/numdiff/cost.hpp"
 
 namespace crocoddyl {
 
@@ -67,10 +67,10 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
   // Computing the d cost(x,u) / du
   data_nd->du.setZero();
   // call the update function on the pinocchio data
-  for (size_t i = 0; i < reevals_.size(); ++i) {
+  for (std::size_t i = 0; i < reevals_.size(); ++i) {
     reevals_[i](x);
   }
-  for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
+  for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
     data_nd->du(iu) = disturbance_;
     data_nd->up = u + data_nd->du;

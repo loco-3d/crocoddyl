@@ -13,7 +13,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model)
+StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<PinocchioModel> model)
     : Base(model->nq + model->nv, 2 * model->nv), pinocchio_(model), x0_(VectorXs::Zero(model->nq + model->nv)) {
   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 
@@ -34,6 +34,9 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<pinocchio::ModelT
   ub_.tail(nv_) = pinocchio_->velocityLimit;
   Base::update_has_limits();
 }
+
+template <typename Scalar>
+StateMultibodyTpl<Scalar>::StateMultibodyTpl() : Base(), x0_(VectorXs::Zero(0)) {}
 
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::~StateMultibodyTpl() {}

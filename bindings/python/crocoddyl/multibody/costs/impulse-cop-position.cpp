@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/impulse-cop-position.hpp"
 
 namespace crocoddyl {
@@ -21,27 +20,28 @@ void exposeCostImpulseCoPPosition() {
           "Initialize the impulse CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
-          ":param cop_support: impulse frame ID and cop support region"))
+          ":param cop_support: impulse frame Id and cop support region"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport>(
           bp::args("self", "state", "cop_support"),
           "Initialize the impulse CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
-          ":param cop_support: impulse frame ID and cop support region"))
+          ":param cop_support: impulse frame Id and cop support region"))
       .def<void (CostModelImpulseCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelImpulseCoPPosition::calc, bp::args("self", "data", "x", "u"),
           "Compute the impulse CoP position cost.\n\n"
           ":param data: cost data\n"
-          ":param x: state vector\n"
+          ":param x: state point\n"
           ":param u: control input")
       .def<void (CostModelImpulseCoPPosition::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelImpulseCoPPosition::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the impulse CoP position cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: state vector\n"
+          ":param x: state point\n"
           ":param u: control input\n")
       .def("createData", &CostModelImpulseCoPPosition::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),

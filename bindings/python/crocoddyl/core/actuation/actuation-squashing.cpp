@@ -33,7 +33,7 @@ void exposeActuationSquashing() {
       .def("calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
-           "describes in continouos time.\n"
+           "describes in continouos time. It assumes that calc has been run first.\n"
            ":param data: actuation data\n"
            ":param x: state vector\n"
            ":param u: control input.")

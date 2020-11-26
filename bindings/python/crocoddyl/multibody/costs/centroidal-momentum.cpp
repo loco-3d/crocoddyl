@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -18,35 +17,36 @@ void exposeCostCentroidalMomentum() {
   typedef Eigen::Matrix<double, 6, 1> Vector6d;
   bp::class_<CostModelCentroidalMomentum, bp::bases<CostModelAbstract> >(
       "CostModelCentroidalMomentum",
+      "This cost function defines a residual vector as r = h - href, with h and href as the current and reference "
+      "centroidal momenta, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Vector6d, int>(
           bp::args("self", "state", "activation", "href", "nu"),
           "Initialize the centroidal momentum cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param ref: reference centroidal momentum\n"
+          ":param href: reference centroidal momentum\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, Vector6d>(
           bp::args("self", "state", "activation", "href"),
           "Initialize the centroidal momentum cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
-          ":param ref: reference centroidal momentum"))
+          ":param href: reference centroidal momentum"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, Vector6d, int>(
           bp::args("self", "state", "href", "nu"),
           "Initialize the centroidal momentum cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(6).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
-          ":param ref: reference centroidal momentum\n"
+          ":param href: reference centroidal momentum\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, Vector6d>(
           bp::args("self", "state", "href"),
           "Initialize the centroidal momentum cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system\n"
-          ":param ref: reference centroidal momentum"))
+          ":param href: reference centroidal momentum"))
       .def<void (CostModelCentroidalMomentum::*)(const boost::shared_ptr<CostDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -63,6 +63,7 @@ void exposeCostCentroidalMomentum() {
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelCentroidalMomentum::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the centroidal momentum cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
@@ -85,6 +86,8 @@ void exposeCostCentroidalMomentum() {
                     bp::make_function(&CostModelCentroidalMomentum::set_reference<MathBaseTpl<double>::Vector6s>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference centroidal momentum");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataCentroidalMomentum> >();
 
   bp::class_<CostDataCentroidalMomentum, bp::bases<CostDataAbstract> >(
       "CostDataCentroidalMomentum", "Data for centroidal momentum cost.\n\n",

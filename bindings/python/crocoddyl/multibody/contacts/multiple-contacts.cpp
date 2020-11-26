@@ -76,6 +76,7 @@ void exposeContactMultiple() {
            "Compute the derivatives of the contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: contact data\n"
            ":param x: state vector\n")
       .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args("self", "data", "dv"),

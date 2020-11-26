@@ -37,6 +37,7 @@ void exposeContactAbstract() {
            "Compute the derivatives of contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: contact data\n"
            ":param x: state vector\n")
       .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),

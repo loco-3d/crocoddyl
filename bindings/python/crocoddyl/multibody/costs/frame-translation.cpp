@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/multibody/cost-base.hpp"
 #include "crocoddyl/multibody/costs/frame-translation.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -17,6 +16,8 @@ namespace python {
 void exposeCostFrameTranslation() {
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
       "CostModelFrameTranslation",
+      "This cost function defines a residual vector as r = t - tref, with t and tref as the current and reference "
+      "frame translations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameTranslation, int>(
           bp::args("self", "state", "activation", "xref", "nu"),
           "Initialize the frame translation cost model.\n\n"
@@ -27,23 +28,22 @@ void exposeCostFrameTranslation() {
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameTranslation>(
           bp::args("self", "state", "activation", "xref"),
           "Initialize the frame translation cost model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param xref: reference frame translation"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int>(
           bp::args("self", "state", "xref", "nu"),
           "Initialize the frame translation cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(3).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation>(
           bp::args("self", "state", "xref"),
           "Initialize the frame translation cost model.\n\n"
-          "For this case the default activation model is quadratic, i.e.\n"
-          "crocoddyl.ActivationModelQuad(3), and nu is equals to model.nv.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and nu is obtained from "
+          "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation"))
       .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&,
@@ -62,6 +62,7 @@ void exposeCostFrameTranslation() {
                                                const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelFrameTranslation::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the frame translation cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")

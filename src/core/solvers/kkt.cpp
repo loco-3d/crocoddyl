@@ -169,7 +169,7 @@ const std::vector<Eigen::VectorXd>& SolverKKT::get_dxs() const { return dxs_; }
 const std::vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
 
 const std::vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const { return lambdas_; }
-  
+
 const std::size_t& SolverKKT::get_nx() const { return nx_; }
 
 const std::size_t& SolverKKT::get_ndx() const { return ndx_; }
@@ -257,13 +257,13 @@ void SolverKKT::allocateData() {
   nu_ = 0;
   const std::size_t& nx = problem_->get_nx();
   const std::size_t& ndx = problem_->get_ndx();
-  const std::size_t& nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
       xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
+    const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dxs_[t] = Eigen::VectorXd::Zero(ndx);
     dus_[t] = Eigen::VectorXd::Zero(nu);

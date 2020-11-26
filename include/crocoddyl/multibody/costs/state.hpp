@@ -9,13 +9,32 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_STATE_HPP_
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/multibody/cost-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
+/**
+ * @brief State cost
+ *
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
+ * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respetively, which belong to the
+ * state manifold \f$\mathcal{X}\f$. Note that the dimension of the residual vector is obtained from
+ * `StateAbstract::get_ndx()`.
+ *
+ * Both cost and residual derivatives are computed analytically.
+ * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
+ * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ *
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
+ *
+ * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
  public:
@@ -27,35 +46,141 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                    const VectorXs& xref, const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                    const VectorXs& xref);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref, const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const VectorXs& xref);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+  /**
+   * @brief Initialize the state cost model
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] xref        Reference state
+   * @param[in] nu          Dimension of the control vector
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                    boost::shared_ptr<ActivationModelAbstract> activation, const VectorXs& xref,
                     const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
-  CostModelStateTpl(boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation);
-  explicit CostModelStateTpl(boost::shared_ptr<StateMultibody> state);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] xref        Reference state
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                    boost::shared_ptr<ActivationModelAbstract> activation, const VectorXs& xref);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] xref   Reference state
+   * @param[in] nu     Dimension of the control vector
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref,
+                    const std::size_t& nu);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] xref   Reference state
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * The default reference state is obtained from `StateAbstractTpl::zero()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] nu          Dimension of the control vector
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * The default reference state is obtained from `StateAbstractTpl::zero()`.
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] nu     Dimension of the control vector
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t& nu);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * The default state reference is obtained from `StateAbstractTpl::zero()`, and `nu` from
+   * `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   */
+  CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                    boost::shared_ptr<ActivationModelAbstract> activation);
+
+  /**
+   * @brief Initialize the state cost model
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * The default state reference is obtained from `StateAbstractTpl::zero()` and `nu` from
+   * `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state  State of the multibody system
+   */
+  explicit CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state);
   virtual ~CostModelStateTpl();
 
+  /**
+   * @brief Compute the state cost
+   *
+   * @param[in] data  State cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the state cost
+   *
+   * @param[in] data  State cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the state cost data
+   */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
   DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::VectorXs>()", void set_xref(const VectorXs& xref_in));
   DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::VectorXs>()", const VectorXs& get_xref() const);
 
  protected:
+  /**
+   * @brief Modify the state reference
+   */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
+  /**
+   * @brief Return the state reference
+   */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
@@ -64,7 +189,8 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  VectorXs xref_;
+  VectorXs xref_;                                                         //!< Reference state
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>
@@ -75,7 +201,6 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>

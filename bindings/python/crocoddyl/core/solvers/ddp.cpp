@@ -17,6 +17,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_computeDirections, SolverDDP::c
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep, 0, 1)
 
 void exposeSolverDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverDDP> >();
+
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
       "DDP solver.\n\n"
@@ -55,9 +57,9 @@ void exposeSolverDDP() {
                ":params recalc: true for recalculating the derivatives at current state and control.\n"
                ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths."))
       .def("tryStep", &SolverDDP::tryStep,
-           SolverDDP_trySteps(bp::args("self", " stepLength=1"),
+           SolverDDP_trySteps(bp::args("self", "stepLength"),
                               "Rollout the system with a predefined step length.\n\n"
-                              ":param stepLength: step length\n"
+                              ":param stepLength: step length (default 1)\n"
                               ":returns the cost improvement."))
       .def("stoppingCriteria", &SolverDDP::stoppingCriteria, bp::args("self"),
            "Return a sum of positive parameters whose sum quantifies the DDP termination.")
@@ -76,7 +78,7 @@ void exposeSolverDDP() {
            "Run the backward pass (Riccati sweep)\n\n"
            "It assumes that the Jacobian and Hessians of the optimal control problem have been\n"
            "compute. These terms are computed by running calc.")
-      .def("forwardPass", &SolverDDP::forwardPass, bp::args("self", " stepLength=1"),
+      .def("forwardPass", &SolverDDP::forwardPass, bp::args("self", "stepLength"),
            "Run the forward pass or rollout\n\n"
            "It rollouts the action model given the computed policy (feedforward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
@@ -121,8 +123,7 @@ void exposeSolverDDP() {
                     "threshold for accepting step which gradients is lower than this value")
       .add_property("th_gaptol",
                     bp::make_function(&SolverDDP::get_th_gaptol, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_th_gaptol),
-                    "threshold for accepting a gap as non-zero")
+                    bp::make_function(&SolverDDP::set_th_gaptol), "threshold for accepting a gap as non-zero")
       .add_property("alphas",
                     bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values");

@@ -9,7 +9,26 @@
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
 
+#include "crocoddyl/core/utils/deprecate.hpp"
+
 namespace crocoddyl {
+
+// action
+template <typename Scalar>
+class ActionModelAbstractTpl;
+
+template <typename Scalar>
+struct ActionDataAbstractTpl;
+
+template <typename Scalar>
+class ActionModelUnicycleTpl;
+template <typename Scalar>
+struct ActionDataUnicycleTpl;
+
+template <typename Scalar>
+class ActionModelLQRTpl;
+template <typename Scalar>
+struct ActionDataLQRTpl;
 
 // differential action
 template <typename Scalar>
@@ -22,20 +41,16 @@ class DifferentialActionModelLQRTpl;
 template <typename Scalar>
 struct DifferentialActionDataLQRTpl;
 
-// action
+// integrated action
 template <typename Scalar>
-class ActionModelUnicycleTpl;
+class IntegratedActionModelEulerTpl;
 template <typename Scalar>
-struct ActionDataUnicycleTpl;
+struct IntegratedActionDataEulerTpl;
 
 template <typename Scalar>
-class ActionModelLQRTpl;
+class IntegratedActionModelRK4Tpl;
 template <typename Scalar>
-struct ActionDataLQRTpl;
-
-// data collector
-template <typename Scalar>
-struct DataCollectorAbstractTpl;
+struct IntegratedActionDataRK4Tpl;
 
 // activation
 template <typename Scalar>
@@ -57,9 +72,14 @@ template <typename Scalar>
 struct ActivationDataWeightedQuadTpl;
 
 template <typename Scalar>
-class ActivationModelSmoothAbsTpl;
+class ActivationModelSmooth1NormTpl;
 template <typename Scalar>
-struct ActivationDataSmoothAbsTpl;
+struct ActivationDataSmooth1NormTpl;
+
+template <typename Scalar>
+class ActivationModelSmooth2NormTpl;
+template <typename Scalar>
+struct ActivationDataSmooth2NormTpl;
 
 template <typename Scalar>
 class ActivationModelAbstractTpl;
@@ -69,6 +89,9 @@ struct ActivationDataAbstractTpl;
 // state
 template <typename Scalar>
 class StateAbstractTpl;
+
+template <typename Scalar>
+class StateVectorTpl;
 
 // actuation
 template <typename Scalar>
@@ -90,35 +113,32 @@ struct SquashingDataAbstractTpl;
 template <typename Scalar>
 class SquashingModelSmoothSatTpl;
 
-// shooting
-template <typename Scalar>
-class ShootingProblemTpl;
-
-// integrated action
-template <typename Scalar>
-class IntegratedActionModelEulerTpl;
-template <typename Scalar>
-struct IntegratedActionDataEulerTpl;
-
-template <typename Scalar>
-class IntegratedActionModelRK4Tpl;
-template <typename Scalar>
-struct IntegratedActionDataRK4Tpl;
-
-// state
-template <typename Scalar>
-class StateVectorTpl;
-
 // data collector
+template <typename Scalar>
+struct DataCollectorAbstractTpl;
+
 template <typename Scalar>
 struct DataCollectorActuationTpl;
 
-// ActionData
+// cost
 template <typename Scalar>
-struct ActionDataAbstractTpl;
+class CostModelAbstractTpl;
+template <typename Scalar>
+struct CostDataAbstractTpl;
 
 template <typename Scalar>
-class ActionModelAbstractTpl;
+struct CostItemTpl;
+template <typename Scalar>
+class CostModelSumTpl;
+template <typename Scalar>
+struct CostDataSumTpl;
+
+template <typename Scalar>
+class CostModelControlTpl;
+
+// shooting
+template <typename Scalar>
+class ShootingProblemTpl;
 
 // Numdiff
 template <typename Scalar>
@@ -151,17 +171,22 @@ template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
 /********************Template Instantiation*************/
-typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
-typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
-typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
-typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
-
+typedef ActionModelAbstractTpl<double> ActionModelAbstract;
+typedef ActionDataAbstractTpl<double> ActionDataAbstract;
 typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
 typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
 typedef ActionModelLQRTpl<double> ActionModelLQR;
 typedef ActionDataLQRTpl<double> ActionDataLQR;
 
-typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+typedef DifferentialActionModelAbstractTpl<double> DifferentialActionModelAbstract;
+typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract;
+typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
+typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
+
+typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
+typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
+typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
+typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
@@ -170,12 +195,17 @@ typedef ActivationModelWeightedQuadraticBarrierTpl<double> ActivationModelWeight
 typedef ActivationModelQuadTpl<double> ActivationModelQuad;
 typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
-typedef ActivationModelSmoothAbsTpl<double> ActivationModelSmoothAbs;
-typedef ActivationDataSmoothAbsTpl<double> ActivationDataSmoothAbs;
+DEPRECATED("Use ActivationModelSmooth1Norm", typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmoothAbs;)
+DEPRECATED("Use ActivationDataSmooth1Norm", typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmoothAbs;)
+typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmooth1Norm;
+typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmooth1Norm;
+typedef ActivationModelSmooth2NormTpl<double> ActivationModelSmooth2Norm;
+typedef ActivationDataSmooth2NormTpl<double> ActivationDataSmooth2Norm;
 typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;
 typedef ActivationDataAbstractTpl<double> ActivationDataAbstract;
 
 typedef StateAbstractTpl<double> StateAbstract;
+typedef StateVectorTpl<double> StateVector;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
@@ -186,19 +216,17 @@ typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
 typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
 typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 
-typedef ShootingProblemTpl<double> ShootingProblem;
-
-typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
-typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
-typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
-typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
-
-typedef StateVectorTpl<double> StateVector;
-
+typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
 
-typedef ActionDataAbstractTpl<double> ActionDataAbstract;
-typedef ActionModelAbstractTpl<double> ActionModelAbstract;
+typedef CostModelAbstractTpl<double> CostModelAbstract;
+typedef CostDataAbstractTpl<double> CostDataAbstract;
+typedef CostItemTpl<double> CostItem;
+typedef CostModelSumTpl<double> CostModelSum;
+typedef CostDataSumTpl<double> CostDataSum;
+typedef CostModelControlTpl<double> CostModelControl;
+
+typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;

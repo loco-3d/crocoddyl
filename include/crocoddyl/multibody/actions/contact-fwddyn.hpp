@@ -14,11 +14,11 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 
