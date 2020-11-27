@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// // Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,13 +18,13 @@ void exposeActivationQuadLog() {
       "ActivationModelQuadLog",
       "Quadratic flat activation model.\n"
       "A quadratic flat action describes a quadratic flat function that depends on the residual, i.e.\n"
-      "log(1 + ||r||^2 / sigma2).",
-      bp::init<int,double>(bp::args("self", "nr","sigma2"),
+      "log(1 + ||r||^2 / alpha).",
+      bp::init<int,double>(bp::args("self", "nr","alpha"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"
-                    "param sigma2: width of basin"))
+                    "param alpha: width of quadratic basin near zero"))
       .def("calc", &ActivationModelQuadLog::calc, bp::args("self", "data", "r"),
-           "Compute the log(1 + ||r||^2 / sigma2).\n"
+           "Compute the log(1 + ||r||^2 / alpha).\n"
            ":param data: activation data\n"
            ":param r: residual vector")
       .def("calcDiff", &ActivationModelQuadLog::calcDiff, bp::args("self", "data", "r"),
@@ -34,11 +34,11 @@ void exposeActivationQuadLog() {
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuadLog::createData, bp::args("self"),
            "Create the quadratic flat activation data.\n")
-      .add_property("sigma2",
-                    bp::make_function(&ActivationModelQuadLog::get_sigma2,
+      .add_property("alpha",
+                    bp::make_function(&ActivationModelQuadLog::get_alpha,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&ActivationModelQuadLog::set_sigma2),
-                    "threshold");
+                    bp::make_function(&ActivationModelQuadLog::set_alpha),
+                    "alpha");
 }
 
 }  // namespace python

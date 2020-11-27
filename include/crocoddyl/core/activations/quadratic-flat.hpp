@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2020, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,12 +10,25 @@
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
 
 #include <stdexcept>
+#include <iostream>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <iostream>
 
 namespace crocoddyl {
+
+/**
+ * @brief Quadratic-flat activation
+ *
+ * This activation function describes a quadratic exponential activation for each element of a
+ * residual vector, i.e. \f[ \begin{equation} sum^nr_{i=0} 1 - exp(\|r_i\|^2 / \alpha) \end{equation} \f] where
+ * \f$\alpha\f$ defines the width of the quadratic basin, \f$r_i\f$ is the scalar residual for the \f$i\f$ constraints, \f$nr\f$
+ * is the dimension of the residual vector. Far away from zero, the quadFlat activation is nearly flat.
+ *
+ * The computation of the function and it derivatives are carried out in `calc()` and `caldDiff()`, respectively.
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`
+ */
 
 template <typename _Scalar>
 class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
@@ -26,32 +39,68 @@ class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ActivationDataQuadFlatTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-
-  explicit ActivationModelQuadFlatTpl(const std::size_t& nr,const Scalar& sigma2)
-     : Base(nr), sigma2_(sigma2){};
+  
+  /**
+   * @brief Initialize the quadFlat activation model
+   *
+   * The default `alpha` value is defined as 1.
+   *
+   * @param[in] nr   Dimension of the residual vector
+   * @param[in] alpha  Width of quadratic basin (default: 1.)
+   */
+  explicit ActivationModelQuadFlatTpl(const std::size_t& nr,const Scalar& alpha = Scalar(1.))
+     : Base(nr), alpha_(alpha){
+		 if (alpha < Scalar(0.)) {
+             throw_pretty("Invalid argument: "
+                   << "alpha should be a positive value");
+         } 
+	};
   virtual ~ActivationModelQuadFlatTpl(){};
-
+  
+  /**
+   * @brief Compute the quadFlat function
+   *
+   * @param[in] data  quadFlat activation data
+   * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
+   */
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    data->a_value = (Scalar(1.0) - exp((-r.transpose() * r)[0] / sigma2_));
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    
+    d->a0 = exp((-r.transpose() * r)[0] / alpha_);
+    data->a_value = Scalar(1.0) - d->a0;
   };
-
+  
+  /**
+   * @brief Compute the derivatives of the quadFlat function
+   *
+   * @param[in] data  quadFlat activation data
+   * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
-    a0_ = Scalar(2.0) / sigma2_ * exp((-r.transpose() * r)[0] / sigma2_);
-    data->Ar = a0_ * r;
-    data->Arr.diagonal() = - Scalar(2.0) * a0_ / sigma2_ * (r * r.transpose()).diagonal();
-    data->Arr.diagonal().array() += a0_;
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    
+    d->a1 = Scalar(2.0) / alpha_ * d->a0;
+    data->Ar = d->a1 * r;
+    data->Arr.diagonal() = - Scalar(2.0) * d->a1 / alpha_ * (r * r.transpose()).diagonal();
+    data->Arr.diagonal().array() += d->a1;
   };
-
+  
+  /**
+   * @brief Create the quadFlat activation data
+   *
+   * @return the activation data
+   */
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     boost::shared_ptr<ActivationDataAbstract> data =
         boost::allocate_shared<ActivationDataAbstract>(Eigen::aligned_allocator<ActivationDataAbstract>(), this);
@@ -59,15 +108,36 @@ class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
     return data;
   };
   
-  const Scalar& get_sigma2() const { return sigma2_; };
-  void set_sigma2(const Scalar& sigma2) { sigma2_ = sigma2; };
+  const Scalar& get_alpha() const { return alpha_; };
+  void set_alpha(const Scalar& alpha) { alpha_ = alpha; };
   
  protected:
-  using Base::nr_;
+  using Base::nr_; //!< Dimension of the residual vector
   
  private:
-  Scalar sigma2_;
-  Scalar a0_;
+  Scalar alpha_; //!< Width of quadratic basin
+};
+ 
+ /**
+   * @brief Data structure of the quadFlat activation
+   *
+   * @param[in] a0  computed in calc to avoid recomputation 
+   * @param[in] a1  computed in calcDiff to avoid recomputation 
+   */
+template <typename _Scalar>
+struct ActivationDataQuadFlatTpl : public ActivationDataAbstractTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationDataAbstractTpl<Scalar> Base;
+
+  template <typename Activation>
+  explicit ActivationDataQuadFlatTpl(Activation* const activation)
+      : Base(activation), a0(0), a1(0) {}
+
+  Scalar a0;
+  Scalar a1;
 };
 
 }  // namespace crocoddyl

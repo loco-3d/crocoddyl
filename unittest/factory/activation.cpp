@@ -66,7 +66,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
   Eigen::VectorXd weights = 0.1 * Eigen::VectorXd::Random(nr);
-  double sigma2 = 10;
+  double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double eps = fabs(Eigen::VectorXd::Random(1)[0]);
 
   switch (activation_type) {
@@ -74,10 +74,10 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
       activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
       break;
     case ActivationModelTypes::ActivationModelQuadFlat:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlat>(nr,sigma2);
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlat>(nr,alpha);
       break;
     case ActivationModelTypes::ActivationModelQuadLog:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadLog>(nr,sigma2);
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadLog>(nr,alpha);
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation = boost::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
