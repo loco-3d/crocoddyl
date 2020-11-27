@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,11 +27,13 @@
 namespace crocoddyl {
 
 /**
- * @brief Control cost
+ * @brief Control gravity cost
  *
- * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respetively. Note
- * that the dimension of the residual vector is obtained from `nu`.
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q},\mathbf{v})\f$, where
+ * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, g the gravity torque corresponding to the current configuration,
+ * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input,
+ * \f$\mathbf{v}\in~\mathbb{R}^{nv}\f$ the current velocity joints input.
+ * Note that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
@@ -60,19 +62,18 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the control cost model
+   * @brief Initialize the control gravity cost model
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
-   * @param[in] uref        Reference control input
    */
   CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
                       boost::shared_ptr<ActivationModelAbstract> activation);
 
   /**
-   * @brief Initialize the control cost model
+   * @brief Initialize the control gravity cost model
    *
    * The default reference configuration is obtained from `StateAbstractTpl::get_nq()`.
    *
@@ -84,22 +85,18 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
                       boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
 
   /**
-   * @brief Initialize the control cost model
+   * @brief Initialize the control gravity cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The
-   * default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)` with `nu` defined by
-   * `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state       State of the multibody system
-   * @param[in] activation  Activation model control vector
    */
   explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state);
 
   /**
-   * @brief Initialize the control cost model
+   * @brief Initialize the control gravity cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The
-   * default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of the control vector
@@ -109,7 +106,7 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
   virtual ~CostModelControlGravTpl();
 
   /**
-   * @brief Compute the control cost
+   * @brief Compute the control gravity cost
    *
    * @param[in] data  Control cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -119,7 +116,7 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the derivatives of the control cost
+   * @brief Compute the derivatives of the control gravity cost
    *
    * @param[in] data  Control cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -149,15 +146,16 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  //typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   CostDataControlGravTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),rnea_partial_dx(model->get_state()->get_nx(),model->get_nu()),
-                          rnea_partial_da(model->get_state()->get_nv(),model->get_nu()) {
-    rnea_partial_dx.setZero();
-    rnea_partial_da.setZero();
+      : Base(model, data),dg_dx(model->get_state()->get_nx(),model->get_nu()),
+                          dg_da(model->get_state()->get_nv(),model->get_nu()),
+                          Arr_dgdx(model->get_nu(),model->get_state()->get_nx()) {
+    dg_dx.setZero();
+    dg_da.setZero();
+    Arr_dgdx.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
@@ -168,8 +166,9 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     }
   
   pinocchio::DataTpl<Scalar>* pinocchio;
-  MatrixXs rnea_partial_dx;
-  MatrixXs rnea_partial_da;
+  MatrixXs dg_dx;
+  MatrixXs dg_da;
+  MatrixXs Arr_dgdx;
   using Base::activation;
   using Base::cost;
   using Base::Lu;

@@ -34,6 +34,8 @@ void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeCostState();
 void exposeCostCoMPosition();
+void exposeCostControlGrav();
+void exposeCostControlGravContact();
 void exposeCostCentroidalMomentum();
 void exposeCostFramePlacement();
 void exposeCostFrameTranslation();

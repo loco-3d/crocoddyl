@@ -10,6 +10,8 @@
 #include "crocoddyl/multibody/costs/state.hpp"
 #include "crocoddyl/core/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
+#include "crocoddyl/multibody/costs/control-gravity.hpp"
+#include "crocoddyl/multibody/costs/control-gravity-contact.hpp"
 // #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
@@ -35,6 +37,12 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
       break;
     case CostModelTypes::CostModelCoMPosition:
       os << "CostModelCoMPosition";
+      break;
+    case CostModelTypes::CostModelControlGrav:
+      os << "CostModelControlGrav";
+      break;
+    case CostModelTypes::CostModelControlGravContact:
+      os << "CostModelControlGravContact";
       break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   os << "CostModelCentroidalMomentum";
@@ -89,6 +97,12 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
     case CostModelTypes::CostModelCoMPosition:
       cost = boost::make_shared<crocoddyl::CostModelCoMPosition>(state, activation_factory.create(activation_type, 3),
                                                                  Eigen::Vector3d::Random(), nu);
+      break;
+    case CostModelTypes::CostModelControlGrav:
+      cost = boost::make_shared<crocoddyl::CostModelControlGrav>(state, activation_factory.create(activation_type, nu));
+      break;
+    case CostModelTypes::CostModelControlGravContact:
+      cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(state, activation_factory.create(activation_type, nu));
       break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,

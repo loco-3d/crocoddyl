@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,8 +52,11 @@ void CostModelControlGravContactTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
-
-  data->r = u - pinocchio::rnea(*pin_model_,*(d->pinocchio),x.head(state_->get_nq()),x.tail(state_->get_nv()),Eigen::VectorXd::Zero(state_->get_nv()),d->fext).tail(nu_);
+  
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+  
+  data->r = u - pinocchio::rnea(*pin_model_,*(d->pinocchio),q,v,Eigen::VectorXd::Zero(state_->get_nv()),d->fext).tail(nu_);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -71,17 +74,23 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
-
-  pinocchio::computeRNEADerivatives(*pin_model_,*(d->pinocchio),x.head(state_->get_nq()),x.tail(state_->get_nv()),Eigen::VectorXd::Zero(state_->get_nv()),d->fext,
-                                    d->rnea_partial_dx.topRows(state_->get_nv()),d->rnea_partial_dx.bottomRows(state_->get_nv()),d->rnea_partial_da);
+  
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+  
+  pinocchio::computeRNEADerivatives(*pin_model_,*(d->pinocchio),q,v,Eigen::VectorXd::Zero(state_->get_nv()),d->fext,
+                                    d->dg_dx.topRows(state_->get_nv()),d->dg_dx.bottomRows(state_->get_nv()),d->dg_da);
   
   activation_->calcDiff(data->activation, data->r);
 
-  data->Lu = data->activation->Ar;
-  data->Lx = - d->rnea_partial_dx * data->activation->Ar;
-  data->Lxx = d->rnea_partial_dx * data->activation->Arr * d->rnea_partial_dx.transpose();
-  data->Lxu = - d->rnea_partial_dx * data->activation->Arr;
-  data->Luu.diagonal() = data->activation->Arr.diagonal();
+  data->Lu.noalias() = data->activation->Ar;
+  data->Lx.noalias() = - d->dg_dx * data->activation->Ar;
+  
+  d->Arr_dgdx.noalias() = data->activation->Arr * d->dg_dx.transpose();
+  data->Lxx.noalias() = d->dg_dx * d->Arr_dgdx;
+  
+  data->Lxu.noalias() = - d->dg_dx * data->activation->Arr;
+  data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();
 }
 
 template <typename Scalar>

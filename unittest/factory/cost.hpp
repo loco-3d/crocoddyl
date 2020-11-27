@@ -24,6 +24,8 @@ struct CostModelTypes {
     CostModelState,
     CostModelControl,
     CostModelCoMPosition,
+    CostModelControlGrav,
+    CostModelControlGravContact,
     // CostModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
     CostModelFramePlacement,
     CostModelFrameRotation,
