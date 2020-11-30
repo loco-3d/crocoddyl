@@ -20,11 +20,10 @@ namespace crocoddyl {
 /**
  * @brief Quadratic-log activation
  *
- * This activation function describes a logarithmic quadratic activation for
- * each element of a residual vector, i.e. \f[ \begin{equation} sum^nr_{i=0}
- * log(1 + \|r_i\|^2 / \alpha) \end{equation} \f] where \f$\alpha\f$ defines the
- * width of the quadratic basin, \f$r_i\f$ is the scalar residual for the
- * \f$i\f$ constraints, \f$nr\f$ is the dimension of the residual vector.
+ * This activation function describes a logarithmic quadratic activation depending
+ * on the quadratic norm of a residual vector, i.e. \f[ \begin{equation} log(1 + \|\mathbf{r}\|^2 / \alpha) 
+ * \end{equation} \f] where \f$\alpha\f$ defines the width of the quadratic basin,
+ * \f$r\f$ is the scalar residual, \f$nr\f$ is the dimension of the residual vector.
  *
  * The computation of the function and it derivatives are carried out in
  * `calc()` and `caldDiff()`, respectively.

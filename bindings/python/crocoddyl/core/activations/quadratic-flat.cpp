@@ -20,7 +20,7 @@ void exposeActivationQuadFlat() {
       "A quadratic flat action describes a quadratic flat function that "
       "depends on the residual, i.e.\n"
       "1 - exp(||r||^2 / alpha).",
-      bp::init<int, double>(bp::args("self", "nr", "sigma2"),
+      bp::init<int, double>(bp::args("self", "nr", "alpha"),
                             "Initialize the activation model.\n\n"
                             ":param nr: dimension of the cost-residual vector"
                             "param alpha: width of quadratic basin near zero"))
