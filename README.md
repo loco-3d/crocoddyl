@@ -223,6 +223,7 @@ The following people have been involved in the development of **Crocoddyl**:
 - [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Oxford): feature extension and debugging
 - [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (IRI: CSIC-UPC): feature extension
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
+- [Julian Eßer](https://github.com/julesser) (DFKI): features extension (contact stability)
 
 
 ## Acknowledgments
