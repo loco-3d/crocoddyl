@@ -100,11 +100,7 @@ void exposeCostControlGravContact() {
       .add_property("dg_dx",
                     bp::make_getter(&CostDataControlGravContact::dg_dx,
                                     bp::return_internal_reference<>()),
-                    "Partial derivative of rnea in contact with respect to x")
-      .add_property("dg_da",
-                    bp::make_getter(&CostDataControlGravContact::dg_da,
-                                    bp::return_internal_reference<>()),
-                    "Partial derivative of rnea in contact with respect to a");
+                    "Partial derivative of rnea in contact with respect to x");
 }
 
 } // namespace python

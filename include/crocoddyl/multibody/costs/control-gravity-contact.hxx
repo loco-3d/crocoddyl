@@ -58,13 +58,8 @@ void CostModelControlGravContactTpl<Scalar>::calc(
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
-      x.tail(state_->get_nv());
 
-  data->r =
-      u - pinocchio::rnea(*pin_model_, *(d->pinocchio), q, v,
-                          Eigen::VectorXd::Zero(state_->get_nv()), d->fext)
-              .tail(nu_);
+  data->r = u - pinocchio::computeStaticTorque(*pin_model_.get(), *d->pinocchio, q, d->fext).tail(nu_);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -88,14 +83,9 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
-      x.tail(state_->get_nv());
 
-  pinocchio::computeRNEADerivatives(*pin_model_, *(d->pinocchio), q, v,
-                                    Eigen::VectorXd::Zero(state_->get_nv()),
-                                    d->fext, d->dg_dx.topRows(state_->get_nv()),
-                                    d->dg_dx.bottomRows(state_->get_nv()),
-                                    d->dg_da);
+  pinocchio::computeStaticTorqueDerivatives(*pin_model_.get(), *d->pinocchio, q,
+                                    d->fext, d->dg_dx.topRows(state_->get_nv()));
 
   activation_->calcDiff(data->activation, data->r);
 
