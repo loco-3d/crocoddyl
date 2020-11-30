@@ -58,11 +58,8 @@ void CostModelControlGravTpl<Scalar>::calc(
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
-      x.tail(state_->get_nv());
 
-  data->r = u - pinocchio::rnea(*pin_model_, *(d->pinocchio), q, v,
-                                Eigen::VectorXd::Zero(state_->get_nv()));
+  data->r = u - pinocchio::computeGeneralizedGravity(*pin_model_.get(), *d->pinocchio, q);
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -86,14 +83,9 @@ void CostModelControlGravTpl<Scalar>::calcDiff(
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
-      x.tail(state_->get_nv());
 
-  pinocchio::computeRNEADerivatives(*pin_model_, *(d->pinocchio), q, v,
-                                    Eigen::VectorXd::Zero(state_->get_nv()),
-                                    d->dg_dx.topRows(state_->get_nq()),
-                                    d->dg_dx.bottomRows(state_->get_nv()),
-                                    d->dg_da);
+  pinocchio::computeGeneralizedGravityDerivatives(*pin_model_.get(), *d->pinocchio, q,
+                                    d->dg_dx.topRows(state_->get_nq()));
 
   activation_->calcDiff(data->activation, data->r);
 

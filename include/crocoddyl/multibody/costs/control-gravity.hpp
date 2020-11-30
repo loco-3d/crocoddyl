@@ -162,10 +162,8 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataControlGravTpl(Model<Scalar> *const model,
                          DataCollectorAbstract *const data)
       : Base(model, data), dg_dx(model->get_state()->get_nx(), model->get_nu()),
-        dg_da(model->get_state()->get_nv(), model->get_nu()),
         Arr_dgdx(model->get_nu(), model->get_state()->get_nx()) {
     dg_dx.setZero();
-    dg_da.setZero();
     Arr_dgdx.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar> *d =
@@ -178,9 +176,8 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar> *pinocchio;
+  pinocchio::DataTpl<Scalar>* pinocchio;
   MatrixXs dg_dx;
-  MatrixXs dg_da;
   MatrixXs Arr_dgdx;
   using Base::activation;
   using Base::cost;
