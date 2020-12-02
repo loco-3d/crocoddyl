@@ -88,14 +88,14 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
                                     d->fext, d->dg_dx.topRows(state_->get_nv()));
 
   activation_->calcDiff(data->activation, data->r);
+  
+  data->Lu.noalias() =  data->activation->Ar; 
+  data->Lx.noalias() =  -d->dg_dx.rightCols(nu_) * data->activation->Ar; 
 
-  data->Lu.noalias() = data->activation->Ar;
-  data->Lx.noalias() = -d->dg_dx * data->activation->Ar;
+  d->Arr_dgdx.noalias() = data->activation->Arr * (d->dg_dx.rightCols(nu_)).transpose(); 
+  data->Lxx.noalias() =  d->dg_dx.rightCols(nu_) * d->Arr_dgdx; 
 
-  d->Arr_dgdx.noalias() = data->activation->Arr * d->dg_dx.transpose();
-  data->Lxx.noalias() = d->dg_dx * d->Arr_dgdx;
-
-  data->Lxu.noalias() = -d->dg_dx * data->activation->Arr;
+  data->Lxu.noalias() =  -d->Arr_dgdx; 
   data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();
 }
 

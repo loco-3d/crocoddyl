@@ -171,7 +171,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataControlGravContactTpl(Model<Scalar> *const model,
                                 DataCollectorAbstract *const data)
       : Base(model, data),
-        dg_dx(model->get_state()->get_ndx(), model->get_nu()),
+        dg_dx(model->get_state()->get_ndx(), model->get_state()->get_nv()),
         Arr_dgdx(model->get_nu(), model->get_state()->get_ndx()) {
     dg_dx.setZero();
     Arr_dgdx.setZero();
