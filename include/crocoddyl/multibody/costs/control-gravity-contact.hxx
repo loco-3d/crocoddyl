@@ -89,14 +89,21 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
 
   activation_->calcDiff(data->activation, data->r);
   
-  data->Lu.noalias() =  data->activation->Ar; 
-  data->Lx.noalias() =  -d->dg_dx.rightCols(nu_) * data->activation->Ar; 
+  for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts.begin();
+         it != d->contacts.end(); ++it) {
+			 d->df_du_Jc.noalias() += (it->second->df_du.transpose() * it->second->Jc).rightCols(nu_);
+			 d->df_dx_Jc.topRows(state_->get_nv()).noalias() += (it->second->df_dx.transpose() * it->second->Jc).rightCols(nu_);
+		 }
+  
+  data->Lu.noalias() =  (MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * data->activation->Ar; 
+  data->Lx.noalias() =  -(d->dg_dx.rightCols(nu_) - d->df_dx_Jc) * data->activation->Ar; 
 
-  d->Arr_dgdx.noalias() = data->activation->Arr * (d->dg_dx.rightCols(nu_)).transpose(); 
-  data->Lxx.noalias() =  d->dg_dx.rightCols(nu_) * d->Arr_dgdx; 
+  d->Arr_dgdx.noalias() = data->activation->Arr * (d->dg_dx.rightCols(nu_) - d->df_dx_Jc).transpose(); 
+  data->Lxx.noalias() =  (d->dg_dx.rightCols(nu_) - d->df_dx_Jc) * d->Arr_dgdx; 
 
-  data->Lxu.noalias() =  -d->Arr_dgdx; 
-  data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();
+  data->Lxu.noalias() =  -(MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * d->Arr_dgdx; 
+  data->Luu.diagonal().noalias() = ((MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * data->activation->Arr * 
+                                    (MatrixXs::Identity(nu_,nu_) + d->df_du_Jc).transpose()).diagonal();
 }
 
 template <typename Scalar>

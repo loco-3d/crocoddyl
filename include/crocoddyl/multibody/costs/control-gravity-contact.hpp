@@ -172,8 +172,12 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
                                 DataCollectorAbstract *const data)
       : Base(model, data),
         dg_dx(model->get_state()->get_ndx(), model->get_state()->get_nv()),
+        df_du_Jc(model->get_nu(), model->get_nu()),
+        df_dx_Jc(model->get_state()->get_ndx(), model->get_nu()),
         Arr_dgdx(model->get_nu(), model->get_state()->get_ndx()) {
     dg_dx.setZero();
+    df_du_Jc.setZero();
+    df_dx_Jc.setZero();
     Arr_dgdx.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyInContactTpl<Scalar> *d =
@@ -185,11 +189,15 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
     fext = d->contacts->fext;
+    contacts = d->contacts->contacts;
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar>> fext;
+  ContactModelMultiple::ContactDataContainer contacts;
   MatrixXs dg_dx;
+  MatrixXs df_du_Jc;
+  MatrixXs df_dx_Jc;
   MatrixXs Arr_dgdx;
   using Base::activation;
   using Base::cost;
