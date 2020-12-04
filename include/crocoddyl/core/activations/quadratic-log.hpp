@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
 
+#include <iostream>
+#include <stdexcept>
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <iostream>
-#include <stdexcept>
 
 namespace crocoddyl {
 
@@ -30,7 +30,6 @@ namespace crocoddyl {
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
-
 template <typename _Scalar>
 class ActivationModelQuadLogTpl : public ActivationModelAbstractTpl<_Scalar> {
 public:
@@ -45,7 +44,7 @@ public:
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the quadLog activation model
+   * @brief Initialize the quadratic-log activation model
    *
    * The default `alpha` value is defined as 1.
    *
@@ -63,9 +62,9 @@ public:
   virtual ~ActivationModelQuadLogTpl(){};
 
   /**
-   * @brief Compute the quadLog function
+   * @brief Compute the quadratic-log function
    *
-   * @param[in] data  quadLog activation data
+   * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
@@ -81,9 +80,9 @@ public:
   };
 
   /**
-   * @brief Compute the derivatives of the quadLog function
+   * @brief Compute the derivatives of the quadratic-log function
    *
-   * @param[in] data  quadLog activation data
+   * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
@@ -102,7 +101,7 @@ public:
   };
 
   /**
-   * @brief Create the quadLog activation data
+   * @brief Create the quadratic-log activation data
    *
    * @return the activation data
    */
@@ -125,7 +124,7 @@ private:
 };
 
 /**
- * @brief Data structure of the quadLog activation
+ * @brief Data structure of the quadratic-log activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation

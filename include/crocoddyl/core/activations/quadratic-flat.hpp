@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
 
+#include <iostream>
+#include <stdexcept>
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <iostream>
-#include <stdexcept>
 
 namespace crocoddyl {
 
@@ -31,7 +31,6 @@ namespace crocoddyl {
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
-
 template <typename _Scalar>
 class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
 public:
@@ -46,11 +45,11 @@ public:
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the quadFlat activation model
+   * @brief Initialize the quadratic-flat activation model
    *
    * The default `alpha` value is defined as 1.
    *
-   * @param[in] nr   Dimension of the residual vector
+   * @param[in] nr     Dimension of the residual vector
    * @param[in] alpha  Width of quadratic basin (default: 1.)
    */
   explicit ActivationModelQuadFlatTpl(const std::size_t &nr,
@@ -64,9 +63,9 @@ public:
   virtual ~ActivationModelQuadFlatTpl(){};
 
   /**
-   * @brief Compute the quadFlat function
+   * @brief Compute the quadratic-flat function
    *
-   * @param[in] data  quadFlat activation data
+   * @param[in] data  Quadratic-flat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
@@ -83,9 +82,9 @@ public:
   };
 
   /**
-   * @brief Compute the derivatives of the quadFlat function
+   * @brief Compute the derivatives of the quadratic-flat function
    *
-   * @param[in] data  quadFlat activation data
+   * @param[in] data  Quadratic-flat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
@@ -105,7 +104,7 @@ public:
   };
 
   /**
-   * @brief Create the quadFlat activation data
+   * @brief Create the quadratic-flat activation data
    *
    * @return the activation data
    */
@@ -128,7 +127,7 @@ private:
 };
 
 /**
- * @brief Data structure of the quadFlat activation
+ * @brief Data structure of the quadratic-flat activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation
