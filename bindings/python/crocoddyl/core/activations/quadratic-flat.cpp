@@ -24,13 +24,11 @@ void exposeActivationQuadFlat() {
                             "Initialize the activation model.\n\n"
                             ":param nr: dimension of the cost-residual vector"
                             "param alpha: width of quadratic basin near zero"))
-      .def("calc", &ActivationModelQuadFlat::calc,
-           bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelQuadFlat::calc, bp::args("self", "data", "r"),
            "Compute the 1 - exp(||r||^2 / alpha).\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelQuadFlat::calcDiff,
-           bp::args("self", "data", "r"),
+      .def("calcDiff", &ActivationModelQuadFlat::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of a quadratic flat function.\n\n"
            "Note that the Hessian is constant, so we don't write again this "
            "value.\n"
@@ -40,10 +38,9 @@ void exposeActivationQuadFlat() {
            "Create the quadratic flat activation data.\n\n")
       .add_property(
           "alpha",
-          bp::make_function(&ActivationModelQuadFlat::get_alpha,
-                            bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActivationModelQuadFlat::get_alpha, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&ActivationModelQuadFlat::set_alpha), "alpha");
 }
 
-} // namespace python
-} // namespace crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
