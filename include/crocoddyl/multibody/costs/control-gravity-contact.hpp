@@ -165,6 +165,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
@@ -194,7 +195,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar>> fext;
-  ContactModelMultiple::ContactDataContainer contacts;
+  typename ContactModelMultiple::ContactDataContainer contacts;
   MatrixXs dg_dx;
   MatrixXs df_du_Jc;
   MatrixXs df_dx_Jc;
