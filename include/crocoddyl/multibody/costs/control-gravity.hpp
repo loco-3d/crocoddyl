@@ -9,12 +9,6 @@
 #ifndef CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_HPP_
 #define CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_HPP_
 
-#include "pinocchio/algorithm/model.hpp"
-#include "pinocchio/algorithm/rnea-derivatives.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
-#include "pinocchio/fwd.hpp"
-#include "pinocchio/multibody/model.hpp"
-
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
@@ -30,11 +24,10 @@ namespace crocoddyl {
  * @brief Control gravity cost
  *
  * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q},\mathbf{v})\f$, where
+ * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
  * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, g the
  * gravity torque corresponding to the current configuration,
- * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input,
- * \f$\mathbf{v}\in~\mathbb{R}^{nv}\f$ the current velocity joints input.
+ * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input.
  * Note that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -145,7 +138,7 @@ protected:
   using Base::unone_;
 
 private:
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
+  typename StateMultibody::PinocchioModel pin_model_;
 };
 
 template <typename _Scalar>
@@ -161,10 +154,10 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataControlGravTpl(Model<Scalar> *const model,
                          DataCollectorAbstract *const data)
-      : Base(model, data), dg_dx(model->get_state()->get_nx(), model->get_nu()),
-        Arr_dgdx(model->get_nu(), model->get_state()->get_nx()) {
-    dg_dx.setZero();
-    Arr_dgdx.setZero();
+      : Base(model, data), dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Arr_dgdq(model->get_nu(), model->get_state()->get_nv()) {
+    dg_dq.setZero();
+    Arr_dgdq.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar> *d =
         dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
@@ -177,8 +170,8 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;
-  MatrixXs dg_dx;
-  MatrixXs Arr_dgdx;
+  MatrixXs dg_dq;
+  MatrixXs Arr_dgdq;
   using Base::activation;
   using Base::cost;
   using Base::Lu;

@@ -17,8 +17,8 @@ void exposeCostControlGravContact() {
   bp::class_<CostModelControlGravContact, bp::bases<CostModelAbstract>>(
       "CostModelControlGravContact",
       "This cost function defines a residual vector as r = u - "
-      "computeStaticTorque(q,fext), with u and q,fext as the control and "
-      "position, external forces ",
+      "g(q,fext), with u as the control, q as the position,"
+      "fext as the external forces and g as the gravity vector in contact",
       bp::init<boost::shared_ptr<StateMultibody>,
                boost::shared_ptr<ActivationModelAbstract>>(
           bp::args("self", "state", "activation"),
@@ -97,10 +97,10 @@ void exposeCostControlGravContact() {
           ":param model: control gravity cost model in contact\n"
           ":param data: shared data")[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3>>()])
-      .add_property("dg_dx",
-                    bp::make_getter(&CostDataControlGravContact::dg_dx,
+      .add_property("dg_dq",
+                    bp::make_getter(&CostDataControlGravContact::dg_dq,
                                     bp::return_internal_reference<>()),
-                    "Partial derivative of rnea in contact with respect to x");
+                    "Partial derivative of gravity torque in contact with respect to q");
 }
 
 } // namespace python

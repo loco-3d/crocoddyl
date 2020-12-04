@@ -16,8 +16,8 @@ namespace python {
 void exposeCostControlGrav() {
   bp::class_<CostModelControlGrav, bp::bases<CostModelAbstract>>(
       "CostModelControlGrav",
-      "This cost function defines a residual vector as r = u - rnea(q,v,a), "
-      "with u and q,v,a as the control and position, velocity, acceleration ",
+      "This cost function defines a residual vector as r = u - g(q), "
+      "where q, g(q) are the generalized position and gravity vector, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>,
                boost::shared_ptr<ActivationModelAbstract>>(
           bp::args("self", "state", "activation"),
@@ -95,10 +95,10 @@ void exposeCostControlGrav() {
           ":param model: control gravity cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3>>()])
-      .add_property("dg_dx",
-                    bp::make_getter(&CostDataControlGrav::dg_dx,
-                                    bp::return_internal_reference<>()),
-                    "Partial derivative of rnea with respect to x");
+      .add_property("dg_dq",
+       bp::make_getter(&CostDataControlGrav::dg_dq,
+       bp::return_internal_reference<>()),
+       "Partial derivative of gravity vector with respect to q");
 }
 
 } // namespace python

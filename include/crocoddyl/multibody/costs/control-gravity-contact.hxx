@@ -7,21 +7,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
+#include "pinocchio/algorithm/rnea-derivatives.hpp"
+#include "pinocchio/algorithm/rnea.hpp"
 
 namespace crocoddyl {
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state,
     boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation), pin_model_(state->get_pinocchio()) {}
-
-template <typename Scalar>
-CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    const std::size_t &nu)
-    : Base(state, activation, nu), pin_model_(state->get_pinocchio()) {
-  if (activation_->get_nr() != nu_) {
+    : Base(state, activation), pin_model_(*state->get_pinocchio()) {
+    if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
   }
@@ -29,13 +24,36 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
+    boost::shared_ptr<StateMultibody> state,
+    boost::shared_ptr<ActivationModelAbstract> activation,
+    const std::size_t &nu)
+    : Base(state, activation, nu), pin_model_(*state->get_pinocchio()) {
+  if (activation_->get_nr() != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(nu_));
+  }
+  if (nu_ == 0) {
+      throw_pretty("Invalid argument: "
+                 << "it seems to be an autonomous system, if so, don't add "
+                    "this cost function");
+  }
+}
+
+template <typename Scalar>
+CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state)
-    : Base(state, state->get_nv()), pin_model_(state->get_pinocchio()) {}
+    : Base(state, state->get_nv()), pin_model_(*state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state, const std::size_t &nu)
-    : Base(state, nu, nu), pin_model_(state->get_pinocchio()) {}
+    : Base(state, nu, nu), pin_model_(*state->get_pinocchio()) {	
+    if (nu_ == 0) {
+      throw_pretty("Invalid argument: "
+                 << "it seems to be an autonomous system, if so, don't add "
+                    "this cost function");
+    }
+}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::~CostModelControlGravContactTpl() {}
@@ -44,11 +62,6 @@ template <typename Scalar>
 void CostModelControlGravContactTpl<Scalar>::calc(
     const boost::shared_ptr<CostDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
-  if (nu_ == 0) {
-    throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-  }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " +
@@ -59,7 +72,7 @@ void CostModelControlGravContactTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
 
-  data->r = u - pinocchio::computeStaticTorque(*pin_model_.get(), *d->pinocchio, q, d->fext).tail(nu_);
+  data->r = u - pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext).tail(nu_);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -68,12 +81,6 @@ template <typename Scalar>
 void CostModelControlGravContactTpl<Scalar>::calcDiff(
     const boost::shared_ptr<CostDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
-
-  if (nu_ == 0) {
-    throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-  }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " +
@@ -84,26 +91,25 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
 
-  pinocchio::computeStaticTorqueDerivatives(*pin_model_.get(), *d->pinocchio, q,
-                                    d->fext, d->dg_dx.topRows(state_->get_nv()));
+  pinocchio::computeStaticTorqueDerivatives(pin_model_, *d->pinocchio, q,
+                                    d->fext, d->dg_dq);
 
   activation_->calcDiff(data->activation, data->r);
-  
-  for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts.begin();
+  const std::size_t& nv = state_->get_nv();
+  /*for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts.begin();
          it != d->contacts.end(); ++it) {
 			 d->df_du_Jc.noalias() += (it->second->df_du.transpose() * it->second->Jc.rightCols(nu_)).rightCols(nu_);
 			 d->df_dx_Jc.topRows(state_->get_nv()).noalias() += (it->second->df_dx.transpose() * it->second->Jc).rightCols(nu_);
-		 }
+		 }*/
   
-  data->Lu.noalias() =  (MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * data->activation->Ar; 
-  data->Lx.noalias() =  -(d->dg_dx.rightCols(nu_) - d->df_dx_Jc) * data->activation->Ar; 
+  data->Lu.noalias() = data->activation->Ar; 
+  data->Lx.head(nv).noalias() = - d->dg_dq.transpose().rightCols(nu_) * data->activation->Ar; 
 
-  d->Arr_dgdx.noalias() = data->activation->Arr * (d->dg_dx.rightCols(nu_) - d->df_dx_Jc).transpose(); 
-  data->Lxx.noalias() =  (d->dg_dx.rightCols(nu_) - d->df_dx_Jc) * d->Arr_dgdx; 
+  d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq.bottomRows(nu_); 
+  data->Lxx.topLeftCorner(nv, nv).noalias() = d->dg_dq.transpose().rightCols(nu_) * d->Arr_dgdq; 
 
-  data->Lxu.noalias() =  -(MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * d->Arr_dgdx; 
-  data->Luu.diagonal().noalias() = ((MatrixXs::Identity(nu_,nu_) + d->df_du_Jc) * data->activation->Arr * 
-                                    (MatrixXs::Identity(nu_,nu_) + d->df_du_Jc).transpose()).diagonal();
+  data->Lxu.topRows(nv).noalias() = - d->Arr_dgdq.transpose(); 
+  data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();
 }
 
 template <typename Scalar>

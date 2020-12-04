@@ -9,12 +9,6 @@
 #ifndef CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_CONTACT_HPP_
 #define CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_CONTACT_HPP_
 
-#include "pinocchio/algorithm/model.hpp"
-#include "pinocchio/algorithm/rnea-derivatives.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
-#include "pinocchio/fwd.hpp"
-#include "pinocchio/multibody/model.hpp"
-
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
@@ -34,13 +28,13 @@ namespace crocoddyl {
  * @brief Control gravity cost
  *
  * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q},\mathbf{v},\mathbf{f})\f$,
- * where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, g the
- * gravity torque corresponding to the current configuration,
- * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input,
- * \f$\mathbf{v}\in~\mathbb{R}^{nv}\f$ the current velocity joints input,
- * \f$\mathbf{f}\f$ the vector of external contact forces. Note that the
- * dimension of the residual vector is obtained from `nu`.
+ * \f$\mathbf{r}=\mathbf{u}-(g(q) - \sum J(q)^{\top} f_{\text{ext}})\f$,
+ * where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, 
+ * \f$J(q)\f$ the contact Jacobians, \f$f_{\text{ext}}\f$ the external forces
+ * associated with the contacts, g the gravity torque corresponding to the 
+ * current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
+ * position joints input. 
+ * Note that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
  * For the computation of the cost Hessian, we use the Gauss-Newton
@@ -154,7 +148,7 @@ protected:
   using Base::unone_;
 
 private:
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
+  typename StateMultibody::PinocchioModel pin_model_;
 };
 
 template <typename _Scalar>
@@ -172,14 +166,10 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataControlGravContactTpl(Model<Scalar> *const model,
                                 DataCollectorAbstract *const data)
       : Base(model, data),
-        dg_dx(model->get_state()->get_ndx(), model->get_state()->get_nv()),
-        df_du_Jc(model->get_nu(), model->get_nu()),
-        df_dx_Jc(model->get_state()->get_ndx(), model->get_nu()),
-        Arr_dgdx(model->get_nu(), model->get_state()->get_ndx()) {
-    dg_dx.setZero();
-    df_du_Jc.setZero();
-    df_dx_Jc.setZero();
-    Arr_dgdx.setZero();
+        dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Arr_dgdq(model->get_nu(), model->get_state()->get_nv()) {
+    dg_dq.setZero();
+    Arr_dgdq.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyInContactTpl<Scalar> *d =
         dynamic_cast<DataCollectorMultibodyInContactTpl<Scalar> *>(shared);
@@ -196,10 +186,8 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar>> fext;
   typename ContactModelMultiple::ContactDataContainer contacts;
-  MatrixXs dg_dx;
-  MatrixXs df_du_Jc;
-  MatrixXs df_dx_Jc;
-  MatrixXs Arr_dgdx;
+  MatrixXs dg_dq;
+  MatrixXs Arr_dgdq;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
