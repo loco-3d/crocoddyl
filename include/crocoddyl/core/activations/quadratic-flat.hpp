@@ -74,7 +74,7 @@ class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-    d->a0 = exp((-r.transpose() * r)[0] / alpha_);
+    d->a0 = exp(-r.dot(r) / alpha_);
     data->a_value = Scalar(1.0) - d->a0;
   };
 

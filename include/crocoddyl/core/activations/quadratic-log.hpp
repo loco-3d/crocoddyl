@@ -72,7 +72,7 @@ class ActivationModelQuadLogTpl : public ActivationModelAbstractTpl<_Scalar> {
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-    d->a0 = (r.transpose() * r)[0] / alpha_;
+    d->a0 = r.dot(r) / alpha_;
     data->a_value = log(Scalar(1.0) + d->a0);
   };
 
