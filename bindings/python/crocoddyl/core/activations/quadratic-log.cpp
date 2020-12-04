@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/activations/quadratic-log.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
