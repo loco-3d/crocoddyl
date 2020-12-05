@@ -14,7 +14,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationQuadFlat() {
-  bp::class_<ActivationModelQuadFlat, bp::bases<ActivationModelAbstract>>(
+  bp::class_<ActivationModelQuadFlat, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuadFlat",
       "Quadratic flat activation model.\n\n"
       "A quadratic flat action describes a quadratic flat function that "
