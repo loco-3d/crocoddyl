@@ -3,7 +3,7 @@ import pinocchio
 import numpy as np
 import example_robot_data
 
-robot = example_robot_data.loadTalosArm()
+robot = example_robot_data.load('talos_arm')
 robot_model = robot.model
 
 DT = 1e-3

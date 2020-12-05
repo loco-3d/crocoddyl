@@ -15,7 +15,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the anymal model
-anymal = example_robot_data.loadANYmal()
+anymal = example_robot_data.load('anymal')
 robot_model = anymal.model
 lims = robot_model.effortLimit
 lims *= 0.5  # reduced artificially the torque limits

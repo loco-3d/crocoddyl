@@ -11,7 +11,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Load robot
-robot = example_robot_data.loadTalos()
+robot = example_robot_data.load('talos')
 rmodel = robot.model
 
 # Create data structures
