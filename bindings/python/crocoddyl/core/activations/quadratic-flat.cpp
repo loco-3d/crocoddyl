@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/activations/quadratic-flat.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/activations/quadratic-flat.hpp"
 
 namespace crocoddyl {
 namespace python {
