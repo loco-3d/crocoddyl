@@ -15,8 +15,8 @@ namespace crocoddyl {
 SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
       regfactor_(10.),
-      regmin_(1e-9),
-      regmax_(1e9),
+      reg_min_(1e-9),
+      reg_max_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
       th_gaptol_(1e-16),
@@ -45,8 +45,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
-    xreg_ = regmin_;
-    ureg_ = regmin_;
+    xreg_ = reg_min_;
+    ureg_ = reg_min_;
   } else {
     xreg_ = reginit;
     ureg_ = reginit;
@@ -61,7 +61,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       } catch (std::exception& e) {
         recalcDiff = false;
         increaseRegularization();
-        if (xreg_ == regmax_) {
+        if (xreg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -99,7 +99,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     if (steplength_ <= th_stepinc_) {
       increaseRegularization();
-      if (xreg_ == regmax_) {
+      if (xreg_ == reg_max_) {
         return false;
       }
     }
@@ -330,16 +330,16 @@ void SolverDDP::computeGains(const std::size_t& t) {
 
 void SolverDDP::increaseRegularization() {
   xreg_ *= regfactor_;
-  if (xreg_ > regmax_) {
-    xreg_ = regmax_;
+  if (xreg_ > reg_max_) {
+    xreg_ = reg_max_;
   }
   ureg_ = xreg_;
 }
 
 void SolverDDP::decreaseRegularization() {
   xreg_ /= regfactor_;
-  if (xreg_ < regmin_) {
-    xreg_ = regmin_;
+  if (xreg_ < reg_min_) {
+    xreg_ = reg_min_;
   }
   ureg_ = xreg_;
 }
@@ -404,9 +404,14 @@ void SolverDDP::allocateData() {
 
 const double& SolverDDP::get_regfactor() const { return regfactor_; }
 
-const double& SolverDDP::get_regmin() const { return regmin_; }
 
-const double& SolverDDP::get_regmax() const { return regmax_; }
+const double& SolverDDP::get_reg_min() const { return reg_min_; }
+
+const double& SolverDDP::get_regmin() const { return reg_min_; }
+
+const double& SolverDDP::get_reg_max() const { return reg_max_; }
+
+const double& SolverDDP::get_regmax() const { return reg_max_; }
 
 const std::vector<double>& SolverDDP::get_alphas() const { return alphas_; }
 
@@ -444,6 +449,13 @@ void SolverDDP::set_regfactor(const double& regfactor) {
                  << "regfactor value is higher than 1.");
   }
   regfactor_ = regfactor;
+
+void SolverDDP::set_reg_min(const double& regmin) {
+  if (0. > regmin) {
+    throw_pretty("Invalid argument: "
+                 << "regmin value has to be positive.");
+  }
+  reg_min_ = regmin;
 }
 
 void SolverDDP::set_regmin(const double& regmin) {
@@ -451,7 +463,15 @@ void SolverDDP::set_regmin(const double& regmin) {
     throw_pretty("Invalid argument: "
                  << "regmin value has to be positive.");
   }
-  regmin_ = regmin;
+  reg_min_ = regmin;
+}
+
+void SolverDDP::set_reg_max(const double& regmax) {
+  if (0. > regmax) {
+    throw_pretty("Invalid argument: "
+                 << "regmax value has to be positive.");
+  }
+  reg_max_ = regmax;
 }
 
 void SolverDDP::set_regmax(const double& regmax) {
@@ -459,7 +479,7 @@ void SolverDDP::set_regmax(const double& regmax) {
     throw_pretty("Invalid argument: "
                  << "regmax value has to be positive.");
   }
-  regmax_ = regmax;
+  reg_max_ = regmax;
 }
 
 void SolverDDP::set_alphas(const std::vector<double>& alphas) {

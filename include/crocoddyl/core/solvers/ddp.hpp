@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "crocoddyl/core/solver-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -158,12 +159,14 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Return the minimum regularization value
    */
-  const double& get_regmin() const;
+  const double& get_reg_min() const;
+  DEPRECATED("Use get_reg_min()", const double& get_regmin() const);
 
   /**
    * @brief Return the maximum regularization value
    */
-  const double& get_regmax() const;
+  const double& get_reg_max() const;
+  DEPRECATED("Use get_reg_max()", const double& get_regmax() const);
 
   /**
    * @brief Return the set of step lengths using by the line-search procedure
@@ -248,12 +251,14 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Modify the minimum regularization value
    */
-  void set_regmin(const double& regmin);
+  void set_reg_min(const double& regmin);
+  DEPRECATED("Use set_reg_min()", void set_regmin(const double& regmin));
 
   /**
    * @brief Modify the maximum regularization value
    */
-  void set_regmax(const double& regmax);
+  void set_reg_max(const double& regmax);
+  DEPRECATED("Use set_reg_max()", void set_regmax(const double& regmax));
 
   /**
    * @brief Modify the set of step lengths using by the line-search procedure
@@ -282,8 +287,8 @@ class SolverDDP : public SolverAbstract {
 
  protected:
   double regfactor_;  //!< Regularization factor used to decrease / increase it
-  double regmin_;     //!< Minimum allowed regularization value
-  double regmax_;     //!< Maximum allowed regularization value
+  double reg_min_;        //!< Minimum allowed regularization value
+  double reg_max_;        //!< Maximum allowed regularization value
 
   double cost_try_;                      //!< Total cost computed by line-search procedure
   std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure

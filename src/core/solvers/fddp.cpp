@@ -22,8 +22,8 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
-    xreg_ = regmin_;
-    ureg_ = regmin_;
+    xreg_ = reg_min_;
+    ureg_ = reg_min_;
   } else {
     xreg_ = reginit;
     ureg_ = reginit;
@@ -38,7 +38,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       } catch (std::exception& e) {
         recalcDiff = false;
         increaseRegularization();
-        if (xreg_ == regmax_) {
+        if (xreg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -85,7 +85,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     }
     if (steplength_ <= th_stepinc_) {
       increaseRegularization();
-      if (xreg_ == regmax_) {
+      if (xreg_ == reg_max_) {
         return false;
       }
     }

@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -101,12 +102,24 @@ void exposeSolverDDP() {
                     bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_regfactor),
                     "regularization factor used for increasing or decreasing the value.")
-      .add_property("regMin",
-                    bp::make_function(&SolverDDP::get_regmin, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regmin), "minimum regularization value.")
-      .add_property("regMax",
-                    bp::make_function(&SolverDDP::get_regmax, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regmax), "maximum regularization value.")
+      .add_property("reg_min",
+                    bp::make_function(&SolverDDP::get_reg_min, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_reg_min), "minimum regularization value.")
+      .add_property("reg_max",
+                    bp::make_function(&SolverDDP::get_reg_max, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::set_reg_max), "maximum regularization value.")
+      .add_property(
+          "regMin",
+          bp::make_function(&SolverDDP::get_reg_min,
+                            deprecated<bp::return_value_policy<bp::copy_const_reference> >("Deprecated. Use reg_min")),
+          bp::make_function(&SolverDDP::set_reg_min, deprecated<>("Deprecated. Use reg_min")),
+          "minimum regularization value.")
+      .add_property(
+          "regMax",
+          bp::make_function(&SolverDDP::get_reg_max,
+                            deprecated<bp::return_value_policy<bp::copy_const_reference> >("Deprecated. Use reg_max")),
+          bp::make_function(&SolverDDP::set_reg_max, deprecated<>("Deprecated. Use reg_max")),
+          "maximum regularization value.")
       .add_property("th_stepDec",
                     bp::make_function(&SolverDDP::get_th_stepdec, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_th_stepdec),
