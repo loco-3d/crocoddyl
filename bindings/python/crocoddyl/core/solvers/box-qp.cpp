@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -63,7 +64,10 @@ void exposeSolverBoxQP() {
                     "QP solution.")
       .add_property("nx", bp::make_function(&BoxQP::get_nx), bp::make_function(&BoxQP::set_nx),
                     "dimension of the decision vector.")
-      .add_property("maxiter", bp::make_function(&BoxQP::get_maxiter), bp::make_function(&BoxQP::set_maxiter),
+      .add_property("maxIter", bp::make_function(&BoxQP::get_maxiter), bp::make_function(&BoxQP::set_maxiter),
+                    "maximum number of allowed iterations.")
+      .add_property("maxiter", bp::make_function(&BoxQP::get_maxiter, deprecated<>("Deprecated. Use maxIter")),
+                    bp::make_function(&BoxQP::set_maxiter, deprecated<>("Deprecated. Use maxIter")),
                     "maximum number of allowed iterations.")
       .add_property("th_acceptStep", bp::make_function(&BoxQP::get_th_acceptstep),
                     bp::make_function(&BoxQP::set_th_acceptstep), "acceptable reduction ration.")
