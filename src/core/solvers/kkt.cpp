@@ -84,7 +84,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 void SolverKKT::computeDirection(bool recalc) {
   const std::size_t& T = problem_->get_T();
   if (recalc) {
-    calc();
+    calcDiff();
   }
   computePrimalDual();
   const Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> p_x = primal_.segment(0, ndx_);
@@ -176,7 +176,7 @@ std::size_t SolverKKT::get_ndx() const { return ndx_; }
 
 std::size_t SolverKKT::get_nu() const { return nu_; }
 
-double SolverKKT::calc() {
+double SolverKKT::calcDiff() {
   cost_ = problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
 
