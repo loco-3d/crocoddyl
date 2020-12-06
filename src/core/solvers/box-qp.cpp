@@ -12,8 +12,7 @@
 
 namespace crocoddyl {
 
-BoxQP::BoxQP(const std::size_t nx, std::size_t maxiter, const double th_acceptstep, const double th_grad,
-             const double reg)
+BoxQP::BoxQP(std::size_t nx, std::size_t maxiter, double th_acceptstep, double th_grad, double reg)
     : nx_(nx),
       maxiter_(maxiter),
       th_acceptstep_(th_acceptstep),
@@ -190,19 +189,19 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
 
 const BoxQPSolution& BoxQP::get_solution() const { return solution_; }
 
-const std::size_t& BoxQP::get_nx() const { return nx_; }
+std::size_t BoxQP::get_nx() const { return nx_; }
 
-const std::size_t& BoxQP::get_maxiter() const { return maxiter_; }
+std::size_t BoxQP::get_maxiter() const { return maxiter_; }
 
-const double& BoxQP::get_th_acceptstep() const { return th_acceptstep_; }
+double BoxQP::get_th_acceptstep() const { return th_acceptstep_; }
 
-const double& BoxQP::get_th_grad() const { return th_grad_; }
+double BoxQP::get_th_grad() const { return th_grad_; }
 
-const double& BoxQP::get_reg() const { return reg_; }
+double BoxQP::get_reg() const { return reg_; }
 
 const std::vector<double>& BoxQP::get_alphas() const { return alphas_; }
 
-void BoxQP::set_nx(const std::size_t& nx) {
+void BoxQP::set_nx(std::size_t nx) {
   nx_ = nx;
   x_ = Eigen::VectorXd::Zero(nx);
   xnew_ = Eigen::VectorXd::Zero(nx);
@@ -210,9 +209,9 @@ void BoxQP::set_nx(const std::size_t& nx) {
   dx_ = Eigen::VectorXd::Zero(nx);
 }
 
-void BoxQP::set_maxiter(const std::size_t& maxiter) { maxiter_ = maxiter; }
+void BoxQP::set_maxiter(std::size_t maxiter) { maxiter_ = maxiter; }
 
-void BoxQP::set_th_acceptstep(const double& th_acceptstep) {
+void BoxQP::set_th_acceptstep(double th_acceptstep) {
   if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
     throw_pretty("Invalid argument: "
                  << "th_acceptstep value should between 0 and 0.5");
@@ -220,7 +219,7 @@ void BoxQP::set_th_acceptstep(const double& th_acceptstep) {
   th_acceptstep_ = th_acceptstep;
 }
 
-void BoxQP::set_th_grad(const double& th_grad) {
+void BoxQP::set_th_grad(double th_grad) {
   if (0. > th_grad) {
     throw_pretty("Invalid argument: "
                  << "th_grad value has to be positive.");
@@ -228,7 +227,7 @@ void BoxQP::set_th_grad(const double& th_grad) {
   th_grad_ = th_grad;
 }
 
-void BoxQP::set_reg(const double& reg) {
+void BoxQP::set_reg(double reg) {
   if (0. > reg) {
     throw_pretty("Invalid argument: "
                  << "reg value has to be positive.");

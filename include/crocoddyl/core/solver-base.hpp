@@ -76,8 +76,8 @@ class SolverAbstract {
    * @return A boolean that describes if convergence was reached.
    */
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
-                     const bool& is_feasible = false, const double& reg_init = 1e-9) = 0;
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, std::size_t maxiter = 100,
+                     bool is_feasible = false, double reg_init = 1e-9) = 0;
 
   /**
    * @brief Compute the search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ for the current guess
@@ -90,7 +90,7 @@ class SolverAbstract {
    * @return  The search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ and the dual lambdas as lists of
    * \f$T+1\f$, \f$T\f$ and \f$T+1\f$ lengths, respectively
    */
-  virtual void computeDirection(const bool& recalc) = 0;
+  virtual void computeDirection(bool recalc) = 0;
 
   /**
    * @brief Try a predefined step length and compute its cost improvement
@@ -102,7 +102,7 @@ class SolverAbstract {
    * @param[in]  stepLength  step length
    * @return  The cost improvement
    */
-  virtual double tryStep(const double& step_length = 1) = 0;
+  virtual double tryStep(double step_length = 1) = 0;
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -134,7 +134,7 @@ class SolverAbstract {
    * @param[in]  isFeasible  true if the \p xs are obtained from integrating the \p us (rollout)
    */
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
-                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool& is_feasible = false);
+                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, bool is_feasible = false);
 
   /**
    * @brief Set a list of callback functions using for diagnostic
@@ -169,17 +169,17 @@ class SolverAbstract {
   /**
    * @brief Return the feasibility status of the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ trajectory
    */
-  const bool& get_is_feasible() const;
+  bool get_is_feasible() const;
 
   /**
    * @brief Return the total cost
    */
-  const double& get_cost() const;
+  double get_cost() const;
 
   /**
    * @brief Return the value computed by `stoppingCriteria()`
    */
-  const double& get_stop() const;
+  double get_stop() const;
 
   /**
    * @brief Return the LQ approximation of the expected improvement
@@ -189,42 +189,42 @@ class SolverAbstract {
   /**
    * @brief Return the state regularization value
    */
-  const double& get_xreg() const;
+  double get_xreg() const;
 
   /**
    * @brief Return the control regularization value
    */
-  const double& get_ureg() const;
+  double get_ureg() const;
 
   /**
    * @brief Return the step length
    */
-  const double& get_steplength() const;
+  double get_steplength() const;
 
   /**
    * @brief Return the cost reduction
    */
-  const double& get_dV() const;
+  double get_dV() const;
 
   /**
    * @brief Return the expected cost reduction
    */
-  const double& get_dVexp() const;
+  double get_dVexp() const;
 
   /**
    * @brief Return the threshold used for accepting a step
    */
-  const double& get_th_acceptstep() const;
+  double get_th_acceptstep() const;
 
   /**
    * @brief Return the tolerance for stopping the algorithm
    */
-  const double& get_th_stop() const;
+  double get_th_stop() const;
 
   /**
    * @brief Return the number of iterations performed by the solver
    */
-  const std::size_t& get_iter() const;
+  std::size_t get_iter() const;
 
   /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
@@ -239,22 +239,22 @@ class SolverAbstract {
   /**
    * @brief Modify the state regularization value
    */
-  void set_xreg(const double& xreg);
+  void set_xreg(double xreg);
 
   /**
    * @brief Modify the control regularization value
    */
-  void set_ureg(const double& ureg);
+  void set_ureg(double ureg);
 
   /**
    * @brief Modify the threshold used for accepting step
    */
-  void set_th_acceptstep(const double& th_acceptstep);
+  void set_th_acceptstep(double th_acceptstep);
 
   /**
    * @brief Modify the tolerance for stopping the algorithm
    */
-  void set_th_stop(const double& th_stop);
+  void set_th_stop(double th_stop);
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem

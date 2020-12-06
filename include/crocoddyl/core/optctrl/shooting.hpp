@@ -166,7 +166,7 @@ class ShootingProblemTpl {
   /**
    * @brief Return the number of running nodes
    */
-  const std::size_t& get_T() const;
+  std::size_t get_T() const;
 
   /**
    * @brief Return the initial state
@@ -211,17 +211,17 @@ class ShootingProblemTpl {
   /**
    * @brief Return the dimension of the state tuple
    */
-  const std::size_t& get_nx() const;
+  std::size_t get_nx() const;
 
   /**
    * @brief Return the dimension of the tangent space of the state manifold
    */
-  const std::size_t& get_ndx() const;
+  std::size_t get_ndx() const;
 
   /**
    * @brief Return the maximum dimension of the control vector
    */
-  const std::size_t& get_nu_max() const;
+  std::size_t get_nu_max() const;
 
  protected:
   Scalar cost_;                                                          //!< Total cost

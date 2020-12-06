@@ -58,10 +58,10 @@ class SolverDDP : public SolverAbstract {
   virtual ~SolverDDP();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
-                     const bool& is_feasible = false, const double& regInit = 1e-9);
-  virtual void computeDirection(const bool& recalc = true);
-  virtual double tryStep(const double& steplength = 1);
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, std::size_t maxiter = 100,
+                     bool is_feasible = false, double regInit = 1e-9);
+  virtual void computeDirection(bool recalc = true);
+  virtual double tryStep(double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
 
@@ -118,7 +118,7 @@ class SolverDDP : public SolverAbstract {
    *
    * @param  stepLength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void forwardPass(const double& stepLength);
+  virtual void forwardPass(double stepLength);
 
   /**
    * @brief Compute the feedforward and feedback terms using a Cholesky decomposition
@@ -133,7 +133,7 @@ class SolverDDP : public SolverAbstract {
    * Note that if the Cholesky decomposition fails, then we re-start the backward pass and increase the
    * state and control regularization values.
    */
-  virtual void computeGains(const std::size_t& t);
+  virtual void computeGains(std::size_t t);
 
   /**
    * @brief Increase the state and control regularization values by a `regfactor_` factor
@@ -153,29 +153,29 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Return the regularization factor used to increase the damping value
    */
-  const double& get_reg_incfactor() const;
+  double get_reg_incfactor() const;
 
   /**
    * @brief Return the regularization factor used to decrease the damping value
    */
-  const double& get_reg_decfactor() const;
+  double get_reg_decfactor() const;
 
   /**
    * @brief Return the regularization factor used to decrease / increase it
    */
-  DEPRECATED("Use get_reg_incfactor() or get_reg_decfactor()", const double& get_regfactor() const;)
+  DEPRECATED("Use get_reg_incfactor() or get_reg_decfactor()", double get_regfactor() const;)
 
   /**
    * @brief Return the minimum regularization value
    */
-  const double& get_reg_min() const;
-  DEPRECATED("Use get_reg_min()", const double& get_regmin() const);
+  double get_reg_min() const;
+  DEPRECATED("Use get_reg_min()", double get_regmin() const);
 
   /**
    * @brief Return the maximum regularization value
    */
-  const double& get_reg_max() const;
-  DEPRECATED("Use get_reg_max()", const double& get_regmax() const);
+  double get_reg_max() const;
+  DEPRECATED("Use get_reg_max()", double get_regmax() const);
 
   /**
    * @brief Return the set of step lengths using by the line-search procedure
@@ -185,22 +185,22 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Return the step-length threshold used to decrease regularization
    */
-  const double& get_th_stepdec() const;
+  double get_th_stepdec() const;
 
   /**
    * @brief Return the step-length threshold used to increase regularization
    */
-  const double& get_th_stepinc() const;
+  double get_th_stepinc() const;
 
   /**
    * @brief Return the tolerance of the expected gradient used for testing the step
    */
-  const double& get_th_grad() const;
+  double get_th_grad() const;
 
   /**
    * @brief Return the threshold for accepting a gap as non-zero
    */
-  const double& get_th_gaptol() const;
+  double get_th_gaptol() const;
 
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
@@ -255,29 +255,29 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Modify the regularization factor used to increase the damping value
    */
-  void set_reg_incfactor(const double& reg_factor);
+  void set_reg_incfactor(double reg_factor);
 
   /**
    * @brief Modify the regularization factor used to decrease the damping value
    */
-  void set_reg_decfactor(const double& reg_factor);
+  void set_reg_decfactor(double reg_factor);
 
   /**
    * @brief Modify the regularization factor used to decrease / increase it
    */
-  DEPRECATED("Use set_reg_incfactor() or set_reg_decfactor()", void set_regfactor(const double& reg_factor);)
+  DEPRECATED("Use set_reg_incfactor() or set_reg_decfactor()", void set_regfactor(double reg_factor);)
 
   /**
    * @brief Modify the minimum regularization value
    */
-  void set_reg_min(const double& regmin);
-  DEPRECATED("Use set_reg_min()", void set_regmin(const double& regmin));
+  void set_reg_min(double regmin);
+  DEPRECATED("Use set_reg_min()", void set_regmin(double regmin));
 
   /**
    * @brief Modify the maximum regularization value
    */
-  void set_reg_max(const double& regmax);
-  DEPRECATED("Use set_reg_max()", void set_regmax(const double& regmax));
+  void set_reg_max(double regmax);
+  DEPRECATED("Use set_reg_max()", void set_regmax(double regmax));
 
   /**
    * @brief Modify the set of step lengths using by the line-search procedure
@@ -287,22 +287,22 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Modify the step-length threshold used to decrease regularization
    */
-  void set_th_stepdec(const double& th_step);
+  void set_th_stepdec(double th_step);
 
   /**
    * @brief Modify the step-length threshold used to increase regularization
    */
-  void set_th_stepinc(const double& th_step);
+  void set_th_stepinc(double th_step);
 
   /**
    * @brief Modify the tolerance of the expected gradient used for testing the step
    */
-  void set_th_grad(const double& th_grad);
+  void set_th_grad(double th_grad);
 
   /**
    * @brief Modify the threshold for accepting a gap as non-zero
    */
-  void set_th_gaptol(const double& th_gaptol);
+  void set_th_gaptol(double th_gaptol);
 
  protected:
   double reg_incfactor_;  //!< Regularization factor used to increase the damping value

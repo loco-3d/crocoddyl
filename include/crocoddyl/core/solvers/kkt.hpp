@@ -25,10 +25,10 @@ class SolverKKT : public SolverAbstract {
   virtual ~SolverKKT();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
-                     const bool& is_feasible = false, const double& regInit = 1e-9);
-  virtual void computeDirection(const bool& recalc = true);
-  virtual double tryStep(const double& steplength = 1);
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, std::size_t maxiter = 100,
+                     bool is_feasible = false, double regInit = 1e-9);
+  virtual void computeDirection(bool recalc = true);
+  virtual double tryStep(double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
 
@@ -38,9 +38,9 @@ class SolverKKT : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_dxs() const;
   const std::vector<Eigen::VectorXd>& get_dus() const;
   const std::vector<Eigen::VectorXd>& get_lambdas() const;
-  const std::size_t& get_nx() const;
-  const std::size_t& get_ndx() const;
-  const std::size_t& get_nu() const;
+  std::size_t get_nx() const;
+  std::size_t get_ndx() const;
+  std::size_t get_nu() const;
 
  protected:
   double regfactor_;
@@ -51,17 +51,18 @@ class SolverKKT : public SolverAbstract {
   std::vector<Eigen::VectorXd> us_try_;
 
  private:
+  double calcDiff();
+  void computePrimalDual();
+  void increaseRegularization();
+  void decreaseRegularization();
+  void allocateData();
+
   std::size_t nx_;
   std::size_t ndx_;
   std::size_t nu_;
   std::vector<Eigen::VectorXd> dxs_;
   std::vector<Eigen::VectorXd> dus_;
   std::vector<Eigen::VectorXd> lambdas_;
-  double calc();
-  void computePrimalDual();
-  void increaseRegularization();
-  void decreaseRegularization();
-  void allocateData();
 
   // allocate data
   Eigen::MatrixXd kkt_;

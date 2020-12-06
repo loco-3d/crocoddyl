@@ -377,7 +377,7 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_T() const {
+std::size_t ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
 
@@ -471,17 +471,17 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nx() const {
+std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
   return nx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
+std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu_max() const {
+std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
   return nu_max_;
 }
 

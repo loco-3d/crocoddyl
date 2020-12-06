@@ -106,23 +106,15 @@ void exposeSolverAbstract() {
           bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
-      .add_property(
-          "x_reg",
-          bp::make_function(&SolverAbstract_wrap::get_xreg, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_xreg), "state regularization")
-      .add_property(
-          "u_reg",
-          bp::make_function(&SolverAbstract_wrap::get_ureg, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
+      .add_property("x_reg", bp::make_function(&SolverAbstract_wrap::get_xreg),
+                    bp::make_function(&SolverAbstract_wrap::set_xreg), "state regularization")
+      .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
+                    bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
       .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
-      .add_property("th_acceptStep",
-                    bp::make_function(&SolverAbstract_wrap::get_th_acceptstep,
-                                      bp::return_value_policy<bp::copy_const_reference>()),
+      .add_property("th_acceptStep", bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
-      .add_property(
-          "th_stop",
-          bp::make_function(&SolverAbstract_wrap::get_th_stop, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
+      .add_property("th_stop", bp::make_function(&SolverAbstract_wrap::get_th_stop),
+                    bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
       .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(

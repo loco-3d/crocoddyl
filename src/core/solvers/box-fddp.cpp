@@ -33,9 +33,9 @@ SolverBoxFDDP::~SolverBoxFDDP() {}
 void SolverBoxFDDP::allocateData() {
   SolverDDP::allocateData();
 
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
-  const std::size_t& nu = problem_->get_nu_max();
+  std::size_t nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
@@ -43,8 +43,8 @@ void SolverBoxFDDP::allocateData() {
   du_ub_.resize(nu);
 }
 
-void SolverBoxFDDP::computeGains(const std::size_t& t) {
-  const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
+void SolverBoxFDDP::computeGains(std::size_t t) {
+  std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
@@ -76,21 +76,21 @@ void SolverBoxFDDP::computeGains(const std::size_t& t) {
   }
 }
 
-void SolverBoxFDDP::forwardPass(const double& steplength) {
+void SolverBoxFDDP::forwardPass(double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t& nu = m->get_nu();
+      std::size_t nu = m->get_nu();
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -127,7 +127,7 @@ void SolverBoxFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t& nu = m->get_nu();
+      std::size_t nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {
