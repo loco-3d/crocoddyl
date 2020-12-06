@@ -98,10 +98,10 @@ void exposeSolverDDP() {
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
       .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
-      .add_property("reg_incfactor", bp::make_function(&SolverDDP::get_reg_incfactor),
+      .add_property("reg_incFactor", bp::make_function(&SolverDDP::get_reg_incfactor),
                     bp::make_function(&SolverDDP::set_reg_incfactor),
                     "regularization factor used for increasing the damping value.")
-      .add_property("reg_decfactor", bp::make_function(&SolverDDP::get_reg_decfactor),
+      .add_property("reg_decFactor", bp::make_function(&SolverDDP::get_reg_decfactor),
                     bp::make_function(&SolverDDP::set_reg_decfactor),
                     "regularization factor used for decreasing the damping value.")
       .add_property("regFactor",
@@ -120,22 +120,12 @@ void exposeSolverDDP() {
       .add_property("regMax", bp::make_function(&SolverDDP::get_reg_max, deprecated<>("Deprecated. Use reg_max")),
                     bp::make_function(&SolverDDP::set_reg_max, deprecated<>("Deprecated. Use reg_max")),
                     "maximum regularization value.")
-      .add_property("th_stepdec", bp::make_function(&SolverDDP::get_th_stepdec),
+      .add_property("th_stepDec", bp::make_function(&SolverDDP::get_th_stepdec),
                     bp::make_function(&SolverDDP::set_th_stepdec),
                     "threshold for decreasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
-      .add_property("th_stepinc", bp::make_function(&SolverDDP::get_th_stepinc),
+      .add_property("th_stepInc", bp::make_function(&SolverDDP::get_th_stepinc),
                     bp::make_function(&SolverDDP::set_th_stepinc),
-                    "threshold for increasing the regularization after approving a step (higher values decreases the "
-                    "regularization)")
-      .add_property("th_stepDec",
-                    bp::make_function(&SolverDDP::get_th_stepdec, deprecated<>("Deprecated. Use th_stepdec")),
-                    bp::make_function(&SolverDDP::set_th_stepdec, deprecated<>("Deprecated. Use th_stepdec")),
-                    "threshold for decreasing the regularization after approving a step (higher values decreases the "
-                    "regularization)")
-      .add_property("th_stepInc",
-                    bp::make_function(&SolverDDP::get_th_stepinc, deprecated<>("Deprecated. Use th_stepinc")),
-                    bp::make_function(&SolverDDP::set_th_stepinc, deprecated<>("Deprecated. Use th_stepdec")),
                     "threshold for increasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
       .add_property("th_grad", bp::make_function(&SolverDDP::get_th_grad), bp::make_function(&SolverDDP::set_th_grad),
