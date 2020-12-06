@@ -130,7 +130,7 @@ void exposeSolverDDP() {
                     "regularization)")
       .add_property("th_grad", bp::make_function(&SolverDDP::get_th_grad), bp::make_function(&SolverDDP::set_th_grad),
                     "threshold for accepting step which gradients is lower than this value")
-      .add_property("th_gaptol", bp::make_function(&SolverDDP::get_th_gaptol),
+      .add_property("th_gapTol", bp::make_function(&SolverDDP::get_th_gaptol),
                     bp::make_function(&SolverDDP::set_th_gaptol), "threshold for accepting a gap as non-zero")
       .add_property("alphas",
                     bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
