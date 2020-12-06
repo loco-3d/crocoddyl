@@ -132,14 +132,28 @@ void exposeSolverDDP() {
                             deprecated<bp::return_value_policy<bp::copy_const_reference> >("Deprecated. Use reg_max")),
           bp::make_function(&SolverDDP::set_reg_max, deprecated<>("Deprecated. Use reg_max")),
           "maximum regularization value.")
-      .add_property("th_stepDec",
+      .add_property("th_stepdec",
                     bp::make_function(&SolverDDP::get_th_stepdec, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_th_stepdec),
                     "threshold for decreasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
-      .add_property("th_stepInc",
+      .add_property("th_stepinc",
                     bp::make_function(&SolverDDP::get_th_stepinc, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_th_stepinc),
+                    "threshold for increasing the regularization after approving a step (higher values decreases the "
+                    "regularization)")
+      .add_property("th_stepDec",
+                    bp::make_function(
+                        &SolverDDP::get_th_stepdec,
+                        deprecated<bp::return_value_policy<bp::copy_const_reference> >("Deprecated. Use th_stepdec")),
+                    bp::make_function(&SolverDDP::set_th_stepdec, deprecated<>("Deprecated. Use th_stepdec")),
+                    "threshold for decreasing the regularization after approving a step (higher values decreases the "
+                    "regularization)")
+      .add_property("th_stepInc",
+                    bp::make_function(
+                        &SolverDDP::get_th_stepinc,
+                        deprecated<bp::return_value_policy<bp::copy_const_reference> >("Deprecated. Use th_stepinc")),
+                    bp::make_function(&SolverDDP::set_th_stepinc, deprecated<>("Deprecated. Use th_stepdec")),
                     "threshold for increasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
       .add_property("th_grad",
