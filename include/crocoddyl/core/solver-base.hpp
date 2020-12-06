@@ -297,7 +297,7 @@ class CallbackAbstract {
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 
-bool raiseIfNaN(const double& value);
+bool raiseIfNaN(double value);
 
 }  // namespace crocoddyl
 
