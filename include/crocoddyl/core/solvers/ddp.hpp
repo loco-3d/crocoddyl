@@ -9,9 +9,8 @@
 #ifndef CROCODDYL_CORE_SOLVERS_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_DDP_HPP_
 
-#include <Eigen/Cholesky>
 #include <vector>
-
+#include <Eigen/Cholesky>
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
@@ -152,9 +151,19 @@ class SolverDDP : public SolverAbstract {
   virtual void allocateData();
 
   /**
+   * @brief Return the regularization factor used to increase the damping value
+   */
+  const double& get_reg_incfactor() const;
+
+  /**
+   * @brief Return the regularization factor used to decrease the damping value
+   */
+  const double& get_reg_decfactor() const;
+
+  /**
    * @brief Return the regularization factor used to decrease / increase it
    */
-  const double& get_regfactor() const;
+  DEPRECATED("Use get_reg_incfactor() or get_reg_decfactor()", const double& get_regfactor() const;)
 
   /**
    * @brief Return the minimum regularization value
@@ -244,9 +253,19 @@ class SolverDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_fs() const;
 
   /**
+   * @brief Modify the regularization factor used to increase the damping value
+   */
+  void set_reg_incfactor(const double& reg_factor);
+
+  /**
+   * @brief Modify the regularization factor used to decrease the damping value
+   */
+  void set_reg_decfactor(const double& reg_factor);
+
+  /**
    * @brief Modify the regularization factor used to decrease / increase it
    */
-  void set_regfactor(const double& reg_factor);
+  DEPRECATED("Use set_reg_incfactor() or set_reg_decfactor()", void set_regfactor(const double& reg_factor);)
 
   /**
    * @brief Modify the minimum regularization value
@@ -286,7 +305,8 @@ class SolverDDP : public SolverAbstract {
   void set_th_gaptol(const double& th_gaptol);
 
  protected:
-  double regfactor_;  //!< Regularization factor used to decrease / increase it
+  double reg_incfactor_;  //!< Regularization factor used to increase the damping value
+  double reg_decfactor_;  //!< Regularization factor used to decrease the damping value
   double reg_min_;        //!< Minimum allowed regularization value
   double reg_max_;        //!< Maximum allowed regularization value
 

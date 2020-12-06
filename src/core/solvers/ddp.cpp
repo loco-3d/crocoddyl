@@ -14,7 +14,8 @@ namespace crocoddyl {
 
 SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
-      regfactor_(10.),
+      reg_incfactor_(10.),
+      reg_decfactor_(10.),
       reg_min_(1e-9),
       reg_max_(1e9),
       cost_try_(0.),
@@ -329,7 +330,7 @@ void SolverDDP::computeGains(const std::size_t& t) {
 }
 
 void SolverDDP::increaseRegularization() {
-  xreg_ *= regfactor_;
+  xreg_ *= reg_incfactor_;
   if (xreg_ > reg_max_) {
     xreg_ = reg_max_;
   }
@@ -337,7 +338,7 @@ void SolverDDP::increaseRegularization() {
 }
 
 void SolverDDP::decreaseRegularization() {
-  xreg_ /= regfactor_;
+  xreg_ /= reg_decfactor_;
   if (xreg_ < reg_min_) {
     xreg_ = reg_min_;
   }
@@ -402,8 +403,11 @@ void SolverDDP::allocateData() {
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
 
-const double& SolverDDP::get_regfactor() const { return regfactor_; }
+const double& SolverDDP::get_reg_incfactor() const { return reg_incfactor_; }
 
+const double& SolverDDP::get_reg_decfactor() const { return reg_decfactor_; }
+
+const double& SolverDDP::get_regfactor() const { return reg_incfactor_; }
 
 const double& SolverDDP::get_reg_min() const { return reg_min_; }
 
@@ -443,12 +447,30 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
 
+void SolverDDP::set_reg_incfactor(const double& regfactor) {
+  if (regfactor <= 1.) {
+    throw_pretty("Invalid argument: "
+                 << "reg_incfactor value is higher than 1.");
+  }
+  reg_incfactor_ = regfactor;
+}
+
+void SolverDDP::set_reg_decfactor(const double& regfactor) {
+  if (regfactor <= 1.) {
+    throw_pretty("Invalid argument: "
+                 << "reg_decfactor value is higher than 1.");
+  }
+  reg_decfactor_ = regfactor;
+}
+
 void SolverDDP::set_regfactor(const double& regfactor) {
   if (regfactor <= 1.) {
     throw_pretty("Invalid argument: "
                  << "regfactor value is higher than 1.");
   }
-  regfactor_ = regfactor;
+  reg_incfactor_ = regfactor;
+  reg_decfactor_ = regfactor;
+}
 
 void SolverDDP::set_reg_min(const double& regmin) {
   if (0. > regmin) {

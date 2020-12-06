@@ -98,10 +98,22 @@ void exposeSolverDDP() {
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
       .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
-      .add_property("regFactor",
-                    bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regfactor),
-                    "regularization factor used for increasing or decreasing the value.")
+      .add_property(
+          "reg_incfactor",
+          bp::make_function(&SolverDDP::get_reg_incfactor, bp::return_value_policy<bp::copy_const_reference>()),
+          bp::make_function(&SolverDDP::set_reg_incfactor),
+          "regularization factor used for increasing the damping value.")
+      .add_property(
+          "reg_decfactor",
+          bp::make_function(&SolverDDP::get_reg_decfactor, bp::return_value_policy<bp::copy_const_reference>()),
+          bp::make_function(&SolverDDP::set_reg_decfactor),
+          "regularization factor used for decreasing the damping value.")
+      .add_property(
+          "regFactor",
+          bp::make_function(&SolverDDP::get_regfactor, deprecated<bp::return_value_policy<bp::copy_const_reference> >(
+                                                           "Deprecated. Use reg_incfactor or reg_decfactor")),
+          bp::make_function(&SolverDDP::set_regfactor, deprecated<>("Deprecated. Use reg_incfactor or reg_decfactor")),
+          "regularization factor used for increasing or decreasing the damping value.")
       .add_property("reg_min",
                     bp::make_function(&SolverDDP::get_reg_min, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_reg_min), "minimum regularization value.")

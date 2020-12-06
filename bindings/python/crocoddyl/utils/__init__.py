@@ -1012,7 +1012,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
         self.x_reg = 0
         self.u_reg = 0
-        self.regFactor = 10
+        self.regIncFactor = 10
+        self.regDecFactor = 10
         self.regMax = 1e9
         self.regMin = 1e-9
         self.th_step = .5
@@ -1097,13 +1098,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return self.xs, self.us, False
 
     def increaseRegularization(self):
-        self.x_reg *= self.regFactor
+        self.x_reg *= self.regIncFactor
         if self.x_reg > self.regMax:
             self.x_reg = self.regMax
         self.u_reg = self.x_reg
 
     def decreaseRegularization(self):
-        self.x_reg /= self.regFactor
+        self.x_reg /= self.regDecFactor
         if self.x_reg < self.regMin:
             self.x_reg = self.regMin
         self.u_reg = self.x_reg
