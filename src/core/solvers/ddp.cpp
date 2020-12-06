@@ -16,7 +16,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
       reg_incfactor_(10.),
       reg_decfactor_(10.),
-      reg_min_(1e-9),
+      reg_min_(1e-18),
       reg_max_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
