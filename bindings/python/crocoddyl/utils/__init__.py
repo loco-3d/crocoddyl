@@ -1016,7 +1016,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.regIncFactor = 10
         self.regDecFactor = 10
         self.regMax = 1e12
-        self.regMin = 1e-18
+        self.regMin = 1e-16
         self.th_step = .5
 
     def calc(self):
