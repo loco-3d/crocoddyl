@@ -14,8 +14,8 @@ namespace crocoddyl {
 SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
       regfactor_(10.),
-      regmin_(1e-9),
-      regmax_(1e9),
+      regmin_(1e-18),
+      regmax_(1e12),
       cost_try_(0.),
       th_grad_(1e-12),
       was_feasible_(false) {
