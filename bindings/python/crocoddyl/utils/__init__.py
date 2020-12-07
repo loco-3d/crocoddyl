@@ -1265,7 +1265,7 @@ class FDDPDerived(DDPDerived):
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            if self.callback is not None:
+            if self.callbacks is not None:
                 [c(self) for c in self.callbacks]
 
             if self.wasFeasible and self.stop < self.th_stop:
