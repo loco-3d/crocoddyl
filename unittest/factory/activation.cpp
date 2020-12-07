@@ -8,8 +8,8 @@
 
 #include "activation.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
-#include "crocoddyl/core/activations/quadratic-flat.hpp"
-#include "crocoddyl/core/activations/quadratic-log.hpp"
+#include "crocoddyl/core/activations/quadratic-flat-exp.hpp"
+#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 #include "crocoddyl/core/activations/smooth-1norm.hpp"
 #include "crocoddyl/core/activations/smooth-2norm.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
@@ -27,11 +27,11 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
     case ActivationModelTypes::ActivationModelQuad:
       os << "ActivationModelQuad";
       break;
-    case ActivationModelTypes::ActivationModelQuadFlat:
-      os << "ActivationModelQuadFlat";
+    case ActivationModelTypes::ActivationModelQuadFlatExp:
+      os << "ActivationModelQuadFlatExp";
       break;
-    case ActivationModelTypes::ActivationModelQuadLog:
-      os << "ActivationModelQuadLog";
+    case ActivationModelTypes::ActivationModelQuadFlatLog:
+      os << "ActivationModelQuadFlatLog";
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       os << "ActivationModelSmooth1Norm";
@@ -73,11 +73,11 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
     case ActivationModelTypes::ActivationModelQuad:
       activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
       break;
-    case ActivationModelTypes::ActivationModelQuadFlat:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlat>(nr,alpha);
+    case ActivationModelTypes::ActivationModelQuadFlatExp:
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr,alpha);
       break;
-    case ActivationModelTypes::ActivationModelQuadLog:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadLog>(nr,alpha);
+    case ActivationModelTypes::ActivationModelQuadFlatLog:
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr,alpha);
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation = boost::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);

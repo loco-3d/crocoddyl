@@ -6,19 +6,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
-#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <iostream>
-#include <stdexcept>
 
 namespace crocoddyl {
 
 /**
- * @brief Quadratic-log activation
+ * @brief Quadratic-flat-log activation
  *
  * This activation function describes a logarithmic quadratic activation depending
  * on the quadratic norm of a residual vector, i.e. \f[ \begin{equation} log(1 + \|\mathbf{r}\|^2 / \alpha) 
@@ -32,7 +30,7 @@ namespace crocoddyl {
  */
 
 template <typename _Scalar>
-class ActivationModelQuadLogTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar> {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -40,19 +38,19 @@ public:
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataQuadLogTpl<Scalar> Data;
+  typedef ActivationDataQuadFlatLogTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the quadLog activation model
+   * @brief Initialize the quadFlatLog activation model
    *
    * The default `alpha` value is defined as 1.
    *
    * @param[in] nr   Dimension of the residual vector
    * @param[in] alpha  Width of quadratic basin (default: 1.)
    */
-  explicit ActivationModelQuadLogTpl(const std::size_t &nr,
+  explicit ActivationModelQuadFlatLogTpl(const std::size_t &nr,
                                      const Scalar &alpha = Scalar(1.))
       : Base(nr), alpha_(alpha) {
     if (alpha < Scalar(0.)) {
@@ -60,10 +58,10 @@ public:
                    << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadLogTpl(){};
+  virtual ~ActivationModelQuadFlatLogTpl(){};
 
   /**
-   * @brief Compute the quadLog function
+   * @brief Compute the quadFlatLog function
    *
    * @param[in] data  quadLog activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -81,7 +79,7 @@ public:
   };
 
   /**
-   * @brief Compute the derivatives of the quadLog function
+   * @brief Compute the derivatives of the quadFlatLog function
    *
    * @param[in] data  quadLog activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -102,7 +100,7 @@ public:
   };
 
   /**
-   * @brief Create the quadLog activation data
+   * @brief Create the quadFlatLog activation data
    *
    * @return the activation data
    */
@@ -125,13 +123,13 @@ private:
 };
 
 /**
- * @brief Data structure of the quadLog activation
+ * @brief Data structure of the quadFlatLog activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation
  */
 template <typename _Scalar>
-struct ActivationDataQuadLogTpl : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataQuadFlatLogTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -139,7 +137,7 @@ struct ActivationDataQuadLogTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationDataQuadLogTpl(Activation *const activation)
+  explicit ActivationDataQuadFlatLogTpl(Activation *const activation)
       : Base(activation), a0(0), a1(0) {}
 
   Scalar a0;
@@ -148,4 +146,4 @@ struct ActivationDataQuadLogTpl : public ActivationDataAbstractTpl<_Scalar> {
 
 } // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_LOG_HPP_
+#endif // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_

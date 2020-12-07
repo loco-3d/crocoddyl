@@ -6,22 +6,20 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
-#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
+#ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_EXP_HPP_
+#define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_EXP_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include <iostream>
-#include <stdexcept>
 
 namespace crocoddyl {
 
 /**
- * @brief Quadratic-flat activation
+ * @brief Quadratic-flat-exp activation
  *
  * This activation function describes a quadratic exponential activation depending on the square norm
- * of a residual vector, i.e. \f[ \begin{equation} 1 - exp(\|\mathbf{r}\|^2 / \alpha) \end{equation}
+ * of a residual vector, i.e. \f[ \begin{equation} 1 - exp(-\|\mathbf{r}\|^2 / \alpha) \end{equation}
  * \f] where \f$\alpha\f$ defines the width of the quadratic basin, \f$r\f$ is the scalar residual, 
  * \f$nr\f$ is the dimension of the residual vector. Far
  * away from zero, the quadFlat activation is nearly flat.
@@ -33,7 +31,7 @@ namespace crocoddyl {
  */
 
 template <typename _Scalar>
-class ActivationModelQuadFlatTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar> {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -41,19 +39,19 @@ public:
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
-  typedef ActivationDataQuadFlatTpl<Scalar> Data;
+  typedef ActivationDataQuadFlatExpTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the quadFlat activation model
+   * @brief Initialize the quadFlatExp activation model
    *
    * The default `alpha` value is defined as 1.
    *
    * @param[in] nr   Dimension of the residual vector
    * @param[in] alpha  Width of quadratic basin (default: 1.)
    */
-  explicit ActivationModelQuadFlatTpl(const std::size_t &nr,
+  explicit ActivationModelQuadFlatExpTpl(const std::size_t &nr,
                                       const Scalar &alpha = Scalar(1.))
       : Base(nr), alpha_(alpha) {
     if (alpha < Scalar(0.)) {
@@ -61,10 +59,10 @@ public:
                    << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatTpl(){};
+  virtual ~ActivationModelQuadFlatExpTpl(){};
 
   /**
-   * @brief Compute the quadFlat function
+   * @brief Compute the quadFlatExp function
    *
    * @param[in] data  quadFlat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -83,7 +81,7 @@ public:
   };
 
   /**
-   * @brief Compute the derivatives of the quadFlat function
+   * @brief Compute the derivatives of the quadFlatExp function
    *
    * @param[in] data  quadFlat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -105,7 +103,7 @@ public:
   };
 
   /**
-   * @brief Create the quadFlat activation data
+   * @brief Create the quadFlatExp activation data
    *
    * @return the activation data
    */
@@ -128,13 +126,13 @@ private:
 };
 
 /**
- * @brief Data structure of the quadFlat activation
+ * @brief Data structure of the quadFlatExp activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation
  */
 template <typename _Scalar>
-struct ActivationDataQuadFlatTpl : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataQuadFlatExpTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -142,7 +140,7 @@ struct ActivationDataQuadFlatTpl : public ActivationDataAbstractTpl<_Scalar> {
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationDataQuadFlatTpl(Activation *const activation)
+  explicit ActivationDataQuadFlatExpTpl(Activation *const activation)
       : Base(activation), a0(0), a1(0) {}
 
   Scalar a0;
@@ -151,4 +149,4 @@ struct ActivationDataQuadFlatTpl : public ActivationDataAbstractTpl<_Scalar> {
 
 } // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_HPP_
+#endif // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_EXP_HPP_
