@@ -31,7 +31,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   ActuationSquashingModelTpl(boost::shared_ptr<ActuationModelAbstract> actuation,
-                             boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t& nu)
+                             boost::shared_ptr<SquashingModelAbstract> squashing, std::size_t nu)
       : Base(actuation->get_state(), nu), squashing_(squashing), actuation_(actuation){};
 
   virtual ~ActuationSquashingModelTpl(){};

@@ -54,7 +54,7 @@ class PinocchioModelFactory {
 
   boost::shared_ptr<pinocchio::Model> create() const;
   const std::string& get_frame_name() const;
-  const std::size_t& get_frame_id() const;
+  std::size_t get_frame_id() const;
 
  private:
   boost::shared_ptr<pinocchio::Model> model_;  //!< The pointer to the state in testing

@@ -83,12 +83,12 @@ const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >& ActuationModelNumDi
 }
 
 template <typename Scalar>
-const Scalar& ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
+Scalar ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ActuationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void ActuationModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

@@ -17,7 +17,7 @@ namespace python {
 
 class ActivationModelAbstract_wrap : public ActivationModelAbstract, public bp::wrapper<ActivationModelAbstract> {
  public:
-  explicit ActivationModelAbstract_wrap(const std::size_t& nr)
+  explicit ActivationModelAbstract_wrap(std::size_t nr)
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r) {

@@ -61,7 +61,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref,
-                                 const std::size_t& nu);
+                                 std::size_t nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model
@@ -84,7 +84,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] mref   Reference centroidal momentum
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, std::size_t nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model

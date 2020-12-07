@@ -26,7 +26,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       was_feasible_(false) {
   allocateData();
 
-  const std::size_t& n_alphas = 10;
+  std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
@@ -106,7 +106,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     stoppingCriteria();
 
-    const std::size_t& n_callbacks = callbacks_.size();
+    std::size_t n_callbacks = callbacks_.size();
     for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -133,7 +133,7 @@ double SolverDDP::tryStep(double steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  const std::size_t& T = this->problem_->get_T();
+  std::size_t T = this->problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     std::size_t nu = models[t]->get_nu();
@@ -146,7 +146,7 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  const std::size_t& T = this->problem_->get_T();
+  std::size_t T = this->problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     std::size_t nu = models[t]->get_nu();
@@ -169,7 +169,7 @@ double SolverDDP::calcDiff() {
     if (fs_[0].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
       could_be_feasible = false;
     }
-    const std::size_t& T = problem_->get_T();
+    std::size_t T = problem_->get_T();
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
     for (std::size_t t = 0; t < T; ++t) {
@@ -346,7 +346,7 @@ void SolverDDP::decreaseRegularization() {
 }
 
 void SolverDDP::allocateData() {
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   Vxx_.resize(T + 1);
   Vx_.resize(T + 1);
   Qxx_.resize(T);

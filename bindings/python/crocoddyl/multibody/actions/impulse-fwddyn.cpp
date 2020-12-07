@@ -85,13 +85,11 @@ void exposeActionImpulseFwdDynamics() {
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),
                     "set an armature mechanism in the joints")
       .add_property("r_coeff",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_restitution_coefficient,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_restitution_coefficient),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_restitution_coefficient),
                     "Restitution coefficient that describes elastic impacts")
       .add_property("JMinvJt_damping",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
 

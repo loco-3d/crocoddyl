@@ -16,7 +16,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const Vector6s& href, const std::size_t& nu)
+    const Vector6s& href, std::size_t nu)
     : Base(state, activation, nu), href_(href), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -37,7 +37,7 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
-                                                                       const Vector6s& href, const std::size_t& nu)
+                                                                       const Vector6s& href, std::size_t nu)
     : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
@@ -65,7 +65,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
                                                       const Eigen::Ref<const VectorXs>&,
                                                       const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  const std::size_t& nv = state_->get_nv();
+  std::size_t nv = state_->get_nv();
   Eigen::Ref<Matrix6xs> Rq = data->Rx.leftCols(nv);
   Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
 

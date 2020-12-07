@@ -71,7 +71,7 @@ class ContactModelMultipleTpl {
    * @param[in] state  Multibody state
    * @param[in] nu     Dimension of control vector
    */
-  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, std::size_t nu);
 
   /**
    * @brief Initialize the multi-contact model
@@ -182,17 +182,17 @@ class ContactModelMultipleTpl {
   /**
    * @brief Return the dimension of active contacts
    */
-  const std::size_t& get_nc() const;
+  std::size_t get_nc() const;
 
   /**
    * @brief Return the dimension of all contacts
    */
-  const std::size_t& get_nc_total() const;
+  std::size_t get_nc_total() const;
 
   /**
    * @brief Return the dimension of control vector
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the names of the active contacts

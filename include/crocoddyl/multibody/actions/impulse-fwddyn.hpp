@@ -48,8 +48,8 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
 
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
-                                   boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff = Scalar(0.),
-                                   const Scalar& JMinvJt_damping = Scalar(0.), const bool& enable_force = false);
+                                   boost::shared_ptr<CostModelSum> costs, Scalar r_coeff = Scalar(0.),
+                                   Scalar JMinvJt_damping = Scalar(0.), bool enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -63,12 +63,12 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  const Scalar& get_restitution_coefficient() const;
-  const Scalar& get_damping_factor() const;
+  Scalar get_restitution_coefficient() const;
+  Scalar get_damping_factor() const;
 
   void set_armature(const VectorXs& armature);
-  void set_restitution_coefficient(const Scalar& r_coeff);
-  void set_damping_factor(const Scalar& damping);
+  void set_restitution_coefficient(Scalar r_coeff);
+  void set_damping_factor(Scalar damping);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits

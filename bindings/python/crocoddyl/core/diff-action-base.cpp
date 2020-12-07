@@ -70,20 +70,17 @@ void exposeDifferentialActionAbstract() {
                ":param tol: stopping tolerance criteria (default 1e-9)\n"
                ":return u: quasic-static control"))
       .add_property("nu",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu),
                     "dimension of control vector")
       .add_property("nr",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .add_property("state",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "state")
       .add_property("has_control_limits",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits),
                     "indicates whether problem has finite control limits")
       .add_property("u_lb",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_lb,

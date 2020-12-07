@@ -79,7 +79,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] fref   Reference spatial contact impulse \f$\boldsymbol{\lambda}^*\f$
    * @param[in] nr     Dimension of residual vector
    */
-  CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
+  CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, std::size_t nr);
 
   /**
    * @brief Initialize the contact impulse cost model

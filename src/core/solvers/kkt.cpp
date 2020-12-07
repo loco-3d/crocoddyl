@@ -68,7 +68,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
     }
     stoppingCriteria();
-    const std::size_t& n_callbacks = callbacks_.size();
+    std::size_t n_callbacks = callbacks_.size();
     if (n_callbacks != 0) {
       for (std::size_t c = 0; c < n_callbacks; ++c) {
         CallbackAbstract& callback = *callbacks_[c];
@@ -83,7 +83,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 }
 
 void SolverKKT::computeDirection(bool recalc) {
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   if (recalc) {
     calcDiff();
   }
@@ -95,15 +95,15 @@ void SolverKKT::computeDirection(bool recalc) {
   std::size_t iu = 0;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t& ndxi = models[t]->get_state()->get_ndx();
-    const std::size_t& nui = models[t]->get_nu();
+    std::size_t ndxi = models[t]->get_state()->get_ndx();
+    std::size_t nui = models[t]->get_nu();
     dxs_[t] = p_x.segment(ix, ndxi);
     dus_[t] = p_u.segment(iu, nui);
     lambdas_[t] = dual_.segment(ix, ndxi);
     ix += ndxi;
     iu += nui;
   }
-  const std::size_t& ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
   dxs_.back() = p_x.segment(ix, ndxi);
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
@@ -143,7 +143,7 @@ double SolverKKT::stoppingCriteria() {
     ix += ndxi;
     iu += nui;
   }
-  const std::size_t& ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
   dF.segment(ix, ndxi) = lambdas_.back();
   stop_ = (kktref_.segment(0, ndx_ + nu_) + dF).squaredNorm() + kktref_.segment(ndx_ + nu_, ndx_).squaredNorm();
   return stop_;

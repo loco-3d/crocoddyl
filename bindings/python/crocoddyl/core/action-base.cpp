@@ -81,8 +81,7 @@ void exposeActionAbstract() {
           bp::make_function(&ActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state")
       .add_property("has_control_limits",
-                    bp::make_function(&ActionModelAbstract_wrap::get_has_control_limits,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ActionModelAbstract_wrap::get_has_control_limits),
                     "indicates whether problem has finite control limits")
       .add_property("u_lb", bp::make_function(&ActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
                     &ActionModelAbstract_wrap::set_u_lb, "lower control limits")

@@ -45,7 +45,7 @@ BoxQP::BoxQP(std::size_t nx, std::size_t maxiter, double th_acceptstep, double t
   solution_.x = Eigen::VectorXd::Zero(nx);
   solution_.clamped_idx.reserve(nx_);
   solution_.free_idx.reserve(nx_);
-  const std::size_t& n_alphas_ = 10;
+  std::size_t n_alphas_ = 10;
   alphas_.resize(n_alphas_);
   for (std::size_t n = 0; n < n_alphas_; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
@@ -90,10 +90,10 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
     g_ = q;
     g_.noalias() += H * x_;
     for (std::size_t j = 0; j < nx_; ++j) {
-      const double& gj = g_(j);
-      const double& xj = x_(j);
-      const double& lbj = lb(j);
-      const double& ubj = ub(j);
+      double gj = g_(j);
+      double xj = x_(j);
+      double lbj = lb(j);
+      double ubj = ub(j);
       if ((xj == lbj && gj > 0.) || (xj == ubj && gj < 0.)) {
         solution_.clamped_idx.push_back(j);
       } else {
@@ -108,7 +108,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       if (k == 0) {  // compute the inverse of the free Hessian
         Hff_.resize(nf_, nf_);
         for (std::size_t i = 0; i < nf_; ++i) {
-          const std::size_t& fi = solution_.free_idx[i];
+          std::size_t fi = solution_.free_idx[i];
           for (std::size_t j = 0; j < nf_; ++j) {
             Hff_(i, j) = H(fi, solution_.free_idx[j]);
           }
@@ -136,7 +136,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
     Hff_.resize(nf_, nf_);
     Hfc_.resize(nf_, nc_);
     for (std::size_t i = 0; i < nf_; ++i) {
-      const std::size_t& fi = solution_.free_idx[i];
+      std::size_t fi = solution_.free_idx[i];
       qf_(i) = q(fi);
       xf_(i) = x_(fi);
       for (std::size_t j = 0; j < nf_; ++j) {

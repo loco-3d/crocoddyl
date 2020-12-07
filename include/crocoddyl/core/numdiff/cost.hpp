@@ -71,12 +71,12 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the disturbance value used by the numdiff routine
    */
-  const Scalar& get_disturbance() const;
+  Scalar get_disturbance() const;
 
   /**
    * @brief Modify the disturbance value used by the numdiff routine
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(Scalar disturbance);
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
@@ -147,8 +147,8 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
     du.setZero();
     up.setZero();
 
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t& nu = model->get_model()->get_nu();
+    std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData(shared_data);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(shared_data));

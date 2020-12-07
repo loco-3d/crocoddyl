@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameFrictionCone& fref, const std::size_t& nu)
+    const FrameFrictionCone& fref, std::size_t nu)
     : Base(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
@@ -36,7 +36,7 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref,
-                                                                         const std::size_t& nu)
+                                                                         std::size_t nu)
     : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>

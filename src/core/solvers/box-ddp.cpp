@@ -16,7 +16,7 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
-  const std::size_t& n_alphas = 10;
+  std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
@@ -43,7 +43,7 @@ void SolverBoxDDP::allocateData() {
   du_ub_.resize(nu);
 }
 
-void SolverBoxDDP::computeGains(const std::size_t& t) {
+void SolverBoxDDP::computeGains(std::size_t t) {
   std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
@@ -76,7 +76,7 @@ void SolverBoxDDP::computeGains(const std::size_t& t) {
   }
 }
 
-void SolverBoxDDP::forwardPass(const double& steplength) {
+void SolverBoxDDP::forwardPass(double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");

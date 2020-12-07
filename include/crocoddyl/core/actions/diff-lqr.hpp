@@ -29,7 +29,7 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
+  DifferentialActionModelLQRTpl(std::size_t nq, std::size_t nu, bool drift_free = true);
   virtual ~DifferentialActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,

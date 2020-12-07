@@ -17,7 +17,7 @@ namespace python {
 
 class SquashingModelAbstract_wrap : public SquashingModelAbstract, public bp::wrapper<SquashingModelAbstract> {
  public:
-  SquashingModelAbstract_wrap(const std::size_t& ns)
+  SquashingModelAbstract_wrap(std::size_t ns)
       : SquashingModelAbstract(ns), bp::wrapper<SquashingModelAbstract>() {}
 
   void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& s) {

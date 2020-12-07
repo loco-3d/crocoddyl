@@ -16,7 +16,7 @@ SolverBoxFDDP::SolverBoxFDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverFDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
-  const std::size_t& n_alphas = 10;
+  std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));

@@ -12,8 +12,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                                               const std::size_t& nu,
-                                                                               const std::size_t& nr)
+                                                                               std::size_t nu,
+                                                                               std::size_t nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -34,7 +34,7 @@ void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<Di
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter, const Scalar& tol) {
+    const Eigen::Ref<const VectorXs>& x, std::size_t maxiter, Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -44,7 +44,7 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  const std::size_t& ndx = state_->get_ndx();
+  std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
   if (nu_ == 0) {
     // TODO(cmastalli): create a method for autonomous systems
@@ -64,8 +64,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs DifferentialActionModelAbstractTpl<Scalar>::quasiStatic_x(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x, const std::size_t& maxiter,
-    const Scalar& tol) {
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x, std::size_t maxiter,
+    Scalar tol) {
   VectorXs u(nu_);
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);
@@ -91,12 +91,12 @@ bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_p
 }
 
 template <typename Scalar>
-const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nu() const {
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
 template <typename Scalar>
-const std::size_t& DifferentialActionModelAbstractTpl<Scalar>::get_nr() const {
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nr() const {
   return nr_;
 }
 
@@ -116,7 +116,7 @@ const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl
 }
 
 template <typename Scalar>
-bool const& DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
+bool DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
   return has_control_limits_;
 }
 

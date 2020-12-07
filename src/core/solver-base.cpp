@@ -25,7 +25,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       th_stop_(1e-9),
       iter_(0) {
   // Allocate common data
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
   us_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
@@ -41,7 +41,7 @@ SolverAbstract::~SolverAbstract() {}
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   const std::vector<Eigen::VectorXd>& us_warm, bool is_feasible) {
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
 
   if (xs_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
@@ -127,7 +127,7 @@ double SolverAbstract::get_th_stop() const { return th_stop_; }
 std::size_t SolverAbstract::get_iter() const { return iter_; }
 
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
     throw_pretty("Invalid argument: "
                  << "xs list has to be " + std::to_string(T + 1));
@@ -148,7 +148,7 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
 }
 
 void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
-  const std::size_t& T = problem_->get_T();
+  std::size_t T = problem_->get_T();
   if (us.size() != T) {
     throw_pretty("Invalid argument: "
                  << "us list has to be " + std::to_string(T));

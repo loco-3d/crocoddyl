@@ -42,7 +42,7 @@ void exposeActivationNumDiff() {
           "action model")
       .add_property(
           "disturbance",
-          bp::make_function(&ActivationModelNumDiff::get_disturbance, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ActivationModelNumDiff::get_disturbance),
           "disturbance value used in the numerical differentiation");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataNumDiff> >();

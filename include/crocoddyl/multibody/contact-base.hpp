@@ -31,8 +31,8 @@ class ContactModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, std::size_t nc, std::size_t nu);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, std::size_t nc);
   virtual ~ContactModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
@@ -47,8 +47,8 @@ class ContactModelAbstractTpl {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
-  const std::size_t& get_nc() const;
-  const std::size_t& get_nu() const;
+  std::size_t get_nc() const;
+  std::size_t get_nu() const;
 
  protected:
   boost::shared_ptr<StateMultibody> state_;

@@ -107,11 +107,11 @@ void exposeImpulseMultiple() {
           "state", bp::make_function(&ImpulseModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
       .add_property("ni",
-                    bp::make_function(&ImpulseModelMultiple::get_ni, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&ImpulseModelMultiple::get_ni),
                     "dimension of the active impulse vector")
       .add_property(
           "ni_total",
-          bp::make_function(&ImpulseModelMultiple::get_ni_total, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ImpulseModelMultiple::get_ni_total),
           "dimension of the total impulse vector")
       .add_property(
           "active",

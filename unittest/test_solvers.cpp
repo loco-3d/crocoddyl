@@ -27,8 +27,8 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
       boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
 
   // define some aliases
-  const std::size_t& ndx = kkt->get_ndx();
-  const std::size_t& nu = kkt->get_nu();
+  std::size_t ndx = kkt->get_ndx();
+  std::size_t nu = kkt->get_nu();
 
   // Test the different matrix sizes
   BOOST_CHECK_EQUAL(kkt->get_kkt().rows(), 2 * ndx + nu);
@@ -64,8 +64,8 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   kkt->computeDirection();
 
   // define some aliases
-  const std::size_t& ndx = kkt->get_ndx();
-  const std::size_t& nu = kkt->get_nu();
+  std::size_t ndx = kkt->get_ndx();
+  std::size_t nu = kkt->get_nu();
   Eigen::MatrixXd kkt_mat = kkt->get_kkt();
   Eigen::Block<Eigen::MatrixXd> hess = kkt_mat.block(0, 0, ndx + nu, ndx + nu);
 
@@ -125,7 +125,7 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   // check solutions against each other
   for (unsigned int t = 0; t < T; ++t) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = solver->get_problem()->get_runningModels()[t];
-    const std::size_t& nu = model->get_nu();
+    std::size_t nu = model->get_nu();
     BOOST_CHECK((state->diff_dx(solver->get_xs()[t], kkt.get_xs()[t])).isMuchSmallerThan(1.0, 1e-9));
     BOOST_CHECK((solver->get_us()[t].head(nu) - kkt.get_us()[t]).isMuchSmallerThan(1.0, 1e-9));
   }

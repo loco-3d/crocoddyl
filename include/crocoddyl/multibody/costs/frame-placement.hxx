@@ -16,7 +16,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
-                                                               const FramePlacement& Mref, const std::size_t& nu)
+                                                               const FramePlacement& Mref, std::size_t nu)
     : Base(state, activation, nu),
       Mref_(Mref),
       oMf_inv_(Mref.placement.inverse()),
@@ -40,7 +40,7 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
 
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
-                                                               const FramePlacement& Mref, const std::size_t& nu)
+                                                               const FramePlacement& Mref, std::size_t nu)
     : Base(state, 6, nu), Mref_(Mref), oMf_inv_(Mref.placement.inverse()), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
@@ -80,7 +80,7 @@ void CostModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDa
   d->J.noalias() = d->rJf * d->fJf;
 
   // Compute the derivatives of the frame placement
-  const std::size_t& nv = state_->get_nv();
+  std::size_t nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
   data->Rx.leftCols(nv) = d->J;
   data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;

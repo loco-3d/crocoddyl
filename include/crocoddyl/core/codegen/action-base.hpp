@@ -62,8 +62,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
         ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
         ad_calcout(ad_model->get_state()->get_nx() + 1) {
-    const std::size_t& ndx = ad_model->get_state()->get_ndx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t ndx = ad_model->get_state()->get_ndx();
+    std::size_t nu = ad_model->get_nu();
     ad_calcDiffout.resize(2 * ndx * ndx + 2 * ndx * nu + nu * nu + ndx + nu);
     initLib();
     loadLib();
@@ -73,8 +73,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void recordCalc() {
     CppAD::Independent(ad_X);
-    const std::size_t& nx = ad_model->get_state()->get_nx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t nx = ad_model->get_state()->get_nx();
+    std::size_t nu = ad_model->get_nu();
 
     fn_record_env(ad_model, ad_X.tail(n_env));
 
@@ -94,8 +94,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void collect_calcDiffout() {
     ADVectorXs& ad_Y = ad_calcDiffout;
 
-    const std::size_t& ndx = ad_model->get_state()->get_ndx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t ndx = ad_model->get_state()->get_ndx();
+    std::size_t nu = ad_model->get_nu();
     Eigen::DenseIndex it_Y = 0;
     Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, ndx, ndx) = ad_data->Fx;
     it_Y += ndx * ndx;
@@ -114,8 +114,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void recordCalcDiff() {
     CppAD::Independent(ad_X2);
-    const std::size_t& nx = ad_model->get_state()->get_nx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t nx = ad_model->get_state()->get_nx();
+    std::size_t nu = ad_model->get_nu();
 
     fn_record_env(ad_model, ad_X2.tail(n_env));
 
@@ -191,8 +191,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
-    const std::size_t& nx = ad_model->get_state()->get_nx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t nx = ad_model->get_state()->get_nx();
+    std::size_t nu = ad_model->get_nu();
 
     d->xu.head(nx) = x;
     d->xu.segment(nx, nu) = u;
@@ -204,8 +204,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
-    const std::size_t& nx = ad_model->get_state()->get_nx();
-    const std::size_t& nu = ad_model->get_nu();
+    std::size_t nx = ad_model->get_state()->get_nx();
+    std::size_t nu = ad_model->get_nu();
 
     d->xu.head(nx) = x;
     d->xu.segment(nx, nu) = u;
@@ -295,8 +295,8 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 
   void distribute_calcDiffout() {
     VectorXs& Y = calcDiffout;
-    const std::size_t& ndx = Fx.rows();
-    const std::size_t& nu = Fu.cols();
+    std::size_t ndx = Fx.rows();
+    std::size_t nu = Fu.cols();
 
     Eigen::DenseIndex it_Y = 0;
     Fx = Eigen::Map<MatrixXs>(Y.data() + it_Y, ndx, ndx);
@@ -320,8 +320,8 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     xu.resize(m->getInputDimension());
     xu.setZero();
     calcout.setZero();
-    const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nu = model->get_nu();
+    std::size_t ndx = model->get_state()->get_ndx();
+    std::size_t nu = model->get_nu();
     calcDiffout.resize(2 * ndx * ndx + 2 * ndx * nu + nu * nu + ndx + nu);
     calcDiffout.setZero();
   }

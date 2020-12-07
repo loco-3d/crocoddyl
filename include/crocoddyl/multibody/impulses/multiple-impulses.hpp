@@ -171,12 +171,12 @@ class ImpulseModelMultipleTpl {
   /**
    * @brief Return the dimension of active impulses
    */
-  const std::size_t& get_ni() const;
+  std::size_t get_ni() const;
 
   /**
    * @brief Return the dimension of all impulses
    */
-  const std::size_t& get_ni_total() const;
+  std::size_t get_ni_total() const;
 
   /**
    * @brief Return the names of the active impulses

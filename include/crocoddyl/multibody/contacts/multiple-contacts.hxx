@@ -10,7 +10,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& nu)
+                                                         std::size_t nu)
     : state_(state), nc_(0), nc_total_(0), nu_(nu) {}
 
 template <typename Scalar>
@@ -93,7 +93,7 @@ void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMu
   }
 
   std::size_t nc = 0;
-  const std::size_t& nv = state_->get_nv();
+  std::size_t nv = state_->get_nv();
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
@@ -105,7 +105,7 @@ void ContactModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ContactDataMu
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->contact->calc(d_i, x);
-      const std::size_t& nc_i = m_i->contact->get_nc();
+      std::size_t nc_i = m_i->contact->get_nc();
       data->a0.segment(nc, nc_i) = d_i->a0;
       data->Jc.block(nc, 0, nc_i, nv) = d_i->Jc;
       nc += nc_i;
@@ -122,7 +122,7 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDa
   }
 
   std::size_t nc = 0;
-  const std::size_t& ndx = state_->get_ndx();
+  std::size_t ndx = state_->get_ndx();
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
   for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
@@ -134,7 +134,7 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDa
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->contact->calcDiff(d_i, x);
-      const std::size_t& nc_i = m_i->contact->get_nc();
+      std::size_t nc_i = m_i->contact->get_nc();
       data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
       nc += nc_i;
     }
@@ -176,7 +176,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
     const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
     if (m_i->active) {
-      const std::size_t& nc_i = m_i->contact->get_nc();
+      std::size_t nc_i = m_i->contact->get_nc();
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
       m_i->contact->updateForce(d_i, force_i);
       data->fext[d_i->joint] = d_i->f;
@@ -202,7 +202,7 @@ void ContactModelMultipleTpl<Scalar>::updateAccelerationDiff(const boost::shared
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
                                                       const MatrixXs& df_dx, const MatrixXs& df_du) const {
-  const std::size_t& ndx = state_->get_ndx();
+  std::size_t ndx = state_->get_ndx();
   if (static_cast<std::size_t>(df_dx.rows()) != nc_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
                  << "df_dx has wrong dimension (it should be " + std::to_string(nc_) + "," + std::to_string(ndx) +
@@ -256,17 +256,17 @@ const typename ContactModelMultipleTpl<Scalar>::ContactModelContainer& ContactMo
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelMultipleTpl<Scalar>::get_nc() const {
+std::size_t ContactModelMultipleTpl<Scalar>::get_nc() const {
   return nc_;
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelMultipleTpl<Scalar>::get_nc_total() const {
+std::size_t ContactModelMultipleTpl<Scalar>::get_nc_total() const {
   return nc_total_;
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelMultipleTpl<Scalar>::get_nu() const {
+std::size_t ContactModelMultipleTpl<Scalar>::get_nu() const {
   return nu_;
 }
 

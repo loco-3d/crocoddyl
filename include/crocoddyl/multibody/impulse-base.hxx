@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& ni)
+                                                         std::size_t ni)
     : state_(state), ni_(ni) {}
 
 template <typename Scalar>
@@ -50,7 +50,7 @@ const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ImpulseModelAbstractTpl<Sca
 }
 
 template <typename Scalar>
-const std::size_t& ImpulseModelAbstractTpl<Scalar>::get_ni() const {
+std::size_t ImpulseModelAbstractTpl<Scalar>::get_ni() const {
   return ni_;
 }
 

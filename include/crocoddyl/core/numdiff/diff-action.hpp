@@ -40,8 +40,8 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const boost::shared_ptr<Base>& get_model() const;
-  const Scalar& get_disturbance() const;
-  void set_disturbance(const Scalar& disturbance);
+  Scalar get_disturbance() const;
+  void set_disturbance(Scalar disturbance);
   bool get_with_gauss_approx();
 
  protected:
@@ -90,8 +90,8 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
     du.setZero();
     xp.setZero();
 
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t& nu = model->get_model()->get_nu();
+    std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());

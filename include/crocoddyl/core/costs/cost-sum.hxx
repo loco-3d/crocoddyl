@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state, std::size_t nu)
     : state_(state), nu_(nu), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
@@ -24,7 +24,7 @@ CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
 
 template <typename Scalar>
 void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost,
-                                      const Scalar& weight, bool active) {
+                                      Scalar weight, bool active) {
   if (cost->get_nu() != nu_) {
     throw_pretty(name << " cost item doesn't have the same control dimension (it should be " + std::to_string(nu_) +
                              ")");
@@ -187,17 +187,17 @@ const typename CostModelSumTpl<Scalar>::CostModelContainer& CostModelSumTpl<Scal
 }
 
 template <typename Scalar>
-const std::size_t& CostModelSumTpl<Scalar>::get_nu() const {
+std::size_t CostModelSumTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
 template <typename Scalar>
-const std::size_t& CostModelSumTpl<Scalar>::get_nr() const {
+std::size_t CostModelSumTpl<Scalar>::get_nr() const {
   return nr_;
 }
 
 template <typename Scalar>
-const std::size_t& CostModelSumTpl<Scalar>::get_nr_total() const {
+std::size_t CostModelSumTpl<Scalar>::get_nr_total() const {
   return nr_total_;
 }
 

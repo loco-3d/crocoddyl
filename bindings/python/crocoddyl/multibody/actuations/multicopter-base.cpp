@@ -41,8 +41,7 @@ void exposeActuationModelMultiCopterBase() {
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
       .add_property("nrotors",
-                    bp::make_function(&ActuationModelMultiCopterBase::get_nrotors,
-                                      bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&ActuationModelMultiCopterBase::get_nrotors),
                     "Number of rotors in the flying base")
       .add_property(
           "tauf",

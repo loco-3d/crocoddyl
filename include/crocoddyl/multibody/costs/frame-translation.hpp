@@ -62,7 +62,7 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                boost::shared_ptr<ActivationModelAbstract> activation, const FrameTranslation& xref,
-                               const std::size_t& nu);
+                               std::size_t nu);
 
   /**
    * @brief Initialize the frame translation cost model
@@ -86,7 +86,7 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                               const std::size_t& nu);
+                               std::size_t nu);
 
   /**
    * @brief Initialize the frame translation cost model

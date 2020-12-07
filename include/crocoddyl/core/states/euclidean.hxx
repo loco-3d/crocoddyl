@@ -9,7 +9,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-StateVectorTpl<Scalar>::StateVectorTpl(const std::size_t& nx) : StateAbstractTpl<Scalar>(nx, nx) {}
+StateVectorTpl<Scalar>::StateVectorTpl(std::size_t nx) : StateAbstractTpl<Scalar>(nx, nx) {}
 
 template <typename Scalar>
 StateVectorTpl<Scalar>::~StateVectorTpl() {}

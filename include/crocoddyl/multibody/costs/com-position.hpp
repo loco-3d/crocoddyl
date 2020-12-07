@@ -60,7 +60,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                           boost::shared_ptr<ActivationModelAbstract> activation, const Vector3s& cref,
-                          const std::size_t& nu);
+                          std::size_t nu);
 
   /**
    * @brief Initialize the CoM position cost model
@@ -83,7 +83,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] cref   Reference CoM position
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref, const std::size_t& nu);
+  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref, std::size_t nu);
 
   /**
    * @brief Initialize the CoM position cost model

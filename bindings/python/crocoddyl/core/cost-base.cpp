@@ -86,7 +86,7 @@ void exposeCostAbstract() {
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
           "activation model")
       .add_property("nu",
-                    bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&CostModelAbstract_wrap::get_nu),
                     "dimension of control vector");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();

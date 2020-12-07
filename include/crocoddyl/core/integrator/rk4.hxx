@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& time_step, const bool& with_cost_residual)
+    boost::shared_ptr<DifferentialActionModelAbstract> model, Scalar time_step, bool with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
@@ -51,7 +51,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -102,7 +102,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  std::size_t nv = differential_->get_state()->get_nv();
 
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -205,12 +205,12 @@ IntegratedActionModelRK4Tpl<Scalar>::get_differential() const {
 }
 
 template <typename Scalar>
-const Scalar& IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
+Scalar IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
   return time_step_;
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar& dt) {
+void IntegratedActionModelRK4Tpl<Scalar>::set_dt(Scalar dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: "
                  << "dt has positive value");
@@ -220,7 +220,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar& dt) {
 
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t& nu = model->get_nu();
+  std::size_t nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
     unone_ = VectorXs::Zero(nu_);
@@ -235,7 +235,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<Dif
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                      const std::size_t& maxiter, const Scalar& tol) {
+                                                      std::size_t maxiter, Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");

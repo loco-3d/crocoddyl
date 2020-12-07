@@ -61,7 +61,7 @@ void exposeImpulseAbstract() {
           bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
       .add_property(
-          "ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni, bp::return_value_policy<bp::return_by_value>()),
+          "ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni),
           "dimension of impulse");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();

@@ -199,9 +199,9 @@ void test_calc() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
+  std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
     BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
@@ -216,7 +216,7 @@ void test_calc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calc(datas[i], x2);
     }
@@ -263,10 +263,10 @@ void test_calc_diff() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
-  const std::size_t& ndx = model.get_state()->get_ndx();
+  std::size_t nv = model.get_state()->get_nv();
+  std::size_t ndx = model.get_state()->get_ndx();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
@@ -284,7 +284,7 @@ void test_calc_diff() {
   model.calc(data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calc(datas[i], x2);
       models[i]->calcDiff(datas[i], x2);
@@ -332,10 +332,10 @@ void test_calc_diff_no_recalc() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
-  const std::size_t& ndx = model.get_state()->get_ndx();
+  std::size_t nv = model.get_state()->get_nv();
+  std::size_t ndx = model.get_state()->get_ndx();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv).isZero());
     BOOST_CHECK(data->a0.segment(nc, nc_i).isZero());
@@ -351,7 +351,7 @@ void test_calc_diff_no_recalc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calcDiff(datas[i], x2);
     }

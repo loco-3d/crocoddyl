@@ -29,7 +29,7 @@ class SquashingModelAbstractTpl {
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelAbstractTpl(const std::size_t& ns) : ns_(ns) {
+  SquashingModelAbstractTpl(std::size_t ns) : ns_(ns) {
     if (ns_ == 0) {
       throw_pretty("Invalid argument: "
                    << "ns cannot be zero");
@@ -43,7 +43,7 @@ class SquashingModelAbstractTpl {
     return boost::allocate_shared<SquashingDataAbstract>(Eigen::aligned_allocator<SquashingDataAbstract>(), this);
   }
 
-  const std::size_t& get_ns() const { return ns_; };
+  std::size_t get_ns() const { return ns_; };
   const VectorXs& get_s_lb() const { return s_lb_; };
   const VectorXs& get_s_ub() const { return s_ub_; };
 

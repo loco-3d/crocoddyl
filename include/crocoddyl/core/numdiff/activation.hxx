@@ -41,9 +41,9 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Activat
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
-  const Scalar& a_value0 = data_nd->data_0->a_value;
+  Scalar a_value0 = data_nd->data_0->a_value;
   data->a_value = data_nd->data_0->a_value;
-  const std::size_t& nr = model_->get_nr();
+  std::size_t nr = model_->get_nr();
 
   // Computing the d activation(r) / dr
   data_nd->rp = r;
@@ -70,12 +70,12 @@ const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& ActivationModelNum
 }
 
 template <typename Scalar>
-const Scalar& ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
+Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ActivationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void ActivationModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");
