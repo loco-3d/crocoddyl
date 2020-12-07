@@ -44,8 +44,8 @@ class SolverKKT : public SolverAbstract {
 
  protected:
   double regfactor_;
-  double regmin_;
-  double regmax_;
+  double reg_min_;
+  double reg_max_;
   double cost_try_;
   std::vector<Eigen::VectorXd> xs_try_;
   std::vector<Eigen::VectorXd> us_try_;
