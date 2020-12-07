@@ -103,7 +103,7 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
 
 
 class Impulse3DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadHyQ().model
+    ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     # gains = pinocchio.utils.rand(2)
@@ -113,7 +113,7 @@ class Impulse3DTest(ImpulseModelAbstractTestCase):
 
 
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadHyQ().model
+    ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
@@ -125,7 +125,7 @@ class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
 
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadICub().model
+    ROBOT_MODEL = example_robot_data.load('icub').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     frame = ROBOT_MODEL.getFrameId('r_sole')
@@ -134,7 +134,7 @@ class Impulse6DTest(ImpulseModelAbstractTestCase):
 
 
 class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadICub().model
+    ROBOT_MODEL = example_robot_data.load('icub').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)

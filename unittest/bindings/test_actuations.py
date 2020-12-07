@@ -37,21 +37,21 @@ class ActuationModelAbstractTestCase(unittest.TestCase):
 
 
 class TalosArmFullActuationTest(ActuationModelAbstractTestCase):
-    STATE = crocoddyl.StateMultibody(example_robot_data.loadTalosArm().model)
+    STATE = crocoddyl.StateMultibody(example_robot_data.load('talos_arm').model)
 
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     ACTUATION_DER = FullActuationDerived(STATE)
 
 
 class HyQFloatingBaseActuationTest(ActuationModelAbstractTestCase):
-    STATE = crocoddyl.StateMultibody(example_robot_data.loadHyQ().model)
+    STATE = crocoddyl.StateMultibody(example_robot_data.load('hyq').model)
 
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     ACTUATION_DER = FreeFloatingActuationDerived(STATE)
 
 
 class TalosFloatingBaseActuationTest(ActuationModelAbstractTestCase):
-    STATE = crocoddyl.StateMultibody(example_robot_data.loadTalos().model)
+    STATE = crocoddyl.StateMultibody(example_robot_data.load('talos').model)
 
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     ACTUATION_DER = FreeFloatingActuationDerived(STATE)
