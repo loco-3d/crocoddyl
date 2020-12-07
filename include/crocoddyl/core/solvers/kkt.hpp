@@ -43,7 +43,8 @@ class SolverKKT : public SolverAbstract {
   std::size_t get_nu() const;
 
  protected:
-  double regfactor_;
+  double reg_incfactor_;
+  double reg_decfactor_;
   double reg_min_;
   double reg_max_;
   double cost_try_;

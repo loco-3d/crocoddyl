@@ -13,7 +13,8 @@ namespace crocoddyl {
 
 SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
-      regfactor_(10.),
+      reg_incfactor_(10.),
+      reg_decfactor_(10.),
       reg_min_(1e-18),
       reg_max_(1e12),
       cost_try_(0.),
@@ -229,7 +230,7 @@ void SolverKKT::computePrimalDual() {
 }
 
 void SolverKKT::increaseRegularization() {
-  xreg_ *= regfactor_;
+  xreg_ *= reg_incfactor_;
   if (xreg_ > reg_max_) {
     xreg_ = reg_max_;
   }
@@ -237,7 +238,7 @@ void SolverKKT::increaseRegularization() {
 }
 
 void SolverKKT::decreaseRegularization() {
-  xreg_ /= regfactor_;
+  xreg_ /= reg_decfactor_;
   if (xreg_ < reg_min_) {
     xreg_ = reg_min_;
   }
