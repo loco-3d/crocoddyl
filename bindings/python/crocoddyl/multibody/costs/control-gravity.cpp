@@ -16,39 +16,28 @@ namespace python {
 void exposeCostControlGrav() {
   bp::class_<CostModelControlGrav, bp::bases<CostModelAbstract>>(
       "CostModelControlGrav",
-      "This cost function defines a residual vector as r = u - g(q), "
-      "where q, g(q) are the generalized position and gravity vector, respectively.",
+      "This cost function defines a residual vector as r = a(u) - g(q), "
+      "where q, g(q) are the generalized position and gravity vector, respectively,"
+      "and a(u) is the actuated torque.",
       bp::init<boost::shared_ptr<StateMultibody>,
-               boost::shared_ptr<ActivationModelAbstract>>(
-          bp::args("self", "state", "activation"),
+               boost::shared_ptr<ActivationModelAbstract>,
+               boost::shared_ptr<ActuationModelFull>>(
+          bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "The default reference control is obtained from np.zero(nu), with nu "
           "obtained from activation.nr.\n"
           ":param state: state description\n"
-          ":param activation: activation model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-                    boost::shared_ptr<ActivationModelAbstract>, int>(
-          bp::args("self", "state", "activation", "nu"),
-          "Initialize the control cost model.\n\n"
-          "The default reference control is obtained from np.zero(nu).\n"
-          ":param state: state description\n"
           ":param activation: activation model\n"
-          ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>>(
-          bp::args("self", "state"),
+          ":param actuation: actuation model"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>,
+                    boost::shared_ptr<ActuationModelFull>>(
+          bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
           "a=0.5*||r||^2). The default reference "
           "control is obtained from np.zero(state.nv).\n"
-          ":param state: state description"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, int>(
-          bp::args("self", "state", "nu"),
-          "Initialize the control cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2). The default reference "
-          "control is obtained from np.zero(nu)\n"
           ":param state: state description\n"
-          ":param nu: dimension of control vector"))
+          ":param actuation: actuation model"))
       .def<void (CostModelControlGrav::*)(
           const boost::shared_ptr<CostDataAbstract> &,
           const Eigen::Ref<const Eigen::VectorXd> &,

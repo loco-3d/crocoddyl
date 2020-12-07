@@ -14,46 +14,22 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation), pin_model_(*state->get_pinocchio()) {
-    if (activation_->get_nr() != nu_) {
+    boost::shared_ptr<ActivationModelAbstract> activation,
+    boost::shared_ptr<ActuationModelFloatingBase> actuation_model)
+    : Base(state, activation,actuation_model->get_nu()), 
+           pin_model_(*state->get_pinocchio()), actuation_model_(*actuation_model) {
+    if (activation_->get_nr() != state_->get_nv()) {
     throw_pretty("Invalid argument: "
-                 << "nr is equals to " + std::to_string(nu_));
+                 << "nr is equals to " + std::to_string(state_->get_nv()));
   }
 }
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    const std::size_t &nu)
-    : Base(state, activation, nu), pin_model_(*state->get_pinocchio()) {
-  if (activation_->get_nr() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "nr is equals to " + std::to_string(nu_));
-  }
-  if (nu_ == 0) {
-      throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-  }
-}
-
-template <typename Scalar>
-CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state)
-    : Base(state, state->get_nv()), pin_model_(*state->get_pinocchio()) {}
-
-template <typename Scalar>
-CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t &nu)
-    : Base(state, nu, nu), pin_model_(*state->get_pinocchio()) {	
-    if (nu_ == 0) {
-      throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-    }
-}
+    boost::shared_ptr<ActuationModelFloatingBase> actuation_model)
+    : Base(state, state->get_nv(),actuation_model->get_nu()), 
+           pin_model_(*state->get_pinocchio()), actuation_model_(*actuation_model) {}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::~CostModelControlGravContactTpl() {}
@@ -71,8 +47,9 @@ void CostModelControlGravContactTpl<Scalar>::calc(
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
-
-  data->r = u - pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext).tail(nu_);
+  
+  actuation_model_.calc(d->actuation,x,u); 
+  data->r = d->actuation->tau - pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -95,16 +72,23 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
                                     d->fext, d->dg_dq);
 
   activation_->calcDiff(data->activation, data->r);
+  actuation_model_.calcDiff(d->actuation,x,u); 
   const std::size_t& nv = state_->get_nv();
 
-  data->Lu.noalias() = data->activation->Ar; 
-  data->Lx.head(nv).noalias() = - d->dg_dq.transpose().rightCols(nu_) * data->activation->Ar; 
+  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
+  data->Lx.noalias() = d->actuation->dtau_dx.transpose() * data->activation->Ar;
+  data->Lx.head(nv).noalias() -= d->dg_dq.transpose() * data->activation->Ar;
 
-  d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq.bottomRows(nu_); 
-  data->Lxx.topLeftCorner(nv, nv).noalias() = d->dg_dq.transpose().rightCols(nu_) * d->Arr_dgdq; 
-
-  data->Lxu.topRows(nv).noalias() = - d->Arr_dgdq.transpose(); 
-  data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();
+  d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
+  d->Arr_dtaudx.noalias() = data->activation->Arr * d->actuation->dtau_dx;
+  data->Lxx.noalias() = d->actuation->dtau_dx.transpose() * d->Arr_dtaudx;
+  data->Lxx.topLeftCorner(nv,nv).noalias() += d->dg_dq.transpose() * d->Arr_dgdq;
+  data->Lxx.topRows(nv).noalias() -= d->dg_dq.transpose() * d->Arr_dtaudx;
+  data->Lxx.leftCols(nv).noalias() -= d->actuation->dtau_dx.transpose() * d->Arr_dgdq;
+  
+  data->Lxu.noalias() = d->Arr_dtaudx.transpose() * d->actuation->dtau_du;
+  data->Lxu.topRows(nv).noalias() -= d->Arr_dgdq.transpose() * d->actuation->dtau_du;
+  data->Luu.diagonal().noalias() = (d->actuation->dtau_du.transpose() * data->activation->Arr * d->actuation->dtau_du).diagonal();
 }
 
 template <typename Scalar>
