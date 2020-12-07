@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// // Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
-#include "python/crocoddyl/core/activation-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -44,5 +44,5 @@ void exposeActivationQuadFlatLog() {
           bp::make_function(&ActivationModelQuadFlatLog::set_alpha), "alpha");
 }
 
-} // namespace python
-} // namespace crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
