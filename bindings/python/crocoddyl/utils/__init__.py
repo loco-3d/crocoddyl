@@ -1010,6 +1010,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.alphas = [2**(-n) for n in range(10)]
         self.th_grad = 1e-12
 
+        self.callbacks = None
         self.x_reg = 0
         self.u_reg = 0
         self.regIncFactor = 10
@@ -1064,8 +1065,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
                     else:
                         continue
                 break
-            d = self.expectedImprovement()
-            d1, d2 = np.asscalar(d[0]), np.asscalar(d[1])
+            self.d = self.expectedImprovement()
+            d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
 
             for a in self.alphas:
                 try:
@@ -1089,9 +1090,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            # TODO @Carlos bind the callbacks
-            # if self.callback is not None:
-            #     [c(self) for c in self.callback]
+            if self.callbacks is not None:
+                [c(self) for c in self.callbacks]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
@@ -1265,9 +1265,8 @@ class FDDPDerived(DDPDerived):
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            # TODO @Carlos bind the callbacks
-            # if self.callback is not None:
-            #     [c(self) for c in self.callback]
+            if self.callback is not None:
+                [c(self) for c in self.callbacks]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True

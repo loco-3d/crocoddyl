@@ -20,9 +20,11 @@ namespace python {
 class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::cost_;
+  using SolverAbstract::d_;
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::steplength_;
+  using SolverAbstract::stop_;
 
   explicit SolverAbstract_wrap(boost::shared_ptr<ShootingProblem> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
@@ -39,24 +41,24 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
 
   double tryStep(double step_length = 1) { return bp::call<double>(this->get_override("tryStep").ptr(), step_length); }
 
-  double stoppingCriteria() { return bp::call<double>(this->get_override("stoppingCriteria").ptr()); }
+  double stoppingCriteria() {
+    stop_ = bp::call<double>(this->get_override("stoppingCriteria").ptr());
+    return stop_;
+  }
 
   const Eigen::Vector2d& expectedImprovement() {
     bp::list exp_impr = bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
-    expected_improvement_ << bp::extract<double>(exp_impr[0]), bp::extract<double>(exp_impr[1]);
-    return expected_improvement_;
+    d_ << bp::extract<double>(exp_impr[0]), bp::extract<double>(exp_impr[1]);
+    return d_;
   }
 
   bp::list expectedImprovement_wrap() {
     expectedImprovement();
     bp::list exp_impr;
-    exp_impr.append(expected_improvement_[0]);
-    exp_impr.append(expected_improvement_[1]);
+    exp_impr.append(d_[0]);
+    exp_impr.append(d_[1]);
     return exp_impr;
   }
-
- private:
-  Eigen::Vector2d expected_improvement_;
 };
 
 class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<CallbackAbstract> {

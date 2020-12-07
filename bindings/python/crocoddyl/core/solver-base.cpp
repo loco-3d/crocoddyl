@@ -106,6 +106,8 @@ void exposeSolverAbstract() {
           bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
+      .def_readwrite("stop", &SolverAbstract_wrap::stop_, "stopping criteria value")
+      .def_readwrite("d", &SolverAbstract_wrap::d_, "expected improvement")
       .add_property("x_reg", bp::make_function(&SolverAbstract_wrap::get_xreg),
                     bp::make_function(&SolverAbstract_wrap::set_xreg), "state regularization")
       .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
