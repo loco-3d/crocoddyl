@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/activations/quadratic-flat-exp.hpp"
+#include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -36,8 +36,8 @@ void exposeActivationQuadFlatExp() {
            "value.\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelQuadFlatExp::createData, bp::args("self"),
-           "Create the quadratic flat activation data.\n\n")
+      .def("createData", &ActivationModelQuadFlatExp::createData,
+           bp::args("self"), "Create the quadratic flat activation data.\n\n")
       .add_property(
           "alpha",
           bp::make_function(&ActivationModelQuadFlatExp::get_alpha,
@@ -45,5 +45,5 @@ void exposeActivationQuadFlatExp() {
           bp::make_function(&ActivationModelQuadFlatExp::set_alpha), "alpha");
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl

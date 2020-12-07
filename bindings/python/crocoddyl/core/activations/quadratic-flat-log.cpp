@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/activations/quadratic-flat-log.hpp"
+#include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -24,7 +24,8 @@ void exposeActivationQuadFlatLog() {
                             "Initialize the activation model.\n\n"
                             ":param nr: dimension of the cost-residual vector"
                             "param alpha: width of quadratic basin near zero"))
-      .def("calc", &ActivationModelQuadFlatLog::calc, bp::args("self", "data", "r"),
+      .def("calc", &ActivationModelQuadFlatLog::calc,
+           bp::args("self", "data", "r"),
            "Compute the log(1 + ||r||^2 / alpha).\n"
            ":param data: activation data\n"
            ":param r: residual vector")
@@ -35,8 +36,8 @@ void exposeActivationQuadFlatLog() {
            "value.\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelQuadFlatLog::createData, bp::args("self"),
-           "Create the quadratic flat activation data.\n")
+      .def("createData", &ActivationModelQuadFlatLog::createData,
+           bp::args("self"), "Create the quadratic flat activation data.\n")
       .add_property(
           "alpha",
           bp::make_function(&ActivationModelQuadFlatLog::get_alpha,
@@ -44,5 +45,5 @@ void exposeActivationQuadFlatLog() {
           bp::make_function(&ActivationModelQuadFlatLog::set_alpha), "alpha");
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl
