@@ -1015,8 +1015,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.u_reg = 0
         self.regIncFactor = 10
         self.regDecFactor = 10
-        self.regMax = 1e9
-        self.regMin = 1e-9
+        self.regMax = 1e12
+        self.regMin = 1e-18
         self.th_step = .5
 
     def calc(self):
@@ -1049,8 +1049,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.regMin
-        self.u_reg = regInit if regInit is not None else self.regMin
+        self.x_reg = regInit if regInit is not None else 1e-9
+        self.u_reg = regInit if regInit is not None else 1e-9
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
@@ -1218,8 +1218,8 @@ class FDDPDerived(DDPDerived):
 
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.regMin
-        self.u_reg = regInit if regInit is not None else self.regMin
+        self.x_reg = regInit if regInit is not None else 1e-9
+        self.u_reg = regInit if regInit is not None else 1e-9
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
