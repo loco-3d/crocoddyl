@@ -96,12 +96,7 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
 
   activation_->calcDiff(data->activation, data->r);
   const std::size_t& nv = state_->get_nv();
-  /*for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts.begin();
-         it != d->contacts.end(); ++it) {
-			 d->df_du_Jc.noalias() += (it->second->df_du.transpose() * it->second->Jc.rightCols(nu_)).rightCols(nu_);
-			 d->df_dx_Jc.topRows(state_->get_nv()).noalias() += (it->second->df_dx.transpose() * it->second->Jc).rightCols(nu_);
-		 }*/
-  
+
   data->Lu.noalias() = data->activation->Ar; 
   data->Lx.head(nv).noalias() = - d->dg_dq.transpose().rightCols(nu_) * data->activation->Ar; 
 

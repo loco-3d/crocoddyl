@@ -102,7 +102,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(
   data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = d->dg_dq * d->Arr_dgdq;
+  data->Lxx.topLeftCorner(nv,nv).noalias() = d->dg_dq.transpose() * d->Arr_dgdq;
 
   data->Lxu.topRows(nv).noalias() = -d->Arr_dgdq.transpose();
   data->Luu.diagonal().noalias() = data->activation->Arr.diagonal();

@@ -18,6 +18,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
+
 namespace crocoddyl {
 
 /**
