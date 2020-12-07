@@ -135,7 +135,7 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
 
 
 class Contact6DTest(ContactModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load('icub').model
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
@@ -145,7 +145,7 @@ class Contact6DTest(ContactModelAbstractTestCase):
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load('icub').model
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
