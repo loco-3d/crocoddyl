@@ -45,7 +45,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /*
-   * @brief Initialize the quadFlatLog activation model
+   * @brief Initialize the quadratic-flat-log activation model
    *
    * The default `alpha` value is defined as 1.
    *
@@ -63,7 +63,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
   virtual ~ActivationModelQuadFlatLogTpl(){};
 
   /*
-   * @brief Compute the quadFlatLog function
+   * @brief Compute the quadratic-flat-log function
    *
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -79,7 +79,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
   /*
-   * @brief Compute the derivatives of the quadFlatLog function
+   * @brief Compute the derivatives of the quadratic-flat-log function
    *
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -98,7 +98,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
   /*
-   * @brief Create the quadFlatLog activation data
+   * @brief Create the quadratic-flat-log activation data
    *
    * @return the activation data
    */
@@ -120,7 +120,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
 };
 
 /*
- * @brief Data structure of the quadFlatLog activation
+ * @brief Data structure of the quadratic-flat-log activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation

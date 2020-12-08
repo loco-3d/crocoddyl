@@ -22,7 +22,7 @@ namespace crocoddyl {
  *
  * This activation function describes a quadratic exponential activation
  * depending on the square norm of a residual vector, i.e. \f[ \begin{equation}
- * 1 - exp(-\|\mathbf{r}\|^2 / \alpha) \end{equation} \f] where \f$\alpha\f$
+ * 1 - exp(\|\mathbf{r}\|^2 / \alpha) \end{equation} \f] where \f$\alpha\f$
  * defines the width of the quadratic basin, \f$r\f$ is the scalar residual,
  * \f$nr\f$ is the dimension of the residual vector. Far
  * away from zero, the quadFlat activation is nearly flat.
@@ -46,7 +46,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /*
-   * @brief Initialize the quadFlatExp activation model
+   * @brief Initialize the quadratic-flat-exp activation model
    *
    * The default `alpha` value is defined as 1.
    *
@@ -64,7 +64,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
   virtual ~ActivationModelQuadFlatExpTpl(){};
 
   /*
-   * @brief Compute the quadFlatExp function
+   * @brief Compute the quadratic-flat-exp function
    *
    * @param[in] data  Quadratic-flat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -81,7 +81,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
   /*
-   * @brief Compute the derivatives of the quadFlatExp function
+   * @brief Compute the derivatives of the quadratic-flat-exp function
    *
    * @param[in] data  Quadratic-flat activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
@@ -100,7 +100,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
   /**
-   * @brief Create the quadFlatExp activation data
+   * @brief Create the quadratic-flat-exp activation data
    *
    * @return the activation data
    */
@@ -122,7 +122,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
 };
 
 /*
- * @brief Data structure of the quadFlatExp activation
+ * @brief Data structure of the quadratic-flat-exp activation
  *
  * @param[in] a0  computed in calc to avoid recomputation
  * @param[in] a1  computed in calcDiff to avoid recomputation
