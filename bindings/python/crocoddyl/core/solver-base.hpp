@@ -39,7 +39,9 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(const double step_length = 1) { return bp::call<double>(this->get_override("tryStep").ptr(), step_length); }
+  double tryStep(const double step_length = 1) {
+    return bp::call<double>(this->get_override("tryStep").ptr(), step_length);
+  }
 
   double stoppingCriteria() {
     stop_ = bp::call<double>(this->get_override("stoppingCriteria").ptr());
