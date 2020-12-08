@@ -112,7 +112,7 @@ class ActivationModelQuadFlatExpTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
   Scalar get_alpha() const { return alpha_; };
-  void set_alpha(Scalar alpha) { alpha_ = alpha; };
+  void set_alpha(const Scalar alpha) { alpha_ = alpha; };
 
  protected:
   using Base::nr_;  //!< Dimension of the residual vector
