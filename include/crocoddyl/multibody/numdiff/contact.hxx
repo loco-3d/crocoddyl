@@ -84,7 +84,7 @@ Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
+void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 

@@ -29,13 +29,13 @@ class FrictionConeTpl {
   typedef typename MathBase::Quaternions Quaternions;
 
   explicit FrictionConeTpl();
-  FrictionConeTpl(const Vector3s& normal, Scalar mu, std::size_t nf = 4, bool inner_appr = true,
-                  Scalar min_nforce = Scalar(0.), Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  FrictionConeTpl(const Vector3s& normal, const Scalar mu, const std::size_t nf = 4, const bool inner_appr = true,
+                  Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
   ~FrictionConeTpl();
 
-  void update(const Vector3s& normal, Scalar mu, bool inner_appr = true, Scalar min_nforce = Scalar(0.),
-              Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  void update(const Vector3s& normal, Scalar mu, const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
+              const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   const MatrixX3s& get_A() const;
   const VectorXs& get_lb() const;
@@ -47,11 +47,11 @@ class FrictionConeTpl {
   Scalar get_min_nforce() const;
   Scalar get_max_nforce() const;
 
-  void set_nsurf(Vector3s nf);
-  void set_mu(Scalar mu);
-  void set_inner_appr(bool inner_appr);
-  void set_min_nforce(Scalar min_nforce);
-  void set_max_nforce(Scalar max_nforce);
+  void set_nsurf(const Vector3s& nf);
+  void set_mu(const Scalar mu);
+  void set_inner_appr(const bool inner_appr);
+  void set_min_nforce(const Scalar min_nforce);
+  void set_max_nforce(const Scalar max_nforce);
 
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);

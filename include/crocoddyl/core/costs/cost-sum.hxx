@@ -12,7 +12,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state, std::size_t nu)
+CostModelSumTpl<Scalar>::CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu)
     : state_(state), nu_(nu), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
@@ -24,7 +24,7 @@ CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
 
 template <typename Scalar>
 void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost,
-                                      Scalar weight, bool active) {
+                                      const Scalar weight, const bool active) {
   if (cost->get_nu() != nu_) {
     throw_pretty(name << " cost item doesn't have the same control dimension (it should be " + std::to_string(nu_) +
                              ")");
@@ -62,7 +62,7 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
 }
 
 template <typename Scalar>
-void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, bool active) {
+void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, const bool active) {
   typename CostModelContainer::iterator it = costs_.find(name);
   if (it != costs_.end()) {
     if (active && !it->second->active) {

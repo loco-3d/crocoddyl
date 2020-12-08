@@ -76,8 +76,8 @@ class SolverAbstract {
    * @return A boolean that describes if convergence was reached.
    */
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, std::size_t maxiter = 100,
-                     bool is_feasible = false, double reg_init = 1e-9) = 0;
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double reg_init = 1e-9) = 0;
 
   /**
    * @brief Compute the search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ for the current guess
@@ -90,7 +90,7 @@ class SolverAbstract {
    * @return  The search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ and the dual lambdas as lists of
    * \f$T+1\f$, \f$T\f$ and \f$T+1\f$ lengths, respectively
    */
-  virtual void computeDirection(bool recalc) = 0;
+  virtual void computeDirection(const bool recalc) = 0;
 
   /**
    * @brief Try a predefined step length and compute its cost improvement
@@ -102,7 +102,7 @@ class SolverAbstract {
    * @param[in]  stepLength  step length
    * @return  The cost improvement
    */
-  virtual double tryStep(double step_length = 1) = 0;
+  virtual double tryStep(const double step_length = 1) = 0;
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -134,7 +134,7 @@ class SolverAbstract {
    * @param[in]  isFeasible  true if the \p xs are obtained from integrating the \p us (rollout)
    */
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
-                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, bool is_feasible = false);
+                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool is_feasible = false);
 
   /**
    * @brief Set a list of callback functions using for diagnostic
@@ -239,22 +239,22 @@ class SolverAbstract {
   /**
    * @brief Modify the state regularization value
    */
-  void set_xreg(double xreg);
+  void set_xreg(const double xreg);
 
   /**
    * @brief Modify the control regularization value
    */
-  void set_ureg(double ureg);
+  void set_ureg(const double ureg);
 
   /**
    * @brief Modify the threshold used for accepting step
    */
-  void set_th_acceptstep(double th_acceptstep);
+  void set_th_acceptstep(const double th_acceptstep);
 
   /**
    * @brief Modify the tolerance for stopping the algorithm
    */
-  void set_th_stop(double th_stop);
+  void set_th_stop(const double th_stop);
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
@@ -297,7 +297,7 @@ class CallbackAbstract {
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 
-bool raiseIfNaN(double value);
+bool raiseIfNaN(const double value);
 
 }  // namespace crocoddyl
 

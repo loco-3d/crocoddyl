@@ -35,7 +35,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
-  Scalar c0 = data_nd->cost;
+  const Scalar c0 = data_nd->cost;
   const VectorXs& r0 = data_nd->r;
   if (get_with_gauss_approx()) {
     model_->get_activation()->calc(data_nd->data_0->activation, r0);
@@ -114,7 +114,7 @@ Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
+void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 

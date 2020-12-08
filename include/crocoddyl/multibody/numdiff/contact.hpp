@@ -82,7 +82,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(Scalar disturbance);
+  void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Register functions that take a pinocchio model, a pinocchio data, a state and a control.
@@ -136,7 +136,7 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
     dx.setZero();
     xp.setZero();
 
-    std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t ndx = model->get_model()->get_state()->get_ndx();
     data_0 = model->get_model()->createData(data);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(data));

@@ -27,7 +27,7 @@ struct ContactItemTpl {
   typedef ContactModelAbstractTpl<Scalar> ContactModelAbstract;
 
   ContactItemTpl() {}
-  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true)
+  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, const bool active = true)
       : name(name), contact(contact), active(active) {}
 
   std::string name;
@@ -71,7 +71,7 @@ class ContactModelMultipleTpl {
    * @param[in] state  Multibody state
    * @param[in] nu     Dimension of control vector
    */
-  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, std::size_t nu);
+  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
 
   /**
    * @brief Initialize the multi-contact model
@@ -90,7 +90,7 @@ class ContactModelMultipleTpl {
    * @param[in] contact  Contact model
    * @param[in] active   Contact status (active by default)
    */
-  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true);
+  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, const bool active = true);
 
   /**
    * @brief Remove contact item
@@ -105,7 +105,7 @@ class ContactModelMultipleTpl {
    * @param[in] name     Contact name
    * @param[in] active   Contact status (True for active)
    */
-  void changeContactStatus(const std::string& name, bool active);
+  void changeContactStatus(const std::string& name, const bool active);
 
   /**
    * @brief Compute the contact Jacobian and contact acceleration

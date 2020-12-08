@@ -54,8 +54,8 @@ class WrenchConeTpl {
    * @param[in] min_nforce      Minimum normal force (default 0.)
    * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
    */
-  WrenchConeTpl(const Matrix3s& R, Scalar mu, const Vector2s& box_size, std::size_t nf = 16,
-                Scalar min_nforce = Scalar(0.), Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 16,
+                const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Initialize the wrench cone
@@ -82,8 +82,8 @@ class WrenchConeTpl {
    * @param[in] min_nforce      Minimum normal force (default 0.)
    * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
    */
-  void update(const Matrix3s& R, Scalar mu, const Vector2s& box_size, Scalar min_nforce = Scalar(0.),
-              Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  void update(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const Scalar min_nforce = Scalar(0.),
+              const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Return the matrix of wrench cone
@@ -143,17 +143,17 @@ class WrenchConeTpl {
   /**
    * @brief Modify friction coefficient
    */
-  void set_mu(Scalar mu);
+  void set_mu(const Scalar mu);
 
   /**
    * @brief Modify the minium normal force
    */
-  void set_min_nforce(Scalar min_nforce);
+  void set_min_nforce(const Scalar min_nforce);
 
   /**
    * @brief Modify the maximum normal force
    */
-  void set_max_nforce(Scalar max_nforce);
+  void set_max_nforce(const Scalar max_nforce);
 
   /**
    * @brief Modify the maximum normal force

@@ -24,7 +24,7 @@ CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
-                                                               const FrameForce& fref, std::size_t nr)
+                                                               const FrameForce& fref, const std::size_t nr)
     : Base(state, nr, 0), fref_(fref) {
   if (nr > 6) {
     throw_pretty("Invalid argument: "

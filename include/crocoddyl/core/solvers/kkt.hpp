@@ -25,10 +25,10 @@ class SolverKKT : public SolverAbstract {
   virtual ~SolverKKT();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, std::size_t maxiter = 100,
-                     bool is_feasible = false, double regInit = 1e-9);
-  virtual void computeDirection(bool recalc = true);
-  virtual double tryStep(double steplength = 1);
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double regInit = 1e-9);
+  virtual void computeDirection(const bool recalc = true);
+  virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
 

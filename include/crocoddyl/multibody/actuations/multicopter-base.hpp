@@ -36,7 +36,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActuationModelMultiCopterBaseTpl(boost::shared_ptr<StateMultibody> state, std::size_t n_rotors,
+  ActuationModelMultiCopterBaseTpl(boost::shared_ptr<StateMultibody> state, const std::size_t n_rotors,
                                    const Eigen::Ref<const MatrixXs>& tau_f)
       : Base(state, state->get_nv() - 6 + n_rotors), n_rotors_(n_rotors) {
     pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;

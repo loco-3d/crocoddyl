@@ -30,7 +30,7 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
+  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, const bool with_gauss_approx = false);
   virtual ~DifferentialActionModelNumDiffTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -41,7 +41,7 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
 
   const boost::shared_ptr<Base>& get_model() const;
   Scalar get_disturbance() const;
-  void set_disturbance(Scalar disturbance);
+  void set_disturbance(const Scalar disturbance);
   bool get_with_gauss_approx();
 
  protected:
@@ -90,8 +90,8 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
     du.setZero();
     xp.setZero();
 
-    std::size_t ndx = model->get_model()->get_state()->get_ndx();
-    std::size_t nu = model->get_model()->get_nu();
+    const std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());

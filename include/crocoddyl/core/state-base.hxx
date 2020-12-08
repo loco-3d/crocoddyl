@@ -9,7 +9,7 @@
 
 namespace crocoddyl {
 template <typename Scalar>
-StateAbstractTpl<Scalar>::StateAbstractTpl(std::size_t nx, std::size_t ndx)
+StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t nx, const std::size_t ndx)
     : nx_(nx),
       ndx_(ndx),
       lb_(VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),

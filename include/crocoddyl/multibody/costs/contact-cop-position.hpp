@@ -85,7 +85,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation,
-                                 const FrameCoPSupport& cop_support, std::size_t nu);
+                                 const FrameCoPSupport& cop_support, const std::size_t nu);
 
   /**
    * @brief Initialize the contact CoP cost model
@@ -111,7 +111,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu           Dimension of control vector
    */
   CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support,
-                                 std::size_t nu);
+                                 const std::size_t nu);
 
   /**
    * @brief Initialize the contact CoP cost model

@@ -11,7 +11,7 @@ namespace crocoddyl {
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, Scalar r_coeff, Scalar JMinvJt_damping, bool enable_force)
+    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff, const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),
@@ -46,9 +46,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  std::size_t nq = state_->get_nq();
-  std::size_t nv = state_->get_nv();
-  std::size_t ni = impulses_->get_ni();
+  const std::size_t nq = state_->get_nq();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t ni = impulses_->get_ni();
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
@@ -92,8 +92,8 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  std::size_t nv = state_->get_nv();
-  std::size_t ni = impulses_->get_ni();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t ni = impulses_->get_ni();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -193,7 +193,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_armature(const VectorXs& arma
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(Scalar r_coeff) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const Scalar r_coeff) {
   if (r_coeff < 0.) {
     throw_pretty("Invalid argument: "
                  << "The restitution coefficient has to be positive");
@@ -202,7 +202,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(Scala
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(Scalar damping) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive");

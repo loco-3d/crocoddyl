@@ -152,7 +152,7 @@ class ShootingProblemTpl {
    * @param[in] model  action model
    * @param[in] data   action data
    */
-  void updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
+  void updateNode(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                   boost::shared_ptr<ActionDataAbstract> data);
 
   /**
@@ -161,7 +161,7 @@ class ShootingProblemTpl {
    * @param[in] i      node index \f$(0\leq i \lt T+1)\f$
    * @param[in] model  action model
    */
-  void updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
+  void updateModel(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Return the number of running nodes

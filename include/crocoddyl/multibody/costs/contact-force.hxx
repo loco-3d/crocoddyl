@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
-                                                           const FrameForce& fref, std::size_t nu)
+                                                           const FrameForce& fref, const std::size_t nu)
     : Base(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
@@ -35,7 +35,8 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, std::size_t nr, std::size_t nu)
+                                                           const FrameForce& fref, const std::size_t nr,
+                                                           const std::size_t nu)
     : Base(state, nr, nu), fref_(fref) {
   if (nr > 6) {
     throw_pretty("Invalid argument: "
@@ -45,7 +46,7 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, std::size_t nr)
+                                                           const FrameForce& fref, const std::size_t nr)
     : Base(state, nr), fref_(fref) {
   if (nr > 6) {
     throw_pretty("Invalid argument: "

@@ -27,7 +27,8 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
 
 template <typename Scalar>
 CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                                 boost::shared_ptr<ActivationModelAbstract> activation, std::size_t nu)
+                                                 boost::shared_ptr<ActivationModelAbstract> activation,
+                                                 const std::size_t nu)
     : Base(state, activation, nu), uref_(VectorXs::Zero(nu)) {
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
@@ -45,7 +46,8 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
     : Base(state, state->get_nv()), uref_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
-CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, std::size_t nu)
+CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                                 const std::size_t nu)
     : Base(state, nu, nu), uref_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>

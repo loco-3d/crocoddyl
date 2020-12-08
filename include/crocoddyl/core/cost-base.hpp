@@ -66,7 +66,7 @@ class CostModelAbstractTpl {
    * @param[in] nu          Dimension of control vector
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       std::size_t nu);
+                       const std::size_t nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -87,7 +87,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, std::size_t nr, std::size_t nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -99,7 +99,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, std::size_t nr);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr);
   virtual ~CostModelAbstractTpl();
 
   /**

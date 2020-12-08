@@ -69,7 +69,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref,
-                           std::size_t nu);
+                           const std::size_t nu);
 
   /**
    * @brief Initialize the contact force cost model
@@ -95,8 +95,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, std::size_t nr,
-                           std::size_t nu);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t nr,
+                           const std::size_t nu);
 
   /**
    * @brief Initialize the contact force cost model
@@ -109,7 +109,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] fref   Reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
    * @param[in] nr     Dimension of residual vector
    */
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, std::size_t nr);
+  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t nr);
 
   /**
    * @brief Initialize the contact force cost model

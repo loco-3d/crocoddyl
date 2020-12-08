@@ -29,7 +29,7 @@ struct ActivationBoundsTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, Scalar b = (Scalar)1.)
+  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, const Scalar b = (Scalar)1.)
       : lb(lower), ub(upper), beta(b) {
     if (lb.size() != ub.size()) {
       throw_pretty("Invalid argument: "

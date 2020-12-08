@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                             const VectorXs& xref, std::size_t nu)
+                                             const VectorXs& xref, const std::size_t nu)
     : Base(state, activation, nu), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -53,7 +53,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             const VectorXs& xref, std::size_t nu)
+                                             const VectorXs& xref, const std::size_t nu)
     : Base(state, state->get_ndx(), nu), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -91,7 +91,8 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             boost::shared_ptr<ActivationModelAbstract> activation, std::size_t nu)
+                                             boost::shared_ptr<ActivationModelAbstract> activation,
+                                             const std::size_t nu)
     : Base(state, activation, nu), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -109,7 +110,8 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, std::size_t nu)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                                             const std::size_t nu)
     : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "

@@ -30,7 +30,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
 
   SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
-                             std::size_t ns)
+                             const std::size_t ns)
       : Base(ns) {
     u_lb_ = u_lb;
     u_ub_ = u_ub;

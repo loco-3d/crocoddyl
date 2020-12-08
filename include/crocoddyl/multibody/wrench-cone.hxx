@@ -21,8 +21,8 @@ WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16) {
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, Scalar mu, const Vector2s& box_size, std::size_t nf,
-                                     Scalar min_nforce, Scalar max_nforce)
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size,
+                                     const std::size_t nf, const Scalar min_nforce, const Scalar max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
     nf_ = 16;
@@ -52,8 +52,8 @@ template <typename Scalar>
 WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, Scalar mu, const Vector2s& box_size, Scalar min_nforce,
-                                   Scalar max_nforce) {
+void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu, const Vector2s& box_size,
+                                   const Scalar min_nforce, const Scalar max_nforce) {
   R_ = R;
   mu_ = mu;
   box_ = box_size;
@@ -159,17 +159,17 @@ void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_mu(Scalar mu) {
+void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
   update(R_, mu, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_min_nforce(Scalar min_nforce) {
+void WrenchConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
   update(R_, mu_, box_, min_nforce, max_nforce_);
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_max_nforce(Scalar max_nforce) {
+void WrenchConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
   update(R_, mu_, box_, min_nforce_, max_nforce);
 }
 

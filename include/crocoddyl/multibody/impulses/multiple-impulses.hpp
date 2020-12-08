@@ -27,7 +27,7 @@ struct ImpulseItemTpl {
   typedef ImpulseModelAbstractTpl<Scalar> ImpulseModelAbstract;
 
   ImpulseItemTpl() {}
-  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, bool active = true)
+  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true)
       : name(name), impulse(impulse), active(active) {}
 
   std::string name;
@@ -82,7 +82,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] contact  Impulse model
    * @param[in] active   Impulse status (active by default)
    */
-  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, bool active = true);
+  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true);
 
   /**
    * @brief Remove impulse item
@@ -97,7 +97,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] name     Impulse name
    * @param[in] active   Impulse status (True for active)
    */
-  void changeImpulseStatus(const std::string& name, bool active);
+  void changeImpulseStatus(const std::string& name, const bool active);
 
   /**
    * @brief Compute the total contact Jacobian and contact acceleration

@@ -29,7 +29,7 @@ class SquashingModelAbstractTpl {
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelAbstractTpl(std::size_t ns) : ns_(ns) {
+  SquashingModelAbstractTpl(const std::size_t ns) : ns_(ns) {
     if (ns_ == 0) {
       throw_pretty("Invalid argument: "
                    << "ns cannot be zero");

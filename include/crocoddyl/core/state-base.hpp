@@ -57,7 +57,7 @@ class StateAbstractTpl {
    * @param[in] nx   Dimension of state configuration tuple
    * @param[in] ndx  Dimension of state tangent vector
    */
-  StateAbstractTpl(std::size_t nx, std::size_t ndx);
+  StateAbstractTpl(const std::size_t nx, const std::size_t ndx);
   StateAbstractTpl();
   virtual ~StateAbstractTpl();
 

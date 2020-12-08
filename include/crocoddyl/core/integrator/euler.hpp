@@ -30,7 +30,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                Scalar time_step = Scalar(1e-3), bool with_cost_residual = true);
+                                const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelEulerTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -41,12 +41,13 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100, Scalar tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   Scalar get_dt() const;
 
-  void set_dt(Scalar dt);
+  void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
  protected:
@@ -79,7 +80,7 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
     differential = model->get_differential()->createData();
-    std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t ndx = model->get_state()->get_ndx();
     dx = VectorXs::Zero(ndx);
   }
   virtual ~IntegratedActionDataEulerTpl() {}

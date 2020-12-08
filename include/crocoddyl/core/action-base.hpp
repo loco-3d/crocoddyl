@@ -74,7 +74,7 @@ class ActionModelAbstractTpl {
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
    */
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, std::size_t nu, std::size_t nr = 0);
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -142,7 +142,8 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100, Scalar tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   /**
    * @copybrief quasicStatic()
@@ -156,7 +157,7 @@ class ActionModelAbstractTpl {
    * @return Quasic static commands
    */
   VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x,
-                         std::size_t maxiter = 100, Scalar tol = Scalar(1e-9));
+                         const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
   /**
    * @brief Return the dimension of the control input

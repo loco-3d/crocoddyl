@@ -88,7 +88,7 @@ Scalar ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void ActuationModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
+void ActuationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

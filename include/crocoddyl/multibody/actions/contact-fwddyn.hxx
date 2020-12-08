@@ -23,8 +23,8 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelContactFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
-    boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs, Scalar JMinvJt_damping,
-    bool enable_force)
+    boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
+    const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
@@ -68,7 +68,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  std::size_t nc = contacts_->get_nc();
+  const std::size_t nc = contacts_->get_nc();
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
@@ -116,8 +116,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  std::size_t nv = state_->get_nv();
-  std::size_t nc = contacts_->get_nc();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = contacts_->get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -185,8 +185,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   // Check the velocity input is zero
   assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  std::size_t nv = state_->get_nv();
-  std::size_t nc = contacts_->get_nc();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = contacts_->get_nc();
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv));
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   d->pinocchio.tau = pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv), VectorXs::Zero(nv));
@@ -258,7 +258,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_armature(const Ve
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(Scalar damping) {
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive");

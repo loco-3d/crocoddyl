@@ -30,7 +30,7 @@ class ActivationModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelAbstractTpl(std::size_t nr) : nr_(nr){};
+  explicit ActivationModelAbstractTpl(const std::size_t nr) : nr_(nr){};
   virtual ~ActivationModelAbstractTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) = 0;

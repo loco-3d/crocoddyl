@@ -88,8 +88,8 @@ class BoxQP {
    * @param[in] th_grad        Gradient tolerance threshold (default 1e-9)
    * @param[in] reg            Regularization value (default 1e-9)
    */
-  BoxQP(std::size_t nx, std::size_t maxiter = 100, double th_acceptstep = 0.1, double th_grad = 1e-9,
-        double reg = 1e-9);
+  BoxQP(const std::size_t nx, const std::size_t maxiter = 100, const double th_acceptstep = 0.1,
+        const double th_grad = 1e-9, const double reg = 1e-9);
   /**
    * @brief Destroy the Projected-Newton QP solver
    */
@@ -146,27 +146,27 @@ class BoxQP {
   /**
    * @brief Modify the decision vector dimension
    */
-  void set_nx(std::size_t nx);
+  void set_nx(const std::size_t nx);
 
   /**
    * @brief Modify the maximum allowed number of iterations
    */
-  void set_maxiter(std::size_t maxiter);
+  void set_maxiter(const std::size_t maxiter);
 
   /**
    * @brief Modify the acceptance step threshold
    */
-  void set_th_acceptstep(double th_acceptstep);
+  void set_th_acceptstep(const double th_acceptstep);
 
   /**
    * @brief Modify the gradient tolerance threshold
    */
-  void set_th_grad(double th_grad);
+  void set_th_grad(const double th_grad);
 
   /**
    * @brief Modify the regularization value
    */
-  void set_reg(double reg);
+  void set_reg(const double reg);
 
   /**
    * @brief Modify the stack of step lengths using by the line-search procedure

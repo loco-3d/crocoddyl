@@ -12,7 +12,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state,
-                                                       std::size_t nu, std::size_t nr)
+                                                       const std::size_t nu, const std::size_t nr)
     : nu_(nu),
       nr_(nr),
       state_(state),
@@ -39,7 +39,7 @@ void ActionModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                  Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                 std::size_t maxiter, Scalar tol) {
+                                                 const std::size_t maxiter, const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -51,7 +51,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
   // Check the velocity input is zero
   assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  std::size_t ndx = state_->get_ndx();
+  const std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
   if (nu_ == 0) {
     // TODO(cmastalli): create a method for autonomous systems
@@ -72,7 +72,8 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStatic_x(
-    const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, std::size_t maxiter, Scalar tol) {
+    const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, const std::size_t maxiter,
+    const Scalar tol) {
   VectorXs u(nu_);
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);

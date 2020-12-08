@@ -78,7 +78,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond = both) const;
 
   Scalar get_disturbance() const;
-  void set_disturbance(Scalar disturbance);
+  void set_disturbance(const Scalar disturbance);
 
  private:
   /**

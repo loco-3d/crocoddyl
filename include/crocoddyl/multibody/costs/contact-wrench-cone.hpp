@@ -42,10 +42,11 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
 
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                 boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref,
-                                std::size_t nu);
+                                const std::size_t nu);
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                 boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref);
-  CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref, std::size_t nu);
+  CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref,
+                                const std::size_t nu);
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref);
   virtual ~CostModelContactWrenchConeTpl();
 
