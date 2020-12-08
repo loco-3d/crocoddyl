@@ -12,8 +12,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         std::size_t ni)
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, std::size_t ni)
     : state_(state), ni_(ni) {}
 
 template <typename Scalar>

@@ -41,8 +41,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100,
-                           Scalar tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100, Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
   Scalar get_dt() const;

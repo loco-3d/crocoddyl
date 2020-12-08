@@ -69,11 +69,9 @@ void exposeDifferentialActionAbstract() {
                ":param maxiter: maximum allowed number of iterations\n"
                ":param tol: stopping tolerance criteria (default 1e-9)\n"
                ":return u: quasic-static control"))
-      .add_property("nu",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu),
+      .add_property("nu", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu),
                     "dimension of control vector")
-      .add_property("nr",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
+      .add_property("nr", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .add_property("state",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,

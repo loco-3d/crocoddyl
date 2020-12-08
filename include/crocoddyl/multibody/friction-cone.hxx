@@ -52,8 +52,8 @@ template <typename Scalar>
 FrictionConeTpl<Scalar>::~FrictionConeTpl() {}
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::update(const Vector3s& normal, Scalar mu, bool inner_appr,
-                                     Scalar min_nforce, Scalar max_nforce) {
+void FrictionConeTpl<Scalar>::update(const Vector3s& normal, Scalar mu, bool inner_appr, Scalar min_nforce,
+                                     Scalar max_nforce) {
   nsurf_ = normal;
   mu_ = mu;
   inner_appr_ = inner_appr;

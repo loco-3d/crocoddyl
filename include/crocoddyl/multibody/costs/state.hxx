@@ -91,8 +91,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             boost::shared_ptr<ActivationModelAbstract> activation,
-                                             std::size_t nu)
+                                             boost::shared_ptr<ActivationModelAbstract> activation, std::size_t nu)
     : Base(state, activation, nu), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -110,8 +109,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 }
 
 template <typename Scalar>
-CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             std::size_t nu)
+CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, std::size_t nu)
     : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "

@@ -52,8 +52,8 @@ template <typename Scalar>
 WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, Scalar mu, const Vector2s& box_size,
-                                   Scalar min_nforce, Scalar max_nforce) {
+void WrenchConeTpl<Scalar>::update(const Matrix3s& R, Scalar mu, const Vector2s& box_size, Scalar min_nforce,
+                                   Scalar max_nforce) {
   R_ = R;
   mu_ = mu;
   box_ = box_size;

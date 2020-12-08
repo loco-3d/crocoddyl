@@ -35,8 +35,7 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                         const FrameFrictionCone& fref,
-                                                                         std::size_t nu)
+                                                                         const FrameFrictionCone& fref, std::size_t nu)
     : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>

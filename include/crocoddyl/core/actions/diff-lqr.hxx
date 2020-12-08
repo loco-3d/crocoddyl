@@ -12,8 +12,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(std::size_t nq, std::size_t nu,
-                                                                     bool drift_free)
+DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(std::size_t nq, std::size_t nu, bool drift_free)
     : Base(boost::make_shared<StateVector>(2 * nq), nu), drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal (matrices)
   Fq_ = MatrixXs::Identity(state_->get_nq(), state_->get_nq());

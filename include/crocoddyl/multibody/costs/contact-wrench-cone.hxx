@@ -35,8 +35,7 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                     const FrameWrenchCone& fref,
-                                                                     std::size_t nu)
+                                                                     const FrameWrenchCone& fref, std::size_t nu)
     : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>

@@ -30,8 +30,7 @@ class FrictionConeTpl {
 
   explicit FrictionConeTpl();
   FrictionConeTpl(const Vector3s& normal, Scalar mu, std::size_t nf = 4, bool inner_appr = true,
-                  Scalar min_nforce = Scalar(0.),
-                  Scalar max_nforce = std::numeric_limits<Scalar>::max());
+                  Scalar min_nforce = Scalar(0.), Scalar max_nforce = std::numeric_limits<Scalar>::max());
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
   ~FrictionConeTpl();
 

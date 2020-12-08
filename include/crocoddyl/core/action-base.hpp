@@ -142,8 +142,7 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100,
-                           Scalar tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, std::size_t maxiter = 100, Scalar tol = Scalar(1e-9));
 
   /**
    * @copybrief quasicStatic()

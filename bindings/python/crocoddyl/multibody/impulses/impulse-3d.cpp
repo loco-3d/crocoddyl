@@ -47,9 +47,7 @@ void exposeImpulse3D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("frame",
-                    bp::make_function(&ImpulseModel3D::get_frame),
-                    "reference frame id");
+      .add_property("frame", bp::make_function(&ImpulseModel3D::get_frame), "reference frame id");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseData3D> >();
 

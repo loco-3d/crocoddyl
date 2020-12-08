@@ -65,12 +65,10 @@ void exposeDifferentialActionNumDiff() {
                     bp::make_function(&DifferentialActionModelNumDiff::get_model,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "action model")
-      .add_property("disturbance",
-                    bp::make_function(&DifferentialActionModelNumDiff::get_disturbance),
+      .add_property("disturbance", bp::make_function(&DifferentialActionModelNumDiff::get_disturbance),
                     &DifferentialActionModelNumDiff::set_disturbance,
                     "disturbance value used in the numerical differentiation")
-      .add_property("withGaussApprox",
-                    bp::make_function(&DifferentialActionModelNumDiff::get_with_gauss_approx),
+      .add_property("withGaussApprox", bp::make_function(&DifferentialActionModelNumDiff::get_with_gauss_approx),
                     "Gauss approximation for computing the Hessians");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataNumDiff> >();

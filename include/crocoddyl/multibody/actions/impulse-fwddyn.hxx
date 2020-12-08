@@ -11,8 +11,7 @@ namespace crocoddyl {
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, Scalar r_coeff, Scalar JMinvJt_damping,
-    bool enable_force)
+    boost::shared_ptr<CostModelSum> costs, Scalar r_coeff, Scalar JMinvJt_damping, bool enable_force)
     : Base(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),

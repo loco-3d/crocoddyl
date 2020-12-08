@@ -12,8 +12,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                                               std::size_t nu,
-                                                                               std::size_t nr)
+                                                                               std::size_t nu, std::size_t nr)
     : nu_(nu),
       nr_(nr),
       state_(state),

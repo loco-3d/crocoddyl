@@ -35,10 +35,8 @@ void exposeActivationAbstract() {
            ":param r: residual vector \n")
       .def("createData", &ActivationModelAbstract_wrap::createData, &ActivationModelAbstract_wrap::default_createData,
            bp::args("self"), "Create the activation data.\n\n")
-      .add_property(
-          "nr",
-          bp::make_function(&ActivationModelAbstract_wrap::get_nr),
-          "dimension of cost-residual vector");
+      .add_property("nr", bp::make_function(&ActivationModelAbstract_wrap::get_nr),
+                    "dimension of cost-residual vector");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
 

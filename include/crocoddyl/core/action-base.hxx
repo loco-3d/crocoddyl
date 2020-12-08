@@ -72,8 +72,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStatic_x(
-    const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, std::size_t maxiter,
-    Scalar tol) {
+    const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, std::size_t maxiter, Scalar tol) {
   VectorXs u(nu_);
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);

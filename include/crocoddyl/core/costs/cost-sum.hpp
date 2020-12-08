@@ -27,8 +27,7 @@ struct CostItemTpl {
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
-  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, Scalar weight,
-              bool active = true)
+  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, Scalar weight, bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
 
   std::string name;
@@ -98,8 +97,7 @@ class CostModelSumTpl {
    * @param[in] weight  Cost weight
    * @param[in] active  True if the cost is activated (default true)
    */
-  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, Scalar weight,
-               bool active = true);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, Scalar weight, bool active = true);
 
   /**
    * @brief Remove a cost item

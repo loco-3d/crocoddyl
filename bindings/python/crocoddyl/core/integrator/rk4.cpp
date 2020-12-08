@@ -61,9 +61,8 @@ void exposeIntegratedActionRK4() {
                     bp::make_function(&IntegratedActionModelRK4::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
                     &IntegratedActionModelRK4::set_differential, "differential action model")
-      .add_property(
-          "dt", bp::make_function(&IntegratedActionModelRK4::get_dt),
-          &IntegratedActionModelRK4::set_dt, "step time");
+      .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
+                    "step time");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 

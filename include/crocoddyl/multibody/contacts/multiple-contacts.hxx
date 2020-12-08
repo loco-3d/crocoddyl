@@ -9,8 +9,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state,
-                                                         std::size_t nu)
+ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, std::size_t nu)
     : state_(state), nc_(0), nc_total_(0), nu_(nu) {}
 
 template <typename Scalar>

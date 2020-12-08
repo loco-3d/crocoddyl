@@ -45,10 +45,7 @@ void exposeActuationAbstract() {
            "Each actuation model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .add_property(
-          "nu",
-          bp::make_function(&ActuationModelAbstract_wrap::get_nu),
-          "dimension of control vector")
+      .add_property("nu", bp::make_function(&ActuationModelAbstract_wrap::get_nu), "dimension of control vector")
       .add_property(
           "state",
           bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
