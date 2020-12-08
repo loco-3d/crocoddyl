@@ -74,10 +74,10 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
       activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
       break;
     case ActivationModelTypes::ActivationModelQuadFlatExp:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr,alpha);
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr, alpha);
       break;
     case ActivationModelTypes::ActivationModelQuadFlatLog:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr,alpha);
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr, alpha);
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation = boost::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
