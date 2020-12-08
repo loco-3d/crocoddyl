@@ -91,7 +91,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     }
     stoppingCriteria();
 
-    std::size_t n_callbacks = callbacks_.size();
+    const std::size_t n_callbacks = callbacks_.size();
     for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -106,7 +106,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
-  std::size_t T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
     problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
@@ -126,7 +126,7 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
 void SolverFDDP::updateExpectedImprovement() {
   dg_ = 0;
   dq_ = 0;
-  std::size_t T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
     dg_ -= Vx_.back().dot(fs_.back());
     fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
@@ -134,7 +134,7 @@ void SolverFDDP::updateExpectedImprovement() {
   }
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    std::size_t nu = models[t]->get_nu();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       dg_ += Qu_[t].head(nu).dot(k_[t].head(nu));
       dq_ -= k_[t].head(nu).dot(Quuk_[t].head(nu));
@@ -154,14 +154,14 @@ void SolverFDDP::forwardPass(double steplength) {
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      std::size_t nu = m->get_nu();
+      const std::size_t nu = m->get_nu();
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -195,7 +195,7 @@ void SolverFDDP::forwardPass(double steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      std::size_t nu = m->get_nu();
+      const std::size_t nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {

@@ -197,9 +197,9 @@ void test_calc() {
 
   // check Jc against single impulse computations
   std::size_t ni = 0;
-  std::size_t nv = model.get_state()->get_nv();
+  const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     models[i]->calc(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
     ni += ni_i;
@@ -213,7 +213,7 @@ void test_calc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calc(datas[i], x2);
     }
@@ -259,9 +259,9 @@ void test_calc_diff() {
 
   // check Jc against single impulse computations
   std::size_t ni = 0;
-  std::size_t nv = model.get_state()->get_nv();
+  const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     models[i]->calc(datas[i], x1);
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
@@ -278,7 +278,7 @@ void test_calc_diff() {
   model.calc(data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calc(datas[i], x2);
       models[i]->calcDiff(datas[i], x2);
@@ -325,9 +325,9 @@ void test_calc_diff_no_recalc() {
 
   // check Jc against single impulse computations
   std::size_t ni = 0;
-  std::size_t nv = model.get_state()->get_nv();
+  const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv).isZero());
     BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
@@ -342,7 +342,7 @@ void test_calc_diff_no_recalc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_ni();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calcDiff(datas[i], x2);
     }

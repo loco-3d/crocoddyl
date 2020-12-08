@@ -25,7 +25,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       th_stop_(1e-9),
       iter_(0) {
   // Allocate common data
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
   us_.resize(T);
   for (std::size_t t = 0; t < T; ++t) {
@@ -41,7 +41,7 @@ SolverAbstract::~SolverAbstract() {}
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   const std::vector<Eigen::VectorXd>& us_warm, bool is_feasible) {
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
 
   if (xs_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
@@ -53,14 +53,14 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
       throw_pretty("Warm start state has wrong dimension, got " << xs_warm.size() << " expecting " << (T + 1));
     }
     for (std::size_t t = 0; t < T; ++t) {
-      std::size_t nx = problem_->get_runningModels()[t]->get_state()->get_nx();
+      const std::size_t nx = problem_->get_runningModels()[t]->get_state()->get_nx();
       if (static_cast<std::size_t>(xs_warm[t].size()) != nx) {
         throw_pretty("Invalid argument: "
                      << "xs_init[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) +
                             ")");
       }
     }
-    std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
+    const std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
     if (static_cast<std::size_t>(xs_warm[T].size()) != nx) {
       throw_pretty("Invalid argument: "
                    << "xs_init[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) +
@@ -77,7 +77,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     if (us_warm.size() != T) {
       throw_pretty("Warm start control has wrong dimension, got " << us_warm.size() << " expecting " << T);
     }
-    std::size_t nu = problem_->get_nu_max();
+    const std::size_t nu = problem_->get_nu_max();
     for (std::size_t t = 0; t < T; ++t) {
       if (static_cast<std::size_t>(us_warm[t].size()) > nu) {
         throw_pretty("Invalid argument: "
@@ -127,13 +127,13 @@ double SolverAbstract::get_th_stop() const { return th_stop_; }
 std::size_t SolverAbstract::get_iter() const { return iter_; }
 
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
     throw_pretty("Invalid argument: "
                  << "xs list has to be " + std::to_string(T + 1));
   }
 
-  std::size_t nx = problem_->get_nx();
+  const std::size_t nx = problem_->get_nx();
   for (std::size_t t = 0; t < T; ++t) {
     if (static_cast<std::size_t>(xs[t].size()) != nx) {
       throw_pretty("Invalid argument: "
@@ -148,13 +148,13 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
 }
 
 void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   if (us.size() != T) {
     throw_pretty("Invalid argument: "
                  << "us list has to be " + std::to_string(T));
   }
 
-  std::size_t nu = problem_->get_nu_max();
+  const std::size_t nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     if (static_cast<std::size_t>(us[t].size()) != nu) {
       throw_pretty("Invalid argument: "

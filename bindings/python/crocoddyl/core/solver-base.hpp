@@ -31,15 +31,15 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   ~SolverAbstract_wrap() {}
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             std::size_t maxiter, bool is_feasible, double reg_init) {
+             const std::size_t maxiter, const bool is_feasible, const double reg_init) {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
   }
 
-  void computeDirection(bool recalc = true) {
+  void computeDirection(const bool recalc = true) {
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(double step_length = 1) { return bp::call<double>(this->get_override("tryStep").ptr(), step_length); }
+  double tryStep(const double step_length = 1) { return bp::call<double>(this->get_override("tryStep").ptr(), step_length); }
 
   double stoppingCriteria() {
     stop_ = bp::call<double>(this->get_override("stoppingCriteria").ptr());

@@ -16,7 +16,7 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
     : SolverDDP(problem), qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
-  std::size_t n_alphas = 10;
+  const std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
@@ -33,9 +33,9 @@ SolverBoxDDP::~SolverBoxDDP() {}
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
-  std::size_t nu = problem_->get_nu_max();
+  const std::size_t nu = problem_->get_nu_max();
   for (std::size_t t = 0; t < T; ++t) {
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }
@@ -44,7 +44,7 @@ void SolverBoxDDP::allocateData() {
 }
 
 void SolverBoxDDP::computeGains(std::size_t t) {
-  std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
@@ -83,13 +83,13 @@ void SolverBoxDDP::forwardPass(double steplength) {
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    std::size_t nu = m->get_nu();
+    const std::size_t nu = m->get_nu();
 
     xs_try_[t] = xnext_;
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);

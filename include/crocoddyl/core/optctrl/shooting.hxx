@@ -27,7 +27,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nu_max_(running_models[0]->get_nu()) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    std::size_t nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -76,7 +76,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nu_max_(running_models[0]->get_nu()) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    std::size_t nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }

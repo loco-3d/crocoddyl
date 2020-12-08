@@ -26,7 +26,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       was_feasible_(false) {
   allocateData();
 
-  std::size_t n_alphas = 10;
+  const std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., static_cast<double>(n));
@@ -106,7 +106,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
     }
     stoppingCriteria();
 
-    std::size_t n_callbacks = callbacks_.size();
+    const std::size_t n_callbacks = callbacks_.size();
     for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -133,10 +133,10 @@ double SolverDDP::tryStep(double steplength) {
 
 double SolverDDP::stoppingCriteria() {
   stop_ = 0.;
-  std::size_t T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    std::size_t nu = models[t]->get_nu();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       stop_ += Qu_[t].head(nu).squaredNorm();
     }
@@ -146,10 +146,10 @@ double SolverDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
-  std::size_t T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    std::size_t nu = models[t]->get_nu();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       d_[0] += Qu_[t].head(nu).dot(k_[t].head(nu));
       d_[1] -= k_[t].head(nu).dot(Quuk_[t].head(nu));
@@ -169,7 +169,7 @@ double SolverDDP::calcDiff() {
     if (fs_[0].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
       could_be_feasible = false;
     }
-    std::size_t T = problem_->get_T();
+    const std::size_t T = problem_->get_T();
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
     for (std::size_t t = 0; t < T; ++t) {
@@ -211,7 +211,7 @@ void SolverDDP::backwardPass() {
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    std::size_t nu = m->get_nu();
+    const std::size_t nu = m->get_nu();
 
     Qxx_[t] = d->Lxx;
     Qx_[t] = d->Lx;
@@ -272,7 +272,7 @@ void SolverDDP::forwardPass(double steplength) {
                  << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
@@ -281,7 +281,7 @@ void SolverDDP::forwardPass(double steplength) {
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (m->get_nu() != 0) {
-      std::size_t nu = m->get_nu();
+      const std::size_t nu = m->get_nu();
 
       us_try_[t].head(nu).noalias() = us_[t].head(nu);
       us_try_[t].head(nu).noalias() -= k_[t].head(nu) * steplength;
@@ -312,7 +312,7 @@ void SolverDDP::forwardPass(double steplength) {
 }
 
 void SolverDDP::computeGains(std::size_t t) {
-  std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
@@ -346,7 +346,7 @@ void SolverDDP::decreaseRegularization() {
 }
 
 void SolverDDP::allocateData() {
-  std::size_t T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   Vxx_.resize(T + 1);
   Vx_.resize(T + 1);
   Qxx_.resize(T);
@@ -366,8 +366,8 @@ void SolverDDP::allocateData() {
   Quu_llt_.resize(T);
   Quuk_.resize(T);
 
-  std::size_t ndx = problem_->get_ndx();
-  std::size_t nu = problem_->get_nu_max();
+  const std::size_t ndx = problem_->get_ndx();
+  const std::size_t nu = problem_->get_nu_max();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
