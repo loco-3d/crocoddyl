@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
 
-#include <iostream>
-#include <stdexcept>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
