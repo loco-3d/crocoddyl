@@ -91,6 +91,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
   d->Arr_dtaudx.noalias() = data->activation->Arr * d->actuation->dtau_dx;
+  d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;
   data->Lxx.noalias() = d->actuation->dtau_dx.transpose() * d->Arr_dtaudx;
   data->Lxx.topLeftCorner(nv,nv).noalias() += d->dg_dq.transpose() * d->Arr_dgdq;
   data->Lxx.topRows(nv).noalias() -= d->dg_dq.transpose() * d->Arr_dtaudx;
@@ -98,7 +99,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(
   
   data->Lxu.noalias() = d->Arr_dtaudx.transpose() * d->actuation->dtau_du;
   data->Lxu.topRows(nv).noalias() -= d->Arr_dgdq.transpose() * d->actuation->dtau_du;
-  data->Luu.diagonal().noalias() = (d->actuation->dtau_du.transpose() * data->activation->Arr * d->actuation->dtau_du).diagonal();
+  data->Luu.diagonal().noalias() = (d->actuation->dtau_du.transpose() * d->Arr_dtaudu).diagonal();
 }
 
 template <typename Scalar>
