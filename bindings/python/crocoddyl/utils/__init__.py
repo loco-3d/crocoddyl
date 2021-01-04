@@ -1013,10 +1013,10 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.callbacks = None
         self.x_reg = 0
         self.u_reg = 0
-        self.regIncFactor = 10
-        self.regDecFactor = 10
-        self.regMax = 1e12
-        self.regMin = 1e-16
+        self.reg_incFactor = 10
+        self.reg_decFactor = 10
+        self.reg_max = 1e12
+        self.reg_min = 1e-16
         self.th_step = .5
 
     def calc(self):
@@ -1060,7 +1060,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.regMax:
+                    if self.x_reg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
@@ -1085,7 +1085,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.regMax:
+                if self.x_reg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
@@ -1098,15 +1098,15 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return self.xs, self.us, False
 
     def increaseRegularization(self):
-        self.x_reg *= self.regIncFactor
-        if self.x_reg > self.regMax:
-            self.x_reg = self.regMax
+        self.x_reg *= self.reg_incFactor
+        if self.x_reg > self.reg_max:
+            self.x_reg = self.reg_max
         self.u_reg = self.x_reg
 
     def decreaseRegularization(self):
-        self.x_reg /= self.regDecFactor
-        if self.x_reg < self.regMin:
-            self.x_reg = self.regMin
+        self.x_reg /= self.reg_decFactor
+        if self.x_reg < self.reg_min:
+            self.x_reg = self.reg_min
         self.u_reg = self.x_reg
 
     def allocateData(self):
@@ -1229,7 +1229,7 @@ class FDDPDerived(DDPDerived):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.regMax:
+                    if self.x_reg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
@@ -1260,7 +1260,7 @@ class FDDPDerived(DDPDerived):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.regMax:
+                if self.x_reg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
