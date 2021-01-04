@@ -468,8 +468,8 @@ void SolverDDP::set_regfactor(const double regfactor) {
     throw_pretty("Invalid argument: "
                  << "regfactor value is higher than 1.");
   }
-  reg_incfactor_ = regfactor;
-  reg_decfactor_ = regfactor;
+  set_reg_incfactor(regfactor);
+  set_reg_decfactor(regfactor);
 }
 
 void SolverDDP::set_reg_min(const double regmin) {
