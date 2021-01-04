@@ -12,7 +12,8 @@
 
 namespace crocoddyl {
 
-BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_acceptstep, const double th_grad, const double reg)
+BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_acceptstep, const double th_grad,
+             const double reg)
     : nx_(nx),
       maxiter_(maxiter),
       th_acceptstep_(th_acceptstep),
