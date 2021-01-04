@@ -113,7 +113,7 @@ class WrenchConeTpl {
   /**
    * @brief Return friction coefficient
    */
-  Scalar get_mu() const;
+  const Scalar get_mu() const;
 
   /**
    * @brief Return the number of facets
@@ -123,22 +123,22 @@ class WrenchConeTpl {
   /**
    * @brief Return the minimum normal force
    */
-  Scalar get_min_nforce() const;
+  const Scalar get_min_nforce() const;
 
   /**
    * @brief Return the maximum normal force
    */
-  Scalar get_max_nforce() const;
+  const Scalar get_max_nforce() const;
 
   /**
    * @brief Modify the rotation matrix that defines the cone orientation
    */
-  void set_R(Matrix3s R);
+  void set_R(const Matrix3s R);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
    */
-  void set_box(Vector2s box);
+  void set_box(const Vector2s box);
 
   /**
    * @brief Modify friction coefficient

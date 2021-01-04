@@ -191,7 +191,7 @@ void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorX
                                                   Eigen::Ref<MatrixXs>, const Jcomponent) const {}
 
 template <typename Scalar>
-Scalar StateNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar StateNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

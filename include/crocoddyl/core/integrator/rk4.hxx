@@ -205,7 +205,7 @@ IntegratedActionModelRK4Tpl<Scalar>::get_differential() const {
 }
 
 template <typename Scalar>
-Scalar IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
+const Scalar IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
   return time_step_;
 }
 

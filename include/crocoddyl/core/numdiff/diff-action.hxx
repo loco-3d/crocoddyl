@@ -113,7 +113,7 @@ DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
 }
 
 template <typename Scalar>
-Scalar DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

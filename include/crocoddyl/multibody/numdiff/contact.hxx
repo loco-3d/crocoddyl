@@ -79,7 +79,7 @@ const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >& ContactModelNumDiffTp
 }
 
 template <typename Scalar>
-Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

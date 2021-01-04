@@ -72,7 +72,7 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
    *
    * @return Scalar
    */
-  Scalar get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object

@@ -17,7 +17,7 @@ SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
 SolverFDDP::~SolverFDDP() {}
 
 bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                       std::size_t maxiter, bool is_feasible, double reginit) {
+                       const std::size_t maxiter, const bool is_feasible, const double reginit) {
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
@@ -147,7 +147,7 @@ void SolverFDDP::updateExpectedImprovement() {
   }
 }
 
-void SolverFDDP::forwardPass(double steplength) {
+void SolverFDDP::forwardPass(const double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
@@ -229,7 +229,7 @@ void SolverFDDP::forwardPass(double steplength) {
 
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
-void SolverFDDP::set_th_acceptnegstep(double th_acceptnegstep) {
+void SolverFDDP::set_th_acceptnegstep(const double th_acceptnegstep) {
   if (0. > th_acceptnegstep) {
     throw_pretty("Invalid argument: "
                  << "th_acceptnegstep value has to be positive.");

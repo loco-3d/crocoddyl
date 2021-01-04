@@ -41,11 +41,11 @@ class FrictionConeTpl {
   const VectorXs& get_lb() const;
   const VectorXs& get_ub() const;
   const Vector3s& get_nsurf() const;
-  Scalar get_mu() const;
+  const Scalar get_mu() const;
   std::size_t get_nf() const;
   bool get_inner_appr() const;
-  Scalar get_min_nforce() const;
-  Scalar get_max_nforce() const;
+  const Scalar get_min_nforce() const;
+  const Scalar get_max_nforce() const;
 
   void set_nsurf(const Vector3s& nf);
   void set_mu(const Scalar mu);

@@ -152,7 +152,7 @@ IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
 }
 
 template <typename Scalar>
-Scalar IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
+const Scalar IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
   return time_step_;
 }
 

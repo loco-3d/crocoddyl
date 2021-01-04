@@ -243,7 +243,7 @@ const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdD
 }
 
 template <typename Scalar>
-Scalar DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+const Scalar DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const {
   return JMinvJt_damping_;
 }
 

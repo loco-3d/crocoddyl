@@ -116,7 +116,7 @@ const typename MathBaseTpl<Scalar>::Vector3s& FrictionConeTpl<Scalar>::get_nsurf
 }
 
 template <typename Scalar>
-Scalar FrictionConeTpl<Scalar>::get_mu() const {
+const Scalar FrictionConeTpl<Scalar>::get_mu() const {
   return mu_;
 }
 
@@ -131,12 +131,12 @@ bool FrictionConeTpl<Scalar>::get_inner_appr() const {
 }
 
 template <typename Scalar>
-Scalar FrictionConeTpl<Scalar>::get_min_nforce() const {
+const Scalar FrictionConeTpl<Scalar>::get_min_nforce() const {
   return min_nforce_;
 }
 
 template <typename Scalar>
-Scalar FrictionConeTpl<Scalar>::get_max_nforce() const {
+const Scalar FrictionConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
 }
 

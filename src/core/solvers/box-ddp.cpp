@@ -43,7 +43,7 @@ void SolverBoxDDP::allocateData() {
   du_ub_.resize(nu);
 }
 
-void SolverBoxDDP::computeGains(std::size_t t) {
+void SolverBoxDDP::computeGains(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {

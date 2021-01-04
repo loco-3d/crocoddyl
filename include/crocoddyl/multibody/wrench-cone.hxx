@@ -129,7 +129,7 @@ const typename MathBaseTpl<Scalar>::Vector2s& WrenchConeTpl<Scalar>::get_box() c
 }
 
 template <typename Scalar>
-Scalar WrenchConeTpl<Scalar>::get_mu() const {
+const Scalar WrenchConeTpl<Scalar>::get_mu() const {
   return mu_;
 }
 
@@ -139,22 +139,22 @@ std::size_t WrenchConeTpl<Scalar>::get_nf() const {
 }
 
 template <typename Scalar>
-Scalar WrenchConeTpl<Scalar>::get_min_nforce() const {
+const Scalar WrenchConeTpl<Scalar>::get_min_nforce() const {
   return min_nforce_;
 }
 
 template <typename Scalar>
-Scalar WrenchConeTpl<Scalar>::get_max_nforce() const {
+const Scalar WrenchConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_R(Matrix3s R) {
+void WrenchConeTpl<Scalar>::set_R(const Matrix3s R) {
   update(R, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
+void WrenchConeTpl<Scalar>::set_box(const Vector2s box) {
   update(R_, mu_, box, min_nforce_, max_nforce_);
 }
 

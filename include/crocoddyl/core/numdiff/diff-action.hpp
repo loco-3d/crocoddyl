@@ -40,7 +40,7 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   const boost::shared_ptr<Base>& get_model() const;
-  Scalar get_disturbance() const;
+  const Scalar get_disturbance() const;
   void set_disturbance(const Scalar disturbance);
   bool get_with_gauss_approx();
 

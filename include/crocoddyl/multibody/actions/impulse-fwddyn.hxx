@@ -173,12 +173,12 @@ const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<S
 }
 
 template <typename Scalar>
-Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
+const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
   return r_coeff_;
 }
 
 template <typename Scalar>
-Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor() const {
   return JMinvJt_damping_;
 }
 

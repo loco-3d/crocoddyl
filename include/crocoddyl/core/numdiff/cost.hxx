@@ -109,7 +109,7 @@ const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scal
 }
 
 template <typename Scalar>
-Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

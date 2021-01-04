@@ -61,7 +61,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  Scalar get_damping_factor() const;
+  const Scalar get_damping_factor() const;
 
   void set_armature(const VectorXs& armature);
   void set_damping_factor(const Scalar damping);

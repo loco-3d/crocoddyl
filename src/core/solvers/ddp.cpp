@@ -41,7 +41,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
 SolverDDP::~SolverDDP() {}
 
 bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      std::size_t maxiter, bool is_feasible, double reginit) {
+                      const std::size_t maxiter, const bool is_feasible, const double reginit) {
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
@@ -119,14 +119,14 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   return false;
 }
 
-void SolverDDP::computeDirection(bool recalcDiff) {
+void SolverDDP::computeDirection(const bool recalcDiff) {
   if (recalcDiff) {
     calcDiff();
   }
   backwardPass();
 }
 
-double SolverDDP::tryStep(double steplength) {
+double SolverDDP::tryStep(const double steplength) {
   forwardPass(steplength);
   return cost_ - cost_try_;
 }
@@ -266,7 +266,7 @@ void SolverDDP::backwardPass() {
   }
 }
 
-void SolverDDP::forwardPass(double steplength) {
+void SolverDDP::forwardPass(const double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
@@ -311,7 +311,7 @@ void SolverDDP::forwardPass(double steplength) {
   }
 }
 
-void SolverDDP::computeGains(std::size_t t) {
+void SolverDDP::computeGains(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
@@ -447,7 +447,7 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
 
-void SolverDDP::set_reg_incfactor(double regfactor) {
+void SolverDDP::set_reg_incfactor(const double regfactor) {
   if (regfactor <= 1.) {
     throw_pretty("Invalid argument: "
                  << "reg_incfactor value is higher than 1.");
@@ -455,7 +455,7 @@ void SolverDDP::set_reg_incfactor(double regfactor) {
   reg_incfactor_ = regfactor;
 }
 
-void SolverDDP::set_reg_decfactor(double regfactor) {
+void SolverDDP::set_reg_decfactor(const double regfactor) {
   if (regfactor <= 1.) {
     throw_pretty("Invalid argument: "
                  << "reg_decfactor value is higher than 1.");
@@ -463,7 +463,7 @@ void SolverDDP::set_reg_decfactor(double regfactor) {
   reg_decfactor_ = regfactor;
 }
 
-void SolverDDP::set_regfactor(double regfactor) {
+void SolverDDP::set_regfactor(const double regfactor) {
   if (regfactor <= 1.) {
     throw_pretty("Invalid argument: "
                  << "regfactor value is higher than 1.");
@@ -472,7 +472,7 @@ void SolverDDP::set_regfactor(double regfactor) {
   reg_decfactor_ = regfactor;
 }
 
-void SolverDDP::set_reg_min(double regmin) {
+void SolverDDP::set_reg_min(const double regmin) {
   if (0. > regmin) {
     throw_pretty("Invalid argument: "
                  << "regmin value has to be positive.");
@@ -480,7 +480,7 @@ void SolverDDP::set_reg_min(double regmin) {
   reg_min_ = regmin;
 }
 
-void SolverDDP::set_regmin(double regmin) {
+void SolverDDP::set_regmin(const double regmin) {
   if (0. > regmin) {
     throw_pretty("Invalid argument: "
                  << "regmin value has to be positive.");
@@ -488,7 +488,7 @@ void SolverDDP::set_regmin(double regmin) {
   reg_min_ = regmin;
 }
 
-void SolverDDP::set_reg_max(double regmax) {
+void SolverDDP::set_reg_max(const double regmax) {
   if (0. > regmax) {
     throw_pretty("Invalid argument: "
                  << "regmax value has to be positive.");
@@ -496,7 +496,7 @@ void SolverDDP::set_reg_max(double regmax) {
   reg_max_ = regmax;
 }
 
-void SolverDDP::set_regmax(double regmax) {
+void SolverDDP::set_regmax(const double regmax) {
   if (0. > regmax) {
     throw_pretty("Invalid argument: "
                  << "regmax value has to be positive.");
@@ -524,7 +524,7 @@ void SolverDDP::set_alphas(const std::vector<double>& alphas) {
   alphas_ = alphas;
 }
 
-void SolverDDP::set_th_stepdec(double th_stepdec) {
+void SolverDDP::set_th_stepdec(const double th_stepdec) {
   if (0. >= th_stepdec || th_stepdec > 1.) {
     throw_pretty("Invalid argument: "
                  << "th_stepdec value should between 0 and 1.");
@@ -532,7 +532,7 @@ void SolverDDP::set_th_stepdec(double th_stepdec) {
   th_stepdec_ = th_stepdec;
 }
 
-void SolverDDP::set_th_stepinc(double th_stepinc) {
+void SolverDDP::set_th_stepinc(const double th_stepinc) {
   if (0. >= th_stepinc || th_stepinc > 1.) {
     throw_pretty("Invalid argument: "
                  << "th_stepinc value should between 0 and 1.");
@@ -540,7 +540,7 @@ void SolverDDP::set_th_stepinc(double th_stepinc) {
   th_stepinc_ = th_stepinc;
 }
 
-void SolverDDP::set_th_grad(double th_grad) {
+void SolverDDP::set_th_grad(const double th_grad) {
   if (0. > th_grad) {
     throw_pretty("Invalid argument: "
                  << "th_grad value has to be positive.");
@@ -548,7 +548,7 @@ void SolverDDP::set_th_grad(double th_grad) {
   th_grad_ = th_grad;
 }
 
-void SolverDDP::set_th_gaptol(double th_gaptol) {
+void SolverDDP::set_th_gaptol(const double th_gaptol) {
   if (0. > th_gaptol) {
     throw_pretty("Invalid argument: "
                  << "th_gaptol value has to be positive.");

@@ -33,7 +33,7 @@ SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
 SolverKKT::~SolverKKT() {}
 
 bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      std::size_t maxiter, bool is_feasible, double) {
+                      const std::size_t maxiter, const bool is_feasible, const double) {
   setCandidate(init_xs, init_us, is_feasible);
   bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -82,7 +82,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   return false;
 }
 
-void SolverKKT::computeDirection(bool recalc) {
+void SolverKKT::computeDirection(const bool recalc) {
   const std::size_t T = problem_->get_T();
   if (recalc) {
     calcDiff();
@@ -108,7 +108,7 @@ void SolverKKT::computeDirection(bool recalc) {
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
 
-double SolverKKT::tryStep(double steplength) {
+double SolverKKT::tryStep(const double steplength) {
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {

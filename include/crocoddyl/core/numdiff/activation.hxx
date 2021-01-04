@@ -70,7 +70,7 @@ const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& ActivationModelNum
 }
 
 template <typename Scalar>
-Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

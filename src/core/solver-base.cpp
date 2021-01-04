@@ -164,7 +164,7 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
   us_ = us;
 }
 
-void SolverAbstract::set_xreg(double xreg) {
+void SolverAbstract::set_xreg(const double xreg) {
   if (xreg < 0.) {
     throw_pretty("Invalid argument: "
                  << "xreg value has to be positive.");
@@ -172,7 +172,7 @@ void SolverAbstract::set_xreg(double xreg) {
   xreg_ = xreg;
 }
 
-void SolverAbstract::set_ureg(double ureg) {
+void SolverAbstract::set_ureg(const double ureg) {
   if (ureg < 0.) {
     throw_pretty("Invalid argument: "
                  << "ureg value has to be positive.");
@@ -180,7 +180,7 @@ void SolverAbstract::set_ureg(double ureg) {
   ureg_ = ureg;
 }
 
-void SolverAbstract::set_th_acceptstep(double th_acceptstep) {
+void SolverAbstract::set_th_acceptstep(const double th_acceptstep) {
   if (0. >= th_acceptstep || th_acceptstep > 1) {
     throw_pretty("Invalid argument: "
                  << "th_acceptstep value should between 0 and 1.");
@@ -188,7 +188,7 @@ void SolverAbstract::set_th_acceptstep(double th_acceptstep) {
   th_acceptstep_ = th_acceptstep;
 }
 
-void SolverAbstract::set_th_stop(double th_stop) {
+void SolverAbstract::set_th_stop(const double th_stop) {
   if (th_stop <= 0.) {
     throw_pretty("Invalid argument: "
                  << "th_stop value has to higher than 0.");
@@ -196,7 +196,7 @@ void SolverAbstract::set_th_stop(double th_stop) {
   th_stop_ = th_stop;
 }
 
-bool raiseIfNaN(double value) {
+bool raiseIfNaN(const double value) {
   if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
     return true;
   } else {

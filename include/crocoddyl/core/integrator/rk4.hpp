@@ -45,7 +45,7 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
                            const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
-  Scalar get_dt() const;
+  const Scalar get_dt() const;
 
   void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);

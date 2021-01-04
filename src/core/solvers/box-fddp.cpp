@@ -43,7 +43,7 @@ void SolverBoxFDDP::allocateData() {
   du_ub_.resize(nu);
 }
 
-void SolverBoxFDDP::computeGains(std::size_t t) {
+void SolverBoxFDDP::computeGains(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
@@ -76,7 +76,7 @@ void SolverBoxFDDP::computeGains(std::size_t t) {
   }
 }
 
-void SolverBoxFDDP::forwardPass(double steplength) {
+void SolverBoxFDDP::forwardPass(const double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");

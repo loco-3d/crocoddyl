@@ -83,7 +83,7 @@ const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >& ActuationModelNumDi
 }
 
 template <typename Scalar>
-Scalar ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 

@@ -12,7 +12,7 @@
 
 namespace crocoddyl {
 
-BoxQP::BoxQP(std::size_t nx, std::size_t maxiter, double th_acceptstep, double th_grad, double reg)
+BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_acceptstep, const double th_grad, const double reg)
     : nx_(nx),
       maxiter_(maxiter),
       th_acceptstep_(th_acceptstep),
@@ -201,7 +201,7 @@ double BoxQP::get_reg() const { return reg_; }
 
 const std::vector<double>& BoxQP::get_alphas() const { return alphas_; }
 
-void BoxQP::set_nx(std::size_t nx) {
+void BoxQP::set_nx(const std::size_t nx) {
   nx_ = nx;
   x_ = Eigen::VectorXd::Zero(nx);
   xnew_ = Eigen::VectorXd::Zero(nx);
@@ -209,9 +209,9 @@ void BoxQP::set_nx(std::size_t nx) {
   dx_ = Eigen::VectorXd::Zero(nx);
 }
 
-void BoxQP::set_maxiter(std::size_t maxiter) { maxiter_ = maxiter; }
+void BoxQP::set_maxiter(const std::size_t maxiter) { maxiter_ = maxiter; }
 
-void BoxQP::set_th_acceptstep(double th_acceptstep) {
+void BoxQP::set_th_acceptstep(const double th_acceptstep) {
   if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
     throw_pretty("Invalid argument: "
                  << "th_acceptstep value should between 0 and 0.5");
@@ -219,7 +219,7 @@ void BoxQP::set_th_acceptstep(double th_acceptstep) {
   th_acceptstep_ = th_acceptstep;
 }
 
-void BoxQP::set_th_grad(double th_grad) {
+void BoxQP::set_th_grad(const double th_grad) {
   if (0. > th_grad) {
     throw_pretty("Invalid argument: "
                  << "th_grad value has to be positive.");
@@ -227,7 +227,7 @@ void BoxQP::set_th_grad(double th_grad) {
   th_grad_ = th_grad;
 }
 
-void BoxQP::set_reg(double reg) {
+void BoxQP::set_reg(const double reg) {
   if (0. > reg) {
     throw_pretty("Invalid argument: "
                  << "reg value has to be positive.");

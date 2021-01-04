@@ -71,7 +71,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the disturbance value used by the numdiff routine
    */
-  Scalar get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Modify the disturbance value used by the numdiff routine

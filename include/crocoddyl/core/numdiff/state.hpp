@@ -77,7 +77,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond = both) const;
 
-  Scalar get_disturbance() const;
+  const Scalar get_disturbance() const;
   void set_disturbance(const Scalar disturbance);
 
  private:

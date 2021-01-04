@@ -61,8 +61,8 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
          Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), Scalar(-0.5)).array() * (s - u_ub_).array());
   }
 
-  Scalar get_smooth() const { return smooth_; };
-  void set_smooth(Scalar smooth) {
+  const Scalar get_smooth() const { return smooth_; };
+  void set_smooth(const Scalar smooth) {
     if (smooth < 0.) {
       throw_pretty("Invalid argument: "
                    << "Smooth value has to be positive");
