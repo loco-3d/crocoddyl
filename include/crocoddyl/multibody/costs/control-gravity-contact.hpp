@@ -17,6 +17,7 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+//#include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -146,11 +147,13 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
                                 DataCollectorAbstract *const data)
       : Base(model, data),
         dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_dgdq(model->get_nu(), model->get_state()->get_nv()),
-        Arr_dtaudx(model->get_state()->get_nv(), model->get_state()->get_ndx()) {
+        Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Arr_dtaudx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        Arr_dtaudu(model->get_state()->get_nv(), model->get_nu()) {
     dg_dq.setZero();
     Arr_dgdq.setZero();
     Arr_dtaudx.setZero();
+    Arr_dtaudu.setZero();
     // Check that proper shared data has been passed
     DataCollectorActMultibodyInContactTpl<Scalar> *d =
         dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
@@ -172,6 +175,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;
   MatrixXs Arr_dtaudx;
+  MatrixXs Arr_dtaudu;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
