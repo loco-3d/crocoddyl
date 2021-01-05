@@ -309,6 +309,7 @@ class GepettoDisplay(DisplayAbstract):
         if mu != current_mu:
             self.frictionMu[coneName] = mu
             coneGroup = self.frictionGroup + "/" + coneName
+
             self.robot.viewer.gui.deleteNode(coneGroup, True)
             self._createCone(coneName, self.frictionConeScale, mu)
 
