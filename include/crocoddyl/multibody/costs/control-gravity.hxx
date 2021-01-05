@@ -15,8 +15,8 @@ template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(
     boost::shared_ptr<StateMultibody> state,
     boost::shared_ptr<ActivationModelAbstract> activation,
-    boost::shared_ptr<ActuationModelFull> actuation_model)
-    : Base(state, activation,actuation_model->get_nu()), pin_model_(*state->get_pinocchio()), actuation_model_(*actuation_model) {  
+    boost::shared_ptr<ActuationModelAbstract> actuation_model)
+    : Base(state, activation,actuation_model->get_nu()), pin_model_(*state->get_pinocchio()), actuation_model_(actuation_model) {  
    if (activation_->get_nr() != state_->get_nv()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_nv()));
@@ -30,9 +30,9 @@ CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelFull> actuation_model)
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation_model)
     : Base(state, state->get_nv(), actuation_model->get_nu()), 
-           pin_model_(*state->get_pinocchio()), actuation_model_(*actuation_model) {
+           pin_model_(*state->get_pinocchio()), actuation_model_(actuation_model) {
    if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add "
@@ -57,7 +57,7 @@ void CostModelControlGravTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
   
-  actuation_model_.calc(d->actuation,x,u); 
+  actuation_model_->calc(d->actuation,x,u); 
   data->r = d->actuation->tau - pinocchio::computeGeneralizedGravity(pin_model_, *d->pinocchio, q);
 
   activation_->calc(data->activation, data->r);
@@ -83,7 +83,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(
                                     
   const std::size_t& nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
-  actuation_model_.calcDiff(d->actuation,x,u); 
+  actuation_model_->calcDiff(d->actuation,x,u); 
 
   data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
   data->Lx.noalias() = d->actuation->dtau_dx.transpose() * data->activation->Ar;

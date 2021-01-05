@@ -21,7 +21,7 @@ void exposeCostControlGrav() {
       "and a(u) is the actuated torque.",
       bp::init<boost::shared_ptr<StateMultibody>,
                boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ActuationModelFull>>(
+               boost::shared_ptr<ActuationModelAbstract>>(
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "The default reference control is obtained from np.zero(nu), with nu "
@@ -30,7 +30,7 @@ void exposeCostControlGrav() {
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>,
-                    boost::shared_ptr<ActuationModelFull>>(
+                    boost::shared_ptr<ActuationModelAbstract>>(
           bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "

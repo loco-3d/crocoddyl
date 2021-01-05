@@ -19,6 +19,7 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 
 
 namespace crocoddyl {
@@ -54,7 +55,7 @@ public:
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActuationModelFullTpl<Scalar> ActuationModelFull;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -71,7 +72,7 @@ public:
   CostModelControlGravTpl(
       boost::shared_ptr<StateMultibody> state,
       boost::shared_ptr<ActivationModelAbstract> activation,
-      boost::shared_ptr<ActuationModelFull> actuation_model);
+      boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   /**
    * @brief Initialize the control gravity cost model
@@ -83,7 +84,7 @@ public:
    * @param[in] state       State of the multibody system
    */
   explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                   boost::shared_ptr<ActuationModelFull> actuation_model);
+                                   boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   virtual ~CostModelControlGravTpl();
 
@@ -120,7 +121,7 @@ protected:
 
 private:
   typename StateMultibody::PinocchioModel pin_model_;
-  ActuationModelFull actuation_model_;
+  const boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model_;
 };
 
 template <typename _Scalar>
@@ -147,7 +148,7 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
         dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from "
-                   "DataCollectorContact");
+                   "DataCollectorActMultibodyTpl");
     }
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;

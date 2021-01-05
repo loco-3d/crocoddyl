@@ -22,6 +22,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
 
 namespace crocoddyl {
 
@@ -58,7 +59,7 @@ public:
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActuationModelFloatingBaseTpl<Scalar> ActuationModelFloatingBase;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -75,7 +76,7 @@ public:
   CostModelControlGravContactTpl(
       boost::shared_ptr<StateMultibody> state,
       boost::shared_ptr<ActivationModelAbstract> activation,
-      boost::shared_ptr<ActuationModelFloatingBase> actuation_model);
+      boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   /**
    * @brief Initialize the control gravity contact cost model
@@ -86,9 +87,10 @@ public:
    *
    * @param[in] state       State of the multibody system
    */
+      
   explicit CostModelControlGravContactTpl(
       boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelFloatingBase> actuation_model);
+      boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   virtual ~CostModelControlGravContactTpl();
 
@@ -125,7 +127,7 @@ protected:
 
 private:
   typename StateMultibody::PinocchioModel pin_model_;
-  ActuationModelFloatingBase actuation_model_;
+  const boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model_;
 };
 
 template <typename _Scalar>
@@ -154,7 +156,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
         dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from "
-                   "DataCollectorContact");
+                   "DataCollectorActMultibodyInContactTpl");
     }
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;

@@ -21,7 +21,7 @@ void exposeCostControlGravContact() {
       "fext as the external forces and g as the gravity vector in contact",
       bp::init<boost::shared_ptr<StateMultibody>,
                boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ActuationModelFloatingBase>>(
+               boost::shared_ptr<ActuationModelAbstract>>(
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "The default reference control is obtained from np.zero(nu), with nu "
@@ -30,7 +30,7 @@ void exposeCostControlGravContact() {
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>,
-                    boost::shared_ptr<ActuationModelFloatingBase>>(
+                    boost::shared_ptr<ActuationModelAbstract>>(
           bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
           "The default reference control is obtained from np.zero(nu).\n"
