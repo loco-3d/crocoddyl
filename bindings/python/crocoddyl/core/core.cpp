@@ -17,6 +17,7 @@ void exposeCore() {
   exposeActuationAbstract();
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
+  exposeResidualAbstract();
   exposeActivationAbstract();
   exposeSquashingAbstract();
   exposeSquashingSmoothSat();

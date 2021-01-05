@@ -19,6 +19,7 @@ void exposeStateAbstract();
 void exposeActuationAbstract();
 void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
+void exposeResidualAbstract();
 void exposeActivationAbstract();
 void exposeSquashingAbstract();
 void exposeSquashingSmoothSat();

@@ -52,6 +52,12 @@ class IntegratedActionModelRK4Tpl;
 template <typename Scalar>
 struct IntegratedActionDataRK4Tpl;
 
+// residual
+template <typename Scalar>
+class ResidualModelAbstractTpl;
+template <typename Scalar>
+struct ResidualDataAbstractTpl;
+
 // activation
 template <typename Scalar>
 struct ActivationBoundsTpl;
@@ -202,6 +208,9 @@ typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
 typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
+
+typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
+typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
