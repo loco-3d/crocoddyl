@@ -38,7 +38,7 @@ namespace crocoddyl {
  * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$, \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$, \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
  * Jacobians and Hessians, respectively.
- * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -61,7 +61,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Initialize the cost model
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state       State of the system
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
@@ -73,7 +73,7 @@ class CostModelAbstractTpl {
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state       State of the system
    * @param[in] activation  Activation model
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
@@ -83,7 +83,7 @@ class CostModelAbstractTpl {
    *
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state  State of the system
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
@@ -95,7 +95,7 @@ class CostModelAbstractTpl {
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state  State of the system
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
@@ -128,7 +128,7 @@ class CostModelAbstractTpl {
    * @brief Create the cost data
    *
    * The default data contains objects to store the values of the cost, residual vector and their derivatives (first
-   * and second order derivatives). However, it is possible to specialized this function is we need to create
+   * and second order derivatives). However, it is possible to specialized this function if we need to create
    * additional data, for instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector
