@@ -12,6 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -48,6 +49,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelFrameVelocityTpl<Scalar> ResidualModelFrameVelocity;
   typedef FrameMotionTpl<Scalar> FrameMotion;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -126,23 +128,23 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Modify the frame velocity reference
-   */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-
-  /**
    * @brief Return the frame velocity reference
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
+  /**
+   * @brief Modify the frame velocity reference
+   */
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
  private:
-  FrameMotion vref_;                                                      //!< Reference frame velocity
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  FrameMotion vref_;  //!< Reference frame velocity
 };
 
 template <typename _Scalar>
@@ -159,17 +161,8 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataFrameVelocityTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Rx(6, model->get_state()->get_nv()) {
     Arr_Rx.setZero();
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
-    }
-
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
   Matrix6xs Arr_Rx;
 
   using Base::activation;
@@ -179,9 +172,6 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
   using Base::shared;
 };
 

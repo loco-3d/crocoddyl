@@ -809,19 +809,19 @@ class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
         self.vref = vref
 
     def calc(self, data, x, u):
-        data.r = (pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self.vref.id) -
-                  self.vref.motion).vector
-        self.activation.calc(data.activation, data.r)
+        data.residual.r[:] = (pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self.vref.id) -
+                              self.vref.motion).vector
+        self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
     def calcDiff(self, data, x, u):
         v_partial_dq, v_partial_dv = pinocchio.getJointVelocityDerivatives(self.state.pinocchio, data.shared.pinocchio,
                                                                            data.joint, pinocchio.ReferenceFrame.LOCAL)
 
-        self.activation.calcDiff(data.activation, data.r)
-        data.Rx[:] = np.hstack([np.dot(data.fXj, v_partial_dq), np.dot(data.fXj, v_partial_dv)])
-        data.Lx[:] = np.dot(data.Rx.T, data.activation.Ar)
-        data.Lxx[:, :] = np.dot(data.Rx.T, np.dot(data.activation.Arr, data.Rx))
+        self.activation.calcDiff(data.activation, data.residual.r)
+        data.residual.Rx[:] = np.hstack([np.dot(data.fXj, v_partial_dq), np.dot(data.fXj, v_partial_dv)])
+        data.Lx[:] = np.dot(data.residual.Rx.T, data.activation.Ar)
+        data.Lxx[:, :] = np.dot(data.residual.Rx.T, np.dot(data.activation.Arr, data.residual.Rx))
 
     def createData(self, collector):
         data = FrameVelocityCostDataDerived(self, collector)
