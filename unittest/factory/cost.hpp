@@ -34,9 +34,10 @@ struct CostModelTypes {
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    for (int i = 0; i < NbCostModelTypes; ++i) {
-      v.push_back((Type)i);
-    }
+    v.push_back(CostModelFrameVelocity);
+    // for (int i = 0; i < NbCostModelTypes; ++i) {
+    //   v.push_back((Type)i);
+    // }
     return v;
   }
   static const std::vector<Type> all;

@@ -247,9 +247,11 @@ class FrameVelocityCostSumTest(CostModelSumTestCase):
 
 if __name__ == '__main__':
     test_classes_to_run = [
-        StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
-        CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
-        FrameTranslationCostSumTest, FrameRotationCostTest, FrameRotationCostSumTest, FrameVelocityCostTest,
+        # StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
+        # CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,
+        # FrameTranslationCostSumTest, FrameRotationCostTest, FrameRotationCostSumTest, FrameVelocityCostTest,
+        # FrameVelocityCostSumTest
+        FrameVelocityCostTest,
         FrameVelocityCostSumTest
     ]
     loader = unittest.TestLoader()
