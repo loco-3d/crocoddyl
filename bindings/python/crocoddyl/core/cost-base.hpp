@@ -19,11 +19,18 @@ namespace python {
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
   CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                         boost::shared_ptr<ResidualModelAbstract> residual)
+      : CostModelAbstract(state, activation, residual) {}
+
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
                          const std::size_t nu)
       : CostModelAbstract(state, activation, nu) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation)
       : CostModelAbstract(state, activation) {}
+
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual)
+      : CostModelAbstract(state, residual) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu)
       : CostModelAbstract(state, nr, nu), bp::wrapper<CostModelAbstract>() {}

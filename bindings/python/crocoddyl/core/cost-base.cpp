@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,17 +26,28 @@ void exposeCostAbstract() {
       "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
       "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>,
+               boost::shared_ptr<ResidualModelAbstract> >(bp::args("self", "state", "activation", "residual"),
+                                                          "Initialize the cost model.\n\n"
+                                                          ":param state: state description\n"
+                                                          ":param activation: activation model\n"
+                                                          ":param residual: residual model"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
-          ":param activation: Activation model\n"
+          ":param activation: activation model\n"
           ":param nu: dimension of control vector (default state.nv)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
-          ":param activation: Activation model"))
+          ":param activation: activation model"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
+          bp::args("self", "state", "residual"),
+          "Initialize the cost model.\n\n"
+          ":param state: state description\n"
+          ":param residual: residual model"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
@@ -85,6 +96,10 @@ void exposeCostAbstract() {
           "activation",
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
           "activation model")
+      .add_property(
+          "residual",
+          bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
+          "residual model")
       .add_property("nu",
                     bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector");
@@ -103,6 +118,9 @@ void exposeCostAbstract() {
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
                     "activation data")
+      .add_property("residual",
+                    bp::make_getter(&CostDataAbstract::residual, bp::return_value_policy<bp::return_by_value>()),
+                    "residual data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),
