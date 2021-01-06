@@ -82,6 +82,11 @@ struct FrameCoPSupportTpl;
 
 // residual
 template <typename Scalar>
+class ResidualModelCentroidalMomentumTpl;
+template <typename Scalar>
+struct ResidualDataCentroidalMomentumTpl;
+
+template <typename Scalar>
 class ResidualModelFrameVelocityTpl;
 template <typename Scalar>
 struct ResidualDataFrameVelocityTpl;
@@ -285,6 +290,8 @@ typedef FrameFrictionConeTpl<double> FrameFrictionCone;
 typedef FrameWrenchConeTpl<double> FrameWrenchCone;
 typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
+typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMomentum;
+typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;
 typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;
 typedef ResidualDataFrameVelocityTpl<double> ResidualDataFrameVelocity;
 

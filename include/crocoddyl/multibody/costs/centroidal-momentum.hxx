@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href, const std::size_t& nu)
-    : Base(state, activation, nu), href_(href), pin_model_(state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -28,7 +28,7 @@ template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href)
-    : Base(state, activation), href_(href), pin_model_(state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelCentroidalMomentum>(state, href)), href_(href) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -38,49 +38,39 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href, const std::size_t& nu)
-    : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href)
-    : Base(state, 6), href_(href), pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href)), href_(href) {}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::~CostModelCentroidalMomentumTpl() {}
 
 template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>&,
-                                                  const Eigen::Ref<const VectorXs>&) {
+                                                  const Eigen::Ref<const VectorXs>& x,
+                                                  const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual give the reference CentroidalMomentum
   Data* d = static_cast<Data*>(data.get());
-  data->r = d->pinocchio->hg.toVector() - href_;
+  residual_->calc(d->residual, x, u);
 
-  activation_->calc(data->activation, data->r);
+  activation_->calc(data->activation, data->residual->r);
   data->cost = data->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>&,
-                                                      const Eigen::Ref<const VectorXs>&) {
+                                                      const Eigen::Ref<const VectorXs>& x,
+                                                      const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
-  const std::size_t& nv = state_->get_nv();
-  Eigen::Ref<Matrix6xs> Rq = data->Rx.leftCols(nv);
-  Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
+  activation_->calcDiff(data->activation, data->residual->r);
+  residual_->calcDiff(d->residual, x, u);
 
-  activation_->calcDiff(data->activation, data->r);
-  pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
-
-  // The derivative computation in pinocchio does not take the frame of reference into
-  // account. So we need to update the com frame as well.
-  for (int i = 0; i < d->pinocchio->Jcom.cols(); ++i) {
-    data->Rx.template block<3, 1>(3, i) -= d->pinocchio->Jcom.col(i).cross(d->pinocchio->hg.linear());
-  }
-
-  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>

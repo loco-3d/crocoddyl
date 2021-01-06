@@ -89,9 +89,7 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
     //                                                              Eigen::Vector3d::Random(), nu);
     //   break;
     // // case ResidualModelTypes::ResidualModelCentroidalMomentum:
-    // //   residual = boost::make_shared<crocoddyl::ResidualModelCentroidalMomentum>(state_,
-    // // activation_factory.create(activation_type,
-    // //                                                                      6), Vector6d::Random(), nu);
+    // //   residual = boost::make_shared<crocoddyl::ResidualModelCentroidalMomentum>(state_, Vector6d::Random(), nu);
     // //   break;
     // case ResidualModelTypes::ResidualModelFramePlacement:
     //   residual = boost::make_shared<crocoddyl::ResidualModelFramePlacement>(

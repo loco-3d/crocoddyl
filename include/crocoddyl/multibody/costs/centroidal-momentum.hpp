@@ -12,6 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -21,7 +22,7 @@ namespace crocoddyl {
  * @brief Centroidal momentum cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{h}-\mathbf{h}^*\f$, where
- * \f$\mathbf{h},\mathbf{h}^*\in~\mathcal{X}\f$ are the current and reference centroidal momenta, respetively. Note
+ * \f$\mathbf{h},\mathbf{h}^*\in~\mathcal{X}\f$ are the current and reference centroidal momenta, respectively. Note
  * that the dimension of the residual vector is 6.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -45,6 +46,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelCentroidalMomentumTpl<Scalar> ResidualModelCentroidalMomentum;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
@@ -135,12 +137,12 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
  private:
-  Vector6s href_;                                                         //!< Reference centroidal momentum
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  Vector6s href_;  //!< Reference centroidal momentum
 };
 
 template <typename _Scalar>
@@ -155,23 +157,10 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), dhd_dq(6, model->get_state()->get_nv()), dhd_dv(6, model->get_state()->get_nv()) {
-    dhd_dq.setZero();
-    dhd_dv.setZero();
-
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
-    }
-
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
+      : Base(model, data), Arr_Rx(6, model->get_state()->get_ndx()) {
+    Arr_Rx.setZero();
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix6xs dhd_dq;
-  Matrix6xs dhd_dv;
   Matrix6xs Arr_Rx;
   using Base::activation;
   using Base::cost;
@@ -180,9 +169,7 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

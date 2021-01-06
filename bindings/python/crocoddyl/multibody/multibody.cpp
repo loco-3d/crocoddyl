@@ -30,6 +30,7 @@ void exposeMultibody() {
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
   exposeActionImpulseFwdDynamics();
+  exposeResidualCentroidalMomentum();
   exposeResidualFrameVelocity();
   exposeCostState();
   exposeCostCoMPosition();
