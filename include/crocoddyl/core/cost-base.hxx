@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,22 +12,35 @@ template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
                                                    const std::size_t& nu)
-    : state_(state), activation_(activation), nu_(nu), unone_(VectorXs::Zero(nu)) {}
+    : state_(state),
+      activation_(activation),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr(), nu)),
+      nu_(nu),
+      unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation)
-    : state_(state), activation_(activation), nu_(state->get_nv()), unone_(VectorXs::Zero(state->get_nv())) {}
+    : state_(state),
+      activation_(activation),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr())),
+      nu_(state->get_nv()),
+      unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr,
                                                    const std::size_t& nu)
-    : state_(state), activation_(boost::make_shared<ActivationModelQuad>(nr)), nu_(nu), unone_(VectorXs::Zero(nu)) {}
+    : state_(state),
+      activation_(boost::make_shared<ActivationModelQuad>(nr)),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, nr, nu)),
+      nu_(nu),
+      unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, nr)),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
@@ -60,6 +73,11 @@ const boost::shared_ptr<StateAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>
 template <typename Scalar>
 const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_activation() const {
   return activation_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_residual() const {
+  return residual_;
 }
 
 template <typename Scalar>

@@ -16,6 +16,7 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
@@ -53,6 +54,7 @@ class CostModelAbstractTpl {
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -163,6 +165,11 @@ class CostModelAbstractTpl {
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
 
   /**
+   * @brief Return the residual model
+   */
+  const boost::shared_ptr<ResidualModelAbstract>& get_residual() const;
+
+  /**
    * @brief Return the dimension of the control input
    */
   const std::size_t& get_nu() const;
@@ -192,6 +199,7 @@ class CostModelAbstractTpl {
 
   boost::shared_ptr<StateAbstract> state_;                 //!< State description
   boost::shared_ptr<ActivationModelAbstract> activation_;  //!< Activation model
+  boost::shared_ptr<ResidualModelAbstract> residual_;      //!< Residual model
   std::size_t nu_;                                         //!< Control dimension
   VectorXs unone_;                                         //!< No control vector
 };
@@ -211,6 +219,7 @@ struct CostDataAbstractTpl {
   CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
+        residual(model->get_residual()->createData(data)),
         cost(Scalar(0.)),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
@@ -233,15 +242,16 @@ struct CostDataAbstractTpl {
 
   DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
+  boost::shared_ptr<ResidualDataAbstract> residual;
   Scalar cost;
   VectorXs Lx;
   VectorXs Lu;
   MatrixXs Lxx;
   MatrixXs Lxu;
   MatrixXs Luu;
-  VectorXs r;
-  MatrixXs Rx;
-  MatrixXs Ru;
+  VectorXs r;   // TODO(cmastalli) remove after full integration of residual data
+  MatrixXs Rx;  // TODO(cmastalli) remove after full integration of residual data
+  MatrixXs Ru;  // TODO(cmastalli) remove after full integration of residual data
 };
 
 }  // namespace crocoddyl

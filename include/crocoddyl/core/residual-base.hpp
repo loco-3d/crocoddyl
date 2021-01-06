@@ -75,7 +75,7 @@ class ResidualModelAbstractTpl {
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u) = 0;
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the Jacobian of the residual vector
@@ -87,7 +87,7 @@ class ResidualModelAbstractTpl {
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u) = 0;
+                        const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the residual data

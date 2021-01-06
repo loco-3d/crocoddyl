@@ -22,9 +22,18 @@ template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::~ResidualModelAbstractTpl() {}
 
 template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>&,
+                                            const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {}
+
+template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
                                             const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
+}
+
+template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>&,
+                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
 }
 
 template <typename Scalar>
