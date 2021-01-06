@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostContactWrenchCone() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelContactWrenchCone> >();
+
   bp::class_<CostModelContactWrenchCone, bp::bases<CostModelAbstract> >(
       "CostModelContactWrenchCone",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameWrenchCone, int>(

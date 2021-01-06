@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2018-2020, University of Duisburg-Essen
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostContactCoPPosition() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelContactCoPPosition> >();
+
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, int>(

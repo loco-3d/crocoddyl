@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostControl() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelControl> >();
+
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
       "CostModelControl",
       "This cost function defines a residual vector as r = u - uref, with u and uref as the current and reference "

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostImpulseFrictionCone() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelImpulseFrictionCone> >();
+
   bp::class_<CostModelImpulseFrictionCone, bp::bases<CostModelAbstract> >(
       "CostModelImpulseFrictionCone",
       "This cost function defines a residual vector as r = A*f, where A, f describe the linearized friction cone and "

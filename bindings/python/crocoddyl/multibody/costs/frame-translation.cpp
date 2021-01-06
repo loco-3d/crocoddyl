@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostFrameTranslation() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelFrameTranslation> >();
+
   bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
       "CostModelFrameTranslation",
       "This cost function defines a residual vector as r = t - tref, with t and tref as the current and reference "

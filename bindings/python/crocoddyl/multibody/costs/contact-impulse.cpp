@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostContactImpulse() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelContactImpulse> >();
+
   bp::class_<CostModelContactImpulse, bp::bases<CostModelAbstract> >(
       "CostModelContactImpulse",
       "This cost function defines a residual vector as r = f-fref, where f,fref describe the current and reference "
