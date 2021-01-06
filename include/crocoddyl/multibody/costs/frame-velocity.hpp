@@ -172,6 +172,7 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
+  using Base::residual;
   using Base::shared;
 };
 

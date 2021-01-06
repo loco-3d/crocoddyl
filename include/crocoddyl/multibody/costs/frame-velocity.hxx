@@ -109,7 +109,7 @@ void CostModelFrameVelocityTpl<Scalar>::set_referenceImpl(const std::type_info& 
     vref_ = *static_cast<const FrameMotion*>(pv);
     ResidualModelFrameVelocity* residual = static_cast<ResidualModelFrameVelocity*>(residual_.get());
     residual->set_id(vref_.id);
-    residual->set_velocity(vref_.motion);
+    residual->set_reference(vref_.motion);
     residual->set_type(vref_.reference);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");

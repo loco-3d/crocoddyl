@@ -68,9 +68,9 @@ void exposeResidualFrameVelocity() {
            ":return residual data.")
       .add_property("id", &ResidualModelFrameVelocity::get_id, &ResidualModelFrameVelocity::set_id,
                     "reference frame id")
-      .add_property("velocity",
-                    bp::make_function(&ResidualModelFrameVelocity::get_velocity, bp::return_internal_reference<>()),
-                    &ResidualModelFrameVelocity::set_velocity, "reference velocity")
+      .add_property("reference",
+                    bp::make_function(&ResidualModelFrameVelocity::get_reference, bp::return_internal_reference<>()),
+                    &ResidualModelFrameVelocity::set_reference, "reference velocity")
       .add_property("type", &ResidualModelFrameVelocity::get_type, &ResidualModelFrameVelocity::set_type,
                     "reference type of velocity");
 

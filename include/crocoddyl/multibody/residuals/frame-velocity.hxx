@@ -20,14 +20,14 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shar
                                                                      const Motion& velocity,
                                                                      const pinocchio::ReferenceFrame type,
                                                                      const std::size_t nu)
-    : Base(state, 6, nu), id_(id), velocity_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6, nu), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const pinocchio::FrameIndex id,
                                                                      const Motion& velocity,
                                                                      const pinocchio::ReferenceFrame type)
-    : Base(state, 6), id_(id), velocity_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::~ResidualModelFrameVelocityTpl() {}
@@ -39,7 +39,7 @@ void ResidualModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<Residua
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the frame velocity w.r.t. the reference frame
-  data->r = (pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_, type_) - velocity_).toVector();
+  data->r = (pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_, type_) - vref_).toVector();
 }
 
 template <typename Scalar>
@@ -65,8 +65,8 @@ void ResidualModelFrameVelocityTpl<Scalar>::set_id(const pinocchio::FrameIndex i
 }
 
 template <typename Scalar>
-void ResidualModelFrameVelocityTpl<Scalar>::set_velocity(const Motion& velocity) {
-  velocity_ = velocity;
+void ResidualModelFrameVelocityTpl<Scalar>::set_reference(const Motion& velocity) {
+  vref_ = velocity;
 }
 
 template <typename Scalar>
@@ -80,8 +80,8 @@ pinocchio::FrameIndex ResidualModelFrameVelocityTpl<Scalar>::get_id() const {
 }
 
 template <typename Scalar>
-const pinocchio::MotionTpl<Scalar>& ResidualModelFrameVelocityTpl<Scalar>::get_velocity() const {
-  return velocity_;
+const pinocchio::MotionTpl<Scalar>& ResidualModelFrameVelocityTpl<Scalar>::get_reference() const {
+  return vref_;
 }
 
 template <typename Scalar>

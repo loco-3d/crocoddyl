@@ -101,11 +101,34 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
+  /**
+   * @brief Return reference frame id
+   */
   void set_id(const pinocchio::FrameIndex id);
-  void set_velocity(const Motion& velocity);
+
+  /**
+   * @brief Return reference velocity
+   */
+  void set_reference(const Motion& velocity);
+
+  /**
+   * @brief Return reference type of velocity
+   */
   void set_type(const pinocchio::ReferenceFrame type);
+
+  /**
+   * @brief Modify the reference frame id
+   */
   pinocchio::FrameIndex get_id() const;
-  const Motion& get_velocity() const;
+
+  /**
+   * @brief Modify the reference velocity
+   */
+  const Motion& get_reference() const;
+
+  /**
+   * @brief Modify the reference type of velocity
+   */
   pinocchio::ReferenceFrame get_type() const;
 
  protected:
@@ -116,7 +139,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   pinocchio::FrameIndex id_;                                              //!< Reference frame id
-  Motion velocity_;                                                       //!< Reference velocity
+  Motion vref_;                                                           //!< Reference velocity
   pinocchio::ReferenceFrame type_;                                        //!< Reference type of velocity
   boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
