@@ -11,7 +11,6 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -132,9 +131,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
-
-  DEPRECATED("Use set_reference<MathbTpl<Scalar>::VectorXs>()", void set_uref(const VectorXs& uref_in));
-  DEPRECATED("Use get_reference<MathbTpl<Scalar>::VectorXs>()", const VectorXs& get_uref() const);
 
  protected:
   /**

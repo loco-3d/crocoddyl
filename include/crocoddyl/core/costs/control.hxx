@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,20 +112,6 @@ void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, vo
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
   }
-}
-
-template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& CostModelControlTpl<Scalar>::get_uref() const {
-  return uref_;
-}
-
-template <typename Scalar>
-void CostModelControlTpl<Scalar>::set_uref(const VectorXs& uref_in) {
-  if (static_cast<std::size_t>(uref_in.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "uref has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  uref_ = uref_in;
 }
 
 }  // namespace crocoddyl

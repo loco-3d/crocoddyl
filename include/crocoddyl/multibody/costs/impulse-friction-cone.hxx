@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,16 +87,6 @@ void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
-}
-
-template <typename Scalar>
-const FrameFrictionConeTpl<Scalar>& CostModelImpulseFrictionConeTpl<Scalar>::get_fref() const {
-  return fref_;
-}
-
-template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::set_fref(const FrameFrictionCone& fref_in) {
-  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,17 +112,6 @@ void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info&
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");
   }
-}
-
-template <typename Scalar>
-const FramePlacementTpl<Scalar>& CostModelFramePlacementTpl<Scalar>::get_Mref() const {
-  return Mref_;
-}
-
-template <typename Scalar>
-void CostModelFramePlacementTpl<Scalar>::set_Mref(const FramePlacement& Mref_in) {
-  Mref_ = Mref_in;
-  oMf_inv_ = Mref_.placement.inverse();
 }
 
 }  // namespace crocoddyl

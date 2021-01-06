@@ -113,14 +113,4 @@ void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_i
   }
 }
 
-template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector6s& CostModelCentroidalMomentumTpl<Scalar>::get_href() const {
-  return href_;
-}
-
-template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::set_href(const Vector6s& href_in) {
-  href_ = href_in;
-}
-
 }  // namespace crocoddyl

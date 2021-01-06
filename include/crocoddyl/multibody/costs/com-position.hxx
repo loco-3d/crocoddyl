@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,16 +96,6 @@ void CostModelCoMPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
   }
-}
-
-template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& CostModelCoMPositionTpl<Scalar>::get_cref() const {
-  return cref_;
-}
-
-template <typename Scalar>
-void CostModelCoMPositionTpl<Scalar>::set_cref(const Vector3s& cref_in) {
-  cref_ = cref_in;
 }
 
 }  // namespace crocoddyl

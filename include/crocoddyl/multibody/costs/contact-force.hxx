@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,16 +139,6 @@ void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& t
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }
-}
-
-template <typename Scalar>
-const FrameForceTpl<Scalar>& CostModelContactForceTpl<Scalar>::get_fref() const {
-  return fref_;
-}
-
-template <typename Scalar>
-void CostModelContactForceTpl<Scalar>::set_fref(const FrameForce& fref_in) {
-  fref_ = fref_in;
 }
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,17 +112,6 @@ void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& 
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }
-}
-
-template <typename Scalar>
-const FrameRotationTpl<Scalar>& CostModelFrameRotationTpl<Scalar>::get_Rref() const {
-  return Rref_;
-}
-
-template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::set_Rref(const FrameRotation& Rref_in) {
-  Rref_ = Rref_in;
-  oRf_inv_ = Rref_.rotation.transpose();
 }
 
 }  // namespace crocoddyl
