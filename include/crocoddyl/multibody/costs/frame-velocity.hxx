@@ -106,14 +106,4 @@ void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& 
   }
 }
 
-template <typename Scalar>
-const FrameMotionTpl<Scalar>& CostModelFrameVelocityTpl<Scalar>::get_vref() const {
-  return vref_;
-}
-
-template <typename Scalar>
-void CostModelFrameVelocityTpl<Scalar>::set_vref(const FrameMotion& vref_in) {
-  vref_ = vref_in;
-}
-
 }  // namespace crocoddyl

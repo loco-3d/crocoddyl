@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,9 +123,6 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Create the frame velocity cost data
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
-  DEPRECATED("Use set_reference<FrameMotionTpl<Scalar> >()", void set_vref(const FrameMotion& vref_in));
-  DEPRECATED("Use get_reference<FrameMotionTpl<Scalar> >()", const FrameMotion& get_vref() const);
 
  protected:
   /**
