@@ -48,7 +48,8 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.COST_DER.calc(self.data_der, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_der.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_der.r, atol=1e-9), "Wrong cost residuals.")
+        self.assertTrue(np.allclose(self.data.residual.r, self.data_der.residual.r, atol=1e-9),
+                        "Wrong cost residuals.")
 
     def test_calcDiff(self):
         # Run calc for both action models
