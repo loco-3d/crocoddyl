@@ -11,6 +11,21 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
+                                                   boost::shared_ptr<ResidualModelAbstract> residual)
+    : state_(state),
+      activation_(activation),
+      residual_(residual),
+      nu_(residual->get_nu()),
+      unone_(VectorXs::Zero(residual->get_nu())) {
+  if (activation_->get_nr() != residual_->get_nr()) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(residual_->get_nr()));
+  }
+}
+
+template <typename Scalar>
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                                                   boost::shared_ptr<ActivationModelAbstract> activation,
                                                    const std::size_t& nu)
     : state_(state),
       activation_(activation),
@@ -26,6 +41,15 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstra
       residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr())),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
+
+template <typename Scalar>
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                                                   boost::shared_ptr<ResidualModelAbstract> residual)
+    : state_(state),
+      activation_(boost::make_shared<ActivationModelQuad>(residual->get_nr())),
+      residual_(residual),
+      nu_(residual->get_nu()),
+      unone_(VectorXs::Zero(residual->get_nu())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr,

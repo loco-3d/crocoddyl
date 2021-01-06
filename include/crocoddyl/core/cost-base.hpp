@@ -65,6 +65,16 @@ class CostModelAbstractTpl {
    *
    * @param[in] state       State of the system
    * @param[in] activation  Activation model
+   * @param[in] residual    Residual model
+   */
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                       boost::shared_ptr<ResidualModelAbstract> residual);
+
+  /**
+   * @brief Initialize the cost model
+   *
+   * @param[in] state       State of the system
+   * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
@@ -79,6 +89,16 @@ class CostModelAbstractTpl {
    * @param[in] activation  Activation model
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
+
+  /**
+   * @copybrief CostModelAbstractTpl()
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
+   *
+   * @param[in] state     State of the system
+   * @param[in] residual  Residual model
+   */
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual);
 
   /**
    * @copybrief CostModelAbstractTpl()
