@@ -80,6 +80,12 @@ struct FrameWrenchConeTpl;
 template <typename Scalar>
 struct FrameCoPSupportTpl;
 
+// residual
+template <typename Scalar>
+class ResidualModelFrameVelocityTpl;
+template <typename Scalar>
+struct ResidualDataFrameVelocityTpl;
+
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
@@ -278,6 +284,9 @@ typedef FrameForceTpl<double> FrameForce;
 typedef FrameFrictionConeTpl<double> FrameFrictionCone;
 typedef FrameWrenchConeTpl<double> FrameWrenchCone;
 typedef FrameCoPSupportTpl<double> FrameCoPSupport;
+
+typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;
+typedef ResidualDataFrameVelocityTpl<double> ResidualDataFrameVelocity;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;
