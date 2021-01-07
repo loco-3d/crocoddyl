@@ -35,6 +35,7 @@ struct CostModelTypes {
     std::vector<Type> v;
     v.clear();
     v.push_back(CostModelCoMPosition);
+    v.push_back(CostModelFramePlacement);
     v.push_back(CostModelFrameVelocity);
     // for (int i = 0; i < NbCostModelTypes; ++i) {
     //   v.push_back((Type)i);

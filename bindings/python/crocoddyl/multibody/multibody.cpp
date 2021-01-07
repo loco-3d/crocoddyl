@@ -32,6 +32,7 @@ void exposeMultibody() {
   exposeActionImpulseFwdDynamics();
   exposeResidualCentroidalMomentum();
   exposeResidualCoMPosition();
+  exposeResidualFramePlacement();
   exposeResidualFrameVelocity();
   exposeCostState();
   exposeCostCoMPosition();

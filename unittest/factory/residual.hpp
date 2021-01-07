@@ -24,7 +24,7 @@ struct ResidualModelTypes {
     // ResidualModelControl,
     ResidualModelCoMPosition,
     // // ResidualModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
-    // ResidualModelFramePlacement,
+    ResidualModelFramePlacement,
     // ResidualModelFrameRotation,
     // ResidualModelFrameTranslation,
     ResidualModelFrameVelocity,

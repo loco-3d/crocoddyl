@@ -11,7 +11,7 @@
 // #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 // // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
-// #include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/frame-placement.hpp"
 // #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 // #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
@@ -38,9 +38,9 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
     // // case ResidualModelTypes::ResidualModelCentroidalMomentum:
     // //   os << "ResidualModelCentroidalMomentum";
     // //   break;
-    // case ResidualModelTypes::ResidualModelFramePlacement:
-    //   os << "ResidualModelFramePlacement";
-    //   break;
+    case ResidualModelTypes::ResidualModelFramePlacement:
+      os << "ResidualModelFramePlacement";
+      break;
     // case ResidualModelTypes::ResidualModelFrameRotation:
     //   os << "ResidualModelFrameRotation";
     //   break;
@@ -69,7 +69,7 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
   pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
-  // pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
+  pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
@@ -89,11 +89,9 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
     // // case ResidualModelTypes::ResidualModelCentroidalMomentum:
     // //   residual = boost::make_shared<crocoddyl::ResidualModelCentroidalMomentum>(state_, Vector6d::Random(), nu);
     // //   break;
-    // case ResidualModelTypes::ResidualModelFramePlacement:
-    //   residual = boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
-    //       state, activation_factory.create(activation_type, 6), crocoddyl::FramePlacement(frame_index, frame_SE3),
-    //       nu);
-    //   break;
+    case ResidualModelTypes::ResidualModelFramePlacement:
+      residual = boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu);
+      break;
     // case ResidualModelTypes::ResidualModelFrameRotation:
     //   residual = boost::make_shared<crocoddyl::ResidualModelFrameRotation>(
     //       state, activation_factory.create(activation_type, 3),
