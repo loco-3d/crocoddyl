@@ -64,6 +64,8 @@ void exposeResidualFrameTranslation() {
            "returns the allocated data for a predefined residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
+      .add_property("id", &ResidualModelFrameTranslation::get_id, &ResidualModelFrameTranslation::set_id,
+                    "reference frame id")
       .add_property(
           "reference",
           bp::make_function(&ResidualModelFrameTranslation::get_reference, bp::return_internal_reference<>()),
