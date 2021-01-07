@@ -13,6 +13,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -47,9 +48,11 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelFrameTranslationTpl<Scalar> ResidualModelFrameTranslation;
   typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the frame translation cost model
@@ -126,17 +129,18 @@ class CostModelFrameTranslationTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Modify the frame translation reference
-   */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-
-  /**
    * @brief Return the frame translation reference
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
+  /**
+   * @brief Modify the frame translation reference
+   */
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -154,26 +158,14 @@ struct CostDataFrameTranslationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Matrix3xs Matrix3xs;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
   CostDataFrameTranslationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), J(3, model->get_state()->get_nv()), fJf(6, model->get_state()->get_nv()) {
-    J.setZero();
-    fJf.setZero();
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
-    }
-
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
+      : Base(model, data), Arr_J(3, model->get_state()->get_nv()) {
+    Arr_J.setZero();
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix3xs J;
-  Matrix6xs fJf;
+  Matrix3xs Arr_J;
 
   using Base::activation;
   using Base::cost;
@@ -182,9 +174,7 @@ struct CostDataFrameTranslationTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

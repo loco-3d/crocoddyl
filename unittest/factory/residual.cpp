@@ -13,7 +13,7 @@
 // // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 // #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
-// #include "crocoddyl/multibody/residuals/frame-translation.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 // #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 // #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
@@ -44,9 +44,9 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
     // case ResidualModelTypes::ResidualModelFrameRotation:
     //   os << "ResidualModelFrameRotation";
     //   break;
-    // case ResidualModelTypes::ResidualModelFrameTranslation:
-    //   os << "ResidualModelFrameTranslation";
-    //   break;
+    case ResidualModelTypes::ResidualModelFrameTranslation:
+      os << "ResidualModelFrameTranslation";
+      break;
     case ResidualModelTypes::ResidualModelFrameVelocity:
       os << "ResidualModelFrameVelocity";
       break;
@@ -97,11 +97,10 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
     //       state, activation_factory.create(activation_type, 3),
     //       crocoddyl::FrameRotation(frame_index, frame_SE3.rotation()), nu);
     //   break;
-    // case ResidualModelTypes::ResidualModelFrameTranslation:
-    //   residual = boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(
-    //       state, activation_factory.create(activation_type, 3),
-    //       crocoddyl::FrameTranslation(frame_index, frame_SE3.translation()), nu);
-    //   break;
+    case ResidualModelTypes::ResidualModelFrameTranslation:
+      residual = boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(state, frame_index,
+                                                                              frame_SE3.translation(), nu);
+      break;
     case ResidualModelTypes::ResidualModelFrameVelocity:
       residual = boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(
           state, frame_index, pinocchio::Motion::Random(), static_cast<pinocchio::ReferenceFrame>(rand() % 2),
