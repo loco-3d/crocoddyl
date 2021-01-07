@@ -87,6 +87,11 @@ template <typename Scalar>
 struct ResidualDataCentroidalMomentumTpl;
 
 template <typename Scalar>
+class ResidualModelCoMPositionTpl;
+template <typename Scalar>
+struct ResidualDataCoMPositionTpl;
+
+template <typename Scalar>
 class ResidualModelFrameVelocityTpl;
 template <typename Scalar>
 struct ResidualDataFrameVelocityTpl;
@@ -292,6 +297,8 @@ typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMomentum;
 typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;
+typedef ResidualModelCoMPositionTpl<double> ResidualModelCoMPosition;
+typedef ResidualDataCoMPositionTpl<double> ResidualDataCoMPosition;
 typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;
 typedef ResidualDataFrameVelocityTpl<double> ResidualDataFrameVelocity;
 

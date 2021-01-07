@@ -22,7 +22,7 @@ struct ResidualModelTypes {
   enum Type {
     // ResidualModelState,
     // ResidualModelControl,
-    // ResidualModelCoMPosition,
+    ResidualModelCoMPosition,
     // // ResidualModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
     // ResidualModelFramePlacement,
     // ResidualModelFrameRotation,

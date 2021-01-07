@@ -34,6 +34,7 @@ void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeResidualCentroidalMomentum();
+void exposeResidualCoMPosition();
 void exposeResidualFrameVelocity();
 void exposeCostState();
 void exposeCostCoMPosition();

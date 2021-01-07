@@ -15,7 +15,7 @@ template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
                                                          const Vector3s& cref, const std::size_t& nu)
-    : Base(state, activation, nu), cref_(cref) {
+    : Base(state, activation, boost::make_shared<ResidualModelCoMPosition>(state, cref, nu)), cref_(cref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -26,7 +26,7 @@ template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
                                                          const Vector3s& cref)
-    : Base(state, activation), cref_(cref) {
+    : Base(state, activation, boost::make_shared<ResidualModelCoMPosition>(state, cref)), cref_(cref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -36,39 +36,40 @@ CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<State
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref,
                                                          const std::size_t& nu)
-    : Base(state, 3, nu), cref_(cref) {}
+    : Base(state, boost::make_shared<ResidualModelCoMPosition>(state, cref, nu)), cref_(cref) {}
 
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref)
-    : Base(state, 3), cref_(cref) {}
+    : Base(state, boost::make_shared<ResidualModelCoMPosition>(state, cref)), cref_(cref) {}
 
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::~CostModelCoMPositionTpl() {}
 
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual give the reference CoMPosition position
   Data* d = static_cast<Data*>(data.get());
-  data->r = d->pinocchio->com[0] - cref_;
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
+  activation_->calc(data->activation, data->residual->r);
   data->cost = data->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+                                               const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the derivatives of the frame placement
-  const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r);
-  data->Rx.leftCols(nv) = d->pinocchio->Jcom;
-  data->Lx.head(nv).noalias() = d->pinocchio->Jcom.transpose() * data->activation->Ar;
-  d->Arr_Jcom.noalias() = data->activation->Arr * d->pinocchio->Jcom;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = d->pinocchio->Jcom.transpose() * d->Arr_Jcom;
+  // Compute the derivatives of the CoM tracking
+  const std::size_t nv = state_->get_nv();
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
+  Eigen::Block<MatrixXs, -1, -1, true> Jcom = d->residual->Rx.leftCols(nv);
+  data->Lx.head(nv).noalias() = Jcom.transpose() * data->activation->Ar;
+  d->Arr_Jcom.noalias() = data->activation->Arr * Jcom;
+  data->Lxx.topLeftCorner(nv, nv).noalias() = Jcom.transpose() * d->Arr_Jcom;
 }
 
 template <typename Scalar>

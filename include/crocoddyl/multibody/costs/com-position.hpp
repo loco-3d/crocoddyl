@@ -12,6 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -21,7 +22,7 @@ namespace crocoddyl {
  * @brief CoM position cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
- * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respetively. Note that the
+ * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respectively. Note that the
  * dimension of the residual vector is obtained from 3.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -45,9 +46,11 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelCoMPositionTpl<Scalar> ResidualModelCoMPosition;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the CoM position cost model
@@ -129,6 +132,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
+  using Base::residual_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
@@ -151,29 +155,17 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.setZero();
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
-    }
-
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
   Matrix3xs Arr_Jcom;
-
   using Base::activation;
+  using Base::residual;
   using Base::cost;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
   using Base::shared;
 };
 
