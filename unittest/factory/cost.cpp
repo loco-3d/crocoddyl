@@ -81,10 +81,10 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-  //boost::shared_ptr<crocoddyl::ActuationModelFull> actuation_full =
-  //    boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation_floatbase =
-      boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);   
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation = 
+     boost::make_shared<crocoddyl::ActuationModelFull>(state); 
+  boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation_floatbase = 
+     boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
   crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   if (nu == std::numeric_limits<std::size_t>::max()) {
@@ -103,12 +103,12 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
       cost = boost::make_shared<crocoddyl::CostModelCoMPosition>(state, activation_factory.create(activation_type, 3),
                                                                  Eigen::Vector3d::Random(), nu);
       break;
-    //case CostModelTypes::CostModelControlGrav:
-    //  cost = boost::make_shared<crocoddyl::CostModelControlGrav>(state, activation_factory.create(activation_type, nu),actuation_full);
-    //  break;
-    case CostModelTypes::CostModelControlGravContact:
-      cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(state, activation_factory.create(activation_type, nu),actuation_floatbase);
+    case CostModelTypes::CostModelControlGrav:
+      cost = boost::make_shared<crocoddyl::CostModelControlGrav>(state, activation_factory.create(activation_type, nu),actuation);
       break;
+    //case CostModelTypes::CostModelControlGravContact:
+    //  cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(state, activation_factory.create(activation_type, nu),actuation_floatbase);
+    //  break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
     //                                                                      activation_factory.create(activation_type,
