@@ -23,7 +23,7 @@ namespace crocoddyl {
 /**
  * @brief Frame placement residual
  *
- * This residual function defines the frame placement trackign as \f$\mathbf{r}=\mathbf{p}\ominus\mathbf{p}^*\f$, where
+ * This residual function defines the frame placement tracking as \f$\mathbf{r}=\mathbf{p}\ominus\mathbf{p}^*\f$, where
  * \f$\mathbf{p},\mathbf{p}^*\in~\mathbb{SE(3)}\f$ are the current and reference frame placements, respectively. Note
  * that the dimension of the residual vector is 6. Furthermore, the Jacobians of the residual function are
  * computed analytically.
