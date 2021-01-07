@@ -18,8 +18,7 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FramePlacement& Mref, const std::size_t& nu)
     : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)),
-      Mref_(Mref),
-      pin_model_(state->get_pinocchio()) {
+      Mref_(Mref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -31,8 +30,7 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FramePlacement& Mref)
     : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)),
-      Mref_(Mref),
-      pin_model_(state->get_pinocchio()) {
+      Mref_(Mref) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -42,16 +40,12 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FramePlacement& Mref, const std::size_t& nu)
-    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)),
-      Mref_(Mref),
-      pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)), Mref_(Mref) {}
 
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FramePlacement& Mref)
-    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)),
-      Mref_(Mref),
-      pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)), Mref_(Mref) {}
 
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::~CostModelFramePlacementTpl() {}

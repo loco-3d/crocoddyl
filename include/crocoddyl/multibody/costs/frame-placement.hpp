@@ -145,8 +145,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  FramePlacement Mref_;                                                   //!< Reference frame placement
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  FramePlacement Mref_;  //!< Reference frame placement
 };
 
 template <typename _Scalar>
