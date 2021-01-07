@@ -60,21 +60,6 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelFrameVelocityTp
 }
 
 template <typename Scalar>
-void ResidualModelFrameVelocityTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
-  id_ = id;
-}
-
-template <typename Scalar>
-void ResidualModelFrameVelocityTpl<Scalar>::set_reference(const Motion& velocity) {
-  vref_ = velocity;
-}
-
-template <typename Scalar>
-void ResidualModelFrameVelocityTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
-  type_ = type;
-}
-
-template <typename Scalar>
 pinocchio::FrameIndex ResidualModelFrameVelocityTpl<Scalar>::get_id() const {
   return id_;
 }
@@ -87,6 +72,21 @@ const pinocchio::MotionTpl<Scalar>& ResidualModelFrameVelocityTpl<Scalar>::get_r
 template <typename Scalar>
 pinocchio::ReferenceFrame ResidualModelFrameVelocityTpl<Scalar>::get_type() const {
   return type_;
+}
+
+template <typename Scalar>
+void ResidualModelFrameVelocityTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+  id_ = id;
+}
+
+template <typename Scalar>
+void ResidualModelFrameVelocityTpl<Scalar>::set_reference(const Motion& velocity) {
+  vref_ = velocity;
+}
+
+template <typename Scalar>
+void ResidualModelFrameVelocityTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
+  type_ = type;
 }
 
 }  // namespace crocoddyl
