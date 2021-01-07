@@ -47,14 +47,11 @@ void ResidualModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<Re
   // Update the frame placements
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the frame Jacobian at the error point
-  pinocchio::Jlog6(d->rMf, d->rJf);
-  pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
-  d->J.noalias() = d->rJf * d->fJf;
-
   // Compute the derivatives of the frame placement
   const std::size_t nv = state_->get_nv();
-  data->Rx.leftCols(nv) = d->J;
+  pinocchio::Jlog6(d->rMf, d->rJf);
+  pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
+  data->Rx.leftCols(nv) = d->rJf * d->fJf;
 }
 
 template <typename Scalar>

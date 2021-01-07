@@ -45,9 +45,8 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef ResidualDataFrameVelocityTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
-  typedef pinocchio::MotionTpl<Scalar> Motion;
-
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef pinocchio::MotionTpl<Scalar> Motion;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**

@@ -44,7 +44,6 @@ class ResidualModelFramePlacementTpl : public ResidualModelAbstractTpl<_Scalar> 
   typedef ResidualDataFramePlacementTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
-  typedef FramePlacementTpl<Scalar> FramePlacement;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef pinocchio::SE3Tpl<Scalar> SE3;
@@ -143,9 +142,8 @@ struct ResidualDataFramePlacementTpl : public ResidualDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   ResidualDataFramePlacementTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), J(6, model->get_state()->get_nv()), rJf(6, 6), fJf(6, model->get_state()->get_nv()) {
+      : Base(model, data), rJf(6, 6), fJf(6, model->get_state()->get_nv()) {
     r.setZero();
-    J.setZero();
     rJf.setZero();
     fJf.setZero();
     // Check that proper shared data has been passed
@@ -161,7 +159,6 @@ struct ResidualDataFramePlacementTpl : public ResidualDataAbstractTpl<_Scalar> {
   pinocchio::DataTpl<Scalar>* pinocchio;
   Vector6s r;
   pinocchio::SE3Tpl<Scalar> rMf;
-  Matrix6xs J;
   Matrix6s rJf;
   Matrix6xs fJf;
 

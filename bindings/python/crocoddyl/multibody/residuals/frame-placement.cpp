@@ -82,8 +82,6 @@ void exposeResidualFramePlacement() {
       .add_property("rMf",
                     bp::make_getter(&ResidualDataFramePlacement::rMf, bp::return_value_policy<bp::return_by_value>()),
                     "error frame placement of the frame")
-      .add_property("J", bp::make_getter(&ResidualDataFramePlacement::J, bp::return_internal_reference<>()),
-                    "Jacobian at the error point")
       .add_property("rJf", bp::make_getter(&ResidualDataFramePlacement::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
       .add_property("fJf", bp::make_getter(&ResidualDataFramePlacement::fJf, bp::return_internal_reference<>()),
