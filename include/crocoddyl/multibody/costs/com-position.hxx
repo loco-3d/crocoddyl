@@ -59,7 +59,8 @@ void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstr
 
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+                                               const Eigen::Ref<const VectorXs>& x,
+                                               const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the derivatives of the CoM tracking

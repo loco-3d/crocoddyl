@@ -22,8 +22,8 @@ namespace crocoddyl {
  * @brief CoM position cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
- * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respectively. Note that the
- * dimension of the residual vector is obtained from 3.
+ * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respectively. Note that
+ * the dimension of the residual vector is obtained from 3.
  *
  * Both cost and residual derivatives are computed analytically.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
@@ -132,8 +132,8 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
-  using Base::residual_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -159,13 +159,13 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
 
   Matrix3xs Arr_Jcom;
   using Base::activation;
-  using Base::residual;
   using Base::cost;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
+  using Base::residual;
   using Base::shared;
 };
 

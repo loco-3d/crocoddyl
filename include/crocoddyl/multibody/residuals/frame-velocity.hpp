@@ -131,7 +131,6 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void set_type(const pinocchio::ReferenceFrame type);
 
-
  protected:
   using Base::nr_;
   using Base::nu_;
