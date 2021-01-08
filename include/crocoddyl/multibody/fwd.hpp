@@ -97,6 +97,11 @@ template <typename Scalar>
 struct ResidualDataFramePlacementTpl;
 
 template <typename Scalar>
+class ResidualModelFrameRotationTpl;
+template <typename Scalar>
+struct ResidualDataFrameRotationTpl;
+
+template <typename Scalar>
 class ResidualModelFrameTranslationTpl;
 template <typename Scalar>
 struct ResidualDataFrameTranslationTpl;
@@ -311,6 +316,8 @@ typedef ResidualModelCoMPositionTpl<double> ResidualModelCoMPosition;
 typedef ResidualDataCoMPositionTpl<double> ResidualDataCoMPosition;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
 typedef ResidualDataFramePlacementTpl<double> ResidualDataFramePlacement;
+typedef ResidualModelFrameRotationTpl<double> ResidualModelFrameRotation;
+typedef ResidualDataFrameRotationTpl<double> ResidualDataFrameRotation;
 typedef ResidualModelFrameTranslationTpl<double> ResidualModelFrameTranslation;
 typedef ResidualDataFrameTranslationTpl<double> ResidualDataFrameTranslation;
 typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;

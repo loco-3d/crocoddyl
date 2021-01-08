@@ -33,6 +33,7 @@ void exposeMultibody() {
   exposeResidualCentroidalMomentum();
   exposeResidualCoMPosition();
   exposeResidualFramePlacement();
+  exposeResidualFrameRotation();
   exposeResidualFrameTranslation();
   exposeResidualFrameVelocity();
   exposeCostState();

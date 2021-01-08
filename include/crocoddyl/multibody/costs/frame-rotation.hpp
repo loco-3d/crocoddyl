@@ -12,6 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -46,10 +47,11 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelFrameRotationTpl<Scalar> ResidualModelFrameRotation;
   typedef FrameRotationTpl<Scalar> FrameRotation;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::Matrix3s Matrix3s;
+  typedef typename MathBase::Matrix3xs Matrix3xs;
 
   /**
    * @brief Initialize the frame rotation cost model
@@ -129,24 +131,23 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Modify the frame rotation reference
-   */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-
-  /**
    * @brief Return the frame rotation reference
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
+  /**
+   * @brief Modify the frame rotation reference
+   */
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
  private:
-  FrameRotation Rref_;                                                    //!< Reference frame rotation
-  Matrix3s oRf_inv_;                                                      //!< Inverser reference rotation
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  FrameRotation Rref_;  //!< Reference frame rotation
 };
 
 template <typename _Scalar>
@@ -157,40 +158,14 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix3xs Matrix3xs;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
   CostDataFrameRotationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),
-        J(3, model->get_state()->get_nv()),
-        rJf(3, 3),
-        fJf(6, model->get_state()->get_nv()),
-        Arr_J(3, model->get_state()->get_nv()) {
-    r.setZero();
-    rRf.setIdentity();
-    J.setZero();
-    rJf.setZero();
-    fJf.setZero();
+      : Base(model, data), Arr_J(3, model->get_state()->get_nv()) {
     Arr_J.setZero();
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
-    }
-
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Vector3s r;
-  Matrix3s rRf;
-  Matrix3xs J;
-  Matrix3s rJf;
-  Matrix6xs fJf;
   Matrix3xs Arr_J;
 
   using Base::activation;
@@ -200,10 +175,8 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
+  using Base::residual;
   using Base::shared;
-  // using Base::r;
-  using Base::Ru;
-  using Base::Rx;
 };
 
 }  // namespace crocoddyl

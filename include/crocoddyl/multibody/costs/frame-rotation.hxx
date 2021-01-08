@@ -17,10 +17,8 @@ template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameRotation& Rref, const std::size_t& nu)
-    : Base(state, activation, nu),
-      Rref_(Rref),
-      oRf_inv_(Rref.rotation.transpose()),
-      pin_model_(state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation, nu)),
+      Rref_(Rref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -31,7 +29,8 @@ template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                                              const FrameRotation& Rref)
-    : Base(state, activation), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()), pin_model_(state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation)),
+      Rref_(Rref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -41,51 +40,44 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref, const std::size_t& nu)
-    : Base(state, 3, nu), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()), pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation, nu)), Rref_(Rref) {}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref)
-    : Base(state, 3), Rref_(Rref), oRf_inv_(Rref.rotation.transpose()), pin_model_(state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation)), Rref_(Rref) {}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}
 
 template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+                                             const Eigen::Ref<const VectorXs>& x,
+                                             const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference frame rotation
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the frame placement w.r.t. the reference frame
-  pinocchio::updateFramePlacement(*pin_model_.get(), *d->pinocchio, Rref_.id);
-  d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[Rref_.id].rotation();
-  d->r = pinocchio::log3(d->rRf);
-  data->r = d->r;  // this is needed because we overwrite it
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(d->activation, d->r);
+  activation_->calc(d->activation, d->residual->r);
   d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>&,
-                                                 const Eigen::Ref<const VectorXs>&) {
-  // Update the frame placements
+                                                 const Eigen::Ref<const VectorXs>& x,
+                                                 const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and frame placement residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(d->activation, d->residual->r);
 
-  // // Compute the frame Jacobian at the error point
-  pinocchio::Jlog3(d->rRf, d->rJf);
-  pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, Rref_.id, pinocchio::LOCAL, d->fJf);
-  d->J.noalias() = d->rJf * d->fJf.template bottomRows<3>();
-
-  // Compute the derivatives of the frame placement
-  const std::size_t& nv = state_->get_nv();
-  activation_->calcDiff(data->activation, data->r);
-  data->Rx.leftCols(nv) = d->J;
-  data->Lx.head(nv).noalias() = d->J.transpose() * data->activation->Ar;
-  d->Arr_J.noalias() = data->activation->Arr * d->J;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = d->J.transpose() * d->Arr_J;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  const std::size_t nv = state_->get_nv();
+  Eigen::Ref<Matrix3xs> J(data->residual->Rx.leftCols(nv));
+  data->Lx.head(nv).noalias() = J.transpose() * data->activation->Ar;
+  d->Arr_J.noalias() = data->activation->Arr * J;
+  data->Lxx.topLeftCorner(nv, nv).noalias() = J.transpose() * d->Arr_J;
 }
 
 template <typename Scalar>
@@ -95,20 +87,22 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar
 }
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameRotation)) {
-    Rref_ = *static_cast<const FrameRotation*>(pv);
-    oRf_inv_ = Rref_.rotation.transpose();
+    FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
+    ref_map = Rref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }
 }
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelFrameRotationTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameRotation)) {
-    FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
-    ref_map = Rref_;
+    Rref_ = *static_cast<const FrameRotation*>(pv);
+    ResidualModelFrameRotation* residual = static_cast<ResidualModelFrameRotation*>(residual_.get());
+    residual->set_id(Rref_.id);
+    residual->set_reference(Rref_.rotation);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");
   }

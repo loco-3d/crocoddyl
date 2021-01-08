@@ -36,6 +36,7 @@ void exposeActionImpulseFwdDynamics();
 void exposeResidualCentroidalMomentum();
 void exposeResidualCoMPosition();
 void exposeResidualFramePlacement();
+void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();
 void exposeResidualFrameVelocity();
 void exposeCostState();

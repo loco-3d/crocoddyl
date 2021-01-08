@@ -20,13 +20,13 @@ void exposeCostFrameRotation() {
       "CostModelFrameRotation",
       "This cost function defines a residual vector as r = R - Rref, with R and Rref as the current and reference "
       "frame rotations, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation, int>(
-          bp::args("self", "state", "activation", "Rref", "nu"),
-          "Initialize the frame rotation cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param Rref: reference frame rotation\n"
-          ":param nu: dimension of control vector"))
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation,
+               std::size_t>(bp::args("self", "state", "activation", "Rref", "nu"),
+                            "Initialize the frame rotation cost model.\n\n"
+                            ":param state: state of the multibody system\n"
+                            ":param activation: activation model\n"
+                            ":param Rref: reference frame rotation\n"
+                            ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameRotation>(
           bp::args("self", "state", "activation", "Rref"),
           "Initialize the frame rotation cost model.\n\n"
@@ -34,7 +34,7 @@ void exposeCostFrameRotation() {
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param Rref: reference frame rotation"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameRotation, std::size_t>(
           bp::args("self", "state", "Rref", "nu"),
           "Initialize the frame rotation cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
@@ -95,17 +95,7 @@ void exposeCostFrameRotation() {
           bp::args("self", "model", "data"),
           "Create frame rotation cost data.\n\n"
           ":param model: frame rotation cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("r", bp::make_getter(&CostDataFrameRotation::r, bp::return_internal_reference<>()),
-                    "cost residual")
-      .add_property("rRf", bp::make_getter(&CostDataFrameRotation::rRf, bp::return_internal_reference<>()),
-                    "rotation error of the frame")
-      .add_property("J", bp::make_getter(&CostDataFrameRotation::J, bp::return_internal_reference<>()),
-                    "Jacobian at the error point")
-      .add_property("rJf", bp::make_getter(&CostDataFrameRotation::rJf, bp::return_internal_reference<>()),
-                    "error Jacobian of the frame")
-      .add_property("fJf", bp::make_getter(&CostDataFrameRotation::fJf, bp::return_internal_reference<>()),
-                    "local Jacobian of the frame");
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 }
 
 }  // namespace python
