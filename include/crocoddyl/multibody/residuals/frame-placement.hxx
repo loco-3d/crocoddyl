@@ -51,7 +51,7 @@ void ResidualModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<Re
   const std::size_t nv = state_->get_nv();
   pinocchio::Jlog6(d->rMf, d->rJf);
   pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
-  data->Rx.leftCols(nv) = d->rJf * d->fJf;
+  data->Rx.leftCols(nv).noalias() = d->rJf * d->fJf;
 }
 
 template <typename Scalar>

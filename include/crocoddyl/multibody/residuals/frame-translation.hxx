@@ -47,7 +47,7 @@ void ResidualModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<
   // Compute the derivatives of the frame placement
   const std::size_t nv = state_->get_nv();
   pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
-  d->Rx.leftCols(nv) = d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
+  d->Rx.leftCols(nv).noalias() = d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
   ;
 }
 
