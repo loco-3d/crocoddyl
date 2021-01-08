@@ -15,11 +15,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref, const std::size_t& nu)
-    : Base(state, activation, nu), xref_(xref) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, activation, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -35,11 +31,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref)
-    : Base(state, activation), xref_(xref) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, activation, boost::make_shared<ResidualModelState>(state, xref)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -54,11 +46,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const VectorXs& xref, const std::size_t& nu)
-    : Base(state, state->get_ndx(), nu), xref_(xref) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -73,11 +61,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const VectorXs& xref)
-    : Base(state, state->get_ndx()), xref_(xref) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, boost::make_shared<ResidualModelState>(state, xref)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -93,11 +77,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const std::size_t& nu)
-    : Base(state, activation, nu), xref_(state->zero()) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, activation, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -112,11 +92,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const std::size_t& nu)
-    : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -131,11 +107,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation), xref_(state->zero()) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, activation, boost::make_shared<ResidualModelState>(state)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -149,11 +121,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
-    : Base(state, state->get_ndx()), xref_(state->zero()) {
-  if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
+    : Base(state, boost::make_shared<ResidualModelState>(state)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -170,33 +138,33 @@ CostModelStateTpl<Scalar>::~CostModelStateTpl() {}
 
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
+                                     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  state_->diff(xref_, x, data->r);
-  activation_->calc(data->activation, data->r);
+  residual_->calc(data->residual, x, u);
+  activation_->calc(data->activation, data->residual->r);
   data->cost = data->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
+                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
-  activation_->calcDiff(data->activation, data->r);
+  residual_->calcDiff(data->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
   if (pin_model_) {
     typedef Eigen::Block<MatrixXs> MatrixBlock;
     for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model_->njoints; ++i) {
-      const MatrixBlock& RxBlock =
-          data->Rx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i]);
+      const MatrixBlock& RxBlock = data->residual->Rx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i],
+                                                            pin_model_->nvs[i], pin_model_->nvs[i]);
       data->Lx.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]).noalias() =
           RxBlock.transpose() * data->activation->Ar.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]);
       data->Lxx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i]).noalias() =
@@ -218,19 +186,6 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelStateTpl<Scalar>::creat
 }
 
 template <typename Scalar>
-void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
-  if (ti == typeid(VectorXs)) {
-    if (static_cast<std::size_t>(static_cast<const VectorXs*>(pv)->size()) != state_->get_nx()) {
-      throw_pretty("Invalid argument: "
-                   << "reference has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-    }
-    xref_ = *static_cast<const VectorXs*>(pv);
-  } else {
-    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
-  }
-}
-
-template <typename Scalar>
 void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(VectorXs)) {
     VectorXs& tmp = *static_cast<VectorXs*>(pv);
@@ -239,6 +194,21 @@ void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void
     for (std::size_t i = 0; i < state_->get_nx(); ++i) {
       ref_map[i] = xref_[i];
     }
+  } else {
+    throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
+  }
+}
+
+template <typename Scalar>
+void CostModelStateTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+  if (ti == typeid(VectorXs)) {
+    if (static_cast<std::size_t>(static_cast<const VectorXs*>(pv)->size()) != state_->get_nx()) {
+      throw_pretty("Invalid argument: "
+                   << "reference has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    xref_ = *static_cast<const VectorXs*>(pv);
+    ResidualModelState* residual = static_cast<ResidualModelState*>(residual_.get());
+    residual->set_reference(xref_);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be VectorXs)");
   }

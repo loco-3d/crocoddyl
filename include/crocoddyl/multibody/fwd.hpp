@@ -111,6 +111,11 @@ class ResidualModelFrameVelocityTpl;
 template <typename Scalar>
 struct ResidualDataFrameVelocityTpl;
 
+template <typename Scalar>
+class ResidualModelStateTpl;
+template <typename Scalar>
+struct ResidualDataStateTpl;
+
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
@@ -322,6 +327,8 @@ typedef ResidualModelFrameTranslationTpl<double> ResidualModelFrameTranslation;
 typedef ResidualDataFrameTranslationTpl<double> ResidualDataFrameTranslation;
 typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;
 typedef ResidualDataFrameVelocityTpl<double> ResidualDataFrameVelocity;
+typedef ResidualModelStateTpl<double> ResidualModelState;
+typedef ResidualDataStateTpl<double> ResidualDataState;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;

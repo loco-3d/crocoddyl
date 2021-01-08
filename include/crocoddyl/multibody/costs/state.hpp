@@ -11,8 +11,8 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
@@ -21,7 +21,7 @@ namespace crocoddyl {
  * @brief State cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
- * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respetively, which belong to the
+ * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respectively, which belong to the
  * state manifold \f$\mathcal{X}\f$. Note that the dimension of the residual vector is obtained from
  * `StateAbstract::get_ndx()`.
  *
@@ -45,6 +45,7 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelStateTpl<Scalar> ResidualModelState;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -170,17 +171,18 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Modify the state reference
-   */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-
-  /**
    * @brief Return the state reference
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
+  /**
+   * @brief Modify the state reference
+   */
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -214,9 +216,7 @@ struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

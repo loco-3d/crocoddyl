@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "residual.hpp"
-// #include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 // #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 // // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
@@ -26,9 +26,9 @@ const std::vector<ResidualModelTypes::Type> ResidualModelTypes::all(ResidualMode
 
 std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
   switch (type) {
-    // case ResidualModelTypes::ResidualModelState:
-    //   os << "ResidualModelState";
-    //   break;
+    case ResidualModelTypes::ResidualModelState:
+      os << "ResidualModelState";
+      break;
     // case ResidualModelTypes::ResidualModelControl:
     //   os << "ResidualModelControl";
     //   break;
@@ -74,10 +74,9 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
     nu = state->get_nv();
   }
   switch (residual_type) {
-    // case ResidualModelTypes::ResidualModelState:
-    //   residual = boost::make_shared<crocoddyl::ResidualModelState>(
-    //       state, activation_factory.create(activation_type, state->get_ndx()), state->rand(), nu);
-    //   break;
+    case ResidualModelTypes::ResidualModelState:
+      residual = boost::make_shared<crocoddyl::ResidualModelState>(state, state->rand(), nu);
+      break;
     // case ResidualModelTypes::ResidualModelControl:
     //   residual = boost::make_shared<crocoddyl::ResidualModelControl>(state,
     //   activation_factory.create(activation_type, nu),

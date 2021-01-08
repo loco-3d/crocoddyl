@@ -34,6 +34,7 @@ struct CostModelTypes {
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
+    v.push_back(CostModelState);
     v.push_back(CostModelCoMPosition);
     v.push_back(CostModelFramePlacement);
     v.push_back(CostModelFrameRotation);

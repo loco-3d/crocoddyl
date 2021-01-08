@@ -20,7 +20,7 @@ namespace unittest {
 
 struct ResidualModelTypes {
   enum Type {
-    // ResidualModelState,
+    ResidualModelState,
     // ResidualModelControl,
     ResidualModelCoMPosition,
     // // ResidualModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
