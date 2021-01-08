@@ -31,7 +31,7 @@ template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                       const Eigen::Ref<const VectorXs>&,
                                                       const Eigen::Ref<const VectorXs>&) {
-  // Compute the residual residual give the reference CentroidalMomentum
+  // Compute the residual residual give the reference centroidal momentum
   Data* d = static_cast<Data*>(data.get());
   data->r = d->pinocchio->hg.toVector() - href_;
 }
@@ -42,8 +42,8 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_pt
                                                           const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   const std::size_t& nv = state_->get_nv();
-  Eigen::Ref<Matrix6xs> Rq = data->Rx.leftCols(nv);
-  Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
+  Eigen::Ref<Matrix6xs> Rq(data->Rx.leftCols(nv));
+  Eigen::Ref<Matrix6xs> Rv(data->Rx.rightCols(nv));
   pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
   // The derivative computation in pinocchio does not take the frame of reference into
