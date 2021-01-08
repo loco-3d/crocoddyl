@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/cost-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -133,12 +134,21 @@ void exposeCostAbstract() {
                     bp::make_setter(&CostDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
-      .add_property("r", bp::make_getter(&CostDataAbstract::r, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::r), "cost residual")
-      .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")
-      .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Ru), "Jacobian of the cost residual");
+      .add_property("r",
+                    bp::make_getter(&CostDataAbstract::r,
+                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.r.")),
+                    bp::make_setter(&CostDataAbstract::r, deprecated<>("Deprecated. Use residual.r.")),
+                    "cost residual")
+      .add_property("Rx",
+                    bp::make_getter(&CostDataAbstract::Rx,
+                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Rx.")),
+                    bp::make_setter(&CostDataAbstract::Rx, deprecated<>("Deprecated. Use residual.Rx.")),
+                    "Jacobian of the cost residual")
+      .add_property("Ru",
+                    bp::make_getter(&CostDataAbstract::Ru,
+                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
+                    bp::make_setter(&CostDataAbstract::Ru, deprecated<>("Deprecated. Use residual.Ru.")),
+                    "Jacobian of the cost residual");
 }
 
 }  // namespace python
