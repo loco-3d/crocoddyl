@@ -51,7 +51,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   typedef FramePlacementTpl<Scalar> FramePlacement;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
 
   /**
    * @brief Initialize the frame placement cost model

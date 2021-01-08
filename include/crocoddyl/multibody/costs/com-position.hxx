@@ -48,7 +48,7 @@ CostModelCoMPositionTpl<Scalar>::~CostModelCoMPositionTpl() {}
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual give the reference CoMPosition position
+  // Compute the cost residual give the reference CoM position
   Data* d = static_cast<Data*>(data.get());
   residual_->calc(d->residual, x, u);
 
@@ -61,13 +61,14 @@ template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>& x,
                                                const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and CoM position residual models
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the derivatives of the CoM tracking
-  const std::size_t nv = state_->get_nv();
   residual_->calcDiff(d->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
-  Eigen::Block<MatrixXs, -1, -1, true> Jcom = d->residual->Rx.leftCols(nv);
+
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  const std::size_t nv = state_->get_nv();
+  Eigen::Ref<Matrix3xs> Jcom(data->residual->Rx.leftCols(nv));
   data->Lx.head(nv).noalias() = Jcom.transpose() * data->activation->Ar;
   d->Arr_Jcom.noalias() = data->activation->Arr * Jcom;
   data->Lxx.topLeftCorner(nv, nv).noalias() = Jcom.transpose() * d->Arr_Jcom;

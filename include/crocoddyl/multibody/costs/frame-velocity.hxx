@@ -60,9 +60,8 @@ template <typename Scalar>
 void CostModelFrameVelocityTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                              const Eigen::Ref<const VectorXs>& x,
                                              const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference frame velocity
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the frame velocity residual
   residual_->calc(d->residual, x, u);
 
   // Compute the cost
@@ -74,14 +73,12 @@ template <typename Scalar>
 void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                  const Eigen::Ref<const VectorXs>& x,
                                                  const Eigen::Ref<const VectorXs>& u) {
-  // Get the partial derivatives of the local frame velocity
+  // Compute the derivatives of the activation and frame velocity residual models
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the Jacobians of frame velocity residual
   residual_->calcDiff(d->residual, x, u);
-
-  // Compute the derivatives of the frame velocity
   activation_->calcDiff(data->activation, d->residual->r);
+
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   data->Lx.noalias() = d->residual->Rx.transpose() * data->activation->Ar;
   d->Arr_Rx.noalias() = data->activation->Arr * d->residual->Rx;
   data->Lxx.noalias() = d->residual->Rx.transpose() * d->Arr_Rx;

@@ -50,7 +50,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix3xs Matrix3xs;
 
   /**
    * @brief Initialize the CoM position cost model

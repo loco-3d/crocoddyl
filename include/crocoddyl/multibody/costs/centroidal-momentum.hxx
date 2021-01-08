@@ -52,10 +52,11 @@ template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                                   const Eigen::Ref<const VectorXs>& x,
                                                   const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual give the reference CentroidalMomentum
+  // Compute the cost residual given the reference centroidal momentum
   Data* d = static_cast<Data*>(data.get());
   residual_->calc(d->residual, x, u);
 
+  // Compute the cost
   activation_->calc(data->activation, data->residual->r);
   data->cost = data->activation->a_value;
 }
@@ -64,13 +65,16 @@ template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                       const Eigen::Ref<const VectorXs>& x,
                                                       const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and centroidal momentum residual models
   Data* d = static_cast<Data*>(data.get());
   activation_->calcDiff(data->activation, data->residual->r);
   residual_->calcDiff(d->residual, x, u);
 
-  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
-  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  Eigen::Ref<Matrix6xs> Rx(data->residual->Rx);
+  d->Arr_Rx.noalias() = data->activation->Arr * Rx;
+  data->Lx.noalias() = Rx.transpose() * data->activation->Ar;
+  data->Lxx.noalias() = Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>

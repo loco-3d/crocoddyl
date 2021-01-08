@@ -54,9 +54,8 @@ template <typename Scalar>
 void CostModelFramePlacementTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                               const Eigen::Ref<const VectorXs>& x,
                                               const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference frame placement
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the frame placement w.r.t. the reference frame
   residual_->calc(d->residual, x, u);
 
   // Compute the cost
@@ -68,14 +67,14 @@ template <typename Scalar>
 void CostModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                   const Eigen::Ref<const VectorXs>& x,
                                                   const Eigen::Ref<const VectorXs>& u) {
-  // Update the frame placements
+  // Compute the derivatives of the activation and frame placement residual models
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the derivatives of the frame placement
-  const std::size_t nv = state_->get_nv();
   residual_->calcDiff(d->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
-  Eigen::Block<MatrixXs, -1, -1, true> J = data->residual->Rx.leftCols(nv);
+
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  const std::size_t nv = state_->get_nv();
+  Eigen::Ref<Matrix6xs> J(data->residual->Rx.leftCols(nv));
   data->Lx.head(nv).noalias() = J.transpose() * data->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * J;
   data->Lxx.topLeftCorner(nv, nv).noalias() = J.transpose() * d->Arr_J;

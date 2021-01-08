@@ -68,14 +68,14 @@ template <typename Scalar>
 void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                                     const Eigen::Ref<const VectorXs>& x,
                                                     const Eigen::Ref<const VectorXs>& u) {
-  // Update the frame placements
+  // Compute the derivatives of the activation and frame translation residual models
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the derivatives of the frame placement
   const std::size_t nv = state_->get_nv();
   residual_->calcDiff(d->residual, x, u);
   activation_->calcDiff(d->activation, d->residual->r);
-  Eigen::Block<MatrixXs, -1, -1, true> J = data->residual->Rx.leftCols(nv);
+
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  Eigen::Ref<Matrix3xs> J(data->residual->Rx.leftCols(nv));
   d->Lx.head(nv) = J.transpose() * d->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * J;
   d->Lxx.topLeftCorner(nv, nv) = J.transpose() * d->Arr_J;
