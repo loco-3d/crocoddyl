@@ -18,7 +18,14 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ActionModelTypes {
-  enum Type { ActionModelUnicycle, ActionModelLQRDriftFree, ActionModelLQR, NbActionModelTypes };
+  enum Type {
+    ActionModelUnicycle,
+    ActionModelLQRDriftFree,
+    ActionModelLQR,
+    ImpulseFwdDynamicsHyQ,
+    ImpulseFwdDynamicsTalos,
+    NbActionModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
