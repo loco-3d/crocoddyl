@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2018-2021, University of Edinburgh
+// Copyright (C) 2018-2020, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,19 +38,26 @@ std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) 
 ImpulseModelFactory::ImpulseModelFactory() {}
 ImpulseModelFactory::~ImpulseModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(
-    ImpulseModelTypes::Type impulse_type, PinocchioModelTypes::Type model_type) const {
+boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(ImpulseModelTypes::Type impulse_type,
+                                                                               PinocchioModelTypes::Type model_type,
+                                                                               const std::string frame_name) const {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::make_shared<crocoddyl::StateMultibody>(model_factory.create());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
+  std::size_t frame_id = 0;
+  if (frame_name == "") {
+    frame_id = model_factory.get_frame_id();
+  } else {
+    frame_id = state->get_pinocchio()->getFrameId(frame_name);
+  }
   switch (impulse_type) {
     case ImpulseModelTypes::ImpulseModel3D:
-      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, model_factory.get_frame_id());
+      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, frame_id);
       break;
     case ImpulseModelTypes::ImpulseModel6D:
-      impulse = boost::make_shared<crocoddyl::ImpulseModel6D>(state, model_factory.get_frame_id());
+      impulse = boost::make_shared<crocoddyl::ImpulseModel6D>(state, frame_id);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ImpulseModelTypes::Type given");

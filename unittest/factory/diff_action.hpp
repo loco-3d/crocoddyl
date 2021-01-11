@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2021, University of Edinburgh
 // Copyright (C) 2020 CTU, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,8 +12,6 @@
 
 #include "state.hpp"
 #include "actuation.hpp"
-#include "cost.hpp"
-#include "contact.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
