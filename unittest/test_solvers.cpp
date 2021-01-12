@@ -100,6 +100,9 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   }
   xs.push_back(state->rand());
 
+  // Print the name of the action model for introspection
+  std::cout << ActionModelTypes::all[action_type] << std::endl;
+
   // Solve the problem using the KKT solver
   crocoddyl::SolverKKT kkt(problem);
   kkt.setCallbacks(cbs);
