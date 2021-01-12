@@ -11,6 +11,9 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/core/actuation-base.hpp"
 
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -31,9 +34,28 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::T
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
+
+  if (cost_type == CostModelTypes::CostModelControlGrav) {
+	    if (state->get_pinocchio()->existJointName("root_joint")) {
+	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
+        }
+        else {
+            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
+        }
+        
+        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
+	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
+	    data = model->createData(&shared_data);
+  }
+  else {
+	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
+	    data = model->createData(&shared_data);
+	    
+  }
+  
   data->cost = nan("");
 
   // Generating random values for the state and control
@@ -62,12 +84,33 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
-
-  // Create the equivalent num diff model and data.
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
+  
+    // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
+  
+  if (cost_type == CostModelTypes::CostModelControlGrav) {
+	    if (state->get_pinocchio()->existJointName("root_joint")) {
+	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
+        }
+        else {
+            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
+        }
+        
+        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
+	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
+	    data = model->createData(&shared_data);
+	    data_num_diff = model_num_diff.createData(&shared_data);
+  }
+  else {
+	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
+	    data = model->createData(&shared_data);
+	    data_num_diff = model_num_diff.createData(&shared_data);
+	    
+  }
 
   // Generating random values for the state and control
   const Eigen::VectorXd& x = model->get_state()->rand();
@@ -97,12 +140,31 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
-
-  // Create the equivalent num diff model and data.
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
+  // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
+  
+  if (cost_type == CostModelTypes::CostModelControlGrav) {
+	    if (state->get_pinocchio()->existJointName("root_joint")) {
+	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
+        }
+        else {
+            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
+        }
+        
+        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
+	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
+	    data = model->createData(&shared_data);
+	    data_num_diff = model_num_diff.createData(&shared_data);
+  }
+  else {
+	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
+	    data = model->createData(&shared_data);
+	    data_num_diff = model_num_diff.createData(&shared_data);
+	    
+  }
 
   // Generating random values for the state and control
   const Eigen::VectorXd& x = model->get_state()->rand();
@@ -153,7 +215,6 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
@@ -185,13 +246,32 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
-
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
   cost_sum.addCost("myCost", model, 1.);
-  const boost::shared_ptr<crocoddyl::CostDataSum>& data_sum = cost_sum.createData(&shared_data);
+  boost::shared_ptr<crocoddyl::CostDataSum> data_sum;
+  
+  if (cost_type == CostModelTypes::CostModelControlGrav) {
+	    if (state->get_pinocchio()->existJointName("root_joint")) {
+	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
+        }
+        else {
+            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
+        }
+        
+        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
+	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
+	    data = model->createData(&shared_data);
+	    data_sum = cost_sum.createData(&shared_data);
+  }
+  else {
+	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
+	    data = model->createData(&shared_data);
+	    data_sum = cost_sum.createData(&shared_data);    
+  }
 
   // Generating random values for the state and control
   const Eigen::VectorXd& x = state->rand();
