@@ -238,13 +238,13 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
                           state, activation,
                           crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("left_sole_link"), cone),
                           actuation->get_nu()),
-                      0.001);
+                      0.1);
         cost->addCost("rf_cone",
                       boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
                           state, activation,
                           crocoddyl::FrameFrictionCone(state->get_pinocchio()->getFrameId("right_sole_link"), cone),
                           actuation->get_nu()),
-                      0.001);
+                      0.1);
       }
       break;
     default:
@@ -254,11 +254,11 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   cost->addCost("state",
                 CostModelFactory().create(CostModelTypes::CostModelState, state_type,
                                           ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
-                1.);
+                0.1);
   cost->addCost("control",
                 CostModelFactory().create(CostModelTypes::CostModelControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
-                1.);
+                0.1);
   action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
                                                                                     0., true);
   return action;
