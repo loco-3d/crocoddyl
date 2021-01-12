@@ -11,8 +11,10 @@
 
 #include <iterator>
 
+#include "state.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -22,8 +24,8 @@ struct ActionModelTypes {
     ActionModelUnicycle,
     ActionModelLQRDriftFree,
     ActionModelLQR,
-    ImpulseFwdDynamicsHyQ,
-    ImpulseFwdDynamicsTalos,
+    ImpulseFwdDynamics_HyQ,
+    ImpulseFwdDynamics_Talos,
     NbActionModelTypes
   };
   static std::vector<Type> init_all() {
@@ -48,6 +50,10 @@ class ActionModelFactory {
 
   boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type,
                                                            bool secondInstance = false) const;
+
+ private:
+  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> create_impulseFwdDynamics(
+      StateModelTypes::Type state_type) const;
 };
 
 }  // namespace unittest
