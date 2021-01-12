@@ -51,7 +51,6 @@ class ActionModelFactory {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type,
                                                            bool secondInstance = false) const;
 
- private:
   boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> create_impulseFwdDynamics(
       StateModelTypes::Type state_type) const;
 };
