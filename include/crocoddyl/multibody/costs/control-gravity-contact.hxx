@@ -49,7 +49,7 @@ void CostModelControlGravContactTpl<Scalar>::calc(
       x.head(state_->get_nq());
   
   actuation_model_->calc(d->actuation,x,u); 
-  data->r = d->actuation->tau - pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext);
+  data->r = pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext) - d->actuation->tau;
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -75,20 +75,14 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(
   actuation_model_->calcDiff(d->actuation,x,u); 
   const std::size_t& nv = state_->get_nv();
 
-  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
-  data->Lx.noalias() = d->actuation->dtau_dx.transpose() * data->activation->Ar;
-  data->Lx.head(nv).noalias() -= d->dg_dq.transpose() * data->activation->Ar;
+  data->Lu.noalias() = -d->actuation->dtau_du.transpose() * data->activation->Ar;
+  data->Lx.head(nv).noalias() = d->dg_dq.transpose() * data->activation->Ar;
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
-  d->Arr_dtaudx.noalias() = data->activation->Arr * d->actuation->dtau_dx;
   d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;
-  data->Lxx.noalias() = d->actuation->dtau_dx.transpose() * d->Arr_dtaudx;
-  data->Lxx.topLeftCorner(nv,nv).noalias() += d->dg_dq.transpose() * d->Arr_dgdq;
-  data->Lxx.topRows(nv).noalias() -= d->dg_dq.transpose() * d->Arr_dtaudx;
-  data->Lxx.leftCols(nv).noalias() -= d->actuation->dtau_dx.transpose() * d->Arr_dgdq;
   
-  data->Lxu.noalias() = d->Arr_dtaudx.transpose() * d->actuation->dtau_du;
-  data->Lxu.topRows(nv).noalias() -= d->Arr_dgdq.transpose() * d->actuation->dtau_du;
+  data->Lxx.topLeftCorner(nv,nv).noalias() = d->dg_dq.transpose() * d->Arr_dgdq;  
+  data->Lxu.topRows(nv).noalias() = d->Arr_dgdq.transpose() * d->actuation->dtau_du;
   data->Luu.diagonal().noalias() = (d->actuation->dtau_du.transpose() * d->Arr_dtaudu).diagonal();
 }
 

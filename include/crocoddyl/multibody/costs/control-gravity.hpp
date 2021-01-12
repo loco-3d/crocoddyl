@@ -139,11 +139,9 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
                          DataCollectorAbstract *const data)
       : Base(model, data), dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
         Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_dtaudx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         Arr_dtaudu(model->get_state()->get_nv(), model->get_nu()) {
     dg_dq.setZero();
     Arr_dgdq.setZero();
-    Arr_dtaudx.setZero();
     Arr_dtaudu.setZero();
     // Check that proper shared data has been passed
     DataCollectorActMultibodyTpl<Scalar> *d =
@@ -161,7 +159,6 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar>> actuation;
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;
-  MatrixXs Arr_dtaudx;
   MatrixXs Arr_dtaudu;
   using Base::activation;
   using Base::cost;

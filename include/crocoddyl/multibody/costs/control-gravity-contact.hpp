@@ -139,7 +139,6 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
@@ -148,11 +147,9 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
       : Base(model, data),
         dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
         Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_dtaudx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         Arr_dtaudu(model->get_state()->get_nv(), model->get_nu()) {
     dg_dq.setZero();
     Arr_dgdq.setZero();
-    Arr_dtaudx.setZero();
     Arr_dtaudu.setZero();
     // Check that proper shared data has been passed
     DataCollectorActMultibodyInContactTpl<Scalar> *d =
@@ -164,17 +161,14 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
     fext = d->contacts->fext;
-    contacts = d->contacts->contacts;
     actuation = d->actuation;
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar>> fext;
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar>> actuation;
-  typename ContactModelMultiple::ContactDataContainer contacts;
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;
-  MatrixXs Arr_dtaudx;
   MatrixXs Arr_dtaudu;
   using Base::activation;
   using Base::cost;
