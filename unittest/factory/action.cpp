@@ -33,11 +33,11 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
     case ActionModelTypes::ActionModelLQR:
       os << "ActionModelLQR";
       break;
-    case ActionModelTypes::ImpulseFwdDynamics_HyQ:
-      os << "ImpulseFwdDynamics_HyQ";
+    case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
+      os << "ActionModelImpulseFwdDynamics_HyQ";
       break;
-    case ActionModelTypes::ImpulseFwdDynamics_Talos:
-      os << "ImpulseFwdDynamics_Talos";
+    case ActionModelTypes::ActionModelImpulseFwdDynamics_Talos:
+      os << "ActionModelImpulseFwdDynamics_Talos";
       break;
     case ActionModelTypes::NbActionModelTypes:
       os << "NbActionModelTypes";
@@ -72,10 +72,10 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(Act
         action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, false);
       }
       break;
-    case ActionModelTypes::ImpulseFwdDynamics_HyQ:
+    case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
       action = create_impulseFwdDynamics(StateModelTypes::StateMultibody_HyQ);
       break;
-    case ActionModelTypes::ImpulseFwdDynamics_Talos:
+    case ActionModelTypes::ActionModelImpulseFwdDynamics_Talos:
       action = create_impulseFwdDynamics(StateModelTypes::StateMultibody_Talos);
       break;
     default:

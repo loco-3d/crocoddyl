@@ -24,8 +24,8 @@ struct ActionModelTypes {
     ActionModelUnicycle,
     ActionModelLQRDriftFree,
     ActionModelLQR,
-    ImpulseFwdDynamics_HyQ,
-    ImpulseFwdDynamics_Talos,
+    ActionModelImpulseFwdDynamics_HyQ,
+    ActionModelImpulseFwdDynamics_Talos,
     NbActionModelTypes
   };
   static std::vector<Type> init_all() {
