@@ -40,6 +40,7 @@ void exposeResidualFramePlacement();
 void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();
 void exposeResidualFrameVelocity();
+void exposeResidualImpulseCoM();
 void exposeCostState();
 void exposeCostCoMPosition();
 void exposeCostCentroidalMomentum();

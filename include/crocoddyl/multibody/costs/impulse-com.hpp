@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,8 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/residuals/impulse-com.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -48,6 +47,7 @@ class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelImpulseCoMTpl<Scalar> ResidualModelImpulseCoM;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
@@ -99,11 +99,9 @@ class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
  protected:
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
-
- private:
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
 template <typename _Scalar>
@@ -114,36 +112,15 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix3xs Matrix3xs;
 
   template <template <typename Scalar> class Model>
   CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),
-        Arr_Rx(3, model->get_state()->get_nv()),
-        dvc_dq(3, model->get_state()->get_nv()),
-        ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()) {
+      : Base(model, data), Arr_Rx(3, model->get_state()->get_nv()) {
     Arr_Rx.setZero();
-    dvc_dq.setZero();
-    ddv_dv.setZero();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    pinocchio_internal = pinocchio::DataTpl<Scalar>(*state->get_pinocchio().get());
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyInImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInImpulse");
-    }
-    pinocchio = d->pinocchio;
-    impulses = d->impulses;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;
   Matrix3xs Arr_Rx;
-  Matrix3xs dvc_dq;
-  MatrixXs ddv_dv;
-  pinocchio::DataTpl<Scalar> pinocchio_internal;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -151,9 +128,7 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 
