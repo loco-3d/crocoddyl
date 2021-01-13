@@ -101,8 +101,7 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
    * @return the activation data
    */
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     return data;
   };
 
