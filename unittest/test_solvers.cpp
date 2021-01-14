@@ -44,7 +44,20 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   boost::shared_ptr<crocoddyl::SolverKKT> kkt =
       boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
 
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = kkt->get_problem();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+
   // Compute the search direction
+  kkt->setCandidate(xs, us);
   kkt->computeDirection();
 
   // define some aliases
@@ -57,7 +70,8 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   BOOST_CHECK((hess - hess.transpose()).isMuchSmallerThan(1.0, 1e-9));
 
   // Check initial state
-  BOOST_CHECK((kkt->get_dxs()[0] - kkt->get_problem()->get_x0()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]), kkt->get_problem()->get_x0()))
+                  .isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
@@ -75,15 +89,19 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
   cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
 
-  // Genreate the different state along the trajectory
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
-    xs.push_back(problem->get_x0());
-    us.push_back(Eigen::VectorXd::Zero(model->get_nu()));
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
   }
-  xs.push_back(problem->get_x0());
+  xs.push_back(state->rand());
+
+  // Print the name of the action model for introspection
+  std::cout << ActionModelTypes::all[action_type] << std::endl;
 
   // Solve the problem using the KKT solver
   crocoddyl::SolverKKT kkt(problem);
@@ -105,10 +123,10 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   for (unsigned int t = 0; t < T; ++t) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = solver->get_problem()->get_runningModels()[t];
     const std::size_t& nu = model->get_nu();
-    BOOST_CHECK((solver->get_xs()[t] - kkt.get_xs()[t]).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((state->diff_dx(solver->get_xs()[t], kkt.get_xs()[t])).isMuchSmallerThan(1.0, 1e-9));
     BOOST_CHECK((solver->get_us()[t].head(nu) - kkt.get_us()[t]).isMuchSmallerThan(1.0, 1e-9));
   }
-  BOOST_CHECK((solver->get_xs()[T] - kkt.get_xs()[T]).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((state->diff_dx(solver->get_xs()[T], kkt.get_xs()[T])).isMuchSmallerThan(1.0, 1e-9));
 }
 
 //____________________________________________________________________________//
@@ -117,8 +135,9 @@ bool init_function() {
   size_t T = 10;
 
   for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
-    const std::string test_name = "test_action_" + std::to_string(action_type);
-    test_suite* ts = BOOST_TEST_SUITE(test_name);
+    boost::test_tools::output_test_stream test_name;
+    test_name << "test_" << ActionModelTypes::all[action_type];
+    test_suite* ts = BOOST_TEST_SUITE(test_name.str());
     ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, ActionModelTypes::all[action_type], T)));
     ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_search_direction, ActionModelTypes::all[action_type], T)));
     framework::master_test_suite().add(ts);
@@ -126,7 +145,7 @@ bool init_function() {
 
   // We start from 1 as 0 is the kkt solver
   for (size_t solver_type = 1; solver_type < SolverTypes::all.size(); ++solver_type) {
-    for (size_t action_type = 0; action_type < ActionModelTypes::all.size(); ++action_type) {
+    for (size_t action_type = 0; action_type < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++action_type) {
       boost::test_tools::output_test_stream test_name;
       test_name << "test_" << SolverTypes::all[solver_type] << "_" << ActionModelTypes::all[action_type];
       test_suite* ts = BOOST_TEST_SUITE(test_name.str());

@@ -66,7 +66,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param model
    */
-  explicit ActionModelNumDiffTpl(boost::shared_ptr<Base> model);
+  explicit ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
 
   /**
    * @brief Destroy the ActionModelNumDiff object
@@ -155,6 +155,8 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    * differenciations
    */
   Scalar disturbance_;
+
+  bool with_gauss_approx_;
 };
 
 template <typename _Scalar>

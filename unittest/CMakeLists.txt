@@ -28,6 +28,8 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_impulses
   test_multiple_contacts
   test_multiple_impulses
+  test_contact_costs
+  test_impulse_costs
   test_actions
   # test_integrators
   test_diff_actions
