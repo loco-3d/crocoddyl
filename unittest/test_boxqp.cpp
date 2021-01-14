@@ -6,6 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <boost/random.hpp>
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "unittest_common.hpp"
