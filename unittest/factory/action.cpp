@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2021, University of Edinburgh
-// Copyright (C) 2018-2020, LAAS-CNRS
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
