@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,6 @@
 #include "crocoddyl/core/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 #include "crocoddyl/multibody/costs/control-gravity.hpp"
-#include "crocoddyl/multibody/costs/control-gravity-contact.hpp"
 // #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/frame-rotation.hpp"
@@ -19,7 +18,7 @@
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/costs/contact-wrench-cone.hpp"
-#include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -42,9 +41,6 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
     case CostModelTypes::CostModelControlGrav:
       os << "CostModelControlGrav";
       break;
-    //case CostModelTypes::CostModelControlGravContact:
-    //  os << "CostModelControlGravContact";
-    //  break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   os << "CostModelCentroidalMomentum";
     //   break;
@@ -89,7 +85,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   else {
       actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
   }
-  
+     
   crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   if (nu == std::numeric_limits<std::size_t>::max()) {
@@ -109,11 +105,9 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
                                                                  Eigen::Vector3d::Random(), nu);
       break;
     case CostModelTypes::CostModelControlGrav:
-      cost = boost::make_shared<crocoddyl::CostModelControlGrav>(state, activation_factory.create(activation_type, nu),actuation);
+      cost = boost::make_shared<crocoddyl::CostModelControlGrav>(state, activation_factory.create(activation_type, nu),
+                                                                 actuation);
       break;
-    //case CostModelTypes::CostModelControlGravContact:
-    //  cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(state, activation_factory.create(activation_type, nu),actuation_floatbase);
-    //  break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
     //                                                                      activation_factory.create(activation_type,

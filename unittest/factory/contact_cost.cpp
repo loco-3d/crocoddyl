@@ -9,6 +9,7 @@
 #include "contact_cost.hpp"
 #include "diff_action.hpp"
 #include "crocoddyl/multibody/costs/contact-force.hpp"
+#include "crocoddyl/multibody/costs/control-gravity-contact.hpp"
 #include "crocoddyl/multibody/costs/contact-cop-position.hpp"
 #include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/costs/contact-wrench-cone.hpp"
@@ -32,6 +33,9 @@ std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type) {
       break;
     case ContactCostModelTypes::CostModelContactWrenchCone:
       os << "CostModelContactWrenchCone";
+      break;
+    case ContactCostModelTypes::CostModelControlGravContact:
+      os << "CostModelControlGravContact";
       break;
     case ContactCostModelTypes::NbContactCostModelTypes:
       os << "NbContactCostModelTypes";
@@ -93,6 +97,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
               model_factory.get_frame_id(),
               crocoddyl::WrenchCone(Eigen::Matrix3d::Identity(), 1., Eigen::Vector2d(0.1, 0.1))),
           nu);
+      break;
+    case ContactCostModelTypes::CostModelControlGravContact:
+      cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(
+          state, ActivationModelFactory().create(activation_type, state->get_nv()),action->get_actuation());
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactCostModelTypes::Type given");

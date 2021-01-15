@@ -24,6 +24,7 @@ struct ContactCostModelTypes {
     CostModelContactCoPPosition,
     CostModelContactFrictionCone,
     CostModelContactWrenchCone,
+    CostModelControlGravContact,
     NbContactCostModelTypes
   };
   static std::vector<Type> init_all() {
