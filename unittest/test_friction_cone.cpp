@@ -6,6 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "unittest_common.hpp"
