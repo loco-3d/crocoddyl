@@ -19,7 +19,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_gaptol_(1e-20),
+      th_gaptol_(1e-16),
       th_stepdec_(0.5),
       th_stepinc_(0.01),
       was_feasible_(false) {
