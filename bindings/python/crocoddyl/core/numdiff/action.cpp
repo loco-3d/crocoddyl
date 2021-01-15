@@ -16,10 +16,11 @@ namespace python {
 void exposeActionNumDiff() {
   bp::class_<ActionModelNumDiff, bp::bases<ActionModelAbstract> >(
       "ActionModelNumDiff", "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
-      bp::init<boost::shared_ptr<ActionModelAbstract> >(
-          bp::args("self", "model"),
+      bp::init<boost::shared_ptr<ActionModelAbstract>, bp::optional<bool> >(
+          bp::args("self", "model", "gaussApprox"),
           "Initialize the action model NumDiff.\n\n"
-          ":param model: action model where we compute the derivatives through NumDiff"))
+          ":param model: action model where we compute the derivatives through NumDiff\n"
+          ":param gaussApprox: compute the Hessian using Gauss approximation (default False)"))
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>(

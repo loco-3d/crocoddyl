@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2018-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,24 +41,35 @@ std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type) 
 ContactModelFactory::ContactModelFactory() {}
 ContactModelFactory::~ContactModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(
-    ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type) const {
+boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(ContactModelTypes::Type contact_type,
+                                                                               PinocchioModelTypes::Type model_type,
+                                                                               const std::string frame_name,
+                                                                               std::size_t nu) const {
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::make_shared<crocoddyl::StateMultibody>(model_factory.create());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
+  std::size_t frame_id = 0;
+  if (frame_name == "") {
+    frame_id = model_factory.get_frame_id();
+  } else {
+    frame_id = state->get_pinocchio()->getFrameId(frame_name);
+  }
+  if (nu == std::numeric_limits<std::size_t>::max()) {
+    nu = state->get_nv();
+  }
   switch (contact_type) {
     case ContactModelTypes::ContactModel2D:
       contact = boost::make_shared<crocoddyl::ContactModel2D>(
-          state, crocoddyl::FrameTranslation(model_factory.get_frame_id(), Eigen::Vector3d::Zero()));
+          state, crocoddyl::FrameTranslation(frame_id, Eigen::Vector3d::Zero()), nu);
       break;
     case ContactModelTypes::ContactModel3D:
       contact = boost::make_shared<crocoddyl::ContactModel3D>(
-          state, crocoddyl::FrameTranslation(model_factory.get_frame_id(), Eigen::Vector3d::Zero()));
+          state, crocoddyl::FrameTranslation(frame_id, Eigen::Vector3d::Zero()), nu);
       break;
     case ContactModelTypes::ContactModel6D:
       contact = boost::make_shared<crocoddyl::ContactModel6D>(
-          state, crocoddyl::FramePlacement(model_factory.get_frame_id(), pinocchio::SE3()));
+          state, crocoddyl::FramePlacement(frame_id, pinocchio::SE3()), nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactModelTypes::Type given");

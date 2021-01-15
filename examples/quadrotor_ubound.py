@@ -9,7 +9,7 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-hector = example_robot_data.loadHector()
+hector = example_robot_data.load('hector')
 robot_model = hector.model
 
 target_pos = np.array([1, 0, 1])

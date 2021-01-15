@@ -1,14 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
+// Copyright (C) 2018-2021, University of Edinburgh
 // Copyright (C) 2018-2020, LAAS-CNRS, New York University,
-//                          Max Planck Gesellschaft, University of Edinburgh
+//                          Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_STATE_FACTORY_HPP_
-#define CROCODDYL_STATE_FACTORY_HPP_
+#ifndef CROCODDYL_SOLVER_FACTORY_HPP_
+#define CROCODDYL_SOLVER_FACTORY_HPP_
 
 #include "action.hpp"
 #include "crocoddyl/core/solver-base.hpp"
@@ -46,4 +47,4 @@ class SolverFactory {
 }  // namespace unittest
 }  // namespace crocoddyl
 
-#endif  // CROCODDYL_STATE_FACTORY_HPP_
+#endif  // CROCODDYL_SOLVER_FACTORY_HPP_
