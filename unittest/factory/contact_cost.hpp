@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CONTACT_COST_FACTORY_HPP_
 #define CROCODDYL_CONTACT_COST_FACTORY_HPP_
 
-#include "state.hpp"
-#include "actuation.hpp"
 #include "activation.hpp"
+#include "actuation.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -38,10 +38,10 @@ struct ContactCostModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type);
 
 class ContactCostModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
@@ -49,13 +49,14 @@ class ContactCostModelFactory {
   explicit ContactCostModelFactory();
   ~ContactCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(ContactCostModelTypes::Type cost_type,
-                                                                       PinocchioModelTypes::Type model_type,
-                                                                       ActivationModelTypes::Type activation_type,
-                                                                       ActuationModelTypes::Type actuation_type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
+  create(ContactCostModelTypes::Type cost_type,
+         PinocchioModelTypes::Type model_type,
+         ActivationModelTypes::Type activation_type,
+         ActuationModelTypes::Type actuation_type) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CONTACT_COST_FACTORY_HPP_
+#endif // CROCODDYL_CONTACT_COST_FACTORY_HPP_

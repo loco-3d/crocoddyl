@@ -18,12 +18,12 @@
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 //#include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
 
 namespace crocoddyl {
 
@@ -32,11 +32,11 @@ namespace crocoddyl {
  *
  * This cost function defines a residual vector as
  * \f$\mathbf{r}=\mathbf{u}-(g(q) - \sum J(q)^{\top} f_{\text{ext}})\f$,
- * where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, 
+ * where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input,
  * \f$J(q)\f$ the contact Jacobians, \f$f_{\text{ext}}\f$ the external forces
- * associated with the contacts, g the gravity torque corresponding to the 
+ * associated with the contacts, g the gravity torque corresponding to the
  * current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
- * position joints input. 
+ * position joints input.
  * Note that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -84,11 +84,11 @@ public:
    *
    * The default `nu` value is obtained from the actuation model.
    * We use `ActivationModelQuadTpl` as a default activation model (i.e.
-   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). 
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state       State of the multibody system
    */
-      
+
   explicit CostModelControlGravContactTpl(
       boost::shared_ptr<StateMultibody> state,
       boost::shared_ptr<ActuationModelAbstract> actuation_model);
@@ -164,7 +164,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
     actuation = d->actuation;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar> *pinocchio;
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar>> fext;
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar>> actuation;
   MatrixXs dg_dq;

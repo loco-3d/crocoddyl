@@ -13,14 +13,12 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
-
 
 namespace crocoddyl {
 
@@ -76,15 +74,16 @@ public:
 
   /**
    * @brief Initialize the control gravity cost model
-   * 
+   *
    * The default `nu` value is obtained from the actuation model.
    * We use `ActivationModelQuadTpl` as a default activation model (i.e.
    * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state       State of the multibody system
    */
-  explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                   boost::shared_ptr<ActuationModelAbstract> actuation_model);
+  explicit CostModelControlGravTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   virtual ~CostModelControlGravTpl();
 
@@ -137,7 +136,8 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataControlGravTpl(Model<Scalar> *const model,
                          DataCollectorAbstract *const data)
-      : Base(model, data), dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+      : Base(model, data),
+        dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
         Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
         Arr_dtaudu(model->get_state()->get_nv(), model->get_nu()) {
     dg_dq.setZero();
@@ -155,7 +155,7 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     actuation = d->actuation;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar> *pinocchio;
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar>> actuation;
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;

@@ -83,10 +83,11 @@ void exposeCostControlGravContact() {
           ":param model: control gravity cost model in contact\n"
           ":param data: shared data")[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3>>()])
-      .add_property("dg_dq",
-                    bp::make_getter(&CostDataControlGravContact::dg_dq,
-                                    bp::return_internal_reference<>()),
-                    "Partial derivative of gravity torque in contact with respect to q");
+      .add_property(
+          "dg_dq",
+          bp::make_getter(&CostDataControlGravContact::dg_dq,
+                          bp::return_internal_reference<>()),
+          "Partial derivative of gravity torque in contact with respect to q");
 }
 
 } // namespace python

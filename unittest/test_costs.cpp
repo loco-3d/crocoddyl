@@ -11,10 +11,10 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -24,44 +24,41 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+void test_calc_returns_a_cost(CostModelTypes::Type cost_type,
+                              StateModelTypes::Type state_type,
                               ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const boost::shared_ptr<crocoddyl::CostModelAbstract> &model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+  const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::CostDataAbstract> data;
 
   if (cost_type == CostModelTypes::CostModelControlGrav) {
-	    if (state->get_pinocchio()->existJointName("root_joint")) {
-	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
-        }
-        else {
-            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
-        }
-        
-        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
-	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
-	    data = model->createData(&shared_data);
+    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+        boost::make_shared<crocoddyl::ActuationModelFull>(state);
+    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+    crocoddyl::DataCollectorActMultibody shared_data =
+        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
+    data = model->createData(&shared_data);
+  } else {
+    crocoddyl::DataCollectorMultibody shared_data =
+        crocoddyl::DataCollectorMultibody(&pinocchio_data);
+    data = model->createData(&shared_data);
   }
-  else {
-	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
-	    data = model->createData(&shared_data);
-	    
-  }
-  
+
   data->cost = nan("");
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd &x = model->get_state()->rand();
+  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -73,49 +70,45 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::T
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_calc_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+void test_calc_against_numdiff(CostModelTypes::Type cost_type,
+                               StateModelTypes::Type state_type,
                                ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const boost::shared_ptr<crocoddyl::CostModelAbstract> &model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+  const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  
+
   boost::shared_ptr<crocoddyl::CostDataAbstract> data;
   boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
-  
-    // Create the equivalent num diff model.
+
+  // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  
+
   if (cost_type == CostModelTypes::CostModelControlGrav) {
-	    if (state->get_pinocchio()->existJointName("root_joint")) {
-	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
-        }
-        else {
-            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
-        }
-        
-        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
-	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
-	    data = model->createData(&shared_data);
-	    data_num_diff = model_num_diff.createData(&shared_data);
-  }
-  else {
-	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
-	    data = model->createData(&shared_data);
-	    data_num_diff = model_num_diff.createData(&shared_data);
-	    
+    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+        boost::make_shared<crocoddyl::ActuationModelFull>(state);
+    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+    crocoddyl::DataCollectorActMultibody shared_data =
+        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
+    data = model->createData(&shared_data);
+    data_num_diff = model_num_diff.createData(&shared_data);
+  } else {
+    crocoddyl::DataCollectorMultibody shared_data =
+        crocoddyl::DataCollectorMultibody(&pinocchio_data);
+    data = model->createData(&shared_data);
+    data_num_diff = model_num_diff.createData(&shared_data);
   }
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd &x = model->get_state()->rand();
+  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -129,54 +122,52 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::
   BOOST_CHECK(data->cost == data_num_diff->cost);
 }
 
-void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-                                              ActivationModelTypes::Type activation_type) {
+void test_partial_derivatives_against_numdiff(
+    CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+    ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const boost::shared_ptr<crocoddyl::CostModelAbstract> &model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+  const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostDataAbstract> data;
   boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
   // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  
+
   if (cost_type == CostModelTypes::CostModelControlGrav) {
-	    if (state->get_pinocchio()->existJointName("root_joint")) {
-	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
-        }
-        else {
-            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
-        }
-        
-        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
-	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
-	    data = model->createData(&shared_data);
-	    data_num_diff = model_num_diff.createData(&shared_data);
-  }
-  else {
-	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
-	    data = model->createData(&shared_data);
-	    data_num_diff = model_num_diff.createData(&shared_data);
-	    
+    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+        boost::make_shared<crocoddyl::ActuationModelFull>(state);
+    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+    crocoddyl::DataCollectorActMultibody shared_data =
+        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
+    data = model->createData(&shared_data);
+    data_num_diff = model_num_diff.createData(&shared_data);
+  } else {
+    crocoddyl::DataCollectorMultibody shared_data =
+        crocoddyl::DataCollectorMultibody(&pinocchio_data);
+    data = model->createData(&shared_data);
+    data_num_diff = model_num_diff.createData(&shared_data);
   }
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd &x = model->get_state()->rand();
+  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
+                                &pinocchio_model, &pinocchio_data, _1));
   model_num_diff.set_reevals(reevals);
 
   // Computing the cost derivatives
@@ -204,17 +195,18 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
   }
 }
 
-void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type,
+                                 StateModelTypes::Type state_type,
                                  ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const boost::shared_ptr<crocoddyl::CostModelAbstract> &model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+  const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
   // create the cost sum model
@@ -222,7 +214,7 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
   cost_sum.addCost("myCost", model, 1.);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd &x = state->rand();
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -235,17 +227,18 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
   BOOST_CHECK(model->get_activation()->get_nr() == cost_sum.get_nr());
 }
 
-void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-                                          ActivationModelTypes::Type activation_type) {
+void test_partial_derivatives_in_cost_sum(
+    CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+    ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const boost::shared_ptr<crocoddyl::CostModelAbstract> &model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+  const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
-  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostDataAbstract> data;
@@ -254,29 +247,26 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
   cost_sum.addCost("myCost", model, 1.);
   boost::shared_ptr<crocoddyl::CostDataSum> data_sum;
-  
+
   if (cost_type == CostModelTypes::CostModelControlGrav) {
-	    if (state->get_pinocchio()->existJointName("root_joint")) {
-	        actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state); 
-        }
-        else {
-            actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state); 
-        }
-        
-        const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
-	    crocoddyl::DataCollectorActMultibody shared_data = crocoddyl::DataCollectorActMultibody(&pinocchio_data,actuation_data); 
-	    data = model->createData(&shared_data);
-	    data_sum = cost_sum.createData(&shared_data);
-  }
-  else {
-	    crocoddyl::DataCollectorMultibody shared_data = crocoddyl::DataCollectorMultibody(&pinocchio_data); 
-	    data = model->createData(&shared_data);
-	    data_sum = cost_sum.createData(&shared_data);    
+    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+        boost::make_shared<crocoddyl::ActuationModelFull>(state);
+    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+    crocoddyl::DataCollectorActMultibody shared_data =
+        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
+    data = model->createData(&shared_data);
+    data_sum = cost_sum.createData(&shared_data);
+  } else {
+    crocoddyl::DataCollectorMultibody shared_data =
+        crocoddyl::DataCollectorMultibody(&pinocchio_data);
+    data = model->createData(&shared_data);
+    data_sum = cost_sum.createData(&shared_data);
   }
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd &x = state->rand();
+  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -298,33 +288,58 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
 
 //----------------------------------------------------------------------------//
 
-void register_cost_model_unit_tests(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-                                    ActivationModelTypes::Type activation_type) {
+void register_cost_model_unit_tests(
+    CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+    ActivationModelTypes::Type activation_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << cost_type << "_" << activation_type << "_" << state_type;
+  test_name << "test_" << cost_type << "_" << activation_type << "_"
+            << state_type;
   std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type, state_type, activation_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type, state_type, activation_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, cost_type, state_type, activation_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_cost_sum, cost_type, state_type, activation_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_cost_sum, cost_type, state_type, activation_type)));
+  test_suite *ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type,
+                                      state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type,
+                                      state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff,
+                                      cost_type, state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_cost_sum, cost_type,
+                                      state_type, activation_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_cost_sum,
+                                      cost_type, state_type, activation_type)));
   framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
-  // Test all costs available with all the activation types with all available states types.
-  for (size_t cost_type = 0; cost_type < CostModelTypes::all.size(); ++cost_type) {
-    for (size_t state_type = StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
-         state_type < StateModelTypes::all.size(); ++state_type) {
-      for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
-        register_cost_model_unit_tests(CostModelTypes::all[cost_type], StateModelTypes::all[state_type],
-                                       ActivationModelTypes::all[activation_type]);
+  // Test all costs available with all the activation types with all available
+  // states types.
+  for (size_t cost_type = 0; cost_type < CostModelTypes::all.size();
+       ++cost_type) {
+    if (cost_type == CostModelTypes::CostModelControlGrav) {
+      for (size_t activation_type = 0;
+           activation_type < ActivationModelTypes::all.size();
+           ++activation_type) {
+        register_cost_model_unit_tests(
+            CostModelTypes::all[cost_type],
+            StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm],
+            ActivationModelTypes::all[activation_type]);
+      }
+    } else {
+      for (size_t state_type =
+               StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
+           state_type < StateModelTypes::all.size(); ++state_type) {
+        for (size_t activation_type = 0;
+             activation_type < ActivationModelTypes::all.size();
+             ++activation_type) {
+          register_cost_model_unit_tests(
+              CostModelTypes::all[cost_type], StateModelTypes::all[state_type],
+              ActivationModelTypes::all[activation_type]);
+        }
       }
     }
   }
   return true;
 }
 
-int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char **argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

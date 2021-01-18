@@ -17,7 +17,8 @@ void exposeCostControlGrav() {
   bp::class_<CostModelControlGrav, bp::bases<CostModelAbstract>>(
       "CostModelControlGrav",
       "This cost function defines a residual vector as r = a(u) - g(q), "
-      "where q, g(q) are the generalized position and gravity vector, respectively,"
+      "where q, g(q) are the generalized position and gravity vector, "
+      "respectively,"
       "and a(u) is the actuated torque.",
       bp::init<boost::shared_ptr<StateMultibody>,
                boost::shared_ptr<ActivationModelAbstract>,
@@ -85,9 +86,9 @@ void exposeCostControlGrav() {
           ":param data: shared data")[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .add_property("dg_dq",
-       bp::make_getter(&CostDataControlGrav::dg_dq,
-       bp::return_internal_reference<>()),
-       "Partial derivative of gravity vector with respect to q");
+                    bp::make_getter(&CostDataControlGrav::dg_dq,
+                                    bp::return_internal_reference<>()),
+                    "Partial derivative of gravity vector with respect to q");
 }
 
 } // namespace python
