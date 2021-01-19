@@ -63,7 +63,7 @@ public:
 };
 
 boost::shared_ptr<crocoddyl::CostModelAbstract>
-create_random_cost(StateModelTypes::Type state_type);
+create_random_cost(StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
 
 } // namespace unittest
 } // namespace crocoddyl

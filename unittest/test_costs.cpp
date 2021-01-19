@@ -12,8 +12,8 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/cost.hpp"
@@ -36,24 +36,20 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type,
   const boost::shared_ptr<crocoddyl::StateMultibody> &state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   pinocchio::Data pinocchio_data(pinocchio_model);
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
-
-  if (cost_type == CostModelTypes::CostModelControlGrav) {
-    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-        boost::make_shared<crocoddyl::ActuationModelFull>(state);
-    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-    crocoddyl::DataCollectorActMultibody shared_data =
-        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
-    data = model->createData(&shared_data);
+  
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  pinocchio::JointModelFreeFlyer ff_joint;
+  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
+    actuation =
+        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
   } else {
-    crocoddyl::DataCollectorMultibody shared_data =
-        crocoddyl::DataCollectorMultibody(&pinocchio_data);
-    data = model->createData(&shared_data);
+    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
   }
-
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data = model->createData(&shared_data);
   data->cost = nan("");
 
   // Generating random values for the state and control
@@ -84,27 +80,22 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type,
   pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
-
   // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-
-  if (cost_type == CostModelTypes::CostModelControlGrav) {
-    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-        boost::make_shared<crocoddyl::ActuationModelFull>(state);
-    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-    crocoddyl::DataCollectorActMultibody shared_data =
-        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
-    data = model->createData(&shared_data);
-    data_num_diff = model_num_diff.createData(&shared_data);
+  
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  pinocchio::JointModelFreeFlyer ff_joint;
+  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
+    actuation =
+        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
   } else {
-    crocoddyl::DataCollectorMultibody shared_data =
-        crocoddyl::DataCollectorMultibody(&pinocchio_data);
-    data = model->createData(&shared_data);
-    data_num_diff = model_num_diff.createData(&shared_data);
+    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
   }
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data = model->createData(&shared_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
   const Eigen::VectorXd &x = model->get_state()->rand();
@@ -135,27 +126,23 @@ void test_partial_derivatives_against_numdiff(
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
+  
   // Create the equivalent num diff model.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-
-  if (cost_type == CostModelTypes::CostModelControlGrav) {
-    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-        boost::make_shared<crocoddyl::ActuationModelFull>(state);
-    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-    crocoddyl::DataCollectorActMultibody shared_data =
-        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
-    data = model->createData(&shared_data);
-    data_num_diff = model_num_diff.createData(&shared_data);
+  
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  pinocchio::JointModelFreeFlyer ff_joint;
+  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
+    actuation =
+        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
   } else {
-    crocoddyl::DataCollectorMultibody shared_data =
-        crocoddyl::DataCollectorMultibody(&pinocchio_data);
-    data = model->createData(&shared_data);
-    data_num_diff = model_num_diff.createData(&shared_data);
+    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
   }
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data = model->createData(&shared_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
   const Eigen::VectorXd &x = model->get_state()->rand();
@@ -240,29 +227,24 @@ void test_partial_derivatives_in_cost_sum(
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model &pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data;
-  boost::shared_ptr<crocoddyl::CostDataAbstract> data_num_diff;
+
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
   cost_sum.addCost("myCost", model, 1.);
-  boost::shared_ptr<crocoddyl::CostDataSum> data_sum;
-
-  if (cost_type == CostModelTypes::CostModelControlGrav) {
-    boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-        boost::make_shared<crocoddyl::ActuationModelFull>(state);
-    const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-    crocoddyl::DataCollectorActMultibody shared_data =
-        crocoddyl::DataCollectorActMultibody(&pinocchio_data, actuation_data);
-    data = model->createData(&shared_data);
-    data_sum = cost_sum.createData(&shared_data);
+  
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  pinocchio::JointModelFreeFlyer ff_joint;
+  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
+    actuation =
+        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
   } else {
-    crocoddyl::DataCollectorMultibody shared_data =
-        crocoddyl::DataCollectorMultibody(&pinocchio_data);
-    data = model->createData(&shared_data);
-    data_sum = cost_sum.createData(&shared_data);
+    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
   }
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
+        actuation->createData();
+  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> data = model->createData(&shared_data);
+  boost::shared_ptr<crocoddyl::CostDataSum> data_sum = cost_sum.createData(&shared_data);
 
   // Generating random values for the state and control
   const Eigen::VectorXd &x = state->rand();
@@ -311,7 +293,8 @@ void register_cost_model_unit_tests(
 
 bool init_function() {
   // Test all costs available with all the activation types with all available
-  // states types.
+  // states types, excluding the combination of CostModelControlGrav with
+  // any model with a free flyer joint
   for (size_t cost_type = 0; cost_type < CostModelTypes::all.size();
        ++cost_type) {
     if (cost_type == CostModelTypes::CostModelControlGrav) {

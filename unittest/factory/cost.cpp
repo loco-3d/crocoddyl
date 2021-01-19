@@ -80,7 +80,8 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
           state_factory.create(state_type));
 
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  if (state->get_pinocchio()->existJointName("root_joint")) {
+  pinocchio::JointModelFreeFlyer ff_joint;
+  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
     actuation =
         boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
   } else {
@@ -110,7 +111,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     break;
   case CostModelTypes::CostModelControlGrav:
     cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
-        state, activation_factory.create(activation_type, nu), actuation);
+        state, activation_factory.create(activation_type, state->get_nv()), actuation);
     break;
   // case CostModelTypes::CostModelCentroidalMomentum:
   //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
@@ -147,7 +148,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
 }
 
 boost::shared_ptr<crocoddyl::CostModelAbstract>
-create_random_cost(StateModelTypes::Type state_type) {
+create_random_cost(StateModelTypes::Type state_type, std::size_t nu) {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
@@ -158,7 +159,7 @@ create_random_cost(StateModelTypes::Type state_type) {
   CostModelTypes::Type rand_type = static_cast<CostModelTypes::Type>(
       rand() % CostModelTypes::NbCostModelTypes);
   return factory.create(rand_type, state_type,
-                        ActivationModelTypes::ActivationModelQuad);
+                        ActivationModelTypes::ActivationModelQuad, nu);
 }
 
 } // namespace unittest
