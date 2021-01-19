@@ -95,6 +95,10 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
       activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
           crocoddyl::ActivationBounds(lb, ub), weights);
       break;
+    case ActivationModelTypes::ActivationModelNorm2Barrier:
+      activation = boost::make_shared<crocoddyl::ActivationModelNorm2Barrier>(
+                                                                              nr, 0.3);
+      break;
     default:
       throw_pretty(__FILE__ ":\n Construct wrong ActivationModelTypes::Type");
       break;

@@ -28,6 +28,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
 
   explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state)
       : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()){};
+
   virtual ~ActuationModelFloatingBaseTpl(){};
 
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
@@ -50,11 +51,11 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
   };
+  boost::shared_ptr<StateMultibody> state = boost::dynamic_pointer_cast<StateMultibody> (state_);
   virtual boost::shared_ptr<Data> createData() {
-    typedef StateMultibodyTpl<Scalar> StateMultibody;
-    boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).fill((Scalar)1.);
+    std::size_t fb_nv = state->get_pinocchio()->joints[1].nv();
+    data->dtau_du.diagonal(-fb_nv).fill((Scalar)1.);
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif

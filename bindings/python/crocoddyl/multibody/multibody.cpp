@@ -30,6 +30,7 @@ void exposeMultibody() {
   exposeDifferentialActionContactFwdDynamics();
   exposeActionImpulseFwdDynamics();
   exposeCostState();
+  exposeCostControlGrav();
   exposeCostCoMPosition();
   exposeCostControlGrav();
   exposeCostControlGravContact();
@@ -48,6 +49,7 @@ void exposeMultibody() {
   exposeCostImpulseWrenchCone();
   exposeCostImpulseCoPPosition();
   exposeContact2D();
+  exposeCostPairCollisions();
   exposeContact3D();
   exposeContact6D();
   exposeImpulse3D();

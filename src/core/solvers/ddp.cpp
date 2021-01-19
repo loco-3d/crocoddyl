@@ -9,6 +9,7 @@
 #include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "pinocchio/algorithm/frames.hpp"
 
 namespace crocoddyl {
 
@@ -325,6 +326,17 @@ void SolverDDP::computeGains(const std::size_t& t) {
     k_[t].head(nu) = Qu_[t].head(nu);
     Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
     Quu_llt_[t].solveInPlace(k);
+  }
+}
+
+void SolverDDP::computeKp(const std::size_t& t, Eigen::MatrixXd& dWp, Eigen::MatrixXd& dKp) { 
+  const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
+  const int nu = problem_->get_runningModels()[t]->get_nu();
+  if (nu > 0) {
+    Eigen::MatrixXd invQuuFuT = d->Fu.transpose();
+    Quu_llt_[t].solveInPlace(invQuuFuT);
+    dKp = invQuuFuT * dWp;
+    dWp.noalias() = (d->Fx.transpose() - Qxu_[t] * invQuuFuT) * dWp;
   }
 }
 

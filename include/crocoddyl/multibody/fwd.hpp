@@ -87,6 +87,11 @@ template <typename Scalar>
 struct CostDataFrameTranslationTpl;
 
 template <typename Scalar>
+class CostModelControlGravTpl;
+template <typename Scalar>
+struct CostDataControlGravTpl;
+
+template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
 template <typename Scalar>
 struct CostDataCentroidalMomentumTpl;
@@ -170,6 +175,11 @@ template <typename Scalar>
 class CostModelImpulseCoPPositionTpl;
 template <typename Scalar>
 struct CostDataImpulseCoPPositionTpl;
+
+template <typename Scalar>
+class CostModelPairCollisionsTpl;
+template <typename Scalar>
+struct CostDataPairCollisionsTpl;
 
 // impulse
 template <typename Scalar>
@@ -286,6 +296,8 @@ typedef FrameCoPSupportTpl<double> FrameCoPSupport;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;
+typedef CostModelControlGravTpl<double> CostModelControlGrav;
+typedef CostDataControlGravTpl<double> CostDataControlGrav;
 typedef CostModelCentroidalMomentumTpl<double> CostModelCentroidalMomentum;
 typedef CostDataCentroidalMomentumTpl<double> CostDataCentroidalMomentum;
 typedef CostModelCoMPositionTpl<double> CostModelCoMPosition;
@@ -319,7 +331,8 @@ typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;
 typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;
 typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;
 typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;
-
+typedef CostModelPairCollisionsTpl<double> CostModelPairCollisions;
+typedef CostDataPairCollisionsTpl<double> CostDataPairCollisions;
 typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;

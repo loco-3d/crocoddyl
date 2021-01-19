@@ -30,38 +30,38 @@ const std::vector<CostModelTypes::Type>
 
 std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   switch (type) {
-  case CostModelTypes::CostModelState:
-    os << "CostModelState";
-    break;
-  case CostModelTypes::CostModelControl:
-    os << "CostModelControl";
-    break;
-  case CostModelTypes::CostModelCoMPosition:
-    os << "CostModelCoMPosition";
-    break;
-  case CostModelTypes::CostModelControlGrav:
-    os << "CostModelControlGrav";
-    break;
-  // case CostModelTypes::CostModelCentroidalMomentum:
-  //   os << "CostModelCentroidalMomentum";
-  //   break;
-  case CostModelTypes::CostModelFramePlacement:
-    os << "CostModelFramePlacement";
-    break;
-  case CostModelTypes::CostModelFrameRotation:
-    os << "CostModelFrameRotation";
-    break;
-  case CostModelTypes::CostModelFrameTranslation:
-    os << "CostModelFrameTranslation";
-    break;
-  case CostModelTypes::CostModelFrameVelocity:
-    os << "CostModelFrameVelocity";
-    break;
-  case CostModelTypes::NbCostModelTypes:
-    os << "NbCostModelTypes";
-    break;
-  default:
-    break;
+    case CostModelTypes::CostModelState:
+      os << "CostModelState";
+      break;
+    case CostModelTypes::CostModelControl:
+      os << "CostModelControl";
+      break;
+    case CostModelTypes::CostModelCoMPosition:
+      os << "CostModelCoMPosition";
+      break;
+    case CostModelTypes::CostModelControlGrav:
+      os << "CostModelControlGrav";
+      break;
+    // case CostModelTypes::CostModelCentroidalMomentum:
+    //   os << "CostModelCentroidalMomentum";
+    //   break;
+    case CostModelTypes::CostModelFramePlacement:
+      os << "CostModelFramePlacement";
+      break;
+    case CostModelTypes::CostModelFrameRotation:
+      os << "CostModelFrameRotation";
+      break;
+    case CostModelTypes::CostModelFrameTranslation:
+      os << "CostModelFrameTranslation";
+      break;
+    case CostModelTypes::CostModelFrameVelocity:
+      os << "CostModelFrameVelocity";
+      break;
+    case CostModelTypes::NbCostModelTypes:
+      os << "NbCostModelTypes";
+      break;
+    default:
+      break;
   }
   return os;
 }
