@@ -12,12 +12,9 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -25,7 +22,7 @@ namespace crocoddyl {
  * @brief Define a contact force cost function
  *
  * This cost function defines a residual vector \f$\mathbf{r}=\boldsymbol{\lambda}-\boldsymbol{\lambda}^*\f$,
- * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial forces, respetively.
+ * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial forces, respectively.
  * The current spatial forces \f$\boldsymbol{\lambda}\in\mathbb{R}^{nc}\f$is computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`, with `nc` as the dimension of the contact.
  *
@@ -51,6 +48,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelContactForceTpl<Scalar> ResidualModelContactForce;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef typename MathBase::VectorXs VectorXs;
@@ -94,8 +92,9 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr,
-                           const std::size_t& nu);
+  DEPRECATED("No needed to pass nr",
+             CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref,
+                                      const std::size_t& nr, const std::size_t& nu);)
 
   /**
    * @brief Initialize the contact force cost model
@@ -108,7 +107,8 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] fref   Reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
    * @param[in] nr     Dimension of residual vector
    */
-  CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
+  DEPRECATED("No needed to pass nr", CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
+                                                              const FrameForce& fref, const std::size_t& nr);)
 
   /**
    * @brief Initialize the contact force cost model
@@ -158,17 +158,18 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   /**
-   * @brief Return the reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
-   */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-
-  /**
    * @brief Modify the reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
    */
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
+  /**
+   * @brief Return the reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
+   */
+  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -184,65 +185,20 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-  typedef FrameForceTpl<Scalar> FrameForce;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+      : Base(model, data),
+        Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
+        Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+    Arr_Rx.setZero();
     Arr_Ru.setZero();
-    contact_type = ContactUndefined;
-
-    // Check that proper shared data has been passed
-    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
-    }
-
-    // Avoids data casting at runtime
-    FrameForce fref = model->template get_reference<FrameForce>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
-    bool found_contact = false;
-    for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
-         it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == fref.id) {
-        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          contact_type = Contact3D;
-          if (model->get_activation()->get_nr() != 3) {
-            throw_pretty("Domain error: nr isn't defined as 3 in the activation model for the 3d contact in " +
-                         frame_name);
-          }
-          found_contact = true;
-          contact = it->second;
-          break;
-        }
-        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          contact_type = Contact6D;
-          if (model->get_activation()->get_nr() != 6) {
-            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d contact in " +
-                         frame_name);
-          }
-          found_contact = true;
-          contact = it->second;
-          break;
-        }
-        throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
-        break;
-      }
-    }
-    if (!found_contact) {
-      throw_pretty("Domain error: there isn't defined contact data for " + frame_name);
-    }
   }
 
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
+  MatrixXs Arr_Rx;
   MatrixXs Arr_Ru;
-  ContactType contact_type;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -250,9 +206,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

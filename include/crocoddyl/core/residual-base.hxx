@@ -63,4 +63,9 @@ std::size_t ResidualModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
+template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::set_nr(const std::size_t nr) {
+  nr_ = nr;
+}
+
 }  // namespace crocoddyl

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/contact-force.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -15,7 +15,8 @@ template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref, const std::size_t& nu)
-    : Base(state, activation, nu), fref_(fref) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)),
+      fref_(fref) {
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
                  << "nr is less than 6");
@@ -26,7 +27,7 @@ template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref)
-    : Base(state, activation), fref_(fref) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
                  << "nr is less than 6");
@@ -35,85 +36,52 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t& nr,
+                                                           const FrameForce& fref, const std::size_t&,
                                                            const std::size_t& nu)
-    : Base(state, nr, nu), fref_(fref) {
-  if (nr > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
-}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t& nr)
-    : Base(state, nr), fref_(fref) {
-  if (nr > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
-}
+                                                           const FrameForce& fref, const std::size_t&)
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            const FrameForce& fref)
-    : Base(state, 6), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::~CostModelContactForceTpl() {}
 
 template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                            const Eigen::Ref<const VectorXs>& /*x*/,
-                                            const Eigen::Ref<const VectorXs>& /*u*/) {
+                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference force
   Data* d = static_cast<Data*>(data.get());
-
-  // We transform the force to the contact frame
-  switch (d->contact_type) {
-    case Contact3D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).linear();
-      break;
-    case Contact6D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_.force).toVector();
-      break;
-    default:
-      break;
-  }
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+                                                const Eigen::Ref<const VectorXs>& x,
+                                                const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and force residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  const MatrixXs& df_dx = d->contact->df_dx;
-  const MatrixXs& df_du = d->contact->df_du;
-
-  activation_->calcDiff(data->activation, data->r);
-  switch (d->contact_type) {
-    case Contact3D:
-      data->Rx = df_dx.template topRows<3>();
-      data->Ru = df_du.template topRows<3>();
-      break;
-    case Contact6D:
-      data->Rx = df_dx;
-      data->Ru = df_du;
-      break;
-    default:
-      break;
-  }
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
-
-  d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
-
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
-  data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
-  data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  d->Arr_Ru.noalias() = data->activation->Arr * data->residual->Ru;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
+  data->Lxu.noalias() = data->residual->Rx.transpose() * d->Arr_Ru;
+  data->Luu.noalias() = data->residual->Ru.transpose() * d->Arr_Ru;
 }
 
 template <typename Scalar>
@@ -123,19 +91,22 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>
 }
 
 template <typename Scalar>
-void CostModelContactForceTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameForce)) {
-    fref_ = *static_cast<const FrameForce*>(pv);
+    FrameForce& ref_map = *static_cast<FrameForce*>(pv);
+    ref_map = fref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }
 }
 
 template <typename Scalar>
-void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelContactForceTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameForce)) {
-    FrameForce& ref_map = *static_cast<FrameForce*>(pv);
-    ref_map = fref_;
+    fref_ = *static_cast<const FrameForce*>(pv);
+    ResidualModelContactForce* residual = static_cast<ResidualModelContactForce*>(residual_.get());
+    residual->set_id(fref_.id);
+    residual->set_reference(fref_.force);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }

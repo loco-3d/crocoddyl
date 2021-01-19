@@ -92,6 +92,11 @@ template <typename Scalar>
 struct ResidualDataCoMPositionTpl;
 
 template <typename Scalar>
+class ResidualModelContactForceTpl;
+template <typename Scalar>
+struct ResidualDataContactForceTpl;
+
+template <typename Scalar>
 class ResidualModelFramePlacementTpl;
 template <typename Scalar>
 struct ResidualDataFramePlacementTpl;
@@ -324,6 +329,8 @@ typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMoment
 typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;
 typedef ResidualModelCoMPositionTpl<double> ResidualModelCoMPosition;
 typedef ResidualDataCoMPositionTpl<double> ResidualDataCoMPosition;
+typedef ResidualModelContactForceTpl<double> ResidualModelContactForce;
+typedef ResidualDataContactForceTpl<double> ResidualDataContactForce;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
 typedef ResidualDataFramePlacementTpl<double> ResidualDataFramePlacement;
 typedef ResidualModelFrameRotationTpl<double> ResidualModelFrameRotation;

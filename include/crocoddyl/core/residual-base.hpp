@@ -132,6 +132,11 @@ class ResidualModelAbstractTpl {
    */
   std::size_t get_nu() const;
 
+  /**
+   * @brief Modify the dimension of the residual vector
+   */
+  void set_nr(const std::size_t nr);
+
  protected:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   std::size_t nr_;                          //!< Residual vector dimension
