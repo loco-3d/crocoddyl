@@ -37,6 +37,7 @@ void exposeResidualState();
 void exposeResidualCentroidalMomentum();
 void exposeResidualCoMPosition();
 void exposeResidualContactForce();
+void exposeResidualContactImpulse();
 void exposeResidualFramePlacement();
 void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();

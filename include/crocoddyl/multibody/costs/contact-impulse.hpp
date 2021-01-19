@@ -12,12 +12,10 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-#include "crocoddyl/multibody/impulses/impulse-6d.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/residuals/contact-impulse.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -26,8 +24,8 @@ namespace crocoddyl {
  *
  * This cost function defines a residual vector \f$\mathbf{r}=\boldsymbol{\lambda}-\boldsymbol{\lambda}^*\f$,
  * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial impulses,
- * respetively. The current spatial impulses \f$\boldsymbol{\lambda}\in\mathbb{R}^{ni}\f$is computed by
- * `DifferentialActionModelContactFwdDynamicsTpl`, with `ni` as the dimension of the impulse.
+ * respectively. The current spatial impulses \f$\boldsymbol{\lambda}\in\mathbb{R}^{ni}\f$is computed by
+ * `ActionModelImpulseFwdDynamicsTpl`, with `ni` as the dimension of the impulse.
  *
  * Both cost and residual derivatives are computed analytically, where th force vector \f$\boldsymbol{\lambda}\f$ and
  * its derivatives \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
@@ -51,6 +49,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelContactImpulseTpl<Scalar> ResidualModelContactImpulse;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef typename MathBase::VectorXs VectorXs;
@@ -78,7 +77,8 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] fref   Reference spatial contact impulse \f$\boldsymbol{\lambda}^*\f$
    * @param[in] nr     Dimension of residual vector
    */
-  CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref, const std::size_t& nr);
+  DEPRECATED("No needed to pass nr", CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
+                                                                const FrameForce& fref, const std::size_t& nr);)
 
   /**
    * @brief Initialize the contact impulse cost model
@@ -137,6 +137,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -153,60 +154,16 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-  typedef FrameForceTpl<Scalar> FrameForce;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
-    impulse_type = ImpulseUndefined;
-
-    // Check that proper shared data has been passed
-    DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorImpulse");
-    }
-
-    // Avoids data casting at runtime
-    FrameForce fref = model->template get_reference<FrameForce>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
-    bool found_impulse = false;
-    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
-         it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == fref.id) {
-        ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          impulse_type = Impulse3D;
-          if (model->get_activation()->get_nr() != 3) {
-            throw_pretty("Domain error: nr isn't defined as 3 in the activation model for the 3d impulse in " +
-                         frame_name);
-          }
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-        ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          impulse_type = Impulse6D;
-          if (model->get_activation()->get_nr() != 6) {
-            throw_pretty("Domain error: nr isn't defined as 6 in the activation model for the 3d impulse in " +
-                         frame_name);
-          }
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-        throw_pretty("Domain error: there isn't defined at least a 3d impulse for " + frame_name);
-        break;
-      }
-    }
-    if (!found_impulse) {
-      throw_pretty("Domain error: there isn't defined impulse data for " + frame_name);
-    }
+  CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
+    Arr_Rx.setZero();
   }
 
-  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;
-  ImpulseType impulse_type;
+  MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -214,9 +171,7 @@ struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

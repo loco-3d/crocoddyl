@@ -90,9 +90,8 @@ void exposeCostContactImpulse() {
           "Create contact impulse cost data.\n\n"
           ":param model: contact impulse cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property(
-          "impulse", bp::make_getter(&CostDataContactImpulse::impulse, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataContactImpulse::impulse), "impulse data associated with the current cost");
+      .add_property("Arr_Rx", bp::make_getter(&CostDataContactImpulse::Arr_Rx, bp::return_internal_reference<>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)");
 }
 
 }  // namespace python

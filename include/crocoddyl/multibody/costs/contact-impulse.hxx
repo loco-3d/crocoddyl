@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/contact-impulse.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -15,7 +15,8 @@ template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FrameForce& fref)
-    : Base(state, activation, 0), fref_(fref) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)),
+      fref_(fref) {
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
                  << "nr is less than 6");
@@ -24,66 +25,43 @@ CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
-                                                               const FrameForce& fref, const std::size_t& nr)
-    : Base(state, nr, 0), fref_(fref) {
-  if (nr > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
-}
+                                                               const FrameForce& fref, const std::size_t&)
+    : Base(state, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref)
-    : Base(state, 6, 0), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::~CostModelContactImpulseTpl() {}
 
 template <typename Scalar>
 void CostModelContactImpulseTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& /*x*/,
-                                              const Eigen::Ref<const VectorXs>& /*u*/) {
+                                              const Eigen::Ref<const VectorXs>& x,
+                                              const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference impulse
   Data* d = static_cast<Data*>(data.get());
-
-  // We transform the impulse to the contact frame
-  switch (d->impulse_type) {
-    case Impulse3D:
-      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.force).linear();
-      break;
-    case Impulse6D:
-      data->r = (d->impulse->jMf.actInv(d->impulse->f) - fref_.force).toVector();
-      break;
-    default:
-      break;
-  }
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelContactImpulseTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>&,
-                                                  const Eigen::Ref<const VectorXs>&) {
+                                                  const Eigen::Ref<const VectorXs>& x,
+                                                  const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and force residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  const MatrixXs& df_dx = d->impulse->df_dx;
-
-  activation_->calcDiff(data->activation, data->r);
-  switch (d->impulse_type) {
-    case Impulse3D:
-      data->Rx = df_dx.template topRows<3>();
-      break;
-    case Impulse6D:
-      data->Rx = df_dx;
-      break;
-    default:
-      break;
-  }
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>
