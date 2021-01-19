@@ -12,7 +12,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the anymal model
-anymal = example_robot_data.loadANYmal()
+anymal = example_robot_data.load('anymal')
 
 # Defining the initial state of the robot
 q0 = anymal.model.referenceConfigurations['standing'].copy()

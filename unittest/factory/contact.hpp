@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define CROCODDYL_CONTACTS_FACTORY_HPP_
 
 #include <iostream>
+#include <limits>
 
 #include "state.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
@@ -41,8 +42,10 @@ class ContactModelFactory {
   explicit ContactModelFactory();
   ~ContactModelFactory();
 
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> create(ContactModelTypes::Type contact_type,
-                                                            PinocchioModelTypes::Type model_type) const;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> create(
+      ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
+      const std::string frame_name = std::string(""),
+      const std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
 boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact();

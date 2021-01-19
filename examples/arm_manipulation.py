@@ -15,7 +15,7 @@ WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 # Finally, we use an Euler sympletic integration scheme.
 
 # First, let's load the Pinocchio model for the Talos arm.
-talos_arm = example_robot_data.loadTalosArm()
+talos_arm = example_robot_data.load('talos_arm')
 robot_model = talos_arm.model
 
 # Create a cost model per the running and terminal action model.

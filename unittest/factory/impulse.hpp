@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,8 @@ class ImpulseModelFactory {
   ~ImpulseModelFactory();
 
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(ImpulseModelTypes::Type impulse_type,
-                                                            PinocchioModelTypes::Type model_type) const;
+                                                            PinocchioModelTypes::Type model_type,
+                                                            const std::string frame_name = std::string("")) const;
 };
 
 boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();

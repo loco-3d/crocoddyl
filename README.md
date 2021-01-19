@@ -25,14 +25,20 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
 [![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
+[![conde version](https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![conde install](https://anaconda.org/conda-forge/crocoddyl/badges/installer/conda.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![conde download](https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg)](https://anaconda.org/conda-forge/crocoddyl)
 [![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
-
 [![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
 [![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
+If you want to directly dive into **Crocoddyl**, only one single line is sufficient (assuming you have Conda):
 
-
+<p align="center">
+conda install crocoddyl -c conda-forge 
+<\p>
+  
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
 **Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
 
@@ -52,16 +58,16 @@ If you want to follow the current developments, you can directly refer to the [d
  * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
  * numerical differentiation support
- * automatic differentiation support
+ * automatic differentiation support via **[CppAD](https://github.com/coin-or/CppAD)**
 
 **Crocoddyl** is efficient and flexible:
 
  * cache friendly,
  * multi-thread friendly
- * Python bindings (including models and solvers abstractions)
+ * Python bindings (including models and solvers abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
  * C++ 98/11/14/17/20 compliant
  * extensively tested
- * automatic code generation support
+ * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
 
 ### Installation through robotpkg
 
@@ -116,7 +122,11 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+* [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+* [eigenpy](https://github.com/stack-of-tasks/eigenpy)
+* [Boost](https://www.boost.org/)
 * [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
+* [OpenMP](https://www.openmp.org/) (optional for multi-threading installation)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for examples)
@@ -174,8 +184,9 @@ and the following one to reference this website:
    year = {2019}
 }
 ```
+Please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
 
-The rest of the publications describes different component of **Crocoddyl**:
+The rest of the publications describes different components of **Crocoddyl**:
 
 
 ### Publications
@@ -206,12 +217,13 @@ The following people have been involved in the development of **Crocoddyl**:
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor and main developer
 - [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh): main developer
 - [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): main developer
-- [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
+- [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives, conda integration
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
 - [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Oxford): feature extension and debugging
 - [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (IRI: CSIC-UPC): feature extension
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
+- [Julian Eßer](https://github.com/julesser) (DFKI): features extension (contact stability)
 
 
 ## Acknowledgments

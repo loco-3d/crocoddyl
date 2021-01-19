@@ -10,7 +10,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the double pendulum model
-robot = example_robot_data.loadDoublePendulum()
+robot = example_robot_data.load('double_pendulum')
 robot_model = robot.model
 
 state = crocoddyl.StateMultibody(robot_model)

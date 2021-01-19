@@ -27,15 +27,17 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_contacts
   # test_impulses
   test_multiple_contacts
-  # test_multiple_impulses
-  # test_actions
-  # # test_integrators
-  # test_diff_actions
-  # test_problem
-  # test_friction_cone
-  # test_wrench_cone
-  # test_boxqp
-  # test_solvers
+  test_multiple_impulses
+  test_contact_costs
+  test_impulse_costs
+  test_actions
+  # test_integrators
+  test_diff_actions
+  test_problem
+  test_friction_cone
+  test_wrench_cone
+  test_boxqp
+  test_solvers
 )
 
 IF(BUILD_WITH_CODEGEN_SUPPORT)

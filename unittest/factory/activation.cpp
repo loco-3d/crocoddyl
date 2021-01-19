@@ -1,15 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "activation.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
-#include "crocoddyl/core/activations/quadratic-flat.hpp"
-#include "crocoddyl/core/activations/quadratic-log.hpp"
+#include "crocoddyl/core/activations/quadratic-flat-exp.hpp"
+#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 #include "crocoddyl/core/activations/smooth-1norm.hpp"
 #include "crocoddyl/core/activations/smooth-2norm.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
@@ -27,11 +27,11 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
     case ActivationModelTypes::ActivationModelQuad:
       os << "ActivationModelQuad";
       break;
-    case ActivationModelTypes::ActivationModelQuadFlat:
-      os << "ActivationModelQuadFlat";
+    case ActivationModelTypes::ActivationModelQuadFlatExp:
+      os << "ActivationModelQuadFlatExp";
       break;
-    case ActivationModelTypes::ActivationModelQuadLog:
-      os << "ActivationModelQuadLog";
+    case ActivationModelTypes::ActivationModelQuadFlatLog:
+      os << "ActivationModelQuadFlatLog";
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       os << "ActivationModelSmooth1Norm";
@@ -65,23 +65,19 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub = lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
-  Eigen::VectorXd weights = 0.1 * Eigen::VectorXd::Random(nr);
-  double threshold = 0.3;
-  double sigma2 = 10;
+  Eigen::VectorXd weights = 1. * Eigen::VectorXd::Random(nr);
+  double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double eps = fabs(Eigen::VectorXd::Random(1)[0]);
 
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
       activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
       break;
-    case ActivationModelTypes::ActivationModelQuadFlat:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlat>(nr,sigma2);
+    case ActivationModelTypes::ActivationModelQuadFlatExp:
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr, alpha);
       break;
-    case ActivationModelTypes::ActivationModelQuadLog:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuadLog>(nr,sigma2);
-      break;
-    case ActivationModelTypes::ActivationModelSmoothAbs:
-      activation = boost::make_shared<crocoddyl::ActivationModelSmoothAbs>(nr);
+    case ActivationModelTypes::ActivationModelQuadFlatLog:
+      activation = boost::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr, alpha);
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation = boost::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);

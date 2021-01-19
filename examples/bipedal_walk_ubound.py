@@ -12,7 +12,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Creating the lower-body part of Talos
-talos_legs = example_robot_data.loadTalosLegs()
+talos_legs = example_robot_data.load('talos_legs')
 lims = talos_legs.model.effortLimit
 lims *= 0.5  # reduced artificially the torque limits
 talos_legs.model.effortLimit = lims

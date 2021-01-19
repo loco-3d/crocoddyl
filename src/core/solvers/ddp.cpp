@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       regmax_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_gaptol_(1e-9),
+      th_gaptol_(1e-16),
       th_stepdec_(0.5),
       th_stepinc_(0.01),
       was_feasible_(false) {

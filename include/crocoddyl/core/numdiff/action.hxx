@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, New York University,
-// Max Planck Gesellschaft
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh,
+//                          New York University, Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,9 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model)
+ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
+  with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
@@ -133,7 +134,7 @@ void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
 
 template <typename Scalar>
 bool ActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
-  return model_->get_nr() > 0;
+  return with_gauss_approx_;
 }
 
 template <typename Scalar>
