@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -50,7 +51,8 @@ void exposeWrenchCone() {
                     bp::make_function(&WrenchCone::set_min_nforce), "minimum normal force")
       .add_property("max_nforce",
                     bp::make_function(&WrenchCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&WrenchCone::set_max_nforce), "maximum normal force");
+                    bp::make_function(&WrenchCone::set_max_nforce), "maximum normal force")
+      .def(PrintableVisitor<WrenchCone>());
 }
 
 }  // namespace python

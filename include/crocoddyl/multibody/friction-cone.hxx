@@ -170,7 +170,12 @@ std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X) {
   os << "    normal: " << X.get_nsurf().transpose() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
   os << "        nf: " << X.get_nf() << std::endl;
-  os << "inner_appr: " << X.get_inner_appr() << std::endl;
+  os << "inner_appr: ";
+  if (X.get_inner_appr()) {
+    os << "true" << std::endl;
+  } else {
+    os << "false" << std::endl;
+  }
   os << " min_force: " << X.get_min_nforce() << std::endl;
   os << " max_force: " << X.get_max_nforce() << std::endl;
   return os;
