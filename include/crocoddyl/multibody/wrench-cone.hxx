@@ -149,12 +149,12 @@ const Scalar WrenchConeTpl<Scalar>::get_max_nforce() const {
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_R(const Matrix3s R) {
+void WrenchConeTpl<Scalar>::set_R(const Matrix3s& R) {
   update(R, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_box(const Vector2s box) {
+void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
   update(R_, mu_, box, min_nforce_, max_nforce_);
 }
 

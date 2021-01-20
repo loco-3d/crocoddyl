@@ -55,7 +55,7 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 16,
+  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf = 16,
                 const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
@@ -81,7 +81,7 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  void update(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const Scalar min_nforce = Scalar(0.),
+  void update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce = Scalar(0.),
               const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
@@ -132,12 +132,12 @@ class WrenchConeTpl {
   /**
    * @brief Modify the rotation matrix that defines the cone orientation
    */
-  void set_R(const Matrix3s R);
+  void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
    */
-  void set_box(const Vector2s box);
+  void set_box(const Vector2s& box);
 
   /**
    * @brief Modify friction coefficient

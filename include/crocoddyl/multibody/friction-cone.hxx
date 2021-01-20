@@ -21,7 +21,7 @@ FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4), A_(nf_ + 1, 3), ub_(nf_ + 1
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu, const std::size_t nf,
+FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu, std::size_t nf,
                                          const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
