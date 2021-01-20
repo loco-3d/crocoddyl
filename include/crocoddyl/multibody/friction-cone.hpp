@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,14 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class encapsulates a friction cone
+ *
+ * A friction cone is a 3D cone that characterizes feasible contact wrench.
+ * The friction cone defines a linearized version (pyramid) with a predefined number of facets.
+ *
+ * /sa `WrenchConeTpl`
+ */
 template <typename _Scalar>
 class FrictionConeTpl {
  public:
@@ -28,45 +36,133 @@ class FrictionConeTpl {
   typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::Quaternions Quaternions;
 
+  /**
+   * @brief Initialize the friction cone
+   */
   explicit FrictionConeTpl();
+
+  /**
+   * @brief Initialize the wrench cone
+   *
+   * @param[in] normal      Surface normal vector
+   * @param[in] mu          Friction coefficient
+   * @param[in] nf          Number of facets (default 4)
+   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
+   */
   FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf = 4, bool inner_appr = true,
                   const Scalar& min_nforce = Scalar(0.),
                   const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
+
+  /**
+   * @brief Initialize the wrench cone
+   *
+   * @param[in] cone  Friction cone
+   */
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
   ~FrictionConeTpl();
 
+  /**
+   * @brief Update the matrix and bound of friction cone inequalities in the world frame.
+   *
+   * This matrix-vector pair describes the linearized Coulomb friction model as follow:
+   * \f$ -ub \leq A \times w \leq -lb \f$,
+   * where wrench, \f$ w \f$, is expressed in the inertial frame located with axes parallel to
+   * those of the world frame.
+   *
+   * @param[in] normal      Surface normal vector
+   * @param[in] mu          Friction coefficient
+   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
+   */
   void update(const Vector3s& normal, const Scalar& mu, bool inner_appr = true, const Scalar& min_nforce = Scalar(0.),
               const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
 
+  /**
+   * @brief Return the matrix of friction cone
+   */
   const MatrixX3s& get_A() const;
-  const VectorXs& get_lb() const;
+
+  /**
+   * @brief Return the upper bound of the friction cone
+   */
   const VectorXs& get_ub() const;
+
+  /**
+   * @brief Return the lower bound of the friction cone
+   */
+  const VectorXs& get_lb() const;
+
+  /**
+   * @brief Return the surface normal vector
+   */
   const Vector3s& get_nsurf() const;
+
+  /**
+   * @brief Return the friction coefficient
+   */
   const Scalar& get_mu() const;
+
+  /**
+   * @brief Return the number of facets
+   */
   const std::size_t& get_nf() const;
+
+  /**
+   * @brief Return the label that describes the type of friction cone approximation (inner/outer)
+   */
   const bool& get_inner_appr() const;
+
+  /**
+   * @brief Return the minimum normal force
+   */
   const Scalar& get_min_nforce() const;
+
+  /**
+   * @brief Return the maximum normal force
+   */
   const Scalar& get_max_nforce() const;
 
-  void set_nsurf(Vector3s nf);
+  /**
+   * @brief Modify the surface normal vector
+   */
+  void set_nsurf(Vector3s nsurf);
+
+  /**
+   * @brief Modify friction coefficient
+   */
   void set_mu(Scalar mu);
+
+  /**
+   * @brief Modify the label that describes the type of friction cone approximation (inner/outer)
+   */
   void set_inner_appr(bool inner_appr);
+
+  /**
+   * @brief Modify the maximum normal force
+   */
   void set_min_nforce(Scalar min_nforce);
+
+  /**
+   * @brief Modify the maximum normal force
+   */
   void set_max_nforce(Scalar max_nforce);
 
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);
 
  private:
-  MatrixX3s A_;
-  VectorXs lb_;
-  VectorXs ub_;
-  Vector3s nsurf_;
-  Scalar mu_;
-  std::size_t nf_;
-  bool inner_appr_;
-  Scalar min_nforce_;
-  Scalar max_nforce_;
+  std::size_t nf_;     //!< Number of facets
+  MatrixX3s A_;        //!< Matrix of friction cone
+  VectorXs ub_;        //!< Upper bound of the friction cone
+  VectorXs lb_;        //!< Lower bound of the friction cone
+  Vector3s nsurf_;     //!< Surface normal vector
+  Scalar mu_;          //!< Friction coefficient
+  bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
+  Scalar min_nforce_;  //!< Minimum normal force
+  Scalar max_nforce_;  //!< Maximum normal force
 };
 
 }  // namespace crocoddyl
