@@ -21,8 +21,8 @@ FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4), A_(nf_ + 1, 3), ub_(nf_ + 1
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf, bool inner_appr,
-                                         const Scalar& min_nforce, const Scalar& max_nforce)
+FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu, std::size_t nf,
+                                         const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
@@ -52,8 +52,8 @@ template <typename Scalar>
 FrictionConeTpl<Scalar>::~FrictionConeTpl() {}
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar& mu, bool inner_appr,
-                                     const Scalar& min_nforce, const Scalar& max_nforce) {
+void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, const bool inner_appr,
+                                     const Scalar min_nforce, const Scalar max_nforce) {
   nsurf_ = normal;
   mu_ = mu;
   inner_appr_ = inner_appr;
@@ -116,52 +116,52 @@ const typename MathBaseTpl<Scalar>::Vector3s& FrictionConeTpl<Scalar>::get_nsurf
 }
 
 template <typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_mu() const {
+const Scalar FrictionConeTpl<Scalar>::get_mu() const {
   return mu_;
 }
 
 template <typename Scalar>
-const std::size_t& FrictionConeTpl<Scalar>::get_nf() const {
+std::size_t FrictionConeTpl<Scalar>::get_nf() const {
   return nf_;
 }
 
 template <typename Scalar>
-const bool& FrictionConeTpl<Scalar>::get_inner_appr() const {
+bool FrictionConeTpl<Scalar>::get_inner_appr() const {
   return inner_appr_;
 }
 
 template <typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_min_nforce() const {
+const Scalar FrictionConeTpl<Scalar>::get_min_nforce() const {
   return min_nforce_;
 }
 
 template <typename Scalar>
-const Scalar& FrictionConeTpl<Scalar>::get_max_nforce() const {
+const Scalar FrictionConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::set_nsurf(Vector3s nsurf) {
+void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
   update(nsurf, mu_, inner_appr_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::set_mu(Scalar mu) {
+void FrictionConeTpl<Scalar>::set_mu(const Scalar mu) {
   update(nsurf_, mu, inner_appr_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::set_inner_appr(bool inner_appr) {
+void FrictionConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
   update(nsurf_, mu_, inner_appr, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::set_min_nforce(Scalar min_nforce) {
+void FrictionConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
   update(nsurf_, mu_, inner_appr_, min_nforce, max_nforce_);
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::set_max_nforce(Scalar max_nforce) {
+void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
   update(nsurf_, mu_, inner_appr_, min_nforce_, max_nforce);
 }
 

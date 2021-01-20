@@ -55,8 +55,8 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf = 16,
-                const Scalar& min_nforce = Scalar(0.), const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
+  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf = 16,
+                const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Initialize the wrench cone
@@ -81,8 +81,8 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  void update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, const Scalar& min_nforce = Scalar(0.),
-              const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
+  void update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce = Scalar(0.),
+              const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Return the matrix of wrench cone
@@ -112,47 +112,47 @@ class WrenchConeTpl {
   /**
    * @brief Return friction coefficient
    */
-  const Scalar& get_mu() const;
+  const Scalar get_mu() const;
 
   /**
    * @brief Return the number of facets
    */
-  const std::size_t& get_nf() const;
+  std::size_t get_nf() const;
 
   /**
    * @brief Return the minimum normal force
    */
-  const Scalar& get_min_nforce() const;
+  const Scalar get_min_nforce() const;
 
   /**
    * @brief Return the maximum normal force
    */
-  const Scalar& get_max_nforce() const;
+  const Scalar get_max_nforce() const;
 
   /**
    * @brief Modify the rotation matrix that defines the cone orientation
    */
-  void set_R(Matrix3s R);
+  void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
    */
-  void set_box(Vector2s box);
+  void set_box(const Vector2s& box);
 
   /**
    * @brief Modify friction coefficient
    */
-  void set_mu(Scalar mu);
+  void set_mu(const Scalar mu);
 
   /**
    * @brief Modify the minium normal force
    */
-  void set_min_nforce(Scalar min_nforce);
+  void set_min_nforce(const Scalar min_nforce);
 
   /**
    * @brief Modify the maximum normal force
    */
-  void set_max_nforce(Scalar max_nforce);
+  void set_max_nforce(const Scalar max_nforce);
 
   /**
    * @brief Modify the maximum normal force
