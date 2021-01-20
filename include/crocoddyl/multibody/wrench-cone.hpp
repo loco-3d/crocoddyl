@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,11 +17,12 @@ namespace crocoddyl {
 /**
  * @brief This class encapsulates a wrench cone
  *
- * A wrench cone is a 6D polyhedral convex cone that chracterizes feasible contact wrench.
+ * A wrench cone is a 6D polyhedral convex cone that characterizes feasible contact wrench.
  * The wrench cone is derived in the case of rectangular support areas, which is of practical importance since most
  * humanoid robot feet can be adequately approximated by rectangles.
+ *
+ * /sa `FrictionConeTpl`
  */
-
 template <typename _Scalar>
 class WrenchConeTpl {
  public:
@@ -47,12 +48,12 @@ class WrenchConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
-   * @param[in] R               Rotation matrix that defines the cone orientation
-   * @param[in] mu              Friction coefficient
-   * @param[in] box             Dimension of the foot surface dim = (length, width)
-   * @param[in] nf              Number of facets (default 16)
-   * @param[in] min_nforce      Minimum normal force (default 0.)
-   * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
+   * @param[in] R           Rotation matrix that defines the cone orientation
+   * @param[in] mu          Friction coefficient
+   * @param[in] box         Dimension of the foot surface dim = (length, width)
+   * @param[in] nf          Number of facets (default 16)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
   WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 16,
                 const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
@@ -60,27 +61,25 @@ class WrenchConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
-   * @param[in] cone            Wrench cone
+   * @param[in] cone  Wrench cone
    */
   WrenchConeTpl(const WrenchConeTpl<Scalar>& cone);
   ~WrenchConeTpl();
 
   /**
-   * @brief Update the matrix of wrench cone inequaliteis in the world frame.
+   * @brief Update the matrix of wrench cone inequalities in the world frame.
    *
    * This matrix-vector pair describes the linearized Coulomb friction model as follow:
-   *
    * \f$ -ub \leq A \times w \leq -lb \f$,
-   *
    * where wrench, \f$ w \f$, is expressed in the inertial frame located at the
    * center of the rectangular foot contact area (length, width) with axes parallel to
    * those of the world frame.
    *
-   * @param[in] R               Rotation matrix that defines the cone orientation
-   * @param[in] mu              Friction coefficient
-   * @param[in] box             Dimension of the foot surface dim = (length, width)
-   * @param[in] min_nforce      Minimum normal force (default 0.)
-   * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
+   * @param[in] R           Rotation matrix that defines the cone orientation
+   * @param[in] mu          Friction coefficient
+   * @param[in] box         Dimension of the foot surface dim = (length, width)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
   void update(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const Scalar min_nforce = Scalar(0.),
               const Scalar max_nforce = std::numeric_limits<Scalar>::max());
@@ -162,15 +161,15 @@ class WrenchConeTpl {
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
 
  private:
-  MatrixX6s A_;
-  VectorXs ub_;
-  VectorXs lb_;
-  Matrix3s R_;
-  Vector2s box_;
-  Scalar mu_;
-  std::size_t nf_;
-  Scalar min_nforce_;
-  Scalar max_nforce_;
+  std::size_t nf_;     //!< Number of facets
+  MatrixX6s A_;        //!< Matrix of wrench cone
+  VectorXs ub_;        //!< Upper bound of the wrench cone
+  VectorXs lb_;        //!< Lower bound of the wrench cone
+  Matrix3s R_;         //!< Rotation of the wrench cone
+  Vector2s box_;       //!< Dimension of the foot surface (length, width)
+  Scalar mu_;          //!< Friction coefficient
+  Scalar min_nforce_;  //!< Minimum normal force
+  Scalar max_nforce_;  //!< Maximum normal force
 };
 
 }  // namespace crocoddyl

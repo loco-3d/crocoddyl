@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,18 +12,18 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16) {
-  A_.resize(nf_ + 1, 6);
-  ub_.resize(nf_ + 1);
-  lb_.resize(nf_ + 1);
+WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16), A_(nf_ + 1, 6), ub_(nf_ + 1), lb_(nf_ + 1) {
+  A_.setZero(nf_ + 1, 6);
+  ub_.setZero(nf_ + 1);
+  lb_.setZero(nf_ + 1);
   // compute the matrix
   update(Matrix3s::Identity(), Scalar(0.7), Vector2s(0.1, 0.05), Scalar(0.), std::numeric_limits<Scalar>::max());
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size,
-                                     const std::size_t nf, const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf) {
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf,
+                                     const Scalar min_nforce, const Scalar max_nforce)
+    : nf_(nf), A_(nf_ + 1, 6), ub_(nf_ + 1), lb_(nf_ + 1) {
   if (nf_ % 2 != 0) {
     nf_ = 16;
     std::cerr << "Warning: nf has to be an even number, set to 16" << std::endl;
@@ -38,13 +38,13 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
 
 template <typename Scalar>
 WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
-    : A_(cone.get_A()),
+    : nf_(cone.get_nf()),
+      A_(cone.get_A()),
       ub_(cone.get_ub()),
       lb_(cone.get_lb()),
       R_(cone.get_R()),
       box_(cone.get_box()),
       mu_(cone.get_mu()),
-      nf_(cone.get_nf()),
       min_nforce_(cone.get_min_nforce()),
       max_nforce_(cone.get_max_nforce()) {}
 

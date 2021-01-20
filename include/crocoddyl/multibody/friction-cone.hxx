@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,10 +12,10 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4) {
-  A_.resize(nf_ + 1, 3);
-  lb_.resize(nf_ + 1);
-  ub_.resize(nf_ + 1);
+FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4), A_(nf_ + 1, 3), ub_(nf_ + 1), lb_(nf_ + 1) {
+  A_.setZero();
+  ub_.setZero();
+  lb_.setZero();
   // compute the matrix
   update(Vector3s(0, 0, 1), Scalar(0.7), true, Scalar(0.), std::numeric_limits<Scalar>::max());
 }
@@ -28,9 +28,9 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
-  A_.resize(nf_ + 1, 3);
-  lb_.resize(nf_ + 1);
-  ub_.resize(nf_ + 1);
+  A_ = MatrixX3s::Zero(nf_ + 1, 3);
+  ub_ = VectorXs::Zero(nf_ + 1);
+  lb_ = VectorXs::Zero(nf_ + 1);
 
   // compute the matrix
   update(normal, mu, inner_appr, min_nforce, max_nforce);
@@ -38,12 +38,12 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu
 
 template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
-    : A_(cone.get_A()),
-      lb_(cone.get_lb()),
+    : nf_(cone.get_nf()),
+      A_(cone.get_A()),
       ub_(cone.get_ub()),
+      lb_(cone.get_lb()),
       nsurf_(cone.get_nsurf()),
       mu_(cone.get_mu()),
-      nf_(cone.get_nf()),
       inner_appr_(cone.get_inner_appr()),
       min_nforce_(cone.get_min_nforce()),
       max_nforce_(cone.get_max_nforce()) {}
@@ -101,13 +101,13 @@ const typename MathBaseTpl<Scalar>::MatrixX3s& FrictionConeTpl<Scalar>::get_A() 
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb() const {
-  return lb_;
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub() const {
+  return ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub() const {
-  return ub_;
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb() const {
+  return lb_;
 }
 
 template <typename Scalar>
