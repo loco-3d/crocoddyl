@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeFrictionCone() {
+  bp::register_ptr_to_python<boost::shared_ptr<FrictionCone> >();
+
   bp::class_<FrictionCone>("FrictionCone", "Model of the friction cone as lb <= Af <= ub",
                            bp::init<Eigen::Vector3d, double, bp::optional<std::size_t, bool, double, double> >(
                                bp::args("self", "normal", "mu", "nf", "inner_appr", "min_nforce", "max_nforce"),
@@ -34,19 +36,19 @@ void exposeFrictionCone() {
            ":param max_nforce: maximum normal force (default sys.float_info.max)")
       .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
                     "inequality matrix")
-      .add_property("lb", bp::make_function(&FrictionCone::get_lb, bp::return_internal_reference<>()),
-                    "inequality lower bound")
       .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_internal_reference<>()),
                     "inequality upper bound")
+      .add_property("lb", bp::make_function(&FrictionCone::get_lb, bp::return_internal_reference<>()),
+                    "inequality lower bound")
+      .add_property("nf", bp::make_function(&FrictionCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
+                    "number of facets")
       .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
                     bp::make_function(&FrictionCone::set_nsurf), "normal vector")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&FrictionCone::set_mu), "friction coefficient")
-      .add_property("nf", bp::make_function(&FrictionCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
-                    "number of facets")
       .add_property("inner_appr",
                     bp::make_function(&FrictionCone::get_inner_appr, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_inner_appr), "type of cone approxition")
+                    bp::make_function(&FrictionCone::set_inner_appr), "type of cone approximation")
       .add_property("min_nforce",
                     bp::make_function(&FrictionCone::get_min_nforce, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&FrictionCone::set_min_nforce), "minimum normal force")
