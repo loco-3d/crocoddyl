@@ -85,10 +85,10 @@ void test_inner_approximation_of_friction_cone() {
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = true;
   crocoddyl::FrictionCone cone(cone_normal, mu, nf, inner_appr);
-  const Eigen::Vector3d A_mu = -cone.get_A().col(2);
-  BOOST_CHECK_CLOSE(A_mu(0), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
-  BOOST_CHECK_CLOSE(A_mu(1), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
-  BOOST_CHECK_CLOSE(A_mu(2), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
+  const Eigen::VectorXd A_mu = -cone.get_A().col(2);
+  for (std::size_t i = 0; i < nf; ++i) {
+    BOOST_CHECK_CLOSE(A_mu(i), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
+  }
 }
 
 void test_A_matrix_with_rotation_change() {
