@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -27,13 +28,18 @@ void exposeFrictionCone() {
                                ":param min_nforce: minimum normal force (default 0.)\n"
                                ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the friction cone."))
-      .def("update", &FrictionCone::update, bp::args("self", "normal", "mu", "inner_appr", "min_nforce", "max_nforce"),
-           "Update the linear inequality (matrix and bounds).\n\n"
-           ":param normal: normal vector that defines the cone orientation\n"
-           ":param mu: friction coefficient\n"
-           ":param inner_appr: inner or outer approximation (default True)\n"
-           ":param min_nforce: minimum normal force (default 0.)\n"
-           ":param max_nforce: maximum normal force (default sys.float_info.max)")
+      .def<void (FrictionCone::*)()>("update", &FrictionCone::update, bp::args("self"),
+                                     "Update the linear inequality (matrix and bounds).\n\n"
+                                     "Run this function if you have changed one of the parameters.")
+      .def<void (FrictionCone::*)(const Eigen::Vector3d&, const double, const bool, const double, const double)>(
+          "update", &FrictionCone::update, deprecated<>("Deprecated. Use update()."),
+          bp::args("self", "normal", "mu", "inner_appr", "min_nforce", "max_nforce"),
+          "Update the linear inequality (matrix and bounds).\n\n"
+          ":param normal: normal vector that defines the cone orientation\n"
+          ":param mu: friction coefficient\n"
+          ":param inner_appr: inner or outer approximation (default True)\n"
+          ":param min_nforce: minimum normal force (default 0.)\n"
+          ":param max_nforce: maximum normal force (default sys.float_info.max)")
       .add_property("A", bp::make_function(&FrictionCone::get_A, bp::return_internal_reference<>()),
                     "inequality matrix")
       .add_property("ub", bp::make_function(&FrictionCone::get_ub, bp::return_internal_reference<>()),
@@ -41,20 +47,25 @@ void exposeFrictionCone() {
       .add_property("lb", bp::make_function(&FrictionCone::get_lb, bp::return_internal_reference<>()),
                     "inequality lower bound")
       .add_property("nf", bp::make_function(&FrictionCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
-                    "number of facets")
+                    "number of facets (run update() if you have changed the value)")
       .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
-                    bp::make_function(&FrictionCone::set_nsurf), "normal vector")
+                    bp::make_function(&FrictionCone::set_nsurf),
+                    "normal vector (run update() if you have changed the value)")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_mu), "friction coefficient")
+                    bp::make_function(&FrictionCone::set_mu),
+                    "friction coefficient (run update() if you have changed the value)")
       .add_property("inner_appr",
                     bp::make_function(&FrictionCone::get_inner_appr, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_inner_appr), "type of cone approximation")
+                    bp::make_function(&FrictionCone::set_inner_appr),
+                    "type of cone approximation (run update() if you have changed the value)")
       .add_property("min_nforce",
                     bp::make_function(&FrictionCone::get_min_nforce, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_min_nforce), "minimum normal force")
+                    bp::make_function(&FrictionCone::set_min_nforce),
+                    "minimum normal force (run update() if you have changed the value)")
       .add_property("max_nforce",
                     bp::make_function(&FrictionCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_max_nforce), "maximum normal force")
+                    bp::make_function(&FrictionCone::set_max_nforce),
+                    "maximum normal force (run update() if you have changed the value)")
       .def(PrintableVisitor<FrictionCone>());
 }
 

@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -69,15 +70,11 @@ class FrictionConeTpl {
    * \f$ -ub \leq A \times w \leq -lb \f$,
    * where wrench, \f$ w \f$, is expressed in the inertial frame located with axes parallel to
    * those of the world frame.
-   *
-   * @param[in] normal      Surface normal vector
-   * @param[in] mu          Friction coefficient
-   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
-   * @param[in] min_nforce  Minimum normal force (default 0.)
-   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  void update(const Vector3s& normal, const Scalar mu, const bool inner_appr = true,
-              const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  void update();
+  DEPRECATED("Use update()", void update(const Vector3s& normal, const Scalar mu, const bool inner_appr = true,
+                                         const Scalar min_nforce = Scalar(0.),
+                                         const Scalar max_nforce = std::numeric_limits<Scalar>::max()));
 
   /**
    * @brief Return the matrix of friction cone
@@ -126,26 +123,36 @@ class FrictionConeTpl {
 
   /**
    * @brief Modify the surface normal vector
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_nsurf(const Vector3s& nsurf);
 
   /**
    * @brief Modify friction coefficient
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_mu(const Scalar mu);
 
   /**
    * @brief Modify the label that describes the type of friction cone approximation (inner/outer)
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_inner_appr(const bool inner_appr);
 
   /**
    * @brief Modify the maximum normal force
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_min_nforce(const Scalar min_nforce);
 
   /**
    * @brief Modify the maximum normal force
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_max_nforce(const Scalar max_nforce);
 
