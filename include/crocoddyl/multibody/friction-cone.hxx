@@ -12,18 +12,28 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl() : nf_(4), A_(nf_ + 1, 3), ub_(nf_ + 1), lb_(nf_ + 1) {
+FrictionConeTpl<Scalar>::FrictionConeTpl()
+    : nf_(4),
+      A_(nf_ + 1, 3),
+      ub_(nf_ + 1),
+      lb_(nf_ + 1),
+      nsurf_(Vector3s::UnitZ()),
+      mu_(Scalar(0.7)),
+      inner_appr_(true),
+      min_nforce_(Scalar(0.)),
+      max_nforce_(std::numeric_limits<Scalar>::max()) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
-  // compute the matrix
-  update(Vector3s(0, 0, 1), Scalar(0.7), true, Scalar(0.), std::numeric_limits<Scalar>::max());
+
+  // Update the inequality matrix and bounds
+  update();
 }
 
 template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu, std::size_t nf,
                                          const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf) {
+    : nf_(nf), nsurf_(normal), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
@@ -32,8 +42,8 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& normal, const Scalar mu
   ub_ = VectorXs::Zero(nf_ + 1);
   lb_ = VectorXs::Zero(nf_ + 1);
 
-  // compute the matrix
-  update(normal, mu, inner_appr, min_nforce, max_nforce);
+  // Update the inequality matrix and bounds
+  update();
 }
 
 template <typename Scalar>
@@ -50,6 +60,36 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
 
 template <typename Scalar>
 FrictionConeTpl<Scalar>::~FrictionConeTpl() {}
+
+template <typename Scalar>
+void FrictionConeTpl<Scalar>::update() {
+  // Initialize the matrix and bounds
+  A_.setZero();
+  ub_.setZero();
+  lb_.setOnes();
+  lb_ *= -std::numeric_limits<Scalar>::max();
+
+  // Compute the mu given the type of friction cone approximation
+  Scalar mu = mu_;
+  const Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
+  if (inner_appr_) {
+    mu *= cos(theta / Scalar(2.));
+  }
+
+  // Update the inequality matrix and the bounds
+  Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
+  Scalar theta_i;
+  Vector3s tsurf_i;
+  for (std::size_t i = 0; i < nf_ / 2; ++i) {
+    theta_i = theta * static_cast<Scalar>(i);
+    tsurf_i << cos(theta_i), sin(theta_i), Scalar(0.);
+    A_.row(2 * i) = (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * c_R_o;
+    A_.row(2 * i + 1) = (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * c_R_o;
+  }
+  A_.row(nf_) = nsurf_.transpose();
+  lb_(nf_) = min_nforce_;
+  ub_(nf_) = max_nforce_;
+}
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, const bool inner_appr,
@@ -74,25 +114,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, co
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
 
-  const Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
-  if (inner_appr_) {
-    mu_ *= cos(theta / Scalar(2.));
-  }
-
-  const Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
-  for (std::size_t i = 0; i < nf_ / 2; ++i) {
-    const Scalar theta_i = theta * static_cast<Scalar>(i);
-    const Vector3s& tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
-    A_.row(2 * i) = (-mu_ * Vector3s::UnitZ() + tsurf_i).transpose() * c_R_o;
-    A_.row(2 * i + 1) = (-mu_ * Vector3s::UnitZ() - tsurf_i).transpose() * c_R_o;
-    lb_(2 * i) = -std::numeric_limits<Scalar>::max();
-    lb_(2 * i + 1) = -std::numeric_limits<Scalar>::max();
-    ub_(2 * i) = Scalar(0.);
-    ub_(2 * i + 1) = Scalar(0.);
-  }
-  A_.row(nf_) = nsurf_.transpose();
-  lb_(nf_) = min_nforce_;
-  ub_(nf_) = max_nforce_;
+  update();
 }
 
 template <typename Scalar>
@@ -142,27 +164,27 @@ const Scalar FrictionConeTpl<Scalar>::get_max_nforce() const {
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
-  update(nsurf, mu_, inner_appr_, min_nforce_, max_nforce_);
+  nsurf_ = nsurf;
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_mu(const Scalar mu) {
-  update(nsurf_, mu, inner_appr_, min_nforce_, max_nforce_);
+  mu_ = mu;
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
-  update(nsurf_, mu_, inner_appr, min_nforce_, max_nforce_);
+  inner_appr_ = inner_appr;
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
-  update(nsurf_, mu_, inner_appr_, min_nforce, max_nforce_);
+  min_nforce_ = min_nforce;
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
-  update(nsurf_, mu_, inner_appr_, min_nforce_, max_nforce);
+  max_nforce_ = max_nforce;
 }
 
 template <typename Scalar>
