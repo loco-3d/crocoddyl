@@ -10,8 +10,6 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
 
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -25,7 +23,7 @@ void test_constructor(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(state_factory.create(state_type));
-  
+
   // Test the initial size of the map
   BOOST_CHECK(model.get_costs().size() == 0);
 }
@@ -33,27 +31,16 @@ void test_constructor(StateModelTypes::Type state_type) {
 void test_addCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
 
   // add an active cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 = create_random_cost(state_type,model.get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 = create_random_cost(state_type);
   model.addCost("random_cost_1", rand_cost_1, 1.);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
   BOOST_CHECK(model.get_nr_total() == rand_cost_1->get_activation()->get_nr());
 
   // add an inactive cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_2 = create_random_cost(state_type,model.get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_2 = create_random_cost(state_type);
   model.addCost("random_cost_2", rand_cost_2, 1., false);
   BOOST_CHECK(model.get_nr() == rand_cost_1->get_activation()->get_nr());
   BOOST_CHECK(model.get_nr_total() ==
@@ -75,21 +62,10 @@ void test_addCost(StateModelTypes::Type state_type) {
 void test_addCost_error_message(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
 
   // create an cost object
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type,model.get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type);
 
   // add twice the same cost object to the container
   model.addCost("random_cost", rand_cost, 1.);
@@ -116,21 +92,10 @@ void test_addCost_error_message(StateModelTypes::Type state_type) {
 void test_removeCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
 
   // add an active cost
-  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type,model.get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> rand_cost = create_random_cost(state_type);
   model.addCost("random_cost", rand_cost, 1.);
   BOOST_CHECK(model.get_nr() == rand_cost->get_activation()->get_nr());
 
@@ -143,18 +108,7 @@ void test_removeCost(StateModelTypes::Type state_type) {
 void test_removeCost_error_message(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
 
   // remove a none existing cost form the container, we expect a cout message here
   CaptureIOStream capture_ios;
@@ -171,26 +125,13 @@ void test_removeCost_error_message(StateModelTypes::Type state_type) {
 void test_calc(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some cost objects
   std::vector<boost::shared_ptr<crocoddyl::CostModelAbstract> > models;
@@ -198,8 +139,7 @@ void test_calc(StateModelTypes::Type state_type) {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m =
-       create_random_cost(state_type, model.get_nu());
+    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost(state_type);
     model.addCost(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
@@ -243,25 +183,13 @@ void test_calc(StateModelTypes::Type state_type) {
 void test_calcDiff(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (pinocchio_model.joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract> &actuation_data =
-        actuation->createData();
-  crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,actuation_data);
+  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some cost objects
   std::vector<boost::shared_ptr<crocoddyl::CostModelAbstract> > models;
@@ -269,8 +197,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = 
-       create_random_cost(state_type,model.get_nu());
+    const boost::shared_ptr<crocoddyl::CostModelAbstract>& m = create_random_cost(state_type);
     model.addCost(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
@@ -348,26 +275,17 @@ void test_calcDiff(StateModelTypes::Type state_type) {
 void test_get_costs(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
   // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Data pinocchio_data(*state->get_pinocchio().get());
 
   // create and add some contact objects
   for (unsigned i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    model.addCost(os.str(), create_random_cost(state_type,model.get_nu()), 1.);
+    model.addCost(os.str(), create_random_cost(state_type), 1.);
   }
 
   // get the contacts
@@ -386,27 +304,18 @@ void test_get_costs(StateModelTypes::Type state_type) {
 void test_get_nr(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-      
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
-  crocoddyl::CostModelSum model(state,actuation->get_nu());
+  crocoddyl::CostModelSum model(state_factory.create(state_type));
 
   // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Data pinocchio_data(*state->get_pinocchio().get());
 
   // create and add some contact objects
   for (unsigned i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
-    model.addCost(os.str(), create_random_cost(state_type,model.get_nu()), 1.);
+    model.addCost(os.str(), create_random_cost(state_type), 1.);
   }
 
   // compute ni

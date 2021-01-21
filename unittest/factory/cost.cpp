@@ -27,6 +27,8 @@ namespace unittest {
 
 const std::vector<CostModelTypes::Type>
     CostModelTypes::all(CostModelTypes::init_all());
+const std::vector<CostModelNoFFTypes::Type>
+    CostModelNoFFTypes::all(CostModelNoFFTypes::init_all());
 
 std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   switch (type) {
@@ -38,9 +40,6 @@ std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
       break;
     case CostModelTypes::CostModelCoMPosition:
       os << "CostModelCoMPosition";
-      break;
-    case CostModelTypes::CostModelControlGrav:
-      os << "CostModelControlGrav";
       break;
     // case CostModelTypes::CostModelCentroidalMomentum:
     //   os << "CostModelCentroidalMomentum";
@@ -66,6 +65,17 @@ std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   return os;
 }
 
+std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type) {
+  switch (type) {
+    case CostModelNoFFTypes::CostModelControlGrav:
+      os << "CostModelControlGrav";
+      break;
+    default:
+      break;
+  }
+  return os;
+}
+
 CostModelFactory::CostModelFactory() {}
 CostModelFactory::~CostModelFactory() {}
 
@@ -78,15 +88,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(
           state_factory.create(state_type));
-
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  pinocchio::JointModelFreeFlyer ff_joint;
-  if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-    actuation =
-        boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  } else {
-    actuation = boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  }
 
   crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
@@ -108,10 +109,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     cost = boost::make_shared<crocoddyl::CostModelCoMPosition>(
         state, activation_factory.create(activation_type, 3),
         Eigen::Vector3d::Random(), nu);
-    break;
-  case CostModelTypes::CostModelControlGrav:
-    cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
-        state, activation_factory.create(activation_type, state->get_nv()), actuation);
     break;
   // case CostModelTypes::CostModelCentroidalMomentum:
   //   cost = boost::make_shared<crocoddyl::CostModelCentroidalMomentum>(state_,
@@ -139,6 +136,36 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     cost = boost::make_shared<crocoddyl::CostModelFrameVelocity>(
         state, activation_factory.create(activation_type, 6),
         crocoddyl::FrameMotion(frame_index, pinocchio::Motion::Random()), nu);
+    break;
+  default:
+    throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
+    break;
+  }
+  return cost;
+}
+
+boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
+    CostModelNoFFTypes::Type cost_type,ActivationModelTypes::Type activation_type,
+    std::size_t nu) const {
+  StateModelFactory state_factory;
+  ActivationModelFactory activation_factory;
+  boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
+  boost::shared_ptr<crocoddyl::StateMultibody> state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+          state_factory.create(StateModelTypes::StateMultibody_TalosArm));
+
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation = 
+     boost::make_shared<crocoddyl::ActuationModelFull>(state);
+
+  crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
+  pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
+  if (nu == std::numeric_limits<std::size_t>::max()) {
+    nu = state->get_nv();
+  }
+  switch (cost_type) {
+  case CostModelNoFFTypes::CostModelControlGrav:
+    cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
+        state, activation_factory.create(activation_type, state->get_nv()), actuation);
     break;
   default:
     throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
