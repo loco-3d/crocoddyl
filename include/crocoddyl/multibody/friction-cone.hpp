@@ -95,6 +95,11 @@ class FrictionConeTpl {
   const VectorXs& get_lb() const;
 
   /**
+   * @brief Return the number of facets
+   */
+  std::size_t get_nf() const;
+
+  /**
    * @brief Return the surface normal vector
    */
   const Vector3s& get_nsurf() const;
@@ -103,11 +108,6 @@ class FrictionConeTpl {
    * @brief Return the friction coefficient
    */
   const Scalar get_mu() const;
-
-  /**
-   * @brief Return the number of facets
-   */
-  std::size_t get_nf() const;
 
   /**
    * @brief Return the label that describes the type of friction cone approximation (inner/outer)
