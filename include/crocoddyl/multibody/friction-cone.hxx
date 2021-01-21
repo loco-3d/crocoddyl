@@ -82,12 +82,12 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, co
   const Matrix3s c_R_o = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     const Scalar theta_i = theta * static_cast<Scalar>(i);
-    const Vector3s& tsurf_i = Vector3s(cos(theta_i), sin(theta_i), 0.);
+    const Vector3s& tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
     A_.row(2 * i) = (-mu_ * Vector3s::UnitZ() + tsurf_i).transpose() * c_R_o;
     A_.row(2 * i + 1) = (-mu_ * Vector3s::UnitZ() - tsurf_i).transpose() * c_R_o;
     lb_(2 * i) = -std::numeric_limits<Scalar>::max();
     lb_(2 * i + 1) = -std::numeric_limits<Scalar>::max();
-    ub_(2 * i) = 0.;
+    ub_(2 * i) = Scalar(0.);
     ub_(2 * i + 1) = Scalar(0.);
   }
   A_.row(nf_) = nsurf_.transpose();
