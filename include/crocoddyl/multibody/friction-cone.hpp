@@ -45,6 +45,19 @@ class FrictionConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
+   * @param[in] R           Rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   * @param[in] mu          Friction coefficient
+   * @param[in] nf          Number of facets (default 4)
+   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
+   */
+  FrictionConeTpl(const Matrix3s& R, const Scalar mu, std::size_t nf = 4, const bool inner_appr = true,
+                  const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+
+  /**
+   * @brief Initialize the wrench cone
+   *
    * @param[in] normal      Surface normal vector
    * @param[in] mu          Friction coefficient
    * @param[in] nf          Number of facets (default 4)
@@ -99,6 +112,11 @@ class FrictionConeTpl {
   /**
    * @brief Return the surface normal vector
    */
+  const Matrix3s& get_R() const;
+
+  /**
+   * @brief Return the surface normal vector
+   */
   const Vector3s& get_nsurf() const;
 
   /**
@@ -120,6 +138,13 @@ class FrictionConeTpl {
    * @brief Return the maximum normal force
    */
   const Scalar get_max_nforce() const;
+
+  /**
+   * @brief Modify the rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   */
+  void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify the surface normal vector
@@ -164,6 +189,7 @@ class FrictionConeTpl {
   MatrixX3s A_;        //!< Matrix of friction cone
   VectorXs ub_;        //!< Upper bound of the friction cone
   VectorXs lb_;        //!< Lower bound of the friction cone
+  Matrix3s R_;         //!< Rotation of the friction cone w.r.t. the inertial frame
   Vector3s nsurf_;     //!< Surface normal vector
   Scalar mu_;          //!< Friction coefficient
   bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
