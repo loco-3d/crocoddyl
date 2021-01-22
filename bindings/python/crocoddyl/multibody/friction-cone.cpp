@@ -27,7 +27,7 @@ void exposeFrictionCone() {
           ":param nf: number of facets\n"
           ":param inner_appr: inner or outer approximation (default True)\n"
           ":param min_nforce: minimum normal force (default 0.)\n"
-          ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
+          ":param max_nforce: maximum normal force (default sys.float_info.max)"))
       .def(bp::init<Eigen::Vector3d, double, bp::optional<std::size_t, bool, double, double> >(
           bp::args("self", "nsurf", "mu", "nf", "inner_appr", "min_nforce", "max_nforce"),
           "Initialize the linearize friction cone.\n\n"
@@ -36,7 +36,7 @@ void exposeFrictionCone() {
           ":param nf: number of facets\n"
           ":param inner_appr: inner or outer approximation (default True)\n"
           ":param min_nforce: minimum normal force (default 0.)\n"
-          ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
+          ":param max_nforce: maximum normal force (default sys.float_info.max)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the friction cone."))
       .def<void (FrictionCone::*)()>("update", &FrictionCone::update, bp::args("self"),
                                      "Update the linear inequality (matrix and bounds).\n\n"
