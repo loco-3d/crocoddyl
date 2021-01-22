@@ -196,6 +196,10 @@ class FrictionConeTpl;
 template <typename Scalar>
 class WrenchConeTpl;
 
+// cop support
+template <typename Scalar>
+class CoPSupportTpl;
+
 // state
 template <typename Scalar>
 class StateMultibodyTpl;
@@ -264,6 +268,7 @@ typedef ContactDataNumDiffTpl<double> ContactDataNumDiff;
 
 typedef FrictionConeTpl<double> FrictionCone;
 typedef WrenchConeTpl<double> WrenchCone;
+typedef CoPSupportTpl<double> CoPSupport;
 
 typedef FrameTranslationTpl<double> FrameTranslation;
 typedef FrameRotationTpl<double> FrameRotation;
