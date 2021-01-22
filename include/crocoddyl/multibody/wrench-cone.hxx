@@ -39,6 +39,18 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
+  }
   A_ = MatrixX6s::Zero(nf_ + 13, 3);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
@@ -54,6 +66,18 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
+  }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
   A_ = MatrixX3s::Zero(nf_ + 13, 3);
   ub_ = VectorXs::Zero(nf_ + 13);
@@ -95,15 +119,7 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar _mu, const Ve
   lb_.setOnes();
   lb_ *= -std::numeric_limits<Scalar>::max();
 
-  if (min_nforce < Scalar(0.)) {
-    min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
-  }
-  if (max_nforce < Scalar(0.)) {
-    max_nforce_ = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
-  }
-
+  // Compute the mu given the type of friction cone approximation
   Scalar mu = mu_;
   Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
   if (inner_appr_) {
@@ -220,12 +236,25 @@ void WrenchConeTpl<Scalar>::set_R(const Matrix3s& R) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
-  update(R_, mu_, box, min_nforce_, max_nforce_);
+  box_ = box;
+  if (box_(0) < Scalar(0.)) {
+    box_(0) = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+  }
+  if (box_(1) < Scalar(0.)) {
+    box_(1) = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+  }
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
-  update(R_, mu, box_, min_nforce_, max_nforce_);
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
@@ -235,11 +264,19 @@ void WrenchConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
   update(R_, mu_, box_, min_nforce, max_nforce_);
 }
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
+  }
   update(R_, mu_, box_, min_nforce_, max_nforce);
 }
 
