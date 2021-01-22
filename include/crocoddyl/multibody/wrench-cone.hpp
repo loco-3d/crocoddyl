@@ -82,15 +82,11 @@ class WrenchConeTpl {
    * where wrench, \f$ w \f$, is expressed in the inertial frame located at the
    * center of the rectangular foot contact area (length, width) with axes parallel to
    * those of the world frame.
-   *
-   * @param[in] R           Rotation matrix that defines the cone orientation with respect to the inertial frame
-   * @param[in] mu          Friction coefficient
-   * @param[in] box         Dimension of the foot surface dim = (length, width)
-   * @param[in] min_nforce  Minimum normal force (default 0.)
-   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  void update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce = Scalar(0.),
-              const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  void update();
+  DEPRECATED("Use update().",
+             void update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce = Scalar(0.),
+                         const Scalar max_nforce = std::numeric_limits<Scalar>::max()));
 
   /**
    * @brief Return the matrix of wrench cone
