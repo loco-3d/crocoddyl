@@ -269,8 +269,8 @@ void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X) {
-  os << "        R: " << X.get_R() << std::endl;
-  os << "  (nsurf): " << X.get_nsurf().transpose() << std::endl;
+  os << "         R: " << X.get_R() << std::endl;
+  os << "   (nsurf): " << X.get_nsurf().transpose() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
   os << "        nf: " << X.get_nf() << std::endl;
   os << "inner_appr: ";
