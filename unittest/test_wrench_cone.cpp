@@ -10,6 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/multibody/wrench-cone.hpp"
+#include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "pinocchio/math/quaternion.hpp"
 #include "unittest_common.hpp"
@@ -18,30 +19,57 @@ using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
 void test_constructor() {
-  // Create the wrench cone
-  Eigen::Matrix3d cone_rotation = Eigen::Matrix3d::Identity();
+  // Common parameters
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   double mu = random_real_in_range(0.01, 1.);
-  Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
-  crocoddyl::WrenchCone cone(cone_rotation, mu, cone_box);
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  std::size_t nf = 2 * random_int_in_range(2, 16);
+  bool inner_appr = false;
 
-  BOOST_CHECK((cone.get_R() - cone_rotation).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone.get_mu() == mu / sqrt(2.));
-  BOOST_CHECK(cone.get_nf() == 16);
-  BOOST_CHECK((cone.get_box() - cone_box).isMuchSmallerThan(1.0, 1e-9));
+  // Create the wrench cone
+  crocoddyl::WrenchCone cone(R, mu, box, nf, inner_appr);
 
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == cone.get_nf() + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == cone.get_nf() + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == cone.get_nf() + 1);
+  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_mu() == mu);
+  BOOST_CHECK(cone.get_nf() == nf);
+  BOOST_CHECK((cone.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 13);
+}
+
+void test_againts_friction_cone() {
+  // Common parameters
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  Eigen::Matrix3d R = q.toRotationMatrix();
+  double mu = random_real_in_range(0.01, 1.);
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  std::size_t nf = 2 * random_int_in_range(2, 16);
+  bool inner_appr = true;
+
+  // Create wrench and friction cone
+  crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
+  crocoddyl::FrictionCone friction_cone(R, mu, nf, inner_appr, 0., 100.);
+
+  BOOST_CHECK((wrench_cone.get_R() - friction_cone.get_R()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(wrench_cone.get_mu() == friction_cone.get_mu());
+  BOOST_CHECK(wrench_cone.get_nf() == friction_cone.get_nf());
+  for (std::size_t i = 0; i < nf + 1; ++i) {
+    BOOST_CHECK((wrench_cone.get_A().row(i).head(3) - friction_cone.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
+  }
+  BOOST_CHECK((wrench_cone.get_lb().head(nf + 1) - friction_cone.get_lb()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_ub().head(nf + 1) - friction_cone.get_ub()).isMuchSmallerThan(1.0, 1e-9));
 }
 
 void test_force_along_wrench_cone_normal() {
   // Create the wrench cone
   Eigen::Quaterniond q;
   pinocchio::quaternion::uniformRandom(q);
-  Eigen::Matrix3d cone_rotation = q.toRotationMatrix();
+  Eigen::Matrix3d R = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
-  crocoddyl::WrenchCone cone(cone_rotation, mu, cone_box);
+  crocoddyl::WrenchCone cone(R, mu, cone_box);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
@@ -51,7 +79,7 @@ void test_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = random_real_in_range(0., 100.) * cone_rotation.col(2);
+  wrench.head(3) = random_real_in_range(0., 100.) * R.row(2).transpose();
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -63,10 +91,10 @@ void test_negative_force_along_wrench_cone_normal() {
   // Create the wrench cone
   Eigen::Quaterniond q;
   pinocchio::quaternion::uniformRandom(q);
-  Eigen::Matrix3d cone_rotation = q.toRotationMatrix();
+  Eigen::Matrix3d R = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
-  crocoddyl::WrenchCone cone(cone_rotation, mu, cone_box);
+  crocoddyl::WrenchCone cone(R, mu, cone_box);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
@@ -76,7 +104,7 @@ void test_negative_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * cone_rotation.col(2);
+  wrench.head(3) = -random_real_in_range(0., 100.) * R.row(2).transpose();
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -95,10 +123,10 @@ void test_negative_force_along_wrench_cone_normal() {
 
 void test_force_parallel_to_wrench_cone_normal() {
   // Create the wrench cone
-  Eigen::Matrix3d cone_rotation = Eigen::Matrix3d::Identity();
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
-  crocoddyl::WrenchCone cone(cone_rotation, mu, cone_box);
+  crocoddyl::WrenchCone cone(R, mu, cone_box);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
@@ -117,6 +145,7 @@ void test_force_parallel_to_wrench_cone_normal() {
 
 void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_constructor)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_againts_friction_cone)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_force_along_wrench_cone_normal)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_negative_force_along_wrench_cone_normal)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_force_parallel_to_wrench_cone_normal)));
