@@ -68,6 +68,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(action->get_state());
   const std::size_t nu = action->get_actuation()->get_nu();
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   switch (cost_type) {
     case ContactCostModelTypes::CostModelContactForce:
       cost = boost::make_shared<crocoddyl::CostModelContactForce>(
@@ -89,9 +90,8 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
     case ContactCostModelTypes::CostModelContactWrenchCone:
       cost = boost::make_shared<crocoddyl::CostModelContactWrenchCone>(
           state, ActivationModelFactory().create(activation_type, 17),
-          crocoddyl::FrameWrenchCone(
-              model_factory.get_frame_id(),
-              crocoddyl::WrenchCone(Eigen::Matrix3d::Identity(), 1., Eigen::Vector2d(0.1, 0.1))),
+          crocoddyl::FrameWrenchCone(model_factory.get_frame_id(),
+                                     crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1))),
           nu);
       break;
     default:

@@ -69,6 +69,21 @@ class WrenchConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
+   * @param[in] normal      Surface normal vector
+   * @param[in] mu          Friction coefficient
+   * @param[in] box         Dimension of the foot surface dim = (length, width)
+   * @param[in] nf          Number of facets (default 4)
+   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
+   * @param[in] min_nforce  Minimum normal force (default 0.)
+   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
+   */
+  WrenchConeTpl(const Vector3s& normal, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 4,
+                const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
+                const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+
+  /**
+   * @brief Initialize the wrench cone
+   *
    * @param[in] cone  Wrench cone
    */
   WrenchConeTpl(const WrenchConeTpl<Scalar>& cone);
@@ -114,6 +129,11 @@ class WrenchConeTpl {
   const Matrix3s& get_R() const;
 
   /**
+   * @brief Return the surface normal vector
+   */
+  const Vector3s& get_nsurf() const;
+
+  /**
    * @brief Return dimension of the foot surface dim = (length, width)
    */
   const Vector2s& get_box() const;
@@ -144,6 +164,13 @@ class WrenchConeTpl {
    * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_R(const Matrix3s& R);
+
+  /**
+   * @brief Modify the surface normal vector
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   */
+  void set_nsurf(const Vector3s& nsurf);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
@@ -192,6 +219,7 @@ class WrenchConeTpl {
   VectorXs ub_;        //!< Upper bound of the wrench cone
   VectorXs lb_;        //!< Lower bound of the wrench cone
   Matrix3s R_;         //!< Rotation of the wrench cone w.r.t. the inertial frame
+  Vector3s nsurf_;     //!< Surface normal vector
   Vector2s box_;       //!< Dimension of the foot surface (length, width)
   Scalar mu_;          //!< Friction coefficient
   bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
