@@ -59,11 +59,11 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 4,
+  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, const std::size_t nf = 4,
                 const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
                 const Scalar max_nforce = std::numeric_limits<Scalar>::max());
   DEPRECATED("Use constructor that includes inner_appr",
-             WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf,
+             WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, std::size_t nf,
                            const Scalar min_nforce, const Scalar max_nforce = std::numeric_limits<Scalar>::max());)
 
   /**
@@ -77,7 +77,7 @@ class WrenchConeTpl {
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  WrenchConeTpl(const Vector3s& normal, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 4,
+  WrenchConeTpl(const Vector3s& normal, const Scalar mu, const Vector2s& box, const std::size_t nf = 4,
                 const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
                 const Scalar max_nforce = std::numeric_limits<Scalar>::max());
 
@@ -207,9 +207,6 @@ class WrenchConeTpl {
    */
   void set_max_nforce(const Scalar max_nforce);
 
-  /**
-   * @brief Modify the maximum normal force
-   */
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
 
