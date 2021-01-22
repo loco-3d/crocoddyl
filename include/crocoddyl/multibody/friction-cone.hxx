@@ -45,6 +45,18 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu, std
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
+  }
   A_ = MatrixX3s::Zero(nf_ + 1, 3);
   ub_ = VectorXs::Zero(nf_ + 1);
   lb_ = VectorXs::Zero(nf_ + 1);
@@ -70,6 +82,18 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
   if (!nsurf.isUnitary()) {
     nsurf_ /= nsurf.norm();
     std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+  }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
   A_ = MatrixX3s::Zero(nf_ + 1, 3);
   ub_ = VectorXs::Zero(nf_ + 1);
@@ -140,20 +164,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, co
   set_min_nforce(min_nforce);
   set_max_nforce(max_nforce);
 
-  // Sanity checks
-  if (!normal.isUnitary()) {
-    nsurf_ /= normal.norm();
-    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
-  }
-  if (min_nforce < Scalar(0.)) {
-    min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
-  }
-  if (max_nforce < Scalar(0.)) {
-    max_nforce_ = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
-  }
-
+  // Update the inequality matrix and bounds
   update();
 }
 
@@ -226,6 +237,10 @@ void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_mu(const Scalar mu) {
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
   mu_ = mu;
 }
 
