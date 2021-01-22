@@ -12,10 +12,10 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16), A_(nf_ + 1, 6), ub_(nf_ + 1), lb_(nf_ + 1) {
-  A_.setZero(nf_ + 1, 6);
-  ub_.setZero(nf_ + 1);
-  lb_.setZero(nf_ + 1);
+WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(4), A_(nf_ + 13, 6), ub_(nf_ + 13), lb_(nf_ + 13) {
+  A_.setZero();
+  ub_.setZero();
+  lb_.setZero();
   // compute the matrix
   update(Matrix3s::Identity(), Scalar(0.7), Vector2s(0.1, 0.05), Scalar(0.), std::numeric_limits<Scalar>::max());
 }
@@ -23,14 +23,14 @@ WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16), A_(nf_ + 1, 6), ub_(nf_ + 1), 
 template <typename Scalar>
 WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf,
                                      const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), A_(nf_ + 1, 6), ub_(nf_ + 1), lb_(nf_ + 1) {
+    : nf_(nf), A_(nf_ + 13, 6), ub_(nf_ + 13), lb_(nf_ + 13) {
   if (nf_ % 2 != 0) {
-    nf_ = 16;
-    std::cerr << "Warning: nf has to be an even number, set to 16" << std::endl;
+    nf_ = 4;
+    std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
-  A_.resize(nf_ + 1, 6);
-  ub_.resize(nf_ + 1);
-  lb_.resize(nf_ + 1);
+  A_.setZero();
+  ub_.setZero();
+  lb_.setZero();
 
   // compute the matrix
   update(R, mu, box_size, min_nforce, max_nforce);
@@ -52,16 +52,19 @@ template <typename Scalar>
 WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu, const Vector2s& box_size,
+void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar _mu, const Vector2s& box_size,
                                    const Scalar min_nforce, const Scalar max_nforce) {
   R_ = R;
-  mu_ = mu;
+  mu_ = _mu;
   box_ = box_size;
   min_nforce_ = min_nforce;
   max_nforce_ = max_nforce;
 
-  mu_ = mu_ / sqrt(Scalar(2.));
+  // Initialize the matrix and bounds
   A_.setZero();
+  ub_.setZero();
+  lb_.setOnes();
+  lb_ *= -std::numeric_limits<Scalar>::max();
 
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
@@ -72,35 +75,63 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu, const Vec
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
   }
 
-  A_.row(0).head(3) << Scalar(1.), Scalar(0.), -mu_;
-  A_.row(1).head(3) << Scalar(-1.), Scalar(0.), -mu_;
-  A_.row(2).head(3) << Scalar(0.), Scalar(1.), -mu_;
-  A_.row(3).head(3) << Scalar(0.), Scalar(-1.), -mu_;
-  A_.row(4).head(3) << Scalar(0.), Scalar(0.), Scalar(-1.);
-  A_.row(5).segment(2, 3) << -box_(1), Scalar(1.), Scalar(0.);
-  A_.row(6).segment(2, 3) << -box_(1), Scalar(-1.), Scalar(0.);
-  A_.row(7).segment(2, 3) << -box_(0), Scalar(0.), Scalar(1.);
-  A_.row(8).segment(2, 3) << -box_(0), Scalar(0.), Scalar(-1.);
-  A_.row(9) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(-1.);
-  A_.row(10) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(-1.);
-  A_.row(11) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(-1.);
-  A_.row(12) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(-1.);
-  A_.row(13) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(1.);
-  A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(1.);
-  A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(1.);
-  A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(1.);
+  Scalar mu = mu_;
+  Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
+  if (inner_appr_) {
+    mu *= cos(theta / Scalar(2.));
+  }
 
-  Matrix6s c_R_o = Matrix6s::Zero();
-  c_R_o.topLeftCorner(3, 3) = R_.transpose();
-  c_R_o.bottomRightCorner(3, 3) = R_.transpose();
+  // Friction cone information
+  // This segment of matrix is defined as
+  // [ 1  0 -mu  0  0  0;
+  //  -1  0 -mu  0  0  0;
+  //   0  1 -mu  0  0  0;
+  //   0 -1 -mu  0  0  0;
+  //   0  0   1  0  0  0]
+  for (std::size_t i = 0; i < nf_ / 2; ++i) {
+    Scalar theta_i = theta * static_cast<Scalar>(i);
+    Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
+    Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
+    A_.row(2 * i).head(3) = (mu_nsurf + tsurf_i).transpose() * R_;
+    A_.row(2 * i + 1).head(3) = (mu_nsurf - tsurf_i).transpose() * R_;
+  }
+  A_.row(nf_).head(3) = R_.row(2);
+  lb_(nf_) = min_nforce_;
+  ub_(nf_) = max_nforce_;
 
-  A_ = (A_ * c_R_o).eval();
+  // CoP information
+  const Scalar L = box_(0) / Scalar(2.);
+  const Scalar W = box_(1) / Scalar(2.);
+  // This segment of matrix is defined as
+  // [0 0 -W  1  0;
+  //  0 0 -W -1  0;
+  //  0 0 -L  0  1;
+  //  0 0 -L  0 -1]
+  A_.row(nf_ + 1) << -W * R_.col(2).transpose(), R_.col(0).transpose();
+  A_.row(nf_ + 2) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
+  A_.row(nf_ + 3) << -L * R_.col(2).transpose(), R_.col(1).transpose();
+  A_.row(nf_ + 4) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
 
-  ub_.setZero();
-  lb_.setOnes();
-  lb_ *= -std::numeric_limits<Scalar>::max();
-  ub_(4) = -min_nforce_;
-  lb_(4) = -max_nforce_;
+  // Yaw-tau information
+  const Scalar mu_LW = -mu * (L + W);
+  // The segment of the matrix that encodes the minimum torque is defined as
+  // [ W  L -mu*(L+W) -mu -mu -1;
+  //   W -L -mu*(L+W) -mu  mu -1;
+  //  -W  L -mu*(L+W)  mu -mu -1;
+  //  -W -L -mu*(L+W)  mu  mu -1]
+  A_.row(nf_ + 5) << Vector3s(W, L, mu_LW).transpose() * R_, Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_;
+  A_.row(nf_ + 6) << Vector3s(W, -L, mu_LW).transpose() * R_, Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_;
+  A_.row(nf_ + 7) << Vector3s(-W, L, mu_LW).transpose() * R_, Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_;
+  A_.row(nf_ + 8) << Vector3s(-W, -L, mu_LW).transpose() * R_, Vector3s(mu, mu, Scalar(-1.)).transpose() * R_;
+  // The segment of the matrix that encodes the maximum torque is defined as
+  // [ W  L -mu*(L+W)  mu  mu 1;
+  //   W -L -mu*(L+W)  mu -mu 1;
+  //  -W  L -mu*(L+W) -mu  mu 1;
+  //  -W -L -mu*(L+W) -mu -mu 1]
+  A_.row(nf_ + 9) << Vector3s(W, L, mu_LW).transpose() * R_, Vector3s(mu, mu, Scalar(1.)).transpose() * R_;
+  A_.row(nf_ + 10) << Vector3s(W, -L, mu_LW).transpose() * R_, Vector3s(mu, -mu, Scalar(1.)).transpose() * R_;
+  A_.row(nf_ + 11) << Vector3s(-W, L, mu_LW).transpose() * R_, Vector3s(-mu, mu, Scalar(1.)).transpose() * R_;
+  A_.row(nf_ + 12) << Vector3s(-W, -L, mu_LW).transpose() * R_, Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_;
 }
 
 template <typename Scalar>

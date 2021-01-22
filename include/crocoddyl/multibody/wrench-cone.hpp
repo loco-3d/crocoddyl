@@ -19,7 +19,9 @@ namespace crocoddyl {
  *
  * A wrench cone is a 6D polyhedral convex cone that characterizes feasible contact wrench.
  * The wrench cone is derived in the case of rectangular support areas, which is of practical importance since most
- * humanoid robot feet can be adequately approximated by rectangles.
+ * humanoid robot feet can be adequately approximated by rectangles. For more details read:
+ *   S. Caron et. al. Stability of surface contacts for humanoid robots: Closed-form formulae of the Contact Wrench
+ * Cone for rectangular support areas (https://hal.archives-ouvertes.fr/hal-02108449/document)
  *
  * /sa `FrictionConeTpl`
  */
@@ -48,7 +50,7 @@ class WrenchConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
-   * @param[in] R           Rotation matrix that defines the cone orientation
+   * @param[in] R           Rotation matrix that defines the cone orientation w.r.t. the inertial frame
    * @param[in] mu          Friction coefficient
    * @param[in] box         Dimension of the foot surface dim = (length, width)
    * @param[in] nf          Number of facets (default 16)
@@ -75,7 +77,7 @@ class WrenchConeTpl {
    * center of the rectangular foot contact area (length, width) with axes parallel to
    * those of the world frame.
    *
-   * @param[in] R           Rotation matrix that defines the cone orientation
+   * @param[in] R           Rotation matrix that defines the cone orientation with respect to the inertial frame
    * @param[in] mu          Friction coefficient
    * @param[in] box         Dimension of the foot surface dim = (length, width)
    * @param[in] min_nforce  Minimum normal force (default 0.)
@@ -100,7 +102,7 @@ class WrenchConeTpl {
   const VectorXs& get_ub() const;
 
   /**
-   * @brief Return the rotation matrix that defines the cone orientation
+   * @brief Return the rotation matrix that defines the cone orientation w.r.t. the inertial frame
    */
   const Matrix3s& get_R() const;
 
@@ -130,7 +132,7 @@ class WrenchConeTpl {
   const Scalar get_max_nforce() const;
 
   /**
-   * @brief Modify the rotation matrix that defines the cone orientation
+   * @brief Modify the rotation matrix that defines the cone orientation w.r.t. the inertial frame
    */
   void set_R(const Matrix3s& R);
 
@@ -165,7 +167,7 @@ class WrenchConeTpl {
   MatrixX6s A_;        //!< Matrix of wrench cone
   VectorXs ub_;        //!< Upper bound of the wrench cone
   VectorXs lb_;        //!< Lower bound of the wrench cone
-  Matrix3s R_;         //!< Rotation of the wrench cone
+  Matrix3s R_;         //!< Rotation of the wrench cone w.r.t. the inertial frame
   Vector2s box_;       //!< Dimension of the foot surface (length, width)
   Scalar mu_;          //!< Friction coefficient
   Scalar min_nforce_;  //!< Minimum normal force
