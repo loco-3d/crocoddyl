@@ -9,6 +9,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -29,13 +30,19 @@ void exposeWrenchCone() {
           ":param min_nforce: minimum normal force (default 0.)\n"
           ":param max_nforce: maximum normal force (default sys.float_info.max)\n"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the wrench cone."))
-      .def("update", &WrenchCone::update, bp::args("self", "R", "mu", "box", "min_nforce", "max_nforce"),
-           "Update the linear inequality (matrix and bounds).\n\n"
-           ":param R: rotation matrix that defines the cone orientation\n"
-           ":param mu: friction coefficient\n"
-           ":param box: dimension of the foot surface dim = (length, width)\n"
-           ":param min_nforce: minimum normal force (default 0.)\n"
-           ":param max_nforce: maximum normal force (default sys.float_info.max)")
+      .def<void (WrenchCone::*)()>("update", &WrenchCone::update, bp::args("self"),
+                                   "Update the linear inequality (matrix and bounds).\n\n"
+                                   "Run this function if you have changed one of the parameters.")
+      .def<void (WrenchCone::*)(const Eigen::Matrix3d&, const double, const Eigen::Vector2d&, const double,
+                                const double)>("update", &WrenchCone::update,
+                                               deprecated<>("Deprecated. Use update()."),
+                                               bp::args("self", "R", "mu", "box", "min_nforce", "max_nforce"),
+                                               "Update the linear inequality (matrix and bounds).\n\n"
+                                               ":param R: rotation matrix that defines the cone orientation\n"
+                                               ":param mu: friction coefficient\n"
+                                               ":param box: dimension of the foot surface dim = (length, width)\n"
+                                               ":param min_nforce: minimum normal force (default 0.)\n"
+                                               ":param max_nforce: maximum normal force (default sys.float_info.max)")
       .add_property("A", bp::make_function(&WrenchCone::get_A, bp::return_internal_reference<>()), "inequality matrix")
       .add_property("ub", bp::make_function(&WrenchCone::get_ub, bp::return_internal_reference<>()),
                     "inequality upper bound")
