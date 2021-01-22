@@ -12,28 +12,55 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(4), A_(nf_ + 13, 6), ub_(nf_ + 13), lb_(nf_ + 13) {
+WrenchConeTpl<Scalar>::WrenchConeTpl()
+    : nf_(4),
+      A_(nf_ + 13, 6),
+      ub_(nf_ + 13),
+      lb_(nf_ + 13),
+      R_(Matrix3s::Identity()),
+      box_(std::numeric_limits<Scalar>::max(), std::numeric_limits<Scalar>::max()),
+      mu_(Scalar(0.7)),
+      inner_appr_(true),
+      min_nforce_(Scalar(0.)),
+      max_nforce_(std::numeric_limits<Scalar>::max()) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
+
   // compute the matrix
-  update(Matrix3s::Identity(), Scalar(0.7), Vector2s(0.1, 0.05), Scalar(0.), std::numeric_limits<Scalar>::max());
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf,
-                                     const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), A_(nf_ + 13, 6), ub_(nf_ + 13), lb_(nf_ + 13) {
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, const std::size_t nf,
+                                     const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
+    : nf_(nf), R_(R), box_(box), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
-  A_.setZero();
-  ub_.setZero();
-  lb_.setZero();
+  A_ = MatrixX6s::Zero(nf_ + 13, 3);
+  ub_ = VectorXs::Zero(nf_ + 13);
+  lb_ = VectorXs::Zero(nf_ + 13);
 
-  // compute the matrix
-  update(R, mu, box_size, min_nforce, max_nforce);
+  // Update the inequality matrix and bounds
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, std::size_t nf,
+                                     const Scalar min_nforce, const Scalar max_nforce)
+    : nf_(nf), R_(R), box_(box), mu_(mu), inner_appr_(true), min_nforce_(min_nforce), max_nforce_(max_nforce) {
+  if (nf_ % 2 != 0) {
+    nf_ = 4;
+    std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
+  }
+  A_ = MatrixX3s::Zero(nf_ + 13, 3);
+  ub_ = VectorXs::Zero(nf_ + 13);
+  lb_ = VectorXs::Zero(nf_ + 13);
+
+  // Update the inequality matrix and bounds
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
@@ -45,6 +72,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
       R_(cone.get_R()),
       box_(cone.get_box()),
       mu_(cone.get_mu()),
+      inner_appr_(cone.get_inner_appr()),
       min_nforce_(cone.get_min_nforce()),
       max_nforce_(cone.get_max_nforce()) {}
 
@@ -56,6 +84,7 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar _mu, const Ve
                                    const Scalar min_nforce, const Scalar max_nforce) {
   R_ = R;
   mu_ = _mu;
+  inner_appr_ = true;
   box_ = box_size;
   min_nforce_ = min_nforce;
   max_nforce_ = max_nforce;
@@ -150,6 +179,11 @@ const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_lb() co
 }
 
 template <typename Scalar>
+std::size_t WrenchConeTpl<Scalar>::get_nf() const {
+  return nf_;
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R() const {
   return R_;
 }
@@ -165,8 +199,8 @@ const Scalar WrenchConeTpl<Scalar>::get_mu() const {
 }
 
 template <typename Scalar>
-std::size_t WrenchConeTpl<Scalar>::get_nf() const {
-  return nf_;
+bool WrenchConeTpl<Scalar>::get_inner_appr() const {
+  return inner_appr_;
 }
 
 template <typename Scalar>
@@ -192,6 +226,11 @@ void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
   update(R_, mu, box_, min_nforce_, max_nforce_);
+}
+
+template <typename Scalar>
+void WrenchConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
+  update(R_, mu_, box_, min_nforce_, max_nforce_);
 }
 
 template <typename Scalar>
