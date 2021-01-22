@@ -11,6 +11,7 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -53,12 +54,17 @@ class WrenchConeTpl {
    * @param[in] R           Rotation matrix that defines the cone orientation w.r.t. the inertial frame
    * @param[in] mu          Friction coefficient
    * @param[in] box         Dimension of the foot surface dim = (length, width)
-   * @param[in] nf          Number of facets (default 16)
+   * @param[in] nf          Number of facets (default 4)
+   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default maximum floating number))
    */
-  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf = 16,
-                const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, const std::size_t nf = 4,
+                const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
+                const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  DEPRECATED("Use constructor that includes inner_appr",
+             WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box_size, std::size_t nf,
+                           const Scalar min_nforce, const Scalar max_nforce = std::numeric_limits<Scalar>::max());)
 
   /**
    * @brief Initialize the wrench cone
@@ -102,6 +108,11 @@ class WrenchConeTpl {
   const VectorXs& get_ub() const;
 
   /**
+   * @brief Return the number of facets
+   */
+  std::size_t get_nf() const;
+
+  /**
    * @brief Return the rotation matrix that defines the cone orientation w.r.t. the inertial frame
    */
   const Matrix3s& get_R() const;
@@ -117,9 +128,9 @@ class WrenchConeTpl {
   const Scalar get_mu() const;
 
   /**
-   * @brief Return the number of facets
+   * @brief Return the label that describes the type of friction cone approximation (inner/outer)
    */
-  std::size_t get_nf() const;
+  bool get_inner_appr() const;
 
   /**
    * @brief Return the minimum normal force
@@ -147,6 +158,11 @@ class WrenchConeTpl {
   void set_mu(const Scalar mu);
 
   /**
+   * @brief Modify the label that describes the type of friction cone approximation (inner/outer)
+   */
+  void set_inner_appr(const bool inner_appr);
+
+  /**
    * @brief Modify the minium normal force
    */
   void set_min_nforce(const Scalar min_nforce);
@@ -170,6 +186,7 @@ class WrenchConeTpl {
   Matrix3s R_;         //!< Rotation of the wrench cone w.r.t. the inertial frame
   Vector2s box_;       //!< Dimension of the foot surface (length, width)
   Scalar mu_;          //!< Friction coefficient
+  bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
   Scalar min_nforce_;  //!< Minimum normal force
   Scalar max_nforce_;  //!< Maximum normal force
 };
