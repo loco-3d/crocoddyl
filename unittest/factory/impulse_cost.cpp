@@ -69,6 +69,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(action->get_state());
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   switch (cost_type) {
     case ImpulseCostModelTypes::CostModelImpulseCoM:
       cost = boost::make_shared<crocoddyl::CostModelImpulseCoM>(state,
@@ -93,9 +94,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
     case ImpulseCostModelTypes::CostModelImpulseWrenchCone:
       cost = boost::make_shared<crocoddyl::CostModelImpulseWrenchCone>(
           state, ActivationModelFactory().create(activation_type, 17),
-          crocoddyl::FrameWrenchCone(
-              model_factory.get_frame_id(),
-              crocoddyl::WrenchCone(Eigen::Matrix3d::Identity(), 1., Eigen::Vector2d(0.1, 0.1))));
+          crocoddyl::FrameWrenchCone(model_factory.get_frame_id(),
+                                     crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1))));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ImpulseCostModelTypes::Type given");

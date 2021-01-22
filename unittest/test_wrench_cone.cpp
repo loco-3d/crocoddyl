@@ -20,22 +20,68 @@ using namespace crocoddyl::unittest;
 
 void test_constructor() {
   // Common parameters
-  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   double mu = random_real_in_range(0.01, 1.);
   Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = false;
 
-  // Create the wrench cone
-  crocoddyl::WrenchCone cone(R, mu, box, nf, inner_appr);
+  // No rotation
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+  Eigen::Vector3d normal = R * Eigen::Vector3d::UnitZ();
 
-  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone.get_mu() == mu);
-  BOOST_CHECK(cone.get_nf() == nf);
-  BOOST_CHECK((cone.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 13);
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
-  BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 13);
+  // Create the wrench cone with rotation and surface normal
+  crocoddyl::WrenchCone cone_1(R, mu, box, nf, inner_appr);
+  crocoddyl::WrenchCone cone_2(normal, mu, box, nf, inner_appr);
+
+  BOOST_CHECK((cone_1.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_1.get_mu() == mu);
+  BOOST_CHECK(cone_1.get_nf() == nf);
+  BOOST_CHECK((cone_1.get_box() - cone_2.get_box()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_1.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_ub().size()) == nf + 13);
+  BOOST_CHECK((cone_2.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_2.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_2.get_mu() == mu);
+  BOOST_CHECK(cone_2.get_nf() == nf);
+  BOOST_CHECK(cone_2.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_ub().size()) == nf + 13);
+  BOOST_CHECK((cone_1.get_A() - cone_2.get_A()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_lb() - cone_2.get_lb()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_ub() - cone_2.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+
+  // With rotation
+  normal = Eigen::Vector3d(0., sqrt(2) / 2, sqrt(2) / 2);
+  R = Eigen::Quaternion<double>::FromTwoVectors(normal, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+
+  // Create the wrench cone with rotation and surface normal
+  cone_1 = crocoddyl::WrenchCone(R, mu, box, nf, inner_appr);
+  cone_2 = crocoddyl::WrenchCone(normal, mu, box, nf, inner_appr);
+
+  BOOST_CHECK((cone_1.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_1.get_mu() == mu);
+  BOOST_CHECK(cone_1.get_nf() == nf);
+  BOOST_CHECK((cone_1.get_box() - cone_2.get_box()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_1.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_ub().size()) == nf + 13);
+  BOOST_CHECK((cone_2.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_2.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone_2.get_mu() == mu);
+  BOOST_CHECK(cone_2.get_nf() == nf);
+  BOOST_CHECK(cone_2.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_ub().size()) == nf + 13);
+  BOOST_CHECK((cone_1.get_A() - cone_2.get_A()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_lb() - cone_2.get_lb()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone_1.get_ub() - cone_2.get_ub()).isMuchSmallerThan(1.0, 1e-9));
 }
 
 void test_againts_friction_cone() {

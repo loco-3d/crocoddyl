@@ -18,6 +18,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl()
       ub_(nf_ + 13),
       lb_(nf_ + 13),
       R_(Matrix3s::Identity()),
+      nsurf_(Vector3s::UnitZ()),
       box_(std::numeric_limits<Scalar>::max(), std::numeric_limits<Scalar>::max()),
       mu_(Scalar(0.7)),
       inner_appr_(true),
@@ -34,7 +35,14 @@ WrenchConeTpl<Scalar>::WrenchConeTpl()
 template <typename Scalar>
 WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, const std::size_t nf,
                                      const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), R_(R), box_(box), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
+    : nf_(nf),
+      R_(R),
+      nsurf_(R_.transpose() * Vector3s::UnitZ()),
+      box_(box),
+      mu_(mu),
+      inner_appr_(inner_appr),
+      min_nforce_(min_nforce),
+      max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
@@ -88,12 +96,48 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
 }
 
 template <typename Scalar>
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Vector3s& nsurf, const Scalar mu, const Vector2s& box, const std::size_t nf,
+                                     const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
+    : nf_(nf),
+      R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix()),
+      nsurf_(nsurf),
+      box_(box),
+      mu_(mu),
+      inner_appr_(inner_appr),
+      min_nforce_(min_nforce),
+      max_nforce_(max_nforce) {
+  if (nf_ % 2 != 0) {
+    nf_ = 4;
+    std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
+  }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
+  }
+  A_ = MatrixX6s::Zero(nf_ + 13, 3);
+  ub_ = VectorXs::Zero(nf_ + 13);
+  lb_ = VectorXs::Zero(nf_ + 13);
+
+  // Update the inequality matrix and bounds
+  update();
+}
+
+template <typename Scalar>
 WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
     : nf_(cone.get_nf()),
       A_(cone.get_A()),
       ub_(cone.get_ub()),
       lb_(cone.get_lb()),
       R_(cone.get_R()),
+      nsurf_(cone.get_nsurf()),
       box_(cone.get_box()),
       mu_(cone.get_mu()),
       inner_appr_(cone.get_inner_appr()),
@@ -211,6 +255,11 @@ const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R() con
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector3s& WrenchConeTpl<Scalar>::get_nsurf() const {
+  return nsurf_;
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& WrenchConeTpl<Scalar>::get_box() const {
   return box_;
 }
@@ -238,6 +287,18 @@ const Scalar WrenchConeTpl<Scalar>::get_max_nforce() const {
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_R(const Matrix3s& R) {
   R_ = R;
+  nsurf_ = R_.transpose() * Vector3s::UnitZ();
+}
+
+template <typename Scalar>
+void WrenchConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
+  nsurf_ = nsurf;
+  // Sanity checks
+  if (!nsurf.isUnitary()) {
+    nsurf_ /= nsurf.norm();
+    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+  }
+  R_ = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
 }
 
 template <typename Scalar>
