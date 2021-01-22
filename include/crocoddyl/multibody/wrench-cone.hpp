@@ -140,31 +140,43 @@ class WrenchConeTpl {
 
   /**
    * @brief Modify the rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_box(const Vector2s& box);
 
   /**
    * @brief Modify friction coefficient
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_mu(const Scalar mu);
 
   /**
    * @brief Modify the label that describes the type of friction cone approximation (inner/outer)
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_inner_appr(const bool inner_appr);
 
   /**
    * @brief Modify the minium normal force
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_min_nforce(const Scalar min_nforce);
 
   /**
    * @brief Modify the maximum normal force
+   *
+   * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_max_nforce(const Scalar max_nforce);
 
