@@ -112,6 +112,12 @@ void FrictionConeTpl<Scalar>::update() {
   }
 
   // Update the inequality matrix and the bounds
+  // This matrix is defined as
+  // [ 1  0 -mu;
+  //  -1  0 -mu;
+  //   0  1 -mu;
+  //   0 -1 -mu;
+  //   0  0   1]
   Scalar theta_i;
   Vector3s tsurf_i;
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
@@ -129,7 +135,7 @@ template <typename Scalar>
 void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, const bool inner_appr,
                                      const Scalar min_nforce, const Scalar max_nforce) {
   set_nsurf(normal);
-  set_mu(mu_);
+  set_mu(mu);
   set_inner_appr(inner_appr);
   set_min_nforce(min_nforce);
   set_max_nforce(max_nforce);
@@ -230,11 +236,19 @@ void FrictionConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+  }
   min_nforce_ = min_nforce;
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::max();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
+  }
   max_nforce_ = max_nforce;
 }
 
