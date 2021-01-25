@@ -110,25 +110,26 @@ void test_against_friction_cone() {
 }
 
 void test_against_cop_support() {
-  // // Common parameters
-  // Eigen::Quaterniond q;
-  // pinocchio::quaternion::uniformRandom(q);
-  // Eigen::Matrix3d R = q.toRotationMatrix();
-  // double mu = random_real_in_range(0.01, 1.);
-  // Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
-  // std::size_t nf = 2 * random_int_in_range(2, 16);
-  // bool inner_appr = true;
+  // Common parameters
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  Eigen::Matrix3d R = q.toRotationMatrix();
+  double mu = random_real_in_range(0.01, 1.);
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  std::size_t nf = 2 * random_int_in_range(2, 16);
+  bool inner_appr = true;
 
-  // // Create wrench and friction cone
-  // crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
-  // crocoddyl::CoPSupport cop_support(R, box);
+  // Create wrench and friction cone
+  crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
+  crocoddyl::CoPSupport cop_support(R, box);
 
-  // BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isMuchSmallerThan(1.0, 1e-9));
-  // for (std::size_t i = 0; i < 4; ++i) {
-  //   BOOST_CHECK((wrench_cone.get_A().row(nf + i + 1).head(3) - cop_support.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
-  // }
-  // BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-  // BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isMuchSmallerThan(1.0, 1e-9));
+  for (std::size_t i = 0; i < 4; ++i) {
+    BOOST_CHECK(
+        (wrench_cone.get_A().row(nf + i + 1).head(3) - cop_support.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
+  }
+  BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isMuchSmallerThan(1.0, 1e-9));
 }
 
 void test_force_along_wrench_cone_normal() {
