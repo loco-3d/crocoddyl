@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <pinocchio/math/quaternion.hpp>
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "unittest_common.hpp"
@@ -107,18 +108,19 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::FrictionCone cone_2(R, mu, nf, inner_appr);
 
   for (std::size_t i = 0; i < 5; ++i) {
-    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R.transpose()).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isMuchSmallerThan(1.0, 1e-9));
   }
 }
 
 void test_force_along_friction_cone_normal() {
   // Create the friction cone
-  Eigen::Vector3d cone_normal = Eigen::Vector3d::Random();
-  cone_normal /= cone_normal.norm();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  Eigen::Matrix3d R = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = false;
-  crocoddyl::FrictionCone cone(cone_normal, mu, nf, inner_appr);
+  crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
@@ -126,7 +128,7 @@ void test_force_along_friction_cone_normal() {
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = activation.createData();
 
   // Compute the activation value
-  Eigen::Vector3d force = random_real_in_range(0., 100.) * cone_normal;
+  Eigen::Vector3d force = random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * force;
   activation.calc(data, r);
 
@@ -136,12 +138,13 @@ void test_force_along_friction_cone_normal() {
 
 void test_negative_force_along_friction_cone_normal() {
   // Create the friction cone
-  Eigen::Vector3d cone_normal = Eigen::Vector3d::Random();
-  cone_normal /= cone_normal.norm();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  Eigen::Matrix3d R = q.toRotationMatrix();
   double mu = random_real_in_range(0.01, 1.);
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = false;
-  crocoddyl::FrictionCone cone(cone_normal, mu, nf, inner_appr);
+  crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
@@ -149,7 +152,7 @@ void test_negative_force_along_friction_cone_normal() {
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = activation.createData();
 
   // Compute the activation value
-  Eigen::Vector3d force = -random_real_in_range(0., 100.) * cone_normal;
+  Eigen::Vector3d force = -random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * force;
 
   // The first nf elements of the residual has to be positive since the force is outside the

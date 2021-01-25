@@ -147,10 +147,10 @@ void FrictionConeTpl<Scalar>::update() {
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     theta_i = theta * static_cast<Scalar>(i);
     tsurf_i << cos(theta_i), sin(theta_i), Scalar(0.);
-    A_.row(2 * i) = (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * R_;
-    A_.row(2 * i + 1) = (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * R_;
+    A_.row(2 * i) = (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * R_.transpose();
+    A_.row(2 * i + 1) = (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * R_.transpose();
   }
-  A_.row(nf_) = nsurf_.transpose();
+  A_.row(nf_) = R_.col(2).transpose();
   lb_(nf_) = min_nforce_;
   ub_(nf_) = max_nforce_;
 }

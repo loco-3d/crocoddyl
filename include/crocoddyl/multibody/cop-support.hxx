@@ -74,10 +74,10 @@ void CoPSupportTpl<Scalar>::update() {
   //  0 0 -L  0 -1]
   const Scalar L = box_(0) / Scalar(2.);
   const Scalar W = box_(1) / Scalar(2.);
-  A_.row(1) << -W * R_.col(2).transpose(), R_.col(0).transpose();
-  A_.row(2) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
-  A_.row(3) << -L * R_.col(2).transpose(), R_.col(1).transpose();
-  A_.row(4) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
+  A_.row(0) << -W * R_.col(2).transpose(), R_.col(0).transpose();
+  A_.row(1) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
+  A_.row(2) << -L * R_.col(2).transpose(), R_.col(1).transpose();
+  A_.row(3) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
 }
 
 template <typename Scalar>
