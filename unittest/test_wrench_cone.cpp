@@ -9,11 +9,11 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <pinocchio/math/quaternion.hpp>
 #include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/multibody/cop-support.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include "pinocchio/math/quaternion.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -148,7 +148,7 @@ void test_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = random_real_in_range(0., 100.) * R.row(2).transpose();
+  wrench.head(3) = random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -173,7 +173,7 @@ void test_negative_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * R.row(2).transpose();
+  wrench.head(3) = -random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 

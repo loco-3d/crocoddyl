@@ -145,7 +145,7 @@ class GepettoDisplay(DisplayAbstract):
                         self.robot.viewer.gui.setVisibility(forceName, "ON")
                         # Display the friction cones
                         position = pose
-                        position.rotation = rotationMatrixFromTwoVectors(self.z_axis, f["nsurf"])
+                        position.rotation = f["R"]
                         frictionName = self.frictionGroup + "/" + key
                         self._setConeMu(key, f["mu"])
                         self.robot.viewer.gui.applyConfiguration(
@@ -179,15 +179,15 @@ class GepettoDisplay(DisplayAbstract):
                             fiMo = pinocchio.SE3(contact.pinocchio.oMi[contact.joint].rotation.T,
                                                  contact.jMf.translation)
                             force = fiMo.actInv(contact.f)
-                            nsurf = np.array([0., 0., 1.])
+                            R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
                                     if contact.joint == self.robot.model.frames[c.cost.reference.id].parent:
-                                        nsurf = c.cost.reference.cone.nsurf
+                                        R = c.cost.reference.cone.R
                                         mu = c.cost.reference.cone.mu
                                         continue
-                            fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
+                            fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
@@ -196,15 +196,15 @@ class GepettoDisplay(DisplayAbstract):
                         oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
                         fiMo = pinocchio.SE3(impulse.pinocchio.oMi[impulse.joint].rotation.T, impulse.jMf.translation)
                         force = fiMo.actInv(impulse.f)
-                        nsurf = np.array([0., 0., 1.])
+                        R = np.eye(3)
                         mu = 0.7
                         for k, c in model.costs.costs.todict().items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
                                 if impulse.joint == self.robot.model.frames[c.cost.id].parent:
-                                    nsurf = c.cost.cone.nsurf
+                                    R = c.cost.cone.R
                                     mu = c.cost.cone.mu
                                     continue
-                        fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "nsurf": nsurf, "mu": mu})
+                        fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                 fs.append(fc)
         return fs
 
