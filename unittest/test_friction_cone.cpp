@@ -42,7 +42,7 @@ void test_constructor() {
   pinocchio::quaternion::uniformRandom(q);
   R = q.toRotationMatrix();
 
-  // Create the friction cone with rotation and surface contact
+  // Create the friction cone
   cone = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
 
   BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
@@ -77,8 +77,9 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::FrictionCone cone_1(R, mu, nf, inner_appr);
 
   // With rotation
-  Eigen::Vector3d normal(0., sqrt(2) / 2, sqrt(2) / 2);
-  R = Eigen::Quaternion<double>::FromTwoVectors(normal, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  R = q.toRotationMatrix();
   crocoddyl::FrictionCone cone_2(R, mu, nf, inner_appr);
 
   for (std::size_t i = 0; i < 5; ++i) {
