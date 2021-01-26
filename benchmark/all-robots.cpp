@@ -23,7 +23,6 @@
 
 #include "factory/legged-robots.hpp"
 #include "factory/arm.hpp"
-#include "factory/arm-collision.hpp"
 #include "factory/arm-kinova.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1))
@@ -37,8 +36,6 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
-  } else if (robot.robot_name == "Talos_arm_w_collision") {
-    crocoddyl::benchmark::build_arm_action_models_w_collision(runningModel, terminalModel);    
   } else if (robot.robot_name == "Kinova_arm") {
     crocoddyl::benchmark::build_arm_kinova_action_models(runningModel, terminalModel);
   } else {
@@ -54,7 +51,7 @@ void print_benchmark(RobotEENames robot) {
   Eigen::VectorXd default_state(state->get_nq() + state->get_nv());
   boost::shared_ptr<crocoddyl::IntegratedActionModelEulerTpl<double> > rm =
       boost::static_pointer_cast<crocoddyl::IntegratedActionModelEulerTpl<double> >(runningModel);
-  if (robot.robot_name == "Talos_arm" || robot.robot_name == "Talos_arm_w_collision" || robot.robot_name == "Kinova_arm") {
+  if (robot.robot_name == "Talos_arm" || robot.robot_name == "Kinova_arm") {
     boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> > dm =
         boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
             rm->get_differential());
@@ -89,8 +86,6 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel, ad_terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(ad_runningModel, ad_terminalModel);
-  } else if (robot.robot_name == "Talos_arm_w_collision") {
-    crocoddyl::benchmark::build_arm_action_models_w_collision(runningModel, terminalModel); 
   } else if (robot.robot_name == "Kinova_arm") {
     crocoddyl::benchmark::build_arm_kinova_action_models(ad_runningModel, ad_terminalModel);
   } else {
@@ -348,15 +343,6 @@ int main() {
       EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "gripper_left_joint", "half_sitting");
 
   print_benchmark(talosArm4Dof);
-  
-  // Arm Manipulation Benchmarks
-  std::cout << "********************Talos 4DoF Arm w Collision******" << std::endl;
-  RobotEENames talosArm4DofwCollision(
-      "Talos_arm_w_collision", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "gripper_left_joint", "half_sitting");  
-
-  print_benchmark(talosArm4DofwCollision);
-  
   // Arm Manipulation Benchmarks
   std::cout << "********************  Kinova Arm  ******************" << std::endl;
   RobotEENames kinovaArm("Kinova_arm", contact_names, contact_types,

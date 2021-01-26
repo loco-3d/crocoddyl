@@ -83,8 +83,6 @@ void exposeSolverDDP() {
            "It rollouts the action model given the computed policy (feedforward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
            ":param stepLength: applied step length (<= 1. and >= 0.)")
-       .def("computeKp", &SolverDDP::computeKp, bp::args("self", "t","dWp","dKp"),
-           "Compute the Riccati gain associated with target displacement at knot t\n")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),
                     "Vxx")
       .add_property("Vx", make_function(&SolverDDP::get_Vx, bp::return_value_policy<bp::copy_const_reference>()), "Vx")

@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
@@ -17,7 +18,6 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 

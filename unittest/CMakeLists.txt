@@ -19,14 +19,14 @@ ENDIF(UNIX)
 
 
 SET(${PROJECT_NAME}_CPP_TESTS
-  # test_states
-  # test_actuation
+  test_states
+  test_actuation
   test_activations
   test_costs
   test_costs_noFF
   test_cost_sum
   test_contacts
-  # test_impulses
+  test_impulses
   test_multiple_contacts
   test_multiple_impulses
   test_contact_costs

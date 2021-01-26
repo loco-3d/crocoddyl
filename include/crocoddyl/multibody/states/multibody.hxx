@@ -22,9 +22,10 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(boost::shared_ptr<PinocchioModel> m
   // Instead simple represents any joint that can model within the Euclidean manifold.
   // The rest of joints use Euclidean algebra. We use this fact for computing Jdiff.
 
-    // Define internally the free-flyer limits by removing the first joint DOFs
+  // Define internally the limits of the first joint
 
   const std::size_t nq0 = model->joints[1].nq();
+
   lb_.head(nq0) = -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
   ub_.head(nq0) = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
   lb_.segment(nq0, nq_ - nq0) = pinocchio_->lowerPositionLimit.tail(nq_ - nq0);
