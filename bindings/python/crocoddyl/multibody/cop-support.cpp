@@ -22,11 +22,6 @@ void exposeCoPSupport() {
                                                  "Initialize the CoP support.\n\n"
                                                  ":param R: rotation matrix that defines the cone orientation\n"
                                                  ":param box: dimension of the foot surface dim = (length, width)\n"))
-      .def(bp::init<Eigen::Vector3d, Eigen::Vector2d>(
-          bp::args("self", "nsurf", "box"),
-          "Initialize the CoP support.\n\n"
-          ":param nsurf: surface normal vector (it defines the cone orientation)\n"
-          ":param box: dimension of the foot surface dim = (length, width)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the CoP support."))
       .def("update", &CoPSupport::update, bp::args("self"),
            "Update the linear inequality (matrix and bounds).\n\n"
@@ -38,9 +33,6 @@ void exposeCoPSupport() {
                     "inequality lower bound")
       .add_property("R", bp::make_function(&CoPSupport::get_R, bp::return_internal_reference<>()),
                     bp::make_function(&CoPSupport::set_R), "rotation matrix")
-      .add_property("nsurf", bp::make_function(&CoPSupport::get_nsurf, bp::return_internal_reference<>()),
-                    bp::make_function(&CoPSupport::set_nsurf),
-                    "surface normal vector (run update() if you have changed the value)")
       .add_property("box", bp::make_function(&CoPSupport::get_box, bp::return_internal_reference<>()),
                     bp::make_function(&CoPSupport::set_box), "box size used to define the sole")
       .def(PrintableVisitor<CoPSupport>());

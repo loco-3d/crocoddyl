@@ -51,14 +51,6 @@ class CoPSupportTpl {
   /**
    * @brief Initialize the center of pressure support
    *
-   * @param[in] normal  Surface normal vector
-   * @param[in] box     Dimension of the foot surface dim = (length, width)
-   */
-  CoPSupportTpl(const Vector3s& normal, const Vector2s& box);
-
-  /**
-   * @brief Initialize the center of pressure support
-   *
    * @param[in] support  Center of pressure support
    */
   CoPSupportTpl(const WrenchConeTpl<Scalar>& support);
@@ -101,23 +93,11 @@ class CoPSupportTpl {
   const Matrix3s& get_R() const;
 
   /**
-   * @brief Return the surface normal vector
-   */
-  const Vector3s& get_nsurf() const;
-
-  /**
    * @brief Modify the rotation matrix that defines the support orientation w.r.t. the inertial frame
    *
    * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_R(const Matrix3s& R);
-
-  /**
-   * @brief Modify the surface normal vector
-   *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
-   */
-  void set_nsurf(const Vector3s& nsurf);
 
   /**
    * @brief Modify dimension of the center of pressure support (length, width)
@@ -130,12 +110,11 @@ class CoPSupportTpl {
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
 
  private:
-  Matrix46s A_;     //!< Matrix of wrench cone
-  Vector4s ub_;     //!< Upper bound of the wrench cone
-  Vector4s lb_;     //!< Lower bound of the wrench cone
-  Matrix3s R_;      //!< Rotation of the wrench cone w.r.t. the inertial frame
-  Vector3s nsurf_;  //!< Surface normal vector
-  Vector2s box_;    //!< Dimension of the foot surface (length, width)
+  Matrix46s A_;   //!< Matrix of wrench cone
+  Vector4s ub_;   //!< Upper bound of the wrench cone
+  Vector4s lb_;   //!< Lower bound of the wrench cone
+  Matrix3s R_;    //!< Rotation of the wrench cone w.r.t. the inertial frame
+  Vector2s box_;  //!< Dimension of the foot surface (length, width)
 };
 
 }  // namespace crocoddyl

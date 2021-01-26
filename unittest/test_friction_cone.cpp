@@ -25,67 +25,41 @@ void test_constructor() {
 
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
-  Eigen::Vector3d normal = R * Eigen::Vector3d::UnitZ();
 
   // Create the friction cone with rotation and surface normal
-  crocoddyl::FrictionCone cone_1(R, mu, nf, inner_appr);
-  crocoddyl::FrictionCone cone_2(normal, mu, nf, inner_appr);
+  crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone_1.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone_1.get_mu() == mu);
-  BOOST_CHECK(cone_1.get_nf() == nf);
-  BOOST_CHECK(cone_1.get_inner_appr() == inner_appr);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_A().rows()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_lb().size()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_ub().size()) == nf + 1);
-  BOOST_CHECK((cone_2.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_2.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone_2.get_mu() == mu);
-  BOOST_CHECK(cone_2.get_nf() == nf);
-  BOOST_CHECK(cone_2.get_inner_appr() == inner_appr);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_A().rows()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_lb().size()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_ub().size()) == nf + 1);
-  BOOST_CHECK((cone_1.get_A() - cone_2.get_A()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_lb() - cone_2.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_ub() - cone_2.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_mu() == mu);
+  BOOST_CHECK(cone.get_nf() == nf);
+  BOOST_CHECK(cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
 
   // With rotation
-  normal = Eigen::Vector3d(0., sqrt(2) / 2, sqrt(2) / 2);
-  R = Eigen::Quaternion<double>::FromTwoVectors(normal, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+  Eigen::Quaterniond q;
+  pinocchio::quaternion::uniformRandom(q);
+  R = q.toRotationMatrix();
 
   // Create the friction cone with rotation and surface contact
-  cone_1 = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
-  cone_2 = crocoddyl::FrictionCone(normal, mu, nf, inner_appr);
+  cone = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone_1.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone_1.get_mu() == mu);
-  BOOST_CHECK(cone_1.get_nf() == nf);
-  BOOST_CHECK(cone_1.get_inner_appr() == inner_appr);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_A().rows()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_lb().size()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_1.get_ub().size()) == nf + 1);
-  BOOST_CHECK((cone_2.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_2.get_nsurf() - normal).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK(cone_2.get_mu() == mu);
-  BOOST_CHECK(cone_2.get_nf() == nf);
-  BOOST_CHECK(cone_2.get_inner_appr() == inner_appr);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_A().rows()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_lb().size()) == nf + 1);
-  BOOST_CHECK(static_cast<std::size_t>(cone_2.get_ub().size()) == nf + 1);
-  BOOST_CHECK((cone_1.get_A() - cone_2.get_A()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_lb() - cone_2.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((cone_1.get_ub() - cone_2.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_mu() == mu);
+  BOOST_CHECK(cone.get_nf() == nf);
+  BOOST_CHECK(cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
 }
 
 void test_inner_approximation_of_friction_cone() {
-  Eigen::Vector3d cone_normal = Eigen::Vector3d::UnitZ();
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   double mu = random_real_in_range(0.01, 1.);
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = true;
-  crocoddyl::FrictionCone cone(cone_normal, mu, nf, inner_appr);
+  crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
   const Eigen::VectorXd A_mu = -cone.get_A().col(2);
   for (std::size_t i = 0; i < nf; ++i) {
     BOOST_CHECK_CLOSE(A_mu(i), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);

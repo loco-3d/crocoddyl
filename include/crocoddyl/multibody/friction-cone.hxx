@@ -18,7 +18,6 @@ FrictionConeTpl<Scalar>::FrictionConeTpl()
       ub_(nf_ + 1),
       lb_(nf_ + 1),
       R_(Matrix3s::Identity()),
-      nsurf_(Vector3s::UnitZ()),
       mu_(Scalar(0.7)),
       inner_appr_(true),
       min_nforce_(Scalar(0.)),
@@ -34,13 +33,7 @@ FrictionConeTpl<Scalar>::FrictionConeTpl()
 template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu, std::size_t nf, const bool inner_appr,
                                          const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf),
-      R_(R),
-      nsurf_(R_.transpose() * Vector3s::UnitZ()),
-      mu_(mu),
-      inner_appr_(inner_appr),
-      min_nforce_(min_nforce),
-      max_nforce_(max_nforce) {
+    : nf_(nf), R_(R), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
@@ -70,7 +63,6 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
                                          const Scalar min_nforce, const Scalar max_nforce)
     : nf_(nf),
       R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix()),
-      nsurf_(nsurf),
       mu_(mu),
       inner_appr_(inner_appr),
       min_nforce_(min_nforce),
@@ -79,8 +71,9 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
+  Eigen::Vector3d normal = nsurf;
   if (!nsurf.isUnitary()) {
-    nsurf_ /= nsurf.norm();
+    normal /= nsurf.norm();
     std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
   }
   if (mu < Scalar(0.)) {
@@ -98,7 +91,7 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
   A_ = MatrixX3s::Zero(nf_ + 1, 3);
   ub_ = VectorXs::Zero(nf_ + 1);
   lb_ = VectorXs::Zero(nf_ + 1);
-  R_ = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
+  R_ = Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
 
   // Update the inequality matrix and bounds
   update();
@@ -111,7 +104,6 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
       ub_(cone.get_ub()),
       lb_(cone.get_lb()),
       R_(cone.get_R()),
-      nsurf_(cone.get_nsurf()),
       mu_(cone.get_mu()),
       inner_appr_(cone.get_inner_appr()),
       min_nforce_(cone.get_min_nforce()),
@@ -158,7 +150,13 @@ void FrictionConeTpl<Scalar>::update() {
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, const bool inner_appr,
                                      const Scalar min_nforce, const Scalar max_nforce) {
-  set_nsurf(normal);
+  Eigen::Vector3d nsurf = normal;
+  // Sanity checks
+  if (!nsurf.isUnitary()) {
+    nsurf /= normal.norm();
+    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+  }
+  R_ = Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix();
   set_mu(mu);
   set_inner_appr(inner_appr);
   set_min_nforce(min_nforce);
@@ -189,8 +187,8 @@ const typename MathBaseTpl<Scalar>::Matrix3s& FrictionConeTpl<Scalar>::get_R() c
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& FrictionConeTpl<Scalar>::get_nsurf() const {
-  return nsurf_;
+typename MathBaseTpl<Scalar>::Vector3s FrictionConeTpl<Scalar>::get_nsurf() {
+  return R_.row(2).transpose();
 }
 
 template <typename Scalar>
@@ -221,18 +219,17 @@ const Scalar FrictionConeTpl<Scalar>::get_max_nforce() const {
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_R(const Matrix3s& R) {
   R_ = R;
-  nsurf_ = R_.transpose() * Vector3s::UnitZ();
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
-  nsurf_ = nsurf;
+  Eigen::Vector3d normal = nsurf;
   // Sanity checks
   if (!nsurf.isUnitary()) {
-    nsurf_ /= nsurf.norm();
+    normal /= nsurf.norm();
     std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
   }
-  R_ = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
+  R_ = Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
 }
 
 template <typename Scalar>
@@ -270,7 +267,6 @@ void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X) {
   os << "         R: " << X.get_R() << std::endl;
-  os << "   (nsurf): " << X.get_nsurf().transpose() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
   os << "        nf: " << X.get_nf() << std::endl;
   os << "inner_appr: ";

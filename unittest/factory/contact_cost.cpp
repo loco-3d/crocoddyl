@@ -83,9 +83,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
     case ContactCostModelTypes::CostModelContactFrictionCone:
       cost = boost::make_shared<crocoddyl::CostModelContactFrictionCone>(
           state, ActivationModelFactory().create(activation_type, 5),
-          crocoddyl::FrameFrictionCone(model_factory.get_frame_id(),
-                                       crocoddyl::FrictionCone(Eigen::Vector3d(0., 0., 1.), 1.)),
-          nu);
+          crocoddyl::FrameFrictionCone(model_factory.get_frame_id(), crocoddyl::FrictionCone(R, 1.)), nu);
       break;
     case ContactCostModelTypes::CostModelContactWrenchCone:
       cost = boost::make_shared<crocoddyl::CostModelContactWrenchCone>(

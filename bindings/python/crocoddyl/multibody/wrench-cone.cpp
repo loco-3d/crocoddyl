@@ -29,16 +29,6 @@ void exposeWrenchCone() {
           ":param inner_appr: inner or outer approximation (default True)\n"
           ":param min_nforce: minimum normal force (default 0.)\n"
           ":param max_nforce: maximum normal force (default sys.float_info.max)"))
-      .def(bp::init<Eigen::Vector3d, double, Eigen::Vector2d, bp::optional<std::size_t, bool, double, double> >(
-          bp::args("self", "nsurf", "mu", "box", "nf", "inner_appr", "min_nforce", "max_nforce"),
-          "Initialize the linearize friction cone.\n\n"
-          ":param nsurf: surface normal vector (it defines the cone orientation)\n"
-          ":param mu: friction coefficient\n"
-          ":param box: dimension of the foot surface dim = (length, width)\n"
-          ":param nf: number of facets\n"
-          ":param inner_appr: inner or outer approximation (default True)\n"
-          ":param min_nforce: minimum normal force (default 0.)\n"
-          ":param max_nforce: maximum normal force (default sys.float_info.max)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the wrench cone."))
       .def<void (WrenchCone::*)()>("update", &WrenchCone::update, bp::args("self"),
                                    "Update the linear inequality (matrix and bounds).\n\n"
@@ -62,9 +52,6 @@ void exposeWrenchCone() {
                     "number of facets")
       .add_property("R", bp::make_function(&WrenchCone::get_R, bp::return_internal_reference<>()),
                     bp::make_function(&WrenchCone::set_R), "rotation matrix")
-      .add_property("nsurf", bp::make_function(&WrenchCone::get_nsurf, bp::return_internal_reference<>()),
-                    bp::make_function(&WrenchCone::set_nsurf),
-                    "surface normal vector (run update() if you have changed the value)")
       .add_property("box", bp::make_function(&WrenchCone::get_box, bp::return_internal_reference<>()),
                     bp::make_function(&WrenchCone::set_box), "box size used to define the sole")
       .add_property("mu", bp::make_function(&WrenchCone::get_mu, bp::return_value_policy<bp::return_by_value>()),

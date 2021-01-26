@@ -54,19 +54,10 @@ class FrictionConeTpl {
    */
   FrictionConeTpl(const Matrix3s& R, const Scalar mu, std::size_t nf = 4, const bool inner_appr = true,
                   const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
-
-  /**
-   * @brief Initialize the wrench cone
-   *
-   * @param[in] normal      Surface normal vector
-   * @param[in] mu          Friction coefficient
-   * @param[in] nf          Number of facets (default 4)
-   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
-   * @param[in] min_nforce  Minimum normal force (default 0.)
-   * @param[in] max_nforce  Maximum normal force (default maximum floating number))
-   */
-  FrictionConeTpl(const Vector3s& normal, const Scalar mu, std::size_t nf = 4, const bool inner_appr = true,
-                  const Scalar min_nforce = Scalar(0.), const Scalar max_nforce = std::numeric_limits<Scalar>::max());
+  DEPRECATED("Use constructor based on rotation matrix.",
+             FrictionConeTpl(const Vector3s& normal, const Scalar mu, std::size_t nf = 4, const bool inner_appr = true,
+                             const Scalar min_nforce = Scalar(0.),
+                             const Scalar max_nforce = std::numeric_limits<Scalar>::max());)
 
   /**
    * @brief Initialize the wrench cone
@@ -114,10 +105,7 @@ class FrictionConeTpl {
    */
   const Matrix3s& get_R() const;
 
-  /**
-   * @brief Return the surface normal vector
-   */
-  const Vector3s& get_nsurf() const;
+  DEPRECATED("Use get_R.", Vector3s get_nsurf();)
 
   /**
    * @brief Return the friction coefficient
@@ -146,12 +134,7 @@ class FrictionConeTpl {
    */
   void set_R(const Matrix3s& R);
 
-  /**
-   * @brief Modify the surface normal vector
-   *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
-   */
-  void set_nsurf(const Vector3s& nsurf);
+  DEPRECATED("Use set_R.", void set_nsurf(const Vector3s& nsurf);)
 
   /**
    * @brief Modify friction coefficient
@@ -190,7 +173,6 @@ class FrictionConeTpl {
   VectorXs ub_;        //!< Upper bound of the friction cone
   VectorXs lb_;        //!< Lower bound of the friction cone
   Matrix3s R_;         //!< Rotation of the friction cone w.r.t. the inertial frame
-  Vector3s nsurf_;     //!< Surface normal vector
   Scalar mu_;          //!< Friction coefficient
   bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
   Scalar min_nforce_;  //!< Minimum normal force
