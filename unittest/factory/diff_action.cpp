@@ -162,7 +162,8 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
 
-  crocoddyl::FrictionCone cone(Eigen::Vector3d(0, 0, 1), 0.8, 4, false);
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+  crocoddyl::FrictionCone cone(R, 0.8, 4, false);
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);

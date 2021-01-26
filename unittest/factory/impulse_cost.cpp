@@ -88,8 +88,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
     case ImpulseCostModelTypes::CostModelImpulseFrictionCone:
       cost = boost::make_shared<crocoddyl::CostModelImpulseFrictionCone>(
           state, ActivationModelFactory().create(activation_type, 5),
-          crocoddyl::FrameFrictionCone(model_factory.get_frame_id(),
-                                       crocoddyl::FrictionCone(Eigen::Vector3d(0., 0., 1.), 1.)));
+          crocoddyl::FrameFrictionCone(model_factory.get_frame_id(), crocoddyl::FrictionCone(R, 1.)));
       break;
     case ImpulseCostModelTypes::CostModelImpulseWrenchCone:
       cost = boost::make_shared<crocoddyl::CostModelImpulseWrenchCone>(

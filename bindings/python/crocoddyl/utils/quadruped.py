@@ -20,7 +20,7 @@ class SimpleQuadrupedalGaitProblem:
         self.firstStep = True
         # Defining the friction coefficient and normal
         self.mu = 0.7
-        self.nsurf = np.array([0., 0., 1.])
+        self.Rsurf = np.eye(3)
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
         """ Create a shooting problem for a CoM forward/backward task.
@@ -427,7 +427,7 @@ class SimpleQuadrupedalGaitProblem:
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e6)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
+            cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             frictionCone = crocoddyl.CostModelContactFrictionCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
                 crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)
@@ -492,7 +492,7 @@ class SimpleQuadrupedalGaitProblem:
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
         for i in supportFootIds:
-            cone = crocoddyl.FrictionCone(self.nsurf, self.mu, 4, False)
+            cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             frictionCone = crocoddyl.CostModelContactFrictionCone(
                 self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
                 crocoddyl.FrameFrictionCone(i, cone), self.actuation.nu)

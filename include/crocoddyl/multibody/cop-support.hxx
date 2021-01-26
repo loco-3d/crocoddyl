@@ -13,9 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl()
-    : R_(Matrix3s::Identity()),
-      nsurf_(Vector3s::UnitZ()),
-      box_(std::numeric_limits<Scalar>::max(), std::numeric_limits<Scalar>::max()) {
+    : R_(Matrix3s::Identity()), box_(std::numeric_limits<Scalar>::max(), std::numeric_limits<Scalar>::max()) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
@@ -25,19 +23,7 @@ CoPSupportTpl<Scalar>::CoPSupportTpl()
 }
 
 template <typename Scalar>
-CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box)
-    : R_(R), nsurf_(R_.transpose() * Vector3s::UnitZ()), box_(box) {
-  A_.setZero();
-  ub_.setZero();
-  lb_.setZero();
-
-  // Update the inequality matrix and bounds
-  update();
-}
-
-template <typename Scalar>
-CoPSupportTpl<Scalar>::CoPSupportTpl(const Vector3s& nsurf, const Vector2s& box)
-    : R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix()), nsurf_(nsurf), box_(box) {
+CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box) : R_(R), box_(box) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
@@ -52,7 +38,6 @@ CoPSupportTpl<Scalar>::CoPSupportTpl(const WrenchConeTpl<Scalar>& support)
       ub_(support.get_ub()),
       lb_(support.get_lb()),
       R_(support.get_R()),
-      nsurf_(support.get_nsurf()),
       box_(support.get_box()) {}
 
 template <typename Scalar>
@@ -106,25 +91,8 @@ const typename MathBaseTpl<Scalar>::Matrix3s& CoPSupportTpl<Scalar>::get_R() con
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& CoPSupportTpl<Scalar>::get_nsurf() const {
-  return nsurf_;
-}
-
-template <typename Scalar>
 void CoPSupportTpl<Scalar>::set_R(const Matrix3s& R) {
   R_ = R;
-  nsurf_ = R_.transpose() * Vector3s::UnitZ();
-}
-
-template <typename Scalar>
-void CoPSupportTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
-  nsurf_ = nsurf;
-  // Sanity checks
-  if (!nsurf.isUnitary()) {
-    nsurf_ /= nsurf.norm();
-    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
-  }
-  R_ = Quaternions::FromTwoVectors(nsurf_, Vector3s::UnitZ()).toRotationMatrix();
 }
 
 template <typename Scalar>
@@ -143,7 +111,6 @@ void CoPSupportTpl<Scalar>::set_box(const Vector2s& box) {
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X) {
   os << "         R: " << X.get_R() << std::endl;
-  os << "   (nsurf): " << X.get_nsurf().transpose() << std::endl;
   os << "       box: " << X.get_box().transpose() << std::endl;
   return os;
 }

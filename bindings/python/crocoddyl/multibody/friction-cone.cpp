@@ -28,15 +28,6 @@ void exposeFrictionCone() {
           ":param inner_appr: inner or outer approximation (default True)\n"
           ":param min_nforce: minimum normal force (default 0.)\n"
           ":param max_nforce: maximum normal force (default sys.float_info.max)"))
-      .def(bp::init<Eigen::Vector3d, double, bp::optional<std::size_t, bool, double, double> >(
-          bp::args("self", "nsurf", "mu", "nf", "inner_appr", "min_nforce", "max_nforce"),
-          "Initialize the linearize friction cone.\n\n"
-          ":param nsurf: surface normal vector (it defines the cone orientation)\n"
-          ":param mu: friction coefficient\n"
-          ":param nf: number of facets\n"
-          ":param inner_appr: inner or outer approximation (default True)\n"
-          ":param min_nforce: minimum normal force (default 0.)\n"
-          ":param max_nforce: maximum normal force (default sys.float_info.max)"))
       .def(bp::init<>(bp::args("self"), "Default initialization of the friction cone."))
       .def<void (FrictionCone::*)()>("update", &FrictionCone::update, bp::args("self"),
                                      "Update the linear inequality (matrix and bounds).\n\n"
@@ -62,9 +53,6 @@ void exposeFrictionCone() {
                     bp::make_function(&FrictionCone::set_R),
                     "rotation matrix that defines the cone orientation w.r.t. the inertial frame (run update() if you "
                     "have changed the value)")
-      .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
-                    bp::make_function(&FrictionCone::set_nsurf),
-                    "surface normal vector (run update() if you have changed the value)")
       .add_property("mu", bp::make_function(&FrictionCone::get_mu), bp::make_function(&FrictionCone::set_mu),
                     "friction coefficient (run update() if you have changed the value)")
       .add_property("inner_appr", bp::make_function(&FrictionCone::get_inner_appr),
