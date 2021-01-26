@@ -50,7 +50,6 @@ conda install crocoddyl -c conda-forge
   </tr>
 </table>
 
-
 **Crocoddyl** is versatible:
 
  * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
@@ -162,6 +161,9 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 - [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
+## Documentation
+
+The documentation of **Crocoddyl** of its last release is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/).
 
 ## Citing Crocoddyl
 
