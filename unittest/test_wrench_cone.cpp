@@ -29,7 +29,7 @@ void test_constructor() {
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
 
-  // Create the wrench cone with rotation and surface normal
+  // Create the wrench cone
   crocoddyl::WrenchCone cone(R, mu, box, nf, inner_appr);
 
   BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
@@ -46,7 +46,7 @@ void test_constructor() {
   pinocchio::quaternion::uniformRandom(q);
   R = q.toRotationMatrix();
 
-  // Create the wrench cone with rotation and surface normal
+  // Create the wrench cone
   cone = crocoddyl::WrenchCone(R, mu, box, nf, inner_appr);
 
   BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
