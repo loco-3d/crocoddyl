@@ -63,7 +63,8 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::CoPSupport support_2(R, box);
 
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK((support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK(
+        (support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isMuchSmallerThan(1.0, 1e-9));
   }
 }
 
@@ -91,7 +92,7 @@ void test_cop_within_the_support_region() {
   // Create the CoP support with no rotation
   R = Eigen::Matrix3d::Identity();
   support = crocoddyl::CoPSupport(R, box);
-  
+
   // Compute the activation value with a small enough torque in X
   wrench.setZero();
   wrench(5) = random_real_in_range(0., 100.);
