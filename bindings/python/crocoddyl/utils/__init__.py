@@ -1049,8 +1049,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else 1e-9
-        self.u_reg = regInit if regInit is not None else 1e-9
+        self.x_reg = regInit if regInit is not None else self.reg_min
+        self.u_reg = regInit if regInit is not None else self.reg_min
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
