@@ -51,7 +51,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
     max_nforce_ = std::numeric_limits<Scalar>::max();
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
-  A_ = MatrixX6s::Zero(nf_ + 13, 3);
+  A_ = MatrixX6s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
 
@@ -79,7 +79,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
     max_nforce_ = std::numeric_limits<Scalar>::max();
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
-  A_ = MatrixX3s::Zero(nf_ + 13, 3);
+  A_ = MatrixX3s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
 

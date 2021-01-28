@@ -100,7 +100,7 @@ void test_against_cop_support() {
   BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isMuchSmallerThan(1.0, 1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
     BOOST_CHECK(
-        (wrench_cone.get_A().row(nf + i + 1).head(3) - cop_support.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
+        (wrench_cone.get_A().row(nf + i + 1) - cop_support.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
   }
   BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isMuchSmallerThan(1.0, 1e-9));
   BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isMuchSmallerThan(1.0, 1e-9));
