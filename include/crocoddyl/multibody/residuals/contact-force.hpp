@@ -28,8 +28,8 @@ namespace crocoddyl {
  * The current spatial forces \f$\boldsymbol{\lambda}\in\mathbb{R}^{nc}\f$ is computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`, with `nc` as the dimension of the contact.
  *
- * Both residual and residual Jacobians are computed analytically, where the force vector \f$\boldsymbol{\lambda}\f$ and
- * its Jacobians \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
+ * Both residual and residual Jacobians are computed analytically, where the force vector \f$\boldsymbol{\lambda}\f$
+ * and its Jacobians \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
  * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
  * DataCollectorContactTpl). Note that this residual function cannot be used with other action models.
