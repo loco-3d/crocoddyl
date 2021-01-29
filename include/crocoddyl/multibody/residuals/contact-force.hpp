@@ -25,17 +25,17 @@ namespace crocoddyl {
  *
  * This residual function is defined as \f$\mathbf{r}=\boldsymbol{\lambda}-\boldsymbol{\lambda}^*\f$,
  * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial forces, respectively.
- * The current spatial forces \f$\boldsymbol{\lambda}\in\mathbb{R}^{nc}\f$is computed by
+ * The current spatial forces \f$\boldsymbol{\lambda}\in\mathbb{R}^{nc}\f$ is computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`, with `nc` as the dimension of the contact.
  *
- * Both residual and residual Jacobians are computed analytically, where th force vector \f$\boldsymbol{\lambda}\f$ and
+ * Both residual and residual Jacobians are computed analytically, where the force vector \f$\boldsymbol{\lambda}\f$ and
  * its Jacobians \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
  * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
  * DataCollectorContactTpl). Note that this residual function cannot be used with other action models.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
- * `DifferentialActionModelContactFwdDynamicsTpl`, `DataCollectorContactTpl`, `ActivationModelAbstractTpl`
+ * `DifferentialActionModelContactFwdDynamicsTpl`, `DataCollectorContactTpl`
  */
 template <typename _Scalar>
 class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
