@@ -12,250 +12,162 @@
 namespace crocoddyl {
 
 // actuation
-template <typename Scalar>
-class ActuationModelFloatingBaseTpl;
+template <typename Scalar> class ActuationModelFloatingBaseTpl;
 
-template <typename Scalar>
-class ActuationModelFullTpl;
+template <typename Scalar> class ActuationModelFullTpl;
 
-template <typename Scalar>
-class ActuationModelMultiCopterBaseTpl;
+template <typename Scalar> class ActuationModelMultiCopterBaseTpl;
 
 // contact
-template <typename Scalar>
-class ContactModelAbstractTpl;
-template <typename Scalar>
-struct ContactDataAbstractTpl;
+template <typename Scalar> class ContactModelAbstractTpl;
+template <typename Scalar> struct ContactDataAbstractTpl;
 
 // action
-template <typename Scalar>
-class ActionModelImpulseFwdDynamicsTpl;
-template <typename Scalar>
-struct ActionDataImpulseFwdDynamicsTpl;
+template <typename Scalar> class ActionModelImpulseFwdDynamicsTpl;
+template <typename Scalar> struct ActionDataImpulseFwdDynamicsTpl;
 
 // differential action
-template <typename Scalar>
-class DifferentialActionModelFreeFwdDynamicsTpl;
-template <typename Scalar>
-struct DifferentialActionDataFreeFwdDynamicsTpl;
+template <typename Scalar> class DifferentialActionModelFreeFwdDynamicsTpl;
+template <typename Scalar> struct DifferentialActionDataFreeFwdDynamicsTpl;
 
-template <typename Scalar>
-class DifferentialActionModelContactFwdDynamicsTpl;
-template <typename Scalar>
-struct DifferentialActionDataContactFwdDynamicsTpl;
+template <typename Scalar> class DifferentialActionModelContactFwdDynamicsTpl;
+template <typename Scalar> struct DifferentialActionDataContactFwdDynamicsTpl;
 
 // numdiff
-template <typename Scalar>
-class CostModelNumDiffTpl;
-template <typename Scalar>
-struct CostDataNumDiffTpl;
+template <typename Scalar> class CostModelNumDiffTpl;
+template <typename Scalar> struct CostDataNumDiffTpl;
 
-template <typename Scalar>
-class ContactModelNumDiffTpl;
-template <typename Scalar>
-struct ContactDataNumDiffTpl;
+template <typename Scalar> class ContactModelNumDiffTpl;
+template <typename Scalar> struct ContactDataNumDiffTpl;
 
 // frame
-template <typename Scalar>
-struct FrameTranslationTpl;
+template <typename Scalar> struct FrameTranslationTpl;
 
-template <typename Scalar>
-struct FrameRotationTpl;
+template <typename Scalar> struct FrameRotationTpl;
 
-template <typename Scalar>
-struct FramePlacementTpl;
+template <typename Scalar> struct FramePlacementTpl;
 
-template <typename Scalar>
-struct FrameMotionTpl;
+template <typename Scalar> struct FrameMotionTpl;
 
-template <typename Scalar>
-struct FrameForceTpl;
+template <typename Scalar> struct FrameForceTpl;
 
-template <typename Scalar>
-struct FrameFrictionConeTpl;
+template <typename Scalar> struct FrameFrictionConeTpl;
 
-template <typename Scalar>
-struct FrameWrenchConeTpl;
+template <typename Scalar> struct FrameWrenchConeTpl;
 
-template <typename Scalar>
-struct FrameCoPSupportTpl;
+template <typename Scalar> struct FrameCoPSupportTpl;
 
 // cost
-template <typename Scalar>
-class CostModelFrameTranslationTpl;
-template <typename Scalar>
-struct CostDataFrameTranslationTpl;
+template <typename Scalar> class CostModelFrameTranslationTpl;
+template <typename Scalar> struct CostDataFrameTranslationTpl;
 
-template <typename Scalar>
-class CostModelControlGravTpl;
-template <typename Scalar>
-struct CostDataControlGravTpl;
+template <typename Scalar> class CostModelControlGravTpl;
+template <typename Scalar> struct CostDataControlGravTpl;
 
-template <typename Scalar>
-class CostModelCentroidalMomentumTpl;
-template <typename Scalar>
-struct CostDataCentroidalMomentumTpl;
+template <typename Scalar> class CostModelCentroidalMomentumTpl;
+template <typename Scalar> struct CostDataCentroidalMomentumTpl;
 
-template <typename Scalar>
-class CostModelCoMPositionTpl;
-template <typename Scalar>
-struct CostDataCoMPositionTpl;
+template <typename Scalar> class CostModelCoMPositionTpl;
+template <typename Scalar> struct CostDataCoMPositionTpl;
 
-template <typename Scalar>
-class CostModelFramePlacementTpl;
-template <typename Scalar>
-struct CostDataFramePlacementTpl;
+template <typename Scalar> class CostModelFramePlacementTpl;
+template <typename Scalar> struct CostDataFramePlacementTpl;
 
-template <typename Scalar>
-class CostModelImpulseCoMTpl;
-template <typename Scalar>
-struct CostDataImpulseCoMTpl;
+template <typename Scalar> class CostModelImpulseCoMTpl;
+template <typename Scalar> struct CostDataImpulseCoMTpl;
 
-template <typename Scalar>
-class CostModelStateTpl;
-template <typename Scalar>
-struct CostDataStateTpl;
+template <typename Scalar> class CostModelStateTpl;
+template <typename Scalar> struct CostDataStateTpl;
 
-template <typename Scalar>
-class CostModelControlGravTpl;
-template <typename Scalar>
-struct CostDataControlGravTpl;
+template <typename Scalar> class CostModelControlGravTpl;
+template <typename Scalar> struct CostDataControlGravTpl;
 
-template <typename Scalar>
-class CostModelControlGravContactTpl;
-template <typename Scalar>
-struct CostDataControlGravContactTpl;
+template <typename Scalar> class CostModelControlGravContactTpl;
+template <typename Scalar> struct CostDataControlGravContactTpl;
 
-template <typename Scalar>
-class CostModelFrameVelocityTpl;
-template <typename Scalar>
-struct CostDataFrameVelocityTpl;
+template <typename Scalar> class CostModelFrameVelocityTpl;
+template <typename Scalar> struct CostDataFrameVelocityTpl;
 
-template <typename Scalar>
-class CostModelContactFrictionConeTpl;
-template <typename Scalar>
-struct CostDataContactFrictionConeTpl;
+template <typename Scalar> class CostModelContactFrictionConeTpl;
+template <typename Scalar> struct CostDataContactFrictionConeTpl;
 
-template <typename Scalar>
-class CostModelContactWrenchConeTpl;
-template <typename Scalar>
-struct CostDataContactWrenchConeTpl;
+template <typename Scalar> class CostModelContactWrenchConeTpl;
+template <typename Scalar> struct CostDataContactWrenchConeTpl;
 
-template <typename Scalar>
-class CostModelContactForceTpl;
-template <typename Scalar>
-struct CostDataContactForceTpl;
+template <typename Scalar> class CostModelContactForceTpl;
+template <typename Scalar> struct CostDataContactForceTpl;
 
-template <typename Scalar>
-class CostModelContactImpulseTpl;
-template <typename Scalar>
-struct CostDataContactImpulseTpl;
+template <typename Scalar> class CostModelContactImpulseTpl;
+template <typename Scalar> struct CostDataContactImpulseTpl;
 
-template <typename Scalar>
-class CostModelFrameRotationTpl;
-template <typename Scalar>
-struct CostDataFrameRotationTpl;
+template <typename Scalar> class CostModelFrameRotationTpl;
+template <typename Scalar> struct CostDataFrameRotationTpl;
 
-template <typename Scalar>
-class CostModelImpulseFrictionConeTpl;
-template <typename Scalar>
-struct CostDataImpulseFrictionConeTpl;
+template <typename Scalar> class CostModelImpulseFrictionConeTpl;
+template <typename Scalar> struct CostDataImpulseFrictionConeTpl;
 
-template <typename Scalar>
-class CostModelImpulseWrenchConeTpl;
-template <typename Scalar>
-struct CostDataImpulseWrenchConeTpl;
+template <typename Scalar> class CostModelImpulseWrenchConeTpl;
+template <typename Scalar> struct CostDataImpulseWrenchConeTpl;
 
-template <typename Scalar>
-class CostModelContactCoPPositionTpl;
-template <typename Scalar>
-struct CostDataContactCoPPositionTpl;
+template <typename Scalar> class CostModelContactCoPPositionTpl;
+template <typename Scalar> struct CostDataContactCoPPositionTpl;
 
-template <typename Scalar>
-class CostModelImpulseCoPPositionTpl;
-template <typename Scalar>
-struct CostDataImpulseCoPPositionTpl;
+template <typename Scalar> class CostModelImpulseCoPPositionTpl;
+template <typename Scalar> struct CostDataImpulseCoPPositionTpl;
 
 // impulse
-template <typename Scalar>
-class ImpulseModelAbstractTpl;
-template <typename Scalar>
-struct ImpulseDataAbstractTpl;
+template <typename Scalar> class ImpulseModelAbstractTpl;
+template <typename Scalar> struct ImpulseDataAbstractTpl;
 
 // contact
-template <typename Scalar>
-struct ContactItemTpl;
-template <typename Scalar>
-class ContactModelMultipleTpl;
-template <typename Scalar>
-struct ContactDataMultipleTpl;
+template <typename Scalar> struct ContactItemTpl;
+template <typename Scalar> class ContactModelMultipleTpl;
+template <typename Scalar> struct ContactDataMultipleTpl;
 
-template <typename Scalar>
-class ContactModel2DTpl;
-template <typename Scalar>
-struct ContactData2DTpl;
+template <typename Scalar> class ContactModel2DTpl;
+template <typename Scalar> struct ContactData2DTpl;
 
-template <typename Scalar>
-class ContactModel3DTpl;
-template <typename Scalar>
-struct ContactData3DTpl;
+template <typename Scalar> class ContactModel3DTpl;
+template <typename Scalar> struct ContactData3DTpl;
 
-template <typename Scalar>
-class ContactModel6DTpl;
-template <typename Scalar>
-struct ContactData6DTpl;
+template <typename Scalar> class ContactModel6DTpl;
+template <typename Scalar> struct ContactData6DTpl;
 
 // friction
-template <typename Scalar>
-class FrictionConeTpl;
-template <typename Scalar>
-class WrenchConeTpl;
+template <typename Scalar> class FrictionConeTpl;
+template <typename Scalar> class WrenchConeTpl;
 
 // state
-template <typename Scalar>
-class StateMultibodyTpl;
+template <typename Scalar> class StateMultibodyTpl;
 
 // data collector
-template <typename Scalar>
-struct DataCollectorMultibodyTpl;
+template <typename Scalar> struct DataCollectorMultibodyTpl;
 
-template <typename Scalar>
-struct DataCollectorActMultibodyTpl;
+template <typename Scalar> struct DataCollectorActMultibodyTpl;
 
-template <typename Scalar>
-struct DataCollectorContactTpl;
+template <typename Scalar> struct DataCollectorContactTpl;
 
-template <typename Scalar>
-struct DataCollectorMultibodyInContactTpl;
+template <typename Scalar> struct DataCollectorMultibodyInContactTpl;
 
-template <typename Scalar>
-struct DataCollectorActMultibodyInContactTpl;
+template <typename Scalar> struct DataCollectorActMultibodyInContactTpl;
 
-template <typename Scalar>
-struct DataCollectorImpulseTpl;
+template <typename Scalar> struct DataCollectorImpulseTpl;
 
-template <typename Scalar>
-struct DataCollectorMultibodyInImpulseTpl;
+template <typename Scalar> struct DataCollectorMultibodyInImpulseTpl;
 
 // impulse
-template <typename Scalar>
-class ImpulseModel6DTpl;
-template <typename Scalar>
-struct ImpulseData6DTpl;
+template <typename Scalar> class ImpulseModel6DTpl;
+template <typename Scalar> struct ImpulseData6DTpl;
 
-template <typename Scalar>
-class ImpulseModel3DTpl;
-template <typename Scalar>
-struct ImpulseData3DTpl;
+template <typename Scalar> class ImpulseModel3DTpl;
+template <typename Scalar> struct ImpulseData3DTpl;
 
-template <typename Scalar>
-struct ImpulseItemTpl;
-template <typename Scalar>
-class ImpulseModelMultipleTpl;
-template <typename Scalar>
-struct ImpulseDataMultipleTpl;
+template <typename Scalar> struct ImpulseItemTpl;
+template <typename Scalar> class ImpulseModelMultipleTpl;
+template <typename Scalar> struct ImpulseDataMultipleTpl;
 
-/*******************************Template Instantiation**************************/
+/*******************************Template
+ * Instantiation**************************/
 
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
@@ -267,10 +179,14 @@ typedef ContactDataAbstractTpl<double> ContactDataAbstract;
 typedef ActionModelImpulseFwdDynamicsTpl<double> ActionModelImpulseFwdDynamics;
 typedef ActionDataImpulseFwdDynamicsTpl<double> ActionDataImpulseFwdDynamics;
 
-typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionModelFreeFwdDynamics;
-typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
-typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
-typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
+typedef DifferentialActionModelFreeFwdDynamicsTpl<double>
+    DifferentialActionModelFreeFwdDynamics;
+typedef DifferentialActionDataFreeFwdDynamicsTpl<double>
+    DifferentialActionDataFreeFwdDynamics;
+typedef DifferentialActionModelContactFwdDynamicsTpl<double>
+    DifferentialActionModelContactFwdDynamics;
+typedef DifferentialActionDataContactFwdDynamicsTpl<double>
+    DifferentialActionDataContactFwdDynamics;
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
@@ -349,10 +265,13 @@ typedef StateMultibodyTpl<double> StateMultibody;
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
-typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
-typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
+typedef DataCollectorMultibodyInContactTpl<double>
+    DataCollectorMultibodyInContact;
+typedef DataCollectorActMultibodyInContactTpl<double>
+    DataCollectorActMultibodyInContact;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
-typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
+typedef DataCollectorMultibodyInImpulseTpl<double>
+    DataCollectorMultibodyInImpulse;
 
 typedef ImpulseModel6DTpl<double> ImpulseModel6D;
 typedef ImpulseData6DTpl<double> ImpulseData6D;
@@ -362,6 +281,6 @@ typedef ImpulseItemTpl<double> ImpulseItem;
 typedef ImpulseModelMultipleTpl<double> ImpulseModelMultiple;
 typedef ImpulseDataMultipleTpl<double> ImpulseDataMultiple;
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_MULTIBODY_FWD_HPP_
+#endif // CROCODDYL_MULTIBODY_FWD_HPP_

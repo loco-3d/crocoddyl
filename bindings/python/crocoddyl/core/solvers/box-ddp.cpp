@@ -6,25 +6,28 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxDDP() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxDDP> >();
+  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxDDP>>();
 
-  bp::class_<SolverBoxDDP, bp::bases<SolverDDP> >(
+  bp::class_<SolverBoxDDP, bp::bases<SolverDDP>>(
       "SolverBoxDDP",
       "Box-constrained DDP solver.\n\n"
-      ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
-                                                    "Initialize the vector dimension.\n\n"
-                                                    ":param problem: shooting problem."))
-      .add_property("Quu_inv", make_function(&SolverBoxDDP::get_Quu_inv, bp::return_internal_reference<>()),
+      ":param shootingProblem: shooting problem (list of action models along "
+      "trajectory.)",
+      bp::init<boost::shared_ptr<ShootingProblem>>(
+          bp::args("self", "problem"), "Initialize the vector dimension.\n\n"
+                                       ":param problem: shooting problem."))
+      .add_property("Quu_inv",
+                    make_function(&SolverBoxDDP::get_Quu_inv,
+                                  bp::return_internal_reference<>()),
                     "inverse of the Quu computed by the box QP");
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl

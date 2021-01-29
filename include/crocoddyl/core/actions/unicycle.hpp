@@ -11,14 +11,14 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 template <typename _Scalar>
 class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -32,26 +32,29 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelUnicycleTpl();
   virtual ~ActionModelUnicycleTpl();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
+                    const Eigen::Ref<const VectorXs> &u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
+                        const Eigen::Ref<const VectorXs> &u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract> &data);
 
-  const Vector2s& get_cost_weights() const;
-  void set_cost_weights(const Vector2s& weights);
+  const Vector2s &get_cost_weights() const;
+  void set_cost_weights(const Vector2s &weights);
 
- protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+protected:
+  using Base::has_control_limits_; //!< Indicates whether any of the control
+                                   //!< limits
+  using Base::nr_;                 //!< Dimension of the cost residual
+  using Base::nu_;                 //!< Control dimension
+  using Base::state_;              //!< Model of the state
+  using Base::u_lb_;               //!< Lower control limits
+  using Base::u_ub_;               //!< Upper control limits
+  using Base::unone_;              //!< Neutral state
 
- private:
+private:
   Vector2s cost_weights_;
   Scalar dt_;
 };
@@ -75,16 +78,16 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::xnext;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataUnicycleTpl(Model<Scalar>* const model) : Base(model) {
+  explicit ActionDataUnicycleTpl(Model<Scalar> *const model) : Base(model) {
     Fx.diagonal().array() = Scalar(1.);
   }
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actions/unicycle.hxx"
 
-#endif  // CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
+#endif // CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_

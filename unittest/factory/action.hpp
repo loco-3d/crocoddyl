@@ -11,10 +11,10 @@
 
 #include <iterator>
 
-#include "state.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -39,23 +39,23 @@ struct ActionModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, ActionModelTypes::Type type);
 
 class ActionModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit ActionModelFactory();
   ~ActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ActionModelTypes::Type type,
-                                                           bool secondInstance = false) const;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract>
+  create(ActionModelTypes::Type type, bool secondInstance = false) const;
 
-  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> create_impulseFwdDynamics(
-      StateModelTypes::Type state_type) const;
+  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
+  create_impulseFwdDynamics(StateModelTypes::Type state_type) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_ACTION_FACTORY_HPP_
+#endif // CROCODDYL_ACTION_FACTORY_HPP_

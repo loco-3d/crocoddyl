@@ -9,19 +9,18 @@
 #ifndef CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
 #define CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
 
-#include <Eigen/Dense>
 #include "crocoddyl/core/fwd.hpp"
+#include <Eigen/Dense>
 
 namespace crocoddyl {
 
-template <typename Scalar>
-struct DataCollectorAbstractTpl {
+template <typename Scalar> struct DataCollectorAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorAbstractTpl() {}
   virtual ~DataCollectorAbstractTpl() {}
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
+#endif // CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_

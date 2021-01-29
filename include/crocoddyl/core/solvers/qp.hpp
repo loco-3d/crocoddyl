@@ -11,4 +11,4 @@
 
 // TODO: quadprogWrapper QPSolution
 
-#endif  // CROCODDYL_CORE_SOLVERS_QP_HPP_
+#endif // CROCODDYL_CORE_SOLVERS_QP_HPP_

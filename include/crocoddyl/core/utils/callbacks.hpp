@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "crocoddyl/core/solver-base.hpp"
 
@@ -18,16 +18,16 @@ namespace crocoddyl {
 
 enum VerboseLevel { _1 = 0, _2 };
 class CallbackVerbose : public CallbackAbstract {
- public:
+public:
   explicit CallbackVerbose(VerboseLevel level = _1);
   ~CallbackVerbose();
 
-  virtual void operator()(SolverAbstract& solver);
+  virtual void operator()(SolverAbstract &solver);
 
- private:
+private:
   VerboseLevel level;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
+#endif // CROCODDYL_CORE_UTILS_CALLBACKS_HPP_

@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_IMPULSE_COST_FACTORY_HPP_
 #define CROCODDYL_IMPULSE_COST_FACTORY_HPP_
 
-#include "state.hpp"
 #include "activation.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -37,10 +37,10 @@ struct ImpulseCostModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, ImpulseCostModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, ImpulseCostModelTypes::Type type);
 
 class ImpulseCostModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
@@ -49,12 +49,13 @@ class ImpulseCostModelFactory {
   explicit ImpulseCostModelFactory();
   ~ImpulseCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ImpulseCostModelTypes::Type cost_type,
-                                                           PinocchioModelTypes::Type model_type,
-                                                           ActivationModelTypes::Type activation_type) const;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract>
+  create(ImpulseCostModelTypes::Type cost_type,
+         PinocchioModelTypes::Type model_type,
+         ActivationModelTypes::Type activation_type) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_IMPULSE_COST_FACTORY_HPP_
+#endif // CROCODDYL_IMPULSE_COST_FACTORY_HPP_

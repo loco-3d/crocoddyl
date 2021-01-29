@@ -43,7 +43,7 @@ namespace crocoddyl {
  */
 template <typename _Scalar>
 class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

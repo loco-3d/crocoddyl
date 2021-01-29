@@ -12,14 +12,14 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
-#include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -33,21 +33,26 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
+  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const std::size_t &frame);
   virtual ~ImpulseModel6DTpl();
 
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x);
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x);
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract> &data,
+                           const VectorXs &force);
+  virtual boost::shared_ptr<ImpulseDataAbstract>
+  createData(pinocchio::DataTpl<Scalar> *const data);
 
-  const std::size_t& get_frame() const;
+  const std::size_t &get_frame() const;
 
- protected:
+protected:
   using Base::ni_;
   using Base::state_;
 
- private:
+private:
   std::size_t frame_;
 };
 
@@ -60,14 +65,17 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  ImpulseData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
-        fJf(6, model->get_state()->get_nv()),
+  ImpulseData6DTpl(Model<Scalar> *const model,
+                   pinocchio::DataTpl<Scalar> *const data)
+      : Base(model, data), fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
     joint = model->get_state()->get_pinocchio()->frames[frame].parent;
-    jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
+    jMf = model->get_state()
+              ->get_pinocchio()
+              ->frames[model->get_frame()]
+              .placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
     v_partial_dq.setZero();
@@ -89,11 +97,11 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   Matrix6xs v_partial_dv;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulses/impulse-6d.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
+#endif // CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_

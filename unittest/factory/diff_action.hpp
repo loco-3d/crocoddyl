@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_DIFF_ACTION_FACTORY_HPP_
 #define CROCODDYL_DIFF_ACTION_FACTORY_HPP_
 
-#include "state.hpp"
 #include "actuation.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -44,25 +44,30 @@ struct DifferentialActionModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os,
+                         DifferentialActionModelTypes::Type type);
 
 class DifferentialActionModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit DifferentialActionModelFactory();
   ~DifferentialActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
+  create(DifferentialActionModelTypes::Type type) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> create_freeFwdDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
+  create_freeFwdDynamics(StateModelTypes::Type state_type,
+                         ActuationModelTypes::Type actuation_type) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
+  create_contactFwdDynamics(StateModelTypes::Type state_type,
+                            ActuationModelTypes::Type actuation_type,
+                            bool with_friction = true) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_DIFF_ACTION_FACTORY_HPP_
+#endif // CROCODDYL_DIFF_ACTION_FACTORY_HPP_

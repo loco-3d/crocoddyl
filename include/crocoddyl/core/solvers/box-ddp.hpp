@@ -12,31 +12,31 @@
 #include <Eigen/Cholesky>
 #include <vector>
 
-#include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
+#include "crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {
 
 class SolverBoxDDP : public SolverDDP {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxDDP();
 
   virtual void allocateData();
-  virtual void computeGains(const std::size_t& t);
-  virtual void forwardPass(const double& steplength);
+  virtual void computeGains(const std::size_t &t);
+  virtual void forwardPass(const double &steplength);
 
-  const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
+  const std::vector<Eigen::MatrixXd> &get_Quu_inv() const;
 
- protected:
+protected:
   BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
   Eigen::VectorXd du_lb_;
   Eigen::VectorXd du_ub_;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
+#endif // CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_

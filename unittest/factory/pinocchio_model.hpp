@@ -9,17 +9,17 @@
 #ifndef CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 #define CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 
-#include <pinocchio/fwd.hpp>
+#include <pinocchio/algorithm/center-of-mass.hpp>
+#include <pinocchio/algorithm/centroidal-derivatives.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/center-of-mass.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
+#include <pinocchio/fwd.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/parsers/srdf.hpp>
+#include <pinocchio/parsers/urdf.hpp>
 
 #include <example-robot-data/path.hpp>
 
@@ -41,25 +41,28 @@ struct PinocchioModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, PinocchioModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, PinocchioModelTypes::Type type);
 
 class PinocchioModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   PinocchioModelFactory(PinocchioModelTypes::Type type);
   ~PinocchioModelFactory();
 
-  void construct_model(const std::string& urdf_file = "", const std::string& srdf_file = "", bool free_flyer = true);
+  void construct_model(const std::string &urdf_file = "",
+                       const std::string &srdf_file = "",
+                       bool free_flyer = true);
 
   boost::shared_ptr<pinocchio::Model> create() const;
-  const std::string& get_frame_name() const;
-  const std::size_t& get_frame_id() const;
+  const std::string &get_frame_name() const;
+  const std::size_t &get_frame_id() const;
 
- private:
-  boost::shared_ptr<pinocchio::Model> model_;  //!< The pointer to the state in testing
-  std::string frame_name_;                     //!< Frame name for unittesting
-  std::size_t frame_id_;                       //!< Frame id for unittesting
+private:
+  boost::shared_ptr<pinocchio::Model>
+      model_;              //!< The pointer to the state in testing
+  std::string frame_name_; //!< Frame name for unittesting
+  std::size_t frame_id_;   //!< Frame id for unittesting
 };
 
 /**
@@ -71,9 +74,10 @@ class PinocchioModelFactory {
  * @param data contains the results of the computations.
  * @param x is the state vector.
  */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x);
+void updateAllPinocchio(pinocchio::Model *const model, pinocchio::Data *data,
+                        const Eigen::VectorXd &x);
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
+#endif // CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_

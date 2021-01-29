@@ -9,34 +9,36 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Centroidal momentum cost
  *
- * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{h}-\mathbf{h}^*\f$, where
- * \f$\mathbf{h},\mathbf{h}^*\in~\mathcal{X}\f$ are the current and reference centroidal momenta, respetively. Note
- * that the dimension of the residual vector is 6.
+ * This cost function defines a residual vector as
+ * \f$\mathbf{r}=\mathbf{h}-\mathbf{h}^*\f$, where
+ * \f$\mathbf{h},\mathbf{h}^*\in~\mathcal{X}\f$ are the current and reference
+ * centroidal momenta, respetively. Note that the dimension of the residual
+ * vector is 6.
  *
  * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
- * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
+ * For the computation of the cost Hessian, we use the Gauss-Newton
+ * approximation, e.g. \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives
+ * are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -59,9 +61,10 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] mref        Reference centroidal momentum
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
-                                 boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref,
-                                 const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActivationModelAbstract> activation,
+      const Vector6s &mref, const std::size_t &nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model
@@ -72,30 +75,36 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] activation  Activation model
    * @param[in] mref        Reference centroidal momentum
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
-                                 boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref);
+  CostModelCentroidalMomentumTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActivationModelAbstract> activation,
+      const Vector6s &mref);
 
   /**
    * @brief Initialize the centroidal momentum cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state  State of the multibody system
    * @param[in] mref   Reference centroidal momentum
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                 const Vector6s &mref, const std::size_t &nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
-   * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). Furthermore, the default `nu` value
+   * is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state  State of the multibody system
    * @param[in] mref   Reference centroidal momentum
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                 const Vector6s &mref);
   virtual ~CostModelCentroidalMomentumTpl();
 
   /**
@@ -105,8 +114,9 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
+                    const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief Compute the derivatives of the centroidal momentum cost
@@ -115,36 +125,41 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
+                        const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief Create the centroidal momentum cost data
    */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<CostDataAbstract>
+  createData(DataCollectorAbstract *const data);
 
-  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector6s>()", void set_href(const Vector6s& mref_in));
-  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector6s>()", const Vector6s& get_href() const);
+  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector6s>()",
+             void set_href(const Vector6s &mref_in));
+  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector6s>()",
+             const Vector6s &get_href() const);
 
- protected:
+protected:
   /**
    * @brief Modify the centroidal momentum reference
    */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+  virtual void set_referenceImpl(const std::type_info &ti, const void *pv);
 
   /**
    * @brief Return the centroidal momentum reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info &ti, void *pv) const;
 
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
- private:
-  Vector6s href_;                                                         //!< Reference centroidal momentum
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+private:
+  Vector6s href_; //!< Reference centroidal momentum
+  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+      pin_model_; //!< Pinocchio model
 };
 
 template <typename _Scalar>
@@ -158,22 +173,26 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), dhd_dq(6, model->get_state()->get_nv()), dhd_dv(6, model->get_state()->get_nv()) {
+  CostDataCentroidalMomentumTpl(Model<Scalar> *const model,
+                                DataCollectorAbstract *const data)
+      : Base(model, data), dhd_dq(6, model->get_state()->get_nv()),
+        dhd_dv(6, model->get_state()->get_nv()) {
     dhd_dq.setZero();
     dhd_dv.setZero();
 
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorMultibodyTpl<Scalar> *d =
+        dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty("Invalid argument: the shared data should be derived from "
+                   "DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar> *pinocchio;
   Matrix6xs dhd_dq;
   Matrix6xs dhd_dv;
   Matrix6xs Arr_Rx;
@@ -190,11 +209,11 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/centroidal-momentum.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
+#endif // CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_

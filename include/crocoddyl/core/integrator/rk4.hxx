@@ -8,19 +8,18 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& time_step, const bool& with_cost_residual)
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    const Scalar &time_step, const bool &with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
-      differential_(model),
-      time_step_(time_step),
-      with_cost_residual_(with_cost_residual),
-      enable_integration_(true) {
+      differential_(model), time_step_(time_step),
+      with_cost_residual_(with_cost_residual), enable_integration_(true) {
   Base::set_u_lb(differential_->get_u_lb());
   Base::set_u_ub(differential_->get_u_ub());
   if (time_step_ < Scalar(0.)) {
@@ -39,19 +38,21 @@ template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::~IntegratedActionModelRK4Tpl() {}
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& u) {
+void IntegratedActionModelRK4Tpl<Scalar>::calc(
+    const boost::shared_ptr<ActionDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  const std::size_t &nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -73,9 +74,12 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
       d->ki[i].tail(nv) = d->differential[i]->xout;
       d->integral[i] = d->differential[i]->cost;
     }
-    d->dx = (d->ki[0] + Scalar(2.) * d->ki[1] + Scalar(2.) * d->ki[2] + d->ki[3]) * time_step_ / Scalar(6.);
+    d->dx =
+        (d->ki[0] + Scalar(2.) * d->ki[1] + Scalar(2.) * d->ki[2] + d->ki[3]) *
+        time_step_ / Scalar(6.);
     differential_->get_state()->integrate(x, d->dx, d->xnext);
-    d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] + Scalar(2.) * d->integral[2] + d->integral[3]) *
+    d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] +
+               Scalar(2.) * d->integral[2] + d->integral[3]) *
               time_step_ / Scalar(6.);
   } else {
     d->dx.setZero();
@@ -90,19 +94,21 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>& x,
-                                                   const Eigen::Ref<const VectorXs>& u) {
+void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActionDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  const std::size_t &nv = differential_->get_state()->get_nv();
 
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -125,52 +131,68 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
-      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
-      differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
+      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i],
+                                                      d->dyi_dx[i], second);
+      differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i],
+                                             d->dyi_dx[i], first, addto);
       d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i];
 
       d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
-      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i], second);
+      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i],
+                                                      d->dyi_du[i], second);
       d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];
       d->dki_du[i].bottomRows(nv) += d->differential[i]->Fu;
 
-      d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
+      d->dli_dx[i].noalias() =
+          d->differential[i]->Lx.transpose() * d->dyi_dx[i];
       d->dli_du[i].noalias() = d->differential[i]->Lu.transpose();
-      d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
+      d->dli_du[i].noalias() +=
+          d->differential[i]->Lx.transpose() * d->dyi_du[i];
 
       d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
       d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
 
-      d->Luu_partialx[i].noalias() = d->differential[i]->Lxu.transpose() * d->dyi_du[i];
+      d->Luu_partialx[i].noalias() =
+          d->differential[i]->Lxu.transpose() * d->dyi_du[i];
       d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-      d->ddli_ddu[i].noalias() = d->differential[i]->Luu + d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
-                                 d->dyi_du[i].transpose() * d->Lxx_partialu[i];
+      d->ddli_ddu[i].noalias() =
+          d->differential[i]->Luu + d->Luu_partialx[i].transpose() +
+          d->Luu_partialx[i] + d->dyi_du[i].transpose() * d->Lxx_partialu[i];
 
-      d->ddli_dxdu[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
-      d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
+      d->ddli_dxdu[i].noalias() =
+          d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
+      d->ddli_dxdu[i].noalias() +=
+          d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
     }
 
     d->Fx.noalias() = time_step_ / Scalar(6.) *
-                      (d->dki_dx[0] + Scalar(2.) * d->dki_dx[1] + Scalar(2.) * d->dki_dx[2] + d->dki_dx[3]);
+                      (d->dki_dx[0] + Scalar(2.) * d->dki_dx[1] +
+                       Scalar(2.) * d->dki_dx[2] + d->dki_dx[3]);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first,
+                                           addto);
 
     d->Fu.noalias() = time_step_ / Scalar(6.) *
-                      (d->dki_du[0] + Scalar(2.) * d->dki_du[1] + Scalar(2.) * d->dki_du[2] + d->dki_du[3]);
+                      (d->dki_du[0] + Scalar(2.) * d->dki_du[1] +
+                       Scalar(2.) * d->dki_du[2] + d->dki_du[3]);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ / Scalar(6.) *
-                      (d->dli_dx[0] + Scalar(2.) * d->dli_dx[1] + Scalar(2.) * d->dli_dx[2] + d->dli_dx[3]);
+                      (d->dli_dx[0] + Scalar(2.) * d->dli_dx[1] +
+                       Scalar(2.) * d->dli_dx[2] + d->dli_dx[3]);
     d->Lu.noalias() = time_step_ / Scalar(6.) *
-                      (d->dli_du[0] + Scalar(2.) * d->dli_du[1] + Scalar(2.) * d->dli_du[2] + d->dli_du[3]);
+                      (d->dli_du[0] + Scalar(2.) * d->dli_du[1] +
+                       Scalar(2.) * d->dli_du[2] + d->dli_du[3]);
 
     d->Lxx.noalias() = time_step_ / Scalar(6.) *
-                       (d->ddli_ddx[0] + Scalar(2.) * d->ddli_ddx[1] + Scalar(2.) * d->ddli_ddx[2] + d->ddli_ddx[3]);
+                       (d->ddli_ddx[0] + Scalar(2.) * d->ddli_ddx[1] +
+                        Scalar(2.) * d->ddli_ddx[2] + d->ddli_ddx[3]);
     d->Luu.noalias() = time_step_ / Scalar(6.) *
-                       (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] + Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
-    d->Lxu.noalias() =
-        time_step_ / Scalar(6.) *
-        (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
+                       (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] +
+                        Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
+    d->Lxu.noalias() = time_step_ / Scalar(6.) *
+                       (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] +
+                        Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   } else {
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
@@ -183,34 +205,38 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelRK4Tpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar>>
+IntegratedActionModelRK4Tpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-bool IntegratedActionModelRK4Tpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+bool IntegratedActionModelRK4Tpl<Scalar>::checkData(
+    const boost::shared_ptr<ActionDataAbstract> &data) {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
-    return differential_->checkData(d->differential[0]) && differential_->checkData(d->differential[2]) &&
-           differential_->checkData(d->differential[1]) && differential_->checkData(d->differential[3]);
+    return differential_->checkData(d->differential[0]) &&
+           differential_->checkData(d->differential[2]) &&
+           differential_->checkData(d->differential[1]) &&
+           differential_->checkData(d->differential[3]);
   } else {
     return false;
   }
 }
 
 template <typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
+const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar>> &
 IntegratedActionModelRK4Tpl<Scalar>::get_differential() const {
   return differential_;
 }
 
 template <typename Scalar>
-const Scalar& IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
+const Scalar &IntegratedActionModelRK4Tpl<Scalar>::get_dt() const {
   return time_step_;
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar& dt) {
+void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar &dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: "
                  << "dt has positive value");
@@ -219,8 +245,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar& dt) {
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t& nu = model->get_nu();
+void IntegratedActionModelRK4Tpl<Scalar>::set_differential(
+    boost::shared_ptr<DifferentialActionModelAbstract> model) {
+  const std::size_t &nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
     unone_ = VectorXs::Zero(nu_);
@@ -233,16 +260,19 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<Dif
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                      Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                      const std::size_t& maxiter, const Scalar& tol) {
+void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<ActionDataAbstract> &data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs> &x, const std::size_t &maxiter,
+    const Scalar &tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
 
   // Static casting the data
@@ -251,4 +281,4 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
   differential_->quasiStatic(d->differential[0], u, x, maxiter, tol);
 }
 
-}  // namespace crocoddyl
+} // namespace crocoddyl

@@ -9,22 +9,22 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_WRENCH_CONE_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_WRENCH_CONE_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
-#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -40,25 +40,31 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX6s MatrixX6s;
 
+  CostModelImpulseWrenchConeTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActivationModelAbstract> activation,
+      const FrameWrenchCone &fref);
   CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                boost::shared_ptr<ActivationModelAbstract> activation, const FrameWrenchCone& fref);
-  CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref);
+                                const FrameWrenchCone &fref);
   virtual ~CostModelImpulseWrenchConeTpl();
 
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
+                    const Eigen::Ref<const VectorXs> &u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
+                        const Eigen::Ref<const VectorXs> &u);
+  virtual boost::shared_ptr<CostDataAbstract>
+  createData(DataCollectorAbstract *const data);
 
- protected:
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+protected:
+  virtual void set_referenceImpl(const std::type_info &ti, const void *pv);
+  virtual void get_referenceImpl(const std::type_info &ti, void *pv) const;
 
   using Base::activation_;
   using Base::state_;
 
- private:
+private:
   FrameWrenchCone fref_;
 };
 
@@ -77,46 +83,59 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
+  CostDataImpulseWrenchConeTpl(Model<Scalar> *const model,
+                               DataCollectorAbstract *const data)
+      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(),
+                                  model->get_state()->get_ndx()) {
     Arr_Rx.setZero();
 
     // Check that proper shared data has been passed
-    DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
+    DataCollectorImpulseTpl<Scalar> *d =
+        dynamic_cast<DataCollectorImpulseTpl<Scalar> *>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorImpulse");
+      throw_pretty("Invalid argument: the shared data should be derived from "
+                   "DataCollectorImpulse");
     }
 
     // Avoids data casting at runtime
     FrameWrenchCone fref = model->template get_reference<FrameWrenchCone>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
+    const boost::shared_ptr<StateMultibody> &state =
+        boost::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
     bool found_impulse = false;
-    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
+    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
+             d->impulses->impulses.begin();
          it != d->impulses->impulses.end(); ++it) {
       if (it->second->frame == fref.id) {
-        ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
+        ImpulseData3DTpl<Scalar> *d3d =
+            dynamic_cast<ImpulseData3DTpl<Scalar> *>(it->second.get());
         if (d3d != NULL) {
           found_impulse = true;
           impulse = it->second;
-          throw_pretty("Domain error: there isn't defined at least a 6d contact for " + frame_name);
+          throw_pretty(
+              "Domain error: there isn't defined at least a 6d contact for " +
+              frame_name);
         }
-        ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
+        ImpulseData6DTpl<Scalar> *d6d =
+            dynamic_cast<ImpulseData6DTpl<Scalar> *>(it->second.get());
         if (d6d != NULL) {
           found_impulse = true;
           impulse = it->second;
           break;
         }
-        throw_pretty("Domain error: there isn't defined at least a 6d impulse for " + frame_name);
+        throw_pretty(
+            "Domain error: there isn't defined at least a 6d impulse for " +
+            frame_name);
         break;
       }
     }
     if (!found_impulse) {
-      throw_pretty("Domain error: there isn't defined impulse data for " + frame_name);
+      throw_pretty("Domain error: there isn't defined impulse data for " +
+                   frame_name);
     }
   }
 
-  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;
+  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar>> impulse;
   MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
@@ -127,11 +146,11 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/impulse-wrench-cone.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_WRENCH_CONE_HPP_
+#endif // CROCODDYL_MULTIBODY_COSTS_IMPULSE_WRENCH_CONE_HPP_

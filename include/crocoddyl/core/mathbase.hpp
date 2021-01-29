@@ -14,9 +14,8 @@
 
 namespace crocoddyl {
 
-template <typename _Scalar>
-struct MathBaseTpl {
- public:
+template <typename _Scalar> struct MathBaseTpl {
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -40,6 +39,6 @@ struct MathBaseTpl {
   typedef Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic> DiagonalMatrixXs;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 #endif

@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -30,8 +30,9 @@ namespace crocoddyl {
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar> {
- public:
+class ActivationModelQuadFlatLogTpl
+    : public ActivationModelAbstractTpl<_Scalar> {
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -51,7 +52,8 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] alpha  Width of quadratic basin (default: 1.)
    */
 
-  explicit ActivationModelQuadFlatLogTpl(const std::size_t &nr, const Scalar &alpha = Scalar(1.))
+  explicit ActivationModelQuadFlatLogTpl(const std::size_t &nr,
+                                         const Scalar &alpha = Scalar(1.))
       : Base(nr), alpha_(alpha) {
     if (alpha < Scalar(0.)) {
       throw_pretty("Invalid argument: "
@@ -66,10 +68,12 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data, const Eigen::Ref<const VectorXs> &r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " +
+                          std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
     d->a0 = r.squaredNorm() / alpha_;
@@ -82,10 +86,12 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data, const Eigen::Ref<const VectorXs> &r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " +
+                          std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -101,18 +107,19 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
    * @return the activation data
    */
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    boost::shared_ptr<Data> data =
+        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     return data;
   };
 
   Scalar get_alpha() const { return alpha_; };
   void set_alpha(const Scalar alpha) { alpha_ = alpha; };
 
- protected:
-  using Base::nr_;  //!< Dimension of the residual vector
+protected:
+  using Base::nr_; //!< Dimension of the residual vector
 
- private:
-  Scalar alpha_;  //!< Width of quadratic basin
+private:
+  Scalar alpha_; //!< Width of quadratic basin
 };
 
 /*
@@ -122,7 +129,8 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
  * @param[in] a1  computed in calcDiff to avoid recomputation
  */
 template <typename _Scalar>
-struct ActivationDataQuadFlatLogTpl : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataQuadFlatLogTpl
+    : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -130,12 +138,13 @@ struct ActivationDataQuadFlatLogTpl : public ActivationDataAbstractTpl<_Scalar> 
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationDataQuadFlatLogTpl(Activation *const activation) : Base(activation), a0(0), a1(0) {}
+  explicit ActivationDataQuadFlatLogTpl(Activation *const activation)
+      : Base(activation), a0(0), a1(0) {}
 
   Scalar a0;
   Scalar a1;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_
+#endif // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_

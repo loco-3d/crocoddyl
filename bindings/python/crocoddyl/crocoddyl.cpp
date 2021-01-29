@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/fwd.hpp"
 #include "crocoddyl/core/utils/version.hpp"
+#include "python/crocoddyl/fwd.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
@@ -32,12 +32,14 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPySpecific<MatrixX3>();
 
   // Register converters between std::vector and Python list
-  StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
-  StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose("StdVec_MatrixX");
+  StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose(
+      "StdVec_VectorX");
+  StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose(
+      "StdVec_MatrixX");
 
   exposeCore();
   exposeMultibody();
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl

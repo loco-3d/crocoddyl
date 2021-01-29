@@ -9,18 +9,18 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
-#include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -35,26 +35,32 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t& nu,
-                    const Vector2s& gains = Vector2s::Zero());
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
-                    const Vector2s& gains = Vector2s::Zero());
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const FramePlacement &xref, const std::size_t &nu,
+                    const Vector2s &gains = Vector2s::Zero());
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const FramePlacement &xref,
+                    const Vector2s &gains = Vector2s::Zero());
   virtual ~ContactModel6DTpl();
 
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
-  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x);
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x);
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
+                           const VectorXs &force);
+  virtual boost::shared_ptr<ContactDataAbstract>
+  createData(pinocchio::DataTpl<Scalar> *const data);
 
-  const FramePlacement& get_Mref() const;
-  const Vector2s& get_gains() const;
+  const FramePlacement &get_Mref() const;
+  const Vector2s &get_gains() const;
 
- protected:
+protected:
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
 
- private:
+private:
   FramePlacement Mref_;
   Vector2s gains_;
 };
@@ -76,9 +82,9 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  ContactData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
-        rMf(pinocchio::SE3Tpl<Scalar>::Identity()),
+  ContactData6DTpl(Model<Scalar> *const model,
+                   pinocchio::DataTpl<Scalar> *const data)
+      : Base(model, data), rMf(pinocchio::SE3Tpl<Scalar>::Identity()),
         v_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
@@ -116,10 +122,10 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6s rMf_Jlog6;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contacts/contact-6d.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
+#endif // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_

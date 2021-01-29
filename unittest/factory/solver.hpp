@@ -18,7 +18,14 @@ namespace crocoddyl {
 namespace unittest {
 
 struct SolverTypes {
-  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, NbSolverTypes };
+  enum Type {
+    SolverKKT,
+    SolverDDP,
+    SolverFDDP,
+    SolverBoxDDP,
+    SolverBoxFDDP,
+    NbSolverTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -30,20 +37,21 @@ struct SolverTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, SolverTypes::Type type);
+std::ostream &operator<<(std::ostream &os, SolverTypes::Type type);
 
 class SolverFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverFactory();
   ~SolverFactory();
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> create(SolverTypes::Type solver_type,
-                                                      ActionModelTypes::Type action_type, size_t T) const;
+  boost::shared_ptr<crocoddyl::SolverAbstract>
+  create(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+         size_t T) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_SOLVER_FACTORY_HPP_
+#endif // CROCODDYL_SOLVER_FACTORY_HPP_

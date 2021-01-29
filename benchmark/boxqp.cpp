@@ -6,13 +6,13 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include <iostream>
 
-int main(int argc, char* argv[]) {
-  unsigned int NX = 36;  // dimension of the decision vector
-  unsigned int T = 5e3;  // number of trials
+int main(int argc, char *argv[]) {
+  unsigned int NX = 36; // dimension of the decision vector
+  unsigned int T = 5e3; // number of trials
   if (argc > 1) {
     T = atoi(argv[1]);
   }
@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "  BoxQP.solve (36) [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  BoxQP.solve (36) [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 
   NX = 76;
   boxqp.set_nx(NX);
@@ -61,6 +61,6 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  BoxQP.solve (76) [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  BoxQP.solve (76) [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 }

@@ -15,33 +15,37 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame)
+ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(
+    boost::shared_ptr<StateMultibody> state, const std::size_t &frame)
     : Base(state, 3), frame_(frame) {}
 
-template <typename Scalar>
-ImpulseModel3DTpl<Scalar>::~ImpulseModel3DTpl() {}
+template <typename Scalar> ImpulseModel3DTpl<Scalar>::~ImpulseModel3DTpl() {}
 
 template <typename Scalar>
-void ImpulseModel3DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>&) {
+void ImpulseModel3DTpl<Scalar>::calc(
+    const boost::shared_ptr<ImpulseDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, frame_, pinocchio::LOCAL, d->fJf);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
+                              frame_, pinocchio::LOCAL, d->fJf);
   d->Jc = d->fJf.template topRows<3>();
 }
 
 template <typename Scalar>
-void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>&) {
+void ImpulseModel3DTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ImpulseDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
-                                         d->v_partial_dq, d->v_partial_dv);
+  pinocchio::getJointVelocityDerivatives(
+      *state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+      d->v_partial_dq, d->v_partial_dv);
   d->dv0_dq.noalias() = d->fXj.template topRows<3>() * d->v_partial_dq;
 }
 
 template <typename Scalar>
-void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                            const VectorXs& force) {
+void ImpulseModel3DTpl<Scalar>::updateForce(
+    const boost::shared_ptr<ImpulseDataAbstract> &data, const VectorXs &force) {
   if (force.size() != 3) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
@@ -50,14 +54,15 @@ void ImpulseModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataA
 }
 
 template <typename Scalar>
-boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel3DTpl<Scalar>::createData(
-    pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<ImpulseDataAbstractTpl<Scalar>>
+ImpulseModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar> *const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const std::size_t& ImpulseModel3DTpl<Scalar>::get_frame() const {
+const std::size_t &ImpulseModel3DTpl<Scalar>::get_frame() const {
   return frame_;
 }
 
-}  // namespace crocoddyl
+} // namespace crocoddyl

@@ -53,5 +53,5 @@ void exposeCore() {
   exposeCallbacks();
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl

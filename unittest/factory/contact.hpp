@@ -12,16 +12,21 @@
 #include <iostream>
 #include <limits>
 
-#include "state.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/numdiff/contact.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "crocoddyl/multibody/numdiff/contact.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
 struct ContactModelTypes {
-  enum Type { ContactModel2D, ContactModel3D, ContactModel6D, NbContactModelTypes };
+  enum Type {
+    ContactModel2D,
+    ContactModel3D,
+    ContactModel6D,
+    NbContactModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -33,24 +38,25 @@ struct ContactModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type);
+std::ostream &operator<<(std::ostream &os, const ContactModelTypes::Type &type);
 
 class ContactModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit ContactModelFactory();
   ~ContactModelFactory();
 
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> create(
-      ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
-      const std::string frame_name = std::string(""),
-      const std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract>
+  create(ContactModelTypes::Type contact_type,
+         PinocchioModelTypes::Type model_type,
+         const std::string frame_name = std::string(""),
+         const std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
 boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact();
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CONTACTS_FACTORY_HPP_
+#endif // CROCODDYL_CONTACTS_FACTORY_HPP_

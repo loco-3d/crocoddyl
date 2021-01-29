@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_CONTROL_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/costs/control.hpp", "crocoddyl/core/costs/control.hpp")
+CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/costs/control.hpp",
+                                   "crocoddyl/core/costs/control.hpp")
 #include "crocoddyl/core/costs/control.hpp"
 
 #endif

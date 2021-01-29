@@ -9,9 +9,9 @@
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
 #define CROCODDYL_IMPULSES_FACTORY_HPP_
 
-#include "state.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -29,23 +29,24 @@ struct ImpulseModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type);
+std::ostream &operator<<(std::ostream &os, const ImpulseModelTypes::Type &type);
 
 class ImpulseModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit ImpulseModelFactory();
   ~ImpulseModelFactory();
 
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(ImpulseModelTypes::Type impulse_type,
-                                                            PinocchioModelTypes::Type model_type,
-                                                            const std::string frame_name = std::string("")) const;
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract>
+  create(ImpulseModelTypes::Type impulse_type,
+         PinocchioModelTypes::Type model_type,
+         const std::string frame_name = std::string("")) const;
 };
 
 boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_IMPULSES_FACTORY_HPP_
+#endif // CROCODDYL_IMPULSES_FACTORY_HPP_

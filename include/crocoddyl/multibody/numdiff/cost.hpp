@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/numdiff/cost-sum.hpp", "crocoddyl/core/numdiff/cost-sum.hpp")
+CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/numdiff/cost-sum.hpp",
+                                   "crocoddyl/core/numdiff/cost-sum.hpp")
 #include "crocoddyl/core/numdiff/cost.hpp"
 
-#endif  // CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
+#endif // CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_

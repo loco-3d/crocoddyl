@@ -9,17 +9,17 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
- public:
+public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -43,14 +43,16 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
+                    const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
+                        const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief Create a Data object from the given model.
@@ -64,23 +66,23 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    *
    * @return Base&
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const boost::shared_ptr<Base> &get_model() const;
 
   /**
    * @brief Get the disturbance_ object
    *
    * @return const Scalar&
    */
-  const Scalar& get_disturbance() const;
+  const Scalar &get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar &disturbance);
 
- private:
+private:
   /**
    * @brief This is the model to compute the finite differentiation from
    */
@@ -92,7 +94,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    */
   Scalar disturbance_;
 
- protected:
+protected:
   using Base::nu_;
 };
 
@@ -112,16 +114,15 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
-  explicit ActuationDataNumDiffTpl(Model<Scalar>* const model)
-      : Base(model),
-        dx(model->get_model()->get_state()->get_ndx()),
+  explicit ActuationDataNumDiffTpl(Model<Scalar> *const model)
+      : Base(model), dx(model->get_model()->get_state()->get_ndx()),
         du(model->get_model()->get_nu()),
         xp(model->get_model()->get_state()->get_nx()) {
     dx.setZero();
     du.setZero();
     xp.setZero();
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t& nu = model->get_model()->get_nu();
+    const std::size_t &ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t &nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());
@@ -131,23 +132,26 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
     }
   }
 
-  VectorXs dx;                     //!< State disturbance
-  VectorXs du;                     //!< Control disturbance
-  VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
-  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation
+  VectorXs dx; //!< State disturbance
+  VectorXs du; //!< Control disturbance
+  VectorXs xp; //!< The integrated state from the disturbance on one DoF "\f$
+               //!< \int x dx_i \f$"
+  boost::shared_ptr<Base> data_0; //!< The data that contains the final results
+  std::vector<boost::shared_ptr<Base>>
+      data_x; //!< The temporary data associated with the state variation
+  std::vector<boost::shared_ptr<Base>>
+      data_u; //!< The temporary data associated with the control variation
 
   using Base::dtau_du;
   using Base::dtau_dx;
   using Base::tau;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/actuation.hxx"
 
-#endif  // CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
+#endif // CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_

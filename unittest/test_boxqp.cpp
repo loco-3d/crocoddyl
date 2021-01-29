@@ -9,9 +9,9 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <boost/random.hpp>
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "unittest_common.hpp"
+#include <boost/random.hpp>
 
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
@@ -32,19 +32,22 @@ void test_unconstrained_qp_with_identity_hessian() {
 
   Eigen::MatrixXd hessian = Eigen::MatrixXd::Identity(nx, nx);
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
-  Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd lb =
+      -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd ub =
+      std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd xinit = Eigen::VectorXd::Random(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
-  // Checking the solution of the problem. Note that it the negative of the gradient since Hessian
-  // is identity matrix
+  // Checking the solution of the problem. Note that it the negative of the
+  // gradient since Hessian is identity matrix
   BOOST_CHECK((sol.x + gradient).isMuchSmallerThan(1.0, 1e-9));
 
   // Checking the solution against a regularized case
   double reg = random_real_in_range(1e-9, 1e2);
   boxqp.set_reg(reg);
-  crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
+  crocoddyl::BoxQPSolution sol_reg =
+      boxqp.solve(hessian, gradient, lb, ub, xinit);
   BOOST_CHECK((sol_reg.x + gradient / (1 + reg)).isMuchSmallerThan(1.0, 1e-9));
 
   // Checking the all bounds are free and zero clamped
@@ -60,11 +63,14 @@ void test_unconstrained_qp() {
   boxqp.set_reg(0.);
 
   Eigen::MatrixXd H = Eigen::MatrixXd::Random(nx, nx);
-  Eigen::MatrixXd hessian = H.transpose() * H + nx * Eigen::MatrixXd::Identity(nx, nx);
+  Eigen::MatrixXd hessian =
+      H.transpose() * H + nx * Eigen::MatrixXd::Identity(nx, nx);
   hessian = 0.5 * (hessian + hessian.transpose()).eval();
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
-  Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
-  Eigen::VectorXd ub = std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd lb =
+      -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
+  Eigen::VectorXd ub =
+      std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);
   Eigen::VectorXd xinit = Eigen::VectorXd::Random(nx);
   crocoddyl::BoxQPSolution sol = boxqp.solve(hessian, gradient, lb, ub, xinit);
 
@@ -75,8 +81,10 @@ void test_unconstrained_qp() {
   // Checking the solution against a regularized KKT problem
   double reg = random_real_in_range(1e-9, 1e2);
   boxqp.set_reg(reg);
-  crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
-  Eigen::VectorXd xkkt_reg = -(hessian + reg * Eigen::MatrixXd::Identity(nx, nx)).inverse() * gradient;
+  crocoddyl::BoxQPSolution sol_reg =
+      boxqp.solve(hessian, gradient, lb, ub, xinit);
+  Eigen::VectorXd xkkt_reg =
+      -(hessian + reg * Eigen::MatrixXd::Identity(nx, nx)).inverse() * gradient;
   BOOST_CHECK((sol_reg.x - xkkt_reg).isMuchSmallerThan(1.0, 1e-9));
 
   // Checking the all bounds are free and zero clamped
@@ -107,7 +115,8 @@ void test_box_qp_with_identity_hessian() {
   double reg = random_real_in_range(1e-9, 1e2);
   for (std::size_t i = 0; i < nx; ++i) {
     negbounded_gradient(i) = std::max(std::min(-gradient(i), ub(i)), lb(i));
-    negbounded_gradient_reg(i) = std::max(std::min(-gradient(i) / (1 + reg), ub(i)), lb(i));
+    negbounded_gradient_reg(i) =
+        std::max(std::min(-gradient(i) / (1 + reg), ub(i)), lb(i));
     if (negbounded_gradient(i) != -gradient(i)) {
       nc += 1;
       nf -= 1;
@@ -118,14 +127,16 @@ void test_box_qp_with_identity_hessian() {
     }
   }
 
-  // Checking the solution of the problem. Note that it the negative of the gradient since Hessian
-  // is identity matrix
+  // Checking the solution of the problem. Note that it the negative of the
+  // gradient since Hessian is identity matrix
   BOOST_CHECK((sol.x - negbounded_gradient).isMuchSmallerThan(1.0, 1e-9));
 
   // Checking the solution against a regularized case
   boxqp.set_reg(reg);
-  crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x - negbounded_gradient / (1 + reg)).isMuchSmallerThan(1.0, 1e-9));
+  crocoddyl::BoxQPSolution sol_reg =
+      boxqp.solve(hessian, gradient, lb, ub, xinit);
+  BOOST_CHECK((sol_reg.x - negbounded_gradient / (1 + reg))
+                  .isMuchSmallerThan(1.0, 1e-9));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nf);
@@ -135,10 +146,14 @@ void test_box_qp_with_identity_hessian() {
 }
 
 void register_unit_tests() {
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_constructor)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_unconstrained_qp_with_identity_hessian)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_unconstrained_qp)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_box_qp_with_identity_hessian)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_constructor)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_unconstrained_qp_with_identity_hessian)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_unconstrained_qp)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_box_qp_with_identity_hessian)));
 }
 
 bool init_function() {
@@ -146,4 +161,6 @@ bool init_function() {
   return true;
 }
 
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char *argv[]) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

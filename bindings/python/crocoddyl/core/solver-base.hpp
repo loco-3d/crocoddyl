@@ -10,15 +10,16 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-#include <vector>
-#include <memory>
 #include "crocoddyl/core/solver-base.hpp"
+#include <memory>
+#include <vector>
 
 namespace crocoddyl {
 namespace python {
 
-class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
- public:
+class SolverAbstract_wrap : public SolverAbstract,
+                            public bp::wrapper<SolverAbstract> {
+public:
   using SolverAbstract::cost_;
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
@@ -28,24 +29,31 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             const std::size_t& maxiter, const bool& is_feasible, const double& reg_init) {
-    return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
+  bool solve(const std::vector<Eigen::VectorXd> &init_xs,
+             const std::vector<Eigen::VectorXd> &init_us,
+             const std::size_t &maxiter, const bool &is_feasible,
+             const double &reg_init) {
+    return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us,
+                          maxiter, is_feasible, reg_init);
   }
 
-  void computeDirection(const bool& recalc = true) {
+  void computeDirection(const bool &recalc = true) {
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(const double& step_length = 1) {
+  double tryStep(const double &step_length = 1) {
     return bp::call<double>(this->get_override("tryStep").ptr(), step_length);
   }
 
-  double stoppingCriteria() { return bp::call<double>(this->get_override("stoppingCriteria").ptr()); }
+  double stoppingCriteria() {
+    return bp::call<double>(this->get_override("stoppingCriteria").ptr());
+  }
 
-  const Eigen::Vector2d& expectedImprovement() {
-    bp::list exp_impr = bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
-    expected_improvement_ << bp::extract<double>(exp_impr[0]), bp::extract<double>(exp_impr[1]);
+  const Eigen::Vector2d &expectedImprovement() {
+    bp::list exp_impr =
+        bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
+    expected_improvement_ << bp::extract<double>(exp_impr[0]),
+        bp::extract<double>(exp_impr[1]);
     return expected_improvement_;
   }
 
@@ -57,23 +65,27 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     return exp_impr;
   }
 
- private:
+private:
   Eigen::Vector2d expected_improvement_;
 };
 
-class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<CallbackAbstract> {
- public:
-  CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
+class CallbackAbstract_wrap : public CallbackAbstract,
+                              public bp::wrapper<CallbackAbstract> {
+public:
+  CallbackAbstract_wrap()
+      : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
   ~CallbackAbstract_wrap() {}
 
-  void operator()(SolverAbstract& solver) {
-    return bp::call<void>(this->get_override("__call__").ptr(), boost::ref(solver));
+  void operator()(SolverAbstract &solver) {
+    return bp::call<void>(this->get_override("__call__").ptr(),
+                          boost::ref(solver));
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads,
+                                       SolverAbstract::setCandidate, 0, 3)
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
+#endif // BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_

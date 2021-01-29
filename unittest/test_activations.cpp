@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
+// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck
+// Gesellschaft
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,22 +23,26 @@ using namespace crocoddyl::unittest;
 void test_construct_data(ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract> &model =
+      factory.create(activation_type);
 
   // create the corresponding data object
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+      model->createData();
 }
 
 void test_calc_returns_a_value(ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract> &model =
+      factory.create(activation_type);
 
   // create the corresponding data object
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+      model->createData();
 
   // Generating random input vector
-  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd &r = Eigen::VectorXd::Random(model->get_nr());
   data->a_value = nan("");
 
   // Getting the state dimension from calc() call
@@ -47,19 +52,23 @@ void test_calc_returns_a_value(ActivationModelTypes::Type activation_type) {
   BOOST_CHECK(!std::isnan(data->a_value));
 }
 
-void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activation_type) {
+void test_partial_derivatives_against_numdiff(
+    ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
+  const boost::shared_ptr<crocoddyl::ActivationModelAbstract> &model =
+      factory.create(activation_type);
 
   // create the corresponding data object and set the cost to nan
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+      model->createData();
 
   crocoddyl::ActivationModelNumDiff model_num_diff(model);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff = model_num_diff.createData();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff =
+      model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd &r = Eigen::VectorXd::Random(model->get_nr());
 
   // Computing the activation derivatives
   model->calc(data, r);
@@ -83,10 +92,12 @@ void register_unit_tests(ActivationModelTypes::Type activation_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << activation_type;
   std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  test_suite *ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, activation_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_value, activation_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_calc_returns_a_value, activation_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -97,4 +108,6 @@ bool init_function() {
   return true;
 }
 
-int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char **argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

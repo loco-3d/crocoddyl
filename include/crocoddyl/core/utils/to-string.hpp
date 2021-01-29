@@ -14,14 +14,13 @@
 
 namespace std {
 
-template <typename T>
-std::string to_string(T number) {
+template <typename T> std::string to_string(T number) {
   std::ostringstream ss;
   ss << number;
   return ss.str();
 }
 
-}  // namespace std
+} // namespace std
 
-#endif  // CROCODDYL_CORE_UTILS_TO_STRING_HPP_
-#endif  // __cplusplus__ >= 201103L
+#endif // CROCODDYL_CORE_UTILS_TO_STRING_HPP_
+#endif // __cplusplus__ >= 201103L

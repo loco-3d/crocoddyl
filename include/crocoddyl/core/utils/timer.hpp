@@ -14,7 +14,7 @@
 namespace crocoddyl {
 
 class Timer {
- public:
+public:
   Timer() { clock_gettime(CLOCK_MONOTONIC, &start_); }
 
   inline void reset() { clock_gettime(CLOCK_MONOTONIC, &start_); }
@@ -33,11 +33,11 @@ class Timer {
     return duration_;
   }
 
- private:
+private:
   struct timespec start_;
   struct timespec finish_;
   double duration_;
 };
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_CORE_UTILS_TIMER_H_
+#endif // CROCODDYL_CORE_UTILS_TIMER_H_

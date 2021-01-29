@@ -13,8 +13,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameWrenchCone& fref, const std::size_t& nu)
+    boost::shared_ptr<StateMultibody> state,
+    boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameWrenchCone &fref, const std::size_t &nu)
     : Base(state, activation, nu), fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
@@ -24,8 +25,9 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameWrenchCone& fref)
+    boost::shared_ptr<StateMultibody> state,
+    boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameWrenchCone &fref)
     : Base(state, activation), fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
@@ -34,28 +36,29 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
 }
 
 template <typename Scalar>
-CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                     const FrameWrenchCone& fref,
-                                                                     const std::size_t& nu)
+CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
+    boost::shared_ptr<StateMultibody> state, const FrameWrenchCone &fref,
+    const std::size_t &nu)
     : Base(state, fref.cone.get_nf() + 1, nu), fref_(fref) {}
 
 template <typename Scalar>
-CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                     const FrameWrenchCone& fref)
+CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
+    boost::shared_ptr<StateMultibody> state, const FrameWrenchCone &fref)
     : Base(state, fref.cone.get_nf() + 1), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::~CostModelContactWrenchConeTpl() {}
 
 template <typename Scalar>
-void CostModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>&,
-                                                 const Eigen::Ref<const VectorXs>&) {
-  Data* d = static_cast<Data*>(data.get());
+void CostModelContactWrenchConeTpl<Scalar>::calc(
+    const boost::shared_ptr<CostDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
+  Data *d = static_cast<Data *>(data.get());
 
-  // Compute the residual of the wrench cone. Note that we need to transform the wrench
-  // to the contact frame
-  data->r.noalias() = fref_.cone.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
+  // Compute the residual of the wrench cone. Note that we need to transform the
+  // wrench to the contact frame
+  data->r.noalias() =
+      fref_.cone.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -63,14 +66,14 @@ void CostModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDat
 }
 
 template <typename Scalar>
-void CostModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                     const Eigen::Ref<const VectorXs>&,
-                                                     const Eigen::Ref<const VectorXs>&) {
-  Data* d = static_cast<Data*>(data.get());
+void CostModelContactWrenchConeTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<CostDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
+  Data *d = static_cast<Data *>(data.get());
 
-  const MatrixXs& df_dx = d->contact->df_dx;
-  const MatrixXs& df_du = d->contact->df_du;
-  const MatrixX6s& A = fref_.cone.get_A();
+  const MatrixXs &df_dx = d->contact->df_dx;
+  const MatrixXs &df_du = d->contact->df_du;
+  const MatrixX6s &A = fref_.cone.get_A();
 
   activation_->calcDiff(data->activation, data->r);
 
@@ -89,28 +92,34 @@ void CostModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactWrenchConeTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar>>
+CostModelContactWrenchConeTpl<Scalar>::createData(
+    DataCollectorAbstract *const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-void CostModelContactWrenchConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
+void CostModelContactWrenchConeTpl<Scalar>::set_referenceImpl(
+    const std::type_info &ti, const void *pv) {
   if (ti == typeid(FrameWrenchCone)) {
-    fref_ = *static_cast<const FrameWrenchCone*>(pv);
+    fref_ = *static_cast<const FrameWrenchCone *>(pv);
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
+    throw_pretty(
+        "Invalid argument: incorrect type (it should be FrameWrenchCone)");
   }
 }
 
 template <typename Scalar>
-void CostModelContactWrenchConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelContactWrenchConeTpl<Scalar>::get_referenceImpl(
+    const std::type_info &ti, void *pv) const {
   if (ti == typeid(FrameWrenchCone)) {
-    FrameWrenchCone& ref_map = *static_cast<FrameWrenchCone*>(pv);
+    FrameWrenchCone &ref_map = *static_cast<FrameWrenchCone *>(pv);
     ref_map = fref_;
   } else {
-    throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
+    throw_pretty(
+        "Invalid argument: incorrect type (it should be FrameWrenchCone)");
   }
 }
 
-}  // namespace crocoddyl
+} // namespace crocoddyl

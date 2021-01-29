@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -15,9 +15,10 @@ namespace python {
 void exposeDataCollector() {
   bp::class_<DataCollectorAbstract, boost::noncopyable>(
       "DataCollectorAbstract",
-      "Abstract class for common collection of data used in different objects in action model.\n\n",
+      "Abstract class for common collection of data used in different objects "
+      "in action model.\n\n",
       bp::init<>(bp::args("self")));
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl

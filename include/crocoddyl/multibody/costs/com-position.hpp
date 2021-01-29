@@ -9,34 +9,36 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief CoM position cost
  *
- * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
- * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respetively. Note that the
- * dimension of the residual vector is obtained from 3.
+ * This cost function defines a residual vector as
+ * \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
+ * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference
+ * CoM position, respetively. Note that the dimension of the residual vector is
+ * obtained from 3.
  *
  * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
- * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * For the computation of the cost Hessian, we use the Gauss-Newton
+ * approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives
+ * are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -59,8 +61,8 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation, const Vector3s& cref,
-                          const std::size_t& nu);
+                          boost::shared_ptr<ActivationModelAbstract> activation,
+                          const Vector3s &cref, const std::size_t &nu);
 
   /**
    * @brief Initialize the CoM position cost model
@@ -72,29 +74,34 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] cref        Reference CoM position
    */
   CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation, const Vector3s& cref);
+                          boost::shared_ptr<ActivationModelAbstract> activation,
+                          const Vector3s &cref);
 
   /**
    * @brief Initialize the CoM position cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
    * @param[in] state  State of the multibody system
    * @param[in] cref   Reference CoM position
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref, const std::size_t& nu);
+  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+                          const Vector3s &cref, const std::size_t &nu);
 
   /**
    * @brief Initialize the CoM position cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
-   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The default `nu` value is obtained
+   * from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state  State of the multibody system
    * @param[in] cref   Reference CoM position
    */
-  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref);
+  CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+                          const Vector3s &cref);
   virtual ~CostModelCoMPositionTpl();
 
   /**
@@ -104,8 +111,9 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
+                    const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief Compute the derivatives of the CoM position cost
@@ -114,31 +122,35 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
+                        const Eigen::Ref<const VectorXs> &u);
+  virtual boost::shared_ptr<CostDataAbstract>
+  createData(DataCollectorAbstract *const data);
 
-  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector3s>()", void set_cref(const Vector3s& cref_in));
-  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector3s>()", const Vector3s& get_cref() const);
+  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::Vector3s>()",
+             void set_cref(const Vector3s &cref_in));
+  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::Vector3s>()",
+             const Vector3s &get_cref() const);
 
- protected:
+protected:
   /**
    * @brief Modify the CoM position reference
    */
-  virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
+  virtual void set_referenceImpl(const std::type_info &ti, const void *pv);
 
   /**
    * @brief Return the CoM position reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info &ti, void *pv) const;
 
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
- private:
-  Vector3s cref_;  //!< Reference CoM position
+private:
+  Vector3s cref_; //!< Reference CoM position
 };
 
 template <typename _Scalar>
@@ -152,20 +164,23 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
 
   template <template <typename Scalar> class Model>
-  CostDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  CostDataCoMPositionTpl(Model<Scalar> *const model,
+                         DataCollectorAbstract *const data)
       : Base(model, data), Arr_Jcom(3, model->get_state()->get_nv()) {
     Arr_Jcom.setZero();
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorMultibodyTpl<Scalar> *d =
+        dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty("Invalid argument: the shared data should be derived from "
+                   "DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar> *pinocchio;
   Matrix3xs Arr_Jcom;
 
   using Base::activation;
@@ -181,11 +196,11 @@ struct CostDataCoMPositionTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/com-position.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_
+#endif // CROCODDYL_MULTIBODY_COSTS_COM_POSITION_HPP_

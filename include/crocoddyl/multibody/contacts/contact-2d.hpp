@@ -9,21 +9,21 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
-#include <pinocchio/spatial/motion.hpp>
-#include <pinocchio/multibody/data.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -38,26 +38,32 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t& nu,
-                    const Vector2s& gains = Vector2s::Zero());
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                    const Vector2s& gains = Vector2s::Zero());
+  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+                    const FrameTranslation &xref, const std::size_t &nu,
+                    const Vector2s &gains = Vector2s::Zero());
+  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+                    const FrameTranslation &xref,
+                    const Vector2s &gains = Vector2s::Zero());
   virtual ~ContactModel2DTpl();
 
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
-  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x);
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x);
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
+                           const VectorXs &force);
+  virtual boost::shared_ptr<ContactDataAbstract>
+  createData(pinocchio::DataTpl<Scalar> *const data);
 
-  const FrameTranslation& get_xref() const;
-  const Vector2s& get_gains() const;
+  const FrameTranslation &get_xref() const;
+  const Vector2s &get_gains() const;
 
- protected:
+protected:
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
 
- private:
+private:
   FrameTranslation xref_;
   Vector2s gains_;
 };
@@ -78,9 +84,9 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  ContactData2DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
-        fJf(6, model->get_state()->get_nv()),
+  ContactData2DTpl(Model<Scalar> *const model,
+                   pinocchio::DataTpl<Scalar> *const data)
+      : Base(model, data), fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
@@ -136,11 +142,11 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix3s oRf;
 };
 
-}  // namespace crocoddyl
+} // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contacts/contact-2d.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
+#endif // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_

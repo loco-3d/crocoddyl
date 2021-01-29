@@ -9,9 +9,9 @@
 #ifndef CROCODDYL_ACTUATION_FACTORY_HPP_
 #define CROCODDYL_ACTUATION_FACTORY_HPP_
 
-#include "state.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/numdiff/actuation.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -35,20 +35,21 @@ struct ActuationModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, ActuationModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, ActuationModelTypes::Type type);
 
 class ActuationModelFactory {
- public:
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit ActuationModelFactory();
   ~ActuationModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> create(ActuationModelTypes::Type actuation_type,
-                                                              StateModelTypes::Type state_type) const;
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract>
+  create(ActuationModelTypes::Type actuation_type,
+         StateModelTypes::Type state_type) const;
 };
 
-}  // namespace unittest
-}  // namespace crocoddyl
+} // namespace unittest
+} // namespace crocoddyl
 
-#endif  // CROCODDYL_ACTUATION_FACTORY_HPP_
+#endif // CROCODDYL_ACTUATION_FACTORY_HPP_

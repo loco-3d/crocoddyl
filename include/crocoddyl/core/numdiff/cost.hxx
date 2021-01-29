@@ -6,14 +6,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/cost.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_activation(), model->get_nu()), model_(model) {
+CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(
+    const boost::shared_ptr<Base> &model)
+    : Base(model->get_state(), model->get_activation(), model->get_nu()),
+      model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
@@ -21,8 +23,9 @@ template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<CostDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   data_nd->data_0->cost = 0.0;
   model_->calc(data_nd->data_0, x, u);
@@ -31,12 +34,13 @@ void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<CostDataAbstract> &data,
+    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
-  const Scalar& c0 = data_nd->cost;
-  const VectorXs& r0 = data_nd->r;
+  const Scalar &c0 = data_nd->cost;
+  const VectorXs &r0 = data_nd->r;
   if (get_with_gauss_approx()) {
     model_->get_activation()->calc(data_nd->data_0->activation, r0);
     model_->get_activation()->calcDiff(data_nd->data_0->activation, r0);
@@ -86,7 +90,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
   }
 
   if (get_with_gauss_approx()) {
-    const MatrixXs& Arr = data_nd->data_0->activation->Arr;
+    const MatrixXs &Arr = data_nd->data_0->activation->Arr;
     data_nd->Lxx = data_nd->Rx.transpose() * Arr * data_nd->Rx;
     data_nd->Lxu = data_nd->Rx.transpose() * Arr * data_nd->Ru;
     data_nd->Luu = data_nd->Ru.transpose() * Arr * data_nd->Ru;
@@ -98,23 +102,25 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelNumDiffTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar>>
+CostModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract *const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<CostModelAbstractTpl<Scalar>> &
+CostModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
 template <typename Scalar>
-const Scalar& CostModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar &CostModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar &disturbance) {
   disturbance_ = disturbance;
 }
 
@@ -124,13 +130,15 @@ bool CostModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+void CostModelNumDiffTpl<Scalar>::set_reevals(
+    const std::vector<ReevaluationFunction> &reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+void CostModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs> & /*x*/) {
   // do nothing in the general case
 }
 
-}  // namespace crocoddyl
+} // namespace crocoddyl

@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/costs/cost-sum.hpp", "crocoddyl/core/costs/cost-sum.hpp")
+CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/costs/cost-sum.hpp",
+                                   "crocoddyl/core/costs/cost-sum.hpp")
 #include "crocoddyl/core/costs/cost-sum.hpp"
 
 #endif

@@ -6,23 +6,25 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
 #include <iostream>
+#include <math.h>
 
 namespace crocoddyl {
 
-template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16) {
+template <typename Scalar> WrenchConeTpl<Scalar>::WrenchConeTpl() : nf_(16) {
   A_.resize(nf_ + 1, 6);
   ub_.resize(nf_ + 1);
   lb_.resize(nf_ + 1);
   // compute the matrix
-  update(Matrix3s::Identity(), Scalar(0.7), Vector2s(0.1, 0.05), Scalar(0.), std::numeric_limits<Scalar>::max());
+  update(Matrix3s::Identity(), Scalar(0.7), Vector2s(0.1, 0.05), Scalar(0.),
+         std::numeric_limits<Scalar>::max());
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf,
-                                     const Scalar& min_nforce, const Scalar& max_nforce)
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s &R, const Scalar &mu,
+                                     const Vector2s &box_size, std::size_t nf,
+                                     const Scalar &min_nforce,
+                                     const Scalar &max_nforce)
     : nf_(nf) {
   if (nf_ % 2 != 0) {
     nf_ = 16;
@@ -37,23 +39,19 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const 
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
-    : A_(cone.get_A()),
-      ub_(cone.get_ub()),
-      lb_(cone.get_lb()),
-      R_(cone.get_R()),
-      box_(cone.get_box()),
-      mu_(cone.get_mu()),
-      nf_(cone.get_nf()),
-      min_nforce_(cone.get_min_nforce()),
+WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar> &cone)
+    : A_(cone.get_A()), ub_(cone.get_ub()), lb_(cone.get_lb()),
+      R_(cone.get_R()), box_(cone.get_box()), mu_(cone.get_mu()),
+      nf_(cone.get_nf()), min_nforce_(cone.get_min_nforce()),
       max_nforce_(cone.get_max_nforce()) {}
 
-template <typename Scalar>
-WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
+template <typename Scalar> WrenchConeTpl<Scalar>::~WrenchConeTpl() {}
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size,
-                                   const Scalar& min_nforce, const Scalar& max_nforce) {
+void WrenchConeTpl<Scalar>::update(const Matrix3s &R, const Scalar &mu,
+                                   const Vector2s &box_size,
+                                   const Scalar &min_nforce,
+                                   const Scalar &max_nforce) {
   R_ = R;
   mu_ = mu;
   box_ = box_size;
@@ -65,11 +63,14 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Ve
 
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to maximun value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "maximun value"
+              << std::endl;
   }
 
   A_.row(0).head(3) << Scalar(1.), Scalar(0.), -mu_;
@@ -81,14 +82,22 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Ve
   A_.row(6).segment(2, 3) << -box_(1), Scalar(-1.), Scalar(0.);
   A_.row(7).segment(2, 3) << -box_(0), Scalar(0.), Scalar(1.);
   A_.row(8).segment(2, 3) << -box_(0), Scalar(0.), Scalar(-1.);
-  A_.row(9) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(-1.);
-  A_.row(10) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(-1.);
-  A_.row(11) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(-1.);
-  A_.row(12) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(-1.);
-  A_.row(13) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_, Scalar(1.);
-  A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_, Scalar(1.);
-  A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_, Scalar(1.);
-  A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_, Scalar(1.);
+  A_.row(9) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_,
+      Scalar(-1.);
+  A_.row(10) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_,
+      Scalar(-1.);
+  A_.row(11) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_,
+      Scalar(-1.);
+  A_.row(12) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_,
+      Scalar(-1.);
+  A_.row(13) << box_(1), box_(0), -mu_ * (box_(0) + box_(1)), mu_, mu_,
+      Scalar(1.);
+  A_.row(14) << box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), mu_, -mu_,
+      Scalar(1.);
+  A_.row(15) << -box_(1), box_(0), -mu_ * (box_(0) + box_(1)), -mu_, mu_,
+      Scalar(1.);
+  A_.row(16) << -box_(1), -box_(0), -mu_ * (box_(0) + box_(1)), -mu_, -mu_,
+      Scalar(1.);
 
   Matrix6s c_R_o = Matrix6s::Zero();
   c_R_o.topLeftCorner(3, 3) = R_.transpose();
@@ -104,62 +113,63 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar& mu, const Ve
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixX6s& WrenchConeTpl<Scalar>::get_A() const {
+const typename MathBaseTpl<Scalar>::MatrixX6s &
+WrenchConeTpl<Scalar>::get_A() const {
   return A_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs &
+WrenchConeTpl<Scalar>::get_ub() const {
   return ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs &
+WrenchConeTpl<Scalar>::get_lb() const {
   return lb_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R() const {
+const typename MathBaseTpl<Scalar>::Matrix3s &
+WrenchConeTpl<Scalar>::get_R() const {
   return R_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& WrenchConeTpl<Scalar>::get_box() const {
+const typename MathBaseTpl<Scalar>::Vector2s &
+WrenchConeTpl<Scalar>::get_box() const {
   return box_;
 }
 
-template <typename Scalar>
-const Scalar& WrenchConeTpl<Scalar>::get_mu() const {
+template <typename Scalar> const Scalar &WrenchConeTpl<Scalar>::get_mu() const {
   return mu_;
 }
 
 template <typename Scalar>
-const std::size_t& WrenchConeTpl<Scalar>::get_nf() const {
+const std::size_t &WrenchConeTpl<Scalar>::get_nf() const {
   return nf_;
 }
 
 template <typename Scalar>
-const Scalar& WrenchConeTpl<Scalar>::get_min_nforce() const {
+const Scalar &WrenchConeTpl<Scalar>::get_min_nforce() const {
   return min_nforce_;
 }
 
 template <typename Scalar>
-const Scalar& WrenchConeTpl<Scalar>::get_max_nforce() const {
+const Scalar &WrenchConeTpl<Scalar>::get_max_nforce() const {
   return max_nforce_;
 }
 
-template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_R(Matrix3s R) {
+template <typename Scalar> void WrenchConeTpl<Scalar>::set_R(Matrix3s R) {
   update(R, mu_, box_, min_nforce_, max_nforce_);
 }
 
-template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
+template <typename Scalar> void WrenchConeTpl<Scalar>::set_box(Vector2s box) {
   update(R_, mu_, box, min_nforce_, max_nforce_);
 }
 
-template <typename Scalar>
-void WrenchConeTpl<Scalar>::set_mu(Scalar mu) {
+template <typename Scalar> void WrenchConeTpl<Scalar>::set_mu(Scalar mu) {
   update(R_, mu, box_, min_nforce_, max_nforce_);
 }
 
@@ -174,7 +184,7 @@ void WrenchConeTpl<Scalar>::set_max_nforce(Scalar max_nforce) {
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X) {
+std::ostream &operator<<(std::ostream &os, const WrenchConeTpl<Scalar> &X) {
   os << "         R: " << X.get_R() << std::endl;
   os << "        mu: " << X.get_mu() << std::endl;
   os << "       box: " << X.get_box().transpose() << std::endl;
@@ -184,4 +194,4 @@ std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X) {
   return os;
 }
 
-}  // namespace crocoddyl
+} // namespace crocoddyl

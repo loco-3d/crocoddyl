@@ -6,25 +6,28 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxFDDP() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxFDDP> >();
+  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxFDDP>>();
 
-  bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP> >(
+  bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP>>(
       "SolverBoxFDDP",
       "Box-constrained FDDP solver.\n\n"
-      ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
-                                                    "Initialize the vector dimension.\n\n"
-                                                    ":param problem: shooting problem."))
-      .add_property("Quu_inv", make_function(&SolverBoxFDDP::get_Quu_inv, bp::return_internal_reference<>()),
+      ":param shootingProblem: shooting problem (list of action models along "
+      "trajectory.)",
+      bp::init<boost::shared_ptr<ShootingProblem>>(
+          bp::args("self", "problem"), "Initialize the vector dimension.\n\n"
+                                       ":param problem: shooting problem."))
+      .add_property("Quu_inv",
+                    make_function(&SolverBoxFDDP::get_Quu_inv,
+                                  bp::return_internal_reference<>()),
                     "inverse of the Quu computed by the box QP");
 }
 
-}  // namespace python
-}  // namespace crocoddyl
+} // namespace python
+} // namespace crocoddyl
