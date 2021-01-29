@@ -9,20 +9,21 @@
 #ifndef CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <stdexcept>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
-template <typename _Scalar> class ActuationModelAbstractTpl {
-public:
+template <typename _Scalar>
+class ActuationModelAbstractTpl {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -32,9 +33,7 @@ public:
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                            const std::size_t &nu)
-      : nu_(nu), state_(state) {
+  ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu) : nu_(nu), state_(state) {
     if (nu_ == 0) {
       throw_pretty("Invalid argument: "
                    << "nu cannot be zero");
@@ -42,26 +41,24 @@ public:
   };
   virtual ~ActuationModelAbstractTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u) = 0;
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u) = 0;
   virtual boost::shared_ptr<ActuationDataAbstract> createData() {
-    return boost::allocate_shared<ActuationDataAbstract>(
-        Eigen::aligned_allocator<ActuationDataAbstract>(), this);
+    return boost::allocate_shared<ActuationDataAbstract>(Eigen::aligned_allocator<ActuationDataAbstract>(), this);
   };
 
-  const std::size_t &get_nu() const { return nu_; };
-  const boost::shared_ptr<StateAbstract> &get_state() const { return state_; };
+  const std::size_t& get_nu() const { return nu_; };
+  const boost::shared_ptr<StateAbstract>& get_state() const { return state_; };
 
-protected:
+ protected:
   std::size_t nu_;
   boost::shared_ptr<StateAbstract> state_;
 };
 
-template <typename _Scalar> struct ActuationDataAbstractTpl {
+template <typename _Scalar>
+struct ActuationDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -70,7 +67,7 @@ template <typename _Scalar> struct ActuationDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit ActuationDataAbstractTpl(Model<Scalar> *const model)
+  explicit ActuationDataAbstractTpl(Model<Scalar>* const model)
       : tau(model->get_state()->get_nv()),
         dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         dtau_du(model->get_state()->get_nv(), model->get_nu()) {
@@ -85,6 +82,6 @@ template <typename _Scalar> struct ActuationDataAbstractTpl {
   MatrixXs dtau_du;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_ACTUATION_BASE_HPP_
+#endif  // CROCODDYL_CORE_ACTUATION_BASE_HPP_

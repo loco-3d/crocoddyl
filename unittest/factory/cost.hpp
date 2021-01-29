@@ -24,8 +24,7 @@ struct CostModelTypes {
     CostModelState,
     CostModelControl,
     CostModelCoMPosition,
-    // CostModelCentroidalMomentum,  // @todo Figure out the pinocchio
-    // callbacks.
+    // CostModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
     CostModelFramePlacement,
     CostModelFrameRotation,
     CostModelFrameTranslation,
@@ -44,7 +43,10 @@ struct CostModelTypes {
 };
 
 struct CostModelNoFFTypes {
-  enum Type { CostModelControlGrav, NbCostModelTypes };
+  enum Type {
+    CostModelControlGrav,
+    NbCostModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -74,14 +76,12 @@ public:
          ActivationModelTypes::Type activation_type,
          std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
   boost::shared_ptr<crocoddyl::CostModelAbstract>
-  create(CostModelNoFFTypes::Type cost_type,
-         ActivationModelTypes::Type activation_type,
+  create(CostModelNoFFTypes::Type cost_type,ActivationModelTypes::Type activation_type,
          std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
 boost::shared_ptr<crocoddyl::CostModelAbstract>
-create_random_cost(StateModelTypes::Type state_type,
-                   std::size_t nu = std::numeric_limits<std::size_t>::max());
+create_random_cost(StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
 
 } // namespace unittest
 } // namespace crocoddyl

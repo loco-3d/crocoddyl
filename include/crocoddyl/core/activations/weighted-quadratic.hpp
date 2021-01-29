@@ -11,16 +11,15 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class ActivationModelWeightedQuadTpl
-    : public ActivationModelAbstractTpl<_Scalar> {
-public:
+class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -31,16 +30,14 @@ public:
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelWeightedQuadTpl(const VectorXs &weights)
+  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights)
       : Base(weights.size()), weights_(weights), new_weights_(false){};
   virtual ~ActivationModelWeightedQuadTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -48,12 +45,10 @@ public:
     data->a_value = Scalar(0.5) * r.dot(d->Wr);
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -69,8 +64,7 @@ public:
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->Arr.diagonal() = weights_;
 
 #ifndef NDEBUG
@@ -80,22 +74,21 @@ public:
     return data;
   };
 
-  const VectorXs &get_weights() const { return weights_; };
-  void set_weights(const VectorXs &weights) {
+  const VectorXs& get_weights() const { return weights_; };
+  void set_weights(const VectorXs& weights) {
     if (weights.size() != weights_.size()) {
       throw_pretty("Invalid argument: "
-                   << "weight vector has wrong dimension (it should be " +
-                          std::to_string(weights_.size()) + ")");
+                   << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) + ")");
     }
 
     weights_ = weights;
     new_weights_ = true;
   };
 
-protected:
+ protected:
   using Base::nr_;
 
-private:
+ private:
   VectorXs weights_;
   bool new_weights_;
 
@@ -105,8 +98,7 @@ private:
 };
 
 template <typename _Scalar>
-struct ActivationDataWeightedQuadTpl
-    : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -115,12 +107,12 @@ struct ActivationDataWeightedQuadTpl
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationDataWeightedQuadTpl(Activation *const activation)
+  explicit ActivationDataWeightedQuadTpl(Activation* const activation)
       : Base(activation), Wr(VectorXs::Zero(activation->get_nr())) {}
 
   VectorXs Wr;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
+#endif  // CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_

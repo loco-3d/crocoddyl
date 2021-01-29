@@ -12,10 +12,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(
-    const boost::shared_ptr<Base> &model)
-    : Base(model->get_state(), model->get_nc(), model->get_nu()),
-      model_(model) {
+ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model)
+    : Base(model->get_state(), model->get_nc(), model->get_nu()), model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
@@ -23,21 +21,19 @@ template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x) {
+void ContactModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
+                                          const Eigen::Ref<const VectorXs>& x) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, x);
   data_nd->a0 = data_nd->data_0->a0;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x) {
+void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                                              const Eigen::Ref<const VectorXs>& x) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
-  const VectorXs &a0 = data_nd->a0;
+  const VectorXs& a0 = data_nd->a0;
 
   assertStableStateFD(x);
 
@@ -59,12 +55,11 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract> &data, const VectorXs &force) {
+void ContactModelNumDiffTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                                                 const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != model_->get_nc()) {
     throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be "
-                 << model_->get_nc() << ")");
+                 << "lambda has wrong dimension (it should be " << model_->get_nc() << ")");
   }
 
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
@@ -73,40 +68,34 @@ void ContactModelNumDiffTpl<Scalar>::updateForce(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar>>
-ContactModelNumDiffTpl<Scalar>::createData(
-    pinocchio::DataTpl<Scalar> *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelNumDiffTpl<Scalar>::createData(
+    pinocchio::DataTpl<Scalar>* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ContactModelAbstractTpl<Scalar>> &
-ContactModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >& ContactModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
 template <typename Scalar>
-const Scalar &ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar& ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::set_disturbance(
-    const Scalar &disturbance) {
+void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
   disturbance_ = disturbance;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::set_reevals(
-    const std::vector<ReevaluationFunction> &reevals) {
+void ContactModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::assertStableStateFD(
-    const Eigen::Ref<const VectorXs> & /*x*/) {
+void ContactModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
   // do nothing in the general case
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

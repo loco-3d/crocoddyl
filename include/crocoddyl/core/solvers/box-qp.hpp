@@ -9,9 +9,9 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 
-#include <Eigen/Cholesky>
-#include <Eigen/Dense>
 #include <vector>
+#include <Eigen/Dense>
+#include <Eigen/Cholesky>
 
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -42,29 +42,26 @@ struct BoxQPSolution {
    * @param[in] free_idx     Free space indexes
    * @param[in] clamped_idx  Clamped space indexes
    */
-  BoxQPSolution(const Eigen::MatrixXd &Hff_inv, const Eigen::VectorXd &x,
-                const std::vector<size_t> &free_idx,
-                const std::vector<size_t> &clamped_idx)
+  BoxQPSolution(const Eigen::MatrixXd& Hff_inv, const Eigen::VectorXd& x, const std::vector<size_t>& free_idx,
+                const std::vector<size_t>& clamped_idx)
       : Hff_inv(Hff_inv), x(x), free_idx(free_idx), clamped_idx(clamped_idx) {}
 
-  Eigen::MatrixXd Hff_inv;         //!< Inverse of the free space Hessian
-  Eigen::VectorXd x;               //!< Decision vector
-  std::vector<size_t> free_idx;    //!< Free space indexes
-  std::vector<size_t> clamped_idx; //!< Clamped space indexes
+  Eigen::MatrixXd Hff_inv;          //!< Inverse of the free space Hessian
+  Eigen::VectorXd x;                //!< Decision vector
+  std::vector<size_t> free_idx;     //!< Free space indexes
+  std::vector<size_t> clamped_idx;  //!< Clamped space indexes
 };
 
 /**
- * @brief This class implements a Box QP solver based on a Projected Newton
- * method.
+ * @brief This class implements a Box QP solver based on a Projected Newton method.
  *
  * We consider a box QP problem of the form:
  * \f{eqnarray*}{
- *   \min_{\mathbf{x}} &= \frac{1}{2}\mathbf{x}^T\mathbf{H}\mathbf{x} +
- * \mathbf{q}^T\mathbf{x} \\
- *   \textrm{subject to} & \hspace{1em} \mathbf{\underline{b}} \leq \mathbf{x}
- * \leq \mathbf{\bar{b}} \\ \f} where \f$\mathbf{H}\f$, \f$\mathbf{q}\f$ are the
- * Hessian and gradient of the problem, respectively,
- * \f$\mathbf{\underline{b}}\f$, \f$\mathbf{\bar{b}}\f$ are lower and upper
+ *   \min_{\mathbf{x}} &= \frac{1}{2}\mathbf{x}^T\mathbf{H}\mathbf{x} + \mathbf{q}^T\mathbf{x} \\
+ *   \textrm{subject to} & \hspace{1em} \mathbf{\underline{b}} \leq \mathbf{x} \leq \mathbf{\bar{b}} \\
+ * \f}
+ * where \f$\mathbf{H}\f$, \f$\mathbf{q}\f$ are the Hessian and gradient of the problem,
+ * respectively, \f$\mathbf{\underline{b}}\f$, \f$\mathbf{\bar{b}}\f$ are lower and upper
  * bounds of the decision variable \f$\mathbf{x}\f$.
  *
  * The algorithm procees by iteratively identifying the active bounds, and then
@@ -80,21 +77,19 @@ struct BoxQPSolution {
  * \include bertsekas-siam82.bib
  */
 class BoxQP {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /**
    * @brief Initialize the Projected-Newton QP for bound constraints
    *
    * @param[in] nx             Dimension of the decision vector
-   * @param[in] maxiter        Maximum number of allowed iterations (default
-   * 100)
+   * @param[in] maxiter        Maximum number of allowed iterations (default 100)
    * @param[in] th_acceptstep  Acceptance step threshold (default 0.1)
    * @param[in] th_grad        Gradient tolerance threshold (default 1e-9)
    * @param[in] reg            Regularization value (default 1e-9)
    */
-  BoxQP(const std::size_t nx, std::size_t maxiter = 100,
-        const double th_acceptstep = 0.1, const double th_grad = 1e-9,
+  BoxQP(const std::size_t nx, std::size_t maxiter = 100, const double th_acceptstep = 0.1, const double th_grad = 1e-9,
         const double reg = 1e-9);
   /**
    * @brief Destroy the Projected-Newton QP solver
@@ -102,8 +97,7 @@ public:
   ~BoxQP();
 
   /**
-   * @brief Compute the solution of bound-constrained QP based on Newton
-   * projection
+   * @brief Compute the solution of bound-constrained QP based on Newton projection
    *
    * @param[in] H      Hessian (dimension nx * nx)
    * @param[in] q      Gradient (dimension nx)
@@ -112,106 +106,101 @@ public:
    * @param[in] xinit  Initial guess (dimension nx)
    * @return The solution of the problem
    */
-  const BoxQPSolution &solve(const Eigen::MatrixXd &H, const Eigen::VectorXd &q,
-                             const Eigen::VectorXd &lb,
-                             const Eigen::VectorXd &ub,
-                             const Eigen::VectorXd &xinit);
+  const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& lb,
+                             const Eigen::VectorXd& ub, const Eigen::VectorXd& xinit);
 
   /**
    * @brief Return the stored solution
    */
-  const BoxQPSolution &get_solution() const;
+  const BoxQPSolution& get_solution() const;
 
   /**
    * @brief Return the decision vector dimension
    */
-  const std::size_t &get_nx() const;
+  const std::size_t& get_nx() const;
 
   /**
    * @brief Return the maximum allowed number of iterations
    */
-  const std::size_t &get_maxiter() const;
+  const std::size_t& get_maxiter() const;
 
   /**
    * @brief Return the acceptance step threshold
    */
-  const double &get_th_acceptstep() const;
+  const double& get_th_acceptstep() const;
 
   /**
    * @brief Return the gradient tolerance threshold
    */
-  const double &get_th_grad() const;
+  const double& get_th_grad() const;
 
   /**
    * @brief Return the regularization value
    */
-  const double &get_reg() const;
+  const double& get_reg() const;
 
   /**
    * @brief Return the stack of step lengths using by the line-search procedure
    */
-  const std::vector<double> &get_alphas() const;
+  const std::vector<double>& get_alphas() const;
 
   /**
    * @brief Modify the decision vector dimension
    */
-  void set_nx(const std::size_t &nx);
+  void set_nx(const std::size_t& nx);
 
   /**
    * @brief Modify the maximum allowed number of iterations
    */
-  void set_maxiter(const std::size_t &maxiter);
+  void set_maxiter(const std::size_t& maxiter);
 
   /**
    * @brief Modify the acceptance step threshold
    */
-  void set_th_acceptstep(const double &th_acceptstep);
+  void set_th_acceptstep(const double& th_acceptstep);
 
   /**
    * @brief Modify the gradient tolerance threshold
    */
-  void set_th_grad(const double &th_grad);
+  void set_th_grad(const double& th_grad);
 
   /**
    * @brief Modify the regularization value
    */
-  void set_reg(const double &reg);
+  void set_reg(const double& reg);
 
   /**
    * @brief Modify the stack of step lengths using by the line-search procedure
    */
-  void set_alphas(const std::vector<double> &alphas);
+  void set_alphas(const std::vector<double>& alphas);
 
-private:
-  std::size_t nx_;         //!< Decision variable dimension
-  BoxQPSolution solution_; //!< Solution of the Box QP
-  std::size_t maxiter_;    //!< Allowed maximum number of iterations
-  double th_acceptstep_;   //!< Threshold used for accepting step
-  double
-      th_grad_; //!< Tolerance for stopping the algorithm (gradient threshold)
-  double reg_;  //!< Current regularization value
+ private:
+  std::size_t nx_;          //!< Decision variable dimension
+  BoxQPSolution solution_;  //!< Solution of the Box QP
+  std::size_t maxiter_;     //!< Allowed maximum number of iterations
+  double th_acceptstep_;    //!< Threshold used for accepting step
+  double th_grad_;          //!< Tolerance for stopping the algorithm (gradient threshold)
+  double reg_;              //!< Current regularization value
 
-  double fold_;    //!< Cost of previous iteration
-  double fnew_;    //!< Cost of current iteration
-  std::size_t nf_; //!< Free space dimension
-  std::size_t nc_; //!< Constrained space dimension
-  std::vector<double>
-      alphas_; //!< Set of step lengths using by the line-search procedure
-  Eigen::VectorXd x_;    //!< Guess of the decision variable
-  Eigen::VectorXd xnew_; //!< New decision variable guess
-  Eigen::VectorXd g_;    //!< Current gradient
-  Eigen::VectorXd dx_;   //!< Current search direction
+  double fold_;                 //!< Cost of previous iteration
+  double fnew_;                 //!< Cost of current iteration
+  std::size_t nf_;              //!< Free space dimension
+  std::size_t nc_;              //!< Constrained space dimension
+  std::vector<double> alphas_;  //!< Set of step lengths using by the line-search procedure
+  Eigen::VectorXd x_;           //!< Guess of the decision variable
+  Eigen::VectorXd xnew_;        //!< New decision variable guess
+  Eigen::VectorXd g_;           //!< Current gradient
+  Eigen::VectorXd dx_;          //!< Current search direction
 
-  Eigen::VectorXd qf_; //!< Current problem gradient in the free subspace
-  Eigen::VectorXd xf_; //!< Current decision variable in the free subspace
-  Eigen::VectorXd
-      xc_; //!< Current decision variable in the constrained subspace
-  Eigen::VectorXd dxf_; //!< Search direction in the free subspace
-  Eigen::MatrixXd Hff_; //!< Hessian in the free subspace
-  Eigen::MatrixXd Hfc_; //!< Hessian in the constrained subspace
-  Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_; //!< Cholesky solver
+  Eigen::VectorXd qf_;                       //!< Current problem gradient in the free subspace
+  Eigen::VectorXd xf_;                       //!< Current decision variable in the free subspace
+  Eigen::VectorXd xc_;                       //!< Current decision variable in the constrained subspace
+  Eigen::VectorXd dxf_;                      //!< Search direction in the free subspace
+  Eigen::MatrixXd Hff_;                      //!< Hessian in the free subspace
+  Eigen::MatrixXd Hfc_;                      //!< Hessian in the constrained subspace
+  Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;  //!< Cholesky solver
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
+#endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_

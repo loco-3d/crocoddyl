@@ -54,5 +54,5 @@ void exposeMultibody() {
   exposeImpulse6D();
 }
 
-} // namespace python
-} // namespace crocoddyl
+}  // namespace python
+}  // namespace crocoddyl

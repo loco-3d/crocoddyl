@@ -9,8 +9,8 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_MULTIBODY_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_MULTIBODY_HPP_
 
-#include "python/crocoddyl/fwd.hpp"
 #include <pinocchio/fwd.hpp>
+#include "python/crocoddyl/fwd.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -58,7 +58,7 @@ void exposeImpulse6D();
 
 void exposeMultibody();
 
-} // namespace python
-} // namespace crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
 
-#endif // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_MULTIBODY_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_MULTIBODY_MULTIBODY_HPP_

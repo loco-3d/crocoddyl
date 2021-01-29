@@ -9,15 +9,15 @@
 #ifndef CROCODDYL_MULTIBODY_NUMDIFF_CONTACT_HPP_
 #define CROCODDYL_MULTIBODY_NUMDIFF_CONTACT_HPP_
 
-#include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
 #include <boost/function.hpp>
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/contact-base.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -26,16 +26,14 @@ public:
   typedef ContactDataNumDiffTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs &)>
-      ReevaluationFunction;
+  typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
 
   /**
-   * @brief Construct a new ContactModelNumDiff object from a
-   * ContactModelAbstract.
+   * @brief Construct a new ContactModelNumDiff object from a ContactModelAbstract.
    *
    * @param model
    */
-  explicit ContactModelNumDiffTpl(const boost::shared_ptr<Base> &model);
+  explicit ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
   /**
    * @brief Default destructor of the ContactModelNumDiff object
@@ -45,20 +43,17 @@ public:
   /**
    * @brief @copydoc ContactModelAbstract::calc()
    */
-  void calc(const boost::shared_ptr<ContactDataAbstract> &data,
-            const Eigen::Ref<const VectorXs> &x);
+  void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc ContactModelAbstract::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract> &data,
-                const Eigen::Ref<const VectorXs> &x);
+  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc ContactModelAbstract::updateForce()
    */
-  void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
-                   const VectorXs &force);
+  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
 
   /**
    * @brief Create a Data object
@@ -66,40 +61,38 @@ public:
    * @param data is the Pinocchio data
    * @return boost::shared_ptr<ContactModelAbstract>
    */
-  boost::shared_ptr<ContactDataAbstract>
-  createData(pinocchio::DataTpl<Scalar> *const data);
+  boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Get the model_ object
    *
    * @return ContactModelAbstract&
    */
-  const boost::shared_ptr<Base> &get_model() const;
+  const boost::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Get the disturbance_ object
    *
    * @return const Scalar&
    */
-  const Scalar &get_disturbance() const;
+  const Scalar& get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const Scalar &disturbance);
+  void set_disturbance(const Scalar& disturbance);
 
   /**
-   * @brief Register functions that take a pinocchio model, a pinocchio data, a
-   * state and a control. The updated data is used to evaluate of the gradient
-   * and hessian.
+   * @brief Register functions that take a pinocchio model, a pinocchio data, a state and a control.
+   * The updated data is used to evaluate of the gradient and hessian.
    *
    * @param reevals are the registered functions.
    */
-  void set_reevals(const std::vector<ReevaluationFunction> &reevals);
+  void set_reevals(const std::vector<ReevaluationFunction>& reevals);
 
-protected:
+ protected:
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
@@ -113,7 +106,7 @@ protected:
   /** @brief Functions that needs execution before calc or calcDiff. */
   std::vector<ReevaluationFunction> reevals_;
 
-private:
+ private:
   /**
    * @brief Make sure that when we finite difference the Cost Model, the user
    * does not face unknown behaviour because of the finite differencing of a
@@ -125,7 +118,7 @@ private:
    *
    * @param x is the state at which the check is performed.
    */
-  void assertStableStateFD(const Eigen::Ref<const VectorXs> & /*x*/);
+  void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 };
 
 template <typename _Scalar>
@@ -138,14 +131,12 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
   template <template <typename Scalar> class Model>
-  explicit ContactDataNumDiffTpl(Model<Scalar> *const model,
-                                 pinocchio::DataTpl<Scalar> *const data)
-      : Base(model, data), dx(model->get_state()->get_ndx()),
-        xp(model->get_state()->get_nx()) {
+  explicit ContactDataNumDiffTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+      : Base(model, data), dx(model->get_state()->get_ndx()), xp(model->get_state()->get_nx()) {
     dx.setZero();
     xp.setZero();
 
-    const std::size_t &ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
     data_0 = model->get_model()->createData(data);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(data));
@@ -159,19 +150,17 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::f;
   using Base::pinocchio;
 
-  VectorXs dx; //!< State disturbance.
-  VectorXs xp; //!< The integrated state from the disturbance on one DoF "\f$
-               //!< \int x dx_i \f$".
-  boost::shared_ptr<Base> data_0; //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base>>
-      data_x; //!< The temporary data associated with the state variation.
+  VectorXs dx;                     //!< State disturbance.
+  VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
+  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/numdiff/contact.hxx"
 
-#endif // CROCODDYL_MULTIBODY_NUMDIFF_CONTACT_HPP_
+#endif  // CROCODDYL_MULTIBODY_NUMDIFF_CONTACT_HPP_

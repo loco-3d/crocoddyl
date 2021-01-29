@@ -9,38 +9,36 @@
 #ifndef CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Impulse CoM cost
  *
- * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{J}_{com}*(\mathbf{v}_{next}-\mathbf{v})\f$,
- * \f$\mathbf{J}_{com}\in\mathbb{R}^{3\times nv}\f$ is the CoM Jacobian, and
- * \f$\mathbf{v}_{next},\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ are the
- * generalized velocities after and before the impulse, respectively. Note that
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{J}_{com}*(\mathbf{v}_{next}-\mathbf{v})\f$,
+ * \f$\mathbf{J}_{com}\in\mathbb{R}^{3\times nv}\f$ is the CoM Jacobian, and \f$\mathbf{v}_{next},\mathbf{v}\in
+ * T_{\mathbf{q}}\mathcal{Q}\f$ are the generalized velocities after and before the impulse, respectively. Note that
  * the dimension of the residual vector is 3.
  *
  * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton
- * approximation, e.g. \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
+ * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
+ * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives
- * are calculated by `calc` and `calcDiff`, respectively.
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelImpulseCoMTpl : public CostModelAbstractTpl<_Scalar> {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -65,9 +63,8 @@ public:
   /**
    * @brief Initialize the impulse CoM cost model
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
-   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$). The default `nu` value is obtained
-   * from `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state  State of the multibody system
    */
@@ -81,9 +78,8 @@ public:
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the derivatives of the impulse CoM cost
@@ -92,23 +88,21 @@ public:
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the impulse CoM cost data
    */
-  virtual boost::shared_ptr<CostDataAbstract>
-  createData(DataCollectorAbstract *const data);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
-protected:
+ protected:
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
-private:
+ private:
   boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
@@ -125,31 +119,27 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
 
   template <template <typename Scalar> class Model>
-  CostDataImpulseCoMTpl(Model<Scalar> *const model,
-                        DataCollectorAbstract *const data)
-      : Base(model, data), Arr_Rx(3, model->get_state()->get_nv()),
+  CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+      : Base(model, data),
+        Arr_Rx(3, model->get_state()->get_nv()),
         dvc_dq(3, model->get_state()->get_nv()),
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     Arr_Rx.setZero();
     dvc_dq.setZero();
     ddv_dv.setZero();
-    const boost::shared_ptr<StateMultibody> &state =
-        boost::static_pointer_cast<StateMultibody>(model->get_state());
-    pinocchio_internal =
-        pinocchio::DataTpl<Scalar>(*state->get_pinocchio().get());
+    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
+    pinocchio_internal = pinocchio::DataTpl<Scalar>(*state->get_pinocchio().get());
     // Check that proper shared data has been passed
-    DataCollectorMultibodyInImpulseTpl<Scalar> *d =
-        dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar> *>(shared);
+    DataCollectorMultibodyInImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from "
-                   "DataCollectorMultibodyInImpulse");
+      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInImpulse");
     }
     pinocchio = d->pinocchio;
     impulses = d->impulses;
   }
 
-  pinocchio::DataTpl<Scalar> *pinocchio;
-  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar>> impulses;
+  pinocchio::DataTpl<Scalar>* pinocchio;
+  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;
   Matrix3xs Arr_Rx;
   Matrix3xs dvc_dq;
   MatrixXs ddv_dv;
@@ -167,11 +157,11 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/impulse-com.hxx"
 
-#endif // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_COM_HPP_

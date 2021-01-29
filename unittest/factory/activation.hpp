@@ -38,20 +38,20 @@ struct ActivationModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, ActivationModelTypes::Type type);
+std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type);
 
 class ActivationModelFactory {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit ActivationModelFactory();
   ~ActivationModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract>
-  create(ActivationModelTypes::Type activation_type, std::size_t nr = 5) const;
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> create(ActivationModelTypes::Type activation_type,
+                                                               std::size_t nr = 5) const;
 };
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_ACTIVATION_FACTORY_HPP_
+#endif  // CROCODDYL_ACTIVATION_FACTORY_HPP_

@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CONTACT_COST_FACTORY_HPP_
 #define CROCODDYL_CONTACT_COST_FACTORY_HPP_
 
-#include "activation.hpp"
+#include "state.hpp"
 #include "actuation.hpp"
+#include "activation.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
-#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {

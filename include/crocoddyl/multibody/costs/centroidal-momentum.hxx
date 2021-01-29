@@ -15,11 +15,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s &href,
-    const std::size_t &nu)
-    : Base(state, activation, nu), href_(href),
-      pin_model_(state->get_pinocchio()) {
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const Vector6s& href, const std::size_t& nu)
+    : Base(state, activation, nu), href_(href), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -28,8 +26,8 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s &href)
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const Vector6s& href)
     : Base(state, activation), href_(href), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -38,25 +36,24 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 }
 
 template <typename Scalar>
-CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s &href,
-    const std::size_t &nu)
+CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                                                       const Vector6s& href, const std::size_t& nu)
     : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
-CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s &href)
+CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+                                                                       const Vector6s& href)
     : Base(state, 6), href_(href), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::~CostModelCentroidalMomentumTpl() {}
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
+void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                                  const Eigen::Ref<const VectorXs>&,
+                                                  const Eigen::Ref<const VectorXs>&) {
   // Compute the cost residual give the reference CentroidalMomentum
-  Data *d = static_cast<Data *>(data.get());
+  Data* d = static_cast<Data*>(data.get());
   data->r = d->pinocchio->hg.toVector() - href_;
 
   activation_->calc(data->activation, data->r);
@@ -64,23 +61,21 @@ void CostModelCentroidalMomentumTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
-  const std::size_t &nv = state_->get_nv();
+void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                                      const Eigen::Ref<const VectorXs>&,
+                                                      const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
+  const std::size_t& nv = state_->get_nv();
   Eigen::Ref<Matrix6xs> Rq = data->Rx.leftCols(nv);
   Eigen::Ref<Matrix6xs> Rv = data->Rx.rightCols(nv);
 
   activation_->calcDiff(data->activation, data->r);
-  pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio,
-                                              Rq, d->dhd_dq, d->dhd_dv, Rv);
+  pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
 
-  // The derivative computation in pinocchio does not take the frame of
-  // reference into account. So we need to update the com frame as well.
+  // The derivative computation in pinocchio does not take the frame of reference into
+  // account. So we need to update the com frame as well.
   for (int i = 0; i < d->pinocchio->Jcom.cols(); ++i) {
-    data->Rx.template block<3, 1>(3, i) -=
-        d->pinocchio->Jcom.col(i).cross(d->pinocchio->hg.linear());
+    data->Rx.template block<3, 1>(3, i) -= d->pinocchio->Jcom.col(i).cross(d->pinocchio->hg.linear());
   }
 
   d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
@@ -89,28 +84,24 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar>>
-CostModelCentroidalMomentumTpl<Scalar>::createData(
-    DataCollectorAbstract *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCentroidalMomentumTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(
-    const std::type_info &ti, const void *pv) {
+void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(Vector6s)) {
-    href_ = *static_cast<const Vector6s *>(pv);
+    href_ = *static_cast<const Vector6s*>(pv);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be Vector6s)");
   }
 }
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(
-    const std::type_info &ti, void *pv) const {
+void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(Vector6s)) {
-    Eigen::Map<Vector6s> ref_map(static_cast<Vector6s *>(pv)->data());
+    Eigen::Map<Vector6s> ref_map(static_cast<Vector6s*>(pv)->data());
     ref_map[0] = href_[0];
     ref_map[1] = href_[1];
     ref_map[2] = href_[2];
@@ -123,14 +114,13 @@ void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector6s &
-CostModelCentroidalMomentumTpl<Scalar>::get_href() const {
+const typename MathBaseTpl<Scalar>::Vector6s& CostModelCentroidalMomentumTpl<Scalar>::get_href() const {
   return href_;
 }
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::set_href(const Vector6s &href_in) {
+void CostModelCentroidalMomentumTpl<Scalar>::set_href(const Vector6s& href_in) {
   href_ = href_in;
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

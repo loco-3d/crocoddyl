@@ -9,18 +9,18 @@
 #ifndef CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 #define CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 
-#include <math.h>
 #include <stdexcept>
+#include <math.h>
 
-#include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/actuation/squashing-base.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -29,9 +29,8 @@ public:
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs> &u_lb,
-                             const Eigen::Ref<const VectorXs> &u_ub,
-                             const std::size_t &ns)
+  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+                             const std::size_t& ns)
       : Base(ns) {
     u_lb_ = u_lb;
     u_ub_ = u_ub;
@@ -47,33 +46,23 @@ public:
 
   virtual ~SquashingModelSmoothSatTpl(){};
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &s) {
+  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
-    // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u -
-    // ub)^2))
-    data->u = Scalar(0.5) *
-              (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
-               Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) +
-               u_lb_.array() + u_ub_.array());
+    // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
+    data->u =
+        Scalar(0.5) * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
+                       Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
   }
 
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &s) {
+  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
     data->du_ds.diagonal() =
         Scalar(0.5) *
-        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2),
-                    Scalar(-0.5))
-                 .array() *
-             (s - u_lb_).array() -
-         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2),
-                    Scalar(-0.5))
-                 .array() *
-             (s - u_ub_).array());
+        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2), Scalar(-0.5)).array() * (s - u_lb_).array() -
+         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), Scalar(-0.5)).array() * (s - u_ub_).array());
   }
 
-  const Scalar &get_smooth() const { return smooth_; };
-  void set_smooth(const Scalar &smooth) {
+  const Scalar& get_smooth() const { return smooth_; };
+  void set_smooth(const Scalar& smooth) {
     if (smooth < 0.) {
       throw_pretty("Invalid argument: "
                    << "Smooth value has to be positive");
@@ -87,15 +76,15 @@ public:
     s_ub_ = u_ub_;
   }
 
-  const VectorXs &get_d() const { return d_; };
+  const VectorXs& get_d() const { return d_; };
 
-private:
+ private:
   VectorXs a_;
   VectorXs d_;
 
   Scalar smooth_;
 
-protected:
+ protected:
   using Base::s_lb_;
   using Base::s_ub_;
 
@@ -103,6 +92,6 @@ protected:
   using Base::u_ub_;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
+#endif  // CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_

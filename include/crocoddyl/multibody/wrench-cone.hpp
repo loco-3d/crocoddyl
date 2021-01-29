@@ -9,22 +9,22 @@
 #ifndef CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 #define CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief This class encapsulates a wrench cone
  *
- * A wrench cone is a 6D polyhedral convex cone that chracterizes feasible
- * contact wrench. The wrench cone is derived in the case of rectangular support
- * areas, which is of practical importance since most humanoid robot feet can be
- * adequately approximated by rectangles.
+ * A wrench cone is a 6D polyhedral convex cone that chracterizes feasible contact wrench.
+ * The wrench cone is derived in the case of rectangular support areas, which is of practical importance since most
+ * humanoid robot feet can be adequately approximated by rectangles.
  */
 
-template <typename _Scalar> class WrenchConeTpl {
-public:
+template <typename _Scalar>
+class WrenchConeTpl {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -47,97 +47,88 @@ public:
   /**
    * @brief Initialize the wrench cone
    *
-   * @param[in] R               Rotation matrix that defines the cone
-   * orientation
+   * @param[in] R               Rotation matrix that defines the cone orientation
    * @param[in] mu              Friction coefficient
-   * @param[in] box             Dimension of the foot surface dim = (length,
-   * width)
+   * @param[in] box             Dimension of the foot surface dim = (length, width)
    * @param[in] nf              Number of facets (default 16)
    * @param[in] min_nforce      Minimum normal force (default 0.)
-   * @param[in] max_nforce      Maximum normal force (default default
-   * sys.float_info.max))
+   * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
    */
-  WrenchConeTpl(const Matrix3s &R, const Scalar &mu, const Vector2s &box_size,
-                std::size_t nf = 16, const Scalar &min_nforce = Scalar(0.),
-                const Scalar &max_nforce = std::numeric_limits<Scalar>::max());
+  WrenchConeTpl(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, std::size_t nf = 16,
+                const Scalar& min_nforce = Scalar(0.), const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Initialize the wrench cone
    *
    * @param[in] cone            Wrench cone
    */
-  WrenchConeTpl(const WrenchConeTpl<Scalar> &cone);
+  WrenchConeTpl(const WrenchConeTpl<Scalar>& cone);
   ~WrenchConeTpl();
 
   /**
    * @brief Update the matrix of wrench cone inequaliteis in the world frame.
    *
-   * This matrix-vector pair describes the linearized Coulomb friction model as
-   * follow:
+   * This matrix-vector pair describes the linearized Coulomb friction model as follow:
    *
    * \f$ -ub \leq A \times w \leq -lb \f$,
    *
    * where wrench, \f$ w \f$, is expressed in the inertial frame located at the
-   * center of the rectangular foot contact area (length, width) with axes
-   * parallel to those of the world frame.
+   * center of the rectangular foot contact area (length, width) with axes parallel to
+   * those of the world frame.
    *
-   * @param[in] R               Rotation matrix that defines the cone
-   * orientation
+   * @param[in] R               Rotation matrix that defines the cone orientation
    * @param[in] mu              Friction coefficient
-   * @param[in] box             Dimension of the foot surface dim = (length,
-   * width)
+   * @param[in] box             Dimension of the foot surface dim = (length, width)
    * @param[in] min_nforce      Minimum normal force (default 0.)
-   * @param[in] max_nforce      Maximum normal force (default default
-   * sys.float_info.max))
+   * @param[in] max_nforce      Maximum normal force (default default sys.float_info.max))
    */
-  void update(const Matrix3s &R, const Scalar &mu, const Vector2s &box_size,
-              const Scalar &min_nforce = Scalar(0.),
-              const Scalar &max_nforce = std::numeric_limits<Scalar>::max());
+  void update(const Matrix3s& R, const Scalar& mu, const Vector2s& box_size, const Scalar& min_nforce = Scalar(0.),
+              const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
 
   /**
    * @brief Return the matrix of wrench cone
    */
-  const MatrixX6s &get_A() const;
+  const MatrixX6s& get_A() const;
 
   /**
    * @brief Return the lower bound of inequalities
    */
-  const VectorXs &get_lb() const;
+  const VectorXs& get_lb() const;
 
   /**
    * @brief Return the upper bound of inequalities
    */
-  const VectorXs &get_ub() const;
+  const VectorXs& get_ub() const;
 
   /**
    * @brief Return the rotation matrix that defines the cone orientation
    */
-  const Matrix3s &get_R() const;
+  const Matrix3s& get_R() const;
 
   /**
    * @brief Return dimension of the foot surface dim = (length, width)
    */
-  const Vector2s &get_box() const;
+  const Vector2s& get_box() const;
 
   /**
    * @brief Return friction coefficient
    */
-  const Scalar &get_mu() const;
+  const Scalar& get_mu() const;
 
   /**
    * @brief Return the number of facets
    */
-  const std::size_t &get_nf() const;
+  const std::size_t& get_nf() const;
 
   /**
    * @brief Return the minimum normal force
    */
-  const Scalar &get_min_nforce() const;
+  const Scalar& get_min_nforce() const;
 
   /**
    * @brief Return the maximum normal force
    */
-  const Scalar &get_max_nforce() const;
+  const Scalar& get_max_nforce() const;
 
   /**
    * @brief Modify the rotation matrix that defines the cone orientation
@@ -168,10 +159,9 @@ public:
    * @brief Modify the maximum normal force
    */
   template <class Scalar>
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const WrenchConeTpl<Scalar> &X);
+  friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
 
-private:
+ private:
   MatrixX6s A_;
   VectorXs ub_;
   VectorXs lb_;
@@ -183,8 +173,8 @@ private:
   Scalar max_nforce_;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 #include "crocoddyl/multibody/wrench-cone.hxx"
 
-#endif // CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
+#endif  // CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_

@@ -11,20 +11,19 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class DifferentialActionModelContactFwdDynamicsTpl
-    : public DifferentialActionModelAbstractTpl<_Scalar> {
-public:
+class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -35,62 +34,52 @@ public:
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
-  typedef DifferentialActionDataAbstractTpl<Scalar>
-      DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  DifferentialActionModelContactFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<ContactModelMultiple> contacts,
-      boost::shared_ptr<CostModelSum> costs,
-      const Scalar &JMinvJt_damping = Scalar(0.),
-      const bool &enable_force = false);
+  DifferentialActionModelContactFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
+                                               boost::shared_ptr<ActuationModelAbstract> actuation,
+                                               boost::shared_ptr<ContactModelMultiple> contacts,
+                                               boost::shared_ptr<CostModelSum> costs,
+                                               const Scalar& JMinvJt_damping = Scalar(0.),
+                                               const bool& enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
-  virtual void
-  calc(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-       const Eigen::Ref<const VectorXs> &x,
-       const Eigen::Ref<const VectorXs> &u);
-  virtual void
-  calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-           const Eigen::Ref<const VectorXs> &x,
-           const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
-  virtual bool
-  checkData(const boost::shared_ptr<DifferentialActionDataAbstract> &data);
-  virtual void
-  quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-              Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs> &x,
-              const std::size_t &maxiter = 100,
-              const Scalar &tol = Scalar(1e-9));
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
+                           const Scalar& tol = Scalar(1e-9));
 
-  const boost::shared_ptr<ActuationModelAbstract> &get_actuation() const;
-  const boost::shared_ptr<ContactModelMultiple> &get_contacts() const;
-  const boost::shared_ptr<CostModelSum> &get_costs() const;
-  pinocchio::ModelTpl<Scalar> &get_pinocchio() const;
-  const VectorXs &get_armature() const;
-  const Scalar &get_damping_factor() const;
+  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
+  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
+  const VectorXs& get_armature() const;
+  const Scalar& get_damping_factor() const;
 
-  void set_armature(const VectorXs &armature);
-  void set_damping_factor(const Scalar &damping);
+  void set_armature(const VectorXs& armature);
+  void set_damping_factor(const Scalar& damping);
 
-protected:
-  using Base::has_control_limits_; //!< Indicates whether any of the control
-                                   //!< limits
-  using Base::nr_;                 //!< Dimension of the cost residual
-  using Base::nu_;                 //!< Control dimension
-  using Base::state_;              //!< Model of the state
-  using Base::u_lb_;               //!< Lower control limits
-  using Base::u_ub_;               //!< Upper control limits
-  using Base::unone_;              //!< Neutral state
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-private:
+ private:
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<ContactModelMultiple> contacts_;
   boost::shared_ptr<CostModelSum> costs_;
-  pinocchio::ModelTpl<Scalar> &pinocchio_;
+  pinocchio::ModelTpl<Scalar>& pinocchio_;
   bool with_armature_;
   VectorXs armature_;
   Scalar JMinvJt_damping_;
@@ -98,8 +87,7 @@ private:
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataContactFwdDynamicsTpl
-    : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -108,23 +96,17 @@ struct DifferentialActionDataContactFwdDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataContactFwdDynamicsTpl(
-      Model<Scalar> *const model)
+  explicit DifferentialActionDataContactFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData(),
-                  model->get_contacts()->createData(&pinocchio)),
+        multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
-        Kinv(model->get_state()->get_nv() +
-                 model->get_contacts()->get_nc_total(),
-             model->get_state()->get_nv() +
-                 model->get_contacts()->get_nc_total()),
-        df_dx(model->get_contacts()->get_nc_total(),
-              model->get_state()->get_ndx()),
+        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
+             model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
+        df_dx(model->get_contacts()->get_nc_total(), model->get_state()->get_ndx()),
         df_du(model->get_contacts()->get_nc_total(), model->get_nu()),
         tmp_xstatic(model->get_state()->get_nx()),
-        tmp_Jstatic(model->get_state()->get_nv(),
-                    model->get_nu() + model->get_contacts()->get_nc_total()) {
+        tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
     Kinv.setZero();
     df_dx.setZero();
@@ -137,7 +119,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar>> costs;
+  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   MatrixXs Kinv;
   MatrixXs df_dx;
   MatrixXs df_du;
@@ -156,11 +138,11 @@ struct DifferentialActionDataContactFwdDynamicsTpl
   using Base::xout;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/contact-fwddyn.hxx>
 
-#endif // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
+#endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_

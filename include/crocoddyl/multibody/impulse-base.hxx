@@ -12,53 +12,46 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t &ni)
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                                                         const std::size_t& ni)
     : state_(state), ni_(ni) {}
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(
-    const boost::shared_ptr<ImpulseDataAbstract> &data,
-    const MatrixXs &df_dx) const {
-  if (static_cast<std::size_t>(df_dx.rows()) != ni_ ||
-      static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
+void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                                                      const MatrixXs& df_dx) const {
+  if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
     throw_pretty("df_dq has wrong dimension");
 
   data->df_dx = df_dx;
 }
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::setZeroForce(
-    const boost::shared_ptr<ImpulseDataAbstract> &data) const {
+void ImpulseModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
   data->f.setZero();
 }
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::setZeroForceDiff(
-    const boost::shared_ptr<ImpulseDataAbstract> &data) const {
+void ImpulseModelAbstractTpl<Scalar>::setZeroForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
   data->df_dx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ImpulseDataAbstractTpl<Scalar>>
-ImpulseModelAbstractTpl<Scalar>::createData(
-    pinocchio::DataTpl<Scalar> *const data) {
-  return boost::allocate_shared<ImpulseDataAbstract>(
-      Eigen::aligned_allocator<ImpulseDataAbstract>(), this, data);
+boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModelAbstractTpl<Scalar>::createData(
+    pinocchio::DataTpl<Scalar>* const data) {
+  return boost::allocate_shared<ImpulseDataAbstract>(Eigen::aligned_allocator<ImpulseDataAbstract>(), this, data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar>> &
-ImpulseModelAbstractTpl<Scalar>::get_state() const {
+const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ImpulseModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const std::size_t &ImpulseModelAbstractTpl<Scalar>::get_ni() const {
+const std::size_t& ImpulseModelAbstractTpl<Scalar>::get_ni() const {
   return ni_;
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

@@ -10,67 +10,58 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 
-#include <iostream>
 #include <vector>
+#include <iostream>
 
 #include "crocoddyl/core/diff-action-base.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class DifferentialActionModelNumDiffTpl
-    : public DifferentialActionModelAbstractTpl<_Scalar> {
-public:
+class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataNumDiffTpl<Scalar> Data;
-  typedef DifferentialActionDataAbstractTpl<Scalar>
-      DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
-                                             bool with_gauss_approx = false);
+  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
   virtual ~DifferentialActionModelNumDiffTpl();
 
-  virtual void
-  calc(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-       const Eigen::Ref<const VectorXs> &x,
-       const Eigen::Ref<const VectorXs> &u);
-  virtual void
-  calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-           const Eigen::Ref<const VectorXs> &x,
-           const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
-  const boost::shared_ptr<Base> &get_model() const;
-  const Scalar &get_disturbance() const;
-  void set_disturbance(const Scalar &disturbance);
+  const boost::shared_ptr<Base>& get_model() const;
+  const Scalar& get_disturbance() const;
+  void set_disturbance(const Scalar& disturbance);
   bool get_with_gauss_approx();
 
-protected:
-  using Base::has_control_limits_; //!< Indicates whether any of the control
-                                   //!< limits
-  using Base::nr_;                 //!< Dimension of the cost residual
-  using Base::nu_;                 //!< Control dimension
-  using Base::state_;              //!< Model of the state
-  using Base::u_lb_;               //!< Lower control limits
-  using Base::u_ub_;               //!< Upper control limits
-  using Base::unone_;              //!< Neutral state
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-private:
-  void assertStableStateFD(const Eigen::Ref<const VectorXs> &x);
+ private:
+  void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
   boost::shared_ptr<Base> model_;
   bool with_gauss_approx_;
   Scalar disturbance_;
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataNumDiffTpl
-    : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -86,9 +77,9 @@ struct DifferentialActionDataNumDiffTpl
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataNumDiffTpl(Model<Scalar> *const model)
-      : Base(model), Rx(model->get_model()->get_nr(),
-                        model->get_model()->get_state()->get_ndx()),
+  explicit DifferentialActionDataNumDiffTpl(Model<Scalar>* const model)
+      : Base(model),
+        Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
         du(model->get_model()->get_nu()),
@@ -99,8 +90,8 @@ struct DifferentialActionDataNumDiffTpl
     du.setZero();
     xp.setZero();
 
-    const std::size_t &ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t &nu = model->get_model()->get_nu();
+    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t& nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());
@@ -116,8 +107,8 @@ struct DifferentialActionDataNumDiffTpl
   VectorXs du;
   VectorXs xp;
   boost::shared_ptr<Base> data_0;
-  std::vector<boost::shared_ptr<Base>> data_x;
-  std::vector<boost::shared_ptr<Base>> data_u;
+  std::vector<boost::shared_ptr<Base> > data_x;
+  std::vector<boost::shared_ptr<Base> > data_u;
 
   using Base::cost;
   using Base::Fu;
@@ -131,11 +122,11 @@ struct DifferentialActionDataNumDiffTpl
   using Base::xout;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/diff-action.hxx"
 
-#endif // CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
+#endif  // CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_

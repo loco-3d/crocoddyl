@@ -32,46 +32,46 @@ const std::vector<CostModelNoFFTypes::Type>
 
 std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   switch (type) {
-  case CostModelTypes::CostModelState:
-    os << "CostModelState";
-    break;
-  case CostModelTypes::CostModelControl:
-    os << "CostModelControl";
-    break;
-  case CostModelTypes::CostModelCoMPosition:
-    os << "CostModelCoMPosition";
-    break;
-  // case CostModelTypes::CostModelCentroidalMomentum:
-  //   os << "CostModelCentroidalMomentum";
-  //   break;
-  case CostModelTypes::CostModelFramePlacement:
-    os << "CostModelFramePlacement";
-    break;
-  case CostModelTypes::CostModelFrameRotation:
-    os << "CostModelFrameRotation";
-    break;
-  case CostModelTypes::CostModelFrameTranslation:
-    os << "CostModelFrameTranslation";
-    break;
-  case CostModelTypes::CostModelFrameVelocity:
-    os << "CostModelFrameVelocity";
-    break;
-  case CostModelTypes::NbCostModelTypes:
-    os << "NbCostModelTypes";
-    break;
-  default:
-    break;
+    case CostModelTypes::CostModelState:
+      os << "CostModelState";
+      break;
+    case CostModelTypes::CostModelControl:
+      os << "CostModelControl";
+      break;
+    case CostModelTypes::CostModelCoMPosition:
+      os << "CostModelCoMPosition";
+      break;
+    // case CostModelTypes::CostModelCentroidalMomentum:
+    //   os << "CostModelCentroidalMomentum";
+    //   break;
+    case CostModelTypes::CostModelFramePlacement:
+      os << "CostModelFramePlacement";
+      break;
+    case CostModelTypes::CostModelFrameRotation:
+      os << "CostModelFrameRotation";
+      break;
+    case CostModelTypes::CostModelFrameTranslation:
+      os << "CostModelFrameTranslation";
+      break;
+    case CostModelTypes::CostModelFrameVelocity:
+      os << "CostModelFrameVelocity";
+      break;
+    case CostModelTypes::NbCostModelTypes:
+      os << "NbCostModelTypes";
+      break;
+    default:
+      break;
   }
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type) {
   switch (type) {
-  case CostModelNoFFTypes::CostModelControlGrav:
-    os << "CostModelControlGrav";
-    break;
-  default:
-    break;
+    case CostModelNoFFTypes::CostModelControlGrav:
+      os << "CostModelControlGrav";
+      break;
+    default:
+      break;
   }
   return os;
 }
@@ -144,10 +144,9 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   return cost;
 }
 
-boost::shared_ptr<crocoddyl::CostModelAbstract>
-CostModelFactory::create(CostModelNoFFTypes::Type cost_type,
-                         ActivationModelTypes::Type activation_type,
-                         std::size_t nu) const {
+boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
+    CostModelNoFFTypes::Type cost_type,ActivationModelTypes::Type activation_type,
+    std::size_t nu) const {
   StateModelFactory state_factory;
   ActivationModelFactory activation_factory;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
@@ -155,8 +154,8 @@ CostModelFactory::create(CostModelNoFFTypes::Type cost_type,
       boost::static_pointer_cast<crocoddyl::StateMultibody>(
           state_factory.create(StateModelTypes::StateMultibody_TalosArm));
 
-  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
+  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation = 
+     boost::make_shared<crocoddyl::ActuationModelFull>(state);
 
   crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
@@ -166,8 +165,7 @@ CostModelFactory::create(CostModelNoFFTypes::Type cost_type,
   switch (cost_type) {
   case CostModelNoFFTypes::CostModelControlGrav:
     cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
-        state, activation_factory.create(activation_type, state->get_nv()),
-        actuation);
+        state, activation_factory.create(activation_type, state->get_nv()), actuation);
     break;
   default:
     throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");

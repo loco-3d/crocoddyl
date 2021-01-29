@@ -13,9 +13,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameFrictionCone &fref)
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameFrictionCone& fref)
     : Base(state, activation, 0), fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
@@ -24,23 +23,22 @@ CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
 }
 
 template <typename Scalar>
-CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
-    boost::shared_ptr<StateMultibody> state, const FrameFrictionCone &fref)
+CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
+                                                                         const FrameFrictionCone& fref)
     : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {}
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::~CostModelImpulseFrictionConeTpl() {}
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
+void CostModelImpulseFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                                   const Eigen::Ref<const VectorXs>&,
+                                                   const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
 
-  // Compute the residual of the friction cone. Note that we need to transform
-  // the force to the contact frame
-  data->r.noalias() =
-      fref_.cone.get_A() * d->impulse->jMf.actInv(d->impulse->f).linear();
+  // Compute the residual of the friction cone. Note that we need to transform the force
+  // to the contact frame
+  data->r.noalias() = fref_.cone.get_A() * d->impulse->jMf.actInv(d->impulse->f).linear();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -48,13 +46,13 @@ void CostModelImpulseFrictionConeTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
+void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                                       const Eigen::Ref<const VectorXs>&,
+                                                       const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
 
-  const MatrixXs &df_dx = d->impulse->df_dx;
-  const MatrixX3s &A = fref_.cone.get_A();
+  const MatrixXs& df_dx = d->impulse->df_dx;
+  const MatrixX3s& A = fref_.cone.get_A();
 
   activation_->calcDiff(data->activation, data->r);
   if (d->more_than_3_constraints) {
@@ -67,46 +65,38 @@ void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar>>
-CostModelImpulseFrictionConeTpl<Scalar>::createData(
-    DataCollectorAbstract *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelImpulseFrictionConeTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::set_referenceImpl(
-    const std::type_info &ti, const void *pv) {
+void CostModelImpulseFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameFrictionCone)) {
-    fref_ = *static_cast<const FrameFrictionCone *>(pv);
+    fref_ = *static_cast<const FrameFrictionCone*>(pv);
   } else {
-    throw_pretty(
-        "Invalid argument: incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(
-    const std::type_info &ti, void *pv) const {
+void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameFrictionCone)) {
-    FrameFrictionCone &ref_map = *static_cast<FrameFrictionCone *>(pv);
+    FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
     ref_map = fref_;
   } else {
-    throw_pretty(
-        "Invalid argument: incorrect type (it should be FrameFrictionCone)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
 }
 
 template <typename Scalar>
-const FrameFrictionConeTpl<Scalar> &
-CostModelImpulseFrictionConeTpl<Scalar>::get_fref() const {
+const FrameFrictionConeTpl<Scalar>& CostModelImpulseFrictionConeTpl<Scalar>::get_fref() const {
   return fref_;
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::set_fref(
-    const FrameFrictionCone &fref_in) {
+void CostModelImpulseFrictionConeTpl<Scalar>::set_fref(const FrameFrictionCone& fref_in) {
   fref_ = fref_in;
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

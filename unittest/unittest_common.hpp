@@ -16,35 +16,34 @@
 
 #define NUMDIFF_MODIFIER 3e4
 
+#include <iterator>
 #include <Eigen/Dense>
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/test/execution_monitor.hpp> // for execution_exception
 #include <boost/test/included/unit_test.hpp>
-#include <iterator>
+#include <boost/test/execution_monitor.hpp>  // for execution_exception
+#include <boost/function.hpp>
 
 #if __cplusplus >= 201103L
 #include <random>
 std::mt19937 rng;
 #else
-#include <boost/nondet_random.hpp>
 #include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
 boost::random::mt19937 rng;
 #endif
 
-#include "crocoddyl/core/utils/exception.hpp"
+#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string>
-#include <unistd.h>
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
 class CaptureIOStream {
-public:
-  CaptureIOStream()
-      : m_oldStdOut(0), m_oldStdErr(0), m_capturing(false), m_init(false) {
+ public:
+  CaptureIOStream() : m_oldStdOut(0), m_oldStdErr(0), m_capturing(false), m_init(false) {
     m_pipe[READ] = 0;
     m_pipe[WRITE] = 0;
     if (pipe(m_pipe) == -1) {
@@ -63,21 +62,15 @@ public:
     if (m_capturing) {
       endCapture();
     }
-    if (m_oldStdOut > 0)
-      close(m_oldStdOut);
-    if (m_oldStdErr > 0)
-      close(m_oldStdErr);
-    if (m_pipe[READ] > 0)
-      close(m_pipe[READ]);
-    if (m_pipe[WRITE] > 0)
-      close(m_pipe[WRITE]);
+    if (m_oldStdOut > 0) close(m_oldStdOut);
+    if (m_oldStdErr > 0) close(m_oldStdErr);
+    if (m_pipe[READ] > 0) close(m_pipe[READ]);
+    if (m_pipe[WRITE] > 0) close(m_pipe[WRITE]);
   }
 
   void beginCapture() {
-    if (!m_init)
-      return;
-    if (m_capturing)
-      endCapture();
+    if (!m_init) return;
+    if (m_capturing) endCapture();
     fflush(stdout);
     fflush(stderr);
     dup2(m_pipe[WRITE], fileno(stdout));
@@ -112,8 +105,7 @@ public:
     bool timed_out = false;
 
     while (!timed_out) {
-      if (select(m_pipe[READ] + 1, &read_fds, &write_fds, &except_fds,
-                 &timeout) == 1) {
+      if (select(m_pipe[READ] + 1, &read_fds, &write_fds, &except_fds, &timeout) == 1) {
         // do the reading
         char buff[1];
         nb_read = read(m_pipe[READ], buff, sizeof(buff));
@@ -131,7 +123,7 @@ public:
 
   std::string str() const { return m_captured.str(); }
 
-private:
+ private:
   enum PIPES { READ, WRITE };
   int m_pipe[2];
   int m_oldStdOut;
@@ -171,7 +163,7 @@ RealType random_real_in_range(RealType first = 0, RealType last = 1) {
 #endif
 }
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_UNITTEST_COMMON_HPP_
+#endif  // CROCODDYL_UNITTEST_COMMON_HPP_

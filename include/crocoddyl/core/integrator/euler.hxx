@@ -8,19 +8,20 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    const Scalar &time_step, const bool &with_cost_residual)
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& time_step, const bool& with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
-      differential_(model), time_step_(time_step),
+      differential_(model),
+      time_step_(time_step),
       time_step2_(time_step * time_step),
-      with_cost_residual_(with_cost_residual), enable_integration_(true) {
+      with_cost_residual_(with_cost_residual),
+      enable_integration_(true) {
   Base::set_u_lb(differential_->get_u_lb());
   Base::set_u_ub(differential_->get_u_ub());
   if (time_step_ < Scalar(0.)) {
@@ -37,21 +38,19 @@ template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
+void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                 const Eigen::Ref<const VectorXs>& x,
+                                                 const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t &nv = differential_->get_state()->get_nv();
+  const std::size_t& nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -62,7 +61,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
   // Computing the next state (discrete time)
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(differential_->get_state()->get_nv());
-  const VectorXs &a = d->differential->xout;
+  const VectorXs& a = d->differential->xout;
   if (enable_integration_) {
     d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
     d->dx.tail(nv).noalias() = a * time_step_;
@@ -81,32 +80,29 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u) {
+void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                     const Eigen::Ref<const VectorXs>& x,
+                                                     const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t &nv = differential_->get_state()->get_nv();
+  const std::size_t& nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  // Computing the derivatives for the time-continuous model (i.e. differential
-  // model)
+  // Computing the derivatives for the time-continuous model (i.e. differential model)
   differential_->calcDiff(d->differential, x, u);
 
   if (enable_integration_) {
-    const MatrixXs &da_dx = d->differential->Fx;
-    const MatrixXs &da_du = d->differential->Fu;
+    const MatrixXs& da_dx = d->differential->Fx;
+    const MatrixXs& da_du = d->differential->Fu;
     d->Fx.topRows(nv).noalias() = da_dx * time_step2_;
     d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
     d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
@@ -115,8 +111,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
     d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
 
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first,
-                                           addto);
+    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
@@ -136,14 +131,12 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar>>
-IntegratedActionModelEulerTpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-bool IntegratedActionModelEulerTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract> &data) {
+bool IntegratedActionModelEulerTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
     return differential_->checkData(d->differential);
@@ -153,18 +146,18 @@ bool IntegratedActionModelEulerTpl<Scalar>::checkData(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar>> &
+const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
   return differential_;
 }
 
 template <typename Scalar>
-const Scalar &IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
+const Scalar& IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
   return time_step_;
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar &dt) {
+void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar& dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: "
                  << "dt has positive value");
@@ -176,7 +169,7 @@ void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar &dt) {
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::set_differential(
     boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t &nu = model->get_nu();
+  const std::size_t& nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
     unone_ = VectorXs::Zero(nu_);
@@ -189,19 +182,16 @@ void IntegratedActionModelEulerTpl<Scalar>::set_differential(
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<ActionDataAbstract> &data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs> &x, const std::size_t &maxiter,
-    const Scalar &tol) {
+void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                        Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                                                        const std::size_t& maxiter, const Scalar& tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
   // Static casting the data
@@ -210,4 +200,4 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
   differential_->quasiStatic(d->differential, u, x, maxiter, tol);
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

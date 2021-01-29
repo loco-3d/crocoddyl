@@ -11,73 +11,64 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class DifferentialActionModelLQRTpl
-    : public DifferentialActionModelAbstractTpl<_Scalar> {
-public:
+class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+ public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataLQRTpl<Scalar> Data;
   typedef StateVectorTpl<Scalar> StateVector;
-  typedef DifferentialActionDataAbstractTpl<Scalar>
-      DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  DifferentialActionModelLQRTpl(const std::size_t &nq, const std::size_t &nu,
-                                bool drift_free = true);
+  DifferentialActionModelLQRTpl(const std::size_t& nq, const std::size_t& nu, bool drift_free = true);
   virtual ~DifferentialActionModelLQRTpl();
 
-  virtual void
-  calc(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-       const Eigen::Ref<const VectorXs> &x,
-       const Eigen::Ref<const VectorXs> &u);
-  virtual void
-  calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-           const Eigen::Ref<const VectorXs> &x,
-           const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
-  virtual bool
-  checkData(const boost::shared_ptr<DifferentialActionDataAbstract> &data);
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
-  const MatrixXs &get_Fq() const;
-  const MatrixXs &get_Fv() const;
-  const MatrixXs &get_Fu() const;
-  const VectorXs &get_f0() const;
-  const VectorXs &get_lx() const;
-  const VectorXs &get_lu() const;
-  const MatrixXs &get_Lxx() const;
-  const MatrixXs &get_Lxu() const;
-  const MatrixXs &get_Luu() const;
+  const MatrixXs& get_Fq() const;
+  const MatrixXs& get_Fv() const;
+  const MatrixXs& get_Fu() const;
+  const VectorXs& get_f0() const;
+  const VectorXs& get_lx() const;
+  const VectorXs& get_lu() const;
+  const MatrixXs& get_Lxx() const;
+  const MatrixXs& get_Lxu() const;
+  const MatrixXs& get_Luu() const;
 
-  void set_Fq(const MatrixXs &Fq);
-  void set_Fv(const MatrixXs &Fv);
-  void set_Fu(const MatrixXs &Fu);
-  void set_f0(const VectorXs &f0);
-  void set_lx(const VectorXs &lx);
-  void set_lu(const VectorXs &lu);
-  void set_Lxx(const MatrixXs &Lxx);
-  void set_Lxu(const MatrixXs &Lxu);
-  void set_Luu(const MatrixXs &Luu);
+  void set_Fq(const MatrixXs& Fq);
+  void set_Fv(const MatrixXs& Fv);
+  void set_Fu(const MatrixXs& Fu);
+  void set_f0(const VectorXs& f0);
+  void set_lx(const VectorXs& lx);
+  void set_lu(const VectorXs& lu);
+  void set_Lxx(const MatrixXs& Lxx);
+  void set_Lxu(const MatrixXs& Lxu);
+  void set_Luu(const MatrixXs& Luu);
 
-protected:
-  using Base::has_control_limits_; //!< Indicates whether any of the control
-                                   //!< limits
-  using Base::nr_;                 //!< Dimension of the cost residual
-  using Base::nu_;                 //!< Control dimension
-  using Base::state_;              //!< Model of the state
-  using Base::u_lb_;               //!< Lower control limits
-  using Base::u_ub_;               //!< Upper control limits
-  using Base::unone_;              //!< Neutral state
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-private:
+ private:
   bool drift_free_;
   MatrixXs Fq_;
   MatrixXs Fv_;
@@ -91,8 +82,7 @@ private:
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataLQRTpl
-    : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
@@ -100,10 +90,8 @@ struct DifferentialActionDataLQRTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataLQRTpl(Model<Scalar> *const model)
-      : Base(model) {
-    // Setting the linear model and quadratic cost here because they are
-    // constant
+  explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
+    // Setting the linear model and quadratic cost here because they are constant
     Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
     Fx.rightCols(model->get_state()->get_nv()) = model->get_Fv();
     Fu = model->get_Fu();
@@ -124,10 +112,10 @@ struct DifferentialActionDataLQRTpl
   using Base::xout;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actions/diff-lqr.hxx"
-#endif // CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_
+#endif  // CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_

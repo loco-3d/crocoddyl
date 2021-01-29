@@ -9,13 +9,14 @@
 #ifndef CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 #define CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 
-template <typename _Scalar> class FrictionConeTpl {
-public:
+template <typename _Scalar>
+class FrictionConeTpl {
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -28,26 +29,24 @@ public:
   typedef typename MathBase::Quaternions Quaternions;
 
   explicit FrictionConeTpl();
-  FrictionConeTpl(
-      const Vector3s &normal, const Scalar &mu, std::size_t nf = 4,
-      bool inner_appr = true, const Scalar &min_nforce = Scalar(0.),
-      const Scalar &max_nforce = std::numeric_limits<Scalar>::max());
-  FrictionConeTpl(const FrictionConeTpl<Scalar> &cone);
+  FrictionConeTpl(const Vector3s& normal, const Scalar& mu, std::size_t nf = 4, bool inner_appr = true,
+                  const Scalar& min_nforce = Scalar(0.),
+                  const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
+  FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
   ~FrictionConeTpl();
 
-  void update(const Vector3s &normal, const Scalar &mu, bool inner_appr = true,
-              const Scalar &min_nforce = Scalar(0.),
-              const Scalar &max_nforce = std::numeric_limits<Scalar>::max());
+  void update(const Vector3s& normal, const Scalar& mu, bool inner_appr = true, const Scalar& min_nforce = Scalar(0.),
+              const Scalar& max_nforce = std::numeric_limits<Scalar>::max());
 
-  const MatrixX3s &get_A() const;
-  const VectorXs &get_lb() const;
-  const VectorXs &get_ub() const;
-  const Vector3s &get_nsurf() const;
-  const Scalar &get_mu() const;
-  const std::size_t &get_nf() const;
-  const bool &get_inner_appr() const;
-  const Scalar &get_min_nforce() const;
-  const Scalar &get_max_nforce() const;
+  const MatrixX3s& get_A() const;
+  const VectorXs& get_lb() const;
+  const VectorXs& get_ub() const;
+  const Vector3s& get_nsurf() const;
+  const Scalar& get_mu() const;
+  const std::size_t& get_nf() const;
+  const bool& get_inner_appr() const;
+  const Scalar& get_min_nforce() const;
+  const Scalar& get_max_nforce() const;
 
   void set_nsurf(Vector3s nf);
   void set_mu(Scalar mu);
@@ -56,10 +55,9 @@ public:
   void set_max_nforce(Scalar max_nforce);
 
   template <class Scalar>
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const FrictionConeTpl<Scalar> &X);
+  friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);
 
-private:
+ private:
   MatrixX3s A_;
   VectorXs lb_;
   VectorXs ub_;
@@ -71,10 +69,10 @@ private:
   Scalar max_nforce_;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/friction-cone.hxx"
 
-#endif // CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
+#endif  // CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_

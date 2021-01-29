@@ -9,15 +9,15 @@
 #ifndef CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -25,51 +25,41 @@ public:
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef IntegratedActionDataRK4Tpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
-  typedef DifferentialActionModelAbstractTpl<Scalar>
-      DifferentialActionModelAbstract;
+  typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  IntegratedActionModelRK4Tpl(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
-      const Scalar &time_step = Scalar(1e-3),
-      const bool &with_cost_residual = true);
+  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                              const Scalar& time_step = Scalar(1e-3), const bool& with_cost_residual = true);
   virtual ~IntegratedActionModelRK4Tpl();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract> &data);
+  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract> &data,
-                           Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs> &x,
-                           const std::size_t &maxiter = 100,
-                           const Scalar &tol = Scalar(1e-9));
+  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
+                           const Scalar& tol = Scalar(1e-9));
 
-  const boost::shared_ptr<DifferentialActionModelAbstract> &
-  get_differential() const;
-  const Scalar &get_dt() const;
+  const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
+  const Scalar& get_dt() const;
 
-  void set_dt(const Scalar &dt);
-  void
-  set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
+  void set_dt(const Scalar& dt);
+  void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
-protected:
-  using Base::has_control_limits_; //!< Indicates whether any of the control
-                                   //!< limits are active
-  using Base::nr_;                 //!< Dimension of the cost residual
-  using Base::nu_;                 //!< Control dimension
-  using Base::state_;              //!< Model of the state
-  using Base::u_lb_;               //!< Lower control limits
-  using Base::u_ub_;               //!< Upper control limits
-  using Base::unone_;              //!< Neutral state
+ protected:
+  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
+  using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Control dimension
+  using Base::state_;               //!< Model of the state
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
 
-private:
+ private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
   std::vector<Scalar> rk4_c_;
@@ -88,17 +78,15 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataRK4Tpl(Model<Scalar> *const model)
-      : Base(model) {
-    const std::size_t &ndx = model->get_state()->get_ndx();
-    const std::size_t &nx = model->get_state()->get_nx();
-    const std::size_t &nv = model->get_state()->get_nv();
-    const std::size_t &nu = model->get_nu();
+  explicit IntegratedActionDataRK4Tpl(Model<Scalar>* const model) : Base(model) {
+    const std::size_t& ndx = model->get_state()->get_ndx();
+    const std::size_t& nx = model->get_state()->get_nx();
+    const std::size_t& nv = model->get_state()->get_nv();
+    const std::size_t& nu = model->get_nu();
 
     for (std::size_t i = 0; i < 4; ++i) {
       differential.push_back(
-          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>(
-              model->get_differential()->createData()));
+          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
     }
 
     dx = VectorXs::Zero(ndx);
@@ -131,8 +119,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   virtual ~IntegratedActionDataRK4Tpl() {}
 
   VectorXs dx;
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>>
-      differential;
+  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
@@ -165,11 +152,11 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::xnext;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integrator/rk4.hxx"
 
-#endif // CROCODDYL_CORE_INTEGRATOR_RK4_HPP_
+#endif  // CROCODDYL_CORE_INTEGRATOR_RK4_HPP_

@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_STATE_FACTORY_HPP_
 #define CROCODDYL_STATE_FACTORY_HPP_
 
-#include "crocoddyl/core/numdiff/state.hpp"
-#include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "pinocchio_model.hpp"
+#include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/numdiff/state.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -37,20 +37,19 @@ struct StateModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, StateModelTypes::Type type);
+std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type);
 
 class StateModelFactory {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit StateModelFactory();
   ~StateModelFactory();
 
-  boost::shared_ptr<crocoddyl::StateAbstract>
-  create(StateModelTypes::Type state_type) const;
+  boost::shared_ptr<crocoddyl::StateAbstract> create(StateModelTypes::Type state_type) const;
 };
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_STATE_FACTORY_HPP_
+#endif  // CROCODDYL_STATE_FACTORY_HPP_

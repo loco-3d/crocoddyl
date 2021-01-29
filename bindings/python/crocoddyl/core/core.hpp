@@ -56,7 +56,7 @@ void exposeCallbacks();
 
 void exposeCore();
 
-} // namespace python
-} // namespace crocoddyl
+}  // namespace python
+}  // namespace crocoddyl
 
-#endif // BINDINGS_PYTHON_CROCODDYL_CORE_CORE_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_CORE_CORE_HPP_

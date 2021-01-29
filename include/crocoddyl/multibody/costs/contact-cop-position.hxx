@@ -13,50 +13,44 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameCoPSupport &cop_support, const std::size_t &nu)
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameCoPSupport& cop_support, const std::size_t& nu)
     : Base(state, activation, nu), cop_support_(cop_support) {}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameCoPSupport &cop_support)
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
+    const FrameCoPSupport& cop_support)
     : Base(state, activation), cop_support_(cop_support) {}
 
 template <typename _Scalar>
-CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const FrameCoPSupport &cop_support,
-    const std::size_t &nu)
+CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+                                                                        const FrameCoPSupport& cop_support,
+                                                                        const std::size_t& nu)
     : Base(state,
-           boost::make_shared<ActivationModelQuadraticBarrier>(ActivationBounds(
-               VectorXs::Zero(4),
-               std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
+           boost::make_shared<ActivationModelQuadraticBarrier>(
+               ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
            nu),
       cop_support_(cop_support) {}
 
 template <typename _Scalar>
-CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const FrameCoPSupport &cop_support)
-    : Base(state,
-           boost::make_shared<ActivationModelQuadraticBarrier>(ActivationBounds(
-               VectorXs::Zero(4),
-               std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4)))),
+CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+                                                                        const FrameCoPSupport& cop_support)
+    : Base(state, boost::make_shared<ActivationModelQuadraticBarrier>(
+                      ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4)))),
       cop_support_(cop_support) {}
 
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
+void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                                  const Eigen::Ref<const VectorXs>&,
+                                                  const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
 
   // Compute the cost residual r =  A * f
-  data->r.noalias() =
-      cop_support_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
+  data->r.noalias() = cop_support_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
 
   // Compute the cost
   activation_->calc(data->activation, data->r);
@@ -64,16 +58,16 @@ void CostModelContactCoPPositionTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
+void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                                      const Eigen::Ref<const VectorXs>&,
+                                                      const Eigen::Ref<const VectorXs>&) {
   // Update all data
-  Data *d = static_cast<Data *>(data.get());
+  Data* d = static_cast<Data*>(data.get());
 
   // Get the derivatives of the local contact wrench
-  const MatrixXs &df_dx = d->contact->df_dx;
-  const MatrixXs &df_du = d->contact->df_du;
-  const Matrix46 &A = cop_support_.get_A();
+  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_du = d->contact->df_du;
+  const Matrix46& A = cop_support_.get_A();
 
   // Compute the derivatives of the activation function
   activation_->calcDiff(data->activation, data->r);
@@ -94,34 +88,28 @@ void CostModelContactCoPPositionTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar>>
-CostModelContactCoPPositionTpl<Scalar>::createData(
-    DataCollectorAbstract *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactCoPPositionTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(
-    const std::type_info &ti, const void *pv) {
+void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameCoPSupport)) {
-    cop_support_ = *static_cast<const FrameCoPSupport *>(pv);
+    cop_support_ = *static_cast<const FrameCoPSupport*>(pv);
   } else {
-    throw_pretty(
-        "Invalid argument: incorrect type (it should be FrameCoPSupport)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
   }
 }
 
 template <typename Scalar>
-void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(
-    const std::type_info &ti, void *pv) const {
+void CostModelContactCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
   if (ti == typeid(FrameCoPSupport)) {
-    FrameCoPSupport &ref_map = *static_cast<FrameCoPSupport *>(pv);
+    FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
     ref_map = cop_support_;
   } else {
-    throw_pretty(
-        "Invalid argument: incorrect type (it should be FrameCoPSupport)");
+    throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
   }
 }
 
-} // namespace crocoddyl
+}  // namespace crocoddyl

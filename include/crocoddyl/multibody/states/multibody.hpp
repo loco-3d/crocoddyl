@@ -8,15 +8,15 @@
 
 #ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 #define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
-#include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
 
 namespace crocoddyl {
 
 template <typename _Scalar>
 class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -34,31 +34,22 @@ public:
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;
-  virtual void diff(const Eigen::Ref<const VectorXs> &x0,
-                    const Eigen::Ref<const VectorXs> &x1,
+  virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                     Eigen::Ref<VectorXs> dxout) const;
-  virtual void integrate(const Eigen::Ref<const VectorXs> &x,
-                         const Eigen::Ref<const VectorXs> &dx,
+  virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                          Eigen::Ref<VectorXs> xout) const;
-  virtual void Jdiff(const Eigen::Ref<const VectorXs> &,
-                     const Eigen::Ref<const VectorXs> &,
-                     Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                     const Jcomponent firstsecond = both) const;
+  virtual void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
+                     Eigen::Ref<MatrixXs> Jsecond, const Jcomponent firstsecond = both) const;
 
-  virtual void Jintegrate(const Eigen::Ref<const VectorXs> &x,
-                          const Eigen::Ref<const VectorXs> &dx,
-                          Eigen::Ref<MatrixXs> Jfirst,
-                          Eigen::Ref<MatrixXs> Jsecond,
-                          const Jcomponent firstsecond = both,
-                          const AssignmentOp = setto) const;
-  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs> &x,
-                                   const Eigen::Ref<const VectorXs> &dx,
-                                   Eigen::Ref<MatrixXs> Jin,
-                                   const Jcomponent firstsecond) const;
+  virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                          const Jcomponent firstsecond = both, const AssignmentOp = setto) const;
+  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+                                   Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
-  const boost::shared_ptr<PinocchioModel> &get_pinocchio() const;
+  const boost::shared_ptr<PinocchioModel>& get_pinocchio() const;
 
-protected:
+ protected:
   using Base::has_limits_;
   using Base::lb_;
   using Base::ndx_;
@@ -67,17 +58,17 @@ protected:
   using Base::nx_;
   using Base::ub_;
 
-private:
+ private:
   boost::shared_ptr<PinocchioModel> pinocchio_;
   VectorXs x0_;
   JointType joint_type_;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/states/multibody.hxx"
 
-#endif // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+#endif  // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_

@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft
+// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,12 +21,10 @@ using namespace crocoddyl::unittest;
 void test_check_data(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract> &model =
-      factory.create(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data =
-      model->createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
   BOOST_CHECK(model->checkData(data));
 }
@@ -35,62 +32,53 @@ void test_check_data(ActionModelTypes::Type action_model_type) {
 void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract> &model =
-      factory.create(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data =
-      model->createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
   // Generating random state and control vectors
-  const Eigen::VectorXd &x = model->get_state()->rand();
-  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
 
-  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) ==
-              model->get_state()->get_nx());
+  BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state()->get_nx());
 }
 
 void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract> &model =
-      factory.create(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data =
-      model->createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  const Eigen::VectorXd &x = model->get_state()->rand();
-  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
   model->calc(data, x, u);
 
   // Checking that calc returns a cost value
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(
-    ActionModelTypes::Type action_model_type) {
+void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract> &model =
-      factory.create(action_model_type);
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data =
-      model->createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
   crocoddyl::ActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data_num_diff =
-      model_num_diff.createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd &x = model->get_state()->rand();
-  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);
@@ -118,19 +106,15 @@ void test_partial_derivatives_against_numdiff(
 
 //----------------------------------------------------------------------------//
 
-void register_action_model_unit_tests(
-    ActionModelTypes::Type action_model_type) {
+void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << action_model_type;
   std::cout << "Running " << test_name.str() << std::endl;
-  test_suite *ts = BOOST_TEST_SUITE(test_name.str());
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_check_data, action_model_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_calc_returns_state, action_model_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_calc_returns_a_cost, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff,
-                                      action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_model_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -141,6 +125,4 @@ bool init_function() {
   return true;
 }
 
-int main(int argc, char **argv) {
-  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
-}
+int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
