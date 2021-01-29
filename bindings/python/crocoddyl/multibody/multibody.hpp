@@ -38,6 +38,7 @@ void exposeResidualCentroidalMomentum();
 void exposeResidualCoMPosition();
 void exposeResidualContactForce();
 void exposeResidualContactImpulse();
+void exposeResidualContactWrenchCone();
 void exposeResidualFramePlacement();
 void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();

@@ -35,6 +35,7 @@ void exposeMultibody() {
   exposeResidualCoMPosition();
   exposeResidualContactForce();
   exposeResidualContactImpulse();
+  exposeResidualContactWrenchCone();
   exposeResidualFramePlacement();
   exposeResidualFrameRotation();
   exposeResidualFrameTranslation();
