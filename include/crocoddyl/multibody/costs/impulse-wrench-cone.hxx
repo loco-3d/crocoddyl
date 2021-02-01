@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,8 @@ template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameWrenchCone& fref)
-    : Base(state, activation, 0), fref_(fref) {
+    : Base(state, activation, boost::make_shared<ResidualModelImpulseWrenchCone>(state, fref.id, fref.cone)),
+      fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 13) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
@@ -25,41 +26,37 @@ CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const FrameWrenchCone& fref)
-    : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelImpulseWrenchCone>(state, fref.id, fref.cone)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::~CostModelImpulseWrenchConeTpl() {}
 
 template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>&,
-                                                 const Eigen::Ref<const VectorXs>&) {
+                                                 const Eigen::Ref<const VectorXs>& x,
+                                                 const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference impulse wrench
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the residual of the wrench cone. Note that we need to transform the force
-  // to the contact frame
-  data->r.noalias() = fref_.cone.get_A() * d->impulse->jMf.actInv(d->impulse->f).toVector();
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                     const Eigen::Ref<const VectorXs>&,
-                                                     const Eigen::Ref<const VectorXs>&) {
+                                                     const Eigen::Ref<const VectorXs>& x,
+                                                     const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and impulse wrench cone residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  const MatrixXs& df_dx = d->impulse->df_dx;
-  const MatrixX6s& A = fref_.cone.get_A();
-
-  activation_->calcDiff(data->activation, data->r);
-  data->Rx.noalias() = A * df_dx;
-
-  d->Arr_Rx.noalias() = data->activation->Arr * data->Rx;
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * d->Arr_Rx;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>
@@ -72,6 +69,9 @@ template <typename Scalar>
 void CostModelImpulseWrenchConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameWrenchCone)) {
     fref_ = *static_cast<const FrameWrenchCone*>(pv);
+    ResidualModelImpulseWrenchCone* residual = static_cast<ResidualModelImpulseWrenchCone*>(residual_.get());
+    residual->set_id(fref_.id);
+    residual->set_reference(fref_.cone);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");
   }

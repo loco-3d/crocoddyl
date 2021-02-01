@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,12 +12,8 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-#include "crocoddyl/multibody/impulses/impulse-6d.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/residuals/impulse-wrench-cone.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -56,6 +52,7 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
+  using Base::residual_;
   using Base::state_;
 
  private:
@@ -80,50 +77,14 @@ struct CostDataImpulseWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataImpulseWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
     Arr_Rx.setZero();
-
-    // Check that proper shared data has been passed
-    DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorImpulse");
-    }
-
-    // Avoids data casting at runtime
-    FrameWrenchCone fref = model->template get_reference<FrameWrenchCone>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
-    bool found_impulse = false;
-    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
-         it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == fref.id) {
-        ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          found_impulse = true;
-          impulse = it->second;
-          throw_pretty("Domain error: there isn't defined at least a 6d contact for " + frame_name);
-        }
-        ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-        throw_pretty("Domain error: there isn't defined at least a 6d impulse for " + frame_name);
-        break;
-      }
-    }
-    if (!found_impulse) {
-      throw_pretty("Domain error: there isn't defined impulse data for " + frame_name);
-    }
   }
 
-  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;
   MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
   using Base::Lx;
   using Base::Lxx;
-  using Base::r;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

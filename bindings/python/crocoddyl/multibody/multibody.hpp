@@ -44,6 +44,7 @@ void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();
 void exposeResidualFrameVelocity();
 void exposeResidualImpulseCoM();
+void exposeResidualImpulseWrenchCone();
 void exposeCostState();
 void exposeCostCoMPosition();
 void exposeCostCentroidalMomentum();

@@ -72,10 +72,6 @@ void exposeCostImpulseWrenchCone() {
           "Create impulse Wrench cone cost data.\n\n"
           ":param model: impulse Wrench cone cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property(
-          "impulse",
-          bp::make_getter(&CostDataImpulseWrenchCone::impulse, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataImpulseWrenchCone::impulse), "impulse data associated with the current cost")
       .add_property("Arr_Rx", bp::make_getter(&CostDataImpulseWrenchCone::Arr_Rx, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataImpulseWrenchCone::Arr_Rx),
                     "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)");
