@@ -89,8 +89,7 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_armature),
                     "set an armature mechanism in the joints")
       .add_property("JMinvJt_damping",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics::get_damping_factor,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics::get_damping_factor),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
 

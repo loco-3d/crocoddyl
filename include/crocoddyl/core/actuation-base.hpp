@@ -33,7 +33,7 @@ class ActuationModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu) : nu_(nu), state_(state) {
+  ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu) : nu_(nu), state_(state) {
     if (nu_ == 0) {
       throw_pretty("Invalid argument: "
                    << "nu cannot be zero");
@@ -49,7 +49,7 @@ class ActuationModelAbstractTpl {
     return boost::allocate_shared<ActuationDataAbstract>(Eigen::aligned_allocator<ActuationDataAbstract>(), this);
   };
 
-  const std::size_t& get_nu() const { return nu_; };
+  std::size_t get_nu() const { return nu_; };
   const boost::shared_ptr<StateAbstract>& get_state() const { return state_; };
 
  protected:

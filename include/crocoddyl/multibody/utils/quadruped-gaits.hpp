@@ -47,18 +47,18 @@ class SimpleQuadrupedGaitProblem {
                                                                      const std::size_t supportKnots);
 
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > createFootStepModels(
-      double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, double stepLength,
-      double stepHeight, std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, const double stepLength,
+      const double stepHeight, const std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
       const std::vector<pinocchio::FrameIndex>& swingFootIds);
 
   boost::shared_ptr<ActionModelAbstract> createSwingFootModel(
-      double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
       const Eigen::Vector3d& comTask = Eigen::Vector3d::Constant(std::numeric_limits<double>::infinity()),
       const std::vector<crocoddyl::FramePlacement>& swingFootTask = std::vector<crocoddyl::FramePlacement>());
 
   boost::shared_ptr<ActionModelAbstract> createFootSwitchModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask,
-      bool pseudoImpulse = false);
+      const bool pseudoImpulse = false);
 
   boost::shared_ptr<ActionModelAbstract> createPseudoImpulseModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask);

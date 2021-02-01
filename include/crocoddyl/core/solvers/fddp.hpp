@@ -58,8 +58,8 @@ class SolverFDDP : public SolverDDP {
   virtual ~SolverFDDP();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
-                     const bool& is_feasible = false, const double& regInit = 1e-9);
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double regInit = 1e-9);
 
   /**
    * @copybrief SolverAbstract::expectedImprovement
@@ -79,7 +79,7 @@ class SolverFDDP : public SolverDDP {
    * @brief Update internal values for computing the expected improvement
    */
   void updateExpectedImprovement();
-  virtual void forwardPass(const double& stepLength);
+  virtual void forwardPass(const double stepLength);
 
   /**
    * @brief Return the threshold used for accepting step along ascent direction
@@ -89,7 +89,7 @@ class SolverFDDP : public SolverDDP {
   /**
    * @brief Modify the threshold used for accepting step along ascent direction
    */
-  void set_th_acceptnegstep(const double& th_acceptnegstep);
+  void set_th_acceptnegstep(const double th_acceptnegstep);
 
  protected:
   double dg_;  //!< Internal data for computing the expected improvement

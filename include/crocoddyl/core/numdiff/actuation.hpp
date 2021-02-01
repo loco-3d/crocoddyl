@@ -69,16 +69,16 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief Get the disturbance_ object
    *
-   * @return const Scalar&
+   * @return Scalar
    */
-  const Scalar& get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar disturbance);
 
  private:
   /**
@@ -120,8 +120,8 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
     dx.setZero();
     du.setZero();
     xp.setZero();
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t& nu = model->get_model()->get_nu();
+    const std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());

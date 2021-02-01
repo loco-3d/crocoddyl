@@ -18,7 +18,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                                             const FrameMotion& vref, const std::size_t& nu)
+                                                             const FrameMotion& vref, const std::size_t nu)
     : Base(state, activation, nu), vref_(vref), pin_model_(state->get_pinocchio()) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -39,7 +39,7 @@ CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<S
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                                                             const FrameMotion& vref, const std::size_t& nu)
+                                                             const FrameMotion& vref, const std::size_t nu)
     : Base(state, 6, nu), vref_(vref), pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
@@ -70,7 +70,7 @@ void CostModelFrameVelocityTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
   Data* d = static_cast<Data*>(data.get());
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio, vref_.id, vref_.reference,
                                          data->Rx.leftCols(nv), data->Rx.rightCols(nv));
 

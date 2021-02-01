@@ -12,7 +12,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
-
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -89,8 +88,8 @@ class BoxQP {
    * @param[in] th_grad        Gradient tolerance threshold (default 1e-9)
    * @param[in] reg            Regularization value (default 1e-9)
    */
-  BoxQP(const std::size_t nx, std::size_t maxiter = 100, const double th_acceptstep = 0.1, const double th_grad = 1e-9,
-        const double reg = 1e-9);
+  BoxQP(const std::size_t nx, const std::size_t maxiter = 100, const double th_acceptstep = 0.1,
+        const double th_grad = 1e-9, const double reg = 1e-9);
   /**
    * @brief Destroy the Projected-Newton QP solver
    */
@@ -117,27 +116,27 @@ class BoxQP {
   /**
    * @brief Return the decision vector dimension
    */
-  const std::size_t& get_nx() const;
+  std::size_t get_nx() const;
 
   /**
    * @brief Return the maximum allowed number of iterations
    */
-  const std::size_t& get_maxiter() const;
+  std::size_t get_maxiter() const;
 
   /**
    * @brief Return the acceptance step threshold
    */
-  const double& get_th_acceptstep() const;
+  double get_th_acceptstep() const;
 
   /**
    * @brief Return the gradient tolerance threshold
    */
-  const double& get_th_grad() const;
+  double get_th_grad() const;
 
   /**
    * @brief Return the regularization value
    */
-  const double& get_reg() const;
+  double get_reg() const;
 
   /**
    * @brief Return the stack of step lengths using by the line-search procedure
@@ -147,27 +146,27 @@ class BoxQP {
   /**
    * @brief Modify the decision vector dimension
    */
-  void set_nx(const std::size_t& nx);
+  void set_nx(const std::size_t nx);
 
   /**
    * @brief Modify the maximum allowed number of iterations
    */
-  void set_maxiter(const std::size_t& maxiter);
+  void set_maxiter(const std::size_t maxiter);
 
   /**
    * @brief Modify the acceptance step threshold
    */
-  void set_th_acceptstep(const double& th_acceptstep);
+  void set_th_acceptstep(const double th_acceptstep);
 
   /**
    * @brief Modify the gradient tolerance threshold
    */
-  void set_th_grad(const double& th_grad);
+  void set_th_grad(const double th_grad);
 
   /**
    * @brief Modify the regularization value
    */
-  void set_reg(const double& reg);
+  void set_reg(const double reg);
 
   /**
    * @brief Modify the stack of step lengths using by the line-search procedure

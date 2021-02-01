@@ -29,7 +29,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free = true);
+  ActionModelLQRTpl(const std::size_t nx, const std::size_t nu, const bool drift_free = true);
   virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,

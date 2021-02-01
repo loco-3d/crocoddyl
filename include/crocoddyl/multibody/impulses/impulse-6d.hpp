@@ -33,7 +33,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
+  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t frame);
   virtual ~ImpulseModel6DTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -41,7 +41,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  const std::size_t& get_frame() const;
+  std::size_t get_frame() const;
 
  protected:
   using Base::ni_;

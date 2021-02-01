@@ -12,13 +12,12 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& nc, const std::size_t& nu)
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
+                                                         const std::size_t nu)
     : state_(state), nc_(nc), nu_(nu) {}
 
 template <typename Scalar>
-ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& nc)
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
     : state_(state), nc_(nc), nu_(state->get_nv()) {}
 
 template <typename Scalar>
@@ -60,12 +59,12 @@ const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelAbstractTpl<Sca
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelAbstractTpl<Scalar>::get_nc() const {
+std::size_t ContactModelAbstractTpl<Scalar>::get_nc() const {
   return nc_;
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelAbstractTpl<Scalar>::get_nu() const {
+std::size_t ContactModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 

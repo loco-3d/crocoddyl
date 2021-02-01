@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
-                                                                             bool with_gauss_approx)
+                                                                             const bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
@@ -57,7 +57,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
   const VectorXs& xn0 = data_nd->data_0->xout;
-  const Scalar& c0 = data_nd->data_0->cost;
+  const Scalar c0 = data_nd->data_0->cost;
   data->xout = data_nd->data_0->xout;
   data->cost = data_nd->data_0->cost;
 
@@ -71,7 +71,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
 
     const VectorXs& xn = data_nd->data_x[ix]->xout;
-    const Scalar& c = data_nd->data_x[ix]->cost;
+    const Scalar c = data_nd->data_x[ix]->cost;
     data->Fx.col(ix) = (xn - xn0) / disturbance_;
 
     data->Lx(ix) = (c - c0) / disturbance_;
@@ -86,7 +86,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->calc(data_nd->data_u[iu], x, u + data_nd->du);
 
     const VectorXs& xn = data_nd->data_u[iu]->xout;
-    const Scalar& c = data_nd->data_u[iu]->cost;
+    const Scalar c = data_nd->data_u[iu]->cost;
     data->Fu.col(iu) = (xn - xn0) / disturbance_;
 
     data->Lu(iu) = (c - c0) / disturbance_;
@@ -113,12 +113,12 @@ DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
 }
 
 template <typename Scalar>
-const Scalar& DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar DifferentialActionModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

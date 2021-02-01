@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -97,33 +98,44 @@ void exposeSolverDDP() {
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
       .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
+      .add_property("reg_incFactor", bp::make_function(&SolverDDP::get_reg_incfactor),
+                    bp::make_function(&SolverDDP::set_reg_incfactor),
+                    "regularization factor used for increasing the damping value.")
+      .add_property("reg_decFactor", bp::make_function(&SolverDDP::get_reg_decfactor),
+                    bp::make_function(&SolverDDP::set_reg_decfactor),
+                    "regularization factor used for decreasing the damping value.")
       .add_property("regFactor",
-                    bp::make_function(&SolverDDP::get_regfactor, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regfactor),
-                    "regularization factor used for increasing or decreasing the value.")
-      .add_property("regMin",
-                    bp::make_function(&SolverDDP::get_regmin, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regmin), "minimum regularization value.")
-      .add_property("regMax",
-                    bp::make_function(&SolverDDP::get_regmax, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_regmax), "maximum regularization value.")
-      .add_property("th_stepDec",
-                    bp::make_function(&SolverDDP::get_th_stepdec, bp::return_value_policy<bp::copy_const_reference>()),
+                    bp::make_function(&SolverDDP::get_reg_incfactor,
+                                      deprecated<>("Deprecated. Use reg_incfactor or reg_decfactor")),
+                    bp::make_function(&SolverDDP::set_reg_incfactor,
+                                      deprecated<>("Deprecated. Use reg_incfactor or reg_decfactor")),
+                    "regularization factor used for increasing or decreasing the damping value.")
+      .add_property("reg_min", bp::make_function(&SolverDDP::get_reg_min), bp::make_function(&SolverDDP::set_reg_min),
+                    "minimum regularization value.")
+      .add_property("reg_max", bp::make_function(&SolverDDP::get_reg_max), bp::make_function(&SolverDDP::set_reg_max),
+                    "maximum regularization value.")
+      .add_property("regMin", bp::make_function(&SolverDDP::get_reg_min, deprecated<>("Deprecated. Use reg_min")),
+                    bp::make_function(&SolverDDP::set_reg_min, deprecated<>("Deprecated. Use reg_min")),
+                    "minimum regularization value.")
+      .add_property("regMax", bp::make_function(&SolverDDP::get_reg_max, deprecated<>("Deprecated. Use reg_max")),
+                    bp::make_function(&SolverDDP::set_reg_max, deprecated<>("Deprecated. Use reg_max")),
+                    "maximum regularization value.")
+      .add_property("th_stepDec", bp::make_function(&SolverDDP::get_th_stepdec),
                     bp::make_function(&SolverDDP::set_th_stepdec),
                     "threshold for decreasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
-      .add_property("th_stepInc",
-                    bp::make_function(&SolverDDP::get_th_stepinc, bp::return_value_policy<bp::copy_const_reference>()),
+      .add_property("th_stepInc", bp::make_function(&SolverDDP::get_th_stepinc),
                     bp::make_function(&SolverDDP::set_th_stepinc),
                     "threshold for increasing the regularization after approving a step (higher values decreases the "
                     "regularization)")
-      .add_property("th_grad",
-                    bp::make_function(&SolverDDP::get_th_grad, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_th_grad),
+      .add_property("th_grad", bp::make_function(&SolverDDP::get_th_grad), bp::make_function(&SolverDDP::set_th_grad),
                     "threshold for accepting step which gradients is lower than this value")
-      .add_property("th_gaptol",
-                    bp::make_function(&SolverDDP::get_th_gaptol, bp::return_value_policy<bp::copy_const_reference>()),
+      .add_property("th_gapTol", bp::make_function(&SolverDDP::get_th_gaptol),
                     bp::make_function(&SolverDDP::set_th_gaptol), "threshold for accepting a gap as non-zero")
+      .add_property("th_gaptol",
+                    bp::make_function(&SolverDDP::get_th_gaptol, deprecated<>("Deprecated. Use th_gapTol")),
+                    bp::make_function(&SolverDDP::set_th_gaptol, deprecated<>("Deprecated. Use th_gapTol")),
+                    "threshold for accepting a gap as non-zero")
       .add_property("alphas",
                     bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values");

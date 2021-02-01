@@ -30,10 +30,9 @@ void exposeSquashingSmoothSat() {
            ":param data: squashing data\n"
            ":param s: squashing input.")
       .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"), "Create the squashing data.\n\n")
-      .add_property(
-          "smooth",
-          bp::make_function(&SquashingModelSmoothSat::get_smooth, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SquashingModelSmoothSat::set_smooth), "Smoothness parameter of the smooth sat. function");
+      .add_property("smooth", bp::make_function(&SquashingModelSmoothSat::get_smooth),
+                    bp::make_function(&SquashingModelSmoothSat::set_smooth),
+                    "Smoothness parameter of the smooth sat. function");
 }
 
 }  // namespace python

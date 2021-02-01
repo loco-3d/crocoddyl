@@ -1010,11 +1010,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.alphas = [2**(-n) for n in range(10)]
         self.th_grad = 1e-12
 
+        self.callbacks = None
         self.x_reg = 0
         self.u_reg = 0
-        self.regFactor = 10
-        self.regMax = 1e9
-        self.regMin = 1e-9
+        self.reg_incFactor = 10
+        self.reg_decFactor = 10
+        self.reg_max = 1e9
+        self.reg_min = 1e-9
         self.th_step = .5
 
     def calc(self):
@@ -1047,8 +1049,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.regMin
-        self.u_reg = regInit if regInit is not None else self.regMin
+        self.x_reg = regInit if regInit is not None else self.reg_min
+        self.u_reg = regInit if regInit is not None else self.reg_min
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
@@ -1058,13 +1060,13 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.regMax:
+                    if self.x_reg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
                 break
-            d = self.expectedImprovement()
-            d1, d2 = np.asscalar(d[0]), np.asscalar(d[1])
+            self.d = self.expectedImprovement()
+            d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
 
             for a in self.alphas:
                 try:
@@ -1083,29 +1085,28 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.regMax:
+                if self.x_reg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            # TODO @Carlos bind the callbacks
-            # if self.callback is not None:
-            #     [c(self) for c in self.callback]
+            if self.callbacks is not None:
+                [c(self) for c in self.callbacks]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
         return self.xs, self.us, False
 
     def increaseRegularization(self):
-        self.x_reg *= self.regFactor
-        if self.x_reg > self.regMax:
-            self.x_reg = self.regMax
+        self.x_reg *= self.reg_incFactor
+        if self.x_reg > self.reg_max:
+            self.x_reg = self.reg_max
         self.u_reg = self.x_reg
 
     def decreaseRegularization(self):
-        self.x_reg /= self.regFactor
-        if self.x_reg < self.regMin:
-            self.x_reg = self.regMin
+        self.x_reg /= self.reg_decFactor
+        if self.x_reg < self.reg_min:
+            self.x_reg = self.reg_min
         self.u_reg = self.x_reg
 
     def allocateData(self):
@@ -1217,8 +1218,8 @@ class FDDPDerived(DDPDerived):
 
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.regMin
-        self.u_reg = regInit if regInit is not None else self.regMin
+        self.x_reg = regInit if regInit is not None else self.reg_min
+        self.u_reg = regInit if regInit is not None else self.reg_min
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
@@ -1228,7 +1229,7 @@ class FDDPDerived(DDPDerived):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.regMax:
+                    if self.x_reg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
@@ -1259,14 +1260,13 @@ class FDDPDerived(DDPDerived):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.regMax:
+                if self.x_reg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            # TODO @Carlos bind the callbacks
-            # if self.callback is not None:
-            #     [c(self) for c in self.callback]
+            if self.callbacks is not None:
+                [c(self) for c in self.callbacks]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True

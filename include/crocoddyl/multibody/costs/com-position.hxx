@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         const Vector3s& cref, const std::size_t& nu)
+                                                         const Vector3s& cref, const std::size_t nu)
     : Base(state, activation, nu), cref_(cref) {
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
@@ -35,7 +35,7 @@ CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<State
 
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref,
-                                                         const std::size_t& nu)
+                                                         const std::size_t nu)
     : Base(state, 3, nu), cref_(cref) {}
 
 template <typename Scalar>
@@ -63,7 +63,7 @@ void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the derivatives of the frame placement
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
   data->Rx.leftCols(nv) = d->pinocchio->Jcom;
   data->Lx.head(nv).noalias() = d->pinocchio->Jcom.transpose() * data->activation->Ar;

@@ -39,18 +39,14 @@ void exposeFrictionCone() {
                     "inequality upper bound")
       .add_property("nsurf", bp::make_function(&FrictionCone::get_nsurf, bp::return_internal_reference<>()),
                     bp::make_function(&FrictionCone::set_nsurf), "normal vector")
-      .add_property("mu", bp::make_function(&FrictionCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&FrictionCone::set_mu), "friction coefficient")
-      .add_property("nf", bp::make_function(&FrictionCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
-                    "number of facets")
-      .add_property("inner_appr",
-                    bp::make_function(&FrictionCone::get_inner_appr, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("mu", bp::make_function(&FrictionCone::get_mu), bp::make_function(&FrictionCone::set_mu),
+                    "friction coefficient")
+      .add_property("nf", bp::make_function(&FrictionCone::get_nf), "number of facets")
+      .add_property("inner_appr", bp::make_function(&FrictionCone::get_inner_appr),
                     bp::make_function(&FrictionCone::set_inner_appr), "type of cone approxition")
-      .add_property("min_nforce",
-                    bp::make_function(&FrictionCone::get_min_nforce, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("min_nforce", bp::make_function(&FrictionCone::get_min_nforce),
                     bp::make_function(&FrictionCone::set_min_nforce), "minimum normal force")
-      .add_property("max_nforce",
-                    bp::make_function(&FrictionCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("max_nforce", bp::make_function(&FrictionCone::get_max_nforce),
                     bp::make_function(&FrictionCone::set_max_nforce), "maximum normal force");
 }
 

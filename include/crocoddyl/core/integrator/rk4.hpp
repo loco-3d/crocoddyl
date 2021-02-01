@@ -30,7 +30,7 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                              const Scalar& time_step = Scalar(1e-3), const bool& with_cost_residual = true);
+                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelRK4Tpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -41,13 +41,13 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
-  const Scalar& get_dt() const;
+  const Scalar get_dt() const;
 
-  void set_dt(const Scalar& dt);
+  void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
  protected:
@@ -79,10 +79,10 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   explicit IntegratedActionDataRK4Tpl(Model<Scalar>* const model) : Base(model) {
-    const std::size_t& ndx = model->get_state()->get_ndx();
-    const std::size_t& nx = model->get_state()->get_nx();
-    const std::size_t& nv = model->get_state()->get_nv();
-    const std::size_t& nu = model->get_nu();
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nx = model->get_state()->get_nx();
+    const std::size_t nv = model->get_state()->get_nv();
+    const std::size_t nu = model->get_nu();
 
     for (std::size_t i = 0; i < 4; ++i) {
       differential.push_back(

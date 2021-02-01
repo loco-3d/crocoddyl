@@ -84,7 +84,7 @@ class DifferentialLQRTest(ActionModelAbstractTestCase):
 
 
 class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    ROBOT_MODEL = example_robot_data.load('talos_arm').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
@@ -100,7 +100,7 @@ class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
 
 
 class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    ROBOT_MODEL = example_robot_data.load('talos_arm').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
@@ -118,7 +118,7 @@ class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
 
 
 class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadANYmal().model
+    ROBOT_MODEL = example_robot_data.load('anymal').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)
@@ -129,7 +129,7 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
 
 
 class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    ROBOT_MODEL = example_robot_data.load('talos_arm').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
@@ -146,7 +146,7 @@ class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
 
 
 class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadANYmal().model
+    ROBOT_MODEL = example_robot_data.load('anymal').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)

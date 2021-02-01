@@ -62,7 +62,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref,
-                            const std::size_t& nu);
+                            const std::size_t nu);
 
   /**
    * @brief Initialize the frame rotation cost model
@@ -87,7 +87,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] Fref        Reference frame rotation
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t nu);
 
   /**
    * @brief Initialize the frame rotation cost model

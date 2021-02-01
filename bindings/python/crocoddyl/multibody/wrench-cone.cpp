@@ -41,10 +41,9 @@ void exposeWrenchCone() {
                     bp::make_function(&WrenchCone::set_R), "rotation matrix")
       .add_property("box", bp::make_function(&WrenchCone::get_box, bp::return_internal_reference<>()),
                     bp::make_function(&WrenchCone::set_box), "box size used to define the sole")
-      .add_property("mu", bp::make_function(&WrenchCone::get_mu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&WrenchCone::set_mu), "friction coefficient")
-      .add_property("nf", bp::make_function(&WrenchCone::get_nf, bp::return_value_policy<bp::return_by_value>()),
-                    "number of facets")
+      .add_property("mu", bp::make_function(&WrenchCone::get_mu), bp::make_function(&WrenchCone::set_mu),
+                    "friction coefficient")
+      .add_property("nf", bp::make_function(&WrenchCone::get_nf), "number of facets")
       .add_property("min_nforce",
                     bp::make_function(&WrenchCone::get_min_nforce, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&WrenchCone::set_min_nforce), "minimum normal force")
