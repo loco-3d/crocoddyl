@@ -12,7 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/residuals/impulse-wrench-cone.hpp"
+#include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -30,6 +30,7 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelContactWrenchConeTpl<Scalar> ResidualModelContactWrenchCone;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef typename MathBase::VectorXs VectorXs;

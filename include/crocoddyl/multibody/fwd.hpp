@@ -101,11 +101,6 @@ template <typename Scalar>
 struct ResidualDataContactForceTpl;
 
 template <typename Scalar>
-class ResidualModelContactImpulseTpl;
-template <typename Scalar>
-struct ResidualDataContactImpulseTpl;
-
-template <typename Scalar>
 class ResidualModelContactWrenchConeTpl;
 template <typename Scalar>
 struct ResidualDataContactWrenchConeTpl;
@@ -134,11 +129,6 @@ template <typename Scalar>
 class ResidualModelImpulseCoMTpl;
 template <typename Scalar>
 struct ResidualDataImpulseCoMTpl;
-
-template <typename Scalar>
-class ResidualModelImpulseWrenchConeTpl;
-template <typename Scalar>
-struct ResidualDataImpulseWrenchConeTpl;
 
 template <typename Scalar>
 class ResidualModelStateTpl;
@@ -352,8 +342,6 @@ typedef ResidualModelCoMPositionTpl<double> ResidualModelCoMPosition;
 typedef ResidualDataCoMPositionTpl<double> ResidualDataCoMPosition;
 typedef ResidualModelContactForceTpl<double> ResidualModelContactForce;
 typedef ResidualDataContactForceTpl<double> ResidualDataContactForce;
-typedef ResidualModelContactImpulseTpl<double> ResidualModelContactImpulse;
-typedef ResidualDataContactImpulseTpl<double> ResidualDataContactImpulse;
 typedef ResidualModelContactWrenchConeTpl<double> ResidualModelContactWrenchCone;
 typedef ResidualDataContactWrenchConeTpl<double> ResidualDataContactWrenchCone;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
@@ -366,8 +354,6 @@ typedef ResidualModelFrameVelocityTpl<double> ResidualModelFrameVelocity;
 typedef ResidualDataFrameVelocityTpl<double> ResidualDataFrameVelocity;
 typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
-typedef ResidualModelImpulseWrenchConeTpl<double> ResidualModelImpulseWrenchCone;
-typedef ResidualDataImpulseWrenchConeTpl<double> ResidualDataImpulseWrenchCone;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
 

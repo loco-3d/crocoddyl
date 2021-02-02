@@ -12,7 +12,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/residuals/contact-impulse.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
@@ -49,7 +49,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ResidualModelContactImpulseTpl<Scalar> ResidualModelContactImpulse;
+  typedef ResidualModelContactForceTpl<Scalar> ResidualModelContactForce;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef typename MathBase::VectorXs VectorXs;

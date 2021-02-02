@@ -13,9 +13,15 @@
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/impulse-base.hpp"
+#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
+#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
+#include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -26,16 +32,19 @@ namespace crocoddyl {
  * This residual function is defined as \f$\mathbf{r}=\boldsymbol{\lambda}-\boldsymbol{\lambda}^*\f$,
  * where \f$\boldsymbol{\lambda}, \boldsymbol{\lambda}^*\f$ are the current and reference spatial forces, respectively.
  * The current spatial forces \f$\boldsymbol{\lambda}\in\mathbb{R}^{nc}\f$ is computed by
- * `DifferentialActionModelContactFwdDynamicsTpl`, with `nc` as the dimension of the contact.
+ * `DifferentialActionModelContactFwdDynamicsTpl` or `ActionModelImpulseFwdDynamicTpl`, with `nc` as the dimension of
+ * the contact.
  *
  * Both residual and residual Jacobians are computed analytically, where the force vector \f$\boldsymbol{\lambda}\f$
  * and its Jacobians \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
  * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
- * `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
- * DataCollectorContactTpl). Note that this residual function cannot be used with other action models.
+ * `DifferentialActionModelContactFwdDynamicsTpl` or `ActionModelImpulseFwdDynamicTpl`. These values are stored in a
+ * shared data (i.e., `DataCollectorContactTpl` or `DataCollectorImpulseTpl`). Note that this residual function cannot
+ * be used with other action models.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
- * `DifferentialActionModelContactFwdDynamicsTpl`, `DataCollectorContactTpl`
+ * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorContactTpl`,
+ * `DataCollectorImpulseTpl`
  */
 template <typename _Scalar>
 class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
@@ -159,9 +168,15 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
     contact_type = ContactUndefined;
 
     // Check that proper shared data has been passed
-    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
+    bool is_contact = true;
+    DataCollectorContactTpl<Scalar>* d1 = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
+    DataCollectorImpulseTpl<Scalar>* d2 = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
+    if (d1 == NULL && d2 == NULL) {
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from DataCollectorContact or DataCollectorImpulse");
+    }
+    if (d2 != NULL) {
+      is_contact = false;
     }
 
     // Avoids data casting at runtime
@@ -169,37 +184,65 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
     const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[id].name;
     bool found_contact = false;
-    for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
-         it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == id) {
-        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          contact_type = Contact3D;
-          model->set_nr(3);
-          r.resize(3);
-          Rx.resize(3, model->get_state()->get_ndx());
-          Ru.resize(3, model->get_nu());
-          found_contact = true;
-          contact = it->second;
+    if (is_contact) {
+      for (typename ContactModelMultiple::ContactDataContainer::iterator it = d1->contacts->contacts.begin();
+           it != d1->contacts->contacts.end(); ++it) {
+        if (it->second->frame == id) {
+          ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
+          if (d3d != NULL) {
+            contact_type = Contact3D;
+            model->set_nr(3);
+            r.resize(3);
+            Rx.resize(3, model->get_state()->get_ndx());
+            Ru.resize(3, model->get_nu());
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
+          if (d6d != NULL) {
+            contact_type = Contact6D;
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
           break;
         }
-        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          contact_type = Contact6D;
-          found_contact = true;
-          contact = it->second;
+      }
+    } else {
+      for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d2->impulses->impulses.begin();
+           it != d2->impulses->impulses.end(); ++it) {
+        if (it->second->frame == id) {
+          ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
+          if (d3d != NULL) {
+            contact_type = Contact3D;
+            model->set_nr(3);
+            r.resize(3);
+            Rx.resize(3, model->get_state()->get_ndx());
+            Ru.resize(3, model->get_nu());
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
+          if (d6d != NULL) {
+            contact_type = Contact6D;
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          throw_pretty("Domain error: there isn't defined at least a 3d impulse for " + frame_name);
           break;
         }
-        throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
-        break;
       }
     }
     if (!found_contact) {
-      throw_pretty("Domain error: there isn't defined contact data for " + frame_name);
+      throw_pretty("Domain error: there isn't defined contact/impulse data for " + frame_name);
     }
   }
 
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;
+  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;
   ContactType contact_type;
   using Base::r;
   using Base::Ru;

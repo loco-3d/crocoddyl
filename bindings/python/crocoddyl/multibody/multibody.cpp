@@ -35,14 +35,12 @@ void exposeMultibody() {
   exposeResidualCentroidalMomentum();
   exposeResidualCoMPosition();
   exposeResidualContactForce();
-  exposeResidualContactImpulse();
   exposeResidualContactWrenchCone();
   exposeResidualFramePlacement();
   exposeResidualFrameRotation();
   exposeResidualFrameTranslation();
   exposeResidualFrameVelocity();
   exposeResidualImpulseCoM();
-  exposeResidualImpulseWrenchCone();
   exposeCostState();
   exposeCostCoMPosition();
   exposeCostCentroidalMomentum();

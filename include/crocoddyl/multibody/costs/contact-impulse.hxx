@@ -15,7 +15,7 @@ template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FrameForce& fref)
-    : Base(state, activation, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)),
+    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)),
       fref_(fref) {
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
@@ -26,12 +26,12 @@ CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref, const std::size_t)
-    : Base(state, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref)
-    : Base(state, boost::make_shared<ResidualModelContactImpulse>(state, fref.id, fref.force)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::~CostModelContactImpulseTpl() {}
