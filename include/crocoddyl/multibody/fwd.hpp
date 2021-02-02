@@ -21,6 +21,10 @@ class ActuationModelFullTpl;
 template <typename Scalar>
 class ActuationModelMultiCopterBaseTpl;
 
+// force
+template <typename Scala>
+class ForceDataAbstractTpl;
+
 // contact
 template <typename Scalar>
 class ContactModelAbstractTpl;
@@ -310,6 +314,8 @@ struct ImpulseDataMultipleTpl;
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
 typedef ActuationModelMultiCopterBaseTpl<double> ActuationModelMultiCopterBase;
+
+typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 
 typedef ContactModelAbstractTpl<double> ContactModelAbstract;
 typedef ContactDataAbstractTpl<double> ContactDataAbstract;

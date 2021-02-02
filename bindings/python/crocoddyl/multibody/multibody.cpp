@@ -20,6 +20,7 @@ void exposeMultibody() {
   exposeActuationFloatingBase();
   exposeActuationFull();
   exposeActuationModelMultiCopterBase();
+  exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
   exposeContactMultiple();

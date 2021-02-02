@@ -44,7 +44,6 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   std::size_t get_frame() const;
 
  protected:
-  using Base::ni_;
   using Base::state_;
 
  private:
