@@ -66,7 +66,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameForce& fref,
-                           const std::size_t& nu);
+                           const std::size_t nu);
 
   /**
    * @brief Initialize the contact force cost model
@@ -94,7 +94,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    */
   DEPRECATED("No needed to pass nr",
              CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref,
-                                      const std::size_t& nr, const std::size_t& nu);)
+                                      const std::size_t nr, const std::size_t nu);)
 
   /**
    * @brief Initialize the contact force cost model
@@ -108,7 +108,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nr     Dimension of residual vector
    */
   DEPRECATED("No needed to pass nr", CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                              const FrameForce& fref, const std::size_t& nr);)
+                                                              const FrameForce& fref, const std::size_t nr);)
 
   /**
    * @brief Initialize the contact force cost model

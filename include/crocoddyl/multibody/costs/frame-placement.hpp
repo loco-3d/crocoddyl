@@ -63,7 +63,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                              boost::shared_ptr<ActivationModelAbstract> activation, const FramePlacement& Fref,
-                             const std::size_t& nu);
+                             const std::size_t nu);
 
   /**
    * @brief Initialize the frame placement cost model
@@ -87,7 +87,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    */
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref,
-                             const std::size_t& nu);
+                             const std::size_t nu);
 
   /**
    * @brief Initialize the frame placement cost model

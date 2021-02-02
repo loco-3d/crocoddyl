@@ -108,12 +108,9 @@ void exposeCostSum() {
       .add_property("costs",
                     bp::make_function(&CostModelSum::get_costs, bp::return_value_policy<bp::return_by_value>()),
                     "stack of costs")
-      .add_property("nu", bp::make_function(&CostModelSum::get_nu, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector")
-      .add_property("nr", bp::make_function(&CostModelSum::get_nr, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the residual vector of active cost")
-      .add_property("nr_total",
-                    bp::make_function(&CostModelSum::get_nr_total, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nu", bp::make_function(&CostModelSum::get_nu), "dimension of control vector")
+      .add_property("nr", bp::make_function(&CostModelSum::get_nr), "dimension of the residual vector of active cost")
+      .add_property("nr_total", bp::make_function(&CostModelSum::get_nr_total),
                     "dimension of the total residual vector")
       .add_property("active",
                     bp::make_function(&CostModelSum::get_active, bp::return_value_policy<bp::return_by_value>()),

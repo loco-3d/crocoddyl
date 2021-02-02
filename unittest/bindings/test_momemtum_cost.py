@@ -7,15 +7,15 @@ from crocoddyl import CostModelCentroidalMomentum as CostModelMomentum
 from crocoddyl import DifferentialActionModelContactFwdDynamics as DifferentialActionModelFloatingInContact
 from crocoddyl import StateMultibody as StatePinocchio
 from crocoddyl import FramePlacement
-from example_robot_data import loadANYmal
+import example_robot_data
 from crocoddyl.utils import a2m, m2a
 
 from pinocchio.utils import rand
 from test_utils import NUMDIFF_MODIFIER, assertNumDiff
 
-# Loading Talos arm with FF TODO use a biped or quadruped
+# Loading ANYmal robot
 # -----------------------------------------------------------------------------
-robot = loadANYmal()
+robot = example_robot_data.load('anymal')
 robot.model.armature[6:] = 1.
 qmin = robot.model.lowerPositionLimit
 qmin[:7] = -1

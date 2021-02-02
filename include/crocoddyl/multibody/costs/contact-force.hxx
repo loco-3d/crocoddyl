@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
-                                                           const FrameForce& fref, const std::size_t& nu)
+                                                           const FrameForce& fref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)),
       fref_(fref) {
   if (activation_->get_nr() > 6) {
@@ -36,13 +36,13 @@ CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<Sta
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t&,
-                                                           const std::size_t& nu)
+                                                           const FrameForce& fref, const std::size_t,
+                                                           const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t&)
+                                                           const FrameForce& fref, const std::size_t)
     : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {}
 
 template <typename Scalar>

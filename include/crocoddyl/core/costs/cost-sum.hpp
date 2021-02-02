@@ -27,8 +27,8 @@ struct CostItemTpl {
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
-  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
-              bool active = true)
+  CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
+              const bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
 
   std::string name;
@@ -78,7 +78,7 @@ class CostModelSumTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu);
+  CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
 
   /**
    * @brief Initialize the cost-sum model
@@ -98,8 +98,8 @@ class CostModelSumTpl {
    * @param[in] weight  Cost weight
    * @param[in] active  True if the cost is activated (default true)
    */
-  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar& weight,
-               bool active = true);
+  void addCost(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
+               const bool active = true);
 
   /**
    * @brief Remove a cost item
@@ -114,7 +114,7 @@ class CostModelSumTpl {
    * @param[in] name    Cost name
    * @param[in] active  Cost status (true for active and false for inactive)
    */
-  void changeCostStatus(const std::string& name, bool active);
+  void changeCostStatus(const std::string& name, const bool active);
 
   /**
    * @brief Compute the total cost value
@@ -177,17 +177,17 @@ class CostModelSumTpl {
   /**
    * @brief Return the dimension of the control input
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the dimension of the active residual vector
    */
-  const std::size_t& get_nr() const;
+  std::size_t get_nr() const;
 
   /**
    * @brief Return the dimension of the total residual vector
    */
-  const std::size_t& get_nr_total() const;
+  std::size_t get_nr_total() const;
 
   /**
    * @brief Return the names of the active costs

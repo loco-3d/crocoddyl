@@ -10,7 +10,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const std::size_t& nu, const Vector2s& gains)
+                                             const std::size_t nu, const Vector2s& gains)
     : Base(state, 2, nu), xref_(xref), gains_(gains) {}
 
 template <typename Scalar>
@@ -55,7 +55,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   Data* d = static_cast<Data*>(data.get());
   pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;

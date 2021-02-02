@@ -75,7 +75,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
+                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu);
 
   /**
    * @brief Initialize the control cost model
@@ -109,7 +109,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t& nu);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
   virtual ~CostModelControlTpl();
 
   /**

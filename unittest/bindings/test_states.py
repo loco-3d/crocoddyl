@@ -91,7 +91,7 @@ class StateVectorTest(StateAbstractTestCase):
 
 
 class StateMultibodyTalosArmTest(StateAbstractTestCase):
-    MODEL = example_robot_data.loadTalosArm().model
+    MODEL = example_robot_data.load('talos_arm').model
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)
@@ -99,7 +99,7 @@ class StateMultibodyTalosArmTest(StateAbstractTestCase):
 
 
 class StateMultibodyHyQTest(StateAbstractTestCase):
-    MODEL = example_robot_data.loadHyQ().model
+    MODEL = example_robot_data.load('hyq').model
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)
@@ -107,7 +107,7 @@ class StateMultibodyHyQTest(StateAbstractTestCase):
 
 
 class StateMultibodyTalosTest(StateAbstractTestCase):
-    MODEL = example_robot_data.loadTalos().model
+    MODEL = example_robot_data.load('talos').model
     NX = MODEL.nq + MODEL.nv
     NDX = 2 * MODEL.nv
     STATE = crocoddyl.StateMultibody(MODEL)

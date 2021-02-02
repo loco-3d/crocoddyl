@@ -101,9 +101,7 @@ void exposeCostAbstract() {
           "residual",
           bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
           "residual model")
-      .add_property("nu",
-                    bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector");
+      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 

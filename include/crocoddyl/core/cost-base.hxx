@@ -26,7 +26,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstra
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
-                                                   const std::size_t& nu)
+                                                   const std::size_t nu)
     : state_(state),
       activation_(activation),
       residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr(), nu)),
@@ -52,8 +52,8 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstra
       unone_(VectorXs::Zero(residual->get_nu())) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr,
-                                                   const std::size_t& nu)
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr,
+                                                   const std::size_t nu)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
       residual_(boost::make_shared<ResidualModelAbstract>(state, nr, nu)),
@@ -61,7 +61,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstra
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr)
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
       residual_(boost::make_shared<ResidualModelAbstract>(state, nr)),
@@ -105,7 +105,7 @@ const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& CostModelAbstractTpl
 }
 
 template <typename Scalar>
-const std::size_t& CostModelAbstractTpl<Scalar>::get_nu() const {
+std::size_t CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 

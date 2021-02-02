@@ -78,7 +78,7 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nr     Dimension of residual vector
    */
   DEPRECATED("No needed to pass nr", CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
-                                                                const FrameForce& fref, const std::size_t& nr);)
+                                                                const FrameForce& fref, const std::size_t nr);)
 
   /**
    * @brief Initialize the contact impulse cost model

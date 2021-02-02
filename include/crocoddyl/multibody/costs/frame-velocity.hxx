@@ -18,7 +18,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                                             const FrameMotion& vref, const std::size_t& nu)
+                                                             const FrameMotion& vref, const std::size_t nu)
     : Base(state, activation,
            boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference, nu)),
       vref_(vref) {
@@ -43,7 +43,7 @@ CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<S
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                                                             const FrameMotion& vref, const std::size_t& nu)
+                                                             const FrameMotion& vref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference, nu)),
       vref_(vref) {}
 

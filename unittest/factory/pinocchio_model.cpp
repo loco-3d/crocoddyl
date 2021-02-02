@@ -108,7 +108,7 @@ void PinocchioModelFactory::construct_model(const std::string& urdf_file, const 
 
 boost::shared_ptr<pinocchio::Model> PinocchioModelFactory::create() const { return model_; }
 const std::string& PinocchioModelFactory::get_frame_name() const { return frame_name_; }
-const std::size_t& PinocchioModelFactory::get_frame_id() const { return frame_id_; }
+std::size_t PinocchioModelFactory::get_frame_id() const { return frame_id_; }
 
 /**
  * @brief Compute all the pinocchio data needed for the numerical

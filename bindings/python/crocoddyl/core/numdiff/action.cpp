@@ -54,10 +54,8 @@ void exposeActionNumDiff() {
       .add_property("model",
                     bp::make_function(&ActionModelNumDiff::get_model, bp::return_value_policy<bp::return_by_value>()),
                     "action model")
-      .add_property(
-          "disturbance",
-          bp::make_function(&ActionModelNumDiff::get_disturbance, bp::return_value_policy<bp::return_by_value>()),
-          &ActionModelNumDiff::set_disturbance, "disturbance value used in the numerical differentiation")
+      .add_property("disturbance", bp::make_function(&ActionModelNumDiff::get_disturbance),
+                    &ActionModelNumDiff::set_disturbance, "disturbance value used in the numerical differentiation")
       .add_property("withGaussApprox",
                     bp::make_function(&ActionModelNumDiff::get_with_gauss_approx,
                                       bp::return_value_policy<bp::return_by_value>()),

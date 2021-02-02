@@ -16,7 +16,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const Vector6s& href, const std::size_t& nu)
+    const Vector6s& href, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
@@ -37,7 +37,7 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
-                                                                       const Vector6s& href, const std::size_t& nu)
+                                                                       const Vector6s& href, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {}
 
 template <typename Scalar>

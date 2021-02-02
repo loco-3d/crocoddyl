@@ -38,7 +38,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t& nu,
+  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
   ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
                     const Vector2s& gains = Vector2s::Zero());

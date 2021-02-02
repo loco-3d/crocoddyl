@@ -42,8 +42,8 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ActuationModelAbstract> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
-                                               const Scalar& JMinvJt_damping = Scalar(0.),
-                                               const bool& enable_force = false);
+                                               const Scalar JMinvJt_damping = Scalar(0.),
+                                               const bool enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -53,18 +53,18 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  const Scalar& get_damping_factor() const;
+  const Scalar get_damping_factor() const;
 
   void set_armature(const VectorXs& armature);
-  void set_damping_factor(const Scalar& damping);
+  void set_damping_factor(const Scalar damping);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits

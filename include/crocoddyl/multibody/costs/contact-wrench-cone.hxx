@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameWrenchCone& fref, const std::size_t& nu)
+    const FrameWrenchCone& fref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelContactWrenchCone>(state, fref.id, fref.cone, nu)),
       fref_(fref) {}
 
@@ -28,7 +28,7 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
 template <typename Scalar>
 CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const FrameWrenchCone& fref,
-                                                                     const std::size_t& nu)
+                                                                     const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelContactWrenchCone>(state, fref.id, fref.cone, nu)), fref_(fref) {}
 
 template <typename Scalar>

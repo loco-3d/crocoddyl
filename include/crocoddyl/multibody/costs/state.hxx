@@ -14,7 +14,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                             const VectorXs& xref, const std::size_t& nu)
+                                             const VectorXs& xref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
@@ -45,7 +45,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             const VectorXs& xref, const std::size_t& nu)
+                                             const VectorXs& xref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
@@ -76,7 +76,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation,
-                                             const std::size_t& nu)
+                                             const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
@@ -91,7 +91,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                             const std::size_t& nu)
+                                             const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "

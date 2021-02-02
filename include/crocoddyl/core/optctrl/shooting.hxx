@@ -27,7 +27,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nu_max_(running_models[0]->get_nu()) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t& nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -76,7 +76,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nu_max_(running_models[0]->get_nu()) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t& nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -85,7 +85,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
   }
-  std::size_t Td = running_datas.size();
+  const std::size_t Td = running_datas.size();
   if (Td != T_) {
     throw_pretty("Invalid argument: "
                  << "the number of running models and datas are not the same (" + std::to_string(T_) +
@@ -144,7 +144,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     if (nu != 0) {
       running_models_[i]->calc(running_datas_[i], xs[i], us[i].head(nu));
     } else {
@@ -177,7 +177,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
-      const std::size_t& nu = running_models_[i]->get_nu();
+      const std::size_t nu = running_models_[i]->get_nu();
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i].head(nu));
     } else {
       running_models_[i]->calcDiff(running_datas_[i], xs[i]);
@@ -210,7 +210,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const VectorXs& x = xs[i];
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     if (model->get_nu() != 0) {
       const VectorXs& u = us[i];
       model->calc(data, x, u.head(nu));
@@ -246,7 +246,7 @@ void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const st
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     running_models_[i]->quasiStatic(running_datas_[i], us[i].head(nu), xs[i]);
   }
 }
@@ -315,7 +315,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
+void ShootingProblemTpl<Scalar>::updateNode(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
@@ -349,7 +349,7 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
+void ShootingProblemTpl<Scalar>::updateModel(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_ + 1) + ")");
@@ -377,7 +377,7 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_T() const {
+std::size_t ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
 
@@ -471,17 +471,17 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nx() const {
+std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
   return nx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
+std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu_max() const {
+std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
   return nu_max_;
 }
 

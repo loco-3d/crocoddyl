@@ -20,7 +20,7 @@ ImpulseModelMultipleTpl<Scalar>::~ImpulseModelMultipleTpl() {}
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
-                                                 boost::shared_ptr<ImpulseModelAbstract> impulse, bool active) {
+                                                 boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active) {
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
       impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse, active)));
   if (ret.second == false) {
@@ -54,7 +54,7 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
 }
 
 template <typename Scalar>
-void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& name, bool active) {
+void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& name, const bool active) {
   typename ImpulseModelContainer::iterator it = impulses_.find(name);
   if (it != impulses_.end()) {
     if (active && !it->second->active) {
@@ -86,7 +86,7 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
   }
 
   std::size_t ni = 0;
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -98,7 +98,7 @@ void ImpulseModelMultipleTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataMu
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->impulse->calc(d_i, x);
-      const std::size_t& ni_i = m_i->impulse->get_ni();
+      const std::size_t ni_i = m_i->impulse->get_ni();
       data->Jc.block(ni, 0, ni_i, nv) = d_i->Jc;
       ni += ni_i;
     }
@@ -114,7 +114,7 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
   }
 
   std::size_t ni = 0;
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   typename ImpulseModelContainer::iterator it_m, end_m;
   typename ImpulseDataContainer::iterator it_d, end_d;
   for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
@@ -126,7 +126,7 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDa
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->impulse->calcDiff(d_i, x);
-      const std::size_t& ni_i = m_i->impulse->get_ni();
+      const std::size_t ni_i = m_i->impulse->get_ni();
       data->dv0_dq.block(ni, 0, ni_i, nv) = d_i->dv0_dq;
       ni += ni_i;
     }
@@ -168,7 +168,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
     if (m_i->active) {
-      const std::size_t& ni_i = m_i->impulse->get_ni();
+      const std::size_t ni_i = m_i->impulse->get_ni();
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(ni, ni_i);
       m_i->impulse->updateForce(d_i, force_i);
       data->fext[d_i->joint] = d_i->f;
@@ -194,7 +194,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(const boost::shared_ptr
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
                                                       const MatrixXs& df_dx) const {
-  const std::size_t& ndx = state_->get_ndx();
+  const std::size_t ndx = state_->get_ndx();
   if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != ndx) {
     throw_pretty("Invalid argument: "
                  << "df_dx has wrong dimension (it should be " + std::to_string(ni_) + "," + std::to_string(ndx) +
@@ -214,7 +214,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
     const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
     if (m_i->active) {
-      const std::size_t& ni_i = m_i->impulse->get_ni();
+      const std::size_t ni_i = m_i->impulse->get_ni();
       const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(ni, 0, ni_i, ndx);
       m_i->impulse->updateForceDiff(d_i, df_dx_i);
       ni += ni_i;
@@ -242,12 +242,12 @@ const typename ImpulseModelMultipleTpl<Scalar>::ImpulseModelContainer& ImpulseMo
 }
 
 template <typename Scalar>
-const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni() const {
+std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni() const {
   return ni_;
 }
 
 template <typename Scalar>
-const std::size_t& ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
+std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
   return ni_total_;
 }
 

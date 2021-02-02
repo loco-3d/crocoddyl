@@ -68,7 +68,7 @@ class UnicycleShootingTest(ShootingProblemTestCase):
 
 
 class TalosArmShootingTest(ShootingProblemTestCase):
-    ROBOT_MODEL = example_robot_data.loadTalosArm().model
+    ROBOT_MODEL = example_robot_data.load('talos_arm').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)

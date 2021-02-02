@@ -16,7 +16,7 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameTranslation& xref, const std::size_t& nu)
+    const FrameTranslation& xref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation, nu)),
       xref_(xref) {
   if (activation_->get_nr() != 3) {
@@ -39,7 +39,7 @@ CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
 
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
-                                                                   const FrameTranslation& xref, const std::size_t& nu)
+                                                                   const FrameTranslation& xref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation, nu)),
       xref_(xref) {}
 
