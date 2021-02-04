@@ -16,7 +16,7 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameWrenchCone& fref, const std::size_t nu)
     : Base(state, activation, nu), fref_(fref) {
-  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 13) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
@@ -27,7 +27,7 @@ CostModelContactWrenchConeTpl<Scalar>::CostModelContactWrenchConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameWrenchCone& fref)
     : Base(state, activation), fref_(fref) {
-  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 13) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
