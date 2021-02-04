@@ -12,7 +12,7 @@ from crocoddyl.utils import EPS
 from pinocchio.utils import rand, zero
 from testutils import NUMDIFF_MODIFIER, assertNumDiff, df_dq, df_dx
 
-pinocchio.switchToNumpyMatrix() 
+pinocchio.switchToNumpyMatrix()
 
 # Loading Talos arm with FF TODO use a bided or quadruped
 # -----------------------------------------------------------------------------

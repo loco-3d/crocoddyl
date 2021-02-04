@@ -43,10 +43,7 @@ struct CostModelTypes {
 };
 
 struct CostModelNoFFTypes {
-  enum Type {
-    CostModelControlGrav,
-    NbCostModelTypes
-  };
+  enum Type { CostModelControlGrav, NbCostModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -62,7 +59,7 @@ std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type);
 std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type);
 
 class CostModelFactory {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
@@ -71,19 +68,18 @@ public:
   explicit CostModelFactory();
   ~CostModelFactory();
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract>
-  create(CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-         ActivationModelTypes::Type activation_type,
-         std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
-  boost::shared_ptr<crocoddyl::CostModelAbstract>
-  create(CostModelNoFFTypes::Type cost_type,ActivationModelTypes::Type activation_type,
-         std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(
+      CostModelTypes::Type cost_type, StateModelTypes::Type state_type, ActivationModelTypes::Type activation_type,
+      std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(
+      CostModelNoFFTypes::Type cost_type, ActivationModelTypes::Type activation_type,
+      std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::CostModelAbstract>
-create_random_cost(StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
+boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
+    StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_COST_FACTORY_HPP_
+#endif  // CROCODDYL_COST_FACTORY_HPP_

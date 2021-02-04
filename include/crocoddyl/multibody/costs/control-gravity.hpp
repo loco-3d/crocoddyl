@@ -67,10 +67,9 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
    */
-  CostModelControlGravTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActivationModelAbstract> activation,
-      boost::shared_ptr<ActuationModelAbstract> actuation_model);
+  CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
+                          boost::shared_ptr<ActivationModelAbstract> activation,
+                          boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   /**
    * @brief Initialize the control gravity cost model
@@ -81,9 +80,8 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       State of the multibody system
    */
-  explicit CostModelControlGravTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation_model);
+  explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ActuationModelAbstract> actuation_model);
 
   virtual ~CostModelControlGravTpl();
 
@@ -94,8 +92,7 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &x,
+  virtual void calc(const boost::shared_ptr<CostDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
@@ -105,20 +102,18 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x,
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
                         const Eigen::Ref<const VectorXs> &u);
 
-  virtual boost::shared_ptr<CostDataAbstract>
-  createData(DataCollectorAbstract *const data);
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract *const data);
 
-protected:
+ protected:
   using Base::activation_;
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
 
-private:
+ private:
   typename StateMultibody::PinocchioModel pin_model_;
   const boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model_;
 };
@@ -134,8 +129,7 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  CostDataControlGravTpl(Model<Scalar> *const model,
-                         DataCollectorAbstract *const data)
+  CostDataControlGravTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
       : Base(model, data),
         dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
         Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
@@ -144,11 +138,11 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     Arr_dgdq.setZero();
     Arr_dtaudu.setZero();
     // Check that proper shared data has been passed
-    DataCollectorActMultibodyTpl<Scalar> *d =
-        dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
+    DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from "
-                   "DataCollectorActMultibodyTpl");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorActMultibodyTpl");
     }
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
@@ -156,7 +150,7 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar> *pinocchio;
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar>> actuation;
+  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;
   MatrixXs Arr_dtaudu;
@@ -171,11 +165,11 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 };
 
-} // namespace crocoddyl
+}  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/control-gravity.hxx"
 
-#endif // CROCODDYL_MULTIBODY_COSTS_CONTROL_GRAVITY_HPP_
+#endif  // CROCODDYL_MULTIBODY_COSTS_CONTROL_GRAVITY_HPP_
