@@ -424,7 +424,7 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   if (x0_in.size() != x0_.size()) {
     throw_pretty("Invalid argument: "
-                 << "invalid size of x0 provided.");
+                 << "invalid size of x0 provided: Expected " << x0_.size() << ", received " << x0_in.size());
   }
   x0_ = x0_in;
 }
