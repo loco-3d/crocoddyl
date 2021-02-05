@@ -68,6 +68,9 @@ std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type) {
     case CostModelNoFFTypes::CostModelControlGrav:
       os << "CostModelControlGrav";
       break;
+    case CostModelNoFFTypes::NbCostModelNoFFTypes:
+      os << "NbCostModelNoFFTypes";
+      break;
     default:
       break;
   }

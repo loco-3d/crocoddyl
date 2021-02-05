@@ -150,7 +150,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
 
     StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
     pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
-    
+
     // Check that proper shared data has been passed
     DataCollectorActMultibodyInContactTpl<Scalar> *d =
         dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
@@ -160,7 +160,7 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
           "DataCollectorActMultibodyInContactTpl");
     }
     // Avoids data casting at runtime
-    //pinocchio = d->pinocchio;
+    // pinocchio = d->pinocchio;
     fext = d->contacts->fext;
     actuation = d->actuation;
   }

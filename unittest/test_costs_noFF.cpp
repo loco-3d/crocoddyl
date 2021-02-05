@@ -252,6 +252,7 @@ bool init_function() {
       register_cost_model_unit_tests(CostModelNoFFTypes::all[cost_type], ActivationModelTypes::all[activation_type]);
     }
   }
+  return true;
 }
 
 int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }

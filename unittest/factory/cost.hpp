@@ -43,11 +43,11 @@ struct CostModelTypes {
 };
 
 struct CostModelNoFFTypes {
-  enum Type { CostModelControlGrav, NbCostModelTypes };
+  enum Type { CostModelControlGrav, NbCostModelNoFFTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    for (int i = 0; i < NbCostModelTypes; ++i) {
+    for (int i = 0; i < NbCostModelNoFFTypes; ++i) {
       v.push_back((Type)i);
     }
     return v;
