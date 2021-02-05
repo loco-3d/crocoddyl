@@ -14,14 +14,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostControlGrav() {
-  bp::class_<CostModelControlGrav, bp::bases<CostModelAbstract>>(
+  bp::class_<CostModelControlGrav, bp::bases<CostModelAbstract> >(
       "CostModelControlGrav",
       "This cost function defines a residual vector as r = a(u) - g(q), "
       "where q, g(q) are the generalized position and gravity vector, "
       "respectively,"
       "and a(u) is the actuated torque.",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ActuationModelAbstract>>(
+               boost::shared_ptr<ActuationModelAbstract> >(
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "The default reference control is obtained from np.zero(nu), with nu "
@@ -29,7 +29,7 @@ void exposeCostControlGrav() {
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract> >(
           bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
@@ -67,13 +67,13 @@ void exposeCostControlGrav() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.");
-  bp::class_<CostDataControlGrav, bp::bases<CostDataAbstract>>(
+  bp::class_<CostDataControlGrav, bp::bases<CostDataAbstract> >(
       "CostDataControlGrav", "Data for control gravity cost.\n\n",
       bp::init<CostModelControlGrav *, DataCollectorAbstract *>(
           bp::args("self", "model", "data"),
           "Create control gravity cost data.\n\n"
           ":param model: control gravity cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("dg_dq", bp::make_getter(&CostDataControlGrav::dg_dq, bp::return_internal_reference<>()),
                     "Partial derivative of gravity vector with respect to q");
 }
