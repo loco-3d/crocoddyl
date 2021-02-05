@@ -57,7 +57,7 @@ void CostModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstr
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
   actuation_model_->calc(d->actuation, x, u);
-  data->r = pinocchio::computeGeneralizedGravity(pin_model_, *d->pinocchio, q) - d->actuation->tau;
+  data->r = pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q) - d->actuation->tau;
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -75,7 +75,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  pinocchio::computeGeneralizedGravityDerivatives(pin_model_, *d->pinocchio, q, d->dg_dq);
+  pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, d->dg_dq);
 
   const std::size_t &nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);

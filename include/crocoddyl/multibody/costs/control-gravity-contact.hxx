@@ -47,7 +47,7 @@ void CostModelControlGravContactTpl<Scalar>::calc(const boost::shared_ptr<CostDa
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
   actuation_model_->calc(d->actuation, x, u);
-  data->r = pinocchio::computeStaticTorque(pin_model_, *d->pinocchio, q, d->fext) - d->actuation->tau;
+  data->r = pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext) - d->actuation->tau;
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -64,7 +64,7 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  pinocchio::computeStaticTorqueDerivatives(pin_model_, *d->pinocchio, q, d->fext, d->dg_dq);
+  pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q, d->fext, d->dg_dq);
 
   activation_->calcDiff(data->activation, data->r);
   actuation_model_->calcDiff(d->actuation, x, u);

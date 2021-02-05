@@ -125,7 +125,9 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
@@ -145,11 +147,12 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
           "DataCollectorActMultibodyTpl");
     }
     // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
+    StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
+    pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
     actuation = d->actuation;
   }
 
-  pinocchio::DataTpl<Scalar> *pinocchio;
+  PinocchioData pinocchio;
   boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
   MatrixXs dg_dq;
   MatrixXs Arr_dgdq;
