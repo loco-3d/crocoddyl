@@ -2,6 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2021, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,6 +164,8 @@ class FrictionConeTpl {
    * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_max_nforce(const Scalar max_nforce);
+
+  FrictionConeTpl<Scalar>& operator=(const FrictionConeTpl<Scalar>& other);
 
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const FrictionConeTpl<Scalar>& X);
