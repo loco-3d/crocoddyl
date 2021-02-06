@@ -92,11 +92,6 @@ template <typename Scalar>
 struct ActivationDataSmooth2NormTpl;
 
 template <typename Scalar>
-class ActivationModelNorm2BarrierTpl;
-template <typename Scalar>
-struct ActivationDataCollisionTpl;
-
-template <typename Scalar>
 class ActivationModelAbstractTpl;
 template <typename Scalar>
 struct ActivationDataAbstractTpl;
@@ -214,8 +209,6 @@ typedef ActivationModelQuadFlatLogTpl<double> ActivationModelQuadFlatLog;
 typedef ActivationDataQuadFlatLogTpl<double> ActivationDataQuadFlatLog;
 typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
-typedef ActivationModelNorm2BarrierTpl<double> ActivationModelNorm2Barrier;
-typedef ActivationDataCollisionTpl<double> ActivationDataCollision;
 DEPRECATED("Use ActivationModelSmooth1Norm", typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmoothAbs;)
 DEPRECATED("Use ActivationDataSmooth1Norm", typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmoothAbs;)
 typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmooth1Norm;

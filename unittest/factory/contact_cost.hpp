@@ -24,6 +24,7 @@ struct ContactCostModelTypes {
     CostModelContactCoPPosition,
     CostModelContactFrictionCone,
     CostModelContactWrenchCone,
+    CostModelControlGravContact,
     NbContactCostModelTypes
   };
   static std::vector<Type> init_all() {
@@ -37,7 +38,7 @@ struct ContactCostModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type);
 
 class ContactCostModelFactory {
  public:
