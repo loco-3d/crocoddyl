@@ -17,6 +17,9 @@ namespace python {
 void exposeWrenchCone() {
   bp::register_ptr_to_python<boost::shared_ptr<WrenchCone> >();
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::class_<WrenchCone>(
       "WrenchCone", "Model of the wrench cone as lb <= Af <= ub",
       bp::init<Eigen::Matrix3d, double, Eigen::Vector2d, bp::optional<std::size_t, bool, double, double> >(
@@ -65,6 +68,8 @@ void exposeWrenchCone() {
                     bp::make_function(&WrenchCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&WrenchCone::set_max_nforce), "maximum normal force")
       .def(PrintableVisitor<WrenchCone>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
