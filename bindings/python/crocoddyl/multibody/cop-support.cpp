@@ -16,6 +16,9 @@ namespace python {
 void exposeCoPSupport() {
   bp::register_ptr_to_python<boost::shared_ptr<CoPSupport> >();
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::class_<CoPSupport>(
       "CoPSupport", "Model of the CoP support as lb <= Af <= ub",
       bp::init<Eigen::Matrix3d, Eigen::Vector2d>(bp::args("self", "R", "box"),
@@ -36,6 +39,8 @@ void exposeCoPSupport() {
       .add_property("box", bp::make_function(&CoPSupport::get_box, bp::return_internal_reference<>()),
                     bp::make_function(&CoPSupport::set_box), "box size used to define the sole")
       .def(PrintableVisitor<CoPSupport>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

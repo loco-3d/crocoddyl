@@ -6,21 +6,19 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
-
-#pragma GCC diagnostic pop
 
 namespace crocoddyl {
 namespace python {
 
 void exposeFrictionCone() {
   bp::register_ptr_to_python<boost::shared_ptr<FrictionCone> >();
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<FrictionCone>(
       "FrictionCone", "Model of the friction cone as lb <= Af <= ub",
@@ -70,6 +68,8 @@ void exposeFrictionCone() {
                     bp::make_function(&FrictionCone::set_max_nforce),
                     "maximum normal force (run update() if you have changed the value)")
       .def(PrintableVisitor<FrictionCone>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
