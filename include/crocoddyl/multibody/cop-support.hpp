@@ -109,7 +109,7 @@ class CoPSupportTpl {
   CoPSupportTpl<Scalar>& operator=(const CoPSupportTpl<Scalar>& other);
 
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
+  friend std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X);
 
  private:
   Matrix46s A_;   //!< Matrix of wrench cone
