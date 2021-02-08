@@ -106,6 +106,8 @@ class CoPSupportTpl {
    */
   void set_box(const Vector2s& box);
 
+  CoPSupportTpl<Scalar>& operator=(const CoPSupportTpl<Scalar>& other);
+
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
 

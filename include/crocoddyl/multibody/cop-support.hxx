@@ -109,6 +109,16 @@ void CoPSupportTpl<Scalar>::set_box(const Vector2s& box) {
 }
 
 template <typename Scalar>
+CoPSupportTpl<Scalar>& CoPSupportTpl<Scalar>::operator=(const CoPSupportTpl<Scalar>& other) {
+  A_ = other.get_A();
+  ub_ = other.get_ub();
+  lb_ = other.get_lb();
+  R_ = other.get_R();
+  box_ = other.get_box();
+  return *this;
+}
+
+template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X) {
   os << "         R: " << X.get_R() << std::endl;
   os << "       box: " << X.get_box().transpose() << std::endl;
