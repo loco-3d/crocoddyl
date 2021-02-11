@@ -51,6 +51,11 @@ class DifferentialActionModelContactFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
 
+template <typename Scalar>
+class DifferentialActionModelContactFwdDynamics2Tpl;
+template <typename Scalar>
+struct DifferentialActionDataContactFwdDynamics2Tpl;
+  
 // numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
@@ -316,6 +321,15 @@ template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorContact2Tpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInContact2Tpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInContact2Tpl;
+  
+template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
 template <typename Scalar>
@@ -358,6 +372,9 @@ typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataF
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
 
+typedef DifferentialActionModelContactFwdDynamics2Tpl<double> DifferentialActionModelContactFwdDynamics2;
+typedef DifferentialActionDataContactFwdDynamics2Tpl<double> DifferentialActionDataContactFwdDynamics2;
+  
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
 typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
@@ -487,6 +504,11 @@ typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
+
+typedef DataCollectorContact2Tpl<double> DataCollectorContact2;
+typedef DataCollectorMultibodyInContact2Tpl<double> DataCollectorMultibodyInContact2;
+typedef DataCollectorActMultibodyInContact2Tpl<double> DataCollectorActMultibodyInContact2;
+  
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
 
