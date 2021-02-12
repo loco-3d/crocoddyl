@@ -84,6 +84,8 @@ template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(Vector3s)) {
     cref_ = *static_cast<const Vector3s*>(pv);
+    ResidualModelCoMPosition* residual = static_cast<ResidualModelCoMPosition*>(residual_.get());
+    residual->set_reference(cref_);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be Vector3s)");
   }

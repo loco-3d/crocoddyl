@@ -74,6 +74,9 @@ template <typename Scalar>
 void CostModelContactImpulseTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameForce)) {
     fref_ = *static_cast<const FrameForce*>(pv);
+    ResidualModelContactForce* residual = static_cast<ResidualModelContactForce*>(residual_.get());
+    residual->set_id(fref_.id);
+    residual->set_reference(fref_.force);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");
   }

@@ -87,6 +87,8 @@ template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(Vector6s)) {
     href_ = *static_cast<const Vector6s*>(pv);
+    ResidualModelCentroidalMomentum* residual = static_cast<ResidualModelCentroidalMomentum*>(residual_.get());
+    residual->set_reference(href_);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be Vector6s)");
   }
