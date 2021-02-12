@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_COST_FACTORY_HPP_
 #define CROCODDYL_COST_FACTORY_HPP_
 
-#include "state.hpp"
 #include "activation.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/numdiff/cost.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -48,7 +48,21 @@ struct CostModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type);
+struct CostModelNoFFTypes {
+  enum Type { CostModelControlGrav, NbCostModelNoFFTypes };
+  static std::vector<Type> init_all() {
+    std::vector<Type> v;
+    v.clear();
+    for (int i = 0; i < NbCostModelNoFFTypes; ++i) {
+      v.push_back((Type)i);
+    }
+    return v;
+  }
+  static const std::vector<Type> all;
+};
+
+std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type);
 
 class CostModelFactory {
  public:
@@ -63,9 +77,13 @@ class CostModelFactory {
   boost::shared_ptr<crocoddyl::CostModelAbstract> create(
       CostModelTypes::Type cost_type, StateModelTypes::Type state_type, ActivationModelTypes::Type activation_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(
+      CostModelNoFFTypes::Type cost_type, ActivationModelTypes::Type activation_type,
+      std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTypes::Type state_type);
+boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
+    StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
 
 }  // namespace unittest
 }  // namespace crocoddyl

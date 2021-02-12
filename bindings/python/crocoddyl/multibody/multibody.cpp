@@ -43,6 +43,8 @@ void exposeMultibody() {
   exposeResidualImpulseCoM();
   exposeCostState();
   exposeCostCoMPosition();
+  exposeCostControlGrav();
+  exposeCostControlGravContact();
   exposeCostCentroidalMomentum();
   exposeCostFramePlacement();
   exposeCostFrameTranslation();
