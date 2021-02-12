@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 
 namespace crocoddyl {
 
@@ -18,7 +19,7 @@ namespace crocoddyl {
  * @brief Control cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respetively. Note
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respectively. Note
  * that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -40,6 +41,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef CostModelAbstractTpl<Scalar> Base;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelControlTpl<Scalar> ResidualModelControl;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
@@ -145,6 +147,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 

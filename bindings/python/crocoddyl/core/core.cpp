@@ -26,6 +26,7 @@ void exposeCore() {
   exposeIntegratedActionEuler();
   exposeIntegratedActionRK4();
   exposeCostAbstract();
+  exposeResidualControl();
   exposeCostSum();
   exposeCostControl();
   exposeActionNumDiff();

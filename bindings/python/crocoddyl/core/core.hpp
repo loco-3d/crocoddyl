@@ -28,6 +28,7 @@ void exposeDataCollectorActuation();
 void exposeIntegratedActionEuler();
 void exposeIntegratedActionRK4();
 void exposeCostAbstract();
+void exposeResidualControl();
 void exposeCostSum();
 void exposeCostControl();
 void exposeActionNumDiff();

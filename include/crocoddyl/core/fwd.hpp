@@ -141,6 +141,12 @@ struct DataCollectorAbstractTpl;
 template <typename Scalar>
 struct DataCollectorActuationTpl;
 
+// residual
+template <typename Scalar>
+class ResidualModelControlTpl;
+template <typename Scalar>
+struct ResidualDataControlTpl;
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -216,6 +222,8 @@ typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
 
 typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
+typedef ResidualModelControlTpl<double> ResidualModelControl;
+typedef ResidualDataControlTpl<double> ResidualDataControl;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
