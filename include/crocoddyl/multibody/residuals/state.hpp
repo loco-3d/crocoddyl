@@ -109,17 +109,12 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create the state residual data
-   */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @brief Return the reference frame rotation
+   * @brief Return the reference state
    */
   const VectorXs& get_reference() const;
 
   /**
-   * @brief Modify the reference frame rotation
+   * @brief Modify the reference state
    */
   void set_reference(const VectorXs& reference);
 
@@ -130,25 +125,6 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   VectorXs xref_;  //!< Reference state
-};
-
-template <typename _Scalar>
-struct ResidualDataStateTpl : public ResidualDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef ResidualDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::MatrixXs MatrixXs;
-
-  template <template <typename Scalar> class Model>
-  ResidualDataStateTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {}
-
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl

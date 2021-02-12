@@ -65,13 +65,6 @@ void exposeResidualState() {
       .def<void (ResidualModelState::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &ResidualModelState::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the state cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference",
                     bp::make_function(&ResidualModelState::get_reference, bp::return_internal_reference<>()),
                     &ResidualModelState::set_reference, "reference state");

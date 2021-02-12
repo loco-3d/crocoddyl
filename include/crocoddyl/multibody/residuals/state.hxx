@@ -66,12 +66,6 @@ void ResidualModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDat
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelStateTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::make_shared<ResidualDataStateTpl<Scalar> >(this, data);
-}
-
-template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelStateTpl<Scalar>::get_reference() const {
   return xref_;
 }
