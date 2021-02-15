@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,6 +262,22 @@ void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
     std::cerr << "Warning: max_nforce has to be a positive value, set to maximum value" << std::endl;
   }
   max_nforce_ = max_nforce;
+}
+
+template <typename Scalar>
+FrictionConeTpl<Scalar>& FrictionConeTpl<Scalar>::operator=(const FrictionConeTpl<Scalar>& other) {
+  if (this != &other) {
+    nf_ = other.get_nf();
+    A_ = other.get_A();
+    ub_ = other.get_ub();
+    lb_ = other.get_lb();
+    R_ = other.get_R();
+    mu_ = other.get_mu();
+    inner_appr_ = other.get_inner_appr();
+    min_nforce_ = other.get_min_nforce();
+    max_nforce_ = other.get_max_nforce();
+  }
+  return *this;
 }
 
 template <typename Scalar>

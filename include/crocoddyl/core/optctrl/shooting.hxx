@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -423,7 +423,7 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   if (x0_in.size() != x0_.size()) {
     throw_pretty("Invalid argument: "
-                 << "invalid size of x0 provided.");
+                 << "invalid size of x0 provided: Expected " << x0_.size() << ", received " << x0_in.size());
   }
   x0_ = x0_in;
 }

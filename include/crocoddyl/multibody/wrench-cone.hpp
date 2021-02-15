@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,6 +179,8 @@ class WrenchConeTpl {
    * Note that you need to run `update` for updating the inequality matrix and bounds.
    */
   void set_max_nforce(const Scalar max_nforce);
+
+  WrenchConeTpl<Scalar>& operator=(const WrenchConeTpl<Scalar>& other);
 
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,13 @@ class CoPSupportTpl {
    * @param[in] support  Center of pressure support
    */
   CoPSupportTpl(const WrenchConeTpl<Scalar>& support);
+
+  /**
+   * @brief Initialize the center of pressure support
+   *
+   * @param[in] support  Center of pressure support
+   */
+  CoPSupportTpl(const CoPSupportTpl<Scalar>& support);
   ~CoPSupportTpl();
 
   /**
@@ -106,8 +113,10 @@ class CoPSupportTpl {
    */
   void set_box(const Vector2s& box);
 
+  CoPSupportTpl<Scalar>& operator=(const CoPSupportTpl<Scalar>& other);
+
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
+  friend std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X);
 
  private:
   Matrix46s A_;   //!< Matrix of wrench cone

@@ -153,8 +153,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
       boost::make_shared<crocoddyl::ActuationModelFull>(state);
 
-  crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
-  pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
