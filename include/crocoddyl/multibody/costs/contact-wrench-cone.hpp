@@ -30,6 +30,7 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelContactWrenchConeTpl<Scalar> ResidualModelContactWrenchCone;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef typename MathBase::VectorXs VectorXs;
@@ -75,7 +76,6 @@ struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-  typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 

@@ -28,7 +28,7 @@
 namespace crocoddyl {
 
 /**
- * @brief Define a contact wrench cone residual function
+ * @brief Contact wrench cone residual function
  *
  * This residual function is defined as \f$\mathbf{r}=\mathbf{A}\boldsymbol{\lambda}\f$,
  * where \f$\mathbf{A}\f$ is the inequality matrix defined by the contact wrench cone, and \f$\boldsymbol{\lambda}\f$
@@ -44,7 +44,7 @@ namespace crocoddyl {
  * be used with other action models.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
- * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorContactTpl`
+ * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorForceTpl`
  */
 template <typename _Scalar>
 class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scalar> {
@@ -160,7 +160,6 @@ struct ResidualDataContactWrenchConeTpl : public ResidualDataAbstractTpl<_Scalar
   typedef ResidualDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-  typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
