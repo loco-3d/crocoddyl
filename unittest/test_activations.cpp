@@ -69,7 +69,7 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activat
   model_num_diff.calcDiff(data_num_diff, r);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
+  double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
   BOOST_CHECK((data->Ar - data_num_diff->Ar).isZero(tol));
 

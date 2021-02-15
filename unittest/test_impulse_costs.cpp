@@ -42,7 +42,7 @@ void test_partial_derivatives_against_impulse_numdiff(ImpulseCostModelTypes::Typ
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
+  double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {

@@ -174,7 +174,7 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
+  double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
 }
 
