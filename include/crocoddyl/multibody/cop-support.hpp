@@ -54,6 +54,13 @@ class CoPSupportTpl {
    * @param[in] support  Center of pressure support
    */
   CoPSupportTpl(const WrenchConeTpl<Scalar>& support);
+
+  /**
+   * @brief Initialize the center of pressure support
+   *
+   * @param[in] support  Center of pressure support
+   */
+  CoPSupportTpl(const CoPSupportTpl<Scalar>& support);
   ~CoPSupportTpl();
 
   /**

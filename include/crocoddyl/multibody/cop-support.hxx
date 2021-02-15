@@ -37,6 +37,10 @@ CoPSupportTpl<Scalar>::CoPSupportTpl(const WrenchConeTpl<Scalar>& other)
     : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
 
 template <typename Scalar>
+CoPSupportTpl<Scalar>::CoPSupportTpl(const CoPSupportTpl<Scalar>& other)
+    : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
+
+template <typename Scalar>
 CoPSupportTpl<Scalar>::~CoPSupportTpl() {}
 
 template <typename Scalar>
