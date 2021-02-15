@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,9 @@ namespace python {
 
 void exposeFrictionCone() {
   bp::register_ptr_to_python<boost::shared_ptr<FrictionCone> >();
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<FrictionCone>(
       "FrictionCone", "Model of the friction cone as lb <= Af <= ub",
@@ -65,6 +68,8 @@ void exposeFrictionCone() {
                     bp::make_function(&FrictionCone::set_max_nforce),
                     "maximum normal force (run update() if you have changed the value)")
       .def(PrintableVisitor<FrictionCone>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

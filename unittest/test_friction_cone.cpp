@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ void test_constructor() {
   // Create the friction cone with rotation and surface normal
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isZero(1e-9));
+  BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
@@ -45,13 +45,44 @@ void test_constructor() {
   // Create the friction cone
   cone = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isZero(1e-9));
+  BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 1);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 1);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
+
+  // Create the friction cone from a reference
+  {
+    crocoddyl::FrictionCone cone_reference(cone);
+
+    BOOST_CHECK(cone.get_nf() == cone_reference.get_nf());
+    BOOST_CHECK(cone.get_A().isApprox(cone_reference.get_A()));
+    BOOST_CHECK(cone.get_ub().isApprox(cone_reference.get_ub()));
+    BOOST_CHECK(cone.get_lb().isApprox(cone_reference.get_lb()));
+    BOOST_CHECK(cone.get_R().isApprox(cone_reference.get_R()));
+    BOOST_CHECK(std::abs(cone.get_mu() - cone_reference.get_mu()) < 1e-9);
+    BOOST_CHECK(cone.get_inner_appr() == cone_reference.get_inner_appr());
+    BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_reference.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(std::abs(cone.get_max_nforce() - cone_reference.get_max_nforce()) < 1e-9);
+  }
+
+  // Create the friction cone through the copy operator
+  {
+    crocoddyl::FrictionCone cone_copy;
+    cone_copy = cone;
+
+    BOOST_CHECK(cone.get_nf() == cone_copy.get_nf());
+    BOOST_CHECK(cone.get_A().isApprox(cone_copy.get_A()));
+    BOOST_CHECK(cone.get_ub().isApprox(cone_copy.get_ub()));
+    BOOST_CHECK(cone.get_lb().isApprox(cone_copy.get_lb()));
+    BOOST_CHECK(cone.get_R().isApprox(cone_copy.get_R()));
+    BOOST_CHECK(std::abs(cone.get_mu() - cone_copy.get_mu()) < 1e-9);
+    BOOST_CHECK(cone.get_inner_appr() == cone_copy.get_inner_appr());
+    BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_copy.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(std::abs(cone.get_max_nforce() - cone_copy.get_max_nforce()) < 1e-9);
+  }
 }
 
 void test_inner_approximation_of_friction_cone() {

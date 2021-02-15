@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,9 @@ namespace python {
 
 void exposeWrenchCone() {
   bp::register_ptr_to_python<boost::shared_ptr<WrenchCone> >();
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<WrenchCone>(
       "WrenchCone", "Model of the wrench cone as lb <= Af <= ub",
@@ -65,6 +68,8 @@ void exposeWrenchCone() {
                     bp::make_function(&WrenchCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&WrenchCone::set_max_nforce), "maximum normal force")
       .def(PrintableVisitor<WrenchCone>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

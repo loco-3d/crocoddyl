@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,12 +33,12 @@ CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box) : R
 }
 
 template <typename Scalar>
-CoPSupportTpl<Scalar>::CoPSupportTpl(const WrenchConeTpl<Scalar>& support)
-    : A_(support.get_A()),
-      ub_(support.get_ub()),
-      lb_(support.get_lb()),
-      R_(support.get_R()),
-      box_(support.get_box()) {}
+CoPSupportTpl<Scalar>::CoPSupportTpl(const WrenchConeTpl<Scalar>& other)
+    : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
+
+template <typename Scalar>
+CoPSupportTpl<Scalar>::CoPSupportTpl(const CoPSupportTpl<Scalar>& other)
+    : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::~CoPSupportTpl() {}
@@ -106,6 +106,18 @@ void CoPSupportTpl<Scalar>::set_box(const Vector2s& box) {
     box_(1) = std::numeric_limits<Scalar>::max();
     std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
   }
+}
+
+template <typename Scalar>
+CoPSupportTpl<Scalar>& CoPSupportTpl<Scalar>::operator=(const CoPSupportTpl<Scalar>& other) {
+  if (this != &other) {
+    A_ = other.get_A();
+    ub_ = other.get_ub();
+    lb_ = other.get_lb();
+    R_ = other.get_R();
+    box_ = other.get_box();
+  }
+  return *this;
 }
 
 template <typename Scalar>
