@@ -21,9 +21,9 @@ namespace unittest {
 struct ResidualModelTypes {
   enum Type {
     ResidualModelState,
-    // ResidualModelControl,
+    ResidualModelControl,
     ResidualModelCoMPosition,
-    // // ResidualModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
+    // ResidualModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
     ResidualModelFramePlacement,
     ResidualModelFrameRotation,
     ResidualModelFrameTranslation,
