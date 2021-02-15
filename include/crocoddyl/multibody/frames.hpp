@@ -42,8 +42,10 @@ struct FrameTranslationTpl {
   }
 
   FrameTranslationTpl<Scalar>& operator=(const FrameTranslationTpl<Scalar>& other) {
-    id = other.id;
-    translation = other.translation;
+    if (this != &other) {
+      id = other.id;
+      translation = other.translation;
+    }
     return *this;
   }
 
@@ -72,8 +74,10 @@ struct FrameRotationTpl {
   }
 
   FrameRotationTpl<Scalar>& operator=(const FrameRotationTpl<Scalar>& other) {
-    id = other.id;
-    rotation = other.rotation;
+    if (this != &other) {
+      id = other.id;
+      rotation = other.rotation;
+    }
     return *this;
   }
 
@@ -98,8 +102,10 @@ struct FramePlacementTpl {
   FramePlacementTpl(const FrameIndex& id, const SE3& placement) : id(id), placement(placement) {}
 
   FramePlacementTpl<Scalar>& operator=(const FramePlacementTpl<Scalar>& other) {
-    id = other.id;
-    placement = other.placement;
+    if (this != &other) {
+      id = other.id;
+      placement = other.placement;
+    }
     return *this;
   }
 
@@ -147,9 +153,11 @@ struct FrameMotionTpl {
   }
 
   FrameMotionTpl<Scalar>& operator=(const FrameMotionTpl<Scalar>& other) {
-    id = other.id;
-    motion = other.motion;
-    reference = other.reference;
+    if (this != &other) {
+      id = other.id;
+      motion = other.motion;
+      reference = other.reference;
+    }
     return *this;
   }
 
@@ -179,8 +187,10 @@ struct FrameForceTpl {
   }
 
   FrameForceTpl<Scalar>& operator=(const FrameForceTpl<Scalar>& other) {
-    id = other.id;
-    force = other.force;
+    if (this != &other) {
+      id = other.id;
+      force = other.force;
+    }
     return *this;
   }
 
@@ -209,8 +219,10 @@ struct FrameFrictionConeTpl {
   }
 
   FrameFrictionConeTpl<Scalar>& operator=(const FrameFrictionConeTpl<Scalar>& other) {
-    id = other.id;
-    cone = other.cone;
+    if (this != &other) {
+      id = other.id;
+      cone = other.cone;
+    }
     return *this;
   }
 
@@ -234,8 +246,10 @@ struct FrameWrenchConeTpl {
   }
 
   FrameWrenchConeTpl<Scalar>& operator=(const FrameWrenchConeTpl<Scalar>& other) {
-    id = other.id;
-    cone = other.cone;
+    if (this != &other) {
+      id = other.id;
+      cone = other.cone;
+    }
     return *this;
   }
 
@@ -263,9 +277,11 @@ struct FrameCoPSupportTpl {
   }
 
   FrameCoPSupportTpl<Scalar>& operator=(const FrameCoPSupportTpl<Scalar>& other) {
-    id_ = other.get_id();
-    box_ = other.get_box();
-    A_ = other.get_A();
+    if (this != &other) {
+      id_ = other.get_id();
+      box_ = other.get_box();
+      A_ = other.get_A();
+    }
     return *this;
   }
 

@@ -292,16 +292,18 @@ void WrenchConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
 
 template <typename Scalar>
 WrenchConeTpl<Scalar>& WrenchConeTpl<Scalar>::operator=(const WrenchConeTpl<Scalar>& other) {
-  nf_ = other.get_nf();
-  A_ = other.get_A();
-  ub_ = other.get_ub();
-  lb_ = other.get_lb();
-  R_ = other.get_R();
-  box_ = other.get_box();
-  mu_ = other.get_mu();
-  inner_appr_ = other.get_inner_appr();
-  min_nforce_ = other.get_min_nforce();
-  max_nforce_ = other.get_max_nforce();
+  if (this != &other) {
+    nf_ = other.get_nf();
+    A_ = other.get_A();
+    ub_ = other.get_ub();
+    lb_ = other.get_lb();
+    R_ = other.get_R();
+    box_ = other.get_box();
+    mu_ = other.get_mu();
+    inner_appr_ = other.get_inner_appr();
+    min_nforce_ = other.get_min_nforce();
+    max_nforce_ = other.get_max_nforce();
+  }
   return *this;
 }
 

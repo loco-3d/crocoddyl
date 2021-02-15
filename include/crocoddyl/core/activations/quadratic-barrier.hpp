@@ -63,9 +63,11 @@ struct ActivationBoundsTpl {
   ActivationBoundsTpl() : beta(Scalar(1.)) {}
 
   ActivationBoundsTpl& operator=(const ActivationBoundsTpl& other) {
-    lb = other.lb;
-    ub = other.ub;
-    beta = other.beta;
+    if (this != &other) {
+      lb = other.lb;
+      ub = other.ub;
+      beta = other.beta;
+    }
     return *this;
   }
 
