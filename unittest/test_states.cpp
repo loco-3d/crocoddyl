@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -186,9 +186,9 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
-  BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
+  double tol = NUMDIFF_MODIFIER * sqrt(state_num_diff.get_disturbance());
+  BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isZero(tol));
+  BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isZero(tol));
 }
 
 void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
@@ -211,9 +211,9 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
-  BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
+  double tol = NUMDIFF_MODIFIER * sqrt(state_num_diff.get_disturbance());
+  BOOST_CHECK((Jint_1 - Jint_num_1).isZero(tol));
+  BOOST_CHECK((Jint_2 - Jint_num_2).isZero(tol));
 }
 
 void test_JintegrateTransport(StateModelTypes::Type state_type) {

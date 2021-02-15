@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -69,9 +69,9 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activat
   model_num_diff.calcDiff(data_num_diff, r);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
+  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
-  BOOST_CHECK((data->Ar - data_num_diff->Ar).isMuchSmallerThan(1.0, tol));
+  BOOST_CHECK((data->Ar - data_num_diff->Ar).isZero(tol));
 
   // numerical differentiation of the Hessian is not good enough to be tested.
   // BOOST_CHECK((data->Arr - data_num_diff->Arr).isMuchSmallerThan(1.0, tol));

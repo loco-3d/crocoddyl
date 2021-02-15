@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,9 +68,9 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isMuchSmallerThan(1.0, tol));
+  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
+  BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//

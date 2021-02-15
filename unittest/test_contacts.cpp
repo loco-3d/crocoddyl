@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,8 +174,8 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isMuchSmallerThan(1.0, tol));
+  double tol = NUMDIFF_MODIFIER * sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//
