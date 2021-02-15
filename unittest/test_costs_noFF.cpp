@@ -222,11 +222,11 @@ void test_partial_derivatives_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   cost_sum.calc(data_sum, x, u);
   cost_sum.calcDiff(data_sum, x, u);
 
-  BOOST_CHECK((data->Lx - data_sum->Lx).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lu - data_sum->Lu).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lxx - data_sum->Lxx).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lxu - data_sum->Lxu).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Luu - data_sum->Luu).isMuchSmallerThan(1.0));
+  BOOST_CHECK((data->Lx - data_sum->Lx).isZero());
+  BOOST_CHECK((data->Lu - data_sum->Lu).isZero());
+  BOOST_CHECK((data->Lxx - data_sum->Lxx).isZero());
+  BOOST_CHECK((data->Lxu - data_sum->Lxu).isZero());
+  BOOST_CHECK((data->Luu - data_sum->Luu).isZero());
 }
 
 //----------------------------------------------------------------------------//

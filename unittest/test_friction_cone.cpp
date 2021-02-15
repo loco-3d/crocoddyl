@@ -29,7 +29,7 @@ void test_constructor() {
   // Create the friction cone with rotation and surface normal
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone.get_R() - R).isZero(1e-9));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
@@ -45,7 +45,7 @@ void test_constructor() {
   // Create the friction cone
   cone = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((cone.get_R() - R).isZero(1e-9));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
@@ -83,7 +83,7 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::FrictionCone cone_2(R, mu, nf, inner_appr);
 
   for (std::size_t i = 0; i < 5; ++i) {
-    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isZero(1e-9));
   }
 }
 

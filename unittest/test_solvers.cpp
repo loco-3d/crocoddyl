@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
@@ -70,11 +70,11 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   Eigen::Block<Eigen::MatrixXd> hess = kkt_mat.block(0, 0, ndx + nu, ndx + nu);
 
   // Checking the symmetricity of the Hessian
-  BOOST_CHECK((hess - hess.transpose()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((hess - hess.transpose()).isZero(1e-9));
 
   // Check initial state
-  BOOST_CHECK((state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]), kkt->get_problem()->get_x0()))
-                  .isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(
+      (state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]), kkt->get_problem()->get_x0())).isZero(1e-9));
 }
 
 //____________________________________________________________________________//
@@ -120,16 +120,16 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
   BOOST_CHECK_EQUAL(solver->get_xs().size(), T + 1);
 
   // initial state
-  BOOST_CHECK((solver->get_xs()[0] - problem->get_x0()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((solver->get_xs()[0] - problem->get_x0()).isZero(1e-9));
 
   // check solutions against each other
   for (unsigned int t = 0; t < T; ++t) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = solver->get_problem()->get_runningModels()[t];
     std::size_t nu = model->get_nu();
-    BOOST_CHECK((state->diff_dx(solver->get_xs()[t], kkt.get_xs()[t])).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((solver->get_us()[t].head(nu) - kkt.get_us()[t]).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((state->diff_dx(solver->get_xs()[t], kkt.get_xs()[t])).isZero(1e-9));
+    BOOST_CHECK((solver->get_us()[t].head(nu) - kkt.get_us()[t]).isZero(1e-9));
   }
-  BOOST_CHECK((state->diff_dx(solver->get_xs()[T], kkt.get_xs()[T])).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((state->diff_dx(solver->get_xs()[T], kkt.get_xs()[T])).isZero(1e-9));
 }
 
 //____________________________________________________________________________//

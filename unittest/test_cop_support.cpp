@@ -27,8 +27,8 @@ void test_constructor() {
   // Create the CoP support support
   crocoddyl::CoPSupport support(R, box);
 
-  BOOST_CHECK((support.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((support.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((support.get_R() - R).isZero(1e-9));
+  BOOST_CHECK((support.get_box() - box).isZero(1e-9));
   BOOST_CHECK(static_cast<std::size_t>(support.get_A().rows()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_lb().size()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_ub().size()) == 4);
@@ -41,8 +41,8 @@ void test_constructor() {
   // Create the wrench support
   support = crocoddyl::CoPSupport(R, box);
 
-  BOOST_CHECK((support.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((support.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((support.get_R() - R).isZero(1e-9));
+  BOOST_CHECK((support.get_box() - box).isZero(1e-9));
   BOOST_CHECK(static_cast<std::size_t>(support.get_A().rows()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_lb().size()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_ub().size()) == 4);
@@ -63,8 +63,7 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::CoPSupport support_2(R, box);
 
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK(
-        (support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isZero(1e-9));
   }
 }
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,12 +46,12 @@ void test_calc(ActionModelTypes::Type action_model_type) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK(problem.get_runningDatas()[i]->cost == data->cost);
-    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   BOOST_CHECK(problem.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
 void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) {
@@ -82,12 +82,12 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) 
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK(problem.get_runningDatas()[i]->cost == data->cost);
-    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   BOOST_CHECK(problem.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
 void test_calcDiff(ActionModelTypes::Type action_model_type) {
@@ -117,20 +117,20 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
+  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isZero(1e-9));
+  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isZero(1e-9));
+  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
 }
 
 void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type) {
@@ -162,20 +162,20 @@ void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_ty
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isMuchSmallerThan(1.0, 1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
+    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isMuchSmallerThan(1.0, 1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isMuchSmallerThan(1.0, 1e-7));
+  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isZero(1e-7));
+  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isZero(1e-7));
+  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
 }
 
 void test_rollout(ActionModelTypes::Type action_model_type) {
@@ -203,7 +203,7 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK((xs[i + 1] - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
   }
 }
 
@@ -234,7 +234,7 @@ void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_typ
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK((xs[i + 1] - data->xnext).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
   }
 }
 
@@ -264,7 +264,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((u - us[i]).isZero(1e-7));
   }
 }
 
@@ -296,7 +296,7 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isMuchSmallerThan(1.0, 1e-7));
+    BOOST_CHECK((u - us[i]).isZero(1e-7));
   }
 }
 
