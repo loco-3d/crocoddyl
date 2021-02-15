@@ -19,13 +19,13 @@ void exposeCostContactFrictionCone() {
       "CostModelContactFrictionCone",
       "This cost function defines a residual vector as r = A*f, where A, f describe the linearized friction cone and "
       "the spatial force, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone, int>(
-          bp::args("self", "state", "activation", "fref", "nu"),
-          "Initialize the contact friction cone cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model\n"
-          ":param fref: frame friction cone\n"
-          ":param nu: dimension of control vector"))
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone,
+               std::size_t>(bp::args("self", "state", "activation", "fref", "nu"),
+                            "Initialize the contact friction cone cost model.\n\n"
+                            ":param state: state of the multibody system\n"
+                            ":param activation: activation model\n"
+                            ":param fref: frame friction cone\n"
+                            ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameFrictionCone>(
           bp::args("self", "state", "activation", "fref"),
           "Initialize the contact friction cone cost model.\n\n"
@@ -33,7 +33,7 @@ void exposeCostContactFrictionCone() {
           ":param state: state of the multibody system\n"
           ":param activation: activation model\n"
           ":param fref: frame friction cone"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameFrictionCone, std::size_t>(
           bp::args("self", "state", "fref", "nu"),
           "Initialize the contact friction cone cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
@@ -90,11 +90,7 @@ void exposeCostContactFrictionCone() {
           ":param model: contact friction cone cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Arr_Ru", bp::make_getter(&CostDataContactFrictionCone::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
-      .add_property(
-          "contact",
-          bp::make_getter(&CostDataContactFrictionCone::contact, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataContactFrictionCone::contact), "contact data associated with the current cost");
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python
