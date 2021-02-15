@@ -32,10 +32,10 @@ void test_constructor() {
   // Create the wrench cone
   crocoddyl::WrenchCone cone(R, mu, box, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
-  BOOST_CHECK((cone.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_box().isApprox(box));
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 13);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
@@ -49,10 +49,10 @@ void test_constructor() {
   // Create the wrench cone
   cone = crocoddyl::WrenchCone(R, mu, box, nf, inner_appr);
 
-  BOOST_CHECK((cone.get_R() - R).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
   BOOST_CHECK(cone.get_nf() == nf);
-  BOOST_CHECK((cone.get_box() - box).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(cone.get_box().isApprox(box));
   BOOST_CHECK(cone.get_inner_appr() == inner_appr);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 13);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
@@ -63,11 +63,11 @@ void test_constructor() {
     crocoddyl::WrenchCone cone_reference(cone);
 
     BOOST_CHECK(cone.get_nf() == cone_reference.get_nf());
-    BOOST_CHECK((cone.get_A() - cone_reference.get_A()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_ub() - cone_reference.get_ub()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_lb() - cone_reference.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_R() - cone_reference.get_R()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_box() - cone_reference.get_box()).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK(cone.get_A().isApprox(cone_reference.get_A()));
+    BOOST_CHECK(cone.get_ub().isApprox(cone_reference.get_ub()));
+    BOOST_CHECK(cone.get_lb().isApprox(cone_reference.get_lb()));
+    BOOST_CHECK(cone.get_R().isApprox(cone_reference.get_R()));
+    BOOST_CHECK(cone.get_box().isApprox(cone_reference.get_box()));
     BOOST_CHECK(std::abs(cone.get_mu() - cone_reference.get_mu()) < 1e-9);
     BOOST_CHECK(cone.get_inner_appr() == cone_reference.get_inner_appr());
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_reference.get_min_nforce()) < 1e-9);
@@ -80,11 +80,11 @@ void test_constructor() {
     cone_copy = cone;
 
     BOOST_CHECK(cone.get_nf() == cone_copy.get_nf());
-    BOOST_CHECK((cone.get_A() - cone_copy.get_A()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_ub() - cone_copy.get_ub()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_lb() - cone_copy.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_R() - cone_copy.get_R()).isMuchSmallerThan(1.0, 1e-9));
-    BOOST_CHECK((cone.get_box() - cone_copy.get_box()).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK(cone.get_A().isApprox(cone_copy.get_A()));
+    BOOST_CHECK(cone.get_ub().isApprox(cone_copy.get_ub()));
+    BOOST_CHECK(cone.get_lb().isApprox(cone_copy.get_lb()));
+    BOOST_CHECK(cone.get_R().isApprox(cone_copy.get_R()));
+    BOOST_CHECK(cone.get_box().isApprox(cone_copy.get_box()));
     BOOST_CHECK(std::abs(cone.get_mu() - cone_copy.get_mu()) < 1e-9);
     BOOST_CHECK(cone.get_inner_appr() == cone_copy.get_inner_appr());
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_copy.get_min_nforce()) < 1e-9);
