@@ -113,7 +113,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, d->dg_dq);
 
-  const std::size_t &nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
 
   data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
