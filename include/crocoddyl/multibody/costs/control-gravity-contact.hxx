@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void CostModelControlGravContactTpl<Scalar>::calc(const boost::shared_ptr<CostDa
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  data->r = pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext) - d->actuation->tau;
+  data->r = d->actuation->tau - pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -97,10 +97,10 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q, d->fext, d->dg_dq);
 
   activation_->calcDiff(data->activation, data->r);
-  const std::size_t &nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
 
-  data->Lu.noalias() = -d->actuation->dtau_du.transpose() * data->activation->Ar;
-  data->Lx.head(nv).noalias() = d->dg_dq.transpose() * data->activation->Ar;
+  data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
+  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
   d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;
