@@ -162,8 +162,6 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>

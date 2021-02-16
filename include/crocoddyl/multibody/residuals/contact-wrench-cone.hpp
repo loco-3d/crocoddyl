@@ -43,7 +43,7 @@ namespace crocoddyl {
  * shared data (i.e., `DataCollectorContactTpl` or `DataCollectorImpulseTpl`). Note that this residual function cannot
  * be used with other action models.
  *
- * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
+ * \sa `ResidualModelAbstractTpl`, calc(), calcDiff(), createData(),
  * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorForceTpl`
  */
 template <typename _Scalar>
@@ -90,8 +90,9 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Compute the contact wrench cone residual
    *
-   * The force vector is computed by DifferentialActionModelContactFwdDynamicsTpl and stored in
-   * DataCollectorContactTpl.
+   * The CoP residual is computed based on the \f$\mathbf{A}\f$ matrix, the force vector is computed by
+   * `DifferentialActionModelContactFwdDynamicsTpl` or `ActionModelImpulseFwdDynamicTpl` which is stored in
+   * `DataCollectorContactTpl` or `DataCollectorImpulseTpl`.
    *
    * @param[in] data  Contact force data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -103,8 +104,9 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Compute the derivatives of the contact wrench cone residual
    *
-   * The force derivatives are computed by DifferentialActionModelContactFwdDynamicsTpl and stored in
-   * DataCollectorContactTpl.
+   * The CoP residual is computed based on the \f$\mathbf{A}\f$ matrix, the force vector is computed by
+   * `DifferentialActionModelContactFwdDynamicsTpl` or `ActionModelImpulseFwdDynamicTpl` which is stored in
+   * `DataCollectorContactTpl` or `DataCollectorImpulseTpl`.
    *
    * @param[in] data  Contact force data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
