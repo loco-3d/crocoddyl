@@ -10,15 +10,9 @@
 #define CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
