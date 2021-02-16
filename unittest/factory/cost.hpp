@@ -61,8 +61,8 @@ struct CostModelNoFFTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type);
-std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type);
+std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type);
+std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type);
 
 class CostModelFactory {
  public:

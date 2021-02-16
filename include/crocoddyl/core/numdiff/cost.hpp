@@ -29,7 +29,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  typedef boost::function<void(const VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
 
   /**
    * @brief Initialize the numdiff cost model

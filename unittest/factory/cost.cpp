@@ -28,7 +28,7 @@ namespace unittest {
 const std::vector<CostModelTypes::Type> CostModelTypes::all(CostModelTypes::init_all());
 const std::vector<CostModelNoFFTypes::Type> CostModelNoFFTypes::all(CostModelNoFFTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
   switch (type) {
     case CostModelTypes::CostModelState:
       os << "CostModelState";
@@ -63,7 +63,7 @@ std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   return os;
 }
 
-std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
   switch (type) {
     case CostModelNoFFTypes::CostModelControlGrav:
       os << "CostModelControlGrav";
