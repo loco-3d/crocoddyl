@@ -85,6 +85,20 @@ class CostModelFactory {
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
     StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
 
+/**
+ * @brief Update the actuation model needed for numerical differentiation.
+ * We use the address of the object to avoid a copy from the
+ * "boost::bind".
+ *
+ * @param model[in]  Pinocchio model
+ * @param data[out]  Pinocchio data
+ * @param x[in]      State vector
+ * @param u[in]      Control vector
+ */
+void updateActuation(const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
+                     const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u);
+
 }  // namespace unittest
 }  // namespace crocoddyl
 
