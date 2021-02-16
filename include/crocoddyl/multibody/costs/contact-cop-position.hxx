@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/contact-cop-position.hpp"
 
 namespace crocoddyl {
@@ -14,77 +13,75 @@ namespace crocoddyl {
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameCoPSupport& cop_support, const std::size_t nu)
-    : Base(state, activation, nu), cop_support_(cop_support) {}
+    const FrameCoPSupport& cref, const std::size_t nu)
+    : Base(state, activation,
+           boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
+                                                               CoPSupport(Matrix3s::Identity(), cref.get_box()), nu)),
+      cop_support_(cref) {}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    const FrameCoPSupport& cop_support)
-    : Base(state, activation), cop_support_(cop_support) {}
+    const FrameCoPSupport& cref)
+    : Base(state, activation,
+           boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
+                                                               CoPSupport(Matrix3s::Identity(), cref.get_box()))),
+      cop_support_(cref) {}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                                                                        const FrameCoPSupport& cop_support,
+                                                                        const FrameCoPSupport& cref,
                                                                         const std::size_t nu)
     : Base(state,
            boost::make_shared<ActivationModelQuadraticBarrier>(
                ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
-           nu),
-      cop_support_(cop_support) {}
+           boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
+                                                               CoPSupport(Matrix3s::Identity(), cref.get_box()), nu)),
+      cop_support_(cref) {}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
-                                                                        const FrameCoPSupport& cop_support)
-    : Base(state, boost::make_shared<ActivationModelQuadraticBarrier>(
-                      ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4)))),
-      cop_support_(cop_support) {}
+                                                                        const FrameCoPSupport& cref)
+    : Base(state,
+           boost::make_shared<ActivationModelQuadraticBarrier>(
+               ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
+           boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
+                                                               CoPSupport(Matrix3s::Identity(), cref.get_box()))),
+      cop_support_(cref) {}
 
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}
 
 template <typename Scalar>
 void CostModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>&,
-                                                  const Eigen::Ref<const VectorXs>&) {
+                                                  const Eigen::Ref<const VectorXs>& x,
+                                                  const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference CoP support
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the cost residual r =  A * f
-  data->r.noalias() = cop_support_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>&,
-                                                      const Eigen::Ref<const VectorXs>&) {
-  // Update all data
+                                                      const Eigen::Ref<const VectorXs>& x,
+                                                      const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and CoP support residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  // Get the derivatives of the local contact wrench
-  const MatrixXs& df_dx = d->contact->df_dx;
-  const MatrixXs& df_du = d->contact->df_du;
-  const Matrix46& A = cop_support_.get_A();
-
-  // Compute the derivatives of the activation function
-  activation_->calcDiff(data->activation, data->r);
-
-  // Compute the derivatives of the cost residual
-  data->Rx.noalias() = A * df_dx;
-  data->Ru.noalias() = A * df_du;
-  d->Arr_Ru.noalias() = data->activation->Arr * data->Ru;
-
-  // Compute the first order derivatives of the cost function
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lu.noalias() = data->Ru.transpose() * data->activation->Ar;
-
-  // Compute the second order derivatives of the cost function
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
-  data->Lxu.noalias() = data->Rx.transpose() * d->Arr_Ru;
-  data->Luu.noalias() = data->Ru.transpose() * d->Arr_Ru;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  d->Arr_Ru.noalias() = data->activation->Arr * data->residual->Ru;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
+  data->Lxu.noalias() = data->residual->Rx.transpose() * d->Arr_Ru;
+  data->Luu.noalias() = data->residual->Ru.transpose() * d->Arr_Ru;
 }
 
 template <typename Scalar>
@@ -97,6 +94,9 @@ template <typename Scalar>
 void CostModelContactCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameCoPSupport)) {
     cop_support_ = *static_cast<const FrameCoPSupport*>(pv);
+    ResidualModelContactCoPPosition* residual = static_cast<ResidualModelContactCoPPosition*>(residual_.get());
+    residual->set_id(cop_support_.get_id());
+    residual->set_reference(CoPSupport(Matrix3s::Identity(), cop_support_.get_box()));
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");
   }

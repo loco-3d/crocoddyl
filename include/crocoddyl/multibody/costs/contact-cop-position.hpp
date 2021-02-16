@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,12 +12,8 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -65,15 +61,14 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelContactCoPPositionTpl<Scalar> ResidualModelContactCoPPosition;
   typedef ActivationModelQuadraticBarrierTpl<Scalar> ActivationModelQuadraticBarrier;
   typedef ActivationBoundsTpl<Scalar> ActivationBounds;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef CoPSupportTpl<Scalar> CoPSupport;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
-  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
 
   /**
    * @brief Initialize the contact CoP cost model
@@ -176,6 +171,7 @@ class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
@@ -191,51 +187,19 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+      : Base(model, data),
+        Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
+        Arr_Ru(model->get_activation()->get_nr(), model->get_nu()) {
+    Arr_Rx.setZero();
     Arr_Ru.setZero();
-
-    // Check that proper shared data has been passed
-    DataCollectorContactTpl<Scalar>* d = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorContact");
-    }
-
-    // Get the active 6d contact (avoids data casting at runtime)
-    FrameCoPSupport cop_support = model->template get_reference<FrameCoPSupport>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[cop_support.get_id()].name;
-    bool found_contact = false;
-    for (typename ContactModelMultiple::ContactDataContainer::iterator it = d->contacts->contacts.begin();
-         it != d->contacts->contacts.end(); ++it) {
-      if (it->second->frame == cop_support.get_id()) {
-        ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          throw_pretty("Domain error: a 6d contact model is required in " + frame_name +
-                       "in order to compute the CoP");
-          break;
-        }
-        ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          found_contact = true;
-          contact = it->second;
-          break;
-        }
-      }
-    }
-    if (!found_contact) {
-      throw_pretty("Domain error: there isn't defined contact data for " + frame_name);
-    }
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  MatrixXs Arr_Rx;
   MatrixXs Arr_Ru;
-  boost::shared_ptr<ContactDataAbstractTpl<Scalar> > contact;  //!< contact force
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -243,9 +207,7 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 

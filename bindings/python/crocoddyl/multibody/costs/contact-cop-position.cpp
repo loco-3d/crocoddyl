@@ -17,20 +17,20 @@ void exposeCostContactCoPPosition() {
 
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
       "CostModelContactCoPPosition",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport, int>(
-          bp::args("self", "state", "activation", "cop_support", "nu"),
-          "Initialize the contact CoP position cost model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
-          ":param cop_support: contact frame Id and cop support region\n"
-          ":param nu: dimension of control vector"))
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport,
+               std::size_t>(bp::args("self", "state", "activation", "cop_support", "nu"),
+                            "Initialize the contact CoP position cost model.\n\n"
+                            ":param state: state of the multibody system\n"
+                            ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
+                            ":param cop_support: contact frame Id and cop support region\n"
+                            ":param nu: dimension of control vector"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, FrameCoPSupport>(
           bp::args("self", "state", "activation", "cop_support"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
           ":param activation: activation model (default ActivationModelQuadraticBarrier)\n"
           ":param cop_support: contact frame Id and cop support region"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport, int>(
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameCoPSupport, std::size_t>(
           bp::args("self", "state", "cop_support", "nu"),
           "Initialize the contact CoP position cost model.\n\n"
           ":param state: state of the multibody system\n"
@@ -78,11 +78,7 @@ void exposeCostContactCoPPosition() {
           ":param model: contact CoP position cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Arr_Ru", bp::make_getter(&CostDataContactCoPPosition::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
-      .add_property(
-          "contact",
-          bp::make_getter(&CostDataContactCoPPosition::contact, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&CostDataContactCoPPosition::contact), "contact data associated with the current cost");
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python
