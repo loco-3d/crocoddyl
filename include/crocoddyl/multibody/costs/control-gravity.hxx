@@ -94,7 +94,7 @@ void CostModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstr
   Data *d = static_cast<Data *>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  data->r = pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q) - d->actuation->tau;
+  data->r = d->actuation->tau - pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
 
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
@@ -116,8 +116,8 @@ void CostModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
   const std::size_t &nv = state_->get_nv();
   activation_->calcDiff(data->activation, data->r);
 
-  data->Lu.noalias() = -d->actuation->dtau_du.transpose() * data->activation->Ar;
-  data->Lx.head(nv).noalias() = d->dg_dq.transpose() * data->activation->Ar;
+  data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
+  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
   d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;
