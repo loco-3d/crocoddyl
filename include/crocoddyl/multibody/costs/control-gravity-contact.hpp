@@ -9,21 +9,11 @@
 #ifndef CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_CONTACT_HPP_
 #define CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_CONTACT_HPP_
 
-#include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
-
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-//#include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -69,27 +59,52 @@ class CostModelControlGravContactTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the control gravity contact cost model
    *
-   * The default `nu` value is obtained from the actuation model.
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] nu          Dimension of the control vector
+   */
+  CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
+                                 boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu);
+
+  /**
+   * @brief Initialize the control gravity contact cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
    */
   CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
-                                 boost::shared_ptr<ActivationModelAbstract> activation,
-                                 boost::shared_ptr<ActuationModelAbstract> actuation_model);
+                                 boost::shared_ptr<ActivationModelAbstract> activation);
+  DEPRECATED("Use constructor without actuation model",
+             CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
+                                            boost::shared_ptr<ActivationModelAbstract> activation,
+                                            boost::shared_ptr<ActuationModelAbstract> actuation_model);)
 
   /**
    * @brief Initialize the control gravity contact cost model
    *
-   * The default `nu` value is obtained from the actuation model.
    * We use `ActivationModelQuadTpl` as a default activation model (i.e.
    * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state  State of the multibody system
+   * @param[in] nu     Dimension of the control vector
    */
+  CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
 
-  explicit CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
-                                          boost::shared_ptr<ActuationModelAbstract> actuation_model);
+  /**
+   * @brief Initialize the control gravity contact cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   *
+   * @param[in] state  State of the multibody system
+   */
+  explicit CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state);
+  DEPRECATED("Use constructor without actuation model",
+             CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
+                                            boost::shared_ptr<ActuationModelAbstract> actuation_model);)
 
   virtual ~CostModelControlGravContactTpl();
 
@@ -123,7 +138,6 @@ class CostModelControlGravContactTpl : public CostModelAbstractTpl<_Scalar> {
 
  private:
   typename StateMultibody::PinocchioModel pin_model_;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model_;
 };
 
 template <typename _Scalar>
