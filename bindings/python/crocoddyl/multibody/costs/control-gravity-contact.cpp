@@ -19,19 +19,47 @@ void exposeCostControlGravContact() {
       "This cost function defines a residual vector as r = u - "
       "g(q,fext), with u as the control, q as the position,"
       "fext as the external forces and g as the gravity vector in contact",
-      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ActuationModelAbstract> >(
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
+          bp::args("self", "state", "activation", "nu"),
+          "Initialize the control-gravity cost model.\n\n"
+          ":param state: state description\n"
+          ":param activation: activation model\n"
+          ":param nu: dimension of the control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract> >(
+          bp::args("self", "state", "activation"),
+          "Initialize the control-gravity cost model.\n\n"
+          "The default nu is obtained from state.nv.\n"
+          ":param state: state description\n"
+          ":param activation: activation model"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+          bp::args("self", "state", "nu"),
+          "Initialize the control-gravity cost model.\n\n"
+          "We use ActivationModelQuad as a default activation model (i.e.\n"
+          "a=0.5*||r||^2).\n"
+          ":param state: state description\n"
+          ":param nu: dimension of the control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody> >(
+          bp::args("self", "state"),
+          "Initialize the control cost model.\n\n"
+          "The default nu is obtained from state.nv. We use ActivationModelQuad \n"
+          "as a default activation model (i.e. a=0.5*||r||^2).\n"
+          ":param state: state description"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
+                    boost::shared_ptr<ActuationModelAbstract> >(
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
-          "The default reference control is obtained from np.zero(nu), with nu "
-          "obtained from activation.nr.\n"
+          "We use ActivationModelQuad as a default activation model (i.e. "
+          "a=0.5*||r||^2). The default reference "
+          "control is obtained from np.zero(state.nv).\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract> >(
           bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
-          "The default reference control is obtained from np.zero(nu).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. "
+          "a=0.5*||r||^2). The default reference "
+          "control is obtained from np.zero(state.nv).\n"
           ":param state: state description\n"
           ":param actuation: actuation model"))
       .def<void (CostModelControlGravContact::*)(const boost::shared_ptr<CostDataAbstract> &,

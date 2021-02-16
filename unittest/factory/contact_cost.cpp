@@ -98,7 +98,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
       break;
     case ContactCostModelTypes::CostModelControlGravContact:
       cost = boost::make_shared<crocoddyl::CostModelControlGravContact>(
-          state, ActivationModelFactory().create(activation_type, state->get_nv()), action->get_actuation());
+          state, ActivationModelFactory().create(activation_type, state->get_nv()), nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactCostModelTypes::Type given");
