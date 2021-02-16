@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostControlGravContact() {
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelControlGravContact> >();
+
   bp::class_<CostModelControlGravContact, bp::bases<CostModelAbstract> >(
       "CostModelControlGravContact",
       "This cost function defines a residual vector as r = u - "
@@ -49,8 +51,7 @@ void exposeCostControlGravContact() {
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2). The default reference "
-          "control is obtained from np.zero(state.nv).\n"
+          "a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
@@ -58,8 +59,7 @@ void exposeCostControlGravContact() {
           bp::args("self", "state", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2). The default reference "
-          "control is obtained from np.zero(state.nv).\n"
+          "a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param actuation: actuation model"))
       .def<void (CostModelControlGravContact::*)(const boost::shared_ptr<CostDataAbstract> &,
@@ -92,6 +92,9 @@ void exposeCostControlGravContact() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.");
+
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataControlGravContact> >();
+
   bp::class_<CostDataControlGravContact, bp::bases<CostDataAbstract> >(
       "CostDataControlGravContact", "Data for control gravity cost in contact.\n\n",
       bp::init<CostModelControlGravContact *, DataCollectorAbstract *>(

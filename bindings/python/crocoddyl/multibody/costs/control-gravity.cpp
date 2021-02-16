@@ -52,8 +52,7 @@ void exposeCostControlGrav() {
           bp::args("self", "state", "activation", "actuation"),
           "Initialize the control cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2). The default reference "
-          "control is obtained from np.zero(state.nv).\n"
+          "a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param actuation: actuation model"))
