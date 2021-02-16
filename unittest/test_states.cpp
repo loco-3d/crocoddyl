@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -47,7 +47,7 @@ void test_integrate_against_difference(StateModelTypes::Type state_type) {
   state->diff(x2i, x2, dxi);
 
   // Checking that both states agree
-  BOOST_CHECK(dxi.isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK(dxi.isZero(1e-9));
 }
 
 void test_difference_against_integrate(StateModelTypes::Type state_type) {
@@ -64,7 +64,7 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   state->diff(x, xidx, dxd);
 
   // Checking that both states agree
-  BOOST_CHECK((dxd - dx).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((dxd - dx).isZero(1e-9));
 }
 
 void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
@@ -86,8 +86,8 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jdiff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, Jdiff_both_first, Jdiff_both_second);
 
-  BOOST_CHECK((Jdiff_first - Jdiff_both_first).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((Jdiff_second - Jdiff_both_second).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((Jdiff_first - Jdiff_both_first).isZero(1e-9));
+  BOOST_CHECK((Jdiff_second - Jdiff_both_second).isZero(1e-9));
 }
 
 void test_Jint_firstsecond(StateModelTypes::Type state_type) {
@@ -109,8 +109,8 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jint_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_both_first, Jint_both_second);
 
-  BOOST_CHECK((Jint_first - Jint_both_first).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((Jint_second - Jint_both_second).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((Jint_first - Jint_both_first).isZero(1e-9));
+  BOOST_CHECK((Jint_second - Jint_both_second).isZero(1e-9));
 }
 
 void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
@@ -135,8 +135,8 @@ void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jdiff_num_diff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_both_first, Jdiff_num_diff_both_second);
 
-  BOOST_CHECK((Jdiff_num_diff_first - Jdiff_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((Jdiff_num_diff_first - Jdiff_num_diff_both_first).isZero(1e-9));
+  BOOST_CHECK((Jdiff_num_diff_second - Jdiff_num_diff_both_second).isZero(1e-9));
 }
 
 void test_Jint_num_diff_firstsecond(StateModelTypes::Type state_type) {
@@ -161,8 +161,8 @@ void test_Jint_num_diff_firstsecond(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jint_num_diff_both_second(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jintegrate(x, dx, Jint_num_diff_both_first, Jint_num_diff_both_second);
 
-  BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isZero(1e-9));
+  BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isZero(1e-9));
 }
 
 void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
@@ -186,9 +186,9 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
-  BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isMuchSmallerThan(1.0, tol));
+  double tol = NUMDIFF_MODIFIER * sqrt(state_num_diff.get_disturbance());
+  BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isZero(tol));
+  BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isZero(tol));
 }
 
 void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
@@ -211,9 +211,9 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
 
   // Checking the partial derivatives against NumDiff
   // The previous tolerance was 10*disturbance
-  double tol = NUMDIFF_MODIFIER * state_num_diff.get_disturbance();
-  BOOST_CHECK((Jint_1 - Jint_num_1).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((Jint_2 - Jint_num_2).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(state_num_diff.get_disturbance());
+  BOOST_CHECK((Jint_1 - Jint_num_1).isZero(tol));
+  BOOST_CHECK((Jint_2 - Jint_num_2).isZero(tol));
 }
 
 void test_JintegrateTransport(StateModelTypes::Type state_type) {
@@ -232,11 +232,11 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   const Eigen::MatrixXd Jtest(Jref);
 
   state->JintegrateTransport(x, dx, Jref, crocoddyl::first);
-  BOOST_CHECK((Jref - Jint_1 * Jtest).isMuchSmallerThan(1.0, 1e-10));
+  BOOST_CHECK((Jref - Jint_1 * Jtest).isZero(1e-10));
 
   Jref = Jtest;
   state->JintegrateTransport(x, dx, Jref, crocoddyl::second);
-  BOOST_CHECK((Jref - Jint_2 * Jtest).isMuchSmallerThan(1.0, 1e-10));
+  BOOST_CHECK((Jref - Jint_2 * Jtest).isZero(1e-10));
 }
 
 void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
@@ -259,7 +259,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   // Checking that Jdiff and Jintegrate are inverses
   Eigen::MatrixXd dX_dDX = Jdx;
   Eigen::MatrixXd dDX_dX = J2;
-  BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isZero(1e-9));
 }
 
 void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
@@ -287,7 +287,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   state->integrate(x1, dx + eps * h, x2eps);
   Eigen::VectorXd x2_eps(state->get_ndx());
   state->diff(x2, x2eps, x2_eps);
-  BOOST_CHECK((dX_dDX * eps - x2_eps / h).isMuchSmallerThan(1.0, 1e-3));
+  BOOST_CHECK((dX_dDX * eps - x2_eps / h).isZero(1e-3));
 
   // Checking the velocity computed from Jdiff
   const Eigen::VectorXd& x = state->rand();
@@ -300,7 +300,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   J1.setZero();
   J2.setZero();
   state->Jdiff(x1, x, J1, J2);
-  BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isMuchSmallerThan(1.0, 1e-3));
+  BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isZero(1e-3));
 }
 
 //----------------------------------------------------------------------------//

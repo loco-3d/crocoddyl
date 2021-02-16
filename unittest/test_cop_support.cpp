@@ -86,8 +86,7 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::CoPSupport support_2(R, box);
 
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK(
-        (support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isZero(1e-9));
   }
 }
 

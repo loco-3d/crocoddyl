@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ void test_updateAccelerationDiff() {
   model.updateAccelerationDiff(data, ddv_dx);
 
   // Test
-  BOOST_CHECK((data->ddv_dx - ddv_dx).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((data->ddv_dx - ddv_dx).isZero(1e-9));
 }
 
 void test_updateForceDiff() {
