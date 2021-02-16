@@ -104,9 +104,9 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
       boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation->createData();
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data = actuation_model->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data, actuation_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
 
@@ -123,7 +123,7 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the cost derivatives
