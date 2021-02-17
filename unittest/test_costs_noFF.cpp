@@ -135,19 +135,18 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     // The num diff is not precise enough to be tested here.
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
   } else {
-    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
 }
 
@@ -223,11 +222,11 @@ void test_partial_derivatives_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   cost_sum.calc(data_sum, x, u);
   cost_sum.calcDiff(data_sum, x, u);
 
-  BOOST_CHECK((data->Lx - data_sum->Lx).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lu - data_sum->Lu).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lxx - data_sum->Lxx).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Lxu - data_sum->Lxu).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Luu - data_sum->Luu).isMuchSmallerThan(1.0));
+  BOOST_CHECK((data->Lx - data_sum->Lx).isZero());
+  BOOST_CHECK((data->Lu - data_sum->Lu).isZero());
+  BOOST_CHECK((data->Lxx - data_sum->Lxx).isZero());
+  BOOST_CHECK((data->Lxu - data_sum->Lxu).isZero());
+  BOOST_CHECK((data->Luu - data_sum->Luu).isZero());
 }
 
 //----------------------------------------------------------------------------//

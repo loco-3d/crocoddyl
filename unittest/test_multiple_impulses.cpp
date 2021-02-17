@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -417,7 +417,7 @@ void test_updateVelocityDiff() {
   model.updateVelocityDiff(data, dvnext_dx);
 
   // Test
-  BOOST_CHECK((data->dvnext_dx - dvnext_dx).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((data->dvnext_dx - dvnext_dx).isZero(1e-9));
 }
 
 void test_updateForceDiff() {

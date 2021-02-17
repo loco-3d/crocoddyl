@@ -106,14 +106,14 @@ void test_against_friction_cone() {
   crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
   crocoddyl::FrictionCone friction_cone(R, mu, nf, inner_appr, 0., 100.);
 
-  BOOST_CHECK((wrench_cone.get_R() - friction_cone.get_R()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_R() - friction_cone.get_R()).isZero(1e-9));
   BOOST_CHECK(wrench_cone.get_mu() == friction_cone.get_mu());
   BOOST_CHECK(wrench_cone.get_nf() == friction_cone.get_nf());
   for (std::size_t i = 0; i < nf + 1; ++i) {
-    BOOST_CHECK((wrench_cone.get_A().row(i).head(3) - friction_cone.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((wrench_cone.get_A().row(i).head(3) - friction_cone.get_A().row(i)).isZero(1e-9));
   }
-  BOOST_CHECK((wrench_cone.get_lb().head(nf + 1) - friction_cone.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((wrench_cone.get_ub().head(nf + 1) - friction_cone.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_lb().head(nf + 1) - friction_cone.get_lb()).isZero(1e-9));
+  BOOST_CHECK((wrench_cone.get_ub().head(nf + 1) - friction_cone.get_ub()).isZero(1e-9));
 }
 
 void test_against_cop_support() {
@@ -130,12 +130,12 @@ void test_against_cop_support() {
   crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
   crocoddyl::CoPSupport cop_support(R, box);
 
-  BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK((wrench_cone.get_A().row(nf + i + 1) - cop_support.get_A().row(i)).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((wrench_cone.get_A().row(nf + i + 1) - cop_support.get_A().row(i)).isZero(1e-9));
   }
-  BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isMuchSmallerThan(1.0, 1e-9));
-  BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isZero(1e-9));
+  BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isZero(1e-9));
 }
 
 void test_force_along_wrench_cone_normal() {

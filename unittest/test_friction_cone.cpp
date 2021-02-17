@@ -114,7 +114,7 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::FrictionCone cone_2(R, mu, nf, inner_appr);
 
   for (std::size_t i = 0; i < 5; ++i) {
-    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isMuchSmallerThan(1.0, 1e-9));
+    BOOST_CHECK((cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isZero(1e-9));
   }
 }
 

@@ -43,17 +43,17 @@ void test_partial_derivatives_against_contact_numdiff(ContactCostModelTypes::Typ
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
   } else {
-    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
 }
 

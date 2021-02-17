@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,10 +152,10 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
 
   boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
       boost::make_shared<crocoddyl::ActuationModelFull>(state);
-
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
+
   switch (cost_type) {
     case CostModelNoFFTypes::CostModelControlGrav:
       cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
