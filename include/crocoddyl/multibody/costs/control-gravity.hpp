@@ -20,21 +20,18 @@ namespace crocoddyl {
 /**
  * @brief Control gravity cost
  *
- * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
- * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, g the
- * gravity torque corresponding to the current configuration,
- * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input.
- * Note that the dimension of the residual vector is obtained from `nu`.
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
+ * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, \f$\mathbf{g}(\mathbf{q})\f$ is the
+ * gravity torque corresponding to the current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
+ * position joints input. Note that the dimension of the residual vector is obtained from `StateAbstractTpl::get_nv()`.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton
- * approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives
- * are calculated by `calc` and `calcDiff`, respectively.
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelAbstractTpl`, calc(), calcDiff(), createData()
  */
 template <typename _Scalar>
 class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
