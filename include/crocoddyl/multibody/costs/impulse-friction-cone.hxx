@@ -6,7 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/impulse-friction-cone.hpp"
 
 namespace crocoddyl {
@@ -20,12 +19,15 @@ CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
+  std::cerr << "Deprecated CostModelImpulseFrictionCone class: Use CostModelContactFrictionCone class" << std::endl;
 }
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref)
-    : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {}
+    : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {
+  std::cerr << "Deprecated CostModelImpulseFrictionCone class: Use CostModelContactFrictionCone class" << std::endl;
+}
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::~CostModelImpulseFrictionConeTpl() {}

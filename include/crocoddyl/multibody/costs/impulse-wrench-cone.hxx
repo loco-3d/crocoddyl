@@ -21,12 +21,15 @@ CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
+  std::cerr << "Deprecated CostModelImpulseWrenchCone class: Use CostModelContactWrenchCone class" << std::endl;
 }
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::CostModelImpulseWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const FrameWrenchCone& fref)
-    : Base(state, boost::make_shared<ResidualModelContactWrenchCone>(state, fref.id, fref.cone, 0)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactWrenchCone>(state, fref.id, fref.cone, 0)), fref_(fref) {
+  std::cerr << "Deprecated CostModelImpulseWrenchCone class: Use CostModelContactWrenchCone class" << std::endl;
+}
 
 template <typename Scalar>
 CostModelImpulseWrenchConeTpl<Scalar>::~CostModelImpulseWrenchConeTpl() {}

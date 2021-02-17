@@ -7,7 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/costs/contact-impulse.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -21,17 +20,22 @@ CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr
     throw_pretty("Invalid argument: "
                  << "nr is less than 6");
   }
+  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
 }
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref, const std::size_t)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
+  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
+}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
+  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
+}
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::~CostModelContactImpulseTpl() {}

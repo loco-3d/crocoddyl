@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/costs/impulse-cop-position.hpp"
 
 namespace crocoddyl {
@@ -15,7 +14,9 @@ template <typename _Scalar>
 CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameCoPSupport& cop_support)
-    : Base(state, activation, 0), cop_support_(cop_support) {}
+    : Base(state, activation, 0), cop_support_(cop_support) {
+  std::cerr << "Deprecated CostModelImpulseCoPPosition class: Use CostModelContactCoPPosition class" << std::endl;
+}
 
 template <typename _Scalar>
 CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
@@ -24,7 +25,9 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(boost::s
            boost::make_shared<ActivationModelQuadraticBarrier>(
                ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
            0),
-      cop_support_(cop_support) {}
+      cop_support_(cop_support) {
+  std::cerr << "Deprecated CostModelImpulseCoPPosition class: Use CostModelContactCoPPosition class" << std::endl;
+}
 
 template <typename Scalar>
 CostModelImpulseCoPPositionTpl<Scalar>::~CostModelImpulseCoPPositionTpl() {}
