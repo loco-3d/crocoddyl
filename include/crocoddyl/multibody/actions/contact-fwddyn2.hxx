@@ -22,12 +22,13 @@ template <typename Scalar>
 DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::DifferentialActionModelContactFwdDynamics2Tpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel)& contacts,
-    boost::shared_ptr<CostModelSum> costs)
+    boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      pinocchio_(*state->get_pinocchio().get()) {
+      pinocchio_(*state->get_pinocchio().get()),
+      mu_contacts(mu_contacts) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
@@ -64,8 +65,8 @@ void DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::calc(
   actuation_->calc(d->multibody.actuation, x, u);
   d->xout = pinocchio::contactDynamics(pinocchio_, d->pinocchio, q, v,
                                        d->multibody.actuation->tau, contacts_,
-                                       d->multibody.contacts);
-
+                                       d->multibody.contacts, mu_contacts);  
+  pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, false);
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
@@ -181,5 +182,18 @@ void DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::set_armature(const V
   }
   pinocchio_.armature = armature;
 }
+
+template <typename Scalar>
+const Scalar& DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::get_mu() const {
+  return mu_contacts;
+}
+
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::set_mu(const Scalar mu_contacts_) {
+  mu_contacts = mu_contacts_;
+}
+
+  
 
 }  // namespace crocoddyl

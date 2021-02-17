@@ -45,7 +45,8 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   DifferentialActionModelContactFwdDynamics2Tpl(boost::shared_ptr<StateMultibody> state,
                                                 boost::shared_ptr<ActuationModelAbstract> actuation,
                                                const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel)& contacts,
-                                               boost::shared_ptr<CostModelSum> costs);
+                                                boost::shared_ptr<CostModelSum> costs,
+                                                const Scalar mu_contacts);
   ~DifferentialActionModelContactFwdDynamics2Tpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -61,10 +62,10 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  const Scalar& get_damping_factor() const;
-
   void set_armature(const VectorXs& armature);
-  void set_damping_factor(const Scalar& damping);
+
+  const Scalar& get_mu() const;
+  void set_mu(const Scalar mu_contacts);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
@@ -80,6 +81,7 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) contacts_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;
+  Scalar mu_contacts;
 };
 
 template <typename _Scalar>
