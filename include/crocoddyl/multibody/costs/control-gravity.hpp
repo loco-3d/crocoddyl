@@ -160,8 +160,11 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
       throw_pretty(
-          "Invalid argument: the shared data should be derived from "
-          "DataCollectorActMultibodyTpl");
+          "Invalid argument: the shared data should be derived from DataCollectorActMultibodyTpl");
+    }
+    if (static_cast<std::size_t>(d->actuation->dtau_du.cols()) != model->get_state()->get_nv()) {
+      throw_pretty(
+          "Invalid argument: the actuation model should consider all the control dimensions (i.e., nu == state.nv)");
     }
     // Avoids data casting at runtime
     StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
