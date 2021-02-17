@@ -79,6 +79,9 @@ void exposeResidualFrameTranslation() {
           "Create frame translation residual data.\n\n"
           ":param model: frame translation residual model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataFrameTranslation::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
       .add_property("fJf", bp::make_getter(&ResidualDataFrameTranslation::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the frame");
 }

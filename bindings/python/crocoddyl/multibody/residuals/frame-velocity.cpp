@@ -82,7 +82,10 @@ void exposeResidualFrameVelocity() {
           bp::args("self", "model", "data"),
           "Create frame velocity residual data.\n\n"
           ":param model: frame Velocity residual model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataFrameVelocity::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data");
 }
 
 }  // namespace python

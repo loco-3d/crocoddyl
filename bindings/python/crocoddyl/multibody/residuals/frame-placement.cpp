@@ -79,6 +79,9 @@ void exposeResidualFramePlacement() {
           "Create frame placement residual data.\n\n"
           ":param model: frame placement residual model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataFramePlacement::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
       .add_property("rMf",
                     bp::make_getter(&ResidualDataFramePlacement::rMf, bp::return_value_policy<bp::return_by_value>()),
                     "error frame placement of the frame")

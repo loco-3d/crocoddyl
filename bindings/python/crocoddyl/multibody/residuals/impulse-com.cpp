@@ -61,6 +61,9 @@ void exposeResidualImpulseCoM() {
           "Create contact force residual data.\n\n"
           ":param model: impulse CoM residual model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataImpulseCoM::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
       .add_property("impulses",
                     bp::make_getter(&ResidualDataImpulseCoM::impulses, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&ResidualDataImpulseCoM::impulses),

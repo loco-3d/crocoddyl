@@ -79,6 +79,9 @@ void exposeResidualFrameRotation() {
           "Create frame rotation residual data.\n\n"
           ":param model: frame rotation residual model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataFrameRotation::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
       .add_property("r", bp::make_getter(&ResidualDataFrameRotation::r, bp::return_internal_reference<>()),
                     "residual residual")
       .add_property("rRf", bp::make_getter(&ResidualDataFrameRotation::rRf, bp::return_internal_reference<>()),

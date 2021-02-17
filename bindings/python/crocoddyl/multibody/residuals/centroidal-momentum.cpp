@@ -78,6 +78,9 @@ void exposeResidualCentroidalMomentum() {
           "Create centroidal momentum residual data.\n\n"
           ":param model: centroidal momentum residual model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("pinocchio",
+                    bp::make_getter(&ResidualDataCentroidalMomentum::pinocchio, bp::return_internal_reference<>()),
+                    "pinocchio data")
       .add_property("dhd_dq",
                     bp::make_getter(&ResidualDataCentroidalMomentum::dhd_dq, bp::return_internal_reference<>()),
                     "Jacobian of the centroidal momentum")
