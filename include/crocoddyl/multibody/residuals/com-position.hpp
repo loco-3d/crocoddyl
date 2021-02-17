@@ -24,7 +24,7 @@ namespace crocoddyl {
  * the dimension of the residual vector is obtained from 3. Furthermore, the Jacobians of the residual function are
  * computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
  * `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -126,7 +126,7 @@ struct ResidualDataCoMPositionTpl : public ResidualDataAbstractTpl<_Scalar> {
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
   using Base::r;
   using Base::Ru;
   using Base::Rx;

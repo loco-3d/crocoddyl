@@ -26,10 +26,10 @@ namespace crocoddyl {
  *
  * Both residual and residual Jacobians are computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its derivatives
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its derivatives
  * are calculated by `calc` and `calcDiff`, respectively.
  *
- * \sa `ResidualModelAbstractTpl`, calc(), calcDiff(), createData()
+ * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
@@ -123,8 +123,8 @@ struct ResidualDataControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
     actuation = d->actuation;
   }
 
-  PinocchioData pinocchio;
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
+  PinocchioData pinocchio;                                         //!< Pinocchio data
+  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;  //!< Actuation data
   using Base::r;
   using Base::Ru;
   using Base::Rx;

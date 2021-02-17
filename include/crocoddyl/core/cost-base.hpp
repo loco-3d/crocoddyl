@@ -63,7 +63,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Initialize the cost model
    *
-   * @param[in] state       State of the system
+   * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    * @param[in] residual    Residual model
    */
@@ -73,7 +73,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Initialize the cost model
    *
-   * @param[in] state       State of the system
+   * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
@@ -85,7 +85,7 @@ class CostModelAbstractTpl {
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State of the system
+   * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
@@ -95,7 +95,7 @@ class CostModelAbstractTpl {
    *
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
-   * @param[in] state     State of the system
+   * @param[in] state     State of the dynamical system
    * @param[in] residual  Residual model
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual);
@@ -117,7 +117,7 @@ class CostModelAbstractTpl {
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the system
+   * @param[in] state  State of the dynamical system
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */

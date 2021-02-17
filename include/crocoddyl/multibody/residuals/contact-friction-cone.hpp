@@ -225,8 +225,8 @@ struct ResidualDataContactFrictionConeTpl : public ResidualDataAbstractTpl<_Scal
     }
   }
 
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;
-  bool more_than_3_constraints;
+  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force data
+  bool more_than_3_constraints;                              //!< Label that indicates if the contact is bigger than 3D
   using Base::r;
   using Base::Ru;
   using Base::Rx;

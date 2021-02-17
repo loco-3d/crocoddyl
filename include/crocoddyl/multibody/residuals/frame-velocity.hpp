@@ -165,7 +165,7 @@ struct ResidualDataFrameVelocityTpl : public ResidualDataAbstractTpl<_Scalar> {
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
   using Base::r;
   using Base::Ru;
   using Base::Rx;

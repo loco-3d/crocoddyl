@@ -35,7 +35,7 @@ namespace crocoddyl {
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * \sa ActionModelImpulseFwdDynamicsTpl, DataCollectorImpulseTpl, ActivationModelAbstractTpl
+ * \sa `ActionModelImpulseFwdDynamicsTpl`, `DataCollectorImpulseTpl`, `ActivationModelAbstractTpl`
  */
 template <typename _Scalar>
 class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {

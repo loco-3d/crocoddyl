@@ -166,10 +166,10 @@ struct ResidualDataAbstractTpl {
   }
   virtual ~ResidualDataAbstractTpl() {}
 
-  DataCollectorAbstract* shared;
-  VectorXs r;
-  MatrixXs Rx;
-  MatrixXs Ru;
+  DataCollectorAbstract* shared;  //!< Shared data allocated by the action model
+  VectorXs r;                     //!< Residual vector
+  MatrixXs Rx;                    //!< Jacobian of the residual vector with respect the state
+  MatrixXs Ru;                    //!< Jacobian of the residual vector with respect the control
 };
 
 }  // namespace crocoddyl

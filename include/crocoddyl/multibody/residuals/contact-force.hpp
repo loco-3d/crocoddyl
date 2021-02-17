@@ -42,7 +42,7 @@ namespace crocoddyl {
  * shared data (i.e., `DataCollectorContactTpl` or `DataCollectorImpulseTpl`). Note that this residual function cannot
  * be used with other action models.
  *
- * \sa `ResidualModelAbstractTpl`, calc(), calcDiff(), createData(),
+ * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
  * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorContactTpl`,
  * `DataCollectorImpulseTpl`
  */
@@ -244,8 +244,8 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
     }
   }
 
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;
-  ContactType contact_type;
+  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force data
+  ContactType contact_type;                                  //!< Type of contact (3D / 6D)
   using Base::r;
   using Base::Ru;
   using Base::Rx;

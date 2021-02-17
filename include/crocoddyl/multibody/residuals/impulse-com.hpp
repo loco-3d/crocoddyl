@@ -28,7 +28,7 @@ namespace crocoddyl {
  * the dimension of the residual vector is 3. Furthermore, the Jacobians of the residual function are
  * computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
  * `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -120,11 +120,11 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
     impulses = d->impulses;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;
-  Matrix3xs dvc_dq;
-  MatrixXs ddv_dv;
-  pinocchio::DataTpl<Scalar> pinocchio_internal;
+  pinocchio::DataTpl<Scalar>* pinocchio;                                   //!< Pinocchio data
+  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> > impulses;  //!< Impulses data
+  Matrix3xs dvc_dq;                                                        //!< Jacobian of the CoM velocity
+  MatrixXs ddv_dv;                                                         //!< Jacobian of the CoM velocity
+  pinocchio::DataTpl<Scalar> pinocchio_internal;                           //!< Pinocchio data for internal computation
   using Base::r;
   using Base::Ru;
   using Base::Rx;

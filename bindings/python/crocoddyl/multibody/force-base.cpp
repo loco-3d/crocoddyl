@@ -29,18 +29,18 @@ void exposeForceAbstract() {
       .add_property("pinocchio", bp::make_getter(&ForceDataAbstract::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("jMf", bp::make_getter(&ForceDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ForceDataAbstract::jMf), "local frame placement of the force frame")
+                    bp::make_setter(&ForceDataAbstract::jMf), "local frame placement of the contact frame")
       .add_property("Jc", bp::make_getter(&ForceDataAbstract::Jc, bp::return_internal_reference<>()),
-                    bp::make_setter(&ForceDataAbstract::Jc), "force Jacobian")
+                    bp::make_setter(&ForceDataAbstract::Jc), "contact Jacobian")
       .add_property("df_dx", bp::make_getter(&ForceDataAbstract::df_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ForceDataAbstract::df_dx), "Jacobian of the force forces")
+                    bp::make_setter(&ForceDataAbstract::df_dx), "Jacobian of the contact forces")
       .add_property("df_du", bp::make_getter(&ForceDataAbstract::df_du, bp::return_internal_reference<>()),
-                    bp::make_setter(&ForceDataAbstract::df_du), "Jacobian of the force forces")
-      .def_readwrite("joint", &ForceDataAbstract::joint, "joint index of the force frame")
-      .def_readwrite("frame", &ForceDataAbstract::frame, "frame index of the force frame")
+                    bp::make_setter(&ForceDataAbstract::df_du), "Jacobian of the contact forces")
+      .def_readwrite("joint", &ForceDataAbstract::joint, "joint index of the contact frame")
+      .def_readwrite("frame", &ForceDataAbstract::frame, "frame index of the contact frame")
       .def_readwrite("f", &ForceDataAbstract::f,
                      "external spatial force at the parent joint level. Note that we could compute the force at the "
-                     "force frame by using jMf (i.e. data.jMf.actInv(data.f)");
+                     "contact frame by using jMf (i.e. data.jMf.actInv(data.f)");
 }
 
 }  // namespace python

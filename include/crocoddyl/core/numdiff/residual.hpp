@@ -55,7 +55,7 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a Data object
+   * @brief Create a data object
    *
    * @param data  Data collector used by the original model
    * @return the residual data
@@ -101,7 +101,7 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   /**
-   * @brief Make sure that when we finite difference the Residual Model, the user
+   * @brief Make sure that when we finite difference the residual model, the user
    * does not face unknown behaviour because of the finite differencing of a
    * quaternion around pi. This behaviour might occur if ResidualModelState and
    * FloatingInContact differential model are used together.

@@ -24,7 +24,7 @@ namespace crocoddyl {
  * that the dimension of the residual vector is 6.
  * Furthermore, the Jacobians of the residual function are computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
  * `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -138,9 +138,9 @@ struct ResidualDataCentroidalMomentumTpl : public ResidualDataAbstractTpl<_Scala
     pinocchio = d->pinocchio;
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix6xs dhd_dq;
-  Matrix6xs dhd_dv;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
+  Matrix6xs dhd_dq;                       //!< Jacobian of the centroidal momentum
+  Matrix6xs dhd_dv;                       //!< Jacobian of the centroidal momentum
   using Base::r;
   using Base::Ru;
   using Base::Rx;

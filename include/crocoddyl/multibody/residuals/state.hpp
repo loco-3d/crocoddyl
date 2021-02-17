@@ -26,7 +26,7 @@ namespace crocoddyl {
  * `StateAbstract::get_ndx()`. Furthermore, the Jacobians of the residual function are
  * computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its derivatives are calculated by `calc` and
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its derivatives are calculated by `calc` and
  * `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`

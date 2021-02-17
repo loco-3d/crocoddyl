@@ -56,7 +56,7 @@ namespace crocoddyl {
  * stored in a shared data (i.e., `DataCollectorContactTpl` or `DataCollectorImpulseTpl`). Note that this residual
  * function cannot be used with other action models.
  *
- * \sa `ResidualModelAbstractTpl`, calc(), calcDiff(), createData(),
+ * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`,
  * `DifferentialActionModelContactFwdDynamicsTpl`, `ActionModelImpulseFwdDynamicTpl`, `DataCollectorForceTpl`
  */
 template <typename _Scalar>
@@ -249,8 +249,8 @@ struct ResidualDataContactCoPPositionTpl : public ResidualDataAbstractTpl<_Scala
     }
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< contact force
+  pinocchio::DataTpl<Scalar>* pinocchio;                     //!< Pinocchio data
+  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force
   using Base::r;
   using Base::Ru;
   using Base::Rx;
