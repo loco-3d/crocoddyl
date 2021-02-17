@@ -58,7 +58,7 @@ void exposeResidualContactWrenchCone() {
            bp::args("self", "data"),
            "Create the contact wrench cone residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the contact wrench cone residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelContactWrenchCone::get_id, &ResidualModelContactWrenchCone::set_id,

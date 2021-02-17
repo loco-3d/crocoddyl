@@ -17,9 +17,8 @@ void exposeResidualFrameTranslation() {
 
   bp::class_<ResidualModelFrameTranslation, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameTranslation",
-      "This residual function defines the the frame translation tracking as as r = t - tref, with t and tref as the "
-      "current and reference "
-      "frame translations, respectively.",
+      "This residual function defines the the frame translation tracking as as r = t - tref, with t and tref as the\n"
+      "current and reference frame translations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector3d, std::size_t>(
           bp::args("self", "state", "id", "xref", "nu"),
           "Initialize the frame translation residual model.\n\n"
@@ -61,7 +60,7 @@ void exposeResidualFrameTranslation() {
            bp::args("self", "data"),
            "Create the frame translation residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the frame translation residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelFrameTranslation::get_id, &ResidualModelFrameTranslation::set_id,

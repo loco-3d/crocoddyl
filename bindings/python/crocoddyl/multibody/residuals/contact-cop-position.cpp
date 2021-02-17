@@ -51,7 +51,7 @@ void exposeResidualContactCoPPosition() {
            bp::args("self", "data"),
            "Create the contact CoP position residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the CoP position residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelContactCoPPosition::get_id, &ResidualModelContactCoPPosition::set_id,

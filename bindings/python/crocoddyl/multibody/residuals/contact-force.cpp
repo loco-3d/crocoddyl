@@ -18,7 +18,7 @@ void exposeResidualContactForce() {
 
   bp::class_<ResidualModelContactForce, bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactForce",
-      "This residual function is defined as r = f-fref, where f,fref describe the current and reference "
+      "This residual function is defined as r = f-fref, where f,fref describe the current and reference\n"
       "the spatial forces, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::Force, std::size_t>(
           bp::args("self", "state", "id", "fref", "nu"),
@@ -61,7 +61,7 @@ void exposeResidualContactForce() {
            bp::args("self", "data"),
            "Create the contact force residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the contact force residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelContactForce::get_id, &ResidualModelContactForce::set_id, "reference frame id")

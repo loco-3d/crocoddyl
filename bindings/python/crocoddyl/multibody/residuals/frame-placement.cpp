@@ -17,9 +17,9 @@ void exposeResidualFramePlacement() {
 
   bp::class_<ResidualModelFramePlacement, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFramePlacement",
-      "This residual function defines the tracking of theframe placement residual as r = p - pref, with p and pref as "
-      "the current and reference "
-      "frame placements, respectively.",
+      "This residual function defines the tracking of theframe placement residual as r = p - pref, with p and pref "
+      "as\n"
+      "the current and reference frame placements, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3, std::size_t>(
           bp::args("self", "state", "id", "pref", "nu"),
           "Initialize the frame placement residual model.\n\n"
@@ -61,7 +61,7 @@ void exposeResidualFramePlacement() {
            bp::args("self", "data"),
            "Create the frame placement residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the frame placement residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelFramePlacement::get_id, &ResidualModelFramePlacement::set_id,

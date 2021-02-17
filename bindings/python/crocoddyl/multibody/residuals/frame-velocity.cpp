@@ -17,7 +17,7 @@ void exposeResidualFrameVelocity() {
 
   bp::class_<ResidualModelFrameVelocity, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameVelocity",
-      "This residual function defines r = v - vref, with v and vref as the current and reference "
+      "This residual function defines r = v - vref, with v and vref as the current and reference\n"
       "frame velocities, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, std::size_t, pinocchio::Motion, pinocchio::ReferenceFrame,
                std::size_t>(bp::args("self", "state", "id", "velocity", "type", "nu"),
@@ -63,7 +63,7 @@ void exposeResidualFrameVelocity() {
            bp::args("self", "data"),
            "Create the frame velocity residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the frame velocity residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelFrameVelocity::get_id, &ResidualModelFrameVelocity::set_id,

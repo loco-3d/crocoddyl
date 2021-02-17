@@ -69,7 +69,7 @@ void exposeResidualAbstract() {
       "ResidualDataAbstract",
       "Abstract class for residual data.\n\n"
       "In crocoddyl, a residual data contains all the required information for processing an\n"
-      "user-defined residual model. The residual data typically is allocated onces and containts\n"
+      "user-defined residual models. The residual data typically is allocated once and containts\n"
       "the residual vector and its Jacobians.",
       bp::init<ResidualModelAbstract*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),

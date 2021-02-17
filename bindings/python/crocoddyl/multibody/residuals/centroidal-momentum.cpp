@@ -20,9 +20,8 @@ void exposeResidualCentroidalMomentum() {
 
   bp::class_<ResidualModelCentroidalMomentum, bp::bases<ResidualModelAbstract> >(
       "ResidualModelCentroidalMomentum",
-      "This residual function defines the centroidal momentum tracking as r = h - href, with h and href as the "
-      "current and reference "
-      "centroidal momenta, respectively.",
+      "This residual function defines the centroidal momentum tracking as r = h - href, with h and href as the\n"
+      "current and reference centroidal momenta, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, Vector6d, std::size_t>(
           bp::args("self", "state", "href", "nu"),
           "Initialize the centroidal momentum residual model.\n\n"
@@ -62,7 +61,7 @@ void exposeResidualCentroidalMomentum() {
            bp::args("self", "data"),
            "Create the centroidal momentum residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the centroidal momentum residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property(

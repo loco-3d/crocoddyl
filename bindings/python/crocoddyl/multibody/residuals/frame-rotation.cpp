@@ -18,7 +18,7 @@ void exposeResidualFrameRotation() {
 
   bp::class_<ResidualModelFrameRotation, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameRotation",
-      "This residual function is defined as r = R - Rref, with R and Rref as the current and reference "
+      "This residual function is defined as r = R - Rref, with R and Rref as the current and reference\n"
       "frame rotations, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Matrix3d, std::size_t>(
           bp::args("self", "state", "id", "Rref", "nu"),
@@ -61,7 +61,7 @@ void exposeResidualFrameRotation() {
            bp::args("self", "data"),
            "Create the frame rotation residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the frame rotation residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelFrameRotation::get_id, &ResidualModelFrameRotation::set_id,

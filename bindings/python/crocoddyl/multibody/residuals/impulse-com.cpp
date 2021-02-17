@@ -17,9 +17,8 @@ void exposeResidualImpulseCoM() {
 
   bp::class_<ResidualModelImpulseCoM, bp::bases<ResidualModelAbstract> >(
       "ResidualModelImpulseCoM",
-      "This residual function defines a residual vector as r = Jcom * (vnext-v), with Jcom as the CoM Jacobian, and "
-      "vnext "
-      "the velocity after impact and v the velocity before impact, respectively.",
+      "This residual function defines a residual vector as r = Jcom * (vnext-v), with Jcom as the CoM Jacobian, and\n"
+      "vnext the velocity after impact and v the velocity before impact, respectively.",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the CoM position cost model for impulse dynamics.\n\n"
                                                    "The default nu is obtained from state.nv.\n"
@@ -49,7 +48,7 @@ void exposeResidualImpulseCoM() {
            bp::args("self", "data"),
            "Create the CoM position residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the impulse CoM residual.\n"
            ":param data: shared data\n"
            ":return residual data.");
 

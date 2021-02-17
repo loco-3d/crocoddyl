@@ -17,7 +17,7 @@ void exposeResidualContactFrictionCone() {
 
   bp::class_<ResidualModelContactFrictionCone, bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactFrictionCone",
-      "This residual function is defined as r = A*f, where A, f describe the linearized friction cone and "
+      "This residual function is defined as r = A*f, where A, f describe the linearized friction cone and\n"
       "the spatial force, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, FrictionCone, std::size_t>(
           bp::args("self", "state", "id", "fref", "nu"),
@@ -60,7 +60,7 @@ void exposeResidualContactFrictionCone() {
            bp::args("self", "data"),
            "Create the contact friction cone residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the contact friction cone residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("id", &ResidualModelContactFrictionCone::get_id, &ResidualModelContactFrictionCone::set_id,

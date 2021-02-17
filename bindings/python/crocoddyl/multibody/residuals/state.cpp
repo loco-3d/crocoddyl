@@ -17,7 +17,7 @@ void exposeResidualState() {
 
   bp::class_<ResidualModelState, bp::bases<ResidualModelAbstract> >(
       "ResidualModelState",
-      "This cost function defines a residual vector as r = x - xref, with x and xref as the current and reference "
+      "This cost function defines a residual vector as r = x - xref, with x and xref as the current and reference\n"
       "state, respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd, std::size_t>(
           bp::args("self", "state", "xref", "nu"),

@@ -17,7 +17,8 @@ void exposeResidualControl() {
 
   bp::class_<ResidualModelControl, bp::bases<ResidualModelAbstract> >(
       "ResidualModelControl",
-      "This residual function defines a residual vector as r = u - uref, with u and uref as the current and reference "
+      "This residual function defines a residual vector as r = u - uref, with u and uref as the current and "
+      "reference\n"
       "control, respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd>(bp::args("self", "state", "uref"),
                                                                   "Initialize the control residual model.\n\n"
@@ -48,7 +49,7 @@ void exposeResidualControl() {
                                           const Eigen::Ref<const Eigen::VectorXd>&,
                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelControl::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the control residual.\n\n"
+          "Compute the Jacobians of the control residual.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
@@ -60,7 +61,7 @@ void exposeResidualControl() {
            bp::args("self", "data"),
            "Create the control residual data.\n\n"
            "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
+           "returns the allocated data for the control residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
       .add_property("reference",
