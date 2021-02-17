@@ -107,7 +107,7 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::ResidualModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the residual derivatives
