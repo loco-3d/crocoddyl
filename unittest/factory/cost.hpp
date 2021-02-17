@@ -34,15 +34,9 @@ struct CostModelTypes {
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
-    v.push_back(CostModelState);
-    v.push_back(CostModelCoMPosition);
-    v.push_back(CostModelFramePlacement);
-    v.push_back(CostModelFrameRotation);
-    v.push_back(CostModelFrameTranslation);
-    v.push_back(CostModelFrameVelocity);
-    // for (int i = 0; i < NbCostModelTypes; ++i) {
-    //   v.push_back((Type)i);
-    // }
+    for (int i = 0; i < NbCostModelTypes; ++i) {
+      v.push_back((Type)i);
+    }
     return v;
   }
   static const std::vector<Type> all;

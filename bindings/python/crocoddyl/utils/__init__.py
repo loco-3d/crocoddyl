@@ -676,7 +676,7 @@ class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
 
     def calc(self, data, x, u):
         data.rMf = self.Mref.placement.inverse() * data.shared.pinocchio.oMf[self.Mref.id]
-        data.residual.r = pinocchio.log(data.rMf).vector
+        data.residual.r[:] = pinocchio.log(data.rMf).vector
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
@@ -721,7 +721,7 @@ class FrameTranslationCostModelDerived(crocoddyl.CostModelAbstract):
         self.xref = xref
 
     def calc(self, data, x, u):
-        data.residual.r = data.shared.pinocchio.oMf[self.xref.id].translation - self.xref.translation
+        data.residual.r[:] = data.shared.pinocchio.oMf[self.xref.id].translation - self.xref.translation
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
@@ -765,7 +765,7 @@ class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
 
     def calc(self, data, x, u):
         data.rRf[:, :] = np.dot(self.Rref.rotation.T, data.shared.pinocchio.oMf[self.Rref.id].rotation)
-        data.residual.r = pinocchio.log3(data.rRf)
+        data.residual.r[:] = pinocchio.log3(data.rRf)
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
