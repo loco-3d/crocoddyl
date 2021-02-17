@@ -119,10 +119,9 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-
-  BOOST_CHECK((data->Rx - data_num_diff->Rx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Ru - data_num_diff->Ru).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(tol));
+  BOOST_CHECK((data->Ru - data_num_diff->Ru).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//
