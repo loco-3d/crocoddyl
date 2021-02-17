@@ -147,6 +147,11 @@ class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
 
+template <typename Scalar>
+class ResidualModelControlGravTpl;
+template <typename Scalar>
+struct ResidualDataControlGravTpl;
+
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
@@ -382,6 +387,8 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
+typedef ResidualModelControlGravTpl<double> ResidualModelControlGrav;
+typedef ResidualDataControlGravTpl<double> ResidualDataControlGrav;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;

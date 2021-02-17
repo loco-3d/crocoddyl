@@ -11,7 +11,7 @@
 
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
@@ -45,8 +45,7 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
+  typedef ResidualModelControlGravTpl<Scalar> ResidualModelControlGrav;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -128,11 +127,9 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
  protected:
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
-
- private:
-  typename StateMultibody::PinocchioModel pin_model_;
 };
 
 template <typename _Scalar>
@@ -142,41 +139,20 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef pinocchio::DataTpl<Scalar> PinocchioData;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   CostDataControlGravTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
       : Base(model, data),
-        dg_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_dgdq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_dtaudu(model->get_state()->get_nv(), model->get_nu()) {
-    dg_dq.setZero();
-    Arr_dgdq.setZero();
-    Arr_dtaudu.setZero();
-    // Check that proper shared data has been passed
-    DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
-    if (d == NULL) {
-      throw_pretty(
-          "Invalid argument: the shared data should be derived from DataCollectorActMultibodyTpl");
-    }
-    if (static_cast<std::size_t>(d->actuation->dtau_du.cols()) != model->get_state()->get_nv()) {
-      throw_pretty(
-          "Invalid argument: the actuation model should consider all the control dimensions (i.e., nu == state.nv)");
-    }
-    // Avoids data casting at runtime
-    StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
-    pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
-    actuation = d->actuation;
+        Arr_Rq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Arr_Ru(model->get_state()->get_nv(), model->get_nu()) {
+    Arr_Rq.setZero();
+    Arr_Ru.setZero();
   }
 
-  PinocchioData pinocchio;
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
-  MatrixXs dg_dq;
-  MatrixXs Arr_dgdq;
-  MatrixXs Arr_dtaudu;
+  MatrixXs Arr_Rq;
+  MatrixXs Arr_Ru;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
@@ -184,7 +160,7 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
+  using Base::residual;
   using Base::shared;
 };
 
