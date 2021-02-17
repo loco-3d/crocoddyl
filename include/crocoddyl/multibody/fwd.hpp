@@ -9,6 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_FWD_HPP_
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
+#include "crocoddyl/core/utils/deprecate.hpp"
+
 namespace crocoddyl {
 
 // actuation
@@ -399,6 +401,8 @@ typedef CostModelControlGravContactTpl<double> CostModelControlGravContact;
 typedef CostDataControlGravContactTpl<double> CostDataControlGravContact;
 typedef CostModelFrameVelocityTpl<double> CostModelFrameVelocity;
 typedef CostDataFrameVelocityTpl<double> CostDataFrameVelocity;
+typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;
+typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
 typedef CostModelContactCoPPositionTpl<double> CostModelContactCoPPosition;
 typedef CostDataContactCoPPositionTpl<double> CostDataContactCoPPosition;
 typedef CostModelContactFrictionConeTpl<double> CostModelContactFrictionCone;
@@ -407,16 +411,17 @@ typedef CostModelContactWrenchConeTpl<double> CostModelContactWrenchCone;
 typedef CostDataContactWrenchConeTpl<double> CostDataContactWrenchCone;
 typedef CostModelContactForceTpl<double> CostModelContactForce;
 typedef CostDataContactForceTpl<double> CostDataContactForce;
-typedef CostModelContactImpulseTpl<double> CostModelContactImpulse;
-typedef CostDataContactImpulseTpl<double> CostDataContactImpulse;
-typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;
-typedef CostModelImpulseFrictionConeTpl<double> CostModelImpulseFrictionCone;
-typedef CostDataImpulseFrictionConeTpl<double> CostDataImpulseFrictionCone;
-typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;
-typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;
-typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;
-typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;
-typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;
+DEPRECATED("Use CostModelContactImpulse", typedef CostModelContactImpulseTpl<double> CostModelContactImpulse;)
+DEPRECATED("Use CostDataContactImpulse", typedef CostDataContactImpulseTpl<double> CostDataContactImpulse;)
+DEPRECATED("Use CostModelImpulseFrictionCone",
+           typedef CostModelImpulseFrictionConeTpl<double> CostModelImpulseFrictionCone;)
+DEPRECATED("Use CostDataImpulseFrictionCone",
+           typedef CostDataImpulseFrictionConeTpl<double> CostDataImpulseFrictionCone;)
+DEPRECATED("Use CostModelImpulseCoPPosition",
+           typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;)
+DEPRECATED("Use CostDataImpulseCoPPosition", typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;)
+DEPRECATED("Use CostModelImpulseWrenchCone", typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;)
+DEPRECATED("Use CostDataImpulseWrenchCone", typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;)
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;

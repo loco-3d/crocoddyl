@@ -12,7 +12,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostImpulseCoPPosition() {
+void exposeCostImpulseCoPPosition() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                       // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelImpulseCoPPosition> >();
 
   bp::class_<CostModelImpulseCoPPosition, bp::bases<CostModelAbstract> >(
@@ -70,6 +74,8 @@ void exposeCostImpulseCoPPosition() {
           "impulse",
           bp::make_getter(&CostDataImpulseCoPPosition::impulse, bp::return_value_policy<bp::return_by_value>()),
           bp::make_setter(&CostDataImpulseCoPPosition::impulse), "impulse data associated with the current cost");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

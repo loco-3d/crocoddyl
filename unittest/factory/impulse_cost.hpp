@@ -20,10 +20,10 @@ namespace unittest {
 struct ImpulseCostModelTypes {
   enum Type {
     CostModelImpulseCoM,
-    CostModelContactImpulse,
-    CostModelImpulseCoPPosition,
-    CostModelImpulseFrictionCone,
-    CostModelImpulseWrenchCone,
+    CostModelContactForce,
+    CostModelContactCoPPosition,
+    CostModelContactFrictionCone,
+    CostModelContactWrenchCone,
     NbImpulseCostModelTypes
   };
   static std::vector<Type> init_all() {

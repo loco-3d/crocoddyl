@@ -12,7 +12,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostImpulseWrenchCone() {
+void exposeCostImpulseWrenchCone() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                      // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelImpulseWrenchCone> >();
 
   bp::class_<CostModelImpulseWrenchCone, bp::bases<CostModelAbstract> >(
@@ -75,6 +79,8 @@ void exposeCostImpulseWrenchCone() {
       .add_property("Arr_Rx", bp::make_getter(&CostDataImpulseWrenchCone::Arr_Rx, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataImpulseWrenchCone::Arr_Rx),
                     "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
