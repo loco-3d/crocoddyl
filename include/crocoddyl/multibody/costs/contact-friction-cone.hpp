@@ -173,8 +173,8 @@ struct CostDataContactFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
     Arr_Ru.setZero();
   }
 
-  MatrixXs Arr_Ru;
   MatrixXs Arr_Rx;
+  MatrixXs Arr_Ru;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
