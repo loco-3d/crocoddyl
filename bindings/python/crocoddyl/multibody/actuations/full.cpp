@@ -15,9 +15,9 @@ namespace python {
 void exposeActuationFull() {
   bp::class_<ActuationModelFull, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFull", "Full actuation models.",
-      bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
-                                                   "Initialize the full actuation model.\n\n"
-                                                   ":param state: state of multibody system"))
+      bp::init<boost::shared_ptr<StateAbstract> >(bp::args("self", "state"),
+                                                  "Initialize the full actuation model.\n\n"
+                                                  ":param state: state of dynamical system"))
       .def("calc", &ActuationModelFull::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: full actuation data\n"
