@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,10 +11,19 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 
+/**
+ * @brief Full actuation model
+ *
+ * This actuation model applies input controls for all the `nv` dimensions of the system.
+ *
+ * Both actuation and Jacobians are computed analytically by `calc` and `calcDiff`, respectively.
+ *
+ * \sa `ActuationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
@@ -22,19 +31,25 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
   typedef ActuationDataAbstractTpl<Scalar> Data;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  explicit ActuationModelFullTpl(boost::shared_ptr<StateMultibody> state) : Base(state, state->get_nv()) {
-    pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
-    if (state->get_pinocchio()->joints[1].shortname() == ff_joint.shortname()) {
-      throw_pretty("Invalid argument: "
-                   << "the first joint cannot be free-flyer");
-    }
-  };
 
+  /**
+   * @brief Initialize the full actuation model
+   *
+   * @param[in] state  State of the dynamical system
+   */
+  explicit ActuationModelFullTpl(boost::shared_ptr<StateAbstract> state) : Base(state, state->get_nv()){};
   virtual ~ActuationModelFullTpl(){};
 
+  /**
+   * @brief Compute the full actuation
+   *
+   * @param[in] data  Full actuation data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -44,6 +59,13 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->tau = u;
   };
 
+    /**
+     * @brief Compute the Jacobians of the full actuation model
+     *
+     * @param[in] data  Full actuation data
+     * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+     * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+     */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
@@ -56,6 +78,12 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
     assert_pretty(data->dtau_du == MatrixXs::Identity(state_->get_nv(), nu_), "dtau_du has wrong value");
   };
 
+  /**
+   * @brief Create the full actuation data
+   *
+   * @param[in] data  shared data (it should be of type DataCollectorContactTpl)
+   * @return the cost data.
+   */
   virtual boost::shared_ptr<Data> createData() {
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal().fill((Scalar)1);
