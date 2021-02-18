@@ -654,7 +654,9 @@ class CoMPositionCostModelDerived(crocoddyl.CostModelAbstract):
 
     def calcDiff(self, data, x, u):
         self.activation.calcDiff(data.activation, data.residual.r)
-        data.residual.Rx[:] = np.hstack([data.shared.pinocchio.Jcom, pinocchio.utils.zero((self.activation.nr, self.state.nv))])
+        data.residual.Rx[:] = np.hstack(
+            [data.shared.pinocchio.Jcom,
+             pinocchio.utils.zero((self.activation.nr, self.state.nv))])
         data.Lx[:] = np.hstack([np.dot(data.shared.pinocchio.Jcom.T, data.activation.Ar), np.zeros(self.state.nv)])
         data.Lxx[:, :] = np.vstack([
             np.hstack([
