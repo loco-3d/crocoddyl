@@ -71,7 +71,7 @@ void CostModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   const std::size_t nv = state_->get_nv();
-  Eigen::Ref<MatrixXs> Rq(data->residual->Rx.leftCols(nv));
+  Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->residual->Rx.leftCols(nv);
   data->Lx.head(nv).noalias() = Rq.transpose() * data->activation->Ar;
   data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;
   d->Arr_Rq.noalias() = data->activation->Arr * Rq;

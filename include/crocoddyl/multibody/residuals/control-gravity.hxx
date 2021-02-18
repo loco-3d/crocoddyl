@@ -49,7 +49,7 @@ void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<Resid
   // Compute the derivatives of the residual residual
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const std::size_t nv = state_->get_nv();
-  Eigen::Ref<MatrixXs> Rq(data->Rx.leftCols(nv));
+  Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->Rx.leftCols(nv);
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, Rq);
   Rq *= -1;
   data->Ru = d->actuation->dtau_du;
