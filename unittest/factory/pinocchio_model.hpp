@@ -67,11 +67,13 @@ class PinocchioModelFactory {
  * differentiation. We use the address of the object to avoid a copy from the
  * "boost::bind".
  *
- * @param model is the rigid body robot model.
- * @param data contains the results of the computations.
- * @param x is the state vector.
+ * @param model[in]  Pinocchio model
+ * @param data[out]  Pinocchio data
+ * @param x[in]      State vector
+ * @param u[in]      Control vector
  */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x);
+void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x,
+                        const Eigen::VectorXd& u = Eigen::VectorXd());
 
 }  // namespace unittest
 }  // namespace crocoddyl

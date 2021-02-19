@@ -1,23 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "pinocchio/algorithm/rnea-derivatives.hpp"
 #include "pinocchio/algorithm/rnea.hpp"
 
 namespace crocoddyl {
+
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, activation, actuation_model->get_nu()),
-      pin_model_(*state->get_pinocchio()),
-      actuation_model_(actuation_model) {
+    const std::size_t nu)
+    : Base(state, activation, nu), pin_model_(*state->get_pinocchio()) {
   if (activation_->get_nr() != state_->get_nv()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_nv()));
@@ -26,10 +24,22 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, state->get_nv(), actuation_model->get_nu()),
-      pin_model_(*state->get_pinocchio()),
-      actuation_model_(actuation_model) {}
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation)
+    : Base(state, activation, state->get_nv()), pin_model_(*state->get_pinocchio()) {
+  if (activation_->get_nr() != state_->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(state_->get_nv()));
+  }
+}
+
+template <typename Scalar>
+CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
+                                                                       std::size_t nu)
+    : Base(state, state->get_nv(), nu), pin_model_(*state->get_pinocchio()) {}
+
+template <typename Scalar>
+CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state)
+    : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::~CostModelControlGravContactTpl() {}
@@ -46,8 +56,7 @@ void CostModelControlGravContactTpl<Scalar>::calc(const boost::shared_ptr<CostDa
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  actuation_model_->calc(d->actuation, x, u);
-  data->r = pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext) - d->actuation->tau;
+  data->r = d->actuation->tau - pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext);
   activation_->calc(data->activation, data->r);
   data->cost = data->activation->a_value;
 }
@@ -67,11 +76,10 @@ void CostModelControlGravContactTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q, d->fext, d->dg_dq);
 
   activation_->calcDiff(data->activation, data->r);
-  actuation_model_->calcDiff(d->actuation, x, u);
-  const std::size_t &nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
 
-  data->Lu.noalias() = -d->actuation->dtau_du.transpose() * data->activation->Ar;
-  data->Lx.head(nv).noalias() = d->dg_dq.transpose() * data->activation->Ar;
+  data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
+  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
 
   d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
   d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;

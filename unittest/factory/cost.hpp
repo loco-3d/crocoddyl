@@ -55,8 +55,8 @@ struct CostModelNoFFTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type);
-std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type);
+std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type);
+std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type);
 
 class CostModelFactory {
  public:
@@ -78,7 +78,6 @@ class CostModelFactory {
 
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
     StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
-
 }  // namespace unittest
 }  // namespace crocoddyl
 

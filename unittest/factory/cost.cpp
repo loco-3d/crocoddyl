@@ -28,7 +28,7 @@ namespace unittest {
 const std::vector<CostModelTypes::Type> CostModelTypes::all(CostModelTypes::init_all());
 const std::vector<CostModelNoFFTypes::Type> CostModelNoFFTypes::all(CostModelNoFFTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
   switch (type) {
     case CostModelTypes::CostModelState:
       os << "CostModelState";
@@ -63,7 +63,7 @@ std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
   return os;
 }
 
-std::ostream &operator<<(std::ostream &os, CostModelNoFFTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
   switch (type) {
     case CostModelNoFFTypes::CostModelControlGrav:
       os << "CostModelControlGrav";
@@ -149,9 +149,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
   boost::shared_ptr<crocoddyl::StateMultibody> state = boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_TalosArm));
-
-  boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
@@ -159,7 +156,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   switch (cost_type) {
     case CostModelNoFFTypes::CostModelControlGrav:
       cost = boost::make_shared<crocoddyl::CostModelControlGrav>(
-          state, activation_factory.create(activation_type, state->get_nv()), actuation);
+          state, activation_factory.create(activation_type, state->get_nv()));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");

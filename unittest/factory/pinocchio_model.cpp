@@ -119,7 +119,8 @@ std::size_t PinocchioModelFactory::get_frame_id() const { return frame_id_; }
  * @param data contains the results of the computations.
  * @param x is the state vector.
  */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x) {
+void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x,
+                        const Eigen::VectorXd&) {
   const Eigen::VectorXd& q = x.segment(0, model->nq);
   const Eigen::VectorXd& v = x.segment(model->nq, model->nv);
   Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);

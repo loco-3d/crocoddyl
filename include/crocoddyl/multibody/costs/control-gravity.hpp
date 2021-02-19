@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,36 +10,27 @@
 #define CROCODDYL_CORE_COSTS_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Control gravity cost
  *
- * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
- * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, g the
- * gravity torque corresponding to the current configuration,
- * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input.
- * Note that the dimension of the residual vector is obtained from `nu`.
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
+ * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, \f$\mathbf{g}(\mathbf{q})\f$ is the
+ * gravity torque corresponding to the current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
+ * position joints input. Note that the dimension of the residual vector is obtained from `StateAbstractTpl::get_nv()`.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton
- * approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives
- * are calculated by `calc` and `calcDiff`, respectively.
+ * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
+ * respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelAbstractTpl`, calc(), calcDiff(), createData()
  */
 template <typename _Scalar>
 class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
@@ -62,26 +53,45 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the control gravity cost model
    *
-   * The default `nu` value is obtained from the actuation model.
+   * @param[in] state       State of the multibody system
+   * @param[in] activation  Activation model
+   * @param[in] nu          Dimension of control vector
+   */
+  CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
+                          boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu);
+
+  /**
+   * @brief Initialize the control gravity cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
    */
   CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                          boost::shared_ptr<ActivationModelAbstract> activation,
-                          boost::shared_ptr<ActuationModelAbstract> actuation_model);
+                          boost::shared_ptr<ActivationModelAbstract> activation);
 
   /**
    * @brief Initialize the control gravity cost model
    *
-   * The default `nu` value is obtained from the actuation model.
    * We use `ActivationModelQuadTpl` as a default activation model (i.e.
    * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state  State of the multibody system
+   * @param[in] nu     Dimension of control vector
    */
-  explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                   boost::shared_ptr<ActuationModelAbstract> actuation_model);
+  CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
+
+  /**
+   * @brief Initialize the control gravity cost model
+   *
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e.
+   * \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   *
+   * @param[in] state  State of the multibody system
+   */
+  explicit CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state);
 
   virtual ~CostModelControlGravTpl();
 
@@ -115,7 +125,6 @@ class CostModelControlGravTpl : public CostModelAbstractTpl<_Scalar> {
 
  private:
   typename StateMultibody::PinocchioModel pin_model_;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model_;
 };
 
 template <typename _Scalar>
@@ -142,9 +151,11 @@ struct CostDataControlGravTpl : public CostDataAbstractTpl<_Scalar> {
     // Check that proper shared data has been passed
     DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
+      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibodyTpl");
+    }
+    if (static_cast<std::size_t>(d->actuation->dtau_du.cols()) != model->get_state()->get_nv()) {
       throw_pretty(
-          "Invalid argument: the shared data should be derived from "
-          "DataCollectorActMultibodyTpl");
+          "Invalid argument: the actuation model should consider all the control dimensions (i.e., nu == state.nv)");
     }
     // Avoids data casting at runtime
     StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
