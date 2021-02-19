@@ -71,13 +71,12 @@ boost::shared_ptr<crocoddyl::ActuationModelAbstract> ActuationModelFactory::crea
       break;
     case ActuationModelTypes::ActuationModelMultiCopterBase:
       state_multibody = boost::static_pointer_cast<crocoddyl::StateMultibody>(state);
-      n_rotors = 4;
-      tau_f = Eigen::MatrixXd::Zero(state_multibody->get_nv(), 4);
+      tau_f = Eigen::MatrixXd::Zero(6, 4);
       tau_f.row(2).fill(1.0);
       tau_f.row(3) << 0.0, 0.1525, 0.0, -0.1525;
       tau_f.row(4) << -0.1525, 0.0, 0.1525, 0.0;
       tau_f.row(5) << -0.01515, 0.01515, -0.01515, 0.01515;
-      actuation = boost::make_shared<crocoddyl::ActuationModelMultiCopterBase>(state_multibody, n_rotors, tau_f);
+      actuation = boost::make_shared<crocoddyl::ActuationModelMultiCopterBase>(state_multibody, tau_f);
       break;
     case ActuationModelTypes::ActuationModelSquashingFull:
       state_multibody = boost::static_pointer_cast<crocoddyl::StateMultibody>(state);
