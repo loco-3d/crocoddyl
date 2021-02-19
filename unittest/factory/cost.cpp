@@ -177,12 +177,5 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTyp
   return factory.create(rand_type, state_type, ActivationModelTypes::ActivationModelQuad, nu);
 }
 
-void updateActuation(const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
-                     const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data, const Eigen::VectorXd& x,
-                     const Eigen::VectorXd& u) {
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-}
-
 }  // namespace unittest
 }  // namespace crocoddyl

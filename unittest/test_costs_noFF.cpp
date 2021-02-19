@@ -3,7 +3,7 @@
 //
 // Copyright (C) 2019-2021, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
-//                           INRIA
+//                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/cost.hpp"
+#include "factory/actuation.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
