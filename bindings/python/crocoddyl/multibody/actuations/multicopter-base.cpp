@@ -16,12 +16,17 @@ void exposeActuationModelMultiCopterBase() {
   bp::class_<ActuationModelMultiCopterBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelMultiCopterBase",
       "Actuation models with base actuated by several propellers (e.g. aerial manipulators).",
-      bp::init<boost::shared_ptr<StateMultibody>, int, Eigen::MatrixXd>(
-          bp::args("self", "state", "nrotors", "force_torque"),
+      bp::init<boost::shared_ptr<StateMultibody>, Eigen::Matrix<double, 6, Eigen::Dynamic> >(
+          bp::args("self", "state", "tau_f"),
+          "Initialize the full actuation model.\n\n"
+          ":param state: state of multibody system\n"
+          ":param tau_f: matrix that maps rotors thrust to generalized torque of the flying base."))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t, Eigen::Matrix<double, 6, Eigen::Dynamic> >(
+          bp::args("self", "state", "nrotors", "tau_f"),
           "Initialize the full actuation model.\n\n"
           ":param state: state of multibody system, \n"
           ":param nrotors: number of rotors of the flying base, \n"
-          ":param force_torque: matrix that maps rotors thrust to generalized torque of the flying base."))
+          ":param tau_f: matrix that maps rotors thrust to generalized torque of the flying base."))
       .def("calc", &ActuationModelMultiCopterBase::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: multicopter-base actuation data\n"
