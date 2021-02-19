@@ -6,9 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "pinocchio/algorithm/rnea-derivatives.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
 
 namespace crocoddyl {
 
@@ -39,23 +38,6 @@ CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<State
 }
 
 template <typename Scalar>
-CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                                         boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, activation, actuation_model->get_nu()), pin_model_(*state->get_pinocchio()) {
-  if (activation_->get_nr() != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "nr is equals to " + std::to_string(state_->get_nv()));
-  }
-  if (nu_ == 0) {
-    throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-  }
-  std::cerr << "Deprecated CostModelControlGrav constructor: Use constructor without actuation model" << std::endl;
-}
-
-template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
     : Base(state, state->get_nv(), nu), pin_model_(*state->get_pinocchio()) {
   if (nu_ == 0) {
@@ -68,18 +50,6 @@ CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<State
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state)
     : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {}
-
-template <typename Scalar>
-CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                                         boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, state->get_nv(), actuation_model->get_nu()), pin_model_(*state->get_pinocchio()) {
-  if (nu_ == 0) {
-    throw_pretty("Invalid argument: "
-                 << "it seems to be an autonomous system, if so, don't add "
-                    "this cost function");
-  }
-  std::cerr << "Deprecated CostModelControlGrav constructor: Use constructor without actuation model" << std::endl;
-}
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::~CostModelControlGravTpl() {}

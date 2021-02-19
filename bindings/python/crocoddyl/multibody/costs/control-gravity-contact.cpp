@@ -46,22 +46,6 @@ void exposeCostControlGravContact() {
           "The default nu is obtained from state.nv. We use ActivationModelQuad \n"
           "as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state description"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActivationModelAbstract>,
-                    boost::shared_ptr<ActuationModelAbstract> >(
-          bp::args("self", "state", "activation", "actuation"),
-          "Initialize the control cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2).\n"
-          ":param state: state description\n"
-          ":param activation: activation model\n"
-          ":param actuation: actuation model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract> >(
-          bp::args("self", "state", "actuation"),
-          "Initialize the control cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. "
-          "a=0.5*||r||^2).\n"
-          ":param state: state description\n"
-          ":param actuation: actuation model"))
       .def<void (CostModelControlGravContact::*)(const boost::shared_ptr<CostDataAbstract> &,
                                                  const Eigen::Ref<const Eigen::VectorXd> &,
                                                  const Eigen::Ref<const Eigen::VectorXd> &)>(

@@ -13,7 +13,6 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -76,10 +75,6 @@ class CostModelControlGravContactTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation);
-  DEPRECATED("Use constructor without actuation model",
-             CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
-                                            boost::shared_ptr<ActivationModelAbstract> activation,
-                                            boost::shared_ptr<ActuationModelAbstract> actuation_model);)
 
   /**
    * @brief Initialize the control gravity contact cost model
@@ -102,10 +97,6 @@ class CostModelControlGravContactTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    */
   explicit CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state);
-  DEPRECATED("Use constructor without actuation model",
-             CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
-                                            boost::shared_ptr<ActuationModelAbstract> actuation_model);)
-
   virtual ~CostModelControlGravContactTpl();
 
   /**
