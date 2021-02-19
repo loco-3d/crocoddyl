@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,6 +97,12 @@ boost::shared_ptr<crocoddyl::ActuationModelAbstract> ActuationModelFactory::crea
       break;
   }
   return actuation;
+}
+
+void updateActuation(const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
+                     const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u) {
+  model->calc(data, x, u);
 }
 
 }  // namespace unittest
