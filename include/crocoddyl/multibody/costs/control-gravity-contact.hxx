@@ -33,19 +33,6 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
 }
 
 template <typename Scalar>
-CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
-    boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, activation, actuation_model->get_nu()), pin_model_(*state->get_pinocchio()) {
-  if (activation_->get_nr() != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "nr is equals to " + std::to_string(state_->get_nv()));
-  }
-  std::cerr << "Deprecated CostModelControlGravContact constructor: Use constructor without actuation model"
-            << std::endl;
-}
-
-template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
                                                                        std::size_t nu)
     : Base(state, state->get_nv(), nu), pin_model_(*state->get_pinocchio()) {}
@@ -53,14 +40,6 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::sh
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state)
     : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {}
-
-template <typename Scalar>
-CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, state->get_nv(), actuation_model->get_nu()), pin_model_(*state->get_pinocchio()) {
-  std::cerr << "Deprecated CostModelControlGravContact constructor: Use constructor without actuation model"
-            << std::endl;
-}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::~CostModelControlGravContactTpl() {}

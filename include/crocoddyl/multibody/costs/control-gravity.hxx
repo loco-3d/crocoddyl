@@ -23,27 +23,12 @@ CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<State
     : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state)) {}
 
 template <typename Scalar>
-CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                                         boost::shared_ptr<ActivationModelAbstract> activation,
-                                                         boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state, actuation_model->get_nu())) {
-  std::cerr << "Deprecated CostModelControlGrav constructor: Use constructor without actuation model" << std::endl;
-}
-
-template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelControlGrav>(state, nu)) {}
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state)
     : Base(state, boost::make_shared<ResidualModelControlGrav>(state)) {}
-
-template <typename Scalar>
-CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
-                                                         boost::shared_ptr<ActuationModelAbstract> actuation_model)
-    : Base(state, boost::make_shared<ResidualModelControlGrav>(state, actuation_model->get_nu())) {
-  std::cerr << "Deprecated CostModelControlGrav constructor: Use constructor without actuation model" << std::endl;
-}
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::~CostModelControlGravTpl() {}
