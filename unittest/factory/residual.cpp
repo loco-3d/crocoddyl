@@ -15,6 +15,7 @@
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -47,6 +48,9 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
       break;
     case ResidualModelTypes::ResidualModelFrameVelocity:
       os << "ResidualModelFrameVelocity";
+      break;
+    case ResidualModelTypes::ResidualModelControlGrav:
+      os << "ResidualModelControlGrav";
       break;
     case ResidualModelTypes::NbResidualModelTypes:
       os << "NbResidualModelTypes";
@@ -99,6 +103,9 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
       residual = boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(
           state, frame_index, pinocchio::Motion::Random(), static_cast<pinocchio::ReferenceFrame>(rand() % 2),
           nu);  // the code cannot test LOCAL_WORLD_ALIGNED
+      break;
+    case ResidualModelTypes::ResidualModelControlGrav:
+      residual = boost::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ResidualModelTypes::Type given");

@@ -28,6 +28,7 @@ struct ResidualModelTypes {
     ResidualModelFrameRotation,
     ResidualModelFrameTranslation,
     ResidualModelFrameVelocity,
+    ResidualModelControlGrav,
     NbResidualModelTypes
   };
   static std::vector<Type> init_all() {
