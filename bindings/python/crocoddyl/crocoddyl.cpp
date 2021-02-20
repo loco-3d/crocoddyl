@@ -24,6 +24,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   typedef Eigen::Matrix<Scalar, 4, 1> Vector4;
   typedef Eigen::Matrix<Scalar, 6, 1> Vector6;
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
+  typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic> Matrix6x;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX;
@@ -32,6 +33,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPySpecific<Vector6>();
   eigenpy::enableEigenPySpecific<Matrix46>();
   eigenpy::enableEigenPySpecific<MatrixX3>();
+  eigenpy::enableEigenPySpecific<Matrix6x>();
 
   // Register converters between std::vector and Python list
   StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
