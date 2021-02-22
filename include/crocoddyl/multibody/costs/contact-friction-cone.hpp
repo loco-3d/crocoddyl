@@ -56,8 +56,6 @@ class CostModelContactFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::MatrixX3s MatrixX3s;
 
   /**
    * @brief Initialize the contact friction cone cost model

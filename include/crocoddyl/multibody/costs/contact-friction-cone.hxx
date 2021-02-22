@@ -15,14 +15,24 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone, nu)),
-      fref_(fref) {}
+      fref_(fref) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " << fref_.cone.get_nf() + 1);
+  }
+}
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref)
     : Base(state, activation, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone)),
-      fref_(fref) {}
+      fref_(fref) {
+  if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " << fref_.cone.get_nf() + 1);
+  }
+}
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
