@@ -18,6 +18,7 @@
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -245,20 +246,21 @@ struct CostDataAbstractTpl {
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
-        Luu(model->get_nu(), model->get_nu()),
-        r(model->get_activation()->get_nr()),
-        Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
-        Ru(model->get_activation()->get_nr(), model->get_nu()) {
+        Luu(model->get_nu(), model->get_nu()) {
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
-    r.setZero();
-    Rx.setZero();
-    Ru.setZero();
   }
   virtual ~CostDataAbstractTpl() {}
+
+  DEPRECATED("Use residual.r", const VectorXs& get_r() const { return residual->r; };)
+  DEPRECATED("Use residual.Rx", const MatrixXs& get_Rx() const { return residual->Rx; };)
+  DEPRECATED("Use residual.Ru", const MatrixXs& get_Ru() const { return residual->Ru; };)
+  DEPRECATED("Use residual.r", void set_r(const VectorXs& r) { residual->r = r; };)
+  DEPRECATED("Use residual.Rx", void set_Rx(const MatrixXs& Rx) { residual->Rx = Rx; };)
+  DEPRECATED("Use residual.Ru", void set_Ru(const MatrixXs& Ru) { residual->Ru = Ru; };)
 
   DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
@@ -269,9 +271,6 @@ struct CostDataAbstractTpl {
   MatrixXs Lxx;
   MatrixXs Lxu;
   MatrixXs Luu;
-  VectorXs r;   // TODO(cmastalli) remove after full integration of residual data
-  MatrixXs Rx;  // TODO(cmastalli) remove after full integration of residual data
-  MatrixXs Ru;  // TODO(cmastalli) remove after full integration of residual data
 };
 
 }  // namespace crocoddyl

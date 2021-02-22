@@ -14,6 +14,10 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostAbstract() {
+// TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelAbstract> >();
 
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
@@ -133,20 +137,22 @@ void exposeCostAbstract() {
       .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
       .add_property("r",
-                    bp::make_getter(&CostDataAbstract::r,
-                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.r.")),
-                    bp::make_setter(&CostDataAbstract::r, deprecated<>("Deprecated. Use residual.r.")),
+                    bp::make_function(&CostDataAbstract::get_r,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.r.")),
+                    bp::make_function(&CostDataAbstract::set_r, deprecated<>("Deprecated. Use residual.r.")),
                     "cost residual")
       .add_property("Rx",
-                    bp::make_getter(&CostDataAbstract::Rx,
-                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Rx.")),
-                    bp::make_setter(&CostDataAbstract::Rx, deprecated<>("Deprecated. Use residual.Rx.")),
+                    bp::make_function(&CostDataAbstract::get_Rx,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Rx.")),
+                    bp::make_function(&CostDataAbstract::set_Rx, deprecated<>("Deprecated. Use residual.Rx.")),
                     "Jacobian of the cost residual")
       .add_property("Ru",
-                    bp::make_getter(&CostDataAbstract::Ru,
-                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
-                    bp::make_setter(&CostDataAbstract::Ru, deprecated<>("Deprecated. Use residual.Ru.")),
+                    bp::make_function(&CostDataAbstract::get_Ru,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
+                    bp::make_function(&CostDataAbstract::set_Ru, deprecated<>("Deprecated. Use residual.Ru.")),
                     "Jacobian of the cost residual");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
