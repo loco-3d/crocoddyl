@@ -15,12 +15,22 @@ template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation,
                                                          const std::size_t nu)
-    : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state, nu)) {}
+    : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state, nu)) {
+  if (activation_->get_nr() != state_->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(state_->get_nv()));
+  }
+}
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
                                                          boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state)) {}
+    : Base(state, activation, boost::make_shared<ResidualModelControlGrav>(state)) {
+  if (activation_->get_nr() != state_->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(state_->get_nv()));
+  }
+}
 
 template <typename Scalar>
 CostModelControlGravTpl<Scalar>::CostModelControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu)

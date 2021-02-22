@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "pinocchio/algorithm/rnea-derivatives.hpp"
-#include "pinocchio/algorithm/rnea.hpp"
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
 
 namespace crocoddyl {
 
@@ -15,7 +15,7 @@ template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const std::size_t nu)
-    : Base(state, activation, nu), pin_model_(*state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactControlGrav>(state, nu)) {
   if (activation_->get_nr() != state_->get_nv()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_nv()));
@@ -25,7 +25,7 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation, state->get_nv()), pin_model_(*state->get_pinocchio()) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactControlGrav>(state)) {
   if (activation_->get_nr() != state_->get_nv()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_nv()));
@@ -35,11 +35,11 @@ CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state,
                                                                        std::size_t nu)
-    : Base(state, state->get_nv(), nu), pin_model_(*state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelContactControlGrav>(state, nu)) {}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::CostModelControlGravContactTpl(boost::shared_ptr<StateMultibody> state)
-    : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {}
+    : Base(state, boost::make_shared<ResidualModelContactControlGrav>(state)) {}
 
 template <typename Scalar>
 CostModelControlGravContactTpl<Scalar>::~CostModelControlGravContactTpl() {}
@@ -48,45 +48,34 @@ template <typename Scalar>
 void CostModelControlGravContactTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract> &data,
                                                   const Eigen::Ref<const VectorXs> &x,
                                                   const Eigen::Ref<const VectorXs> &u) {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
+  // Compute the cost residual
   Data *d = static_cast<Data *>(data.get());
+  residual_->calc(d->residual, x, u);
 
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-
-  data->r = d->actuation->tau - pinocchio::computeStaticTorque(pin_model_, d->pinocchio, q, d->fext);
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  // Compute the cost
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelControlGravContactTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract> &data,
                                                       const Eigen::Ref<const VectorXs> &x,
                                                       const Eigen::Ref<const VectorXs> &u) {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
+  // Compute the derivatives of the activation and control gravity residual models
   Data *d = static_cast<Data *>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-
-  pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q, d->fext, d->dg_dq);
-
-  activation_->calcDiff(data->activation, data->r);
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   const std::size_t nv = state_->get_nv();
-
-  data->Lx.head(nv).noalias() = -d->dg_dq.transpose() * data->activation->Ar;
-  data->Lu.noalias() = d->actuation->dtau_du.transpose() * data->activation->Ar;
-
-  d->Arr_dgdq.noalias() = data->activation->Arr * d->dg_dq;
-  d->Arr_dtaudu.noalias() = data->activation->Arr * d->actuation->dtau_du;
-
-  data->Lxx.topLeftCorner(nv, nv).noalias() = d->dg_dq.transpose() * d->Arr_dgdq;
-  data->Lxu.topRows(nv).noalias() = d->Arr_dgdq.transpose() * d->actuation->dtau_du;
-  data->Luu.diagonal().noalias() = (d->actuation->dtau_du.transpose() * d->Arr_dtaudu).diagonal();
+  Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->residual->Rx.leftCols(nv);
+  data->Lx.head(nv).noalias() = Rq.transpose() * data->activation->Ar;
+  data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;
+  d->Arr_Rq.noalias() = data->activation->Arr * Rq;
+  d->Arr_Ru.noalias() = data->activation->Arr * data->residual->Ru;
+  data->Lxx.topLeftCorner(nv, nv).noalias() = Rq.transpose() * d->Arr_Rq;
+  data->Lxu.topRows(nv).noalias() = Rq.transpose() * d->Arr_Ru;
+  data->Luu.noalias() = data->residual->Ru.transpose() * d->Arr_Ru;
 }
 
 template <typename Scalar>

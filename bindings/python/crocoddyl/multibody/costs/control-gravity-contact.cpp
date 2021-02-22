@@ -86,8 +86,14 @@ void exposeCostControlGravContact() {
           "Create control gravity contact cost data in contact.\n\n"
           ":param model: control gravity cost model in contact\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("dg_dq", bp::make_getter(&CostDataControlGravContact::dg_dq, bp::return_internal_reference<>()),
-                    "Partial derivative of gravity torque in contact with respect to q");
+      .add_property("dg_dq",
+                    bp::make_getter(&CostDataControlGravContact::Arr_Rq,
+                                    deprecated<bp::return_internal_reference<> >("Deprecated. Use Arr_Rq.")),
+                    "Partial derivative of gravity torque in contact with respect to q")
+      .add_property("Arr_Rq", bp::make_getter(&CostDataControlGravContact::Arr_Rq, bp::return_internal_reference<>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rq (deriv of residue)")
+      .add_property("Arr_Ru", bp::make_getter(&CostDataControlGravContact::Arr_Ru, bp::return_internal_reference<>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python
