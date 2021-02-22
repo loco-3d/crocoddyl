@@ -41,6 +41,7 @@ void exposeResidualContactForce();
 void exposeResidualContactFrictionCone();
 void exposeResidualContactCoPPosition();
 void exposeResidualContactWrenchCone();
+void exposeResidualContactControlGrav();
 void exposeResidualControlGrav();
 void exposeResidualFramePlacement();
 void exposeResidualFrameRotation();

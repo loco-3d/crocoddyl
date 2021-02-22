@@ -118,6 +118,11 @@ template <typename Scalar>
 struct ResidualDataContactWrenchConeTpl;
 
 template <typename Scalar>
+class ResidualModelContactControlGravTpl;
+template <typename Scalar>
+struct ResidualDataContactControlGravTpl;
+
+template <typename Scalar>
 class ResidualModelControlGravTpl;
 template <typename Scalar>
 struct ResidualDataControlGravTpl;
@@ -375,6 +380,8 @@ typedef ResidualModelContactCoPPositionTpl<double> ResidualModelContactCoPPositi
 typedef ResidualDataContactCoPPositionTpl<double> ResidualDataContactCoPPosition;
 typedef ResidualModelContactWrenchConeTpl<double> ResidualModelContactWrenchCone;
 typedef ResidualDataContactWrenchConeTpl<double> ResidualDataContactWrenchCone;
+typedef ResidualModelContactControlGravTpl<double> ResidualModelContactControlGrav;
+typedef ResidualDataContactControlGravTpl<double> ResidualDataContactControlGrav;
 typedef ResidualModelControlGravTpl<double> ResidualModelControlGrav;
 typedef ResidualDataControlGravTpl<double> ResidualDataControlGrav;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
