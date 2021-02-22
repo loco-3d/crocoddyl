@@ -98,7 +98,9 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
  protected:
   using Base::nu_;
   using Base::state_;
+  using Base::u_dependent_;
   using Base::unone_;
+  using Base::v_dependent_;
 
  private:
   Vector3s cref_;  //!< Reference CoM position

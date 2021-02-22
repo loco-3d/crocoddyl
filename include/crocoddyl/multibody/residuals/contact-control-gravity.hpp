@@ -91,6 +91,7 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
+  using Base::v_dependent_;
 
  private:
   typename StateMultibody::PinocchioModel pin_model_;

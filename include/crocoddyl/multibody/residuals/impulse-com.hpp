@@ -84,6 +84,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
  protected:
   using Base::nu_;
   using Base::state_;
+  using Base::u_dependent_;
   using Base::unone_;
 
  private:

@@ -17,13 +17,19 @@ template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const pinocchio::FrameIndex id,
                                                                      const Matrix3s& Rref, const std::size_t nu)
-    : Base(state, 3, nu), id_(id), Rref_(Rref), oRf_inv_(Rref.transpose()), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 3, nu), id_(id), Rref_(Rref), oRf_inv_(Rref.transpose()), pin_model_(state->get_pinocchio()) {
+  v_dependent_ = false;
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const pinocchio::FrameIndex id,
                                                                      const Matrix3s& Rref)
-    : Base(state, 3), id_(id), Rref_(Rref), oRf_inv_(Rref.transpose()), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 3), id_(id), Rref_(Rref), oRf_inv_(Rref.transpose()), pin_model_(state->get_pinocchio()) {
+  v_dependent_ = false;
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::~ResidualModelFrameRotationTpl() {}

@@ -19,6 +19,7 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename 
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  u_dependent_ = false;
 }
 
 template <typename Scalar>
@@ -29,16 +30,21 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename 
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  u_dependent_ = false;
 }
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                      const std::size_t nu)
-    : Base(state, state->get_ndx(), nu), xref_(state->zero()) {}
+    : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
-    : Base(state, state->get_ndx()), xref_(state->zero()) {}
+    : Base(state, state->get_ndx()), xref_(state->zero()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::~ResidualModelStateTpl() {}

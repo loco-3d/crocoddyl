@@ -21,11 +21,14 @@ ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(boost::shared_p
                  << "it seems to be an autonomous system, if so, don't add "
                     "this residual function");
   }
+  v_dependent_ = false;
 }
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state)
-    : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {}
+    : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {
+  v_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::~ResidualModelControlGravTpl() {}

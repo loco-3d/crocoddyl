@@ -119,7 +119,9 @@ class ResidualModelFramePlacementTpl : public ResidualModelAbstractTpl<_Scalar> 
 
   using Base::nu_;
   using Base::state_;
+  using Base::u_dependent_;
   using Base::unone_;
+  using Base::v_dependent_;
 
  private:
   pinocchio::FrameIndex id_;                                              //!< Reference frame id

@@ -134,6 +134,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::nr_;
   using Base::nu_;
   using Base::state_;
+  using Base::u_dependent_;
   using Base::unone_;
 
  private:

@@ -88,6 +88,7 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
+  using Base::v_dependent_;
 
  private:
   typename StateMultibody::PinocchioModel pin_model_;  //!< Pinocchio model used for internal computations

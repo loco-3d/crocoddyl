@@ -17,12 +17,16 @@ template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                                const Vector6s& href,
                                                                                const std::size_t nu)
-    : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6, nu), href_(href), pin_model_(state->get_pinocchio()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                                const Vector6s& href)
-    : Base(state, 6), href_(href), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6), href_(href), pin_model_(state->get_pinocchio()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::~ResidualModelCentroidalMomentumTpl() {}

@@ -133,6 +133,21 @@ class ResidualModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return true if the residual function depends on q
+   */
+  bool get_q_dependent() const;
+
+  /**
+   * @brief Return true if the residual function depends on v
+   */
+  bool get_v_dependent() const;
+
+  /**
+   * @brief Return true if the residual function depends on u
+   */
+  bool get_u_dependent() const;
+
+  /**
    * @brief Modify the dimension of the residual vector
    */
   void set_nr(const std::size_t nr);
@@ -142,6 +157,9 @@ class ResidualModelAbstractTpl {
   std::size_t nr_;                          //!< Residual vector dimension
   std::size_t nu_;                          //!< Control dimension
   VectorXs unone_;                          //!< No control vector
+  bool q_dependent_;                        //!< Label to indicate if the residual function depends on q
+  bool v_dependent_;                        //!< Label to indicate if the residual function depends on v
+  bool u_dependent_;                        //!< Label to indicate if the residual function depends on u
 };
 
 template <typename _Scalar>

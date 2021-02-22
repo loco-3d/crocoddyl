@@ -20,14 +20,18 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shar
                                                                      const Motion& velocity,
                                                                      const pinocchio::ReferenceFrame type,
                                                                      const std::size_t nu)
-    : Base(state, 6, nu), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6, nu), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const pinocchio::FrameIndex id,
                                                                      const Motion& velocity,
                                                                      const pinocchio::ReferenceFrame type)
-    : Base(state, 6), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {
+  u_dependent_ = false;
+}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::~ResidualModelFrameVelocityTpl() {}
