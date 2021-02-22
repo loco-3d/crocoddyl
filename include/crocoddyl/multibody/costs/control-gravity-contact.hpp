@@ -142,8 +142,8 @@ struct CostDataControlGravContactTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataControlGravContactTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
       : Base(model, data),
-        Arr_Rq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Arr_Ru(model->get_state()->get_nv(), model->get_nu()) {
+        Arr_Rq(model->get_residual()->get_nr(), model->get_state()->get_nv()),
+        Arr_Ru(model->get_residual()->get_nr(), model->get_nu()) {
     Arr_Rq.setZero();
     Arr_Ru.setZero();
   }

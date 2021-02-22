@@ -192,8 +192,8 @@ struct CostDataContactCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataContactCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
-        Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_activation()->get_nr(), model->get_nu()) {
+        Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()),
+        Arr_Ru(model->get_residual()->get_nr(), model->get_nu()) {
     Arr_Rx.setZero();
     Arr_Ru.setZero();
   }

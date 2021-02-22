@@ -191,8 +191,8 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
-        Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
+        Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()),
+        Arr_Ru(model->get_residual()->get_nr(), model->get_state()->get_nv()) {
     Arr_Rx.setZero();
     Arr_Ru.setZero();
   }
