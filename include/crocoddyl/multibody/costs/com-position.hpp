@@ -25,12 +25,11 @@ namespace crocoddyl {
  * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respectively. Note that
  * the dimension of the residual vector is obtained from 3.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
- * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */

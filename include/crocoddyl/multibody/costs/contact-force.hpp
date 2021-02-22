@@ -30,11 +30,11 @@ namespace crocoddyl {
  * its derivatives \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
  * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
  * `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
- * DataCollectorContactTpl). Note that this cost function cannot be used with other action models.
+ * `DataCollectorContactTpl`). Note that this cost function cannot be used with other action models.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * \sa DifferentialActionModelContactFwdDynamicsTpl, DataCollectorContactTpl, ActivationModelAbstractTpl
+ * \sa `DifferentialActionModelContactFwdDynamicsTpl`, `DataCollectorContactTpl`, `ActivationModelAbstractTpl`
  */
 template <typename _Scalar>
 class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {

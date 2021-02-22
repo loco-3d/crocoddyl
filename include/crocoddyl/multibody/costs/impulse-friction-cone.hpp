@@ -31,12 +31,12 @@ namespace crocoddyl {
  * its derivatives \f$\left(\frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{x}},
  * \frac{\partial\boldsymbol{\lambda}}{\partial\mathbf{u}}\right)\f$ are computed by
  * `ActionModelImpulseFwdDynamicsTpl`. These values are stored in a shared data (i.e.
- * DataCollectorImpulseTpl). Note that this cost function cannot be used with other action models.
+ * `DataCollectorImpulseTpl`). Note that this cost function cannot be used with other action models.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `ActionModelImpulseFwdDynamicsTpl`, `calc()`, `calcDiff()`, `createData()`
  */

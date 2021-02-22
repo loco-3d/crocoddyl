@@ -27,9 +27,8 @@ namespace crocoddyl {
  * respectively. Note that the tangent vector is described by the frame placement \f$\mathbf{p}\f$, and the dimension
  * of the residual vector is 6.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
- * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
  * As described in `CostModelAbstractTpl`, the cost value and its derivatives are calculated by `calc` and `calcDiff`,
  * respectively.

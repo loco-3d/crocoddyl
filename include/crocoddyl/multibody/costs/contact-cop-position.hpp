@@ -47,7 +47,7 @@ namespace crocoddyl {
  * computed by `DifferentialActionModelContactFwdDynamicsTpl`. These values are stored in a shared data (i.e.
  * `DataCollectorContactTpl`). Note that this cost function cannot be used with other action models.
  *
- * \sa DifferentialActionModelContactFwdDynamicsTpl, DataCollectorContactTpl, ActivationModelAbstractTpl
+ * \sa `DifferentialActionModelContactFwdDynamicsTpl`, `DataCollectorContactTpl`, `ActivationModelAbstractTpl`
  */
 template <typename _Scalar>
 class CostModelContactCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {

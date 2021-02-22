@@ -35,8 +35,8 @@ namespace crocoddyl {
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `DifferentialActionModelContactFwdDynamicsTpl`, `calc()`, `calcDiff()`, `createData()`
  */

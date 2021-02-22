@@ -19,20 +19,17 @@ namespace crocoddyl {
 /**
  * @brief Control gravity cost
  *
- * This cost function defines a residual vector as
- * \f$\mathbf{r}=\mathbf{u}-(g(q) - \sum J(q)^{\top} f_{\text{ext}})\f$,
- * where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input,
- * \f$J(q)\f$ the contact Jacobians, \f$f_{\text{ext}}\f$ the external forces
- * associated with the contacts, g the gravity torque corresponding to the
- * current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
- * position joints input.
- * Note that the dimension of the residual vector is obtained from `nu`.
+ * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-(g(q) - \sum
+ * \mathbf{J_c}(\mathbf{q})^{\top} f_{\text{ext}})\f$, where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control
+ * input, \f$\mathbf{J_c}(\mathbf{q})\f$ is the contact Jacobians, \f$\mathbf{f_c}}\f$ is the contact forces,
+ * \f$\mathbf{g}(\mathbf{q})\f$ is the gravity torque corresponding to the* current configuration,
+ * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position joints input. Note that the dimension of the residual
+ * vector is obtained from `nu`.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton
- * approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives
+ * As described in `CostModelAbstractTpl()`, the cost value and its derivatives
  * are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
