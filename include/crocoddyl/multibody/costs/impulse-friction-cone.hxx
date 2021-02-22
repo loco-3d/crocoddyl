@@ -14,7 +14,8 @@ template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const FrameFrictionCone& fref)
-    : Base(state, activation, 0), fref_(fref) {
+    : Base(state, activation, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone, 0)),
+      fref_(fref) {
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
@@ -25,7 +26,7 @@ CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref)
-    : Base(state, fref.cone.get_nf() + 1, 0), fref_(fref) {
+    : Base(state, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone, 0)), fref_(fref) {
   std::cerr << "Deprecated CostModelImpulseFrictionCone class: Use CostModelContactFrictionCone class" << std::endl;
 }
 
@@ -34,36 +35,30 @@ CostModelImpulseFrictionConeTpl<Scalar>::~CostModelImpulseFrictionConeTpl() {}
 
 template <typename Scalar>
 void CostModelImpulseFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>&,
-                                                   const Eigen::Ref<const VectorXs>&) {
+                                                   const Eigen::Ref<const VectorXs>& x,
+                                                   const Eigen::Ref<const VectorXs>& u) {
+  // Compute the cost residual given the reference contact friction
   Data* d = static_cast<Data*>(data.get());
-
-  // Compute the residual of the friction cone. Note that we need to transform the force
-  // to the contact frame
-  data->r.noalias() = fref_.cone.get_A() * d->impulse->jMf.actInv(d->impulse->f).linear();
+  residual_->calc(d->residual, x, u);
 
   // Compute the cost
-  activation_->calc(data->activation, data->r);
-  data->cost = data->activation->a_value;
+  activation_->calc(d->activation, d->residual->r);
+  d->cost = d->activation->a_value;
 }
 
 template <typename Scalar>
 void CostModelImpulseFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>&,
-                                                       const Eigen::Ref<const VectorXs>&) {
+                                                       const Eigen::Ref<const VectorXs>& x,
+                                                       const Eigen::Ref<const VectorXs>& u) {
+  // Compute the derivatives of the activation and contact friction cone residual models
   Data* d = static_cast<Data*>(data.get());
+  residual_->calcDiff(d->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
-  const MatrixXs& df_dx = d->impulse->df_dx;
-  const MatrixX3s& A = fref_.cone.get_A();
-
-  activation_->calcDiff(data->activation, data->r);
-  if (d->more_than_3_constraints) {
-    data->Rx.noalias() = A * df_dx.template topRows<3>();
-  } else {
-    data->Rx.noalias() = A * df_dx;
-  }
-  data->Lx.noalias() = data->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->Rx.transpose() * data->activation->Arr * data->Rx;
+  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
+  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
+  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
+  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
 }
 
 template <typename Scalar>

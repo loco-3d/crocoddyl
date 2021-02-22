@@ -12,12 +12,8 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-#include "crocoddyl/multibody/impulses/impulse-6d.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -59,8 +55,6 @@ class CostModelImpulseFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::MatrixX3s MatrixX3s;
 
   /**
    * @brief Initialize the impulse friction cone cost model
@@ -121,6 +115,7 @@ class CostModelImpulseFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
 
   using Base::activation_;
+  using Base::residual_;
   using Base::state_;
 
  private:
@@ -135,57 +130,20 @@ struct CostDataImpulseFrictionConeTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-  typedef FrameFrictionConeTpl<Scalar> FrameFrictionCone;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   CostDataImpulseFrictionConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), more_than_3_constraints(false) {
-    // Check that proper shared data has been passed
-    DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorImpulse");
-    }
-
-    // Avoids data casting at runtime
-    FrameFrictionCone fref = model->template get_reference<FrameFrictionCone>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[fref.id].name;
-    bool found_impulse = false;
-    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
-         it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == fref.id) {
-        ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-        ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          more_than_3_constraints = true;
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-        throw_pretty("Domain error: there isn't defined at least a 3d impulse for " + frame_name);
-        break;
-      }
-    }
-    if (!found_impulse) {
-      throw_pretty("Domain error: there isn't defined impulse data for " + frame_name);
-    }
+      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
+    Arr_Rx.setZero();
   }
 
-  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;
-  bool more_than_3_constraints;
+  MatrixXs Arr_Rx;
   using Base::activation;
   using Base::cost;
   using Base::Lx;
   using Base::Lxx;
-  using Base::r;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 };
 
