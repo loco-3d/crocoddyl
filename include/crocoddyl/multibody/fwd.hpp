@@ -118,6 +118,11 @@ template <typename Scalar>
 struct ResidualDataContactWrenchConeTpl;
 
 template <typename Scalar>
+class ResidualModelControlGravTpl;
+template <typename Scalar>
+struct ResidualDataControlGravTpl;
+
+template <typename Scalar>
 class ResidualModelFramePlacementTpl;
 template <typename Scalar>
 struct ResidualDataFramePlacementTpl;
@@ -146,11 +151,6 @@ template <typename Scalar>
 class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
-
-template <typename Scalar>
-class ResidualModelControlGravTpl;
-template <typename Scalar>
-struct ResidualDataControlGravTpl;
 
 // cost
 template <typename Scalar>
@@ -375,6 +375,8 @@ typedef ResidualModelContactCoPPositionTpl<double> ResidualModelContactCoPPositi
 typedef ResidualDataContactCoPPositionTpl<double> ResidualDataContactCoPPosition;
 typedef ResidualModelContactWrenchConeTpl<double> ResidualModelContactWrenchCone;
 typedef ResidualDataContactWrenchConeTpl<double> ResidualDataContactWrenchCone;
+typedef ResidualModelControlGravTpl<double> ResidualModelControlGrav;
+typedef ResidualDataControlGravTpl<double> ResidualDataControlGrav;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
 typedef ResidualDataFramePlacementTpl<double> ResidualDataFramePlacement;
 typedef ResidualModelFrameRotationTpl<double> ResidualModelFrameRotation;
@@ -387,8 +389,6 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
-typedef ResidualModelControlGravTpl<double> ResidualModelControlGrav;
-typedef ResidualDataControlGravTpl<double> ResidualDataControlGrav;
 
 typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;
 typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;

@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_RESIDUALS_CONTROL_GRAVITY_HPP_
-#define CROCODDYL_CORE_RESIDUALS_CONTROL_GRAVITY_HPP_
+#ifndef CROCODDYL_MULTIBODY_RESIDUALS_CONTROL_GRAVITY_HPP_
+#define CROCODDYL_MULTIBODY_RESIDUALS_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -24,10 +24,8 @@ namespace crocoddyl {
  * gravity torque corresponding to the current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position
  * joints input. Note that the dimension of the residual vector is obtained from `StateAbstractTpl::get_nv()`.
  *
- * Both residual and residual Jacobians are computed analytically.
- *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its derivatives
- * are calculated by `calc` and `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
