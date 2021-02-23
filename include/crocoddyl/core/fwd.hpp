@@ -156,6 +156,11 @@ template <typename Scalar>
 struct CostDataSumTpl;
 
 template <typename Scalar>
+class CostModelResidualTpl;
+template <typename Scalar>
+struct CostDataResidualTpl;
+
+template <typename Scalar>
 class CostModelControlTpl;
 
 // shooting
@@ -260,6 +265,8 @@ typedef CostDataAbstractTpl<double> CostDataAbstract;
 typedef CostItemTpl<double> CostItem;
 typedef CostModelSumTpl<double> CostModelSum;
 typedef CostDataSumTpl<double> CostDataSum;
+typedef CostModelResidualTpl<double> CostModelResidual;
+typedef CostDataResidualTpl<double> CostDataResidual;
 typedef CostModelControlTpl<double> CostModelControl;
 
 typedef ShootingProblemTpl<double> ShootingProblem;

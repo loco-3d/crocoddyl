@@ -232,6 +232,7 @@ struct CostDataAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;

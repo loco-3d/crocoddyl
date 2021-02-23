@@ -40,10 +40,12 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostDataResidualTpl<Scalar> Data;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the residual cost model
@@ -86,6 +88,11 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the residual cost data
+   */
+  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
  protected:
   using Base::activation_;
