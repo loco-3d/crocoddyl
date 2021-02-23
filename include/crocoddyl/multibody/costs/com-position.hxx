@@ -49,8 +49,7 @@ template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual give the reference CoM position
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calc(d->residual, x, u);
+  residual_->calc(data->residual, x, u);
 
   // Compute the cost
   activation_->calc(data->activation, data->residual->r);
@@ -63,7 +62,7 @@ void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
                                                const Eigen::Ref<const VectorXs>& u) {
   // Compute the derivatives of the activation and CoM position residual models
   Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(d->residual, x, u);
+  residual_->calcDiff(data->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation

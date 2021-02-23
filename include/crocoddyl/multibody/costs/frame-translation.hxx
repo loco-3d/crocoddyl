@@ -56,8 +56,7 @@ void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostData
                                                 const Eigen::Ref<const VectorXs>& x,
                                                 const Eigen::Ref<const VectorXs>& u) {
   // Compute the frame translation w.r.t. the reference frame
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calc(d->residual, x, u);
+  residual_->calc(data->residual, x, u);
 
   // Compute the cost
   activation_->calc(data->activation, data->residual->r);
@@ -71,14 +70,14 @@ void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<Cost
   // Compute the derivatives of the activation and frame translation residual models
   Data* d = static_cast<Data*>(data.get());
   const std::size_t nv = state_->get_nv();
-  residual_->calcDiff(d->residual, x, u);
-  activation_->calcDiff(d->activation, d->residual->r);
+  residual_->calcDiff(data->residual, x, u);
+  activation_->calcDiff(data->activation, data->residual->r);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   Eigen::Ref<Matrix3xs> J(data->residual->Rx.leftCols(nv));
-  d->Lx.head(nv) = J.transpose() * d->activation->Ar;
+  data->Lx.head(nv) = J.transpose() * d->activation->Ar;
   d->Arr_J.noalias() = data->activation->Arr * J;
-  d->Lxx.topLeftCorner(nv, nv) = J.transpose() * d->Arr_J;
+  data->Lxx.topLeftCorner(nv, nv) = J.transpose() * d->Arr_J;
 }
 
 template <typename Scalar>

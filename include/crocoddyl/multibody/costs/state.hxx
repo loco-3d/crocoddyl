@@ -139,11 +139,6 @@ CostModelStateTpl<Scalar>::~CostModelStateTpl() {}
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
-
   residual_->calc(data->residual, x, u);
   activation_->calc(data->activation, data->residual->r);
   data->cost = data->activation->a_value;
@@ -152,11 +147,6 @@ void CostModelStateTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& 
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
-
   residual_->calcDiff(data->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
 

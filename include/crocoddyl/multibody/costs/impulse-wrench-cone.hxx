@@ -39,12 +39,11 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<CostDat
                                                  const Eigen::Ref<const VectorXs>& x,
                                                  const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual given the reference impulse wrench
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calc(d->residual, x, u);
+  residual_->calc(data->residual, x, u);
 
   // Compute the cost
-  activation_->calc(d->activation, d->residual->r);
-  d->cost = d->activation->a_value;
+  activation_->calc(data->activation, data->residual->r);
+  data->cost = data->activation->a_value;
 }
 
 template <typename Scalar>
@@ -53,7 +52,7 @@ void CostModelImpulseWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<Cos
                                                      const Eigen::Ref<const VectorXs>& u) {
   // Compute the derivatives of the activation and impulse wrench cone residual models
   Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(d->residual, x, u);
+  residual_->calcDiff(data->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation

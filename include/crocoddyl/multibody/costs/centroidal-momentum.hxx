@@ -53,8 +53,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDa
                                                   const Eigen::Ref<const VectorXs>& x,
                                                   const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual given the reference centroidal momentum
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calc(d->residual, x, u);
+  residual_->calc(data->residual, x, u);
 
   // Compute the cost
   activation_->calc(data->activation, data->residual->r);
@@ -68,7 +67,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   // Compute the derivatives of the activation and centroidal momentum residual models
   Data* d = static_cast<Data*>(data.get());
   activation_->calcDiff(data->activation, data->residual->r);
-  residual_->calcDiff(d->residual, x, u);
+  residual_->calcDiff(data->residual, x, u);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   Eigen::Ref<Matrix6xs> Rx(data->residual->Rx);
