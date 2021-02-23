@@ -87,8 +87,9 @@ void register_actuation_model_unit_tests(ActuationModelTypes::Type actuation_typ
 }
 
 bool init_function() {
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull,
-                                      StateModelTypes::StateMultibody_TalosArm);
+  for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
+    register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull, StateModelTypes::all[i]);
+  }
   register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
                                       StateModelTypes::StateMultibody_HyQ);
   register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
