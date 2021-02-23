@@ -6,10 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
-
 #include <pinocchio/algorithm/frames.hpp>
+#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 
 namespace crocoddyl {
 

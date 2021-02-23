@@ -6,11 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/residuals/impulse-com.hpp"
-
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/center-of-mass-derivatives.hpp>
+#include "crocoddyl/multibody/residuals/impulse-com.hpp"
 
 namespace crocoddyl {
 

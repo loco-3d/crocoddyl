@@ -8,6 +8,7 @@
 
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
+#include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 
 namespace crocoddyl {
 

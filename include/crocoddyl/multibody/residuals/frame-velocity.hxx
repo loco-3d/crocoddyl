@@ -6,11 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
-
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/frames-derivatives.hpp>
+#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 
 namespace crocoddyl {
 
