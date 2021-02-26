@@ -162,6 +162,7 @@ struct ResidualDataContactWrenchConeTpl : public ResidualDataAbstractTpl<_Scalar
   typedef ResidualDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 

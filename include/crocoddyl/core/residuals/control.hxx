@@ -56,7 +56,8 @@ void ResidualModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualD
 template <typename Scalar>
 boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelControlTpl<Scalar>::createData(
     DataCollectorAbstract* const _data) {
-  boost::shared_ptr<ResidualDataAbstract> data = boost::make_shared<ResidualDataAbstract>(this, _data);
+  boost::shared_ptr<ResidualDataAbstract> data =
+      boost::allocate_shared<ResidualDataAbstract>(Eigen::aligned_allocator<ResidualDataAbstract>(), this, _data);
   data->Ru.diagonal().fill((Scalar)1.);
   return data;
 }
