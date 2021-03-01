@@ -97,4 +97,15 @@ void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::V
   cost_weights_ = weights;
 }
 
+template <typename Scalar>
+Scalar ActionModelUnicycleTpl<Scalar>::get_dt() const {
+  return dt_;
+}
+
+template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::set_dt(const Scalar dt) {
+  if (dt <= 0) throw_pretty("Invalid argument: dt should be strictly positive.");
+  dt_ = dt;
+}
+
 }  // namespace crocoddyl
