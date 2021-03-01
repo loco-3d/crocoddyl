@@ -30,6 +30,7 @@ void exposeIntegratedActionRK4();
 void exposeCostAbstract();
 void exposeResidualControl();
 void exposeCostSum();
+void exposeCostResidual();
 void exposeCostControl();
 void exposeActionNumDiff();
 void exposeDifferentialActionNumDiff();

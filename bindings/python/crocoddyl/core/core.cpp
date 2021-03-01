@@ -28,6 +28,7 @@ void exposeCore() {
   exposeCostAbstract();
   exposeResidualControl();
   exposeCostSum();
+  exposeCostResidual();
   exposeCostControl();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
