@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/utils/quadruped-gaits.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 
 namespace crocoddyl {
 
@@ -178,16 +179,16 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   boost::shared_ptr<crocoddyl::CostModelSum> cost_model =
       boost::make_shared<crocoddyl::CostModelSum>(state_, actuation_->get_nu());
   if (com_task.array().allFinite()) {
-    boost::shared_ptr<crocoddyl::CostModelAbstract> com_track =
-        boost::make_shared<crocoddyl::CostModelCoMPosition>(state_, com_task, actuation_->get_nu());
+    boost::shared_ptr<crocoddyl::CostModelAbstract> com_track = boost::make_shared<crocoddyl::CostModelResidual>(
+        state_, boost::make_shared<crocoddyl::ResidualModelCoMPosition>(state_, com_task, actuation_->get_nu()));
     cost_model->addCost("comTrack", com_track, 1e6);
   }
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
-      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
-          boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, actuation_->get_nu());
+      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track = boost::make_shared<crocoddyl::CostModelResidual>(
+          state_, boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(
+                      state_, it->id, it->placement.translation(), actuation_->get_nu()));
       cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e6);
     }
   }
@@ -199,10 +200,11 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   state_weights.segment(rmodel_.nv + 6, rmodel_.nv - 6).fill(pow(1., 2));
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
-  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg =
-      boost::make_shared<crocoddyl::CostModelState>(state_, state_activation, defaultstate_, actuation_->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg =
-      boost::make_shared<crocoddyl::CostModelControl>(state_, actuation_->get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg = boost::make_shared<crocoddyl::CostModelResidual>(
+      state_, boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()),
+      state_activation);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg = boost::make_shared<crocoddyl::CostModelResidual>(
+      state_, boost::make_shared<crocoddyl::ResidualModelControl>(state_, actuation_->get_nu()));
   cost_model->addCost("stateReg", state_reg, 1e1);
   cost_model->addCost("ctrlReg", ctrl_reg, 1e-1);
 
@@ -243,12 +245,14 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
-      crocoddyl::FrameMotion vref(it->id, pinocchio::Motion::Zero());
-      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
-          boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, actuation_->get_nu());
+      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track = boost::make_shared<crocoddyl::CostModelResidual>(
+          state_, boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(
+                      state_, it->id, it->placement.translation(), actuation_->get_nu()));
       boost::shared_ptr<crocoddyl::CostModelAbstract> impulse_foot_vel =
-          boost::make_shared<crocoddyl::CostModelFrameVelocity>(state_, vref, actuation_->get_nu());
+          boost::make_shared<crocoddyl::CostModelResidual>(
+              state_,
+              boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(
+                  state_, it->id, pinocchio::Motion::Zero(), pinocchio::ReferenceFrame::LOCAL, actuation_->get_nu()));
       cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e7);
       cost_model->addCost(rmodel_.frames[it->id].name + "_impulseVel", impulse_foot_vel, 1e6);
     }
@@ -260,10 +264,11 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   state_weights.segment(rmodel_.nv, rmodel_.nv).fill(pow(10., 2));
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
-  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg =
-      boost::make_shared<crocoddyl::CostModelState>(state_, state_activation, defaultstate_, actuation_->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg =
-      boost::make_shared<crocoddyl::CostModelControl>(state_, actuation_->get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg = boost::make_shared<crocoddyl::CostModelResidual>(
+      state_, boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()),
+      state_activation);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg = boost::make_shared<crocoddyl::CostModelResidual>(
+      state_, boost::make_shared<crocoddyl::ResidualModelControl>(state_, actuation_->get_nu()));
   cost_model->addCost("stateReg", state_reg, 1e1);
   cost_model->addCost("ctrlReg", ctrl_reg, 1e-3);
 
@@ -291,9 +296,9 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
-      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
-          boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, 0);
+      boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track = boost::make_shared<crocoddyl::CostModelResidual>(
+          state_, boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(state_, it->id,
+                                                                               it->placement.translation(), 0));
       cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e7);
     }
   }
@@ -303,8 +308,8 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   state_weights.segment(rmodel_.nv, rmodel_.nv).fill(pow(10., 2));
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
-  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg =
-      boost::make_shared<crocoddyl::CostModelState>(state_, state_activation, defaultstate_, 0);
+  boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg = boost::make_shared<crocoddyl::CostModelResidual>(
+      state_, boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, 0), state_activation);
   cost_model->addCost("stateReg", state_reg, 1e1);
 
   // Creating the action model for the KKT dynamics with simpletic Euler integration scheme

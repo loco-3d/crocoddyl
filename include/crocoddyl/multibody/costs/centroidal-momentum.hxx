@@ -18,6 +18,9 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {
+  std::cerr << "Deprecated CostModelCentroidalMomentum: Use ResidualModelCentroidalMomentum with "
+               "CostModelResidual class"
+            << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -29,6 +32,9 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActivationModelAbstract> activation,
     const Vector6s& href)
     : Base(state, activation, boost::make_shared<ResidualModelCentroidalMomentum>(state, href)), href_(href) {
+  std::cerr << "Deprecated CostModelCentroidalMomentum: Use ResidualModelCentroidalMomentum with "
+               "CostModelResidual class"
+            << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -38,12 +44,20 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href, const std::size_t nu)
-    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {}
+    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href, nu)), href_(href) {
+  std::cerr << "Deprecated CostModelCentroidalMomentum: Use ResidualModelCentroidalMomentum with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                                                        const Vector6s& href)
-    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href)), href_(href) {}
+    : Base(state, boost::make_shared<ResidualModelCentroidalMomentum>(state, href)), href_(href) {
+  std::cerr << "Deprecated CostModelCentroidalMomentum: Use ResidualModelCentroidalMomentum with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::~CostModelCentroidalMomentumTpl() {}

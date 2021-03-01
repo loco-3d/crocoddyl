@@ -18,7 +18,9 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), 0)),
       cop_support_(cref) {
-  std::cerr << "Deprecated CostModelImpulseCoPPosition: Use CostModelContactCoPPosition" << std::endl;
+  std::cerr << "Deprecated CostModelImpulseCoMPosition: Use ResidualModelImpulseCoMPosition with "
+               "CostModelResidual class"
+            << std::endl;
 }
 
 template <typename _Scalar>
@@ -30,7 +32,9 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(boost::s
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), 0)),
       cop_support_(cref) {
-  std::cerr << "Deprecated CostModelImpulseCoPPosition: Use CostModelContactCoPPosition" << std::endl;
+  std::cerr << "Deprecated CostModelImpulseCoMPosition: Use ResidualModelImpulseCoMPosition with "
+               "CostModelResidual class"
+            << std::endl;
 }
 
 template <typename Scalar>

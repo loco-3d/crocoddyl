@@ -19,6 +19,8 @@ CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
     const FrameTranslation& xref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation, nu)),
       xref_(xref) {
+  std::cerr << "Deprecated CostModelFrameTranslation: Use ResidualModelFrameTranslation with CostModelResidual"
+            << std::endl;
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -31,6 +33,8 @@ CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(
     const FrameTranslation& xref)
     : Base(state, activation, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation)),
       xref_(xref) {
+  std::cerr << "Deprecated CostModelFrameTranslation: Use ResidualModelFrameTranslation with CostModelResidual"
+            << std::endl;
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -41,12 +45,18 @@ template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const FrameTranslation& xref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation, nu)),
-      xref_(xref) {}
+      xref_(xref) {
+  std::cerr << "Deprecated CostModelFrameTranslation: Use ResidualModelFrameTranslation with CostModelResidual"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::CostModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const FrameTranslation& xref)
-    : Base(state, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation)), xref_(xref) {}
+    : Base(state, boost::make_shared<ResidualModelFrameTranslation>(state, xref.id, xref.translation)), xref_(xref) {
+  std::cerr << "Deprecated CostModelFrameTranslation: Use ResidualModelFrameTranslation with CostModelResidual"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::~CostModelFrameTranslationTpl() {}

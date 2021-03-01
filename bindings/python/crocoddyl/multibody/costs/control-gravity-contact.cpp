@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostControlGravContact() {
+void exposeCostControlGravContact() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                       // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelControlGravContact> >();
 
   bp::class_<CostModelControlGravContact, bp::bases<CostModelAbstract> >(
@@ -94,6 +98,8 @@ void exposeCostControlGravContact() {
                     "Intermediate product of Arr (2nd deriv of Activation) with Rq (deriv of residue)")
       .add_property("Arr_Ru", bp::make_getter(&CostDataControlGravContact::Arr_Ru, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

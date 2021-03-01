@@ -12,7 +12,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostContactCoPPosition() {
+void exposeCostContactCoPPosition() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                       // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelContactCoPPosition> >();
 
   bp::class_<CostModelContactCoPPosition, bp::bases<CostModelAbstract> >(
@@ -79,6 +83,8 @@ void exposeCostContactCoPPosition() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("Arr_Ru", bp::make_getter(&CostDataContactCoPPosition::Arr_Ru, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

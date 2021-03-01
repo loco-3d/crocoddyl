@@ -16,6 +16,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -32,6 +33,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const VectorXs& xref)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state, xref)), xref_(xref) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -47,6 +49,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const VectorXs& xref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelState>(state, xref, nu)), xref_(xref) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -62,6 +65,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const VectorXs& xref)
     : Base(state, boost::make_shared<ResidualModelState>(state, xref)), xref_(xref) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -78,6 +82,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
                                              boost::shared_ptr<ActivationModelAbstract> activation,
                                              const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -93,6 +98,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelState>(state, nu)), xref_(state->zero()) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -108,6 +114,7 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                              boost::shared_ptr<ActivationModelAbstract> activation)
     : Base(state, activation, boost::make_shared<ResidualModelState>(state)), xref_(state->zero()) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));
@@ -122,6 +129,7 @@ CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::St
 template <typename Scalar>
 CostModelStateTpl<Scalar>::CostModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, boost::make_shared<ResidualModelState>(state)), xref_(state->zero()) {
+  std::cerr << "Deprecated CostModelState: Use ResidualModelState with CostModelResidual" << std::endl;
   if (activation_->get_nr() != state_->get_ndx()) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(state_->get_ndx()));

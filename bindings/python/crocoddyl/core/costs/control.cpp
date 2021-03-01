@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostControl() {
+void exposeCostControl() {  // TODO: Remove once the deprecated update call has been removed in a future
+                            // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelControl> >();
 
   bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
@@ -96,6 +100,8 @@ void exposeCostControl() {
                     bp::make_function(&CostModelControl::set_reference<Eigen::VectorXd>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference control vector");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

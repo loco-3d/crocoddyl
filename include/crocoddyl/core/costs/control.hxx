@@ -6,6 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -14,6 +15,7 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const VectorXs& uref)
     : Base(state, activation, boost::make_shared<ResidualModelControl>(state, uref)), uref_(uref) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
@@ -25,6 +27,7 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
                                                  boost::shared_ptr<ActivationModelAbstract> activation)
     : Base(state, activation, boost::make_shared<ResidualModelControl>(state)),
       uref_(VectorXs::Zero(activation->get_nr())) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
@@ -36,6 +39,7 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
                                                  boost::shared_ptr<ActivationModelAbstract> activation,
                                                  const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelControl>(state, nu)), uref_(VectorXs::Zero(nu)) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
   if (activation_->get_nr() != nu_) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " + std::to_string(nu_));
@@ -45,16 +49,22 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
 template <typename Scalar>
 CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                  const VectorXs& uref)
-    : Base(state, boost::make_shared<ResidualModelControl>(state, uref)), uref_(uref) {}
+    : Base(state, boost::make_shared<ResidualModelControl>(state, uref)), uref_(uref) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state)
-    : Base(state, boost::make_shared<ResidualModelControl>(state)), uref_(VectorXs::Zero(state->get_nv())) {}
+    : Base(state, boost::make_shared<ResidualModelControl>(state)), uref_(VectorXs::Zero(state->get_nv())) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                  const std::size_t nu)
-    : Base(state, boost::make_shared<ResidualModelControl>(state, nu)), uref_(VectorXs::Zero(nu)) {}
+    : Base(state, boost::make_shared<ResidualModelControl>(state, nu)), uref_(VectorXs::Zero(nu)) {
+  std::cerr << "Deprecated CostModelControl: Use ResidualModelControl with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelControlTpl<Scalar>::~CostModelControlTpl() {}

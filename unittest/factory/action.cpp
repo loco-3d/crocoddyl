@@ -118,7 +118,7 @@ boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> ActionModelFactory::
       break;
   }
   cost->addCost("state",
-                CostModelFactory().create(CostModelTypes::CostModelState, state_type,
+                CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
                                           ActivationModelTypes::ActivationModelQuad, 0),
                 0.1);
   action = boost::make_shared<crocoddyl::ActionModelImpulseFwdDynamics>(state, impulse, cost, r_coeff, damping, true);

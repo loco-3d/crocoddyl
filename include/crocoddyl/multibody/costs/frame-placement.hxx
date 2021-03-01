@@ -19,6 +19,8 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
                                                                const FramePlacement& Mref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)),
       Mref_(Mref) {
+  std::cerr << "Deprecated CostModelFramePlacement: Use ResidualModelFramePlacement with CostModelResidual"
+            << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -31,6 +33,8 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
                                                                const FramePlacement& Mref)
     : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)),
       Mref_(Mref) {
+  std::cerr << "Deprecated CostModelFramePlacement: Use ResidualModelFramePlacement with CostModelResidual"
+            << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -40,12 +44,18 @@ CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FramePlacement& Mref, const std::size_t nu)
-    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)), Mref_(Mref) {}
+    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)), Mref_(Mref) {
+  std::cerr << "Deprecated CostModelFramePlacement: Use ResidualModelFramePlacement with CostModelResidual"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FramePlacement& Mref)
-    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)), Mref_(Mref) {}
+    : Base(state, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement)), Mref_(Mref) {
+  std::cerr << "Deprecated CostModelFramePlacement: Use ResidualModelFramePlacement with CostModelResidual"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::~CostModelFramePlacementTpl() {}

@@ -18,6 +18,7 @@ template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state,
                                                        boost::shared_ptr<ActivationModelAbstract> activation)
     : Base(state, activation, boost::make_shared<ResidualModelImpulseCoM>(state)) {
+  std::cerr << "Deprecated CostModelImpulseCoM: Use ResidualModelImpulseCoM with CostModelResidual" << std::endl;
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -26,7 +27,9 @@ CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMu
 
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state)
-    : Base(state, boost::make_shared<ResidualModelImpulseCoM>(state)) {}
+    : Base(state, boost::make_shared<ResidualModelImpulseCoM>(state)) {
+  std::cerr << "Deprecated CostModelImpulseCoM: Use ResidualModelImpulseCoM with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::~CostModelImpulseCoMTpl() {}

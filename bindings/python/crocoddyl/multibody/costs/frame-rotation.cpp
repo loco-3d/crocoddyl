@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostFrameRotation() {
+void exposeCostFrameRotation() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                  // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelFrameRotation> >();
 
   bp::class_<CostModelFrameRotation, bp::bases<CostModelAbstract> >(
@@ -96,6 +100,8 @@ void exposeCostFrameRotation() {
           "Create frame rotation cost data.\n\n"
           ":param model: frame rotation cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

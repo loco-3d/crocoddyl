@@ -17,7 +17,11 @@ CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     : Base(state, activation,
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), nu)),
-      cop_support_(cref) {}
+      cop_support_(cref) {
+  std::cerr << "Deprecated CostModelContactCoPPosition: Use ResidualModelContactCoPPosition with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
@@ -26,7 +30,11 @@ CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(
     : Base(state, activation,
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()))),
-      cop_support_(cref) {}
+      cop_support_(cref) {
+  std::cerr << "Deprecated CostModelContactCoPPosition: Use ResidualModelContactCoPPosition with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
@@ -37,7 +45,11 @@ CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::s
                ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), nu)),
-      cop_support_(cref) {}
+      cop_support_(cref) {
+  std::cerr << "Deprecated CostModelContactCoPPosition: Use ResidualModelContactCoPPosition with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename _Scalar>
 CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
@@ -47,7 +59,11 @@ CostModelContactCoPPositionTpl<_Scalar>::CostModelContactCoPPositionTpl(boost::s
                ActivationBounds(VectorXs::Zero(4), std::numeric_limits<_Scalar>::max() * VectorXs::Ones(4))),
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()))),
-      cop_support_(cref) {}
+      cop_support_(cref) {
+  std::cerr << "Deprecated CostModelContactCoPPosition: Use ResidualModelContactCoPPosition with "
+               "CostModelResidual class"
+            << std::endl;
+}
 
 template <typename Scalar>
 CostModelContactCoPPositionTpl<Scalar>::~CostModelContactCoPPositionTpl() {}

@@ -19,6 +19,7 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
                                                              const FrameRotation& Rref, const std::size_t nu)
     : Base(state, activation, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation, nu)),
       Rref_(Rref) {
+  std::cerr << "Deprecated CostModelFrameRotation: Use ResidualModelFrameRotation with CostModelResidual" << std::endl;
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -31,6 +32,7 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
                                                              const FrameRotation& Rref)
     : Base(state, activation, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation)),
       Rref_(Rref) {
+  std::cerr << "Deprecated CostModelFrameRotation: Use ResidualModelFrameRotation with CostModelResidual" << std::endl;
   if (activation_->get_nr() != 3) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 3");
@@ -40,12 +42,16 @@ CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<S
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref, const std::size_t nu)
-    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation, nu)), Rref_(Rref) {}
+    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation, nu)), Rref_(Rref) {
+  std::cerr << "Deprecated CostModelFrameRotation: Use ResidualModelFrameRotation with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameRotation& Rref)
-    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation)), Rref_(Rref) {}
+    : Base(state, boost::make_shared<ResidualModelFrameRotation>(state, Rref.id, Rref.rotation)), Rref_(Rref) {
+  std::cerr << "Deprecated CostModelFrameRotation: Use ResidualModelFrameRotation with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}

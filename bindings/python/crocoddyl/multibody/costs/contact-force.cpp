@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostContactForce() {
+void exposeCostContactForce() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                 // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelContactForce> >();
 
   bp::class_<CostModelContactForce, bp::bases<CostModelAbstract> >(
@@ -114,6 +118,8 @@ void exposeCostContactForce() {
                     "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
       .add_property("Arr_Ru", bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_FWD_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -267,7 +268,7 @@ typedef CostModelSumTpl<double> CostModelSum;
 typedef CostDataSumTpl<double> CostDataSum;
 typedef CostModelResidualTpl<double> CostModelResidual;
 typedef CostDataResidualTpl<double> CostDataResidual;
-typedef CostModelControlTpl<double> CostModelControl;
+DEPRECATED("Use ResidualModelControl with CostModelResidual", typedef CostModelControlTpl<double> CostModelControl;)
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 

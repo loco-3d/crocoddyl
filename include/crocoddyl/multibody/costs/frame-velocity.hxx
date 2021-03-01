@@ -22,6 +22,7 @@ CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<S
     : Base(state, activation,
            boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference, nu)),
       vref_(vref) {
+  std::cerr << "Deprecated CostModelFrameVelocity: Use ResidualModelFrameVelocity with CostModelResidual" << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -35,6 +36,7 @@ CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<S
     : Base(state, activation,
            boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference)),
       vref_(vref) {
+  std::cerr << "Deprecated CostModelFrameVelocity: Use ResidualModelFrameVelocity with CostModelResidual" << std::endl;
   if (activation_->get_nr() != 6) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to 6");
@@ -45,13 +47,17 @@ template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameMotion& vref, const std::size_t nu)
     : Base(state, boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference, nu)),
-      vref_(vref) {}
+      vref_(vref) {
+  std::cerr << "Deprecated CostModelFrameVelocity: Use ResidualModelFrameVelocity with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                              const FrameMotion& vref)
     : Base(state, boost::make_shared<ResidualModelFrameVelocity>(state, vref.id, vref.motion, vref.reference)),
-      vref_(vref) {}
+      vref_(vref) {
+  std::cerr << "Deprecated CostModelFrameVelocity: Use ResidualModelFrameVelocity with CostModelResidual" << std::endl;
+}
 
 template <typename Scalar>
 CostModelFrameVelocityTpl<Scalar>::~CostModelFrameVelocityTpl() {}

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,9 +17,10 @@
 #include "crocoddyl/core/mathbase.hpp"
 
 #include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/core/costs/control.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
 
 #include "crocoddyl/core/utils/callbacks.hpp"
@@ -67,16 +68,15 @@ int main(int argc, char* argv[]) {
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 
-  crocoddyl::FramePlacement Mref(model.getFrameId("gripper_left_joint"),
-                                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
+  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost = boost::make_shared<crocoddyl::CostModelResidual>(
+      state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
+                 state, model.getFrameId("gripper_left_joint"),
+                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)), actuation->get_nu()));
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
-      boost::make_shared<crocoddyl::CostModelFramePlacement>(state, Mref, actuation->get_nu());
-
-  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost =
-      boost::make_shared<crocoddyl::CostModelState>(state, actuation->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost =
-      boost::make_shared<crocoddyl::CostModelControl>(state, actuation->get_nu());
+  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost = boost::make_shared<crocoddyl::CostModelResidual>(
+      state, boost::make_shared<crocoddyl::ResidualModelState>(state, actuation->get_nu()));
+  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost = boost::make_shared<crocoddyl::CostModelResidual>(
+      state, boost::make_shared<crocoddyl::ResidualModelControl>(state, actuation->get_nu()));
 
   boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel =
       boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());

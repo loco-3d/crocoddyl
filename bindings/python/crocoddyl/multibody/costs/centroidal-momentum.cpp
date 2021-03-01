@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostCentroidalMomentum() {
+void exposeCostCentroidalMomentum() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                       // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   typedef Eigen::Matrix<double, 6, 1> Vector6d;
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelCentroidalMomentum> >();
@@ -99,6 +103,8 @@ void exposeCostCentroidalMomentum() {
           "Create centroidal momentum cost data.\n\n"
           ":param model: centroidal momentum cost model\n"
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

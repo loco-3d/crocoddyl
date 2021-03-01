@@ -13,7 +13,11 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeCostCoMPosition() {
+void exposeCostCoMPosition() {  // TODO: Remove once the deprecated update call has been removed in a future
+                                // release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelCoMPosition> >();
 
   bp::class_<CostModelCoMPosition, bp::bases<CostModelAbstract> >(
@@ -86,6 +90,8 @@ void exposeCostCoMPosition() {
                     bp::make_function(&CostModelCoMPosition::set_reference<Eigen::Vector3d>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference CoM position");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
