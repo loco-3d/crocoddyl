@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/constraint.hpp"
 
 namespace crocoddyl {
@@ -48,9 +47,9 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
     // x + dx
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
-    // call the update function on the pinocchio data
+    // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp);
+      reevals_[i](data_nd->xp, u);
     }
     // constraints(x+dx, u)
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
@@ -62,14 +61,14 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
 
   // Computing the d constraint(x,u) / du
   data_nd->du.setZero();
-  // call the update function on the pinocchio data
-  for (std::size_t i = 0; i < reevals_.size(); ++i) {
-    reevals_[i](x);
-  }
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
     data_nd->du(iu) = disturbance_;
     data_nd->up = u + data_nd->du;
+    // call the update function
+    for (std::size_t i = 0; i < reevals_.size(); ++i) {
+      reevals_[i](x, data_nd->up);
+    }
     // constraint(x, u+du)
     model_->calc(data_nd->data_u[iu], x, data_nd->up);
     // Gu, Hu

@@ -244,6 +244,7 @@ class ResidualModelNumDiffTpl;
 template <typename Scalar>
 struct ResidualDataNumDiffTpl;
 
+template <typename Scalar>
 class ConstraintModelNumDiffTpl;
 template <typename Scalar>
 struct ConstraintDataNumDiffTpl;
