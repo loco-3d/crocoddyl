@@ -79,8 +79,8 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, State
   model_num_diff.calc(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  BOOST_CHECK((data->g - data_num_diff->g).isMuchSmallerThan(1.));
-  BOOST_CHECK((data->h - data_num_diff->h).isMuchSmallerThan(1.));
+  BOOST_CHECK((data->g - data_num_diff->g).isZero());
+  BOOST_CHECK((data->h - data_num_diff->h).isZero());
 }
 
 void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constraint_type,
@@ -122,12 +122,11 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Gu - data_num_diff->Gu).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Hu - data_num_diff->Hu).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+  BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
+  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+  BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
 }
 
 void test_dimensions_in_constraint_manager(ConstraintModelTypes::Type constraint_type,
@@ -196,8 +195,8 @@ void test_partial_derivatives_in_constraint_manager(ConstraintModelTypes::Type c
   constraint_man.calc(data_man, x, u);
   constraint_man.calcDiff(data_man, x, u);
 
-  BOOST_CHECK((data->Hx - data_man->Hx).isMuchSmallerThan(1.0));
-  BOOST_CHECK((data->Hu - data_man->Hu).isMuchSmallerThan(1.0));
+  BOOST_CHECK((data->Hx - data_man->Hx).isZero());
+  BOOST_CHECK((data->Hu - data_man->Hu).isZero());
 }
 
 //----------------------------------------------------------------------------//
