@@ -90,9 +90,4 @@ bool ResidualModelAbstractTpl<Scalar>::get_u_dependent() const {
   return u_dependent_;
 }
 
-template <typename Scalar>
-void ResidualModelAbstractTpl<Scalar>::set_nr(const std::size_t nr) {
-  nr_ = nr;
-}
-
 }  // namespace crocoddyl
