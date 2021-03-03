@@ -136,7 +136,7 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(pinocchio::FrameIndex id);
+  void set_id(const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the reference contact wrench cone

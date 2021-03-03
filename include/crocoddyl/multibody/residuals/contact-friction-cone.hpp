@@ -128,7 +128,7 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(pinocchio::FrameIndex id);
+  void set_id(const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the reference contact friction cone

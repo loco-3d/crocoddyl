@@ -83,12 +83,12 @@ const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& ResidualModelNumDiff
 }
 
 template <typename Scalar>
-const Scalar& ResidualModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ResidualModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void ResidualModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 

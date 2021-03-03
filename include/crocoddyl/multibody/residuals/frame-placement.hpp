@@ -110,7 +110,7 @@ class ResidualModelFramePlacementTpl : public ResidualModelAbstractTpl<_Scalar> 
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(pinocchio::FrameIndex id);
+  void set_id(const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the reference frame placement

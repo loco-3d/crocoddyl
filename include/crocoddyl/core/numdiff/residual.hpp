@@ -70,12 +70,12 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the disturbance value used by the numdiff routine
    */
-  const Scalar& get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Modify the disturbance value used by the numdiff routine
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Register functions that updates the shared data computed for a system rollout
