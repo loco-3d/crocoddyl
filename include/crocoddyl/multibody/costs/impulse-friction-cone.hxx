@@ -16,18 +16,18 @@ CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(
     const FrameFrictionCone& fref)
     : Base(state, activation, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone, 0)),
       fref_(fref) {
+  std::cerr << "Deprecated CostModelImpulseFrictionCone: Use CostModelContactFrictionCone" << std::endl;
   if (activation_->get_nr() != fref_.cone.get_nf() + 1) {
     throw_pretty("Invalid argument: "
                  << "nr is equals to " << fref_.cone.get_nf() + 1);
   }
-  std::cerr << "Deprecated CostModelImpulseFrictionCone class: Use CostModelContactFrictionCone class" << std::endl;
 }
 
 template <typename Scalar>
 CostModelImpulseFrictionConeTpl<Scalar>::CostModelImpulseFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
                                                                          const FrameFrictionCone& fref)
     : Base(state, boost::make_shared<ResidualModelContactFrictionCone>(state, fref.id, fref.cone, 0)), fref_(fref) {
-  std::cerr << "Deprecated CostModelImpulseFrictionCone class: Use CostModelContactFrictionCone class" << std::endl;
+  std::cerr << "Deprecated CostModelImpulseFrictionCone: Use CostModelContactFrictionCone" << std::endl;
 }
 
 template <typename Scalar>
