@@ -86,9 +86,12 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar
 }
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameRotation)) {
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
+    ResidualModelFrameRotation* residual = static_cast<ResidualModelFrameRotation*>(residual_.get());
+    Rref_.id = residual->get_id();
+    Rref_.rotation = residual->get_reference();
     ref_map = Rref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameRotation)");

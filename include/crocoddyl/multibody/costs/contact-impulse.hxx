@@ -16,25 +16,25 @@ CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr
                                                                const FrameForce& fref)
     : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)),
       fref_(fref) {
+  std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
   if (activation_->get_nr() > 6) {
     throw_pretty("Invalid argument: "
                  << "nr is less than 6");
   }
-  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
 }
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref, const std::size_t)
     : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
-  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
+  std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
 }
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref)
     : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
-  std::cerr << "Deprecated CostModelContactImpulse class: Use CostModelContactForce class" << std::endl;
+  std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
 }
 
 template <typename Scalar>
@@ -86,9 +86,12 @@ void CostModelContactImpulseTpl<Scalar>::set_referenceImpl(const std::type_info&
 }
 
 template <typename Scalar>
-void CostModelContactImpulseTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelContactImpulseTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameForce)) {
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
+    ResidualModelContactForce* residual = static_cast<ResidualModelContactForce*>(residual_.get());
+    fref_.id = residual->get_id();
+    fref_.force = residual->get_reference();
     ref_map = fref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");

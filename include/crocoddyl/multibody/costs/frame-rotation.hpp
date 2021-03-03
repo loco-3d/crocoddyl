@@ -132,7 +132,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the frame rotation reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   /**
    * @brief Modify the frame rotation reference

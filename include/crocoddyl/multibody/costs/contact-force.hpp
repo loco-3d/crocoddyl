@@ -160,7 +160,7 @@ class CostModelContactForceTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Modify the reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   /**
    * @brief Return the reference spatial contact force \f$\boldsymbol{\lambda}^*\f$
@@ -192,7 +192,7 @@ struct CostDataContactForceTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataContactForceTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data),
         Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_residual()->get_nr(), model->get_state()->get_nv()) {
+        Arr_Ru(model->get_residual()->get_nr(), model->get_nu()) {
     Arr_Rx.setZero();
     Arr_Ru.setZero();
   }

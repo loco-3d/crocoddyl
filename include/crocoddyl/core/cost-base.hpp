@@ -205,7 +205,7 @@ class CostModelAbstractTpl {
    * @brief Return the cost reference
    */
   template <class ReferenceType>
-  ReferenceType get_reference() const;
+  ReferenceType get_reference();
 
  protected:
   /**
@@ -216,7 +216,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief get_reference()
    */
-  virtual void get_referenceImpl(const std::type_info&, void*) const;
+  virtual void get_referenceImpl(const std::type_info&, void*);
 
   boost::shared_ptr<StateAbstract> state_;                 //!< State description
   boost::shared_ptr<ActivationModelAbstract> activation_;  //!< Activation model

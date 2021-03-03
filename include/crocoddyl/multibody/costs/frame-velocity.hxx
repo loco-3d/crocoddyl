@@ -90,9 +90,13 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameVelocityTpl<Scalar
 }
 
 template <typename Scalar>
-void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelFrameVelocityTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameMotion)) {
     FrameMotion& ref_map = *static_cast<FrameMotion*>(pv);
+    ResidualModelFrameVelocity* residual = static_cast<ResidualModelFrameVelocity*>(residual_.get());
+    vref_.id = residual->get_id();
+    vref_.motion = residual->get_reference();
+    vref_.reference = residual->get_type();
     ref_map = vref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameMotion)");

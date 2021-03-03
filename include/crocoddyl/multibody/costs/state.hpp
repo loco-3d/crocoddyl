@@ -170,7 +170,7 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the state reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   /**
    * @brief Modify the state reference

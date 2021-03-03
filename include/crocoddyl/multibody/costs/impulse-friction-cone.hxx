@@ -70,15 +70,21 @@ template <typename Scalar>
 void CostModelImpulseFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
   if (ti == typeid(FrameFrictionCone)) {
     fref_ = *static_cast<const FrameFrictionCone*>(pv);
+    ResidualModelContactFrictionCone* residual = static_cast<ResidualModelContactFrictionCone*>(residual_.get());
+    residual->set_id(fref_.id);
+    residual->set_reference(fref_.cone);
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");
   }
 }
 
 template <typename Scalar>
-void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelImpulseFrictionConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameFrictionCone)) {
     FrameFrictionCone& ref_map = *static_cast<FrameFrictionCone*>(pv);
+    ResidualModelContactFrictionCone* residual = static_cast<ResidualModelContactFrictionCone*>(residual_.get());
+    fref_.id = residual->get_id();
+    fref_.cone = residual->get_reference();
     ref_map = fref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameFrictionCone)");

@@ -94,9 +94,11 @@ void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_i
 }
 
 template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelCentroidalMomentumTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(Vector6s)) {
     Eigen::Map<Vector6s> ref_map(static_cast<Vector6s*>(pv)->data());
+    ResidualModelCentroidalMomentum* residual = static_cast<ResidualModelCentroidalMomentum*>(residual_.get());
+    href_ = residual->get_reference();
     ref_map[0] = href_[0];
     ref_map[1] = href_[1];
     ref_map[2] = href_[2];

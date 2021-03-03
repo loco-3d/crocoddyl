@@ -87,9 +87,12 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameTranslationTpl<Sca
 }
 
 template <typename Scalar>
-void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameTranslation)) {
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);
+    ResidualModelFrameTranslation* residual = static_cast<ResidualModelFrameTranslation*>(residual_.get());
+    xref_.id = residual->get_id();
+    xref_.translation = residual->get_reference();
     ref_map = xref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameTranslation)");

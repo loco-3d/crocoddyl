@@ -86,9 +86,12 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFramePlacementTpl<Scala
 }
 
 template <typename Scalar>
-void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelFramePlacementTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FramePlacement)) {
     FramePlacement& ref_map = *static_cast<FramePlacement*>(pv);
+    ResidualModelFramePlacement* residual = static_cast<ResidualModelFramePlacement*>(residual_.get());
+    Mref_.id = residual->get_id();
+    Mref_.placement = residual->get_reference();
     ref_map = Mref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FramePlacement)");

@@ -18,7 +18,7 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), 0)),
       cop_support_(cref) {
-  std::cerr << "Deprecated CostModelImpulseCoPPosition class: Use CostModelContactCoPPosition class" << std::endl;
+  std::cerr << "Deprecated CostModelImpulseCoPPosition: Use CostModelContactCoPPosition" << std::endl;
 }
 
 template <typename _Scalar>
@@ -30,7 +30,7 @@ CostModelImpulseCoPPositionTpl<_Scalar>::CostModelImpulseCoPPositionTpl(boost::s
            boost::make_shared<ResidualModelContactCoPPosition>(state, cref.get_id(),
                                                                CoPSupport(Matrix3s::Identity(), cref.get_box()), 0)),
       cop_support_(cref) {
-  std::cerr << "Deprecated CostModelImpulseCoPPosition class: Use CostModelContactCoPPosition class" << std::endl;
+  std::cerr << "Deprecated CostModelImpulseCoPPosition: Use CostModelContactCoPPosition" << std::endl;
 }
 
 template <typename Scalar>
@@ -82,9 +82,12 @@ void CostModelImpulseCoPPositionTpl<Scalar>::set_referenceImpl(const std::type_i
 }
 
 template <typename Scalar>
-void CostModelImpulseCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelImpulseCoPPositionTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameCoPSupport)) {
     FrameCoPSupport& ref_map = *static_cast<FrameCoPSupport*>(pv);
+    ResidualModelContactCoPPosition* residual = static_cast<ResidualModelContactCoPPosition*>(residual_.get());
+    cop_support_.set_id(residual->get_id());
+    cop_support_.set_box(residual->get_reference().get_box());
     ref_map = cop_support_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameCoPSupport)");

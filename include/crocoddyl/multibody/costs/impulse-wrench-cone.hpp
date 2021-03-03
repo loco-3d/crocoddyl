@@ -50,7 +50,7 @@ class CostModelImpulseWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::residual_;

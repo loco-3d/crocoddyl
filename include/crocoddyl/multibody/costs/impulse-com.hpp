@@ -115,7 +115,7 @@ struct CostDataImpulseCoMTpl : public CostDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   CostDataImpulseCoMTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Rx(3, model->get_state()->get_nv()) {
+      : Base(model, data), Arr_Rx(3, model->get_state()->get_ndx()) {
     Arr_Rx.setZero();
   }
 

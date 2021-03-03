@@ -90,9 +90,12 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactForceTpl<Scalar>
 }
 
 template <typename Scalar>
-void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelContactForceTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameForce)) {
     FrameForce& ref_map = *static_cast<FrameForce*>(pv);
+    ResidualModelContactForce* residual = static_cast<ResidualModelContactForce*>(residual_.get());
+    fref_.id = residual->get_id();
+    fref_.force = residual->get_reference();
     ref_map = fref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameForce)");

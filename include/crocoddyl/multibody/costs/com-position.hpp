@@ -128,7 +128,7 @@ class CostModelCoMPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the CoM position reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::nu_;

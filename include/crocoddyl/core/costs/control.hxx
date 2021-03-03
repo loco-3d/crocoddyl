@@ -91,11 +91,13 @@ void CostModelControlTpl<Scalar>::set_referenceImpl(const std::type_info& ti, co
 }
 
 template <typename Scalar>
-void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelControlTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
     VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(nu_);
     Eigen::Map<VectorXs> ref_map(static_cast<VectorXs*>(pv)->data(), nu_);
+    ResidualModelControl* residual = static_cast<ResidualModelControl*>(residual_.get());
+    uref_ = residual->get_reference();
     for (std::size_t i = 0; i < nu_; ++i) {
       ref_map[i] = uref_[i];
     }

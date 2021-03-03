@@ -88,9 +88,12 @@ void CostModelContactWrenchConeTpl<Scalar>::set_referenceImpl(const std::type_in
 }
 
 template <typename Scalar>
-void CostModelContactWrenchConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelContactWrenchConeTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameWrenchCone)) {
     FrameWrenchCone& ref_map = *static_cast<FrameWrenchCone*>(pv);
+    ResidualModelContactWrenchCone* residual = static_cast<ResidualModelContactWrenchCone*>(residual_.get());
+    fref_.id = residual->get_id();
+    fref_.cone = residual->get_reference();
     ref_map = fref_;
   } else {
     throw_pretty("Invalid argument: incorrect type (it should be FrameWrenchCone)");

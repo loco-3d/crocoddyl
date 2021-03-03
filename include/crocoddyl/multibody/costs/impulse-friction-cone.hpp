@@ -112,7 +112,7 @@ class CostModelImpulseFrictionConeTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the impulse friction cone reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::residual_;

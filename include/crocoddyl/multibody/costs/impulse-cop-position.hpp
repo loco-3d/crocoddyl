@@ -140,7 +140,7 @@ class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Modify the frame CoP support
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::nu_;

@@ -176,7 +176,7 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelStateTpl<Scalar>::creat
 }
 
 template <typename Scalar>
-void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) const {
+void CostModelStateTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(VectorXs)) {
     VectorXs& tmp = *static_cast<VectorXs*>(pv);
     tmp.resize(state_->get_nx());

@@ -128,7 +128,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the frame velocity reference
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   /**
    * @brief Modify the frame velocity reference
