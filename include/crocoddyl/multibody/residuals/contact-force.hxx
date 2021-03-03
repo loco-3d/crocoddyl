@@ -13,13 +13,22 @@ namespace crocoddyl {
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const pinocchio::FrameIndex id, const Force& fref,
-                                                                   const std::size_t nu)
-    : Base(state, 6, nu), id_(id), fref_(fref) {}
+                                                                   const std::size_t nc, const std::size_t nu)
+    : Base(state, nc, nu), id_(id), fref_(fref) {
+  if (nc > 6) {
+    throw_pretty("Invalid argument in ResidualModelContactForce: nc is less than 6");
+  }
+}
 
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                                   const pinocchio::FrameIndex id, const Force& fref)
-    : Base(state, 6), id_(id), fref_(fref) {}
+                                                                   const pinocchio::FrameIndex id, const Force& fref,
+                                                                   const std::size_t nc)
+    : Base(state, nc), id_(id), fref_(fref) {
+  if (nc > 6) {
+    throw_pretty("Invalid argument in ResidualModelContactForce: nc is less than 6");
+  }
+}
 
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::~ResidualModelContactForceTpl() {}

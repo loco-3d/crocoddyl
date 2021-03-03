@@ -68,10 +68,11 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  Multibody state
    * @param[in] id     Reference frame id
    * @param[in] fref   Reference spatial contact force in the contact coordinates
+   * @param[in] nc     Dimension of the contact force (nc <= 6)
    * @param[in] nu     Dimension of control vector
    */
   ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                               const Force& fref, const std::size_t nu);
+                               const Force& fref, const std::size_t nc, const std::size_t nu);
 
   /**
    * @brief Initialize the contact force residual model
@@ -81,9 +82,10 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  Multibody state
    * @param[in] id     Reference frame id
    * @param[in] fref   Reference spatial contact force in the contact coordinates
+   * @param[in] nc     Dimension of the contact force (nc <= 6)
    */
   ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                               const Force& fref);
+                               const Force& fref, const std::size_t nc);
   virtual ~ResidualModelContactForceTpl();
 
   /**
@@ -194,10 +196,6 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
           ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
           if (d3d != NULL) {
             contact_type = Contact3D;
-            model->set_nr(3);
-            r.resize(3);
-            Rx.resize(3, model->get_state()->get_ndx());
-            Ru.resize(3, model->get_nu());
             found_contact = true;
             contact = it->second;
             break;
@@ -220,10 +218,6 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
           ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
           if (d3d != NULL) {
             contact_type = Contact3D;
-            model->set_nr(3);
-            r.resize(3);
-            Rx.resize(3, model->get_state()->get_ndx());
-            Ru.resize(3, model->get_nu());
             found_contact = true;
             contact = it->second;
             break;

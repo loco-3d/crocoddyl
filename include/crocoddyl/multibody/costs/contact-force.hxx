@@ -15,40 +15,33 @@ template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref, const std::size_t nu)
-    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)),
-      fref_(fref) {
-  if (activation_->get_nr() > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
-}
+    : Base(state, activation,
+           boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, activation->get_nr(), nu)),
+      fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            boost::shared_ptr<ActivationModelAbstract> activation,
                                                            const FrameForce& fref)
-    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {
-  if (activation_->get_nr() > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
-}
+    : Base(state, activation,
+           boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, activation->get_nr())),
+      fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t,
+                                                           const FrameForce& fref, const std::size_t nr,
                                                            const std::size_t nu)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nu)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nr, nu)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                           const FrameForce& fref, const std::size_t)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {}
+                                                           const FrameForce& fref, const std::size_t nr)
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nr)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::CostModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                            const FrameForce& fref)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force)), fref_(fref) {}
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 6)), fref_(fref) {}
 
 template <typename Scalar>
 CostModelContactForceTpl<Scalar>::~CostModelContactForceTpl() {}

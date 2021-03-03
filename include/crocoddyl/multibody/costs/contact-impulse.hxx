@@ -14,26 +14,23 @@ template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FrameForce& fref)
-    : Base(state, activation, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)),
+    : Base(state, activation,
+           boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, activation->get_nr(), 0)),
       fref_(fref) {
   std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
-  if (activation_->get_nr() > 6) {
-    throw_pretty("Invalid argument: "
-                 << "nr is less than 6");
-  }
 }
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
-                                                               const FrameForce& fref, const std::size_t)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
+                                                               const FrameForce& fref, const std::size_t nr)
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, nr, 0)), fref_(fref) {
   std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
 }
 
 template <typename Scalar>
 CostModelContactImpulseTpl<Scalar>::CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state,
                                                                const FrameForce& fref)
-    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 0)), fref_(fref) {
+    : Base(state, boost::make_shared<ResidualModelContactForce>(state, fref.id, fref.force, 6, 0)), fref_(fref) {
   std::cerr << "Deprecated CostModelContactImpulse: Use CostModelContactForce" << std::endl;
 }
 
