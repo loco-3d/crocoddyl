@@ -155,7 +155,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
 
   cost_ = Scalar(0.);
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp simd reduction(+:cost_)
+#pragma omp simd reduction(+ : cost_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
@@ -190,7 +190,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 
   cost_ = Scalar(0.);
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp simd reduction(+:cost_)
+#pragma omp simd reduction(+ : cost_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;

@@ -119,7 +119,7 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp simd reduction(-:dv_)
+#pragma omp simd reduction(- : dv_)
 #endif
     for (std::size_t t = 0; t < T; ++t) {
       models[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);

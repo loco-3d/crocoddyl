@@ -142,7 +142,7 @@ double SolverDDP::stoppingCriteria() {
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp simd reduction(+:stop_)
+#pragma omp simd reduction(+ : stop_)
 #endif
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
