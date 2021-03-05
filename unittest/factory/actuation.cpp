@@ -53,7 +53,6 @@ boost::shared_ptr<crocoddyl::ActuationModelAbstract> ActuationModelFactory::crea
   boost::shared_ptr<crocoddyl::StateAbstract> state = factory.create(state_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state_multibody;
   // MultiCopter objects
-  size_t n_rotors;
   Eigen::MatrixXd tau_f;
   // Actuation Squashing objects
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> act;
