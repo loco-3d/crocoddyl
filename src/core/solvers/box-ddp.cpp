@@ -1,14 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, CNRS-LAAS, University of Edinburgh
+// Copyright (C) 2019-2021, CNRS-LAAS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include "crocoddyl/core/utils/exception.hpp"
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#include <omp.h>
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
+#endif  // CROCODDYL_WITH_MULTITHREADING
+
 #include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -36,6 +41,9 @@ void SolverBoxDDP::allocateData() {
   const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
   const std::size_t nu = problem_->get_nu_max();
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(NUM_THREADS)
+#endif
   for (std::size_t t = 0; t < T; ++t) {
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
   }

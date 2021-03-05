@@ -1,14 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include "crocoddyl/core/utils/exception.hpp"
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#include <omp.h>
+#define NUM_THREADS CROCODDYL_WITH_NTHREADS
+#endif  // CROCODDYL_WITH_MULTITHREADING
+
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -369,6 +374,9 @@ void SolverDDP::allocateData() {
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t nu = problem_->get_nu_max();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(NUM_THREADS)
+#endif
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);

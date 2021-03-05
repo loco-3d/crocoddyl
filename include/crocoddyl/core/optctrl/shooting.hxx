@@ -394,9 +394,13 @@ const typename MathBaseTpl<Scalar>::VectorXs& ShootingProblemTpl<Scalar>::get_x0
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::allocateData() {
+  running_datas_.resize(T_);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(NUM_THREADS)
+#endif
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    running_datas_.push_back(model->createData());
+    running_datas_[i] = model->createData();
   }
   terminal_data_ = terminal_model_->createData();
 }
