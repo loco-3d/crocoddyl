@@ -188,9 +188,13 @@ double SolverDDP::calcDiff() {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
-      if (could_be_feasible) {
+    }
+
+    if (could_be_feasible) {
+      for (std::size_t t = 0; t < T; ++t) {
         if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
           could_be_feasible = false;
+          break;
         }
       }
     }
