@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS CROCODDYL_WITH_NTHREADS
-#else
-#define NUM_THREADS 1
+#ifndef CROCODDYL_WITH_NTHREADS
+#define CROCODDYL_WITH_NTHREADS 1
+#endif
 #endif
 
 #ifdef CROCODDYL_WITH_CODEGEN
@@ -142,15 +142,15 @@ void print_benchmark(RobotEENames robot) {
   /*******************************************************************************/
   /*********************************** TIMINGS ***********************************/
   Eigen::ArrayXd duration(T);
-  Eigen::ArrayXd avg(NUM_THREADS);
-  Eigen::ArrayXd stddev(NUM_THREADS);
+  Eigen::ArrayXd avg(CROCODDYL_WITH_NTHREADS);
+  Eigen::ArrayXd stddev(CROCODDYL_WITH_NTHREADS);
 
   /*******************************************************************************/
   /****************************** ACTION MODEL TIMINGS ***************************/
   std::cout << "Without Code Generation:" << std::endl;
   problem->calc(xs, us);
   // calcDiff timings
-  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+  for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
 #ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -176,7 +176,7 @@ void print_benchmark(RobotEENames robot) {
   }
 
   // calc timings
-  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+  for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
 #ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -247,7 +247,7 @@ void print_benchmark(RobotEENames robot) {
   std::cout << std::endl << "With Code Generation:" << std::endl;
   // calcDiff timings
   cg_problem->calc(xs, us);
-  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+  for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
 #ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -273,7 +273,7 @@ void print_benchmark(RobotEENames robot) {
   }
 
   // calc timings
-  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
+  for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
 #ifdef CROCODDYL_WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);

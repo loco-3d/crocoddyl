@@ -8,7 +8,6 @@
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
 namespace crocoddyl {
@@ -141,7 +140,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for num_threads(CROCODDYL_WITH_NTHREADS)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     const std::size_t nu = running_models_[i]->get_nu();
@@ -176,7 +175,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for num_threads(CROCODDYL_WITH_NTHREADS)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
@@ -249,7 +248,7 @@ void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const st
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for num_threads(CROCODDYL_WITH_NTHREADS)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     const std::size_t nu = running_models_[i]->get_nu();

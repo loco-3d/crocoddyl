@@ -8,7 +8,6 @@
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
 #include "crocoddyl/core/utils/exception.hpp"
