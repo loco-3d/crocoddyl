@@ -8,9 +8,9 @@
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
+#endif
 #ifndef CROCODDYL_WITH_NTHREADS
 #define CROCODDYL_WITH_NTHREADS 1
-#endif
 #endif
 
 #ifdef CROCODDYL_WITH_CODEGEN
