@@ -117,7 +117,11 @@ void exposeSolverAbstract() {
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
       .add_property("th_stop", bp::make_function(&SolverAbstract_wrap::get_th_stop),
                     bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
-      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()")
+      .add_property("nthreads", bp::make_function(&SolverAbstract_wrap::get_nthreads),
+                    bp::make_function(&SolverAbstract_wrap::set_nthreads),
+                    "number of threads launch by the multi-threading support (if you set nthreads <= 1, then "
+                    "nthreads=CROCODDYL_WITH_NTHREADS)");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",
