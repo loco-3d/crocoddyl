@@ -152,13 +152,10 @@ void print_benchmark(RobotEENames robot) {
   // calcDiff timings
   for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
-#ifdef CROCODDYL_WITH_MULTITHREADING
-    omp_set_num_threads(ithread + 1);
-#endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(ithread + 1)
 #endif
       for (unsigned int j = 0; j < N; ++j) {
         runningModels[j]->calcDiff(problem->get_runningDatas()[j], xs[j], us[j]);
@@ -178,13 +175,10 @@ void print_benchmark(RobotEENames robot) {
   // calc timings
   for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
-#ifdef CROCODDYL_WITH_MULTITHREADING
-    omp_set_num_threads(ithread + 1);
-#endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(ithread + 1)
 #endif
       for (unsigned int j = 0; j < N; ++j) {
         runningModels[j]->calc(problem->get_runningDatas()[j], xs[j], us[j]);
@@ -249,13 +243,10 @@ void print_benchmark(RobotEENames robot) {
   cg_problem->calc(xs, us);
   for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
-#ifdef CROCODDYL_WITH_MULTITHREADING
-    omp_set_num_threads(ithread + 1);
-#endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(ithread + 1)
 #endif
       for (unsigned int j = 0; j < N; ++j) {
         cg_runningModels[j]->calcDiff(cg_problem->get_runningDatas()[j], xs[j], us[j]);
@@ -275,13 +266,10 @@ void print_benchmark(RobotEENames robot) {
   // calc timings
   for (int ithread = 0; ithread < CROCODDYL_WITH_NTHREADS; ++ithread) {
     duration.setZero();
-#ifdef CROCODDYL_WITH_MULTITHREADING
-    omp_set_num_threads(ithread + 1);
-#endif
     for (unsigned int i = 0; i < T; ++i) {
       crocoddyl::Timer timer;
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(ithread + 1)
 #endif
       for (unsigned int j = 0; j < N; ++j) {
         cg_runningModels[j]->calc(cg_problem->get_runningDatas()[j], xs[j], us[j]);
