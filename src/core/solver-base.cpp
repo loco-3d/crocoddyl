@@ -23,8 +23,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       dVexp_(0.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
-      iter_(0),
-      nthreads_(1) {
+      iter_(0) {
   // Allocate common data
   const std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
@@ -36,10 +35,6 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
     us_[t] = Eigen::VectorXd::Zero(problem_->get_nu_max());
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
-
-#ifdef CROCODDYL_WITH_MULTITHREADING
-  nthreads_ = CROCODDYL_WITH_NTHREADS;
-#endif
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -131,15 +126,6 @@ double SolverAbstract::get_th_stop() const { return th_stop_; }
 
 std::size_t SolverAbstract::get_iter() const { return iter_; }
 
-std::size_t SolverAbstract::get_nthreads() const {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
-            << std::endl;
-#endif
-  return nthreads_;
-}
-
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
@@ -208,20 +194,6 @@ void SolverAbstract::set_th_stop(const double th_stop) {
                  << "th_stop value has to higher than 0.");
   }
   th_stop_ = th_stop;
-}
-
-void SolverAbstract::set_nthreads(const int nthreads) {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
-            << std::endl;
-#else
-  if (nthreads < 1) {
-    nthreads_ = CROCODDYL_WITH_NTHREADS;
-  } else {
-    nthreads_ = static_cast<std::size_t>(nthreads);
-  }
-#endif
 }
 
 bool raiseIfNaN(const double value) {

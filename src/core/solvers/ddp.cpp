@@ -181,7 +181,7 @@ double SolverDDP::calcDiff() {
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
     const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(nthreads_)
+#pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& model = models[t];

@@ -227,11 +227,6 @@ class SolverAbstract {
   std::size_t get_iter() const;
 
   /**
-   * @brief Return the number of threads
-   */
-  std::size_t get_nthreads() const;
-
-  /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
    */
   void set_xs(const std::vector<Eigen::VectorXd>& xs);
@@ -261,13 +256,6 @@ class SolverAbstract {
    */
   void set_th_stop(const double th_stop);
 
-  /**
-   * @brief Modify the number of threads using with multithreading support
-   *
-   * For values lower than 1, the number of threads is chosen by CROCODDYL_WITH_NTHREADS macro
-   */
-  void set_nthreads(const int nthreads);
-
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
   std::vector<Eigen::VectorXd> xs_;                              //!< State trajectory
@@ -285,7 +273,6 @@ class SolverAbstract {
   double th_acceptstep_;                                         //!< Threshold used for accepting step
   double th_stop_;                                               //!< Tolerance for stopping the algorithm
   std::size_t iter_;                                             //!< Number of iteration performed by the solver
-  std::size_t nthreads_;  //!< Number of threach launch by the multi-threading application
 };
 
 /**
