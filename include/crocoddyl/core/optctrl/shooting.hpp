@@ -209,6 +209,13 @@ class ShootingProblemTpl {
   void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
   /**
+   * @brief Modify the number of threads using with multithreading support
+   *
+   * For values lower than 1, the number of threads is chosen by CROCODDYL_WITH_NTHREADS macro
+   */
+  void set_nthreads(const int nthreads);
+
+  /**
    * @brief Return the dimension of the state tuple
    */
   std::size_t get_nx() const;
@@ -223,6 +230,11 @@ class ShootingProblemTpl {
    */
   std::size_t get_nu_max() const;
 
+  /**
+   * @brief Return the number of threads
+   */
+  std::size_t get_nthreads() const;
+
  protected:
   Scalar cost_;                                                          //!< Total cost
   std::size_t T_;                                                        //!< number of running nodes
@@ -234,6 +246,7 @@ class ShootingProblemTpl {
   std::size_t nx_;                                                       //!< State dimension
   std::size_t ndx_;                                                      //!< State rate dimension
   std::size_t nu_max_;                                                   //!< Maximum control dimension
+  std::size_t nthreads_;  //!< Number of threach launch by the multi-threading application
 
  private:
   void allocateData();

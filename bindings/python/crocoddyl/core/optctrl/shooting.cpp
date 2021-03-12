@@ -110,6 +110,10 @@ void exposeShootingProblem() {
           "terminalData",
           bp::make_function(&ShootingProblem::get_terminalData, bp::return_value_policy<bp::return_by_value>()),
           "terminal data")
+      .add_property("nthreads", bp::make_function(&ShootingProblem::get_nthreads),
+                    bp::make_function(&ShootingProblem::set_nthreads),
+                    "number of threads launch by the multi-threading support (if you set nthreads <= 1, then "
+                    "nthreads=CROCODDYL_WITH_NTHREADS)")
       .add_property("nx", bp::make_function(&ShootingProblem::get_nx), "dimension of state tuple")
       .add_property("ndx", bp::make_function(&ShootingProblem::get_ndx),
                     "dimension of the tangent space of the state manifold")
