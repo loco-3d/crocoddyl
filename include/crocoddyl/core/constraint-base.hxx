@@ -10,14 +10,46 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                                                               boost::shared_ptr<ResidualModelAbstract> residual,
+                                                               const std::size_t ng, const std::size_t nh)
+    : state_(state),
+      residual_(residual),
+      nu_(residual->get_nu()),
+      ng_(ng),
+      nh_(nh),
+      unone_(VectorXs::Zero(residual->get_nu())) {
+  if (nh_ > residual_->get_nr()) {
+    throw_pretty("Invalid argument: "
+                 << "the number of equality constraints (nh) is wrong as it is bigger than the residual dimension.")
+  }
+  std::size_t max_ng = 2 * (residual_->get_nr() - nh_);
+  if (0 > ng_ || ng_ > max_ng) {
+    throw_pretty("Invalid argument: "
+                 << "the number of inequality constraints (ng) is wrong as it should be in the range [0, " +
+                        std::to_string(max_ng) + "]");
+  }
+}
+
+template <typename Scalar>
+ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                                const std::size_t nu, const std::size_t ng,
                                                                const std::size_t nh)
-    : state_(state), nu_(nu), ng_(ng), nh_(nh), unone_(VectorXs::Zero(nu)) {}
+    : state_(state),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh, nu)),
+      nu_(nu),
+      ng_(ng),
+      nh_(nh),
+      unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                                const std::size_t ng, const std::size_t nh)
-    : state_(state), nu_(state->get_nv()), ng_(ng), nh_(nh), unone_(VectorXs::Zero(state->get_nv())) {}
+    : state_(state),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh)),
+      nu_(state->get_nv()),
+      ng_(ng),
+      nh_(nh),
+      unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::~ConstraintModelAbstractTpl() {}
@@ -44,6 +76,11 @@ boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> > ConstraintModelAbstractTpl
 template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& ConstraintModelAbstractTpl<Scalar>::get_state() const {
   return state_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& ConstraintModelAbstractTpl<Scalar>::get_residual() const {
+  return residual_;
 }
 
 template <typename Scalar>

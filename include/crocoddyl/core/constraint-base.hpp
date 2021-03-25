@@ -15,6 +15,7 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {
 
@@ -32,7 +33,7 @@ namespace crocoddyl {
  * a linear approximation of the constraint function with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
  * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
- * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -46,11 +47,23 @@ class ConstraintModelAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
+  typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
    * @brief Initialize the constraint model
+   *
+   * @param[in] state     State of the multibody system
+   * @param[in] residual  Residual model
+   * @param[in] ng        Number of inequality constraints
+   * @param[in] nh        Number of equality constraints
+   */
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual,
+                             const std::size_t ng, const std::size_t nh);
+
+  /**
+   * @copybrief Initialize the constraint model
    *
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
@@ -129,6 +142,11 @@ class ConstraintModelAbstractTpl {
   const boost::shared_ptr<StateAbstract>& get_state() const;
 
   /**
+   * @brief Return the residual model
+   */
+  const boost::shared_ptr<ResidualModelAbstract>& get_residual() const;
+
+  /**
    * @brief Return the dimension of the control input
    */
   std::size_t get_nu() const;
@@ -166,11 +184,12 @@ class ConstraintModelAbstractTpl {
    */
   virtual void get_referenceImpl(const std::type_info&, void*) const;
 
-  boost::shared_ptr<StateAbstract> state_;  //!< State description
-  std::size_t nu_;                          //!< Control dimension
-  std::size_t ng_;                          //!< Number of inequality constraints
-  std::size_t nh_;                          //!< Number of equality constraints
-  VectorXs unone_;                          //!< No control vector
+  boost::shared_ptr<StateAbstract> state_;             //!< State description
+  boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
+  std::size_t nu_;                                     //!< Control dimension
+  std::size_t ng_;                                     //!< Number of inequality constraints
+  std::size_t nh_;                                     //!< Number of equality constraints
+  VectorXs unone_;                                     //!< No control vector
 };
 
 template <typename _Scalar>
@@ -186,6 +205,7 @@ struct ConstraintDataAbstractTpl {
   template <template <typename Scalar> class Model>
   ConstraintDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
+        residual(model->get_residual()->createData(data)),
         g(model->get_ng()),
         Gx(model->get_ng(), model->get_state()->get_ndx()),
         Gu(model->get_ng(), model->get_nu()),
@@ -201,13 +221,14 @@ struct ConstraintDataAbstractTpl {
   }
   virtual ~ConstraintDataAbstractTpl() {}
 
-  DataCollectorAbstract* shared;  //!< Shared data
-  VectorXs g;                     //!< Inequality constraint values
-  MatrixXs Gx;                    //!< Jacobian of the inequality constraint
-  MatrixXs Gu;                    //!< Jacobian of the inequality constraint
-  VectorXs h;                     //!< Equality constraint values
-  MatrixXs Hx;                    //!< Jacobian of the equality constraint
-  MatrixXs Hu;                    //!< Jacobian of the equality constraint
+  DataCollectorAbstract* shared;                     //!< Shared data
+  boost::shared_ptr<ResidualDataAbstract> residual;  //!< Residual data
+  VectorXs g;                                        //!< Inequality constraint values
+  MatrixXs Gx;                                       //!< Jacobian of the inequality constraint
+  MatrixXs Gu;                                       //!< Jacobian of the inequality constraint
+  VectorXs h;                                        //!< Equality constraint values
+  MatrixXs Hx;                                       //!< Jacobian of the equality constraint
+  MatrixXs Hu;                                       //!< Jacobian of the equality constraint
 };
 
 }  // namespace crocoddyl

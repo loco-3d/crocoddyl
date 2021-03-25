@@ -17,6 +17,11 @@ namespace python {
 
 class ConstraintModelAbstract_wrap : public ConstraintModelAbstract, public bp::wrapper<ConstraintModelAbstract> {
  public:
+  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+                               boost::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
+                               const std::size_t nh)
+      : ConstraintModelAbstract(state, residual, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
+
   ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
                                const std::size_t nh)
       : ConstraintModelAbstract(state, nu, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}

@@ -22,7 +22,14 @@ void exposeConstraintAbstract() {
       "The constraint function depends on the state point x, which lies in the state manifold\n"
       "described with a nq-tuple, its velocity xd that belongs to the tangent space with nv dimension,\n"
       "and the control input u.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, std::size_t>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract>, std::size_t, std::size_t>(
+          bp::args("self", "state", "residual", "ng", "nh"),
+          "Initialize the constraint model.\n\n"
+          ":param state: state description\n"
+          ":param residual: residual model\n"
+          ":param ng: number of inequality constraints\n"
+          ":param nh: number of equality constraints"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, std::size_t>(
           bp::args("self", "state", "nu", "ng", "nh"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
@@ -66,6 +73,10 @@ void exposeConstraintAbstract() {
           "state",
           bp::make_function(&ConstraintModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state description")
+      .add_property("residual",
+                    bp::make_function(&ConstraintModelAbstract_wrap::get_residual,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "residual model")
       .add_property("nu", bp::make_function(&ConstraintModelAbstract_wrap::get_nu), "dimension of control vector")
       .add_property("ng", bp::make_function(&ConstraintModelAbstract_wrap::get_ng), "number of inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelAbstract_wrap::get_nh), "number of equality constraints");
@@ -81,6 +92,9 @@ void exposeConstraintAbstract() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("shared", bp::make_getter(&ConstraintDataAbstract::shared, bp::return_internal_reference<>()),
                     "shared data")
+      .add_property("residual",
+                    bp::make_getter(&ConstraintDataAbstract::residual, bp::return_value_policy<bp::return_by_value>()),
+                    "residual data")
       .add_property("g", bp::make_getter(&ConstraintDataAbstract::g, bp::return_internal_reference<>()),
                     bp::make_setter(&ConstraintDataAbstract::g), "inequality constraint residual")
       .add_property("Gx", bp::make_getter(&ConstraintDataAbstract::Gx, bp::return_internal_reference<>()),
