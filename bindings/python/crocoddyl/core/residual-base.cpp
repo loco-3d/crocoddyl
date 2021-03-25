@@ -56,12 +56,8 @@ void exposeResidualAbstract() {
           "state",
           bp::make_function(&ResidualModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state")
-      .add_property(
-          "nr", bp::make_function(&ResidualModelAbstract_wrap::get_nr),
-          "dimension of residual vector")
-      .add_property(
-          "nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu),
-          "dimension of control vector");
+      .add_property("nr", bp::make_function(&ResidualModelAbstract_wrap::get_nr), "dimension of residual vector")
+      .add_property("nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu), "dimension of control vector");
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
 
