@@ -35,6 +35,7 @@ void exposeCore() {
   exposeCostControl();
   exposeConstraintAbstract();
   exposeConstraintManager();
+  exposeConstraintResidual();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
