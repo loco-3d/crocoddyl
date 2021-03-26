@@ -37,6 +37,7 @@ void exposeCostResidual();
 void exposeCostControl();
 void exposeConstraintAbstract();
 void exposeConstraintManager();
+void exposeConstraintResidual();
 void exposeActionNumDiff();
 void exposeDifferentialActionNumDiff();
 void exposeActivationNumDiff();

@@ -219,6 +219,11 @@ class ConstraintModelManagerTpl;
 template <typename Scalar>
 struct ConstraintDataManagerTpl;
 
+template <typename Scalar>
+class ConstraintModelResidualTpl;
+template <typename Scalar>
+struct ConstraintDataResidualTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
@@ -354,6 +359,8 @@ typedef ConstraintDataAbstractTpl<double> ConstraintDataAbstract;
 typedef ConstraintItemTpl<double> ConstraintItem;
 typedef ConstraintModelManagerTpl<double> ConstraintModelManager;
 typedef ConstraintDataManagerTpl<double> ConstraintDataManager;
+typedef ConstraintModelResidualTpl<double> ConstraintModelResidual;
+typedef ConstraintDataResidualTpl<double> ConstraintDataResidual;
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 
