@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2020-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,12 +21,19 @@ namespace unittest {
 struct ConstraintModelTypes {
   enum Type {
     ConstraintModelResidualStateEquality,
+    ConstraintModelResidualStateInequality,
     ConstraintModelResidualControlEquality,
+    ConstraintModelResidualControlInequality,
     ConstraintModelResidualCoMPositionEquality,
+    ConstraintModelResidualCoMPositionInequality,
     ConstraintModelResidualFramePlacementEquality,
+    ConstraintModelResidualFramePlacementInequality,
     ConstraintModelResidualFrameRotationEquality,
+    ConstraintModelResidualFrameRotationInequality,
     ConstraintModelResidualFrameTranslationEquality,
+    ConstraintModelResidualFrameTranslationInequality,
     ConstraintModelResidualFrameVelocityEquality,
+    ConstraintModelResidualFrameVelocityInequality,
     NbConstraintModelTypes
   };
   static std::vector<Type> init_all() {
