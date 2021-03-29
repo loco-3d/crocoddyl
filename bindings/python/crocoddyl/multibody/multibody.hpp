@@ -71,8 +71,6 @@ void exposeCostImpulseFrictionCone();
 void exposeCostImpulseWrenchCone();
 void exposeCostImpulseCoPPosition();
 void exposeCostImpulseCoM();
-void exposeConstraintFramePlacementEquality();
-void exposeConstraintFrameVelocityEquality();
 void exposeContact1D();
 void exposeContact2D();
 void exposeContact3D();

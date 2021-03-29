@@ -162,11 +162,12 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
                                           ActivationModelTypes::ActivationModelQuad),
                 1.);
   constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, actuation->get_nu());
-  constraint->addConstraint("frame", ConstraintModelFactory().create(
-                                         ConstraintModelTypes::ConstraintModelFramePlacementEquality, state_type));
+  constraint->addConstraint(
+      "frame", ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality,
+                                               state_type));
   constraint->addConstraint(
       "frame-velocity",
-      ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelFrameVelocityEquality, state_type));
+      ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type));
   action = boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, cost, constraint);
   return action;
 }

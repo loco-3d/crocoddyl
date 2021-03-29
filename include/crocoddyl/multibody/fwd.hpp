@@ -480,11 +480,6 @@ DEPRECATED("Use ResidualModelContactWrenchCone with CostModelResidual",
            typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;)
 DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<double> CostDataImpulseWrenchCone;)
 
-typedef ConstraintModelFramePlacementEqualityTpl<double> ConstraintModelFramePlacementEquality;
-typedef ConstraintDataFramePlacementEqualityTpl<double> ConstraintDataFramePlacementEquality;
-typedef ConstraintModelFrameVelocityEqualityTpl<double> ConstraintModelFrameVelocityEquality;
-typedef ConstraintDataFrameVelocityEqualityTpl<double> ConstraintDataFrameVelocityEquality;
-
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 

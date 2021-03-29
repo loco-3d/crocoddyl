@@ -7,8 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "constraint.hpp"
-#include "crocoddyl/multibody/constraints/frame-placement-equality.hpp"
-#include "crocoddyl/multibody/constraints/frame-velocity-equality.hpp"
+#include "crocoddyl/core/constraints/residual.hpp"
+#include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -18,11 +19,11 @@ const std::vector<ConstraintModelTypes::Type> ConstraintModelTypes::all(Constrai
 
 std::ostream& operator<<(std::ostream& os, ConstraintModelTypes::Type type) {
   switch (type) {
-    case ConstraintModelTypes::ConstraintModelFramePlacementEquality:
-      os << "ConstraintModelFramePlacementEquality";
+    case ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality:
+      os << "ConstraintModelResidualFramePlacementEquality";
       break;
-    case ConstraintModelTypes::ConstraintModelFrameVelocityEquality:
-      os << "ConstraintModelFrameVelocity";
+    case ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality:
+      os << "ConstraintModelResidualFrameVelocityEquality";
       break;
     case ConstraintModelTypes::NbConstraintModelTypes:
       os << "NbConstraintModelTypes";
@@ -42,20 +43,21 @@ boost::shared_ptr<crocoddyl::ConstraintModelAbstract> ConstraintModelFactory::cr
   boost::shared_ptr<crocoddyl::ConstraintModelAbstract> constraint;
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
-  crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
+  pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   pinocchio::Motion frame_motion = pinocchio::Motion::Random();
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
   switch (constraint_type) {
-    case ConstraintModelTypes::ConstraintModelFramePlacementEquality:
-      constraint = boost::make_shared<crocoddyl::ConstraintModelFramePlacementEquality>(
-          state, crocoddyl::FramePlacement(frame_index, frame_SE3), nu);
+    case ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu));
       break;
-    case ConstraintModelTypes::ConstraintModelFrameVelocityEquality:
-      constraint = boost::make_shared<crocoddyl::ConstraintModelFrameVelocityEquality>(
-          state, crocoddyl::FrameMotion(frame_index, frame_motion), nu);
+    case ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(state, frame_index, frame_motion,
+                                                                           pinocchio::LOCAL, nu));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ConstraintModelType::Type given");

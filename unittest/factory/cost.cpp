@@ -111,7 +111,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
 
-  crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
+  pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
 
   if (nu == std::numeric_limits<std::size_t>::max()) {

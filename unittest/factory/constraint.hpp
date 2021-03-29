@@ -19,7 +19,11 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ConstraintModelTypes {
-  enum Type { ConstraintModelFramePlacementEquality, ConstraintModelFrameVelocityEquality, NbConstraintModelTypes };
+  enum Type {
+    ConstraintModelResidualFramePlacementEquality,
+    ConstraintModelResidualFrameVelocityEquality,
+    NbConstraintModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
