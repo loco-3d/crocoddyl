@@ -12,9 +12,38 @@ template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
     boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff, const Scalar JMinvJt_damping, const bool enable_force)
+    : Base(state, 0, costs->get_nr(), 0, 0),
+      impulses_(impulses),
+      costs_(costs),
+      constraints_(nullptr),
+      pinocchio_(*state->get_pinocchio().get()),
+      with_armature_(true),
+      armature_(VectorXs::Zero(state->get_nv())),
+      r_coeff_(r_coeff),
+      JMinvJt_damping_(JMinvJt_damping),
+      enable_force_(enable_force),
+      gravity_(state->get_pinocchio()->gravity) {
+  if (r_coeff_ < Scalar(0.)) {
+    r_coeff_ = Scalar(0.);
+    throw_pretty("Invalid argument: "
+                 << "The restitution coefficient has to be positive, set to 0");
+  }
+  if (JMinvJt_damping_ < Scalar(0.)) {
+    JMinvJt_damping_ = Scalar(0.);
+    throw_pretty("Invalid argument: "
+                 << "The damping factor has to be positive, set to 0");
+  }
+}
+
+template <typename Scalar>
+ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
+    boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
+    const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),
+      constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
@@ -81,6 +110,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
+  if (constraints_ != nullptr) {
+    constraints_->calc(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -134,6 +166,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
     impulses_->updateForceDiff(d->multibody.impulses, d->df_dx.topRows(nc));
   }
   costs_->calcDiff(d->costs, x, u);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -171,6 +206,12 @@ const boost::shared_ptr<ImpulseModelMultipleTpl<Scalar> >& ActionModelImpulseFwd
 template <typename Scalar>
 const boost::shared_ptr<CostModelSumTpl<Scalar> >& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_constraints() const {
+  return constraints_;
 }
 
 template <typename Scalar>

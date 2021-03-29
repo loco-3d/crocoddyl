@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
@@ -48,10 +49,10 @@ namespace crocoddyl {
  * \cite mastalli-icra20. Note that the algorithm for computing the RNEA derivatives is described in
  * \cite carpentier-rss18.
  *
- * The stack of cost functions is implemented in `CostModelSumTpl`. The computation of the contact dynamics and its
- * derivatives are carrying out inside `calc()` and `calcDiff()` functions, respectively. It is also important to
- * remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we need to run
- * `calc()` first.
+ * The stack of cost and constraint functions are implemented in `CostModelSumTpl` and `ConstraintModelAbstractTpl`,
+ * respectively. The computation of the contact dynamics and its derivatives are carrying out inside `calc()` and
+ * `calcDiff()` functions, respectively. It is also important to remark that `calcDiff()` computes the derivatives
+ * using the latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -64,8 +65,9 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataContactFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
@@ -89,6 +91,28 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ActuationModelAbstract> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
+                                               const Scalar JMinvJt_damping = Scalar(0.),
+                                               const bool enable_force = false);
+
+  /**
+   * @brief Initialize the contact forward-dynamics action model
+   *
+   * It describes the dynamics evolution of a multibody system under rigid-contact constraints defined by
+   * `ContactModelMultipleTpl`. It computes the cost described in `CostModelSumTpl`.
+   *
+   * @param[in] state            State of the multibody system
+   * @param[in] actuation        Actuation model
+   * @param[in] contacts         Stack of rigid contact
+   * @param[in] costs            Stack of cost functions
+   * @param[in] constraints      Stack of constraints
+   * @param[in] JMinvJt_damping  Damping term used in operational space inertia matrix (default 0.)
+   * @param[in] enable_force     Enable the computation of the contact force derivatives (default false)
+   */
+  DifferentialActionModelContactFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
+                                               boost::shared_ptr<ActuationModelAbstract> actuation,
+                                               boost::shared_ptr<ContactModelMultiple> contacts,
+                                               boost::shared_ptr<CostModelSum> costs,
+                                               boost::shared_ptr<ConstraintModelManager> constraints,
                                                const Scalar JMinvJt_damping = Scalar(0.),
                                                const bool enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
@@ -176,6 +200,11 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
+   * @brief Return the constraint model
+   */
+  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+
+  /**
    * @brief Return the Pinocchio model
    */
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
@@ -212,13 +241,14 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ActuationModelAbstract> actuation_;  //!< Actuation model
-  boost::shared_ptr<ContactModelMultiple> contacts_;     //!< Contact model
-  boost::shared_ptr<CostModelSum> costs_;                //!< Cost model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
-  bool with_armature_;                                   //!< Indicate if we have defined an armature
-  VectorXs armature_;                                    //!< Armature vector
-  Scalar JMinvJt_damping_;                               //!< Damping factor used in operational space inertia matrix
+  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
+  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  bool with_armature_;                                     //!< Indicate if we have defined an armature
+  VectorXs armature_;                                      //!< Armature vector
+  Scalar JMinvJt_damping_;                                 //!< Damping factor used in operational space inertia matrix
   bool enable_force_;  //!< Indicate if we have enabled the computation of the contact-forces derivatives
 };
 
@@ -244,6 +274,10 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         tmp_xstatic(model->get_state()->get_nx()),
         tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
+    if (model->get_constraints() != nullptr) {
+      constraints = model->get_constraints()->createData(&multibody);
+      constraints->shareMemory(this);
+    }
     Kinv.setZero();
     df_dx.setZero();
     df_du.setZero();
@@ -256,6 +290,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Kinv;
   MatrixXs df_dx;
   MatrixXs df_du;

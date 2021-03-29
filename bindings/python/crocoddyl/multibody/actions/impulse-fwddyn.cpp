@@ -25,7 +25,7 @@ void exposeActionImpulseFwdDynamics() {
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
                boost::shared_ptr<CostModelSum>, bp::optional<double, double, bool> >(
-          bp::args("self", "state", " impulses", "costs", "r_coeff=0.", "inv_damping", "enable_force"),
+          bp::args("self", "state", " impulses", "costs", "r_coeff", "inv_damping", "enable_force"),
           "Initialize the impulse forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
           "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
@@ -35,8 +35,22 @@ void exposeActionImpulseFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param r_coeff: restitution coefficient (default 0.)\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"
-          ":param enable_force: Enable the computation of force Jacobians (default False)")
-          [bp::with_custodian_and_ward<1, 3>()])
+          ":param enable_force: Enable the computation of force Jacobians (default False)"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
+                    boost::shared_ptr<CostModelSum>, boost::shared_ptr<ConstraintModelManager>,
+                    bp::optional<double, double, bool> >(
+          bp::args("self", "state", "impulses", "costs", "constraints", "r_coeff", "inv_damping", "enable_force"),
+          "Initialize the constrained forward-dynamics action model.\n\n"
+          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
+          ":param state: multibody state\n"
+          ":param impulses: multiple impulse model\n"
+          ":param costs: stack of cost functions\n"
+          ":param constraints: stack of constraint functions\n"
+          ":param r_coeff: restitution coefficient (default 0.)\n"
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"
+          ":param enable_force: Enable the computation of force Jacobians (default False)"))
       .def<void (ActionModelImpulseFwdDynamics::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::Ref<const Eigen::VectorXd>&,
                                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -82,6 +96,10 @@ void exposeActionImpulseFwdDynamics() {
           "costs",
           bp::make_function(&ActionModelImpulseFwdDynamics::get_costs, bp::return_value_policy<bp::return_by_value>()),
           "total cost model")
+      .add_property("constraints",
+                    bp::make_function(&ActionModelImpulseFwdDynamics::get_constraints,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "entire constraint model")
       .add_property("armature",
                     bp::make_function(&ActionModelImpulseFwdDynamics::get_armature, bp::return_internal_reference<>()),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),
@@ -110,6 +128,10 @@ void exposeActionImpulseFwdDynamics() {
           "costs",
           bp::make_getter(&ActionDataImpulseFwdDynamics::costs, bp::return_value_policy<bp::return_by_value>()),
           "total cost data")
+      .add_property(
+          "constraints",
+          bp::make_getter(&ActionDataImpulseFwdDynamics::constraints, bp::return_value_policy<bp::return_by_value>()),
+          "constraint data")
       .add_property("Kinv", bp::make_getter(&ActionDataImpulseFwdDynamics::Kinv, bp::return_internal_reference<>()),
                     "inverse of the KKT matrix")
       .add_property("df_dx", bp::make_getter(&ActionDataImpulseFwdDynamics::df_dx, bp::return_internal_reference<>()),
