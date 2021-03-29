@@ -25,10 +25,44 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     const Scalar JMinvJt_damping, const bool enable_force)
-    : Base(state, actuation->get_nu(), costs->get_nr()),
+    : Base(state, actuation->get_nu(), costs->get_nr(), 0, 0),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
+      constraints_(nullptr),
+      pinocchio_(*state->get_pinocchio().get()),
+      with_armature_(true),
+      armature_(VectorXs::Zero(state->get_nv())),
+      JMinvJt_damping_(fabs(JMinvJt_damping)),
+      enable_force_(enable_force) {
+  if (JMinvJt_damping_ < Scalar(0.)) {
+    JMinvJt_damping_ = Scalar(0.);
+    throw_pretty("Invalid argument: "
+                 << "The damping factor has to be positive, set to 0");
+  }
+  if (contacts_->get_nu() != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (costs_->get_nu() != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
+  }
+
+  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
+  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
+}
+
+template <typename Scalar>
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelContactFwdDynamicsTpl(
+    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
+    boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
+    boost::shared_ptr<ConstraintModelManager> constraints, const Scalar JMinvJt_damping, const bool enable_force)
+    : Base(state, actuation->get_nu(), costs->get_nr(), constraints->get_ng(), constraints->get_nh()),
+      actuation_(actuation),
+      contacts_(contacts),
+      costs_(costs),
+      constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
@@ -101,6 +135,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
+  if (constraints_ != nullptr) {
+    constraints_->calc(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -177,6 +214,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
     contacts_->updateForceDiff(d->multibody.contacts, d->df_dx.topRows(nc), d->df_du.topRows(nc));
   }
   costs_->calcDiff(d->costs, x, u);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -276,6 +316,12 @@ template <typename Scalar>
 const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_costs()
     const {
   return costs_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_constraints() const {
+  return constraints_;
 }
 
 template <typename Scalar>

@@ -36,6 +36,21 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"
           ":param enable_force: Enable the computation of force Jacobians (default False)"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
+                    boost::shared_ptr<ContactModelMultiple>, boost::shared_ptr<CostModelSum>,
+                    boost::shared_ptr<ConstraintModelManager>, bp::optional<double, bool> >(
+          bp::args("self", "state", "actuation", "contacts", "costs", "constraints", "inv_damping", "enable_force"),
+          "Initialize the constrained forward-dynamics action model.\n\n"
+          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
+          ":param state: multibody state\n"
+          ":param actuation: actuation model\n"
+          ":param contacts: multiple contact model\n"
+          ":param costs: stack of cost functions\n"
+          ":param constraints: stack of constraint functions\n"
+          ":param inv_damping: Damping factor for cholesky decomposition of JMinvJt (default 0.)\n"
+          ":param enable_force: Enable the computation of force Jacobians (default False)"))
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -84,6 +99,10 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_costs,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "total cost model")
+      .add_property("constraints",
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics::get_constraints,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "entire constraint model")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -113,6 +132,10 @@ void exposeDifferentialActionContactFwdDynamics() {
                     bp::make_getter(&DifferentialActionDataContactFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "total cost data")
+      .add_property("constraints",
+                    bp::make_getter(&DifferentialActionDataContactFwdDynamics::constraints,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "constraint data")
       .add_property(
           "Kinv", bp::make_getter(&DifferentialActionDataContactFwdDynamics::Kinv, bp::return_internal_reference<>()),
           "inverse of the KKT matrix")

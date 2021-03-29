@@ -22,6 +22,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
@@ -51,10 +52,10 @@ namespace crocoddyl {
  * \cite mastalli-icra20. Note that the algorithm for computing the RNEA derivatives is described in
  * \cite carpentier-rss18.
  *
- * The stack of cost functions is implemented in `CostModelSumTpl`. The computation of the impulse dynamics and its
- * derivatives are carrying out inside `calc()` and `calcDiff()` functions, respectively. It is also important to
- * remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we need to run
- * `calc()` first.
+ * The stack of cost and constraint functions are implemented in `CostModelSumTpl` and `ConstraintModelAbstractTpl`,
+ * respectively. The computation of the impulse dynamics and its derivatives are carrying out inside `calc()` and
+ * `calcDiff()` functions, respectively. It is also important to remark that `calcDiff()` computes the derivatives
+ * using the latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
  * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -68,6 +69,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef ActionDataImpulseFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
@@ -92,6 +94,13 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
                                    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
                                    const Scalar JMinvJt_damping = Scalar(0.), const bool enable_force = false);
+
+  ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ImpulseModelMultiple> impulses,
+                                   boost::shared_ptr<CostModelSum> costs,
+                                   boost::shared_ptr<ConstraintModelManager> constraints,
+                                   const Scalar r_coeff = Scalar(0.), const Scalar JMinvJt_damping = Scalar(0.),
+                                   const bool enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
   /**
@@ -139,6 +148,11 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
+   * @brief Return the constraint model
+   */
+  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+
+  /**
    * @brief Return the Pinocchio model
    */
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
@@ -184,13 +198,14 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ImpulseModelMultiple> impulses_;  //!< Impulse model
-  boost::shared_ptr<CostModelSum> costs_;             //!< Cost model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;            //!< Pinocchio model
-  bool with_armature_;                                //!< Indicate if we have defined an armature
-  VectorXs armature_;                                 //!< Armature vector
-  Scalar r_coeff_;                                    //!< Restitution coefficient
-  Scalar JMinvJt_damping_;                            //!< Damping factor used in operational space inertia matrix
+  boost::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
+  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  bool with_armature_;                                     //!< Indicate if we have defined an armature
+  VectorXs armature_;                                      //!< Armature vector
+  Scalar r_coeff_;                                         //!< Restitution coefficient
+  Scalar JMinvJt_damping_;                                 //!< Damping factor used in operational space inertia matrix
   bool enable_force_;  //!< Indicate if we have enabled the computation of the contact-forces derivatives
   pinocchio::MotionTpl<Scalar> gravity_;  //! Gravity acceleration
 };
@@ -216,6 +231,10 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         df_dx(model->get_impulses()->get_nc_total(), model->get_state()->get_ndx()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
+    if (model->get_constraints() != nullptr) {
+      constraints = model->get_constraints()->createData(&multibody);
+      constraints->shareMemory(this);
+    }
     vnone.setZero();
     Kinv.setZero();
     df_dx.setZero();
@@ -225,6 +244,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorMultibodyInImpulseTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   VectorXs vnone;
   MatrixXs Kinv;
   MatrixXs df_dx;
