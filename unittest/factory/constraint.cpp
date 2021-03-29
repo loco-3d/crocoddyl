@@ -8,7 +8,12 @@
 
 #include "constraint.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -19,8 +24,23 @@ const std::vector<ConstraintModelTypes::Type> ConstraintModelTypes::all(Constrai
 
 std::ostream& operator<<(std::ostream& os, ConstraintModelTypes::Type type) {
   switch (type) {
+    case ConstraintModelTypes::ConstraintModelResidualStateEquality:
+      os << "ConstraintModelResidualStateEquality";
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualControlEquality:
+      os << "ConstraintModelResidualControlEquality";
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualCoMPositionEquality:
+      os << "ConstraintModelResidualCoMPositionEquality";
+      break;
     case ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality:
       os << "ConstraintModelResidualFramePlacementEquality";
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualFrameRotationEquality:
+      os << "ConstraintModelResidualFrameRotationEquality";
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualFrameTranslationEquality:
+      os << "ConstraintModelResidualFrameTranslationEquality";
       break;
     case ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality:
       os << "ConstraintModelResidualFrameVelocityEquality";
@@ -50,9 +70,31 @@ boost::shared_ptr<crocoddyl::ConstraintModelAbstract> ConstraintModelFactory::cr
     nu = state->get_nv();
   }
   switch (constraint_type) {
+    case ConstraintModelTypes::ConstraintModelResidualStateEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelState>(state, state->rand(), nu));
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualControlEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelControl>(state, Eigen::VectorXd::Random(nu)));
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualCoMPositionEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelCoMPosition>(state, Eigen::Vector3d::Random(), nu));
+      break;
     case ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality:
       constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
           state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu));
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualFrameRotationEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state,
+          boost::make_shared<crocoddyl::ResidualModelFrameRotation>(state, frame_index, frame_SE3.rotation(), nu));
+      break;
+    case ConstraintModelTypes::ConstraintModelResidualFrameTranslationEquality:
+      constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(state, frame_index,
+                                                                              frame_SE3.translation(), nu));
       break;
     case ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality:
       constraint = boost::make_shared<crocoddyl::ConstraintModelResidual>(

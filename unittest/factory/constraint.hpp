@@ -20,7 +20,12 @@ namespace unittest {
 
 struct ConstraintModelTypes {
   enum Type {
+    ConstraintModelResidualStateEquality,
+    ConstraintModelResidualControlEquality,
+    ConstraintModelResidualCoMPositionEquality,
     ConstraintModelResidualFramePlacementEquality,
+    ConstraintModelResidualFrameRotationEquality,
+    ConstraintModelResidualFrameTranslationEquality,
     ConstraintModelResidualFrameVelocityEquality,
     NbConstraintModelTypes
   };
