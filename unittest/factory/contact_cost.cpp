@@ -78,8 +78,8 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
     case ContactCostModelTypes::CostModelResidualContactForce:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
-          boost::make_shared<crocoddyl::ResidualModelContactForce>(state, model_factory.get_frame_id(),
-                                                                   pinocchio::Force::Random(), nu),
+          boost::make_shared<crocoddyl::ResidualModelContactForce>(
+              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), nu),
           ActivationModelFactory().create(activation_type, 6));
       break;
     case ContactCostModelTypes::CostModelResidualContactCoPPosition:

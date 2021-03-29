@@ -80,8 +80,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
     case ImpulseCostModelTypes::CostModelResidualContactForce:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
-          boost::make_shared<crocoddyl::ResidualModelContactForce>(state, model_factory.get_frame_id(),
-                                                                   pinocchio::Force::Random(), 0),
+          boost::make_shared<crocoddyl::ResidualModelContactForce>(
+              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), 0),
           ActivationModelFactory().create(activation_type, 6));
       break;
     case ImpulseCostModelTypes::CostModelResidualContactCoPPosition:

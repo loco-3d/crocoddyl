@@ -55,11 +55,13 @@ class PinocchioModelFactory {
   boost::shared_ptr<pinocchio::Model> create() const;
   const std::string& get_frame_name() const;
   std::size_t get_frame_id() const;
+  std::size_t get_contact_nc() const;
 
  private:
   boost::shared_ptr<pinocchio::Model> model_;  //!< The pointer to the state in testing
   std::string frame_name_;                     //!< Frame name for unittesting
   std::size_t frame_id_;                       //!< Frame id for unittesting
+  std::size_t contact_nc_;                     //!< Dimension of the contact
 };
 
 /**

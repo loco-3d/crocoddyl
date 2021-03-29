@@ -10,7 +10,6 @@
 #define CROCODDYL_CORE_FWD_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
