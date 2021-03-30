@@ -276,6 +276,12 @@ struct CostDataSumTpl {
 
   template <class ActionData>
   void shareMemory(ActionData* const data) {
+    // Save memory by setting the internal variables with null dimension
+    Lx_internal.resize(0);
+    Lu_internal.resize(0);
+    Lxx_internal.resize(0, 0);
+    Lxu_internal.resize(0, 0);
+    Luu_internal.resize(0, 0);
     // Share memory with the differential action data
     new (&Lx) Eigen::Map<VectorXs>(data->Lx.data(), data->Lx.size());
     new (&Lu) Eigen::Map<VectorXs>(data->Lu.data(), data->Lu.size());
