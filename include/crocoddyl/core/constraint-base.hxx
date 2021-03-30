@@ -98,28 +98,4 @@ std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
 }
 
-template <typename Scalar>
-template <class ReferenceType>
-void ConstraintModelAbstractTpl<Scalar>::set_reference(ReferenceType ref) {
-  set_referenceImpl(typeid(ref), &ref);
-}
-
-template <typename Scalar>
-void ConstraintModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, const void*) {
-  throw_pretty("It has not been implemented the set_referenceImpl() function");
-}
-
-template <typename Scalar>
-template <class ReferenceType>
-ReferenceType ConstraintModelAbstractTpl<Scalar>::get_reference() const {
-  ReferenceType ref;
-  get_referenceImpl(typeid(ref), &ref);
-  return ref;
-}
-
-template <typename Scalar>
-void ConstraintModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) const {
-  throw_pretty("It has not been implemented the set_referenceImpl() function");
-}
-
 }  // namespace crocoddyl
