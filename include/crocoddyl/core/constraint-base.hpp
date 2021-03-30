@@ -161,29 +161,7 @@ class ConstraintModelAbstractTpl {
    */
   std::size_t get_nh() const;
 
-  /**
-   * @brief Modify the constraint reference
-   */
-  template <class ReferenceType>
-  void set_reference(ReferenceType ref);
-
-  /**
-   * @brief Return the constraint reference
-   */
-  template <class ReferenceType>
-  ReferenceType get_reference() const;
-
  protected:
-  /**
-   * @copybrief set_reference()
-   */
-  virtual void set_referenceImpl(const std::type_info&, const void*);
-
-  /**
-   * @copybrief get_reference()
-   */
-  virtual void get_referenceImpl(const std::type_info&, void*) const;
-
   boost::shared_ptr<StateAbstract> state_;             //!< State description
   boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
   std::size_t nu_;                                     //!< Control dimension

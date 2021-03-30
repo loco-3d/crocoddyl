@@ -9,6 +9,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
+
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                                boost::shared_ptr<ResidualModelAbstract> residual,
