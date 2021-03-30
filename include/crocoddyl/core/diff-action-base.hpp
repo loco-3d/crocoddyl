@@ -16,6 +16,7 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
+#include "crocoddyl/core/utils/to-string.hpp"
 
 namespace crocoddyl {
 
@@ -387,6 +388,9 @@ class DifferentialActionModelAbstractTpl {
   VectorXs u_ub_;                           //!< Upper control limits
   bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
+  /**
+   * @brief Update the status of the control limits (i.e. if there are defined limits)
+   */
   void update_has_control_limits();
 };
 
@@ -401,7 +405,7 @@ struct DifferentialActionDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit DifferentialActionDataAbstractTpl(Model<Scalar>* const model)
-      : cost(0.),
+      : cost(Scalar(0.)),
         xout(model->get_state()->get_nv()),
         Fx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         Fu(model->get_state()->get_nv(), model->get_nu()),
@@ -418,9 +422,9 @@ struct DifferentialActionDataAbstractTpl {
         Hx(model->get_nh(), model->get_state()->get_ndx()),
         Hu(model->get_nh(), model->get_nu()) {
     xout.setZero();
-    r.setZero();
     Fx.setZero();
     Fu.setZero();
+    r.setZero();
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
