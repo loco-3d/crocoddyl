@@ -40,7 +40,7 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
     boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
     const Scalar JMinvJt_damping, const bool enable_force)
-    : Base(state, 0, costs->get_nr()),
+    : Base(state, 0, costs->get_nr(), constraints->get_ng(), constraints->get_nh()),
       impulses_(impulses),
       costs_(costs),
       constraints_(constraints),
