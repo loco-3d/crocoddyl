@@ -268,6 +268,13 @@ struct ConstraintDataManagerTpl {
 
   template <class ActionData>
   void shareMemory(ActionData* const data) {
+    // Save memory by setting the internal variables with null dimension
+    g_internal.resize(0);
+    Gx_internal.resize(0, 0);
+    Gu_internal.resize(0, 0);
+    h_internal.resize(0);
+    Hx_internal.resize(0, 0);
+    Hu_internal.resize(0, 0);
     // Share memory with the differential action data
     new (&g) Eigen::Map<VectorXs>(data->g.data(), data->g.size());
     new (&Gx) Eigen::Map<MatrixXs>(data->Gx.data(), data->Gx.rows(), data->Gx.cols());
