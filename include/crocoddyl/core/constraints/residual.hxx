@@ -15,8 +15,9 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr
                                                                boost::shared_ptr<ResidualModelAbstract> residual,
                                                                const VectorXs& lower, const VectorXs& upper)
     : Base(state, residual,
-           2 * ((upper - lower).array() != 0.).count() - (upper.array() == INFINITY).count() -
-               (lower.array() == -INFINITY).count(),
+           2 * ((upper - lower).array() != 0.).count() -
+               (upper.array() == std::numeric_limits<Scalar>::infinity()).count() -
+               (lower.array() == -std::numeric_limits<Scalar>::infinity()).count(),
            ((upper - lower).array() == 0.).count()),
       lb_(lower),
       ub_(upper),
@@ -24,10 +25,10 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr
   if (((ub_ - lb_).array() < 0.).any()) {
     throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
   }
-  if ((lb_.array() == INFINITY).any()) {
+  if ((lb_.array() == std::numeric_limits<Scalar>::infinity()).any()) {
     throw_pretty("Invalid argument: the lower bound cannot containt a positive infinity value");
   }
-  if ((ub_.array() == -INFINITY).any()) {
+  if ((ub_.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
     throw_pretty("Invalid argument: the lower bound cannot containt a negative infinity value");
   }
   updateConstraintType();
@@ -169,16 +170,17 @@ void ConstraintModelResidualTpl<Scalar>::update_bounds(const VectorXs& lower, co
   if (((upper - lower).array() < 0.).any()) {
     throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
   }
-  if ((lower.array() == INFINITY).any()) {
+  if ((lower.array() == std::numeric_limits<Scalar>::infinity()).any()) {
     throw_pretty("Invalid argument: the lower bound cannot containt a positive infinity value");
   }
-  if ((upper.array() == -INFINITY).any()) {
+  if ((upper.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
     throw_pretty("Invalid argument: the lower bound cannot containt a negative infinity value");
   }
 
   // Update the information related to the bounds
-  ng_ = 2 * ((upper - lower).array() != 0.).count() - (upper.array() == INFINITY).count() -
-        (lower.array() == -INFINITY).count();
+  ng_ = 2 * ((upper - lower).array() != 0.).count() -
+        (upper.array() == std::numeric_limits<Scalar>::infinity()).count() -
+        (lower.array() == -std::numeric_limits<Scalar>::infinity()).count();
   nh_ = ((upper - lower).array() == 0.).count();
   lb_ = lower;
   ub_ = upper;
