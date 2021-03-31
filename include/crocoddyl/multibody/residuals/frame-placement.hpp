@@ -159,15 +159,14 @@ struct ResidualDataFramePlacementTpl : public ResidualDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  Vector6s r;
-  pinocchio::SE3Tpl<Scalar> rMf;  //!< Error frame placement of the frame
-  Matrix6s rJf;                   //!< Error Jacobian of the frame
-  Matrix6xs fJf;                  //!< Local Jacobian of the frame
+  pinocchio::SE3Tpl<Scalar> rMf;          //!< Error frame placement of the frame
+  Matrix6s rJf;                           //!< Error Jacobian of the frame
+  Matrix6xs fJf;                          //!< Local Jacobian of the frame
 
-  using Base::shared;
-  // using Base::r;
+  using Base::r;
   using Base::Ru;
   using Base::Rx;
+  using Base::shared;
 };
 
 }  // namespace crocoddyl

@@ -40,15 +40,13 @@ void ResidualModelFramePlacementTpl<Scalar>::calc(const boost::shared_ptr<Residu
   // Compute the frame placement w.r.t. the reference frame
   pinocchio::updateFramePlacement(*pin_model_.get(), *d->pinocchio, id_);
   d->rMf = oMf_inv_ * d->pinocchio->oMf[id_];
-  d->r = pinocchio::log6(d->rMf);
-  data->r = d->r;  // this is needed because we overwrite it
+  data->r = pinocchio::log6(d->rMf).toVector();
 }
 
 template <typename Scalar>
 void ResidualModelFramePlacementTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                       const Eigen::Ref<const VectorXs>&,
                                                       const Eigen::Ref<const VectorXs>&) {
-  // Update the frame placements
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the derivatives of the frame placement

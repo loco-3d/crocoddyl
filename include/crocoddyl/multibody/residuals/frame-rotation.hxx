@@ -38,25 +38,23 @@ void ResidualModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<Residua
                                                  const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the frame placement w.r.t. the reference frame
+  // Compute the frame rotation w.r.t. the reference frame
   pinocchio::updateFramePlacement(*pin_model_.get(), *d->pinocchio, id_);
   d->rRf.noalias() = oRf_inv_ * d->pinocchio->oMf[id_].rotation();
-  d->r = pinocchio::log3(d->rRf);
-  data->r = d->r;  // this is needed because we overwrite it
+  data->r = pinocchio::log3(d->rRf);
 }
 
 template <typename Scalar>
 void ResidualModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                      const Eigen::Ref<const VectorXs>&,
                                                      const Eigen::Ref<const VectorXs>&) {
-  // Update the frame placements
   Data* d = static_cast<Data*>(data.get());
 
-  // // Compute the frame Jacobian at the error point
+  // Compute the frame Jacobian at the error point
   pinocchio::Jlog3(d->rRf, d->rJf);
   pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
 
-  // Compute the derivatives of the frame placement
+  // Compute the derivatives of the frame rotation
   const std::size_t nv = state_->get_nv();
   data->Rx.leftCols(nv).noalias() = d->rJf * d->fJf.template bottomRows<3>();
 }

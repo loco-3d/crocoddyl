@@ -160,15 +160,14 @@ struct ResidualDataFrameRotationTpl : public ResidualDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  Vector3s r;
-  Matrix3s rRf;   //!< Rotation error of the frame
-  Matrix3s rJf;   //!< Error Jacobian of the frame
-  Matrix6xs fJf;  //!< Local Jacobian of the frame
+  Matrix3s rRf;                           //!< Rotation error of the frame
+  Matrix3s rJf;                           //!< Error Jacobian of the frame
+  Matrix6xs fJf;                          //!< Local Jacobian of the frame
 
-  using Base::shared;
-  // using Base::r;
+  using Base::r;
   using Base::Ru;
   using Base::Rx;
+  using Base::shared;
 };
 
 }  // namespace crocoddyl
