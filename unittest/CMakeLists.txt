@@ -36,6 +36,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_contact_costs
   test_impulse_costs
   test_contact_constraints
+  test_impulse_constraints
   test_actions
   # test_integrators
   test_diff_actions
