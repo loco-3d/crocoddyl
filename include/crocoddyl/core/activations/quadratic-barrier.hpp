@@ -40,7 +40,6 @@ struct ActivationBoundsTpl {
       throw_pretty("Invalid argument: "
                    << "The range of beta is between 0 and 1");
     }
-    using std::isfinite;
     for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
       if (isfinite(lb(i)) && isfinite(ub(i))) {
         if (lb(i) - ub(i) > 0) {
@@ -48,11 +47,18 @@ struct ActivationBoundsTpl {
                        << "The lower and upper bounds are badly defined; ub has to be bigger / equals to lb");
         }
       }
+      // Assign the maximum value for infinity/nan values
+      if (!std::isfinite(lb(i))) {
+        lb(i) = -std::numeric_limits<Scalar>::max();
+      }
+      if (!std::isfinite(ub(i))) {
+        ub(i) = std::numeric_limits<Scalar>::max();
+      }
     }
 
     if (beta >= Scalar(0) && beta <= Scalar(1.)) {
-      VectorXs m = Scalar(0.5) * (lower + upper);
-      VectorXs d = Scalar(0.5) * (upper - lower);
+      VectorXs m = Scalar(0.5) * (lb + ub);
+      VectorXs d = Scalar(0.5) * (ub - lb);
       lb = m - beta * d;
       ub = m + beta * d;
     } else {
