@@ -53,10 +53,10 @@ void CoPSupportTpl<Scalar>::update() {
 
   // CoP information
   // This matrix is defined as
-  // [0 0 -W  1  0;
-  //  0 0 -W -1  0;
-  //  0 0 -L  0  1;
-  //  0 0 -L  0 -1]
+  // [0  0 -W  1  0  0;
+  //  0  0 -W -1  0  0;
+  //  0  0 -L  0  1  0;
+  //  0  0 -L  0 -1  0]
   const Scalar L = box_(0) / Scalar(2.);
   const Scalar W = box_(1) / Scalar(2.);
   A_.row(0) << -W * R_.col(2).transpose(), R_.col(0).transpose();
