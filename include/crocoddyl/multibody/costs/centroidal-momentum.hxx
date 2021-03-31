@@ -70,7 +70,7 @@ void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<Co
   residual_->calcDiff(data->residual, x, u);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  Eigen::Ref<Matrix6xs> Rx(data->residual->Rx);
+  const MatrixXs& Rx = data->residual->Rx;
   d->Arr_Rx.noalias() = data->activation->Arr * Rx;
   data->Lx.noalias() = Rx.transpose() * data->activation->Ar;
   data->Lxx.noalias() = Rx.transpose() * d->Arr_Rx;

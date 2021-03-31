@@ -49,6 +49,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   /**

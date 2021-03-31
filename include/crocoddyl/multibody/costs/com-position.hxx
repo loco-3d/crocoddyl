@@ -67,7 +67,7 @@ void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataA
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   const std::size_t nv = state_->get_nv();
-  Eigen::Ref<Matrix3xs> Jcom(data->residual->Rx.leftCols(nv));
+  const MatrixXs& Jcom = data->residual->Rx.leftCols(nv);
   data->Lx.head(nv).noalias() = Jcom.transpose() * data->activation->Ar;
   d->Arr_Jcom.noalias() = data->activation->Arr * Jcom;
   data->Lxx.topLeftCorner(nv, nv).noalias() = Jcom.transpose() * d->Arr_Jcom;
