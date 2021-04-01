@@ -48,10 +48,10 @@ struct ActivationBoundsTpl {
         }
       }
       // Assign the maximum value for infinity/nan values
-      if (!std::isfinite(lb(i))) {
+      if (!isfinite(lb(i))) {
         lb(i) = -std::numeric_limits<Scalar>::max();
       }
-      if (!std::isfinite(ub(i))) {
+      if (!isfinite(ub(i))) {
         ub(i) = std::numeric_limits<Scalar>::max();
       }
     }
