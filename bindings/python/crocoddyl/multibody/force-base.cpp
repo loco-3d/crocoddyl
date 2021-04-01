@@ -36,7 +36,6 @@ void exposeForceAbstract() {
                     bp::make_setter(&ForceDataAbstract::df_dx), "Jacobian of the contact forces")
       .add_property("df_du", bp::make_getter(&ForceDataAbstract::df_du, bp::return_internal_reference<>()),
                     bp::make_setter(&ForceDataAbstract::df_du), "Jacobian of the contact forces")
-      .def_readwrite("joint", &ForceDataAbstract::joint, "joint index of the contact frame")
       .def_readwrite("frame", &ForceDataAbstract::frame, "frame index of the contact frame")
       .def_readwrite("f", &ForceDataAbstract::f,
                      "external spatial force at the parent joint level. Note that we could compute the force at the "

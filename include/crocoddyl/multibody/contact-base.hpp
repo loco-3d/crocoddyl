@@ -81,7 +81,6 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   using Base::frame;
   using Base::Jc;
   using Base::jMf;
-  using Base::joint;
   using Base::pinocchio;
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
   VectorXs a0;

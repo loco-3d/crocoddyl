@@ -29,7 +29,6 @@ struct ForceDataAbstractTpl {
   template <template <typename Scalar> class Model>
   ForceDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : pinocchio(data),
-        joint(0),
         frame(0),
         jMf(pinocchio::SE3Tpl<Scalar>::Identity()),
         Jc(model->get_nc(), model->get_state()->get_nv()),
@@ -43,7 +42,6 @@ struct ForceDataAbstractTpl {
   virtual ~ForceDataAbstractTpl() {}
 
   typename pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  pinocchio::JointIndex joint;                     //!< Joint index of the contact frame
   pinocchio::FrameIndex frame;                     //!< Frame index of the contact frame
   typename pinocchio::SE3Tpl<Scalar> jMf;          //!< Local frame placement of the contact frame
   MatrixXs Jc;                                     //!< Contact Jacobian

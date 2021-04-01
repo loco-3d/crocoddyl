@@ -66,7 +66,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
-    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
     jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
@@ -80,7 +79,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::frame;
   using Base::Jc;
   using Base::jMf;
-  using Base::joint;
   using Base::pinocchio;
 
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
