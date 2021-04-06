@@ -40,6 +40,7 @@ struct ActivationBoundsTpl {
       throw_pretty("Invalid argument: "
                    << "The range of beta is between 0 and 1");
     }
+    using std::isfinite;
     for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
       if (isfinite(lb(i)) && isfinite(ub(i))) {
         if (lb(i) - ub(i) > 0) {
