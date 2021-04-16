@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, CTU, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -264,6 +264,13 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(co
                  << "The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const DifferentialActionModelContactFwdDynamicsTpl<Scalar>& model) {
+  os << "DifferentialActionModelContactFwdDynamics (" << model.get_contacts().size()
+     << " contacts, JMinvJt_damping=" << model.get_damping_factor() << ") " << std::endl;
+  return os;
 }
 
 }  // namespace crocoddyl
