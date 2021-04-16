@@ -527,4 +527,17 @@ std::size_t ShootingProblemTpl<Scalar>::get_nthreads() const {
   return nthreads_;
 }
 
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem) {
+  os << "ShootingProblem (T=" << problem.get_T() << ", nx=" << problem.get_nx() << ", ndx=" << problem.get_ndx()
+     << ", nu_max=" << problem.get_nu_max() << ") " << std::endl;
+  os << "  Models:" << std::endl;
+  auto runningModels = problem.get_runningModels();
+  for (std::size_t t = 0; t < problem.get_T(); ++t) {
+    os << "    " << t << ": " << runningModels[t] << std::endl;
+  }
+  os << "    T+1: " << problem.get_terminalModel() << std::endl;
+  return os;
+}
+
 }  // namespace crocoddyl

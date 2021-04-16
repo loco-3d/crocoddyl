@@ -235,6 +235,12 @@ class ShootingProblemTpl {
    */
   std::size_t get_nthreads() const;
 
+  /**
+   * @brief Print information on the ShootingProblem
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem);
+
  protected:
   Scalar cost_;                                                          //!< Total cost
   std::size_t T_;                                                        //!< number of running nodes
