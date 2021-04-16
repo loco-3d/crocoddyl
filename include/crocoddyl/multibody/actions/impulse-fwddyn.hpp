@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,6 +69,12 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   void set_armature(const VectorXs& armature);
   void set_restitution_coefficient(const Scalar r_coeff);
   void set_damping_factor(const Scalar damping);
+
+  /**
+   * @brief Print information on the action model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ActionModelImpulseFwdDynamicsTpl<Scalar>& model);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
