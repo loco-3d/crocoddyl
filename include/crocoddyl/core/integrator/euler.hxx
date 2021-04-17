@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <typeinfo>
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
@@ -198,6 +199,16 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   differential_->quasiStatic(d->differential, u, x, maxiter, tol);
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& model) {
+  // TODO: TTI
+  // Get derived pointer
+
+  os << "IntegratedActionModelEuler (dt=" << model.get_dt() << ", differential=" << model.get_differential()
+     << " of type '" << typeid(*model.get_differential()).name() << "') " << std::endl;
+  return os;
 }
 
 }  // namespace crocoddyl
