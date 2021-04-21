@@ -116,6 +116,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     throw_pretty("Invalid argument: "
                  << "terminal action data is not consistent with the terminal action model")
   }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>
