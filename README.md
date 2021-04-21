@@ -103,7 +103,7 @@ sudo apt-get update
 ```bash
 sudo apt install robotpkg-py27-crocoddyl # for Python 2
 
-sudo apt install robotpkg-py35-crocoddyl # for Python 3
+sudo apt install robotpkg-py36-crocoddyl # for Python 3
 ```
 
 Finally you will need to configure your environment variables, e.g.:
@@ -154,12 +154,12 @@ python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display
 ```
 
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
-- [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
-- [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
-- [examples/notebooks/whole_body_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/whole_body_manipulation.ipynb)
-- [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
-- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
+- [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/unicycle_towards_origin.ipynb)
+- [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/cartpole_swing_up.py)
+- [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/whole_body_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/whole_body_manipulation.ipynb)
+- [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/bipedal_walking.ipynb)
+- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 ## Documentation
 
