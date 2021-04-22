@@ -38,7 +38,6 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  enum JointType { FreeFlyer = 0, Spherical, Simple };
   /**
    * @brief Initialize the multibody state
    *
@@ -91,7 +90,6 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  JointType joint_type_;
   boost::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
   VectorXs x0_;                                  //!< Zero state
 };
