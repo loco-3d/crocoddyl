@@ -19,41 +19,49 @@ Here, there is a list of other contributions that were possible thanks to **Croc
 
 &nbsp;
 
-*i. Optimal control and learning:*
+*i. Optimal control:*
 
 <a id="4">[4]</a>
 R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
 
 <a id="5">[5]</a>
-T. G. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
-
-<a id="6">[6]</a>
 J. Martin-Saumell, J. Sola, C. Mastalli, and A. Santamaria-Navarro. [Squash-Box Feasibility Driven Differential Dynamic Programming](https://cmastalli.github.io/publications/squashddp20iros.html),  IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2020
 
 &nbsp;
 
 *ii. Model predictive control:*
 
-<a id="7">[7]</a>
+<a id="6">[6]</a>
 E. Dantec, R. Budhiraja, A. Roig, T.G. Lembono, G. Saurel, O. Stasse, P. Fernbach, S. Tonneau, S. Vijayakumar, S. Calinon, M. Taïx, N. Mansard. [Whole Body Model Predictive Control with a Memory of Motion: Experiments on a Torque-Controlled Talos](https://hal.archives-ouvertes.fr/hal-02995796/file/HAL_MPC_memory_collision.pdf), IEEE International Conference on Robotics and Automation (ICRA), 2021
 
-<a id="8">[8]</a>
+<a id="7">[7]</a>
 T. Corbères, T. Flayols, P.A. Léziart, R. Budhiraja, N. Mansard
 [Comparison of predictive controllers for locomotion and balance recovery of quadruped robots](https://hal.laas.fr/hal-03034022/file/icra20_corberes.pdf), IEEE International Conference on Robotics and Automation (ICRA), 2021
 
-<a id="9">[9]</a>
+<a id="8">[8]</a>
 S. Kleff, A. Meduri, R. Budhiraja, N. Mansard and L. Righetti.
 [High-Frequency Nonlinear Model Predictive Control of a Manipulator](https://hal.archives-ouvertes.fr/hal-02993058v2/document), IEEE International Conference on Robotics and Automation (ICRA), 2021
 
 &nbsp;
 
-*iii. Co-design and biomechanics*
+*iii. Machine learning:*
+
+<a id="9">[9]</a>
+T. G. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
+
+&nbsp;
+
+*iv. Co-design*
 
 <a id="10">[10]</a>
 G Fadini, T Flayols, A del Prete, N Mansard, P Souères. [Computational design of energy-efficient legged robots: Optimizing for size and actuators](https://hal.archives-ouvertes.fr/hal-02993624v2/document), IEEE International Conference on Robotics and Automation (ICRA), 2021
 
 <a id="11">[11]</a>
 T. Dinev, C. Mastalli, V. Ivan, S. Tonneau and S. Vijayakumar. [Co-Designing Robots by Differentiating Motion Solvers](https://arxiv.org/pdf/2103.04660.pdf), 2021
+
+&nbsp;
+
+*v. Biomechanics*
 
 <a id="12">[12]</a>
 M. Boukheddimi, R. Budhiraja, P. Souères and B. Watier.
