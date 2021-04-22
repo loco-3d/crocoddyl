@@ -1,19 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 #define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
 
 namespace crocoddyl {
 
+/**
+ * @brief State multibody representation
+ *
+ * A multibody state is described by the configuration point and its tangential velocity, or in other words, by the
+ * generalized position and velocity coordinates of a rigid-body system. For this state, we describe its operators:
+ * difference, integrates, transport and their derivatives for any Pinocchio model.
+ *
+ * For more details about these operators, please read the documentation of the `StateAbstractTpl` class.
+ *
+ * \sa `diff()`, `integrate()`, `Jdiff()`, `Jintegrate()` and `JintegrateTransport()`
+ */
 template <typename _Scalar>
 class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  public:
@@ -27,13 +39,30 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   enum JointType { FreeFlyer = 0, Spherical, Simple };
-
+  /**
+   * @brief Initialize the multibody state
+   *
+   * @param[in] model  Pinocchio model
+   */
   explicit StateMultibodyTpl(boost::shared_ptr<PinocchioModel> model);
   StateMultibodyTpl();
   virtual ~StateMultibodyTpl();
 
+  /**
+   * @brief Generate a zero state.
+   *
+   * Note that the zero configuration is computed using `pinocchio::neutral`.
+   */
   virtual VectorXs zero() const;
+
+  /**
+   * @brief Generate a random state
+   *
+   * Note that the random configuration is computed using `pinocchio::random` which satisfies the manifold definition
+   * (e.g., the quaterion definition)
+   */
   virtual VectorXs rand() const;
+
   virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
                     Eigen::Ref<VectorXs> dxout) const;
   virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
@@ -47,6 +76,9 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
 
+  /**
+   * @brief Return the Pinocchio model (i.e., model of the rigid body system)
+   */
   const boost::shared_ptr<PinocchioModel>& get_pinocchio() const;
 
  protected:
@@ -59,9 +91,9 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  boost::shared_ptr<PinocchioModel> pinocchio_;
-  VectorXs x0_;
   JointType joint_type_;
+  boost::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
+  VectorXs x0_;                                  //!< Zero state
 };
 
 }  // namespace crocoddyl
