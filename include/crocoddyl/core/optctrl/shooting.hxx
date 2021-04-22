@@ -78,7 +78,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()) {
+      nu_max_(running_models[0]->get_nu()),
+      nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const std::size_t nu = model->get_nu();
@@ -116,6 +117,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     throw_pretty("Invalid argument: "
                  << "terminal action data is not consistent with the terminal action model")
   }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>

@@ -25,11 +25,16 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
@@ -41,17 +46,22 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   xs.back() = model->get_state()->rand();
 
   // check the state and cost in each node
-  problem.calc(xs, us);
+  problem1.calc(xs, us);
+  problem2.calc(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK(problem.get_runningDatas()[i]->cost == data->cost);
-    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
+    BOOST_CHECK(problem1.get_runningDatas()[i]->cost == data->cost);
+    BOOST_CHECK(problem2.get_runningDatas()[i]->cost == data->cost);
+    BOOST_CHECK((problem1.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
-  BOOST_CHECK(problem.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
+  BOOST_CHECK(problem2.get_terminalData()->cost == data->cost);
+  BOOST_CHECK((problem1.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
 void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) {
@@ -61,11 +71,16 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) 
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
@@ -77,17 +92,22 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) 
   xs.back() = model->get_state()->rand();
 
   // check the state and cost in each node
-  problem.calc(xs, us);
+  problem1.calc(xs, us);
+  problem2.calc(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK(problem.get_runningDatas()[i]->cost == data->cost);
-    BOOST_CHECK((problem.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
+    BOOST_CHECK(problem1.get_runningDatas()[i]->cost == data->cost);
+    BOOST_CHECK(problem2.get_runningDatas()[i]->cost == data->cost);
+    BOOST_CHECK((problem1.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
-  BOOST_CHECK(problem.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
+  BOOST_CHECK(problem2.get_terminalData()->cost == data->cost);
+  BOOST_CHECK((problem1.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
 void test_calcDiff(ActionModelTypes::Type action_model_type) {
@@ -95,11 +115,16 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
@@ -111,26 +136,38 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   xs.back() = model->get_state()->rand();
 
   // check the state and cost in each node
-  problem.calc(xs, us);
-  problem.calcDiff(xs, us);
+  problem1.calc(xs, us);
+  problem2.calc(xs, us);
+  problem1.calcDiff(xs, us);
+  problem2.calcDiff(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isZero(1e-9));
-  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isZero(1e-9));
-  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
+  BOOST_CHECK((problem1.get_terminalData()->Fx - data->Fx).isZero(1e-9));
+  BOOST_CHECK((problem2.get_terminalData()->Fx - data->Fx).isZero(1e-9));
+  BOOST_CHECK((problem1.get_terminalData()->Lx - data->Lx).isZero(1e-9));
+  BOOST_CHECK((problem2.get_terminalData()->Lx - data->Lx).isZero(1e-9));
+  BOOST_CHECK((problem1.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
+  BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
 }
 
 void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type) {
@@ -140,11 +177,16 @@ void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_ty
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
@@ -156,26 +198,38 @@ void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_ty
   xs.back() = model->get_state()->rand();
 
   // check the state and cost in each node
-  problem.calc(xs, us);
-  problem.calcDiff(xs, us);
+  problem1.calc(xs, us);
+  problem2.calc(xs, us);
+  problem1.calcDiff(xs, us);
+  problem2.calcDiff(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
-    BOOST_CHECK((problem.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
+    BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
+    BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
   }
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem.get_terminalData()->Fx - data->Fx).isZero(1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lx - data->Lx).isZero(1e-7));
-  BOOST_CHECK((problem.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
+  BOOST_CHECK((problem1.get_terminalData()->Fx - data->Fx).isZero(1e-7));
+  BOOST_CHECK((problem2.get_terminalData()->Fx - data->Fx).isZero(1e-7));
+  BOOST_CHECK((problem1.get_terminalData()->Lx - data->Lx).isZero(1e-7));
+  BOOST_CHECK((problem2.get_terminalData()->Lx - data->Lx).isZero(1e-7));
+  BOOST_CHECK((problem1.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
+  BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
 }
 
 void test_rollout(ActionModelTypes::Type action_model_type) {
@@ -243,11 +297,16 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T);
@@ -259,7 +318,14 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   }
 
   // check the state and cost in each node
-  problem.quasiStatic(us, xs);
+  problem1.quasiStatic(us, xs);
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
+    Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
+    model->quasiStatic(data, u, xs[i]);
+    BOOST_CHECK((u - us[i]).isZero(1e-7));
+  }
+  problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
@@ -275,11 +341,16 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
 
-  // create the shooting problem
+  // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T, model);
-  crocoddyl::ShootingProblem problem(x0, models, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    datas[i] = model->createData();
+  }
+  crocoddyl::ShootingProblem problem1(x0, models, model);
+  crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T);
@@ -291,7 +362,14 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
   }
 
   // check the state and cost in each node
-  problem.quasiStatic(us, xs);
+  problem1.quasiStatic(us, xs);
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
+    Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
+    model->quasiStatic(data, u, xs[i]);
+    BOOST_CHECK((u - us[i]).isZero(1e-7));
+  }
+  problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
