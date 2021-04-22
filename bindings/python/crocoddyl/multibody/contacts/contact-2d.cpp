@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeContact2D() {
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModel2D> >();
+
   bp::class_<ContactModel2D, bp::bases<ContactModelAbstract> >(
       "ContactModel2D",
       "Rigid 2D contact model.\n\n"
