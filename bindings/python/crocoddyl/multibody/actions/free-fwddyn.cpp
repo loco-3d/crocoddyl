@@ -21,7 +21,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "Differential action model for free forward dynamics in multibody systems.\n\n"
       "This class implements a the dynamics using Articulate Body Algorithm (ABA),\n"
       "or a custom implementation in case of system with armatures. If you want to\n"
-      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "include the armature, you need to use set_armature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
                boost::shared_ptr<CostModelSum> >(bp::args("self", "state", "actuation", "costs"),
