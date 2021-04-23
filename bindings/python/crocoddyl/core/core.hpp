@@ -53,6 +53,7 @@ void exposeSolverBoxQP();
 void exposeSolverBoxDDP();
 void exposeSolverBoxFDDP();
 void exposeCallbacks();
+void exposeStopWatch();
 
 void exposeCore();
 

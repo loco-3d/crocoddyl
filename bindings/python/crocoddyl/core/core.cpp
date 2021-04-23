@@ -51,6 +51,7 @@ void exposeCore() {
   exposeSolverBoxDDP();
   exposeSolverBoxFDDP();
   exposeCallbacks();
+  exposeStopWatch();
 }
 
 }  // namespace python
