@@ -537,7 +537,7 @@ std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& pro
   for (std::size_t t = 0; t < problem.get_T(); ++t) {
     os << "    " << t << ": " << *runningModels[t] << std::endl;
   }
-  os << "    T+1: " << *problem.get_terminalModel() << std::endl;
+  os << "    T+1: " << *problem.get_terminalModel();
   return os;
 }
 
