@@ -357,9 +357,9 @@ void SolverDDP::computeGains(const std::size_t t) {
     K_[t].topRows(nu).noalias() = Qxu_[t].leftCols(nu).transpose();
 
     Eigen::Block<Eigen::MatrixXd> K = K_[t].topRows(nu);
-    START_PROFILER("SolverDDP::Quu_solve");
+    START_PROFILER("SolverDDP::Quu_inv_Qux");
     Quu_llt_[t].solveInPlace(K);
-    STOP_PROFILER("SolverDDP::Quu_solve");
+    STOP_PROFILER("SolverDDP::Quu_inv_Qux");
     k_[t].head(nu) = Qu_[t].head(nu);
     Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
     Quu_llt_[t].solveInPlace(k);
