@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,8 @@ void exposeDifferentialActionNumDiff() {
       "StdVec_DiffActionModel");
   StdVectorPythonVisitor<DifferentialActionDataPtr, std::allocator<DifferentialActionDataPtr>, true>::expose(
       "StdVec_DiffActionData");
+
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelNumDiff> >();
 
   bp::class_<DifferentialActionModelNumDiff, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelNumDiff",

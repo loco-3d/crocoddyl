@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationQuadFlatLog() {
+  boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelQuadFlatLog> >();
+
   bp::class_<ActivationModelQuadFlatLog, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuadFlatLog",
       "Quadratic flat activation model.\n"

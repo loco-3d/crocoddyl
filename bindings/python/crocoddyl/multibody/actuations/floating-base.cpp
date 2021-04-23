@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActuationFloatingBase() {
+  bp::register_ptr_to_python<boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> >();
+
   bp::class_<ActuationModelFloatingBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFloatingBase",
       "Floating-base actuation models.\n\n"
