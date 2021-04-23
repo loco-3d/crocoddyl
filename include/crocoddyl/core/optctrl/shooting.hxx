@@ -490,8 +490,9 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
 #ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
+  (void)nthreads;
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
             << std::endl;
 #else
   if (nthreads < 1) {
@@ -520,8 +521,8 @@ std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
 template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_nthreads() const {
 #ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
             << std::endl;
 #endif
   return nthreads_;
