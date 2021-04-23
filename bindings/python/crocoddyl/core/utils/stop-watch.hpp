@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,7 +9,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_STOP_WATCH_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_STOP_WATCH_HPP_
 
-//#include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {

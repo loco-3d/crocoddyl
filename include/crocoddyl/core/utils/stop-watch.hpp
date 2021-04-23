@@ -35,7 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma GCC visibility push(default)
 #endif
 
+// Uncomment the following line to activate the profiler
 //#define PROFILER_ACTIVE
+
 #ifdef PROFILER_ACTIVE
   #define START_PROFILER(name) getProfiler().start(name)
   #define STOP_PROFILER(name) getProfiler().stop(name)
@@ -63,7 +65,7 @@ enum StopwatchMode
   NONE	    = 0,  // Clock is not initialized
   CPU_TIME  = 1,  // Clock calculates time ranges using ctime and CLOCKS_PER_SEC
   REAL_TIME = 2   // Clock calculates time by asking the operating system how
-  // much real time passed
+                  // much real time passed
 };
 
 
@@ -161,72 +163,73 @@ enum StopwatchMode
 class Stopwatch {
 public:
 
-  /** Constructor */
+  /** @brief Constructor */
   Stopwatch(StopwatchMode _mode=NONE);
 
-  /** Destructor */
+  /** @brief Destructor */
   ~Stopwatch();
 
-  /** Tells if a performance with a certain ID exists */
+  /** @brief Tells if a performance with a certain ID exists */
   bool performance_exists(std::string perf_name);
 
-  /** Initialize stopwatch to use a certain time taking mode */
+  /** @brief Initialize stopwatch to use a certain time taking mode */
   void set_mode(StopwatchMode mode);
 
-  /** Start the stopwatch related to a certain piece of code */
-  void start(std::string perf_name);
+  /** @brief Start the stopwatch related to a certain piece of code */
+  void start(const std::string &perf_name);
 
-  /** Stops the stopwatch related to a certain piece of code */
-  void stop(std::string perf_name);
+  /** @brief Stops the stopwatch related to a certain piece of code */
+  void stop(const std::string &perf_name);
 
-  /** Stops the stopwatch related to a certain piece of code */
-  void pause(std::string perf_name);
+  /** @brief Stops the stopwatch related to a certain piece of code */
+  void pause(const std::string &perf_name);
 
-  /** Reset a certain performance record */
-  void reset(std::string perf_name);
+  /** @brief Reset a certain performance record */
+  void reset(const std::string &perf_name);
 
-  /** Resets all the performance records */
+  /** @brief Resets all the performance records */
   void reset_all();
 
-  /** Dump the data of a certain performance record */
-  void report(std::string perf_name, int precision=2,
+  /** @brief Dump the data of a certain performance record */
+  void report(const std::string &perf_name, int precision=2,
               std::ostream& output = std::cout);
 
-  /** Dump the data of all the performance records */
+  /** @brief Dump the data of all the performance records */
   void report_all(int precision=2, std::ostream& output = std::cout);
 
-  /** Returns total execution time of a certain performance */
-  long double get_total_time(std::string perf_name);
+  /** @brief Returns total execution time of a certain performance */
+  long double get_total_time(const std::string &perf_name);
 
-  /** Returns average execution time of a certain performance */
-  long double get_average_time(std::string perf_name);
+  /** @brief Returns average execution time of a certain performance */
+  long double get_average_time(const std::string &perf_name);
 
-  /** Returns minimum execution time of a certain performance */
-  long double get_min_time(std::string perf_name);
+  /** @brief Returns minimum execution time of a certain performance */
+  long double get_min_time(const std::string &perf_name);
 
-  /** Returns maximum execution time of a certain performance */
-  long double get_max_time(std::string perf_name);
+  /** @brief Returns maximum execution time of a certain performance */
+  long double get_max_time(const std::string &perf_name);
 
-  /** Return last measurement of a certain performance */
-  long double get_last_time(std::string perf_name);
+  /** @brief Return last measurement of a certain performance */
+  long double get_last_time(const std::string &perf_name);
 
-  /** Return the time since the start of the last measurement of a given
-      performance. */
-  long double get_time_so_far(std::string perf_name);
+  /** @brief Return the time since the start of the last measurement of a given
+      performance.
+  */
+  long double get_time_so_far(const std::string &perf_name);
 
-  /**	Turn off clock, all the Stopwatch::* methods return without doing
+  /** @brief Turn off clock, all the Stopwatch::* methods return without doing
         anything after this method is called. */
   void turn_off();
 
-  /** Turn on clock, restore clock operativity after a turn_off(). */
+  /** @brief Turn on clock, restore clock operativity after a turn_off(). */
   void turn_on();
 
-  /** Take time, depends on mode */
+  /** @brief Take time, depends on mode. */
   long double take_time();
 
 protected:
 
-  /** Struct to hold the performance data */
+  /** @brief Struct to hold the performance data */
   struct PerformanceData {
 
     PerformanceData() :
@@ -239,37 +242,18 @@ protected:
       stops(0) {
     }
 
-    /** Start time */
-    long double	clock_start;
-
-    /** Cumulative total time */
-    long double	total_time;
-
-    /** Minimum time */
-    long double	min_time;
-
-    /** Maximum time */
-    long double	max_time;
-
-    /** Last time */
-    long double last_time;
-
-    /** Tells if this performance has been paused, only for internal use */
-    bool paused;
-
-    /** How many cycles have been this stopwatch executed? */
-    int	stops;
+    long double	clock_start;  //!< Start time
+    long double	total_time;   //!< Cumulative total time
+    long double	min_time;     //!< Minimum time
+    long double	max_time;     //!< Maximum time
+    long double last_time;    //!< Last time
+    bool paused;              //!< Tells if this performance has been paused, only for internal use
+    int	stops;                //!< How many cycles have been this stopwatch executed?
   };
 
-  /** Flag to hold the clock's status */
-  bool active;
-
-  /** Time taking mode */
-  StopwatchMode mode;
-
-  /** Pointer to the dynamic structure which holds the collection of performance
-      data */
-  std::map<std::string, PerformanceData >* records_of;
+  bool active;                //!< Flag to hold the clock's status
+  StopwatchMode mode;         //!< Time taking mode
+  std::map<std::string, PerformanceData >* records_of; //!< Dynamic collection of performance data
 
 };
 

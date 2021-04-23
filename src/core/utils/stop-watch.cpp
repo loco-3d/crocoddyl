@@ -114,7 +114,7 @@ long double Stopwatch::take_time()
   }
 }
 
-void Stopwatch::start(string perf_name)
+void Stopwatch::start(const string &perf_name)
 {
   if (!active) return;
 
@@ -133,7 +133,7 @@ void Stopwatch::start(string perf_name)
   perf_info.paused = false;
 }
 
-void Stopwatch::stop(string perf_name)
+void Stopwatch::stop(const string &perf_name)
 {
   if (!active) return;
 
@@ -167,7 +167,7 @@ void Stopwatch::stop(string perf_name)
   perf_info.total_time += lapse;
 }
 
-void Stopwatch::pause(string perf_name)
+void Stopwatch::pause(const string &perf_name)
 {
   if (!active) return;
 
@@ -219,7 +219,7 @@ void Stopwatch::report_all(int precision, std::ostream& output)
   }
 }
 
-void Stopwatch::reset(string perf_name)
+void Stopwatch::reset(const string &perf_name)
 {
   if (!active) return;
 
@@ -250,7 +250,7 @@ void Stopwatch::turn_off()
   active = false;
 }
 
-void Stopwatch::report(string perf_name, int precision, std::ostream& output)
+void Stopwatch::report(const string &perf_name, int precision, std::ostream& output)
 {
   if (!active) return;
 
@@ -275,7 +275,7 @@ void Stopwatch::report(string perf_name, int precision, std::ostream& output)
          << perf_info.total_time*1e3 << std::endl;
 }
 
-long double Stopwatch::get_time_so_far(string perf_name)
+long double Stopwatch::get_time_so_far(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )
@@ -290,7 +290,7 @@ long double Stopwatch::get_time_so_far(string perf_name)
   return lapse;
 }
 
-long double Stopwatch::get_total_time(string perf_name)
+long double Stopwatch::get_total_time(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )
@@ -302,7 +302,7 @@ long double Stopwatch::get_total_time(string perf_name)
 
 }
 
-long double Stopwatch::get_average_time(string perf_name)
+long double Stopwatch::get_average_time(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )
@@ -314,7 +314,7 @@ long double Stopwatch::get_average_time(string perf_name)
 
 }
 
-long double Stopwatch::get_min_time(string perf_name)
+long double Stopwatch::get_min_time(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )
@@ -326,7 +326,7 @@ long double Stopwatch::get_min_time(string perf_name)
 
 }
 
-long double Stopwatch::get_max_time(string perf_name)
+long double Stopwatch::get_max_time(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )
@@ -338,7 +338,7 @@ long double Stopwatch::get_max_time(string perf_name)
 
 }
 
-long double Stopwatch::get_last_time(string perf_name)
+long double Stopwatch::get_last_time(const string &perf_name)
 {
   // Try to recover performance data
   if ( !performance_exists(perf_name)  )

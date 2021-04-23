@@ -1,16 +1,7 @@
-//#include <boost/python.hpp>
-//#include <iostream>
-//#include <string>
-//#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-//#include <boost/python/make_constructor.hpp>
-
-//#include "crocoddyl/bindings/python/stop_watch.hpp"
-//#include "crocoddyl/core/utils/stop-watch.hpp"
-
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
