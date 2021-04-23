@@ -6,8 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <typeinfo>
+#include <iostream>                 // std::ostream
+#include <typeinfo>                 // typeid()
+#include <boost/core/demangle.hpp>  // boost::core::demangle
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
@@ -203,11 +204,8 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& model) {
-  // TODO: TTI
-  // Get derived pointer
-
-  os << "IntegratedActionModelEuler (dt=" << model.get_dt() << ", differential=" << model.get_differential()
-     << " of type '" << typeid(*model.get_differential()).name() << "') " << std::endl;
+  os << "IntegratedActionModelEuler (dt=" << model.get_dt() << ", differential of type '"
+     << boost::core::demangle(typeid(*model.get_differential()).name()) << "')";
   return os;
 }
 

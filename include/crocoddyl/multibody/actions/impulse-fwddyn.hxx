@@ -213,7 +213,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar d
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const ActionModelImpulseFwdDynamicsTpl<Scalar>& model) {
   os << "ActionModelImpulseFwdDynamics (r_coeff=" << model.get_restitution_coefficient()
-     << ", JMinvJt_damping=" << model.get_damping_factor() << ") " << std::endl;
+     << ", JMinvJt_damping=" << model.get_damping_factor() << ")";
   return os;
 }
 

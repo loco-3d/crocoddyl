@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -85,7 +86,8 @@ void exposeActionAbstract() {
       .add_property("u_lb", bp::make_function(&ActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
                     &ActionModelAbstract_wrap::set_u_lb, "lower control limits")
       .add_property("u_ub", bp::make_function(&ActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
-                    &ActionModelAbstract_wrap::set_u_ub, "upper control limits");
+                    &ActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .def(PrintableVisitor<ActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
 

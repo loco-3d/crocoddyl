@@ -1,10 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#include <iostream>                 // std::ostream
+#include <typeinfo>                 // typeid()
+#include <boost/core/demangle.hpp>  // boost::core::demangle
 
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -143,6 +147,12 @@ void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
   has_control_limits_ = isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model) {
+  os << "ActionModel type '" << boost::core::demangle(typeid(action_model).name()) << "'" << action_model;
+  return os;
 }
 
 }  // namespace crocoddyl

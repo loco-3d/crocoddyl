@@ -269,8 +269,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(co
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const DifferentialActionModelContactFwdDynamicsTpl<Scalar>& model) {
   os << "DifferentialActionModelContactFwdDynamics (" << model.get_contacts()->get_nc_total() << " contacts ["
-     << model.get_contacts()->get_nc() << " active], JMinvJt_damping=" << model.get_damping_factor() << ") "
-     << std::endl;
+     << model.get_contacts()->get_nc() << " active], JMinvJt_damping=" << model.get_damping_factor() << ")";
   return os;
 }
 
