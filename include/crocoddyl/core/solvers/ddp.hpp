@@ -16,6 +16,8 @@
 
 namespace crocoddyl {
 
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXdRowMajor;
+
 /**
  * @brief Differential Dynamic Programming (DDP) solver
  *
@@ -240,7 +242,7 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Return the feedback gains \f$\mathbf{K}_{s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_K() const;
+  const std::vector<MatrixXdRowMajor>& get_K() const;
 
   /**
    * @brief Return the feedforward gains \f$\mathbf{k}_{s}\f$
@@ -323,13 +325,13 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
   std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
   std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
-  std::vector<Eigen::MatrixXd> K_;    //!< Feedback gains
+  std::vector<MatrixXdRowMajor> K_;    //!< Feedback gains
   std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
   std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
 
   Eigen::VectorXd xnext_;                              //!< Next state
-  Eigen::MatrixXd FxTVxx_p_;                           //!< fxTVxx_p_
-  std::vector<Eigen::MatrixXd> FuTVxx_p_;              //!< fuTVxx_p_
+  MatrixXdRowMajor FxTVxx_p_;                           //!< fxTVxx_p_
+  std::vector<MatrixXdRowMajor> FuTVxx_p_;              //!< fuTVxx_p_
   Eigen::VectorXd fTVxx_p_;                            //!< fTVxx_p term
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;  //!< Cholesky LLT solver
   std::vector<Eigen::VectorXd> Quuk_;                  //!< Quuk term
