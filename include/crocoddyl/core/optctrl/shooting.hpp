@@ -236,7 +236,7 @@ class ShootingProblemTpl {
   std::size_t get_nthreads() const;
 
   /**
-   * @brief Print information on the ShootingProblem
+   * @brief Print information on the 'ShootingProblem'
    */
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem);

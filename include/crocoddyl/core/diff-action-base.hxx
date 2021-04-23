@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>                 // std::ostream
-#include <typeinfo>                 // typeid()
-#include <boost/core/demangle.hpp>  // boost::core::demangle
+#include <iostream>
+#include <typeinfo>
+#include <boost/core/demangle.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
 
