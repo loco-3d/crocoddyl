@@ -533,7 +533,8 @@ std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& pro
   os << "ShootingProblem (T=" << problem.get_T() << ", nx=" << problem.get_nx() << ", ndx=" << problem.get_ndx()
      << ", nu_max=" << problem.get_nu_max() << ") " << std::endl;
   os << "  Models:" << std::endl;
-  auto runningModels = problem.get_runningModels();
+  const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar>>>& runningModels =
+      problem.get_runningModels();
   for (std::size_t t = 0; t < problem.get_T(); ++t) {
     os << "    " << t << ": " << *runningModels[t] << std::endl;
   }
