@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: true
+          submodules: recursive
       # This step will fetch/store the directory used by ccache before/after the ci run
       - uses: actions/cache@v2
         with:
