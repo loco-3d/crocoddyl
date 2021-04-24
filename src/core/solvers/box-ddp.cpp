@@ -1,14 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, CNRS-LAAS, University of Edinburgh
+// Copyright (C) 2019-2021, CNRS-LAAS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include "crocoddyl/core/utils/exception.hpp"
+
 #include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

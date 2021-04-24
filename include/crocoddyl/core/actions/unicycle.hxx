@@ -57,10 +57,10 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   // Cost derivatives
   const Scalar w_x = cost_weights_[0] * cost_weights_[0];
   const Scalar w_u = cost_weights_[1] * cost_weights_[1];
-  d->Lx = x.cwiseProduct(MathBase::VectorXs::Constant(state_->get_nx(), w_x));
-  d->Lu = u.cwiseProduct(MathBase::VectorXs::Constant(nu_, w_u));
-  d->Lxx.diagonal() << w_x, w_x, w_x;
-  d->Luu.diagonal() << w_u, w_u;
+  d->Lx = x * w_x;
+  d->Lu = u * w_u;
+  d->Lxx.diagonal().setConstant(w_x);
+  d->Luu.diagonal().setConstant(w_u);
 
   // Dynamic derivatives
   const Scalar c = cos(x[2]);
@@ -95,6 +95,17 @@ const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::ge
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::Vector2s& weights) {
   cost_weights_ = weights;
+}
+
+template <typename Scalar>
+Scalar ActionModelUnicycleTpl<Scalar>::get_dt() const {
+  return dt_;
+}
+
+template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::set_dt(const Scalar dt) {
+  if (dt <= 0) throw_pretty("Invalid argument: dt should be strictly positive.");
+  dt_ = dt;
 }
 
 }  // namespace crocoddyl

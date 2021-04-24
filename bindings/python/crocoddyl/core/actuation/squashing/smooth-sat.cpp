@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSquashingSmoothSat() {
+  bp::register_ptr_to_python<boost::shared_ptr<SquashingModelSmoothSat> >();
+
   bp::class_<SquashingModelSmoothSat, bp::bases<SquashingModelAbstract> >(
       "SquashingModelSmoothSat", "Smooth Sat squashing model",
       bp::init<Eigen::VectorXd, Eigen::VectorXd, int>(bp::args("self", "u_lb", "u_ub", "ns"),

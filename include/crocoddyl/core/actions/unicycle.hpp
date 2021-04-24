@@ -42,6 +42,9 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   const Vector2s& get_cost_weights() const;
   void set_cost_weights(const Vector2s& weights);
 
+  Scalar get_dt() const;
+  void set_dt(const Scalar dt);
+
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
   using Base::nr_;                  //!< Dimension of the cost residual
