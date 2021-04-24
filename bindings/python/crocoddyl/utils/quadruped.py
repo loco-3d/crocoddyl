@@ -547,7 +547,6 @@ class SimpleQuadrupedalGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                xref = crocoddyl.FrameTranslation(i.id, i.placement.translation)
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i.id,
                                                                                    i.placement.translation, 0)
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
