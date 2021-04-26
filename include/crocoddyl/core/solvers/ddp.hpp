@@ -13,6 +13,7 @@
 #include <Eigen/Cholesky>
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/aligned-vector.hpp"
 
 namespace crocoddyl {
 
@@ -59,9 +60,9 @@ class SolverDDP : public SolverAbstract {
   explicit SolverDDP(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverDDP();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-                     const bool is_feasible = false, const double regInit = 1e-9);
+  virtual bool solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
+                     const std::size_t maxiter = 100, const bool is_feasible = false, const double regInit = 1e-9);
   virtual void computeDirection(const bool recalc = true);
   virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
@@ -207,52 +208,52 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Vxx() const;
+  const crocoddyl::aligned_vector<Eigen::MatrixXd>& get_Vxx() const;
 
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{x}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Vx() const;
+  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_Vx() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function \f$\mathbf{Q}_{\mathbf{xx}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxx() const;
+  const crocoddyl::aligned_vector<Eigen::MatrixXd>& get_Qxx() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function \f$\mathbf{Q}_{\mathbf{xu}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxu() const;
+  const crocoddyl::aligned_vector<Eigen::MatrixXd>& get_Qxu() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function \f$\mathbf{Q}_{\mathbf{uu}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Quu() const;
+  const crocoddyl::aligned_vector<Eigen::MatrixXd>& get_Quu() const;
 
   /**
    * @brief Return the Jacobian of the Hamiltonian function \f$\mathbf{Q}_{\mathbf{x}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Qx() const;
+  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_Qx() const;
 
   /**
    * @brief Return the Jacobian of the Hamiltonian function \f$\mathbf{Q}_{\mathbf{u}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Qu() const;
+  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_Qu() const;
 
   /**
    * @brief Return the feedback gains \f$\mathbf{K}_{s}\f$
    */
-  const std::vector<MatrixXdRowMajor>& get_K() const;
+  const crocoddyl::aligned_vector<MatrixXdRowMajor>& get_K() const;
 
   /**
    * @brief Return the feedforward gains \f$\mathbf{k}_{s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_k() const;
+  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_k() const;
 
   /**
    * @brief Return the gaps \f$\mathbf{\bar{f}}_{s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_fs() const;
+  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_fs() const;
 
   /**
    * @brief Modify the regularization factor used to increase the damping value
@@ -312,35 +313,35 @@ class SolverDDP : public SolverAbstract {
   double reg_min_;        //!< Minimum allowed regularization value
   double reg_max_;        //!< Maximum allowed regularization value
 
-  double cost_try_;                      //!< Total cost computed by line-search procedure
-  std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
-  std::vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
-  std::vector<Eigen::VectorXd> dx_;
+  double cost_try_;                                    //!< Total cost computed by line-search procedure
+  crocoddyl::aligned_vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
+  crocoddyl::aligned_vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
+  crocoddyl::aligned_vector<Eigen::VectorXd> dx_;
 
   // allocate data
-  std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
-  std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
-  std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
-  std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
-  std::vector<MatrixXdRowMajor> K_;    //!< Feedback gains
-  std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
-  std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
+  crocoddyl::aligned_vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
+  crocoddyl::aligned_vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
+  crocoddyl::aligned_vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
+  crocoddyl::aligned_vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
+  crocoddyl::aligned_vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
+  crocoddyl::aligned_vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
+  crocoddyl::aligned_vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
+  crocoddyl::aligned_vector<MatrixXdRowMajor> K_;   //!< Feedback gains
+  crocoddyl::aligned_vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
+  crocoddyl::aligned_vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
 
-  Eigen::VectorXd xnext_;                              //!< Next state
-  MatrixXdRowMajor FxTVxx_p_;                           //!< fxTVxx_p_
-  std::vector<MatrixXdRowMajor> FuTVxx_p_;              //!< fuTVxx_p_
-  Eigen::VectorXd fTVxx_p_;                            //!< fTVxx_p term
-  std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;  //!< Cholesky LLT solver
-  std::vector<Eigen::VectorXd> Quuk_;                  //!< Quuk term
-  std::vector<double> alphas_;                         //!< Set of step lengths using by the line-search procedure
-  double th_grad_;     //!< Tolerance of the expected gradient used for testing the step
-  double th_gaptol_;   //!< Threshold limit to check non-zero gaps
-  double th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  double th_stepinc_;  //!< Step-length threshold used to increase regularization
-  bool was_feasible_;  //!< Label that indicates in the previous iterate was feasible
+  Eigen::VectorXd xnext_;                                            //!< Next state
+  MatrixXdRowMajor FxTVxx_p_;                                        //!< fxTVxx_p_
+  crocoddyl::aligned_vector<MatrixXdRowMajor> FuTVxx_p_;             //!< fuTVxx_p_
+  Eigen::VectorXd fTVxx_p_;                                          //!< fTVxx_p term
+  crocoddyl::aligned_vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;  //!< Cholesky LLT solver
+  crocoddyl::aligned_vector<Eigen::VectorXd> Quuk_;                  //!< Quuk term
+  std::vector<double> alphas_;  //!< Set of step lengths using by the line-search procedure
+  double th_grad_;              //!< Tolerance of the expected gradient used for testing the step
+  double th_gaptol_;            //!< Threshold limit to check non-zero gaps
+  double th_stepdec_;           //!< Step-length threshold used to decrease regularization
+  double th_stepinc_;           //!< Step-length threshold used to increase regularization
+  bool was_feasible_;           //!< Label that indicates in the previous iterate was feasible
 };
 
 }  // namespace crocoddyl

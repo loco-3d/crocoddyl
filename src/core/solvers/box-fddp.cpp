@@ -163,6 +163,6 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
   }
 }
 
-const std::vector<Eigen::MatrixXd>& SolverBoxFDDP::get_Quu_inv() const { return Quu_inv_; }
+const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverBoxFDDP::get_Quu_inv() const { return Quu_inv_; }
 
 }  // namespace crocoddyl

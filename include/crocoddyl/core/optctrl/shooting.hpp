@@ -15,6 +15,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/utils/aligned-vector.hpp"
 
 namespace crocoddyl {
 
@@ -77,7 +78,7 @@ class ShootingProblemTpl {
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  Scalar calc(const crocoddyl::aligned_vector<VectorXs>& xs, const crocoddyl::aligned_vector<VectorXs>& us);
 
   /**
    * @brief Compute the derivatives of the cost and dynamics
@@ -91,7 +92,7 @@ class ShootingProblemTpl {
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calcDiff(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  Scalar calcDiff(const crocoddyl::aligned_vector<VectorXs>& xs, const crocoddyl::aligned_vector<VectorXs>& us);
 
   /**
    * @brief Integrate the dynamics given a control sequence
@@ -99,7 +100,7 @@ class ShootingProblemTpl {
    * @param[in] xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    */
-  void rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs);
+  void rollout(const crocoddyl::aligned_vector<VectorXs>& us, crocoddyl::aligned_vector<VectorXs>& xs);
 
   /**
    * @copybrief rollout
@@ -107,7 +108,7 @@ class ShootingProblemTpl {
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    */
-  std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+  crocoddyl::aligned_vector<VectorXs> rollout_us(const crocoddyl::aligned_vector<VectorXs>& us);
 
   /**
    * @brief Compute the quasic static commands given a state trajectory
@@ -115,7 +116,7 @@ class ShootingProblemTpl {
    * @param[out] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    * @param[in]  xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    */
-  void quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs);
+  void quasiStatic(crocoddyl::aligned_vector<VectorXs>& us, const crocoddyl::aligned_vector<VectorXs>& xs);
 
   /**
    * @copybrief quasiStatic
@@ -123,7 +124,7 @@ class ShootingProblemTpl {
    * @param[in] xs  time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size \f$T+1\f$)
    * @return the time-discrete quasic static commands \f$\mathbf{u_{s}}\f$ (size \f$T\f$)
    */
-  std::vector<VectorXs> quasiStatic_xs(const std::vector<VectorXs>& xs);
+  crocoddyl::aligned_vector<VectorXs> quasiStatic_xs(const crocoddyl::aligned_vector<VectorXs>& xs);
 
   /**
    * @brief Circular append of the model and data onto the end running node

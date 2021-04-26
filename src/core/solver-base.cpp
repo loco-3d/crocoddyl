@@ -39,8 +39,8 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
 
 SolverAbstract::~SolverAbstract() {}
 
-void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
-                                  const std::vector<Eigen::VectorXd>& us_warm, bool is_feasible) {
+void SolverAbstract::setCandidate(const crocoddyl::aligned_vector<Eigen::VectorXd>& xs_warm,
+                                  const crocoddyl::aligned_vector<Eigen::VectorXd>& us_warm, bool is_feasible) {
   const std::size_t T = problem_->get_T();
 
   if (xs_warm.size() == 0) {
@@ -98,9 +98,9 @@ const std::vector<boost::shared_ptr<CallbackAbstract> >& SolverAbstract::getCall
 
 const boost::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const { return problem_; }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_; }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
 
 bool SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
@@ -126,7 +126,7 @@ double SolverAbstract::get_th_stop() const { return th_stop_; }
 
 std::size_t SolverAbstract::get_iter() const { return iter_; }
 
-void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
+void SolverAbstract::set_xs(const crocoddyl::aligned_vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
     throw_pretty("Invalid argument: "
@@ -147,7 +147,7 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   xs_ = xs;
 }
 
-void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
+void SolverAbstract::set_us(const crocoddyl::aligned_vector<Eigen::VectorXd>& us) {
   const std::size_t T = problem_->get_T();
   if (us.size() != T) {
     throw_pretty("Invalid argument: "

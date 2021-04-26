@@ -20,8 +20,9 @@ SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
 
 SolverFDDP::~SolverFDDP() {}
 
-bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                       const std::size_t maxiter, const bool is_feasible, const double reginit) {
+bool SolverFDDP::solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs,
+                       const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us, const std::size_t maxiter,
+                       const bool is_feasible, const double reginit) {
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 

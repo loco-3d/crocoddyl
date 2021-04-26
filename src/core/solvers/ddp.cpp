@@ -44,8 +44,9 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
 
 SolverDDP::~SolverDDP() {}
 
-bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const std::size_t maxiter, const bool is_feasible, const double reginit) {
+bool SolverDDP::solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs,
+                      const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us, const std::size_t maxiter,
+                      const bool is_feasible, const double reginit) {
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
@@ -197,7 +198,7 @@ double SolverDDP::calcDiff() {
     is_feasible_ = could_be_feasible;
 
   } else if (!was_feasible_) {  // closing the gaps
-    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
+    for (crocoddyl::aligned_vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
     }
   }
@@ -439,25 +440,25 @@ double SolverDDP::get_th_grad() const { return th_grad_; }
 
 double SolverDDP::get_th_gaptol() const { return th_gaptol_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
+const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxx() const { return Qxx_; }
+const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverDDP::get_Qxx() const { return Qxx_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Qxu() const { return Qxu_; }
+const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverDDP::get_Qxu() const { return Qxu_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_Quu() const { return Quu_; }
+const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverDDP::get_Quu() const { return Quu_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
 
-const std::vector<MatrixXdRowMajor>& SolverDDP::get_K() const { return K_; }
+const crocoddyl::aligned_vector<MatrixXdRowMajor>& SolverDDP::get_K() const { return K_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
-const std::vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
+const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
 
 void SolverDDP::set_reg_incfactor(const double regfactor) {
   if (regfactor <= 1.) {

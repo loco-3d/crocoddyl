@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
-  std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  crocoddyl::aligned_vector<Eigen::VectorXd> xs(N + 1, x0);
 
   /***************************************************************/
 

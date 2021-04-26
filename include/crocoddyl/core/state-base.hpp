@@ -15,6 +15,7 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/core/utils/aligned-vector.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -221,8 +222,9 @@ class StateAbstractTpl {
    * @param[in]  x1     Current state point (size `nx`)
    * @return  Jacobians
    */
-  std::vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                                 const Jcomponent firstsecond = both);
+  crocoddyl::aligned_vector<MatrixXs> Jdiff_Js(const Eigen::Ref<const VectorXs>& x0,
+                                               const Eigen::Ref<const VectorXs>& x1,
+                                               const Jcomponent firstsecond = both);
 
   /**
    * @copybrief Jintegrate()
@@ -231,8 +233,9 @@ class StateAbstractTpl {
    * @param[in]  dx    Velocity vector (size `ndx`)
    * @return  Jacobians
    */
-  std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                      const Jcomponent firstsecond = both);
+  crocoddyl::aligned_vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x,
+                                                    const Eigen::Ref<const VectorXs>& dx,
+                                                    const Jcomponent firstsecond = both);
 
   /**
    * @brief Return the dimension of the state tuple

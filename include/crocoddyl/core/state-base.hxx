@@ -47,12 +47,12 @@ typename MathBaseTpl<Scalar>::VectorXs StateAbstractTpl<Scalar>::integrate_x(con
 }
 
 template <typename Scalar>
-std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jdiff_Js(
+crocoddyl::aligned_vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jdiff_Js(
     const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1, Jcomponent firstsecond) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
   Jfirst.setZero();
   Jsecond.setZero();
-  std::vector<MatrixXs> Jacs;
+  crocoddyl::aligned_vector<MatrixXs> Jacs;
   Jdiff(x0, x1, Jfirst, Jsecond, firstsecond);
   switch (firstsecond) {
     case both:
@@ -74,12 +74,12 @@ std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jd
 }
 
 template <typename Scalar>
-std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jintegrate_Js(
+crocoddyl::aligned_vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Jintegrate_Js(
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx, const Jcomponent firstsecond) {
   MatrixXs Jfirst(ndx_, ndx_), Jsecond(ndx_, ndx_);
   Jfirst.setZero();
   Jsecond.setZero();
-  std::vector<MatrixXs> Jacs;
+  crocoddyl::aligned_vector<MatrixXs> Jacs;
   Jintegrate(x, dx, Jfirst, Jsecond, firstsecond, setto);
   switch (firstsecond) {
     case both:
