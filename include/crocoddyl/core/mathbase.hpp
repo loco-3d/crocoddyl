@@ -37,6 +37,7 @@ struct MathBaseTpl {
 
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXsRowMajor;
   typedef Eigen::Array<Scalar, Eigen::Dynamic, 1> ArrayXs;
   typedef Eigen::Quaternion<Scalar> Quaternions;
   typedef Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic> DiagonalMatrixXs;
