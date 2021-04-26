@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
 
   // Initial State
   const std::size_t N = ddp.get_problem()->get_T();
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(N, x0);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us = problem->quasiStatic_xs(xs);
+  std::vector<Eigen::VectorXd> xs(N, x0);
+  std::vector<Eigen::VectorXd> us = problem->quasiStatic_xs(xs);
   xs.push_back(x0);
 
   // Solving the optimal control problem

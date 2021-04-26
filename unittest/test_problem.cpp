@@ -37,8 +37,8 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -83,8 +83,8 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) 
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -127,8 +127,8 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -189,8 +189,8 @@ void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_ty
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -244,8 +244,8 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
   crocoddyl::ShootingProblem problem(x0, models, model);
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->zero();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -275,8 +275,8 @@ void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_typ
   crocoddyl::ShootingProblem problem(x0, models, model);
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T + 1);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T + 1);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->zero();
     us[i] = Eigen::VectorXd::Random(model->get_nu());
@@ -309,8 +309,8 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     xs[i].tail(model->get_state()->get_nv()) *= 0;
@@ -353,8 +353,8 @@ void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
   // create random trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(T);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(T);
+  std::vector<Eigen::VectorXd> xs(T);
+  std::vector<Eigen::VectorXd> us(T);
   for (std::size_t i = 0; i < T; ++i) {
     xs[i] = model->get_state()->rand();
     xs[i].tail(model->get_state()->get_nv()) *= 0;

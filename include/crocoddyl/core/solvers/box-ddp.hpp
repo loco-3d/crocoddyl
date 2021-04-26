@@ -28,11 +28,11 @@ class SolverBoxDDP : public SolverDDP {
   virtual void computeGains(const std::size_t t);
   virtual void forwardPass(const double steplength);
 
-  const crocoddyl::aligned_vector<Eigen::MatrixXd>& get_Quu_inv() const;
+  const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
 
  protected:
   BoxQP qp_;
-  crocoddyl::aligned_vector<Eigen::MatrixXd> Quu_inv_;
+  std::vector<Eigen::MatrixXd> Quu_inv_;
   Eigen::VectorXd du_lb_;
   Eigen::VectorXd du_ub_;
 };

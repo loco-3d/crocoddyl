@@ -129,6 +129,6 @@ void SolverBoxDDP::forwardPass(double steplength) {
   }
 }
 
-const crocoddyl::aligned_vector<Eigen::MatrixXd>& SolverBoxDDP::get_Quu_inv() const { return Quu_inv_; }
+const std::vector<Eigen::MatrixXd>& SolverBoxDDP::get_Quu_inv() const { return Quu_inv_; }
 
 }  // namespace crocoddyl

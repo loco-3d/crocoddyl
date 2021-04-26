@@ -24,9 +24,9 @@ class SolverKKT : public SolverAbstract {
   explicit SolverKKT(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverKKT();
 
-  virtual bool solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-                     const std::size_t maxiter = 100, const bool is_feasible = false, const double regInit = 1e-9);
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double regInit = 1e-9);
   virtual void computeDirection(const bool recalc = true);
   virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
@@ -35,9 +35,9 @@ class SolverKKT : public SolverAbstract {
   const Eigen::MatrixXd& get_kkt() const;
   const Eigen::VectorXd& get_kktref() const;
   const Eigen::VectorXd& get_primaldual() const;
-  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_dxs() const;
-  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_dus() const;
-  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_lambdas() const;
+  const std::vector<Eigen::VectorXd>& get_dxs() const;
+  const std::vector<Eigen::VectorXd>& get_dus() const;
+  const std::vector<Eigen::VectorXd>& get_lambdas() const;
   std::size_t get_nx() const;
   std::size_t get_ndx() const;
   std::size_t get_nu() const;
@@ -48,8 +48,8 @@ class SolverKKT : public SolverAbstract {
   double reg_min_;
   double reg_max_;
   double cost_try_;
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs_try_;
-  crocoddyl::aligned_vector<Eigen::VectorXd> us_try_;
+  std::vector<Eigen::VectorXd> xs_try_;
+  std::vector<Eigen::VectorXd> us_try_;
 
  private:
   double calcDiff();
@@ -61,9 +61,9 @@ class SolverKKT : public SolverAbstract {
   std::size_t nx_;
   std::size_t ndx_;
   std::size_t nu_;
-  crocoddyl::aligned_vector<Eigen::VectorXd> dxs_;
-  crocoddyl::aligned_vector<Eigen::VectorXd> dus_;
-  crocoddyl::aligned_vector<Eigen::VectorXd> lambdas_;
+  std::vector<Eigen::VectorXd> dxs_;
+  std::vector<Eigen::VectorXd> dus_;
+  std::vector<Eigen::VectorXd> lambdas_;
 
   // allocate data
   Eigen::MatrixXd kkt_;

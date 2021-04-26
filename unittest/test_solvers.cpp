@@ -50,8 +50,8 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   // Generate the different state along the trajectory
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = kkt->get_problem();
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs;
-  crocoddyl::aligned_vector<Eigen::VectorXd> us;
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     xs.push_back(state->rand());
@@ -94,8 +94,8 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
 
   // Generate the different state along the trajectory
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs;
-  crocoddyl::aligned_vector<Eigen::VectorXd> us;
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     xs.push_back(state->rand());

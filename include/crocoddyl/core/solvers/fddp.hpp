@@ -57,9 +57,9 @@ class SolverFDDP : public SolverDDP {
   explicit SolverFDDP(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverFDDP();
 
-  virtual bool solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-                     const std::size_t maxiter = 100, const bool is_feasible = false, const double regInit = 1e-9);
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double regInit = 1e-9);
 
   /**
    * @copybrief SolverAbstract::expectedImprovement

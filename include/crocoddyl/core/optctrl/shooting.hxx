@@ -140,8 +140,7 @@ template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
 
 template <typename Scalar>
-Scalar ShootingProblemTpl<Scalar>::calc(const crocoddyl::aligned_vector<VectorXs>& xs,
-                                        const crocoddyl::aligned_vector<VectorXs>& us) {
+Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -176,8 +175,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const crocoddyl::aligned_vector<VectorXs
 }
 
 template <typename Scalar>
-Scalar ShootingProblemTpl<Scalar>::calcDiff(const crocoddyl::aligned_vector<VectorXs>& xs,
-                                            const crocoddyl::aligned_vector<VectorXs>& us) {
+Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -213,8 +211,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const crocoddyl::aligned_vector<Vect
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::rollout(const crocoddyl::aligned_vector<VectorXs>& us,
-                                         crocoddyl::aligned_vector<VectorXs>& xs) {
+void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs) {
   if (xs.size() != T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_ + 1) + ")");
@@ -242,17 +239,16 @@ void ShootingProblemTpl<Scalar>::rollout(const crocoddyl::aligned_vector<VectorX
 }
 
 template <typename Scalar>
-crocoddyl::aligned_vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::rollout_us(
-    const crocoddyl::aligned_vector<VectorXs>& us) {
-  crocoddyl::aligned_vector<VectorXs> xs;
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::rollout_us(
+    const std::vector<VectorXs>& us) {
+  std::vector<VectorXs> xs;
   xs.resize(T_ + 1);
   rollout(us, xs);
   return xs;
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::quasiStatic(crocoddyl::aligned_vector<VectorXs>& us,
-                                             const crocoddyl::aligned_vector<VectorXs>& xs) {
+void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const std::vector<VectorXs>& xs) {
   if (xs.size() != T_) {
     throw_pretty("Invalid argument: "
                  << "xs has wrong dimension (it should be " + std::to_string(T_) + ")");
@@ -272,9 +268,9 @@ void ShootingProblemTpl<Scalar>::quasiStatic(crocoddyl::aligned_vector<VectorXs>
 }
 
 template <typename Scalar>
-crocoddyl::aligned_vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::quasiStatic_xs(
-    const crocoddyl::aligned_vector<VectorXs>& xs) {
-  crocoddyl::aligned_vector<VectorXs> us;
+std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::quasiStatic_xs(
+    const std::vector<VectorXs>& xs) {
+  std::vector<VectorXs> us;
   us.resize(T_);
   for (std::size_t i = 0; i < T_; ++i) {
     us[i] = VectorXs::Zero(running_models_[i]->get_nu());

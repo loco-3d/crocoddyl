@@ -16,7 +16,7 @@
 namespace crocoddyl {
 
 class CallbackAbstract;  // forward declaration
-static crocoddyl::aligned_vector<Eigen::VectorXd> DEFAULT_VECTOR;
+static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
 /**
  * @brief Abstract class for optimal control solvers
@@ -75,10 +75,9 @@ class SolverAbstract {
    * good guess points (init_xs, init_us)
    * @return A boolean that describes if convergence was reached.
    */
-  virtual bool solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-                     const std::size_t maxiter = 100, const bool is_feasible = false,
-                     const double reg_init = 1e-9) = 0;
+  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
+                     const bool is_feasible = false, const double reg_init = 1e-9) = 0;
 
   /**
    * @brief Compute the search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ for the current guess
@@ -134,9 +133,8 @@ class SolverAbstract {
    * @param[in]  us          control trajectory of \f$T\f$ elements (default [])
    * @param[in]  isFeasible  true if the \p xs are obtained from integrating the \p us (rollout)
    */
-  void setCandidate(const crocoddyl::aligned_vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
-                    const crocoddyl::aligned_vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR,
-                    const bool is_feasible = false);
+  void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
+                    const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool is_feasible = false);
 
   /**
    * @brief Set a list of callback functions using for diagnostic
@@ -161,12 +159,12 @@ class SolverAbstract {
   /**
    * @brief Return the state trajectory \f$\mathbf{x}_s\f$
    */
-  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_xs() const;
+  const std::vector<Eigen::VectorXd>& get_xs() const;
 
   /**
    * @brief Return the control trajectory \f$\mathbf{u}_s\f$
    */
-  const crocoddyl::aligned_vector<Eigen::VectorXd>& get_us() const;
+  const std::vector<Eigen::VectorXd>& get_us() const;
 
   /**
    * @brief Return the feasibility status of the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ trajectory
@@ -231,12 +229,12 @@ class SolverAbstract {
   /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
    */
-  void set_xs(const crocoddyl::aligned_vector<Eigen::VectorXd>& xs);
+  void set_xs(const std::vector<Eigen::VectorXd>& xs);
 
   /**
    * @brief Modify the control trajectory \f$\mathbf{u}_s\f$
    */
-  void set_us(const crocoddyl::aligned_vector<Eigen::VectorXd>& us);
+  void set_us(const std::vector<Eigen::VectorXd>& us);
 
   /**
    * @brief Modify the state regularization value
@@ -260,8 +258,8 @@ class SolverAbstract {
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs_;                //!< State trajectory
-  crocoddyl::aligned_vector<Eigen::VectorXd> us_;                //!< Control trajectory
+  std::vector<Eigen::VectorXd> xs_;                              //!< State trajectory
+  std::vector<Eigen::VectorXd> us_;                              //!< Control trajectory
   std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;  //!< Callback functions
   bool is_feasible_;                                             //!< Label that indicates is the iteration is feasible
   double cost_;                                                  //!< Total cost

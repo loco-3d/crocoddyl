@@ -69,8 +69,8 @@ void print_benchmark(RobotEENames robot) {
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
   // Computing the warm-start
-  crocoddyl::aligned_vector<Eigen::VectorXd> xs(N + 1, x0);
-  crocoddyl::aligned_vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
+  std::vector<Eigen::VectorXd> xs(N + 1, x0);
+  std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(runningModel->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
     const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
     const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem->get_runningDatas()[i];

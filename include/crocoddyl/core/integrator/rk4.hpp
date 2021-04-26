@@ -92,24 +92,24 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     dx = VectorXs::Zero(ndx);
     integral = std::vector<Scalar>(4, Scalar(0.));
 
-    ki = crocoddyl::aligned_vector<VectorXs>(4, VectorXs::Zero(ndx));
-    y = crocoddyl::aligned_vector<VectorXs>(4, VectorXs::Zero(nx));
-    dx_rk4 = crocoddyl::aligned_vector<VectorXs>(4, VectorXs::Zero(ndx));
+    ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
+    y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
+    dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
 
-    dki_dx = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dki_du = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dyi_dx = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dyi_du = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dki_dy = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    dyi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
-    dli_dx = crocoddyl::aligned_vector<VectorXs>(4, VectorXs::Zero(ndx));
-    dli_du = crocoddyl::aligned_vector<VectorXs>(4, VectorXs::Zero(nu));
-    ddli_ddx = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddu = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    ddli_dxdu = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    Luu_partialx = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    Lxx_partialx = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    Lxx_partialu = crocoddyl::aligned_vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
+    dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
+    ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    Lxx_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    Lxx_partialu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
 
     dyi_dx[0].diagonal().array() = (Scalar)1;
     for (std::size_t i = 0; i < 4; ++i) {
@@ -121,24 +121,24 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs dx;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
   std::vector<Scalar> integral;
-  crocoddyl::aligned_vector<VectorXs> ki;
-  crocoddyl::aligned_vector<VectorXs> y;
-  crocoddyl::aligned_vector<VectorXs> dx_rk4;
+  std::vector<VectorXs> ki;
+  std::vector<VectorXs> y;
+  std::vector<VectorXs> dx_rk4;
 
-  crocoddyl::aligned_vector<MatrixXs> dki_dx;
-  crocoddyl::aligned_vector<MatrixXs> dki_du;
-  crocoddyl::aligned_vector<MatrixXs> dyi_dx;
-  crocoddyl::aligned_vector<MatrixXs> dyi_du;
-  crocoddyl::aligned_vector<MatrixXs> dki_dy;
+  std::vector<MatrixXs> dki_dx;
+  std::vector<MatrixXs> dki_du;
+  std::vector<MatrixXs> dyi_dx;
+  std::vector<MatrixXs> dyi_du;
+  std::vector<MatrixXs> dki_dy;
 
-  crocoddyl::aligned_vector<VectorXs> dli_dx;
-  crocoddyl::aligned_vector<VectorXs> dli_du;
-  crocoddyl::aligned_vector<MatrixXs> ddli_ddx;
-  crocoddyl::aligned_vector<MatrixXs> ddli_ddu;
-  crocoddyl::aligned_vector<MatrixXs> ddli_dxdu;
-  crocoddyl::aligned_vector<MatrixXs> Luu_partialx;
-  crocoddyl::aligned_vector<MatrixXs> Lxx_partialx;
-  crocoddyl::aligned_vector<MatrixXs> Lxx_partialu;
+  std::vector<VectorXs> dli_dx;
+  std::vector<VectorXs> dli_du;
+  std::vector<MatrixXs> ddli_ddx;
+  std::vector<MatrixXs> ddli_ddu;
+  std::vector<MatrixXs> ddli_dxdu;
+  std::vector<MatrixXs> Luu_partialx;
+  std::vector<MatrixXs> Lxx_partialx;
+  std::vector<MatrixXs> Lxx_partialu;
 
   using Base::cost;
   using Base::Fu;

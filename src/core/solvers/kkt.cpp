@@ -32,9 +32,8 @@ SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
 
 SolverKKT::~SolverKKT() {}
 
-bool SolverKKT::solve(const crocoddyl::aligned_vector<Eigen::VectorXd>& init_xs,
-                      const crocoddyl::aligned_vector<Eigen::VectorXd>& init_us, const std::size_t maxiter,
-                      const bool is_feasible, const double) {
+bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
+                      const std::size_t maxiter, const bool is_feasible, const double) {
   setCandidate(init_xs, init_us, is_feasible);
   bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -166,11 +165,11 @@ const Eigen::VectorXd& SolverKKT::get_kktref() const { return kktref_; }
 
 const Eigen::VectorXd& SolverKKT::get_primaldual() const { return primaldual_; }
 
-const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverKKT::get_dxs() const { return dxs_; }
+const std::vector<Eigen::VectorXd>& SolverKKT::get_dxs() const { return dxs_; }
 
-const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
+const std::vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
 
-const crocoddyl::aligned_vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const { return lambdas_; }
+const std::vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const { return lambdas_; }
 
 std::size_t SolverKKT::get_nx() const { return nx_; }
 
