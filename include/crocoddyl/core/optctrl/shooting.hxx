@@ -490,8 +490,9 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
 #ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
+  (void)nthreads;
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
             << std::endl;
 #else
   if (nthreads < 1) {
@@ -520,11 +521,25 @@ std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
 template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_nthreads() const {
 #ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as it is not enable the "
-               "multithreading support."
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
             << std::endl;
 #endif
   return nthreads_;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem) {
+  os << "ShootingProblem (T=" << problem.get_T() << ", nx=" << problem.get_nx() << ", ndx=" << problem.get_ndx()
+     << ", nu_max=" << problem.get_nu_max() << ") " << std::endl;
+  os << "  Models:" << std::endl;
+  const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >& runningModels =
+      problem.get_runningModels();
+  for (std::size_t t = 0; t < problem.get_T(); ++t) {
+    os << "    " << t << ": " << *runningModels[t] << std::endl;
+  }
+  os << "    T+1: " << *problem.get_terminalModel();
+  return os;
 }
 
 }  // namespace crocoddyl

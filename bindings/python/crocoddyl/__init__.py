@@ -318,7 +318,10 @@ class MeshcatDisplay(DisplayAbstract):
     def __init__(self, robot, rate=-1, freq=1, openWindow=True):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
-        robot.setVisualizer(pinocchio.visualize.MeshcatVisualizer())
+        robot.setVisualizer(
+            pinocchio.visualize.MeshcatVisualizer(model=self.robot.model,
+                                                  collision_model=self.robot.collision_model,
+                                                  visual_model=self.robot.visual_model))
         self._addRobot(openWindow)
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):

@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -21,7 +22,7 @@ void exposeActionImpulseFwdDynamics() {
       "Action model for impulse forward dynamics in multibody systems.\n\n"
       "The impulse is modelled as holonomic constraits in the contact frame. There\n"
       "is also a custom implementation in case of system with armatures. If you want to\n"
-      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "include the armature, you need to use set_armature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
                boost::shared_ptr<CostModelSum>, bp::optional<double, double, bool> >(
@@ -91,7 +92,8 @@ void exposeActionImpulseFwdDynamics() {
                     "Restitution coefficient that describes elastic impacts")
       .add_property("JMinvJt_damping", bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
-                    "Damping factor for cholesky decomposition of JMinvJt");
+                    "Damping factor for cholesky decomposition of JMinvJt")
+      .def(PrintableVisitor<ActionModelImpulseFwdDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataImpulseFwdDynamics> >();
 

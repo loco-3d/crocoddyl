@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
@@ -118,7 +119,8 @@ void exposeShootingProblem() {
       .add_property("ndx", bp::make_function(&ShootingProblem::get_ndx),
                     "dimension of the tangent space of the state manifold")
       .add_property("nu_max", bp::make_function(&ShootingProblem::get_nu_max),
-                    "dimension of the maximum control vector");
+                    "dimension of the maximum control vector")
+      .def(PrintableVisitor<ShootingProblem>());
 }
 
 }  // namespace python

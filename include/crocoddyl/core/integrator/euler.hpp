@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +49,12 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
+
+  /**
+   * @brief Print information on the ActionModel
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& problem);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, 2020 CTU, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,12 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
 
   void set_armature(const VectorXs& armature);
   void set_damping_factor(const Scalar damping);
+
+  /**
+   * @brief Print information on the action model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const DifferentialActionModelContactFwdDynamicsTpl<Scalar>& model);
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits

@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
@@ -62,7 +63,8 @@ void exposeIntegratedActionEuler() {
                     &IntegratedActionModelEuler::set_differential, "differential action model")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
-          &IntegratedActionModelEuler::set_dt, "step time");
+          &IntegratedActionModelEuler::set_dt, "step time")
+      .def(PrintableVisitor<IntegratedActionModelEuler>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 

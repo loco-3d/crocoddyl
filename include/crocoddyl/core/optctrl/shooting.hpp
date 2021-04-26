@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,6 +234,12 @@ class ShootingProblemTpl {
    * @brief Return the number of threads
    */
   std::size_t get_nthreads() const;
+
+  /**
+   * @brief Print information on the 'ShootingProblem'
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem);
 
  protected:
   Scalar cost_;                                                          //!< Total cost

@@ -18,7 +18,7 @@ void exposeActuationFloatingBase() {
   bp::class_<ActuationModelFloatingBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFloatingBase",
       "Floating-base actuation models.\n\n"
-      "It simplies consider a floating-base actuation model, where the first 6 elements are unactuated.",
+      "It simply considers a floating-base actuation model, where the first 6 elements are unactuated.",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the floating-base actuation model.\n\n"
                                                    ":param state: state of multibody system"))
