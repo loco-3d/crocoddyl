@@ -36,7 +36,7 @@ struct ActivationDataSmoothAbsTpl : public ActivationDataSmooth1NormTpl<Scalar> 
 
   template <typename Activation>
   DEPRECATED("Use ActivationDataSmooth1Norm", explicit ActivationDataSmoothAbsTpl(Activation* const activation)
-             : Base(activation){};)
+             : Base(activation){})
 };
 
 }  // namespace crocoddyl
