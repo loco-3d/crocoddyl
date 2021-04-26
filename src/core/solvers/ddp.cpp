@@ -331,7 +331,7 @@ void SolverDDP::computeGains(const std::size_t t) {
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
     }
-    K_[t].topRows(nu).noalias() = Qxu_[t].leftCols(nu).transpose();
+    K_[t].topRows(nu) = Qxu_[t].leftCols(nu).transpose();
 
     auto K = K_[t].topRows(nu);
     Quu_llt_[t].solveInPlace(K);
