@@ -334,7 +334,8 @@ void SolverDDP::computeGains(const std::size_t t) {
     }
     K_[t].topRows(nu) = Qxu_[t].leftCols(nu).transpose();
 
-    auto K = K_[t].topRows(nu);
+    Eigen::Block<MatrixXdRowMajor, Eigen::Dynamic, Eigen::internal::traits<MatrixXdRowMajor>::ColsAtCompileTime, true>
+        K = K_[t].topRows(nu);
     Quu_llt_[t].solveInPlace(K);
     k_[t].head(nu) = Qu_[t].head(nu);
     Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
