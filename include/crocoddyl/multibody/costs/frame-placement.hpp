@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ namespace crocoddyl {
  * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
  * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * As described in `CostModelResidualTpl()`, the cost value and its derivatives are calculated by `calc` and
  * `calcDiff`, respectively.
  *
  * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
