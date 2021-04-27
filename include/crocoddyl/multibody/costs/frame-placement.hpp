@@ -10,10 +10,9 @@
 #define CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -32,23 +31,20 @@ namespace crocoddyl {
  * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
  * `calcDiff`, respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelFramePlacementTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataFramePlacementTpl<Scalar> Data;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualModelFramePlacementTpl<Scalar> ResidualModelFramePlacement;
   typedef FramePlacementTpl<Scalar> FramePlacement;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
@@ -101,31 +97,6 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref);
   virtual ~CostModelFramePlacementTpl();
 
-  /**
-   * @brief Compute the frame placement cost
-   *
-   * @param[in] data  Frame placement cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Compute the derivatives of the frame placement cost
-   *
-   * @param[in] data  Frame-placement cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Create the frame placement cost data
-   */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
  protected:
   /**
    * @brief Return the frame placement reference
@@ -145,37 +116,6 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
 
  private:
   FramePlacement Mref_;  //!< Reference frame placement
-};
-
-template <typename _Scalar>
-struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
-  typedef typename MathBase::Matrix6s Matrix6s;
-  typedef typename MathBase::Vector6s Vector6s;
-
-  template <template <typename Scalar> class Model>
-  CostDataFramePlacementTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_J(6, model->get_state()->get_nv()) {
-    Arr_J.setZero();
-  }
-
-  Matrix6xs Arr_J;
-
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::residual;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl
