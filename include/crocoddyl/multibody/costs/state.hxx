@@ -146,8 +146,7 @@ CostModelStateTpl<Scalar>::~CostModelStateTpl() {}
 
 template <typename Scalar>
 void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x,
-					 const Eigen::Ref<const VectorXs>& u) {
+                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   residual_->calcDiff(data->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
 

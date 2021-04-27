@@ -13,7 +13,7 @@ template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
                                                    boost::shared_ptr<ResidualModelAbstract> residual)
-  : Base(state, activation, residual) {}
+    : Base(state, activation, residual) {}
 
 template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,

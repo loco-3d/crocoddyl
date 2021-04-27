@@ -33,5 +33,5 @@ CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMu
 
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::~CostModelImpulseCoMTpl() {}
-  
+
 }  // namespace crocoddyl

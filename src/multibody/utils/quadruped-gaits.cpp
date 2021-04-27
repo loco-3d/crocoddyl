@@ -201,8 +201,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
   boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg = boost::make_shared<crocoddyl::CostModelResidual>(
-      state_,
-      state_activation, boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()));
+      state_, state_activation,
+      boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()));
   boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg = boost::make_shared<crocoddyl::CostModelResidual>(
       state_, boost::make_shared<crocoddyl::ResidualModelControl>(state_, actuation_->get_nu()));
   cost_model->addCost("stateReg", state_reg, 1e1);
@@ -265,8 +265,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> state_activation =
       boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(state_weights);
   boost::shared_ptr<crocoddyl::CostModelAbstract> state_reg = boost::make_shared<crocoddyl::CostModelResidual>(
-      state_,
-      state_activation, boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()));
+      state_, state_activation,
+      boost::make_shared<crocoddyl::ResidualModelState>(state_, defaultstate_, actuation_->get_nu()));
   boost::shared_ptr<crocoddyl::CostModelAbstract> ctrl_reg = boost::make_shared<crocoddyl::CostModelResidual>(
       state_, boost::make_shared<crocoddyl::ResidualModelControl>(state_, actuation_->get_nu()));
   cost_model->addCost("stateReg", state_reg, 1e1);

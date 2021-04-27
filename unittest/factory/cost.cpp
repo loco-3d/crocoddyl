@@ -98,20 +98,18 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   switch (cost_type) {
     case CostModelTypes::CostModelResidualState:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-		  state,
-		  activation_factory.create(activation_type, state->get_ndx()),
-		  boost::make_shared<crocoddyl::ResidualModelState>(state, state->rand(), nu)
-							      );
+          state, activation_factory.create(activation_type, state->get_ndx()),
+          boost::make_shared<crocoddyl::ResidualModelState>(state, state->rand(), nu));
       break;
     case CostModelTypes::CostModelResidualControl:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-							      state,activation_factory.create(activation_type, nu), boost::make_shared<crocoddyl::ResidualModelControl>(state, Eigen::VectorXd::Random(nu))
-          );
+          state, activation_factory.create(activation_type, nu),
+          boost::make_shared<crocoddyl::ResidualModelControl>(state, Eigen::VectorXd::Random(nu)));
       break;
     case CostModelTypes::CostModelResidualCoMPosition:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          activation_factory.create(activation_type, 3), boost::make_shared<crocoddyl::ResidualModelCoMPosition>(state, Eigen::Vector3d::Random(), nu));
+          state, activation_factory.create(activation_type, 3),
+          boost::make_shared<crocoddyl::ResidualModelCoMPosition>(state, Eigen::Vector3d::Random(), nu));
       break;
     // case CostModelTypes::CostModelResidualCentroidalMomentum:
     //   cost = boost::make_shared<crocoddyl::CostModelResidual>(
@@ -120,26 +118,23 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
     //   break;
     case CostModelTypes::CostModelResidualFramePlacement:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          activation_factory.create(activation_type, 6), boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu));
+          state, activation_factory.create(activation_type, 6),
+          boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu));
       break;
     case CostModelTypes::CostModelResidualFrameRotation:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          activation_factory.create(activation_type, 3),
+          state, activation_factory.create(activation_type, 3),
           boost::make_shared<crocoddyl::ResidualModelFrameRotation>(state, frame_index, frame_SE3.rotation(), nu));
       break;
     case CostModelTypes::CostModelResidualFrameTranslation:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          activation_factory.create(activation_type, 3),
+          state, activation_factory.create(activation_type, 3),
           boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(state, frame_index, frame_SE3.translation(),
                                                                        nu));
       break;
     case CostModelTypes::CostModelResidualFrameVelocity:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          activation_factory.create(activation_type, 6),
+          state, activation_factory.create(activation_type, 6),
           boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(state, frame_index, pinocchio::Motion::Random(),
                                                                     pinocchio::ReferenceFrame::LOCAL, nu));
       break;
@@ -165,9 +160,8 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   switch (cost_type) {
     case CostModelNoFFTypes::CostModelResidualControlGrav:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-							      state,
-							      activation_factory.create(activation_type, state->get_nv()),
-							      boost::make_shared<ResidualModelControlGrav>(state, nu));
+          state, activation_factory.create(activation_type, state->get_nv()),
+          boost::make_shared<ResidualModelControlGrav>(state, nu));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");

@@ -59,8 +59,7 @@ class CostModelFrameVelocityTpl : public CostModelResidualTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                            boost::shared_ptr<ActivationModelAbstract> activation,
-			    const FrameMotion& Fref,
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref,
                             const std::size_t nu);
 
   /**
@@ -73,8 +72,7 @@ class CostModelFrameVelocityTpl : public CostModelResidualTpl<_Scalar> {
    * @param[in] Fref        Reference frame velocity
    */
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
-                            boost::shared_ptr<ActivationModelAbstract> activation,
-			    const FrameMotion& Fref);
+                            boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref);
 
   /**
    * @brief Initialize the frame velocity cost model

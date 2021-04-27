@@ -17,7 +17,7 @@ template <typename Scalar>
 CostModelFramePlacementTpl<Scalar>::CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                                                                boost::shared_ptr<ActivationModelAbstract> activation,
                                                                const FramePlacement& Mref, const std::size_t nu)
-  : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)),
+    : Base(state, activation, boost::make_shared<ResidualModelFramePlacement>(state, Mref.id, Mref.placement, nu)),
       Mref_(Mref) {
   std::cerr << "Deprecated CostModelFramePlacement: Use ResidualModelFramePlacement with CostModelResidual"
             << std::endl;

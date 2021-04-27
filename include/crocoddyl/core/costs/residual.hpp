@@ -56,7 +56,7 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                        boost::shared_ptr<ActivationModelAbstract> activation,
-		       boost::shared_ptr<ResidualModelAbstract> residual);
+                       boost::shared_ptr<ResidualModelAbstract> residual);
   /**
    * @brief Initialize the residual cost model
    *
@@ -76,8 +76,7 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
-		    const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -87,8 +86,7 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-			const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
