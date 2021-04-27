@@ -153,6 +153,7 @@ pinocchio.updateFramePlacements(rmodel, rdata)
 com = pinocchio.centerOfMass(rmodel, rdata, xT[:state.nq])
 finalPosEff = np.array(rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation.T.flat)
 
+sys.stdout.flush()
 print('Finally reached = ', finalPosEff)
 print('Distance between hand and target = ', np.linalg.norm(finalPosEff - target))
 print('Distance to default state = ', np.linalg.norm(rmodel.defaultState - np.array(xT.flat)))

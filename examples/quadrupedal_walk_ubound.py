@@ -40,6 +40,7 @@ boxddp = crocoddyl.SolverBoxDDP(
 
 # Add the callback functions
 print('*** SOLVE ***')
+sys.stdout.flush()
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
