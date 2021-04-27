@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,16 +145,9 @@ template <typename Scalar>
 CostModelStateTpl<Scalar>::~CostModelStateTpl() {}
 
 template <typename Scalar>
-void CostModelStateTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  residual_->calc(data->residual, x, u);
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
 void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+                                         const Eigen::Ref<const VectorXs>& x,
+					 const Eigen::Ref<const VectorXs>& u) {
   residual_->calcDiff(data->residual, x, u);
   activation_->calcDiff(data->activation, data->residual->r);
 
@@ -175,12 +168,6 @@ void CostModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstrac
     data->Lx = data->activation->Ar;
     data->Lxx.diagonal() = data->activation->Arr.diagonal();
   }
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelStateTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::make_shared<CostDataStateTpl<Scalar> >(this, data);
 }
 
 template <typename Scalar>

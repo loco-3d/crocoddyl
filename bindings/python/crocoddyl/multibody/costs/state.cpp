@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ void exposeCostState() {  // TODO: Remove once the deprecated update call has be
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelState> >();
 
-  bp::class_<CostModelState, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelState, bp::bases<CostModelResidual> >(
       "CostModelState",
       "This cost function defines a residual vector as r = x - xref, with x and xref as the current and reference "
       "state, respectively.",
@@ -78,16 +78,6 @@ void exposeCostState() {  // TODO: Remove once the deprecated update call has be
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2). The default reference state "
           "is obtained from state.zero(), and nu from state.nv.\n"
           ":param state: state description"))
-      .def<void (CostModelState::*)(
-          const boost::shared_ptr<CostDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelState::calc, bp::args("self", "data", "x", "u"),
-                                                     "Compute the state cost.\n\n"
-                                                     ":param data: cost data\n"
-                                                     ":param x: time-discrete state vector\n"
-                                                     ":param u: time-discrete control input")
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                    const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
-                                                                               bp::args("self", "data", "x"))
       .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&,
                                     const Eigen::Ref<const Eigen::VectorXd>&,
                                     const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -97,16 +87,6 @@ void exposeCostState() {  // TODO: Remove once the deprecated update call has be
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
-      .def<void (CostModelState::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &CostModelState::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the state cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference", &CostModelState::get_reference<Eigen::VectorXd>,
                     &CostModelState::set_reference<Eigen::VectorXd>, "reference state")
       .add_property("xref",
