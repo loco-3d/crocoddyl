@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 
 namespace crocoddyl {
 
@@ -160,93 +161,94 @@ struct ResidualDataStateTpl;
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
+
 template <typename Scalar>
-struct CostDataFrameTranslationTpl;
+using CostDataFrameTranslationTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
 template <typename Scalar>
-struct CostDataCentroidalMomentumTpl;
+using CostDataCentroidalMomentumTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelCoMPositionTpl;
 template <typename Scalar>
-struct CostDataCoMPositionTpl;
+using CostDataCoMPositionTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelFramePlacementTpl;
 template <typename Scalar>
-struct CostDataFramePlacementTpl;
+using CostDataFramePlacementTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelImpulseCoMTpl;
 template <typename Scalar>
-struct CostDataImpulseCoMTpl;
+using CostDataImpulseCoMTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelStateTpl;
 template <typename Scalar>
-struct CostDataStateTpl;
+using CostDataStateTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelControlGravTpl;
 template <typename Scalar>
-struct CostDataControlGravTpl;
+using CostDataControlGravTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelControlGravContactTpl;
 template <typename Scalar>
-struct CostDataControlGravContactTpl;
+using CostDataControlGravContactTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelFrameVelocityTpl;
 template <typename Scalar>
-struct CostDataFrameVelocityTpl;
+using CostDataFrameVelocityTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelContactFrictionConeTpl;
 template <typename Scalar>
-struct CostDataContactFrictionConeTpl;
+using CostDataContactFrictionConeTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelContactWrenchConeTpl;
 template <typename Scalar>
-struct CostDataContactWrenchConeTpl;
+using CostDataContactWrenchConeTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelContactForceTpl;
 template <typename Scalar>
-struct CostDataContactForceTpl;
+using CostDataContactForceTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelContactImpulseTpl;
 template <typename Scalar>
-struct CostDataContactImpulseTpl;
+using CostDataContactImpulseTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelFrameRotationTpl;
 template <typename Scalar>
-struct CostDataFrameRotationTpl;
+using CostDataFrameRotationTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelImpulseFrictionConeTpl;
 template <typename Scalar>
-struct CostDataImpulseFrictionConeTpl;
+using CostDataImpulseFrictionConeTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelImpulseWrenchConeTpl;
 template <typename Scalar>
-struct CostDataImpulseWrenchConeTpl;
+using CostDataImpulseWrenchConeTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelContactCoPPositionTpl;
 template <typename Scalar>
-struct CostDataContactCoPPositionTpl;
+using CostDataContactCoPPositionTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
 class CostModelImpulseCoPPositionTpl;
 template <typename Scalar>
-struct CostDataImpulseCoPPositionTpl;
+using CostDataImpulseCoPPositionTpl = CostDataResidualTpl<Scalar>;
 
 // impulse
 template <typename Scalar>
@@ -399,64 +401,64 @@ typedef ResidualDataStateTpl<double> ResidualDataState;
 
 DEPRECATED("Use ResidualModelFrameTranslation with CostModelResidual",
            typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;)
-DEPRECATED("Use ResidualDataFrameTranslation", typedef CostDataFrameTranslationTpl<double> CostDataFrameTranslation;)
+DEPRECATED("Use ResidualDataFrameTranslation", typedef CostDataResidualTpl<double> CostDataFrameTranslation;)
 DEPRECATED("Use ResidualModelCentroidalMomentum with CostModelResidual",
            typedef CostModelCentroidalMomentumTpl<double> CostModelCentroidalMomentum;)
 DEPRECATED("Use ResidualDataCentroidalMomentum",
-           typedef CostDataCentroidalMomentumTpl<double> CostDataCentroidalMomentum;)
+           typedef CostDataResidualTpl<double> CostDataCentroidalMomentum;)
 DEPRECATED("Use ResidualModelCoMPosition with CostModelResidual",
            typedef CostModelCoMPositionTpl<double> CostModelCoMPosition;)
-DEPRECATED("Use ResidualDataCoMPosition", typedef CostDataCoMPositionTpl<double> CostDataCoMPosition;)
+DEPRECATED("Use ResidualDataCoMPosition", typedef CostDataResidualTpl<double> CostDataCoMPosition;)
 DEPRECATED("Use ResidualModelFramePlacement with CostModelResidual",
            typedef CostModelFramePlacementTpl<double> CostModelFramePlacement;)
-DEPRECATED("Use ResidualDataFramePlacement", typedef CostDataFramePlacementTpl<double> CostDataFramePlacement;)
+DEPRECATED("Use ResidualDataFramePlacement", typedef CostDataResidualTpl<double> CostDataFramePlacement;)
 DEPRECATED("Use ResidualModelImpulseCoM with CostModelResidual",
            typedef CostModelImpulseCoMTpl<double> CostModelImpulseCoM;)
-DEPRECATED("Use ResidualDataImpulseCoM", typedef CostDataImpulseCoMTpl<double> CostDataImpulseCoM;)
+DEPRECATED("Use ResidualDataImpulseCoM", typedef CostDataResidualTpl<double> CostDataImpulseCoM;)
 DEPRECATED("Use ResidualModelState with CostModelResidual", typedef CostModelStateTpl<double> CostModelState;)
-DEPRECATED("Use ResidualDataState", typedef CostDataStateTpl<double> CostDataState;)
+DEPRECATED("Use ResidualDataState", typedef CostDataResidualTpl<double> CostDataState;)
 DEPRECATED("Use ResidualModelControlGrav with CostModelResidual",
            typedef CostModelControlGravTpl<double> CostModelControlGrav;)
-DEPRECATED("Use ResidualDataControlGrav", typedef CostDataControlGravTpl<double> CostDataControlGrav;)
+DEPRECATED("Use ResidualDataControlGrav", typedef CostDataResidualTpl<double> CostDataControlGrav;)
 DEPRECATED("Use ResidualModelContactControlGrav with CostModelResidual",
            typedef CostModelControlGravContactTpl<double> CostModelControlGravContact;)
 DEPRECATED("Use ResidualDataContactControlGrav",
-           typedef CostDataControlGravContactTpl<double> CostDataControlGravContact;)
+           typedef CostDataResidualTpl<double> CostDataControlGravContact;)
 DEPRECATED("Use ResidualModelFrameVelocity with CostModelResidual",
            typedef CostModelFrameVelocityTpl<double> CostModelFrameVelocity;)
-DEPRECATED("Use ResidualDataFrameVelocity", typedef CostDataFrameVelocityTpl<double> CostDataFrameVelocity;)
+DEPRECATED("Use ResidualDataFrameVelocity", typedef CostDataResidualTpl<double> CostDataFrameVelocity;)
 DEPRECATED("Use ResidualModelFrameRotation with CostModelResidual",
            typedef CostModelFrameRotationTpl<double> CostModelFrameRotation;)
-DEPRECATED("Use ResidualDataFrameRotation", typedef CostDataFrameRotationTpl<double> CostDataFrameRotation;)
+DEPRECATED("Use ResidualDataFrameRotation", typedef CostDataResidualTpl<double> CostDataFrameRotation;)
 DEPRECATED("Use ResidualModelCoPPosition with CostModelResidual",
            typedef CostModelContactCoPPositionTpl<double> CostModelContactCoPPosition;)
-DEPRECATED("Use ResidualDataCoPPosition", typedef CostDataContactCoPPositionTpl<double> CostDataContactCoPPosition;)
+DEPRECATED("Use ResidualDataCoPPosition", typedef CostDataResidualTpl<double> CostDataContactCoPPosition;)
 DEPRECATED("Use ResidualModelContactFrictionCone with CostModelResidual",
            typedef CostModelContactFrictionConeTpl<double> CostModelContactFrictionCone;)
 DEPRECATED("Use ResidualDataContactFrictionCone",
-           typedef CostDataContactFrictionConeTpl<double> CostDataContactFrictionCone;)
+           typedef CostDataResidualTpl<double> CostDataContactFrictionCone;)
 DEPRECATED("Use ResidualModelContactWrenchCone with CostModelResidual",
            typedef CostModelContactWrenchConeTpl<double> CostModelContactWrenchCone;)
 DEPRECATED("Use ResidualDataContactWrenchCone",
-           typedef CostDataContactWrenchConeTpl<double> CostDataContactWrenchCone;)
+           typedef CostDataResidualTpl<double> CostDataContactWrenchCone;)
 DEPRECATED("Use ResidualModelContactForce with CostModelResidual",
            typedef CostModelContactForceTpl<double> CostModelContactForce;)
-DEPRECATED("Use ResidualDataContactForce", typedef CostDataContactForceTpl<double> CostDataContactForce;)
+DEPRECATED("Use ResidualDataContactForce", typedef CostDataResidualTpl<double> CostDataContactForce;)
 DEPRECATED("Use ResidualModelContactForce with CostModelResidual",
            typedef CostModelContactImpulseTpl<double> CostModelContactImpulse;)
-DEPRECATED("Use ResidualDataContactForce", typedef CostDataContactImpulseTpl<double> CostDataContactImpulse;)
+DEPRECATED("Use ResidualDataContactForce", typedef CostDataResidualTpl<double> CostDataContactImpulse;)
 DEPRECATED("Use ResidualModelFrictionCone with CostModelResidual",
            typedef CostModelImpulseFrictionConeTpl<double> CostModelImpulseFrictionCone;)
 DEPRECATED("Use ResidualDataContactFrictionCone",
-           typedef CostDataImpulseFrictionConeTpl<double> CostDataImpulseFrictionCone;)
+           typedef CostDataResidualTpl<double> CostDataImpulseFrictionCone;)
 DEPRECATED("Use ResidualModelContactCoPPosition with CostModelResidual",
            typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;)
 DEPRECATED("Use ResidualDataContactCoPPosition",
-           typedef CostDataImpulseCoPPositionTpl<double> CostDataImpulseCoPPosition;)
+           typedef CostDataResidualTpl<double> CostDataImpulseCoPPosition;)
 DEPRECATED("Use ResidualModelContactWrenchCone with CostModelResidual",
            typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;)
 DEPRECATED("Use ResidualDataContactWrenchCone",
-           typedef CostDataImpulseWrenchConeTpl<double> CostDataImpulseWrenchCone;)
+           typedef CostDataResidualTpl<double> CostDataImpulseWrenchCone;)
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
