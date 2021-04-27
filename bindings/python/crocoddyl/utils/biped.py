@@ -195,7 +195,7 @@ class SimpleBipedGaitProblem:
             cone = crocoddyl.WrenchCone(self.Rsurf, self.mu, np.array([0.1, 0.05]))
             wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, self.actuation.nu)
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
-            wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchResidual, wrenchActivation)
+            wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchActivation, wrenchResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
 
         if swingFootTask is not None:
@@ -209,7 +209,7 @@ class SimpleBipedGaitProblem:
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
         ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
@@ -256,7 +256,7 @@ class SimpleBipedGaitProblem:
             cone = crocoddyl.WrenchCone(self.Rsurf, self.mu, np.array([0.1, 0.05]))
             wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, self.actuation.nu)
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
-            wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchResidual, wrenchActivation)
+            wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchActivation, wrenchResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
 
         if swingFootTask is not None:
@@ -274,7 +274,7 @@ class SimpleBipedGaitProblem:
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
         ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
@@ -312,7 +312,7 @@ class SimpleBipedGaitProblem:
         stateWeights = np.array([1.] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, 0)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
 
         # Creating the action model for the KKT dynamics with simpletic Euler

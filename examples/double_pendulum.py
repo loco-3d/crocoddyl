@@ -22,7 +22,7 @@ terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
 xActivation = crocoddyl.ActivationModelQuad(state.ndx)
 uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
-xRegCost = crocoddyl.CostModelResidual(state, xResidual, xActivation)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(weights), actModel.nu)
 

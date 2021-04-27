@@ -33,7 +33,7 @@ terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
 xActivation = crocoddyl.ActivationModelWeightedQuad(np.array([0.1] * 3 + [1000.] * 3 + [1000.] * robot_model.nv))
 uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
-xRegCost = crocoddyl.CostModelResidual(state, xResidual, xActivation)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("base_link"),
                                                              pinocchio.SE3(target_quat.matrix(), target_pos),
