@@ -18,12 +18,11 @@ void exposeCostResidual() {
   bp::class_<CostModelResidual, bp::bases<CostModelAbstract> >(
       "CostModelResidual",
       "This cost function uses a residual vector with a Gauss-Newton assumption to define a cost term.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract>,
-               boost::shared_ptr<ActivationModelAbstract> >(bp::args("self", "state", "residual", "activation"),
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, boost::shared_ptr<ResidualModelAbstract> >(bp::args("self", "state", "activation", "residual"),
                                                             "Initialize the residual cost model.\n\n"
                                                             ":param state: state description\n"
-                                                            ":param residual: residual model\n"
-                                                            ":param activation: activation model"))
+                                                            ":param activation: activation model\n"
+							    ":param residual: residual model"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
           "Initialize the residual cost model.\n\n"
