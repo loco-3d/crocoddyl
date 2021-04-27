@@ -20,7 +20,7 @@ void exposeCostContactForce() {  // TODO: Remove once the deprecated update call
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelContactForce> >();
 
-  bp::class_<CostModelContactForce, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelContactForce, bp::bases<CostModelResidual> >(
       "CostModelContactForce",
       "This cost function defines a residual vector as r = f-fref, where f,fref describe the current and reference "
       "the spatial forces, respectively.",
@@ -65,36 +65,6 @@ void exposeCostContactForce() {  // TODO: Remove once the deprecated update call
           "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference spatial contact force in the contact coordinates"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelContactForce::calc, bp::args("self", "data", "x", "u"),
-          "Compute the contact force cost.\n\n"
-          ":param data: cost data\n"
-          ":param x: state vector\n"
-          ":param u: control input")
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
-                                                                                      bp::args("self", "data", "x"))
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelContactForce::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the contact force cost.\n\n"
-          "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: state vector\n"
-          ":param u: control input\n")
-      .def<void (CostModelContactForce::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                           const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &CostModelContactForce::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the contact force cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference", &CostModelContactForce::get_reference<FrameForce>,
                     &CostModelContactForce::set_reference<FrameForce>,
                     "reference spatial contact force in the contact coordinates")
@@ -104,20 +74,6 @@ void exposeCostContactForce() {  // TODO: Remove once the deprecated update call
                     bp::make_function(&CostModelContactForce::set_reference<FrameForce>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference spatial contact force in the contact coordinates");
-
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataContactForce> >();
-
-  bp::class_<CostDataContactForce, bp::bases<CostDataAbstract> >(
-      "CostDataContactForce", "Data for contact force cost.\n\n",
-      bp::init<CostModelContactForce*, DataCollectorAbstract*>(
-          bp::args("self", "model", "data"),
-          "Create contact force cost data.\n\n"
-          ":param model: contact force cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Arr_Rx", bp::make_getter(&CostDataContactForce::Arr_Rx, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
-      .add_property("Arr_Ru", bp::make_getter(&CostDataContactForce::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 
 #pragma GCC diagnostic pop
 }
