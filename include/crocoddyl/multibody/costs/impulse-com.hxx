@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,37 +33,5 @@ CostModelImpulseCoMTpl<Scalar>::CostModelImpulseCoMTpl(boost::shared_ptr<StateMu
 
 template <typename Scalar>
 CostModelImpulseCoMTpl<Scalar>::~CostModelImpulseCoMTpl() {}
-
-template <typename Scalar>
-void CostModelImpulseCoMTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                          const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual given the impulse CoM
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelImpulseCoMTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& x,
-                                              const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and impulse CoM residual models
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(data->residual, x, u);
-  activation_->calcDiff(data->activation, data->residual->r);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
-  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelImpulseCoMTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
-
+  
 }  // namespace crocoddyl
