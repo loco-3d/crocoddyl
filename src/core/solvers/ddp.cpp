@@ -258,7 +258,8 @@ void SolverDDP::backwardPass() {
       }
       Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
     }
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
+    Vxx_tmp_ = Vxx_[t] + Vxx_[t].transpose();
+    Vxx_[t].noalias() = 0.5 * Vxx_tmp_;
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal().array() += xreg_;
@@ -408,6 +409,7 @@ void SolverDDP::allocateData() {
     Quuk_[t] = Eigen::VectorXd(nu);
   }
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
+  Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
   fs_.back() = Eigen::VectorXd::Zero(ndx);

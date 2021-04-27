@@ -320,6 +320,7 @@ class SolverDDP : public SolverAbstract {
 
   // allocate data
   std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
+  Eigen::MatrixXd Vxx_tmp_;           //!< Temporary variable for ensuring symmetry of Vxx
   std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
   std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
   std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
