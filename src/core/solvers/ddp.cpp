@@ -13,6 +13,7 @@
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
 
@@ -124,10 +125,12 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 }
 
 void SolverDDP::computeDirection(const bool recalcDiff) {
+  START_PROFILER("SolverDDP::computeDirection");
   if (recalcDiff) {
     calcDiff();
   }
   backwardPass();
+  STOP_PROFILER("SolverDDP::computeDirection");
 }
 
 double SolverDDP::tryStep(const double steplength) {
@@ -164,6 +167,7 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 }
 
 double SolverDDP::calcDiff() {
+  START_PROFILER("SolverDDP::calcDiff");
   if (iter_ == 0) problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
 
@@ -201,10 +205,12 @@ double SolverDDP::calcDiff() {
       it->setZero();
     }
   }
+  STOP_PROFILER("SolverDDP::calcDiff");
   return cost_;
 }
 
 void SolverDDP::backwardPass() {
+  START_PROFILER("SolverDDP::backwardPass");
   const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
   Vxx_.back() = d_T->Lxx;
   Vx_.back() = d_T->Lx;
@@ -227,16 +233,22 @@ void SolverDDP::backwardPass() {
 
     Qxx_[t] = d->Lxx;
     Qx_[t] = d->Lx;
+    START_PROFILER("SolverDDP::Qxx");
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
     Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    STOP_PROFILER("SolverDDP::Qxx");
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
     if (nu != 0) {
       Qxu_[t].leftCols(nu) = d->Lxu;
       Quu_[t].topLeftCorner(nu, nu) = d->Luu;
       Qu_[t].head(nu) = d->Lu;
-      FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
+      START_PROFILER("SolverDDP::Qxu");
       Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
+      STOP_PROFILER("SolverDDP::Qxu");
+      START_PROFILER("SolverDDP::Quu");
+      FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
       Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      STOP_PROFILER("SolverDDP::Quu");
       Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
 
       if (!std::isnan(ureg_)) {
@@ -256,7 +268,9 @@ void SolverDDP::backwardPass() {
         Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
         Vx_[t].noalias() -= 2 * (K_[t].topRows(nu).transpose() * Qu_[t].head(nu));
       }
+      START_PROFILER("SolverDDP::Vxx");
       Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
+      STOP_PROFILER("SolverDDP::Vxx");
     }
     Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
     Vxx_[t] = Vxx_tmp_;
@@ -277,9 +291,11 @@ void SolverDDP::backwardPass() {
       throw_pretty("backward_error");
     }
   }
+  STOP_PROFILER("SolverDDP::backwardPass");
 }
 
 void SolverDDP::forwardPass(const double steplength) {
+  START_PROFILER("SolverDDP::forwardPass");
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
@@ -322,12 +338,16 @@ void SolverDDP::forwardPass(const double steplength) {
   if (raiseIfNaN(cost_try_)) {
     throw_pretty("forward_error");
   }
+  STOP_PROFILER("SolverDDP::forwardPass");
 }
 
 void SolverDDP::computeGains(const std::size_t t) {
+  START_PROFILER("SolverDDP::computeGains");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
+    START_PROFILER("SolverDDP::Quu_inv");
     Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
+    STOP_PROFILER("SolverDDP::Quu_inv");
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
@@ -336,11 +356,14 @@ void SolverDDP::computeGains(const std::size_t t) {
 
     Eigen::Block<MatrixXdRowMajor, Eigen::Dynamic, Eigen::internal::traits<MatrixXdRowMajor>::ColsAtCompileTime, true>
         K = K_[t].topRows(nu);
+    START_PROFILER("SolverDDP::Quu_inv_Qux");
     Quu_llt_[t].solveInPlace(K);
+    STOP_PROFILER("SolverDDP::Quu_inv_Qux");
     k_[t].head(nu) = Qu_[t].head(nu);
     Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
     Quu_llt_[t].solveInPlace(k);
   }
+  STOP_PROFILER("SolverDDP::computeGains");
 }
 
 void SolverDDP::increaseRegularization() {
