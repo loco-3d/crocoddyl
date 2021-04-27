@@ -51,8 +51,8 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @brief Initialize the residual cost model
    *
    * @param[in] state       State of the multibody system
-   * @param[in] residual    Residual model
    * @param[in] activation  Activation model
+   * @param[in] residual    Residual model
    */
   CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                        boost::shared_ptr<ActivationModelAbstract> activation,

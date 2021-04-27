@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,9 +11,9 @@
 namespace crocoddyl {
 template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                                   boost::shared_ptr<ResidualModelAbstract> residual,
-                                                   boost::shared_ptr<ActivationModelAbstract> activation)
-    : Base(state, activation, residual) {}
+                                                   boost::shared_ptr<ActivationModelAbstract> activation,
+                                                   boost::shared_ptr<ResidualModelAbstract> residual)
+  : Base(state, activation, residual) {}
 
 template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
