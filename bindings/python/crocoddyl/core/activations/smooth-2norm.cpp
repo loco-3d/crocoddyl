@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationSmooth2Norm() {
+  boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelSmooth2Norm> >();
+
   bp::class_<ActivationModelSmooth2Norm, bp::bases<ActivationModelAbstract> >(
       "ActivationModelSmooth2Norm",
       "Smooth-2Norm activation model.\n\n"

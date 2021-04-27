@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -87,7 +88,8 @@ void exposeDifferentialActionAbstract() {
       .add_property("u_ub",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_ub,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits");
+                    &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
 

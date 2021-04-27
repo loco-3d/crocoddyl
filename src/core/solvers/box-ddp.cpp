@@ -67,7 +67,7 @@ void SolverBoxDDP::computeGains(const std::size_t t) {
       }
     }
     K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu, nu) * Qxu_[t].leftCols(nu).transpose();
-    k_[t].topRows(nu).noalias() = -boxqp_sol.x;
+    k_[t].topRows(nu) = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)

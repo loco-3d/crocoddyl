@@ -24,6 +24,7 @@ void test_construct_data(ActuationModelTypes::Type actuation_type, StateModelTyp
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
+  if (!data) throw std::runtime_error("[test_construct_data] Data pointer is dead.");
 }
 
 void test_calc_returns_tau(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {

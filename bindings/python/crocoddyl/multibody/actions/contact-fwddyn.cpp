@@ -1,26 +1,28 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
-// Copyright (C) 2020 CTU, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeDifferentialActionContactFwdDynamics() {
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelContactFwdDynamics> >();
+
   bp::class_<DifferentialActionModelContactFwdDynamics, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelContactFwdDynamics",
       "Differential action model for contact forward dynamics in multibody systems.\n\n"
       "The contact is modelled as holonomic constraits in the contact frame. There\n"
       "is also a custom implementation in case of system with armatures. If you want to\n"
-      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "include the armature, you need to use set_armature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
                boost::shared_ptr<ContactModelMultiple>, boost::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
@@ -91,7 +93,8 @@ void exposeDifferentialActionContactFwdDynamics() {
       .add_property("JMinvJt_damping",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_damping_factor),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
-                    "Damping factor for cholesky decomposition of JMinvJt");
+                    "Damping factor for cholesky decomposition of JMinvJt")
+      .def(PrintableVisitor<DifferentialActionModelContactFwdDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
 
