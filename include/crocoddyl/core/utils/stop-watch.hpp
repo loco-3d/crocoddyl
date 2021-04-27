@@ -35,11 +35,11 @@
 //#define PROFILER_ACTIVE
 
 #ifdef PROFILER_ACTIVE
-  #define START_PROFILER(name) getProfiler().start(name)
-  #define STOP_PROFILER(name) getProfiler().stop(name)
+#define START_PROFILER(name) getProfiler().start(name)
+#define STOP_PROFILER(name) getProfiler().stop(name)
 #else
-  #define START_PROFILER(name)
-  #define STOP_PROFILER(name)
+#define START_PROFILER(name)
+#define STOP_PROFILER(name)
 #endif
 
 #define STOP_WATCH_MAX_NAME_LENGTH 60
@@ -48,22 +48,18 @@
 namespace crocoddyl {
 
 // Generic stopwatch exception class
-struct StopwatchException
-{
-public:
-  StopwatchException(std::string error) : error(error) { }
+struct StopwatchException {
+ public:
+  StopwatchException(std::string error) : error(error) {}
   std::string error;
 };
 
-
-enum StopwatchMode
-{
-  NONE	    = 0,  // Clock is not initialized
-  CPU_TIME  = 1,  // Clock calculates time ranges using ctime and CLOCKS_PER_SEC
-  REAL_TIME = 2   // Clock calculates time by asking the operating system how
-                  // much real time passed
+enum StopwatchMode {
+  NONE = 0,      // Clock is not initialized
+  CPU_TIME = 1,  // Clock calculates time ranges using ctime and CLOCKS_PER_SEC
+  REAL_TIME = 2  // Clock calculates time by asking the operating system how
+                 // much real time passed
 };
-
 
 /**
     @brief A class representing a stopwatch.
@@ -157,10 +153,9 @@ enum StopwatchMode
 
 */
 class Stopwatch {
-public:
-
+ public:
   /** @brief Constructor */
-  Stopwatch(StopwatchMode _mode=NONE);
+  Stopwatch(StopwatchMode _mode = NONE);
 
   /** @brief Destructor */
   ~Stopwatch();
@@ -187,11 +182,10 @@ public:
   void reset_all();
 
   /** @brief Dump the data of a certain performance record */
-  void report(const std::string &perf_name, int precision=2,
-              std::ostream& output = std::cout);
+  void report(const std::string &perf_name, int precision = 2, std::ostream &output = std::cout);
 
   /** @brief Dump the data of all the performance records */
-  void report_all(int precision=2, std::ostream& output = std::cout);
+  void report_all(int precision = 2, std::ostream &output = std::cout);
 
   /** @brief Returns total execution time of a certain performance */
   long double get_total_time(const std::string &perf_name);
@@ -223,39 +217,29 @@ public:
   /** @brief Take time, depends on mode. */
   long double take_time();
 
-protected:
-
+ protected:
   /** @brief Struct to hold the performance data */
   struct PerformanceData {
+    PerformanceData()
+        : clock_start(0), total_time(0), min_time(0), max_time(0), last_time(0), paused(false), stops(0) {}
 
-    PerformanceData() :
-      clock_start(0),
-      total_time(0),
-      min_time(0),
-      max_time(0),
-      last_time(0),
-      paused(false),
-      stops(0) {
-    }
-
-    long double	clock_start;  //!< Start time
-    long double	total_time;   //!< Cumulative total time
-    long double	min_time;     //!< Minimum time
-    long double	max_time;     //!< Maximum time
+    long double clock_start;  //!< Start time
+    long double total_time;   //!< Cumulative total time
+    long double min_time;     //!< Minimum time
+    long double max_time;     //!< Maximum time
     long double last_time;    //!< Last time
     bool paused;              //!< Tells if this performance has been paused, only for internal use
-    int	stops;                //!< How many cycles have been this stopwatch executed?
+    int stops;                //!< How many cycles have been this stopwatch executed?
   };
 
-  bool active;                //!< Flag to hold the clock's status
-  StopwatchMode mode;         //!< Time taking mode
-  std::map<std::string, PerformanceData >* records_of; //!< Dynamic collection of performance data
-
+  bool active;                                         //!< Flag to hold the clock's status
+  StopwatchMode mode;                                  //!< Time taking mode
+  std::map<std::string, PerformanceData> *records_of;  //!< Dynamic collection of performance data
 };
 
-Stopwatch& getProfiler();
+Stopwatch &getProfiler();
 
-}
+}  // namespace crocoddyl
 
 #ifndef WIN32
 #pragma GCC visibility pop

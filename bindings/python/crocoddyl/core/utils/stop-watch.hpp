@@ -16,15 +16,15 @@ namespace python {
 
 void stop_watch_report(int precision);
 
-long double stop_watch_get_average_time(const std::string & perf_name);
+long double stop_watch_get_average_time(const std::string& perf_name);
 
 /** Returns minimum execution time of a certain performance */
-long double stop_watch_get_min_time(const std::string & perf_name);
+long double stop_watch_get_min_time(const std::string& perf_name);
 
 /** Returns maximum execution time of a certain performance */
-long double stop_watch_get_max_time(const std::string & perf_name);
+long double stop_watch_get_max_time(const std::string& perf_name);
 
-long double stop_watch_get_total_time(const std::string & perf_name);
+long double stop_watch_get_total_time(const std::string& perf_name);
 
 void stop_watch_reset_all();
 
