@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,40 +50,6 @@ CostModelCoMPositionTpl<Scalar>::CostModelCoMPositionTpl(boost::shared_ptr<State
 
 template <typename Scalar>
 CostModelCoMPositionTpl<Scalar>::~CostModelCoMPositionTpl() {}
-
-template <typename Scalar>
-void CostModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual give the reference CoM position
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and CoM position residual models
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(data->residual, x, u);
-  activation_->calcDiff(data->activation, data->residual->r);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  const std::size_t nv = state_->get_nv();
-  const MatrixXs& Jcom = data->residual->Rx.leftCols(nv);
-  data->Lx.head(nv).noalias() = Jcom.transpose() * data->activation->Ar;
-  d->Arr_Jcom.noalias() = data->activation->Arr * Jcom;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = Jcom.transpose() * d->Arr_Jcom;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCoMPositionTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
 
 template <typename Scalar>
 void CostModelCoMPositionTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
