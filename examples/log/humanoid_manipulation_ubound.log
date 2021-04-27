@@ -147,6 +147,6 @@ iter 	 cost 	      stop 	    grad 	  xreg 	      ureg 	 step 	 feas
  132  4.61934e+00  4.66151e-04  9.85999e-06  1.00000e-09  1.00000e-09   1.0000     1
  133  4.61934e+00  6.56743e-06  4.87220e-06  1.00000e-09  1.00000e-09   1.0000     1
 Finally reached =  [3.99994244e-01 1.78989227e-05 1.20000385e+00]
-Distance between hand and target =  1.9192318758120287e-05
-Distance to default state =  1.638037708135107
-XY distance to CoM reference =  0.04161955447748748
+Distance between hand and target =  1.9192318757136123e-05
+Distance to default state =  1.638037708132289
+XY distance to CoM reference =  0.041619554477623805
