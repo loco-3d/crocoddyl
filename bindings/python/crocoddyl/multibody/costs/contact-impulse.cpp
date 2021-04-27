@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ void exposeCostContactImpulse() {  // TODO: Remove once the deprecated update ca
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelContactImpulse> >();
 
-  bp::class_<CostModelContactImpulse, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelContactImpulse, bp::bases<CostModelResidual> >(
       "CostModelContactImpulse",
       "This cost function defines a residual vector as r = f-fref, where f,fref describe the current and reference "
       "the spatial impulses, respectively.",
@@ -44,36 +44,6 @@ void exposeCostContactImpulse() {  // TODO: Remove once the deprecated update ca
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state of the multibody system\n"
           ":param fref: reference spatial contact impulse in the contact coordinates"))
-      .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelContactImpulse::calc, bp::args("self", "data", "x", "u"),
-          "Compute the contact impulse cost.\n\n"
-          ":param data: cost data\n"
-          ":param x: state vector\n"
-          ":param u: control input")
-      .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelContactImpulse::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the contact impulse cost.\n\n"
-          "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: state vector\n"
-          ":param u: control input\n")
-      .def<void (CostModelContactImpulse::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &CostModelContactImpulse::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the contact impulse cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference", &CostModelContactImpulse::get_reference<FrameForce>,
                     &CostModelContactImpulse::set_reference<FrameForce>,
                     "reference spatial contact impulse in the contact coordinates")
@@ -83,18 +53,6 @@ void exposeCostContactImpulse() {  // TODO: Remove once the deprecated update ca
                     bp::make_function(&CostModelContactImpulse::set_reference<FrameForce>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference spatial contact impulse in the contact coordinates");
-
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataContactImpulse> >();
-
-  bp::class_<CostDataContactImpulse, bp::bases<CostDataAbstract> >(
-      "CostDataContactImpulse", "Data for contact impulse cost.\n\n",
-      bp::init<CostModelContactImpulse*, DataCollectorAbstract*>(
-          bp::args("self", "model", "data"),
-          "Create contact impulse cost data.\n\n"
-          ":param model: contact impulse cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Arr_Rx", bp::make_getter(&CostDataContactImpulse::Arr_Rx, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)");
 
 #pragma GCC diagnostic pop
 }

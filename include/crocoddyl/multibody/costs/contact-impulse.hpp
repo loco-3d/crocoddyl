@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_IMPULSE_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -37,19 +37,18 @@ namespace crocoddyl {
  * \sa `ActionModelImpulseFwdDynamicsTpl`, `DataCollectorImpulseTpl`, `ActivationModelAbstractTpl`
  */
 template <typename _Scalar>
-class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelContactImpulseTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef CostDataContactImpulseTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualModelContactForceTpl<Scalar> ResidualModelContactForce;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameForceTpl<Scalar> FrameForce;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -90,38 +89,6 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelContactImpulseTpl(boost::shared_ptr<StateMultibody> state, const FrameForce& fref);
   virtual ~CostModelContactImpulseTpl();
 
-  /**
-   * @brief Compute the contact impulse cost
-   *
-   * The impulse vector is computed by ActionModelImpulseFwdDynamicsTpl and stored in DataCollectorImpulseTpl.
-   *
-   * @param[in] data  Contact impulse data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Compute the derivatives of the contact impulse cost
-   *
-   * The impulse derivatives are computed by ActionModelImpulseFwdDynamicsTpl and stored in DataCollectorImpulseTpl.
-   *
-   * @param[in] data  Contact impulse data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Create the contact impulse cost data
-   *
-   * @param[in] data  shared data (it should be of type DataCollectorImpulseTpl)
-   * @return the cost data.
-   */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
  protected:
   /**
    * @brief Return the reference spatial impulse \f$\boldsymbol{\lambda}^*\f$
@@ -141,36 +108,6 @@ class CostModelContactImpulseTpl : public CostModelAbstractTpl<_Scalar> {
 
  protected:
   FrameForce fref_;  //!< Reference spatial impulse \f$\boldsymbol{\lambda}^*\f$
-};
-
-template <typename _Scalar>
-struct CostDataContactImpulseTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::MatrixXs MatrixXs;
-
-  template <template <typename Scalar> class Model>
-  CostDataContactImpulseTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()) {
-    Arr_Rx.setZero();
-  }
-
-  MatrixXs Arr_Rx;
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::residual;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl
