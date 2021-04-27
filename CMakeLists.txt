@@ -34,8 +34,7 @@ ENDIF()
 SET(DOXYGEN_USE_MATHJAX YES)
 SET(DOXYGEN_USE_TEMPLATE_CSS YES)
 
-# Disable -Werror on Unix for now.
-SET(CXX_DISABLE_WERROR True)
+SET(CXX_DISABLE_WERROR False)
 SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
