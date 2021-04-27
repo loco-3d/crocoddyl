@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,43 +61,6 @@ CostModelContactFrictionConeTpl<Scalar>::CostModelContactFrictionConeTpl(boost::
 
 template <typename Scalar>
 CostModelContactFrictionConeTpl<Scalar>::~CostModelContactFrictionConeTpl() {}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>& x,
-                                                   const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual given the reference contact friction
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>& x,
-                                                       const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and contact friction cone residual models
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(data->residual, x, u);
-  activation_->calcDiff(data->activation, data->residual->r);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
-  data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;
-  d->Arr_Rx.noalias() = data->activation->Arr * data->residual->Rx;
-  d->Arr_Ru.noalias() = data->activation->Arr * data->residual->Ru;
-  data->Lxx.noalias() = data->residual->Rx.transpose() * d->Arr_Rx;
-  data->Lxu.noalias() = data->residual->Rx.transpose() * d->Arr_Ru;
-  data->Luu.noalias() = data->residual->Ru.transpose() * d->Arr_Ru;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelContactFrictionConeTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
 
 template <typename Scalar>
 void CostModelContactFrictionConeTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {
