@@ -29,7 +29,7 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
       actuation_(actuation),
       costs_(costs),
       pinocchio_(*state->get_pinocchio().get()),
-      with_armature_(true),
+      without_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
@@ -62,7 +62,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
   actuation_->calc(d->multibody.actuation, x, u);
 
   // Computing the dynamics using ABA or manually for armature case
-  if (with_armature_) {
+  if (without_armature_) {
     d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau);
     pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   } else {
@@ -102,7 +102,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
   actuation_->calcDiff(d->multibody.actuation, x, u);
 
   // Computing the dynamics derivatives
-  if (with_armature_) {
+  if (without_armature_) {
     pinocchio::computeABADerivatives(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau, d->Fx.leftCols(nv),
                                      d->Fx.rightCols(nv), d->pinocchio.Minv);
     d->Fx.noalias() += d->pinocchio.Minv * d->multibody.actuation->dtau_dx;
@@ -195,7 +195,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::set_armature(const Vecto
   }
 
   armature_ = armature;
-  with_armature_ = false;
+  without_armature_ = false;
 }
 
 }  // namespace crocoddyl
