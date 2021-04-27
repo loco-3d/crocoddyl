@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -258,7 +258,8 @@ void SolverDDP::backwardPass() {
       }
       Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
     }
-    Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();
+    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+    Vxx_[t] = Vxx_tmp_;
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal().array() += xreg_;
@@ -331,9 +332,10 @@ void SolverDDP::computeGains(const std::size_t t) {
     if (info != Eigen::Success) {
       throw_pretty("backward_error");
     }
-    K_[t].topRows(nu).noalias() = Qxu_[t].leftCols(nu).transpose();
+    K_[t].topRows(nu) = Qxu_[t].leftCols(nu).transpose();
 
-    Eigen::Block<Eigen::MatrixXd> K = K_[t].topRows(nu);
+    Eigen::Block<MatrixXdRowMajor, Eigen::Dynamic, Eigen::internal::traits<MatrixXdRowMajor>::ColsAtCompileTime, true>
+        K = K_[t].topRows(nu);
     Quu_llt_[t].solveInPlace(K);
     k_[t].head(nu) = Qu_[t].head(nu);
     Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
@@ -390,7 +392,7 @@ void SolverDDP::allocateData() {
     Quu_[t] = Eigen::MatrixXd::Zero(nu, nu);
     Qx_[t] = Eigen::VectorXd::Zero(ndx);
     Qu_[t] = Eigen::VectorXd::Zero(nu);
-    K_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    K_[t] = MatrixXdRowMajor::Zero(nu, ndx);
     k_[t] = Eigen::VectorXd::Zero(nu);
     fs_[t] = Eigen::VectorXd::Zero(ndx);
 
@@ -402,16 +404,17 @@ void SolverDDP::allocateData() {
     us_try_[t] = Eigen::VectorXd::Zero(nu);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
 
-    FuTVxx_p_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    FuTVxx_p_[t] = MatrixXdRowMajor::Zero(nu, ndx);
     Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(model->get_nu());
     Quuk_[t] = Eigen::VectorXd(nu);
   }
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
+  Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
   fs_.back() = Eigen::VectorXd::Zero(ndx);
 
-  FxTVxx_p_ = Eigen::MatrixXd::Zero(ndx, ndx);
+  FxTVxx_p_ = MatrixXdRowMajor::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
 }
 
@@ -453,7 +456,7 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
 
-const std::vector<Eigen::MatrixXd>& SolverDDP::get_K() const { return K_; }
+const std::vector<typename MathBaseTpl<double>::MatrixXsRowMajor>& SolverDDP::get_K() const { return K_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
