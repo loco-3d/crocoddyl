@@ -76,7 +76,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;
-  bool with_armature_;
+  bool without_armature_;
   VectorXs armature_;
 };
 
