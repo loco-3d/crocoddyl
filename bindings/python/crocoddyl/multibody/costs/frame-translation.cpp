@@ -20,7 +20,7 @@ void exposeCostFrameTranslation() {  // TODO: Remove once the deprecated update 
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelFrameTranslation> >();
 
-  bp::class_<CostModelFrameTranslation, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelFrameTranslation, bp::bases<CostModelResidual> >(
       "CostModelFrameTranslation",
       "This cost function defines a residual vector as r = t - tref, with t and tref as the current and reference "
       "frame translations, respectively.",
@@ -52,36 +52,6 @@ void exposeCostFrameTranslation() {  // TODO: Remove once the deprecated update 
           "state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation"))
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelFrameTranslation::calc, bp::args("self", "data", "x", "u"),
-          "Compute the frame translation cost.\n\n"
-          ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelFrameTranslation::calcDiff, bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the frame translation cost.\n\n"
-          "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
-      .def<void (CostModelFrameTranslation::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &CostModelFrameTranslation::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the frame translation cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference", &CostModelFrameTranslation::get_reference<FrameTranslation>,
                     &CostModelFrameTranslation::set_reference<FrameTranslation>, "reference frame translation")
       .add_property("xref",
@@ -90,16 +60,6 @@ void exposeCostFrameTranslation() {  // TODO: Remove once the deprecated update 
                     bp::make_function(&CostModelFrameTranslation::set_reference<FrameTranslation>,
                                       deprecated<>("Deprecated. Use reference.")),
                     "reference frame translation");
-
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataFrameTranslation> >();
-
-  bp::class_<CostDataFrameTranslation, bp::bases<CostDataAbstract> >(
-      "CostDataFrameTranslation", "Data for frame translation cost.\n\n",
-      bp::init<CostModelFrameTranslation*, DataCollectorAbstract*>(
-          bp::args("self", "model", "data"),
-          "Create frame translation cost data.\n\n"
-          ":param model: frame translation cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 
 #pragma GCC diagnostic pop
 }
