@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define CROCODDYL_CORE_COSTS_CONTROL_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 
 namespace crocoddyl {
@@ -26,20 +26,19 @@ namespace crocoddyl {
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * As described in `CostModelResidualTpl()`, the cost value and its derivatives are calculated by `calc` and
  * `calcDiff`, respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelControlTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualModelControlTpl<Scalar> ResidualModelControl;
   typedef typename MathBase::VectorXs VectorXs;
@@ -113,16 +112,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
   virtual ~CostModelControlTpl();
-
-  /**
-   * @brief Compute the control cost
-   *
-   * @param[in] data  Control cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the derivatives of the control cost

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,14 +68,6 @@ CostModelControlTpl<Scalar>::CostModelControlTpl(boost::shared_ptr<typename Base
 
 template <typename Scalar>
 CostModelControlTpl<Scalar>::~CostModelControlTpl() {}
-
-template <typename Scalar>
-void CostModelControlTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  residual_->calc(data->residual, x, u);
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
 
 template <typename Scalar>
 void CostModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,

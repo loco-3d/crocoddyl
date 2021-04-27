@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ void exposeCostControl() {  // TODO: Remove once the deprecated update call has 
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelControl> >();
 
-  bp::class_<CostModelControl, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelControl, bp::bases<CostModelResidual> >(
       "CostModelControl",
       "This cost function defines a residual vector as r = u - uref, with u and uref as the current and reference "
       "control, respectively.",
@@ -65,33 +65,12 @@ void exposeCostControl() {  // TODO: Remove once the deprecated update call has 
       .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
                                       const Eigen::Ref<const Eigen::VectorXd>&,
                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &CostModelControl::calc, bp::args("self", "data", "x", "u"),
-          "Compute the control cost.\n\n"
-          ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                      const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
-                                                                                 bp::args("self", "data", "x"))
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                      const Eigen::Ref<const Eigen::VectorXd>&,
-                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelControl::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the control cost.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
-      .def<void (CostModelControl::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &CostModelControl::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the control cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined cost.\n"
-           ":param data: shared data\n"
-           ":return cost data.")
       .add_property("reference", &CostModelControl::get_reference<Eigen::VectorXd>,
                     &CostModelControl::set_reference<Eigen::VectorXd>, "reference control vector")
       .add_property("uref",
