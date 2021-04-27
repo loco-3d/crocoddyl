@@ -258,8 +258,8 @@ void SolverDDP::backwardPass() {
       }
       Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
     }
-    Vxx_tmp_ = Vxx_[t] + Vxx_[t].transpose();
-    Vxx_[t].noalias() = 0.5 * Vxx_tmp_;
+    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+    Vxx_[t] = Vxx_tmp_;
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal().array() += xreg_;
