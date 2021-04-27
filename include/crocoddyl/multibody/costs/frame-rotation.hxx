@@ -57,41 +57,6 @@ template <typename Scalar>
 CostModelFrameRotationTpl<Scalar>::~CostModelFrameRotationTpl() {}
 
 template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x,
-                                             const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual given the reference frame rotation
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelFrameRotationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>& x,
-                                                 const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and frame placement residual models
-  Data* d = static_cast<Data*>(data.get());
-  residual_->calcDiff(data->residual, x, u);
-  activation_->calcDiff(data->activation, data->residual->r);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  const std::size_t nv = state_->get_nv();
-  Eigen::Ref<Matrix3xs> J(data->residual->Rx.leftCols(nv));
-  data->Lx.head(nv).noalias() = J.transpose() * data->activation->Ar;
-  d->Arr_J.noalias() = data->activation->Arr * J;
-  data->Lxx.topLeftCorner(nv, nv).noalias() = J.transpose() * d->Arr_J;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameRotationTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
-
-template <typename Scalar>
 void CostModelFrameRotationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameRotation)) {
     FrameRotation& ref_map = *static_cast<FrameRotation*>(pv);
