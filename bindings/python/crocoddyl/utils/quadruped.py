@@ -128,7 +128,7 @@ class SimpleQuadrupedalGaitProblem:
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -179,7 +179,7 @@ class SimpleQuadrupedalGaitProblem:
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -227,7 +227,7 @@ class SimpleQuadrupedalGaitProblem:
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -276,7 +276,7 @@ class SimpleQuadrupedalGaitProblem:
         lfFootPos0 = self.rdata.oMf[self.lfFootId].translation
         lhFootPos0 = self.rdata.oMf[self.lhFootId].translation
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -311,7 +311,7 @@ class SimpleQuadrupedalGaitProblem:
         lfFootPos0[2] = 0.
         lhFootPos0[2] = 0.
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
 
         loco3dModel = []
         takeOff = [

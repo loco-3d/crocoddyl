@@ -39,7 +39,7 @@ rfPos0 = rdata.oMf[rightFootId].translation
 lfPos0 = rdata.oMf[leftFootId].translation
 refGripper = rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation
 comRef = (rfPos0 + lfPos0) / 2
-comRef[2] = np.asscalar(pinocchio.centerOfMass(rmodel, rdata, q0)[2])
+comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
 # Initialize Gepetto viewer
 if WITHDISPLAY:
