@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,40 +61,6 @@ CostModelCentroidalMomentumTpl<Scalar>::CostModelCentroidalMomentumTpl(boost::sh
 
 template <typename Scalar>
 CostModelCentroidalMomentumTpl<Scalar>::~CostModelCentroidalMomentumTpl() {}
-
-template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>& x,
-                                                  const Eigen::Ref<const VectorXs>& u) {
-  // Compute the cost residual given the reference centroidal momentum
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>& x,
-                                                      const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and centroidal momentum residual models
-  Data* d = static_cast<Data*>(data.get());
-  activation_->calcDiff(data->activation, data->residual->r);
-  residual_->calcDiff(data->residual, x, u);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  const MatrixXs& Rx = data->residual->Rx;
-  d->Arr_Rx.noalias() = data->activation->Arr * Rx;
-  data->Lx.noalias() = Rx.transpose() * data->activation->Ar;
-  data->Lxx.noalias() = Rx.transpose() * d->Arr_Rx;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelCentroidalMomentumTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
 
 template <typename Scalar>
 void CostModelCentroidalMomentumTpl<Scalar>::set_referenceImpl(const std::type_info& ti, const void* pv) {

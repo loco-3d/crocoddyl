@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_MOMENTUM_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
@@ -28,25 +28,22 @@ namespace crocoddyl {
  * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
  * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xu}} = \mathbf{l_{x}}^T \mathbf{l_{u}} \f$.
  *
- * As described in `CostModelAbstractTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * As described in `CostModelResidualTpl()`, the cost value and its derivatives are calculated by `calc` and
  * `calcDiff`, respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelCentroidalMomentumTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataCentroidalMomentumTpl<Scalar> Data;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualModelCentroidalMomentumTpl<Scalar> ResidualModelCentroidalMomentum;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -99,31 +96,6 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref);
   virtual ~CostModelCentroidalMomentumTpl();
 
-  /**
-   * @brief Compute the centroidal momentum cost
-   *
-   * @param[in] data  Centroidal momentum cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Compute the derivatives of the centroidal momentum cost
-   *
-   * @param[in] data  Centroidal momentum cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Create the centroidal momentum cost data
-   */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
  protected:
   /**
    * @brief Modify the centroidal momentum reference
@@ -143,34 +115,6 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
 
  private:
   Vector6s href_;  //!< Reference centroidal momentum
-};
-
-template <typename _Scalar>
-struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::Matrix6xs Matrix6xs;
-
-  template <template <typename Scalar> class Model>
-  CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Rx(6, model->get_state()->get_ndx()) {
-    Arr_Rx.setZero();
-  }
-
-  Matrix6xs Arr_Rx;
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::residual;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl
