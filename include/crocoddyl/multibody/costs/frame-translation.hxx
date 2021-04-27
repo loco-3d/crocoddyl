@@ -62,41 +62,6 @@ template <typename Scalar>
 CostModelFrameTranslationTpl<Scalar>::~CostModelFrameTranslationTpl() {}
 
 template <typename Scalar>
-void CostModelFrameTranslationTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                                const Eigen::Ref<const VectorXs>& x,
-                                                const Eigen::Ref<const VectorXs>& u) {
-  // Compute the frame translation w.r.t. the reference frame
-  residual_->calc(data->residual, x, u);
-
-  // Compute the cost
-  activation_->calc(data->activation, data->residual->r);
-  data->cost = data->activation->a_value;
-}
-
-template <typename Scalar>
-void CostModelFrameTranslationTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>& x,
-                                                    const Eigen::Ref<const VectorXs>& u) {
-  // Compute the derivatives of the activation and frame translation residual models
-  Data* d = static_cast<Data*>(data.get());
-  const std::size_t nv = state_->get_nv();
-  residual_->calcDiff(data->residual, x, u);
-  activation_->calcDiff(data->activation, data->residual->r);
-
-  // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  Eigen::Ref<Matrix3xs> J(data->residual->Rx.leftCols(nv));
-  data->Lx.head(nv) = J.transpose() * d->activation->Ar;
-  d->Arr_J.noalias() = data->activation->Arr * J;
-  data->Lxx.topLeftCorner(nv, nv) = J.transpose() * d->Arr_J;
-}
-
-template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelFrameTranslationTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
-}
-
-template <typename Scalar>
 void CostModelFrameTranslationTpl<Scalar>::get_referenceImpl(const std::type_info& ti, void* pv) {
   if (ti == typeid(FrameTranslation)) {
     FrameTranslation& ref_map = *static_cast<FrameTranslation*>(pv);

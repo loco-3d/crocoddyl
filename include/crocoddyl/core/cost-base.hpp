@@ -68,7 +68,8 @@ class CostModelAbstractTpl {
    * @param[in] activation  Activation model
    * @param[in] residual    Residual model
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+		       boost::shared_ptr<ActivationModelAbstract> activation,
                        boost::shared_ptr<ResidualModelAbstract> residual);
 
   /**
@@ -78,7 +79,8 @@ class CostModelAbstractTpl {
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+		       boost::shared_ptr<ActivationModelAbstract> activation,
                        const std::size_t nu);
 
   /**
@@ -89,7 +91,8 @@ class CostModelAbstractTpl {
    * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+		       boost::shared_ptr<ActivationModelAbstract> activation);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -99,7 +102,8 @@ class CostModelAbstractTpl {
    * @param[in] state     State of the dynamical system
    * @param[in] residual  Residual model
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+		       boost::shared_ptr<ResidualModelAbstract> residual);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -110,7 +114,9 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+		       const std::size_t nr,
+		       const std::size_t nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
