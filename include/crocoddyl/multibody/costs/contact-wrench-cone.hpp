@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_COSTS_CONTACT_WRENCH_CONE_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/multibody/frames.hpp"
@@ -19,19 +19,16 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelContactWrenchConeTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataContactWrenchConeTpl<Scalar> Data;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualModelContactWrenchConeTpl<Scalar> ResidualModelContactWrenchCone;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef FrameWrenchConeTpl<Scalar> FrameWrenchCone;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -47,12 +44,6 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state, const FrameWrenchCone& fref);
   virtual ~CostModelContactWrenchConeTpl();
 
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
  protected:
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
   virtual void get_referenceImpl(const std::type_info& ti, void* pv);
@@ -65,38 +56,6 @@ class CostModelContactWrenchConeTpl : public CostModelAbstractTpl<_Scalar> {
 
  private:
   FrameWrenchCone fref_;
-};
-
-template <typename _Scalar>
-struct CostDataContactWrenchConeTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::MatrixXs MatrixXs;
-
-  template <template <typename Scalar> class Model>
-  CostDataContactWrenchConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),
-        Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_residual()->get_nr(), model->get_nu()) {
-    Arr_Rx.setZero();
-    Arr_Ru.setZero();
-  }
-
-  MatrixXs Arr_Rx;
-  MatrixXs Arr_Ru;
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::residual;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl
