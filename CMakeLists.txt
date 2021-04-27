@@ -34,8 +34,7 @@ ENDIF()
 SET(DOXYGEN_USE_MATHJAX YES)
 SET(DOXYGEN_USE_TEMPLATE_CSS YES)
 
-# Disable -Werror on Unix for now.
-SET(CXX_DISABLE_WERROR True)
+SET(CXX_DISABLE_WERROR False)
 SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
@@ -141,6 +140,11 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_HEADERS
   )
 
 IF(UNIX)
+  # Build options
+  #   We'd like to deactivate sign conversion since we frequently convert Eigen::Index<>std::size_t
+  #   Otherwise, activate all warnings.
+  ADD_COMPILE_OPTIONS(-Wall -Wpedantic -Wextra -Wno-sign-conversion)
+
   ADD_LIBRARY(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES} ${${PROJECT_NAME}_HEADERS})
   SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
