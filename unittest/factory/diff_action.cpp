@@ -180,10 +180,10 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
         cost->addCost("lf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
                               state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"), cone,
-                              actuation->get_nu()),
-                          activation),
+                              actuation->get_nu())),
                       0.1);
       }
       break;
@@ -204,30 +204,30 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
         cost->addCost("lf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("lf_foot"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("lf_foot"), cone, actuation->get_nu())),
                       0.1);
         cost->addCost("rf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("rf_foot"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("rf_foot"), cone, actuation->get_nu())),
                       0.1);
         cost->addCost("lh_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("lh_foot"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("lh_foot"), cone, actuation->get_nu())),
                       0.1);
         cost->addCost("rh_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("rh_foot"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("rh_foot"), cone, actuation->get_nu())),
                       0.1);
       }
       break;
@@ -242,16 +242,16 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
         cost->addCost("lf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("left_sole_link"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("left_sole_link"), cone, actuation->get_nu())),
                       0.1);
         cost->addCost("rf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(
                           state,
+                          activation,
                           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                              state, state->get_pinocchio()->getFrameId("right_sole_link"), cone, actuation->get_nu()),
-                          activation),
+                              state, state->get_pinocchio()->getFrameId("right_sole_link"), cone, actuation->get_nu())),
                       0.1);
       }
       break;

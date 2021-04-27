@@ -78,35 +78,35 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
     case ContactCostModelTypes::CostModelResidualContactForce:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
+          ActivationModelFactory().create(activation_type, 6),
           boost::make_shared<crocoddyl::ResidualModelContactForce>(
-              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), nu),
-          ActivationModelFactory().create(activation_type, 6));
+              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), nu));
       break;
     case ContactCostModelTypes::CostModelResidualContactCoPPosition:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
+          ActivationModelFactory().create(activation_type, 4),
           boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
-              state, model_factory.get_frame_id(), crocoddyl::CoPSupport(R, Eigen::Vector2d(0.1, 0.1)), nu),
-          ActivationModelFactory().create(activation_type, 4));
+              state, model_factory.get_frame_id(), crocoddyl::CoPSupport(R, Eigen::Vector2d(0.1, 0.1)), nu));
       break;
     case ContactCostModelTypes::CostModelResidualContactFrictionCone:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
+          ActivationModelFactory().create(activation_type, 5),
           boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(state, model_factory.get_frame_id(),
-                                                                          crocoddyl::FrictionCone(R, 1.), nu),
-          ActivationModelFactory().create(activation_type, 5));
+                                                                          crocoddyl::FrictionCone(R, 1.), nu));
       break;
     case ContactCostModelTypes::CostModelResidualContactWrenchCone:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state,
+          ActivationModelFactory().create(activation_type, 17),
           boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
-              state, model_factory.get_frame_id(), crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1)), nu),
-          ActivationModelFactory().create(activation_type, 17));
+              state, model_factory.get_frame_id(), crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1)), nu));
       break;
     case ContactCostModelTypes::CostModelResidualContactControlGrav:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, nu),
-          ActivationModelFactory().create(activation_type, state->get_nv()));
+          state,
+          ActivationModelFactory().create(activation_type, state->get_nv()), boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, nu));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactCostModelTypes::Type given");
