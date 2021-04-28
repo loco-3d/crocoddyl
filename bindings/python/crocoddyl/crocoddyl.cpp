@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX;
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXRowMajor;
 
   eigenpy::enableEigenPySpecific<Vector4>();
   eigenpy::enableEigenPySpecific<Vector6>();
@@ -38,6 +39,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   // Register converters between std::vector and Python list
   StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
   StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose("StdVec_MatrixX");
+  StdVectorPythonVisitor<MatrixXRowMajor, std::allocator<MatrixXRowMajor>, true>::expose("StdVec_MatrixXRowMajor");
 
   exposeCore();
   exposeMultibody();
