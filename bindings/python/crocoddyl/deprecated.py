@@ -1,5 +1,6 @@
 import functools
 import warnings
+from types import FunctionType
 
 
 class DeprecatedWarning(UserWarning):
@@ -30,3 +31,36 @@ def deprecated(instructions):
         return wrapper
 
     return decorator
+
+
+def depr_wrapper(f, warning):
+    def new(*args, **kwargs):
+        if not args[0].warned:
+            print("Deprecated Warning: %s" % warning)
+            args[0].warned = True
+        return f(*args, **kwargs)
+
+    return new
+
+
+def DeprecatedObject(o, warning):
+    class temp(o):
+        pass
+
+    temp.__name__ = "Deprecated_%s" % o.__class__.__name__
+    output = temp.__new__(temp, o)
+
+    output.warned = True
+    wrappable_types = (type(int.__add__), type(zip), FunctionType)
+    unwrappable_names = ("__str__", "__unicode__", "__repr__", "__getattribute__", "__setattr__")
+
+    for method_name in dir(temp):
+        if not type(getattr(temp, method_name)) in wrappable_types:
+            continue
+        if method_name in unwrappable_names:
+            continue
+        if method_name != "__class__":
+            setattr(temp, method_name, depr_wrapper(getattr(temp, method_name), warning))
+
+    output.warned = False
+    return output
