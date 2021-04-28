@@ -431,7 +431,7 @@ class SimpleQuadrupedalGaitProblem:
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, self.actuation.nu)
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
-            frictionCone = crocoddyl.CostModelResidual(self.state, coneResidual, coneActivation)
+            frictionCone = crocoddyl.CostModelResidual(self.state, coneActivation, coneResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
@@ -446,7 +446,7 @@ class SimpleQuadrupedalGaitProblem:
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
         ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
@@ -455,7 +455,7 @@ class SimpleQuadrupedalGaitProblem:
         ub = np.concatenate([self.state.ub[1:self.state.nv + 1], self.state.ub[-self.state.nv:]])
         stateBoundsResidual = crocoddyl.ResidualModelState(self.state, 0 * self.rmodel.defaultState, self.actuation.nu)
         stateBoundsActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(lb, ub))
-        stateBounds = crocoddyl.CostModelResidual(self.state, stateBoundsResidual, stateBoundsActivation)
+        stateBounds = crocoddyl.CostModelResidual(self.state, stateBoundsActivation, stateBoundsResidual)
         costModel.addCost("stateBounds", stateBounds, 1e3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
@@ -500,7 +500,7 @@ class SimpleQuadrupedalGaitProblem:
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, self.actuation.nu)
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
-            frictionCone = crocoddyl.CostModelResidual(self.state, coneResidual, coneActivation)
+            frictionCone = crocoddyl.CostModelResidual(self.state, coneActivation, coneResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
@@ -517,7 +517,7 @@ class SimpleQuadrupedalGaitProblem:
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
         ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
@@ -555,7 +555,7 @@ class SimpleQuadrupedalGaitProblem:
         stateWeights = np.array([1.] * 6 + [10.] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, 0)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        stateReg = crocoddyl.CostModelResidual(self.state, stateResidual, stateActivation)
+        stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
