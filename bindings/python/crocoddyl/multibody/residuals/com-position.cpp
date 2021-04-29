@@ -19,7 +19,7 @@ void exposeResidualCoMPosition() {
       "ResidualModelCoMPosition",
       "This residual function defines the CoM tracking as r = c - cref, with c and cref as the current and reference "
       "CoM position, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, Eigen::Vector3d, int>(
+      bp::init<boost::shared_ptr<StateMultibody>, Eigen::Vector3d, std::size_t>(
           bp::args("self", "state", "cref", "nu"),
           "Initialize the CoM position residual model.\n\n"
           ":param state: state of the multibody system\n"
