@@ -34,9 +34,9 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
 
   if (drift_free_) {
@@ -55,9 +55,9 @@ void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstr
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
 
   data->Lx.noalias() = lx_ + Lxx_ * x + Lxu_ * u;
@@ -137,10 +137,10 @@ void ActionModelLQRTpl<Scalar>::set_Fx(const MatrixXs& Fx) {
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Fu(const MatrixXs& Fu) {
-  if (static_cast<std::size_t>(Fu.rows()) != state_->get_nx() || static_cast<std::size_t>(Fu.cols()) != nu_) {
+  if (static_cast<std::size_t>(Fu.rows()) != state_->get_nx() || static_cast<std::size_t>(Fu.cols()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
                  << "Fu has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                        std::to_string(nu_) + ")");
+                        std::to_string(control_->get_np()) + ")");
   }
   Fu_ = Fu;
 }
@@ -165,9 +165,9 @@ void ActionModelLQRTpl<Scalar>::set_lx(const VectorXs& lx) {
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_lu(const VectorXs& lu) {
-  if (static_cast<std::size_t>(lu.size()) != nu_) {
+  if (static_cast<std::size_t>(lu.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "lu has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "lu has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
   lu_ = lu;
 }
@@ -185,19 +185,19 @@ void ActionModelLQRTpl<Scalar>::set_Lxx(const MatrixXs& Lxx) {
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Lxu(const MatrixXs& Lxu) {
-  if (static_cast<std::size_t>(Lxu.rows()) != state_->get_nx() || static_cast<std::size_t>(Lxu.cols()) != nu_) {
+  if (static_cast<std::size_t>(Lxu.rows()) != state_->get_nx() || static_cast<std::size_t>(Lxu.cols()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
                  << "Lxu has wrong dimension (it should be " + std::to_string(state_->get_nx()) + "," +
-                        std::to_string(nu_) + ")");
+                        std::to_string(control_->get_np()) + ")");
   }
   Lxu_ = Lxu;
 }
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_Luu(const MatrixXs& Luu) {
-  if (static_cast<std::size_t>(Luu.rows()) != nu_ || static_cast<std::size_t>(Luu.cols()) != nu_) {
+  if (static_cast<std::size_t>(Luu.rows()) != control_->get_np() || static_cast<std::size_t>(Luu.cols()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "Fq has wrong dimension (it should be " + std::to_string(nu_) + "," + std::to_string(nu_) + ")");
+                 << "Fq has wrong dimension (it should be " + std::to_string(control_->get_np()) + "," + std::to_string(control_->get_np()) + ")");
   }
   Luu_ = Luu;
 }

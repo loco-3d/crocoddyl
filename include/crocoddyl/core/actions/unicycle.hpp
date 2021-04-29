@@ -48,7 +48,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
   using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
+  using Base::control_;             //!< Control discretization
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits

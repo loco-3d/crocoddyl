@@ -59,7 +59,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
+  using Base::control_;             //!< Control discretization
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
@@ -88,11 +88,15 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     differential = model->get_differential()->createData();
     const std::size_t ndx = model->get_state()->get_ndx();
     dx = VectorXs::Zero(ndx);
+    u = VectorXs::Zero(model->get_nu());
+    da_dp = MatrixXs::Zero(ndx, model->get_np());
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
+  VectorXs u;
+  MatrixXs da_dp;
 
   using Base::cost;
   using Base::Fu;

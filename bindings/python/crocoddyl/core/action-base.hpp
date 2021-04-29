@@ -26,9 +26,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
     }
-    if (static_cast<std::size_t>(u.size()) != nu_) {
+    if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                   << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
     }
     return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
@@ -39,9 +39,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
     }
-    if (static_cast<std::size_t>(u.size()) != nu_) {
+    if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                   << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }

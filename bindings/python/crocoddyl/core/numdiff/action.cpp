@@ -76,8 +76,8 @@ void exposeActionNumDiff() {
                     "Jacobian of the cost residual.")
       .add_property("dx", bp::make_getter(&ActionDataNumDiff::dx, bp::return_internal_reference<>()),
                     "state disturbance.")
-      .add_property("du", bp::make_getter(&ActionDataNumDiff::du, bp::return_internal_reference<>()),
-                    "control disturbance.")
+      .add_property("dp", bp::make_getter(&ActionDataNumDiff::dp, bp::return_internal_reference<>()),
+                    "control parameters disturbance.")
       .add_property("data_0",
                     bp::make_getter(&ActionDataNumDiff::data_0, bp::return_value_policy<bp::return_by_value>()),
                     "data that contains the final results")

@@ -46,9 +46,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
 
   const std::size_t nv = differential_->get_state()->get_nv();
@@ -97,9 +97,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
 
   const std::size_t nv = differential_->get_state()->get_nv();
@@ -221,9 +221,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::set_dt(const Scalar dt) {
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model) {
   const std::size_t nu = model->get_nu();
-  if (nu_ != nu) {
-    nu_ = nu;
-    unone_ = VectorXs::Zero(nu_);
+  if (control_->get_np() != nu) {
+    control_->resize(nu);
+    unone_ = VectorXs::Zero(control_->get_np());
   }
   nr_ = model->get_nr();
   state_ = model->get_state();
@@ -236,9 +236,9 @@ template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
                                                       const std::size_t maxiter, const Scalar tol) {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "

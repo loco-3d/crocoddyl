@@ -15,6 +15,7 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
@@ -65,6 +66,7 @@ class ActionModelAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
+  typedef ControlAbstractTpl<Scalar> ControlAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
@@ -75,6 +77,7 @@ class ActionModelAbstractTpl {
    * @param[in] nr     Dimension of cost-residual vector
    */
   ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 0);
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ControlAbstract> control, const std::size_t nr = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -82,7 +85,7 @@ class ActionModelAbstractTpl {
    *
    * @param[in] data  Action data
    * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] u     Control input parameters
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
@@ -96,7 +99,7 @@ class ActionModelAbstractTpl {
    *
    * @param[in] data  Action data
    * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] u     Control input parameters
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
@@ -165,6 +168,11 @@ class ActionModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the control input parameters
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Return the dimension of the cost-residual vector
    */
   std::size_t get_nr() const;
@@ -206,13 +214,14 @@ class ActionModelAbstractTpl {
   friend std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model);
 
  protected:
-  std::size_t nu_;                          //!< Control dimension
-  std::size_t nr_;                          //!< Dimension of the cost residual
-  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  VectorXs unone_;                          //!< Neutral state
-  VectorXs u_lb_;                           //!< Lower control limits
-  VectorXs u_ub_;                           //!< Upper control limits
-  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
+  // std::size_t nu_;                           //!< Control dimension
+  boost::shared_ptr<ControlAbstract> control_;  //!< Model of the control discretization
+  std::size_t nr_;                              //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;      //!< Model of the state
+  VectorXs unone_;                              //!< Neutral state
+  VectorXs u_lb_;                               //!< Lower control limits
+  VectorXs u_ub_;                               //!< Upper control limits
+  bool has_control_limits_;                     //!< Indicates whether any of the control limits is finite
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined limits)
@@ -234,13 +243,13 @@ struct ActionDataAbstractTpl {
       : cost(Scalar(0.)),
         xnext(model->get_state()->get_nx()),
         Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
-        Fu(model->get_state()->get_ndx(), model->get_nu()),
+        Fu(model->get_state()->get_ndx(), model->get_np()),
         r(model->get_nr()),
         Lx(model->get_state()->get_ndx()),
-        Lu(model->get_nu()),
+        Lu(model->get_np()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
-        Lxu(model->get_state()->get_ndx(), model->get_nu()),
-        Luu(model->get_nu(), model->get_nu()) {
+        Lxu(model->get_state()->get_ndx(), model->get_np()),
+        Luu(model->get_np(), model->get_np()) {
     xnext.setZero();
     Fx.setZero();
     Fu.setZero();
