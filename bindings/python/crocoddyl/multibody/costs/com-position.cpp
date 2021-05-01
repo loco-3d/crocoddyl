@@ -20,7 +20,7 @@ void exposeCostCoMPosition() {  // TODO: Remove once the deprecated update call 
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelCoMPosition> >();
 
-  bp::class_<CostModelCoMPosition, bp::bases<CostModelAbstract> >(
+  bp::class_<CostModelCoMPosition, bp::bases<CostModelResidual> >(
       "CostModelCoMPosition",
       "This cost function defines a residual vector as r = c - cref, with c and cref as the current and reference "
       "CoM position, respetively.",
