@@ -64,14 +64,16 @@ void test_constructor() {
 
     BOOST_CHECK(cone.get_nf() == cone_reference.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_reference.get_A()));
-    BOOST_CHECK(cone.get_ub().isApprox(cone_reference.get_ub()));
-    BOOST_CHECK(cone.get_lb().isApprox(cone_reference.get_lb()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size()); ++i) {
+      BOOST_CHECK(cone.get_ub()[i] == cone_reference.get_ub()[i]);
+      BOOST_CHECK(cone.get_lb()[i] == cone_reference.get_lb()[i]);
+    }
     BOOST_CHECK(cone.get_R().isApprox(cone_reference.get_R()));
     BOOST_CHECK(cone.get_box().isApprox(cone_reference.get_box()));
     BOOST_CHECK(std::abs(cone.get_mu() - cone_reference.get_mu()) < 1e-9);
     BOOST_CHECK(cone.get_inner_appr() == cone_reference.get_inner_appr());
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_reference.get_min_nforce()) < 1e-9);
-    BOOST_CHECK(std::abs(cone.get_max_nforce() - cone_reference.get_max_nforce()) < 1e-9);
+    BOOST_CHECK(cone.get_max_nforce() == cone_reference.get_max_nforce());
   }
 
   // Create the wrench cone through the copy operator
@@ -81,14 +83,16 @@ void test_constructor() {
 
     BOOST_CHECK(cone.get_nf() == cone_copy.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_copy.get_A()));
-    BOOST_CHECK(cone.get_ub().isApprox(cone_copy.get_ub()));
-    BOOST_CHECK(cone.get_lb().isApprox(cone_copy.get_lb()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size()); ++i) {
+      BOOST_CHECK(cone.get_ub()[i] == cone_copy.get_ub()[i]);
+      BOOST_CHECK(cone.get_lb()[i] == cone_copy.get_lb()[i]);
+    }
     BOOST_CHECK(cone.get_R().isApprox(cone_copy.get_R()));
     BOOST_CHECK(cone.get_box().isApprox(cone_copy.get_box()));
     BOOST_CHECK(std::abs(cone.get_mu() - cone_copy.get_mu()) < 1e-9);
     BOOST_CHECK(cone.get_inner_appr() == cone_copy.get_inner_appr());
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_copy.get_min_nforce()) < 1e-9);
-    BOOST_CHECK(std::abs(cone.get_max_nforce() - cone_copy.get_max_nforce()) < 1e-9);
+    BOOST_CHECK(cone.get_max_nforce() == cone_copy.get_max_nforce());
   }
 }
 
@@ -110,10 +114,14 @@ void test_against_friction_cone() {
   BOOST_CHECK(wrench_cone.get_mu() == friction_cone.get_mu());
   BOOST_CHECK(wrench_cone.get_nf() == friction_cone.get_nf());
   for (std::size_t i = 0; i < nf + 1; ++i) {
-    BOOST_CHECK((wrench_cone.get_A().row(i).head(3) - friction_cone.get_A().row(i)).isZero(1e-9));
+    for (std::size_t j = 0; j < 3; ++j) {
+      BOOST_CHECK(wrench_cone.get_A().row(i)[j] == friction_cone.get_A().row(i)[j]);
+    }
   }
-  BOOST_CHECK((wrench_cone.get_lb().head(nf + 1) - friction_cone.get_lb()).isZero(1e-9));
-  BOOST_CHECK((wrench_cone.get_ub().head(nf + 1) - friction_cone.get_ub()).isZero(1e-9));
+  for (std::size_t i = 0; i < nf + 1; ++i) {
+    BOOST_CHECK(wrench_cone.get_ub()[i] == friction_cone.get_ub()[i]);
+    BOOST_CHECK(wrench_cone.get_lb()[i] == friction_cone.get_lb()[i]);
+  }
 }
 
 void test_against_cop_support() {
@@ -132,10 +140,14 @@ void test_against_cop_support() {
 
   BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK((wrench_cone.get_A().row(nf + i + 1) - cop_support.get_A().row(i)).isZero(1e-9));
+    for (std::size_t j = 0; j < 6; ++j) {
+      BOOST_CHECK(wrench_cone.get_A().row(nf + i + 1)[j] == cop_support.get_A().row(i)[j]);
+    }
   }
-  BOOST_CHECK((wrench_cone.get_lb().segment(nf + 1, 4) - cop_support.get_lb()).isZero(1e-9));
-  BOOST_CHECK((wrench_cone.get_ub().segment(nf + 1, 4) - cop_support.get_ub()).isZero(1e-9));
+  for (std::size_t i = 0; i < 4; ++i) {
+    BOOST_CHECK(wrench_cone.get_ub()[i + nf + 1] == cop_support.get_ub()[i]);
+    BOOST_CHECK(wrench_cone.get_lb()[i + nf + 1] == cop_support.get_lb()[i]);
+  }
 }
 
 void test_force_along_wrench_cone_normal() {

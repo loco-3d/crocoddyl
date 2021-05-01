@@ -175,9 +175,9 @@ class GepettoDisplay(DisplayAbstract):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.todict().items():
                         if model.differential.contacts.contacts[key].active:
-                            oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
-                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[contact.joint].rotation.T,
-                                                 contact.jMf.translation)
+                            joint = model.differential.state.pinocchio.frames[contact.frame].parent
+                            oMf = contact.pinocchio.oMi[joint] * contact.jMf
+                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[joint].rotation.T, contact.jMf.translation)
                             force = fiMo.actInv(contact.f)
                             R = np.eye(3)
                             mu = 0.7
@@ -187,14 +187,15 @@ class GepettoDisplay(DisplayAbstract):
                                         R = c.cost.reference.cone.R
                                         mu = c.cost.reference.cone.mu
                                         continue
-                            fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                            fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.todict().items():
                     if model.impulses.impulses[key].active:
-                        oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                        fiMo = pinocchio.SE3(impulse.pinocchio.oMi[impulse.joint].rotation.T, impulse.jMf.translation)
+                        joint = model.state.pinocchio.frames[impulse.frame].parent
+                        oMf = impulse.pinocchio.oMi[joint] * impulse.jMf
+                        fiMo = pinocchio.SE3(impulse.pinocchio.oMi[joint].rotation.T, impulse.jMf.translation)
                         force = fiMo.actInv(impulse.f)
                         R = np.eye(3)
                         mu = 0.7
@@ -204,7 +205,7 @@ class GepettoDisplay(DisplayAbstract):
                                     R = c.cost.cone.R
                                     mu = c.cost.cone.mu
                                     continue
-                        fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                        fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                 fs.append(fc)
         return fs
 

@@ -73,29 +73,30 @@ xub = np.concatenate([
     maxfloat * np.ones(state.nv)
 ])
 bounds = crocoddyl.ActivationBounds(xlb, xub, 1.)
-limitCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelQuadraticBarrier(bounds), rmodel.defaultState,
-                                     actuation.nu)
+xLimitResidual = crocoddyl.ResidualModelState(state, rmodel.defaultState, actuation.nu)
+xLimitActivation = crocoddyl.ActivationModelQuadraticBarrier(bounds)
+limitCost = crocoddyl.CostModelResidual(state, xLimitActivation, xLimitResidual)
 
 # Cost for state and control
-stateWeights = np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [10] * state.nv)
-stateWeightsTerm = np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [100] * state.nv)
-xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2), rmodel.defaultState,
-                                    actuation.nu)
-uRegCost = crocoddyl.CostModelControl(state, actuation.nu)
-xRegTermCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeightsTerm**2),
-                                        rmodel.defaultState, actuation.nu)
+xResidual = crocoddyl.ResidualModelState(state, rmodel.defaultState, actuation.nu)
+xActivation = crocoddyl.ActivationModelWeightedQuad(
+    np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [10] * state.nv)**2)
+uResidual = crocoddyl.ResidualModelControl(state, actuation.nu)
+xTActivation = crocoddyl.ActivationModelWeightedQuad(
+    np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [100] * state.nv)**2)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
+xRegTermCost = crocoddyl.CostModelResidual(state, xTActivation, xResidual)
 
 # Cost for target reaching
-goaltrackingWeights = np.array([1] * 3 + [0.0001] * 3)
-framePoseEff = pinocchio.SE3.Identity()
-framePoseEff.translation = target
-Pref = crocoddyl.FramePlacement(endEffectorId, framePoseEff)
-goalTrackingCost = crocoddyl.CostModelFramePlacement(state,
-                                                     crocoddyl.ActivationModelWeightedQuad(goaltrackingWeights**2),
-                                                     Pref, actuation.nu)
+framePlacementResidual = crocoddyl.ResidualModelFramePlacement(state, endEffectorId, pinocchio.SE3(np.eye(3), target),
+                                                               actuation.nu)
+framePlacementActivation = crocoddyl.ActivationModelWeightedQuad(np.array([1] * 3 + [0.0001] * 3)**2)
+goalTrackingCost = crocoddyl.CostModelResidual(state, framePlacementActivation, framePlacementResidual)
 
 # Cost for CoM reference
-comTrack = crocoddyl.CostModelCoMPosition(state, comRef, actuation.nu)
+comResidual = crocoddyl.ResidualModelCoMPosition(state, comRef, actuation.nu)
+comTrack = crocoddyl.CostModelResidual(state, comResidual)
 
 # Create cost model per each action model
 runningCostModel = crocoddyl.CostModelSum(state, actuation.nu)

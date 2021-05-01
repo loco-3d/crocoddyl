@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,16 +19,23 @@ namespace python {
 class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<CostModelAbstract> {
  public:
   CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                         int nu)
+                         boost::shared_ptr<ResidualModelAbstract> residual)
+      : CostModelAbstract(state, activation, residual) {}
+
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                         const std::size_t nu)
       : CostModelAbstract(state, activation, nu) {}
 
   CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation)
       : CostModelAbstract(state, activation) {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, int nr, int nu)
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual)
+      : CostModelAbstract(state, residual) {}
+
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu)
       : CostModelAbstract(state, nr, nu), bp::wrapper<CostModelAbstract>() {}
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, int nr)
+  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr)
       : CostModelAbstract(state, nr), bp::wrapper<CostModelAbstract>() {}
 
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

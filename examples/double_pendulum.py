@@ -19,8 +19,11 @@ actModel = ActuationModelDoublePendulum(state, actLink=1)
 weights = np.array([1, 1, 1, 1] + [0.1] * 2)
 runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
-xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelQuad(state.ndx), state.zero(), actModel.nu)
-uRegCost = crocoddyl.CostModelControl(state, crocoddyl.ActivationModelQuad(1), actModel.nu)
+xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
+xActivation = crocoddyl.ActivationModelQuad(state.ndx)
+uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(weights), actModel.nu)
 
 dt = 1e-2

@@ -12,8 +12,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t ni)
-    : state_(state), ni_(ni) {}
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
+    : state_(state), nc_(nc) {}
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
@@ -21,7 +21,7 @@ ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
 template <typename Scalar>
 void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                                       const MatrixXs& df_dx) const {
-  if (static_cast<std::size_t>(df_dx.rows()) != ni_ || static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
+  if (static_cast<std::size_t>(df_dx.rows()) != nc_ || static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
     throw_pretty("df_dq has wrong dimension");
 
   data->df_dx = df_dx;
@@ -49,8 +49,18 @@ const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ImpulseModelAbstractTpl<Sca
 }
 
 template <typename Scalar>
+std::size_t ImpulseModelAbstractTpl<Scalar>::get_nc() const {
+  return nc_;
+}
+
+template <typename Scalar>
 std::size_t ImpulseModelAbstractTpl<Scalar>::get_ni() const {
-  return ni_;
+  return nc_;
+}
+
+template <typename Scalar>
+std::size_t ImpulseModelAbstractTpl<Scalar>::get_nu() const {
+  return 0;
 }
 
 }  // namespace crocoddyl

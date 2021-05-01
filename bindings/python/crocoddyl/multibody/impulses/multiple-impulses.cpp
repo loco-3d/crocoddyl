@@ -14,6 +14,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -106,8 +107,13 @@ void exposeImpulseMultiple() {
       .add_property(
           "state", bp::make_function(&ImpulseModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
-      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_ni), "dimension of the active impulse vector")
-      .add_property("ni_total", bp::make_function(&ImpulseModelMultiple::get_ni_total),
+      .add_property("nc", bp::make_function(&ImpulseModelMultiple::get_nc), "dimension of the active impulse vector")
+      .add_property("nc_total", bp::make_function(&ImpulseModelMultiple::get_nc_total),
+                    "dimension of the total impulse vector")
+      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_nc, deprecated<>("Deprecated. Use nc.")),
+                    "dimension of the active impulse vector")
+      .add_property("ni_total",
+                    bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
                     "dimension of the total impulse vector")
       .add_property(
           "active",
