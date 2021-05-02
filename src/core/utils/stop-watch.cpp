@@ -21,8 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/Stdafx.hh"
-
 #ifndef WIN32
 #include <sys/time.h>
 #else
