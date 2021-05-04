@@ -52,8 +52,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the FDDP solver
 T = 33
-q0 = pinocchio.neutral(hector.model)
-problem = crocoddyl.ShootingProblem(np.concatenate([q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
+problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 fddp = crocoddyl.SolverFDDP(problem)
 
 fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])

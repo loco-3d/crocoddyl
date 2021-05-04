@@ -54,8 +54,7 @@ runningModel.u_ub = np.array([u_lim, u_lim, u_lim, u_lim])
 
 # Creating the shooting problem and the boxddp solver
 T = 33
-q0 = pinocchio.neutral(hector.model)
-problem = crocoddyl.ShootingProblem(np.concatenate([q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
+problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 boxddp = crocoddyl.SolverBoxDDP(problem)
 boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
