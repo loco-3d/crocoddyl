@@ -26,7 +26,7 @@ class ActuationModelMultiCopterBaseTpl;
 
 // force
 template <typename Scala>
-class ForceDataAbstractTpl;
+struct ForceDataAbstractTpl;
 
 // contact
 template <typename Scalar>
