@@ -57,7 +57,16 @@ void exposeResidualAbstract() {
           bp::make_function(&ResidualModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state")
       .add_property("nr", bp::make_function(&ResidualModelAbstract_wrap::get_nr), "dimension of residual vector")
-      .add_property("nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu), "dimension of control vector");
+      .add_property("nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu), "dimension of control vector")
+      .add_property("q_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_q_dependent),
+                    bp::make_function(&ResidualModelAbstract_wrap::set_q_dependent),
+                    "flag that indicates if the residual function depends on q")
+      .add_property("v_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_v_dependent),
+                    bp::make_function(&ResidualModelAbstract_wrap::set_v_dependent),
+                    "flag that indicates if the residual function depends on v")
+      .add_property("u_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_u_dependent),
+                    bp::make_function(&ResidualModelAbstract_wrap::set_u_dependent),
+                    "flag that indicates if the residual function depends on u");
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
 

@@ -90,4 +90,19 @@ bool ResidualModelAbstractTpl<Scalar>::get_u_dependent() const {
   return u_dependent_;
 }
 
+template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::set_q_dependent(const bool q_dependent) {
+  q_dependent_ = q_dependent;
+}
+
+template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::set_v_dependent(const bool v_dependent) {
+  v_dependent_ = v_dependent;
+}
+
+template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::set_u_dependent(const bool u_dependent) {
+  u_dependent_ = u_dependent;
+}
+
 }  // namespace crocoddyl

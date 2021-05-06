@@ -147,6 +147,21 @@ class ResidualModelAbstractTpl {
    */
   bool get_u_dependent() const;
 
+  /**
+   * @brief Modify if the residual function depends on q
+   */
+  void set_q_dependent(const bool q_dependent);
+
+  /**
+   * @brief Modify if the residual function depends on v
+   */
+  void set_v_dependent(const bool v_dependent);
+
+  /**
+   * @brief Modify true if the residual function depends on u
+   */
+  void set_u_dependent(const bool u_dependent);
+
  protected:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   std::size_t nr_;                          //!< Residual vector dimension
