@@ -15,7 +15,7 @@ ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(boo
                                                                              const pinocchio::FrameIndex id,
                                                                              const WrenchCone& fref,
                                                                              const std::size_t nu)
-    : Base(state, fref.get_nf() + 13, nu), id_(id), fref_(fref) {}
+    : Base(state, fref.get_nf() + 13, nu, true, true, true), id_(id), fref_(fref) {}
 
 template <typename Scalar>
 ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,

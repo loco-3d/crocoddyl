@@ -14,7 +14,7 @@ template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const pinocchio::FrameIndex id, const Force& fref,
                                                                    const std::size_t nc, const std::size_t nu)
-    : Base(state, nc, nu), id_(id), fref_(fref) {
+    : Base(state, nc, nu, true, true, true), id_(id), fref_(fref) {
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc is less than 6");
   }

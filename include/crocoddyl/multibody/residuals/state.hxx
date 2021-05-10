@@ -14,37 +14,31 @@ namespace crocoddyl {
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                      const VectorXs& xref, const std::size_t nu)
-    : Base(state, state->get_ndx(), nu), xref_(xref) {
+    : Base(state, state->get_ndx(), nu, true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  u_dependent_ = false;
 }
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                      const VectorXs& xref)
-    : Base(state, state->get_ndx()), xref_(xref) {
+    : Base(state, state->get_ndx(), true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  u_dependent_ = false;
 }
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                      const std::size_t nu)
-    : Base(state, state->get_ndx(), nu), xref_(state->zero()) {
-  u_dependent_ = false;
-}
+    : Base(state, state->get_ndx(), nu, true, true, false), xref_(state->zero()) {}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
-    : Base(state, state->get_ndx()), xref_(state->zero()) {
-  u_dependent_ = false;
-}
+    : Base(state, state->get_ndx(), true, true, false), xref_(state->zero()) {}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::~ResidualModelStateTpl() {}

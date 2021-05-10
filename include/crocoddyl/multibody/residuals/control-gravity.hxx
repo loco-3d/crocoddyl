@@ -14,20 +14,17 @@ namespace crocoddyl {
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
                                                                  const std::size_t nu)
-    : Base(state, state->get_nv(), nu), pin_model_(*state->get_pinocchio()) {
+    : Base(state, state->get_nv(), nu, true, false), pin_model_(*state->get_pinocchio()) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "it seems to be an autonomous system, if so, don't add "
                     "this residual function");
   }
-  v_dependent_ = false;
 }
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state)
-    : Base(state, state->get_nv(), state->get_nv()), pin_model_(*state->get_pinocchio()) {
-  v_dependent_ = false;
-}
+    : Base(state, state->get_nv(), state->get_nv(), true, false), pin_model_(*state->get_pinocchio()) {}
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::~ResidualModelControlGravTpl() {}

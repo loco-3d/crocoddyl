@@ -14,7 +14,7 @@ template <typename Scalar>
 ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const FrictionCone& fref,
     const std::size_t nu)
-    : Base(state, fref.get_nf() + 1, nu), id_(id), fref_(fref) {}
+    : Base(state, fref.get_nf() + 1, nu, true, true, true), id_(id), fref_(fref) {}
 
 template <typename Scalar>
 ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl(
