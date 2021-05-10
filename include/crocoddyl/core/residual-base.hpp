@@ -50,21 +50,30 @@ class ResidualModelAbstractTpl {
   /**
    * @brief Initialize the residual model
    *
-   * @param[in] state       State of the system
-   * @param[in] nr          Dimension of residual vector
-   * @param[in] nu          Dimension of control vector
+   * @param[in] state        State of the system
+   * @param[in] nr           Dimension of residual vector
+   * @param[in] nu           Dimension of control vector
+   * @param[in] q_dependent  Define if the residual function depends on q (default true)
+   * @param[in] v_dependent  Define if the residual function depends on v (default true)
+   * @param[in] u_dependent  Define if the residual function depends on u (default true)
    */
-  ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu);
+  ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu,
+                           const bool q_dependent = true, const bool v_dependent = true,
+                           const bool u_dependent = true);
 
   /**
    * @copybrief ResidualModelAbstractTpl()
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State of the system
-   * @param[in] nr          Dimension of residual vector
+   * @param[in] state        State of the system
+   * @param[in] nr           Dimension of residual vector
+   * @param[in] q_dependent  Define if the residual function depends on q (default true)
+   * @param[in] v_dependent  Define if the residual function depends on v (default true)
+   * @param[in] u_dependent  Define if the residual function depends on u (default true)
    */
-  ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr);
+  ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const bool q_dependent = true,
+                           const bool v_dependent = true, const bool u_dependent = true);
   virtual ~ResidualModelAbstractTpl();
 
   /**
@@ -147,29 +156,14 @@ class ResidualModelAbstractTpl {
    */
   bool get_u_dependent() const;
 
-  /**
-   * @brief Modify if the residual function depends on q
-   */
-  void set_q_dependent(const bool q_dependent);
-
-  /**
-   * @brief Modify if the residual function depends on v
-   */
-  void set_v_dependent(const bool v_dependent);
-
-  /**
-   * @brief Modify true if the residual function depends on u
-   */
-  void set_u_dependent(const bool u_dependent);
-
  protected:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   std::size_t nr_;                          //!< Residual vector dimension
   std::size_t nu_;                          //!< Control dimension
   VectorXs unone_;                          //!< No control vector
-  bool q_dependent_;                        //!< Label to indicate if the residual function depends on q
-  bool v_dependent_;                        //!< Label to indicate if the residual function depends on v
-  bool u_dependent_;                        //!< Label to indicate if the residual function depends on u
+  bool q_dependent_;                        //!< Label that indicates if the residual function depends on q
+  bool v_dependent_;                        //!< Label that indicates if the residual function depends on v
+  bool u_dependent_;                        //!< Label that indicates if the residual function depends on u
 };
 
 template <typename _Scalar>
