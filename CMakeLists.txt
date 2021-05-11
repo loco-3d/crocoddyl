@@ -40,10 +40,15 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
+IF(DEFINED BUILD_UNIT_TESTS)
+  MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
+    If you are manually building Crocoddyl from source in an existing build folder,\
+    we suggest that you delete your build folder and make a new one.")
+  SET(BUILD_TESTING ${BUILD_UNIT_TESTS})
+ENDIF(DEFINED BUILD_UNIT_TESTS)
 
 IF(ENABLE_VECTORIZATION)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -168,9 +173,9 @@ IF(BUILD_PYTHON_INTERFACE)
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Build the unit tests
-IF(BUILD_UNIT_TESTS)
+IF(BUILD_TESTING)
   ADD_SUBDIRECTORY(unittest)
-ENDIF(BUILD_UNIT_TESTS)
+ENDIF(BUILD_TESTING)
 
 # Build the benchmark
 IF(BUILD_BENCHMARK)
