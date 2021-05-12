@@ -14,7 +14,7 @@ template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref,
     const std::size_t nu)
-    : Base(state, 4, nu), id_(id), cref_(cref) {}
+    : Base(state, 4, nu, true, true, true), id_(id), cref_(cref) {}
 
 template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(

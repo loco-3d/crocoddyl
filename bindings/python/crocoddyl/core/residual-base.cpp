@@ -22,16 +22,23 @@ void exposeResidualAbstract() {
       "where nr describes its dimension in the Euclidean space.\n"
       "For each residual model, we need to provide ways of computing the residual vector and its Jacobians.\n"
       "These computations are mainly carry on inside calc() and calcDiff(), respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
-          bp::args("self", "state", "nr", "nu"),
+      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, bp::optional<bool, bool, bool> >(
+          bp::args("self", "state", "nr", "nu", "q_dependent", "v_dependent", "u_dependent"),
           "Initialize the residual model.\n\n"
           ":param state: state description,\n"
           ":param nr: dimension of the residual vector\n"
-          ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(bp::args("self", "state", "nr"),
-                                                                   "Initialize the cost model.\n\n"
-                                                                   ":param state: state description\n"
-                                                                   ":param nr: dimension of the residual vector"))
+          ":param nu: dimension of control vector (default state.nv)\n"
+          ":param q_dependent: define if the residual function depends on q (default true)\n"
+          ":param v_dependent: define if the residual function depends on v (default true)\n"
+          ":param u_dependent: define if the residual function depends on u (default true)"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, bp::optional<bool, bool, bool> >(
+          bp::args("self", "state", "nr", "q_dependent", "v_dependent", "u_dependent"),
+          "Initialize the cost model.\n\n"
+          ":param state: state description\n"
+          ":param nr: dimension of the residual vector\n"
+          ":param q_dependent: define if the residual function depends on q (default true)\n"
+          ":param v_dependent: define if the residual function depends on v (default true)\n"
+          ":param u_dependent: define if the residual function depends on u (default true)"))
       .def("calc", pure_virtual(&ResidualModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the residual vector.\n\n"
            ":param data: residual data\n"
@@ -57,7 +64,13 @@ void exposeResidualAbstract() {
           bp::make_function(&ResidualModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state")
       .add_property("nr", bp::make_function(&ResidualModelAbstract_wrap::get_nr), "dimension of residual vector")
-      .add_property("nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu), "dimension of control vector");
+      .add_property("nu", bp::make_function(&ResidualModelAbstract_wrap::get_nu), "dimension of control vector")
+      .add_property("q_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_q_dependent),
+                    "flag that indicates if the residual function depends on q")
+      .add_property("v_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_v_dependent),
+                    "flag that indicates if the residual function depends on v")
+      .add_property("u_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_u_dependent),
+                    "flag that indicates if the residual function depends on u");
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
 

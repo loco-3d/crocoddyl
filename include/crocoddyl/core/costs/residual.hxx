@@ -45,7 +45,7 @@ void CostModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbst
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
-  const bool is_ru = residual_->get_u_dependent() || nu_ == 0;
+  const bool is_ru = residual_->get_u_dependent() && nu_ != 0;
   const std::size_t nv = state_->get_nv();
   if (is_ru) {
     data->Lu.noalias() = data->residual->Ru.transpose() * data->activation->Ar;

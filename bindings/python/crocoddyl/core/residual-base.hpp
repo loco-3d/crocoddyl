@@ -17,11 +17,17 @@ namespace python {
 
 class ResidualModelAbstract_wrap : public ResidualModelAbstract, public bp::wrapper<ResidualModelAbstract> {
  public:
-  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu)
-      : ResidualModelAbstract(state, nr, nu), bp::wrapper<ResidualModelAbstract>() {}
+  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu,
+                             const bool q_dependent = true, const bool v_dependent = true,
+                             const bool u_dependent = true)
+      : ResidualModelAbstract(state, nr, nu, q_dependent, v_dependent, u_dependent),
+        bp::wrapper<ResidualModelAbstract>() {}
 
-  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr)
-      : ResidualModelAbstract(state, nr), bp::wrapper<ResidualModelAbstract>() {}
+  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nr,
+                             const bool q_dependent = true, const bool v_dependent = true,
+                             const bool u_dependent = true)
+      : ResidualModelAbstract(state, nr, q_dependent, v_dependent, u_dependent),
+        bp::wrapper<ResidualModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {

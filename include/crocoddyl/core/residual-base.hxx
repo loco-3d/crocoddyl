@@ -10,25 +10,28 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                           const std::size_t nr, const std::size_t nu)
+                                                           const std::size_t nr, const std::size_t nu,
+                                                           const bool q_dependent, const bool v_dependent,
+                                                           const bool u_dependent)
     : state_(state),
       nr_(nr),
       nu_(nu),
       unone_(VectorXs::Zero(nu)),
-      q_dependent_(true),
-      v_dependent_(true),
-      u_dependent_(true) {}
+      q_dependent_(q_dependent),
+      v_dependent_(v_dependent),
+      u_dependent_(u_dependent) {}
 
 template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                           const std::size_t nr)
+                                                           const std::size_t nr, const bool q_dependent,
+                                                           const bool v_dependent, const bool u_dependent)
     : state_(state),
       nr_(nr),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())),
-      q_dependent_(true),
-      v_dependent_(true),
-      u_dependent_(true) {}
+      q_dependent_(q_dependent),
+      v_dependent_(v_dependent),
+      u_dependent_(u_dependent) {}
 
 template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::~ResidualModelAbstractTpl() {}

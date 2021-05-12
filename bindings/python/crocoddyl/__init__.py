@@ -140,8 +140,8 @@ class GepettoDisplay(DisplayAbstract):
                         forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         forceName = self.forceGroup + "/" + key
-                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
+                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.setVisibility(forceName, "ON")
                         # Display the friction cones
                         position = pose
@@ -183,7 +183,7 @@ class GepettoDisplay(DisplayAbstract):
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                    if contact.joint == self.robot.model.frames[c.cost.reference.id].parent:
+                                    if contact.frame == c.cost.reference.id:
                                         R = c.cost.reference.cone.R
                                         mu = c.cost.reference.cone.mu
                                         continue
@@ -201,7 +201,7 @@ class GepettoDisplay(DisplayAbstract):
                         mu = 0.7
                         for k, c in model.costs.costs.todict().items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if impulse.joint == self.robot.model.frames[c.cost.id].parent:
+                                if impulse.frame == c.cost.id:
                                     R = c.cost.cone.R
                                     mu = c.cost.cone.mu
                                     continue
