@@ -65,7 +65,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_M
 # Add the different required and optional dependencies
 ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.7.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.7.0")
-ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
 OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
