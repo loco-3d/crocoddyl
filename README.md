@@ -64,7 +64,7 @@ conda install crocoddyl -c conda-forge
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
- * C++ 98/11/14/17/20 compliant
+ * C++ 14/17/20 compliant
  * extensively tested
  * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
 
