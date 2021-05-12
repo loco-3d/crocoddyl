@@ -19,12 +19,8 @@ jobs:
   allow_failures:
     - dist: bionic
       env: CMAKE_BUILD_TYPE=Debug DIST=bionic CTEST_OUTPUT_ON_FAILURE=1
-    - dist: bionic
-      env: CMAKE_BUILD_TYPE=Release DIST=bionic CTEST_OUTPUT_ON_FAILURE=1
     - dist: xenial
       env: CMAKE_BUILD_TYPE=Debug DIST=xenial CTEST_OUTPUT_ON_FAILURE=1 CMAKE_CXX_STANDARD=11
-    - dist: xenial
-      env: CMAKE_BUILD_TYPE=Release DIST=xenial CTEST_OUTPUT_ON_FAILURE=1 CMAKE_CXX_STANDARD=11
 
 before_install:
   - echo "deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list && echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg" | sudo tee -a /etc/apt/sources.list.d/robotpkg.list && curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
