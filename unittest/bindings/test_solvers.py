@@ -115,11 +115,12 @@ class TalosArmDDPTest(SolverAbstractTestCase):
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
-        crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
-        1e-3)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+        crocoddyl.CostModelResidual(
+            STATE,
+            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                                                  pinocchio.SE3.Random())), 1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     SOLVER = crocoddyl.SolverDDP
@@ -133,11 +134,12 @@ class TalosArmFDDPTest(SolverAbstractTestCase):
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
-        crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
-        1e-3)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+        crocoddyl.CostModelResidual(
+            STATE,
+            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                                                  pinocchio.SE3.Random())), 1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     SOLVER = crocoddyl.SolverFDDP
