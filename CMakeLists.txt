@@ -40,10 +40,15 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
+IF(DEFINED BUILD_UNIT_TESTS)
+  MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
+    If you are manually building Crocoddyl from source in an existing build folder,\
+    we suggest that you delete your build folder and make a new one.")
+  SET(BUILD_TESTING ${BUILD_UNIT_TESTS})
+ENDIF(DEFINED BUILD_UNIT_TESTS)
 
 IF(ENABLE_VECTORIZATION)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -62,7 +67,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_M
 # Add the different required and optional dependencies
 ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.7.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.7.0")
-ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
 OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
@@ -165,13 +169,12 @@ IF(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
-  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Build the unit tests
-IF(BUILD_UNIT_TESTS)
+IF(BUILD_TESTING)
   ADD_SUBDIRECTORY(unittest)
-ENDIF(BUILD_UNIT_TESTS)
+ENDIF(BUILD_TESTING)
 
 # Build the benchmark
 IF(BUILD_BENCHMARK)

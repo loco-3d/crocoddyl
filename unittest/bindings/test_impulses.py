@@ -31,7 +31,7 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        self.assertEqual(self.IMPULSE.ni, self.IMPULSE_DER.ni, "Wrong ni.")
+        self.assertEqual(self.IMPULSE.nc, self.IMPULSE_DER.nc, "Wrong ni.")
 
     def test_calc(self):
         # Run calc for both action models
@@ -77,8 +77,8 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        ni = sum([impulse.ni for impulse in self.IMPULSES.values()])
-        self.assertEqual(self.impulseSum.ni, ni, "Wrong nc.")
+        nc = sum([impulse.nc for impulse in self.IMPULSES.values()])
+        self.assertEqual(self.impulseSum.nc, nc, "Wrong nc.")
 
     def test_calc(self):
         # Run calc for both action models

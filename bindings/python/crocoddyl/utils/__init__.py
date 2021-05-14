@@ -668,16 +668,17 @@ class CoMPositionCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, state, activation=None, Mref=None, nu=None):
+    def __init__(self, state, activation=None, frame_id=None, placement=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
         if nu is None:
             crocoddyl.CostModelAbstract.__init__(self, state, activation)
         else:
             crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
-        self.Mref = Mref
+        self._frame_id = frame_id
+        self._placement = placement
 
     def calc(self, data, x, u):
-        data.rMf = self.Mref.placement.inverse() * data.shared.pinocchio.oMf[self.Mref.id]
+        data.rMf = self._placement.inverse() * data.shared.pinocchio.oMf[self._frame_id]
         data.residual.r[:] = pinocchio.log(data.rMf).vector
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
@@ -685,7 +686,7 @@ class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u):
         pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
         data.rJf[:, :] = pinocchio.Jlog6(data.rMf)
-        data.fJf[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Mref.id,
+        data.fJf[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self._frame_id,
                                                     pinocchio.ReferenceFrame.LOCAL)
         data.J[:, :] = np.dot(data.rJf, data.fJf)
         self.activation.calcDiff(data.activation, data.residual.r)
@@ -714,25 +715,26 @@ class FramePlacementCostDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameTranslationCostModelDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, state, activation=None, xref=None, nu=None):
+    def __init__(self, state, activation=None, frame_id=None, translation=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
         if nu is None:
             crocoddyl.CostModelAbstract.__init__(self, state, activation)
         else:
             crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
-        self.xref = xref
+        self._frame_id = frame_id
+        self._translation = translation
 
     def calc(self, data, x, u):
-        data.residual.r[:] = data.shared.pinocchio.oMf[self.xref.id].translation - self.xref.translation
+        data.residual.r[:] = data.shared.pinocchio.oMf[self._frame_id].translation - self._translation
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
     def calcDiff(self, data, x, u):
         pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
-        data.R[:, :] = data.shared.pinocchio.oMf[self.xref.id].rotation
+        data.R[:, :] = data.shared.pinocchio.oMf[self._frame_id].rotation
         data.J[:, :] = np.dot(
             data.R,
-            pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.xref.id,
+            pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self._frame_id,
                                        pinocchio.ReferenceFrame.LOCAL)[:3, :])
         self.activation.calcDiff(data.activation, data.residual.r)
         data.residual.Rx[:] = np.hstack([data.J, np.zeros((self.activation.nr, self.state.nv))])
@@ -757,16 +759,17 @@ class FrameTranslationDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, state, activation=None, Rref=None, nu=None):
+    def __init__(self, state, activation=None, frame_id=None, rotation=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
         if nu is None:
             crocoddyl.CostModelAbstract.__init__(self, state, activation)
         else:
             crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
-        self.Rref = Rref
+        self._frame_id = frame_id
+        self._rotation = rotation
 
     def calc(self, data, x, u):
-        data.rRf[:, :] = np.dot(self.Rref.rotation.T, data.shared.pinocchio.oMf[self.Rref.id].rotation)
+        data.rRf[:, :] = np.dot(self._rotation.T, data.shared.pinocchio.oMf[self._frame_id].rotation)
         data.residual.r[:] = pinocchio.log3(data.rRf)
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
@@ -774,7 +777,7 @@ class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
     def calcDiff(self, data, x, u):
         pinocchio.updateFramePlacements(self.state.pinocchio, data.shared.pinocchio)
         data.rJf[:, :] = pinocchio.Jlog3(data.rRf)
-        data.fJf[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self.Rref.id,
+        data.fJf[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.shared.pinocchio, self._frame_id,
                                                     pinocchio.ReferenceFrame.LOCAL)[3:, :]
         data.J[:, :] = np.dot(data.rJf, data.fJf)
         self.activation.calcDiff(data.activation, data.residual.r)
@@ -802,17 +805,19 @@ class FrameRotationCostDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
-    def __init__(self, state, activation=None, vref=None, nu=None):
+    def __init__(self, state, activation=None, frame_id=None, velocity=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
         if nu is None:
             crocoddyl.CostModelAbstract.__init__(self, state, activation)
         else:
             crocoddyl.CostModelAbstract.__init__(self, state, activation, nu)
-        self.vref = vref
+        self._frame_id = frame_id
+        self._velocity = velocity
 
     def calc(self, data, x, u):
-        data.residual.r[:] = (pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self.vref.id) -
-                              self.vref.motion).vector
+        data.residual.r[:] = (
+            pinocchio.getFrameVelocity(self.state.pinocchio, data.shared.pinocchio, self._frame_id, pinocchio.LOCAL) -
+            self._velocity).vector
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
@@ -833,8 +838,8 @@ class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
 class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
-        self.fXj = model.state.pinocchio.frames[model.vref.id].placement.inverse().action
-        self.joint = model.state.pinocchio.frames[model.vref.id].parent
+        self.fXj = model.state.pinocchio.frames[model._frame_id].placement.inverse().action
+        self.joint = model.state.pinocchio.frames[model._frame_id].parent
 
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
