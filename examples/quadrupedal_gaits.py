@@ -98,7 +98,6 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
-    sys.stdout.flush()
     if WITHDISPLAY and WITHPLOT:
         display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
         ddp[i].setCallbacks(

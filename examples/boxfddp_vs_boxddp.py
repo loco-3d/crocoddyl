@@ -75,7 +75,6 @@ xs = [anymal.model.defaultState] * (boxfddp.problem.T + 1)
 us = boxddp.problem.quasiStatic([anymal.model.defaultState] * boxddp.problem.T)
 
 print('*** SOLVE with Box-FDDP ***')
-sys.stdout.flush()
 boxfddp.th_stop = 1e-7
 boxfddp.solve(xs, us, 50, False)
 
@@ -85,7 +84,6 @@ if WITHDISPLAY:
     display.displayFromSolver(boxfddp)
 
 print('*** SOLVE with Box-DDP ***')
-sys.stdout.flush()
 boxddp.th_stop = 1e-7
 boxddp.solve(xs, us, 30, False)
 
