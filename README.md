@@ -37,16 +37,13 @@ If you want to follow the current developments, you can directly refer to the [d
 If you want to directly dive into **Crocoddyl**, only one single line is sufficient
 
 <p align="center">
-pip3 install --user crocoddyl  # for python 3 users
+conda install crocoddyl -c conda-forge 
 </p>
-or
-<p align="center">
-pip install --user crocoddyl  # for deprecated python 2 support
-</p>
-and if you prefer Conda:
+
+and if you prefer pip (in Python 3 or 2):
 
 <p align="center">
-conda install crocoddyl -c conda-forge 
+pip install --user crocoddyl
 </p>
 
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
