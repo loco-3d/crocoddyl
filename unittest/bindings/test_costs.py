@@ -135,7 +135,7 @@ class StateCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    COST = crocoddyl.CostModelState(ROBOT_STATE)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelState(ROBOT_STATE))
     COST_DER = StateCostModelDerived(ROBOT_STATE)
 
 
@@ -143,14 +143,14 @@ class StateCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    COST = crocoddyl.CostModelState(ROBOT_STATE)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelState(ROBOT_STATE))
 
 
 class ControlCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    COST = crocoddyl.CostModelControl(ROBOT_STATE)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelControl(ROBOT_STATE))
     COST_DER = ControlCostModelDerived(ROBOT_STATE)
 
 
@@ -158,7 +158,7 @@ class ControlCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    COST = crocoddyl.CostModelControl(ROBOT_STATE)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelControl(ROBOT_STATE))
 
 
 class CoMPositionCostTest(CostModelAbstractTestCase):
@@ -166,7 +166,7 @@ class CoMPositionCostTest(CostModelAbstractTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     cref = pinocchio.utils.rand(3)
-    COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelCoMPosition(ROBOT_STATE, cref))
     COST_DER = CoMPositionCostModelDerived(ROBOT_STATE, cref=cref)
 
 
@@ -175,75 +175,89 @@ class CoMPositionCostSumTest(CostModelSumTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     cref = pinocchio.utils.rand(3)
-    COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
+    COST = crocoddyl.CostModelResidual(ROBOT_STATE, crocoddyl.ResidualModelCoMPosition(ROBOT_STATE, cref))
 
 
 class FramePlacementCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random())
-    COST = crocoddyl.CostModelFramePlacement(ROBOT_STATE, Mref)
-    COST_DER = FramePlacementCostModelDerived(ROBOT_STATE, Mref=Mref)
+    Mref = pinocchio.SE3.Random()
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE, crocoddyl.ResidualModelFramePlacement(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref))
+    COST_DER = FramePlacementCostModelDerived(ROBOT_STATE, frame_id=ROBOT_MODEL.getFrameId('r_sole'), placement=Mref)
 
 
 class FramePlacementCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random())
-    COST = crocoddyl.CostModelFramePlacement(ROBOT_STATE, Mref)
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE,
+        crocoddyl.ResidualModelFramePlacement(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random()))
 
 
 class FrameTranslationCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.utils.rand(3))
-    COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
-    COST_DER = FrameTranslationCostModelDerived(ROBOT_STATE, xref=xref)
+    xref = pinocchio.utils.rand(3)
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE, crocoddyl.ResidualModelFrameTranslation(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), xref))
+    COST_DER = FrameTranslationCostModelDerived(ROBOT_STATE,
+                                                frame_id=ROBOT_MODEL.getFrameId('r_sole'),
+                                                translation=xref)
 
 
 class FrameTranslationCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.utils.rand(3))
-    COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE,
+        crocoddyl.ResidualModelFrameTranslation(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'),
+                                                pinocchio.utils.rand(3)))
 
 
 class FrameRotationCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    Rref = crocoddyl.FrameRotation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random().rotation)
-    COST = crocoddyl.CostModelFrameRotation(ROBOT_STATE, Rref)
-    COST_DER = FrameRotationCostModelDerived(ROBOT_STATE, Rref=Rref)
+    Rref = pinocchio.SE3.Random().rotation
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE, crocoddyl.ResidualModelFrameRotation(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Rref))
+    COST_DER = FrameRotationCostModelDerived(ROBOT_STATE, frame_id=ROBOT_MODEL.getFrameId('r_sole'), rotation=Rref)
 
 
 class FrameRotationCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    Rref = crocoddyl.FrameRotation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random().rotation)
-    COST = crocoddyl.CostModelFrameRotation(ROBOT_STATE, Rref)
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE,
+        crocoddyl.ResidualModelFrameRotation(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'),
+                                             pinocchio.SE3.Random().rotation))
 
 
 class FrameVelocityCostTest(CostModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Motion.Random())
-    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
-    COST_DER = FrameVelocityCostModelDerived(ROBOT_STATE, vref=vref)
+    vref = pinocchio.Motion.Random()
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE,
+        crocoddyl.ResidualModelFrameVelocity(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), vref, pinocchio.LOCAL))
+    COST_DER = FrameVelocityCostModelDerived(ROBOT_STATE, frame_id=ROBOT_MODEL.getFrameId('r_sole'), velocity=vref)
 
 
 class FrameVelocityCostSumTest(CostModelSumTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
-    vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Motion.Random())
-    COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
+    COST = crocoddyl.CostModelResidual(
+        ROBOT_STATE,
+        crocoddyl.ResidualModelFrameVelocity(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Motion.Random(),
+                                             pinocchio.LOCAL))
 
 
 if __name__ == '__main__':

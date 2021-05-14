@@ -41,6 +41,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 T = 100
 x0 = np.array([3.14, 0, 0., 0.])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
+problem.nthreads = 1  # TODO(cmastalli): Remove after Crocoddyl supports multithreading with Python-derived models
 fddp = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
