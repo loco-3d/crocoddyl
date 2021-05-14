@@ -60,17 +60,17 @@ void exposeActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic_x,
-           ActionModel_quasiStatic_wraps(
-               bp::args("self", "data", "x", "maxiter", "tol"),
-               "Compute the quasic-static control given a state.\n\n"
-               "It runs an iterative Newton step in order to compute the quasic-static regime\n"
-               "given a state configuration.\n"
-               ":param data: action data\n"
-               ":param x: discrete-time state vector\n"
-               ":param maxiter: maximum allowed number of iterations\n"
-               ":param tol: stopping tolerance criteria (default 1e-9)\n"
-               ":return u: quasic-static control"))
+      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic, &ActionModelAbstract_wrap::default_quasiStatic,
+           bp::args("self", "data", "x", "maxiter", "tol"),
+           "Compute the quasic-static control given a state.\n\n"
+           "It runs a procedure to compute the quasic-static regime, which is often used for \n"
+           "warm-starting the solvers. By default it runs an iterative Newton step in order \n"
+           "to compute this regime given a state configuration.\n"
+           ":param data: action data\n"
+           ":param x: discrete-time state vector\n"
+           ":param maxiter: maximum allowed number of iterations\n"
+           ":param tol: stopping tolerance criteria (default 1e-9)\n"
+           ":return u: quasic-static control")
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
