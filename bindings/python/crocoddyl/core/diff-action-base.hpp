@@ -81,6 +81,9 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   }
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DifferentialActionModel_quasiStatic_wraps,
+                                       DifferentialActionModelAbstract::quasiStatic_x, 2, 4)
+
 }  // namespace python
 }  // namespace crocoddyl
 
