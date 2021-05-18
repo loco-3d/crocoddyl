@@ -377,7 +377,7 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.u_regs.append(solver.u_reg)
         self.x_regs.append(solver.x_reg)
         self.stops.append(solver.stoppingCriteria())
-        self.grads.append(-np.asscalar(solver.expectedImprovement()[1]))
+        self.grads.append(-solver.expectedImprovement()[1].item())
 
 
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
