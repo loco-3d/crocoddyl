@@ -62,10 +62,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
                    const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t maxiter, const double tol) {
     if (boost::python::override quasiStatic = this->get_override("quasiStatic")) {
-      Eigen::VectorXd u_tmp = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
-      if (static_cast<std::size_t>(u_tmp.size()) == nu_) {
-        u = u_tmp;
-      } else {
+      u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
+      if (static_cast<std::size_t>(u.size()) != nu_) {
         throw_pretty("Invalid argument: "
                      << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
       }
