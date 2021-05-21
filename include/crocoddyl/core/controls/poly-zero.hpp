@@ -37,6 +37,9 @@ class ControlPolyZeroTpl : public ControlAbstractTpl<_Scalar> {
 
   virtual void multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  
+  virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
   using ControlAbstractTpl<Scalar>::nu_;

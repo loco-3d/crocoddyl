@@ -91,6 +91,18 @@ class ControlAbstractTpl {
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
   /**
+   * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
+   * a specified matrix
+   *
+   * @param[in]  t      Time
+   * @param[in]  p      Control parameters
+   * @param[in]  A      A matrix to multiply times the Jacobian
+   * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the matrix A
+   */
+  virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
+
+  /**
    * @brief Return the dimension of the control value
    */
   std::size_t get_nu() const;

@@ -35,8 +35,7 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
                  << "p has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
-  control_->value(0.0, p, u_);
-  model_->calc(data_nd->data_0, x, u_);
+  model_->calc(data_nd->data_0, x, p);
   data->cost = data_nd->data_0->cost;
   data->xnext = data_nd->data_0->xnext;
 }
@@ -63,12 +62,11 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  control_->value(0.0, p, u_);
   data_nd->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
-    model_->calc(data_nd->data_x[ix], data_nd->xp, u_);
+    model_->calc(data_nd->data_x[ix], data_nd->xp, p);
 
     const VectorXs& xn = data_nd->data_x[ix]->xnext;
     const Scalar c = data_nd->data_x[ix]->cost;
@@ -86,8 +84,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   data_nd->dp.setZero();
   for (unsigned iu = 0; iu < control_->get_np(); ++iu) {
     data_nd->dp(iu) = disturbance_;
-    control_->value(0.0, p+data_nd->dp, u_);
-    model_->calc(data_nd->data_u[iu], x, u_);
+    model_->calc(data_nd->data_u[iu], x, p+data_nd->dp);
 
     const VectorXs& xn = data_nd->data_u[iu]->xnext;
     const Scalar c = data_nd->data_u[iu]->cost;

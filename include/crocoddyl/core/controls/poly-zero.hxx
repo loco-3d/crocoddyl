@@ -53,7 +53,22 @@ void ControlPolyZeroTpl<Scalar>::multiplyByDValue(double, const Eigen::Ref<const
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (A.rows() != out.rows() || A.cols()!=nu_ || out.cols()!=np_) {
+  if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols())!=nu_ || static_cast<std::size_t>(out.cols())!=np_) {
+    throw_pretty("Invalid argument: "
+                << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
+                + " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
+  }
+  out = A;
+}
+
+template <typename Scalar>
+void ControlPolyZeroTpl<Scalar>::multiplyDValueTransposeBy(double, const Eigen::Ref<const VectorXs>& p, 
+    const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
+  if (static_cast<std::size_t>(p.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows())!=nu_ || static_cast<std::size_t>(out.rows())!=np_) {
     throw_pretty("Invalid argument: "
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
                 + " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");

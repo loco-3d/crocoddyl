@@ -83,6 +83,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t nx = model->get_state()->get_nx();
     const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nu = model->get_nu();
+    const std::size_t np = model->get_np();
 
     for (std::size_t i = 0; i < 4; ++i) {
       differential.push_back(
@@ -90,6 +91,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     }
 
     dx = VectorXs::Zero(ndx);
+    u = VectorXs::Zero(nu);
     integral = std::vector<Scalar>(4, Scalar(0.));
 
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
@@ -98,18 +100,25 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
 
     dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
     dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dki_dp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
+    dfi_dp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
     dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dyi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    dyi_dp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
     dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
-    ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    dli_dp = std::vector<VectorXs>(4, VectorXs::Zero(np));
+    ddli_ddx  = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    ddli_ddu  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    ddli_dudp = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, np));
+    ddli_ddp  = std::vector<MatrixXs>(4, MatrixXs::Zero(np, np));
     ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    ddli_dxdp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
+    Lpp_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(np, np));
+    Lxp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
     Lxx_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    Lxx_partialu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
+    Lxx_partialp = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, np));
 
     dyi_dx[0].diagonal().array() = (Scalar)1;
     for (std::size_t i = 0; i < 4; ++i) {
@@ -119,6 +128,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   virtual ~IntegratedActionDataRK4Tpl() {}
 
   VectorXs dx;
+  VectorXs u;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
@@ -127,18 +137,25 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
 
   std::vector<MatrixXs> dki_dx;
   std::vector<MatrixXs> dki_du;
+  std::vector<MatrixXs> dki_dp;
+  std::vector<MatrixXs> dfi_dp;
   std::vector<MatrixXs> dyi_dx;
-  std::vector<MatrixXs> dyi_du;
+  std::vector<MatrixXs> dyi_dp;
   std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_du;
+  std::vector<VectorXs> dli_du; // not used
+  std::vector<VectorXs> dli_dp;
   std::vector<MatrixXs> ddli_ddx;
   std::vector<MatrixXs> ddli_ddu;
+  std::vector<MatrixXs> ddli_dudp;
+  std::vector<MatrixXs> ddli_ddp;
   std::vector<MatrixXs> ddli_dxdu;
-  std::vector<MatrixXs> Luu_partialx;
+  std::vector<MatrixXs> ddli_dxdp;
+  std::vector<MatrixXs> Lpp_partialx;
+  std::vector<MatrixXs> Lxp;
   std::vector<MatrixXs> Lxx_partialx;
-  std::vector<MatrixXs> Lxx_partialu;
+  std::vector<MatrixXs> Lxx_partialp;
 
   using Base::cost;
   using Base::Fu;
