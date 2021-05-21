@@ -21,16 +21,16 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       : ActionModelAbstract(state, nu, nr), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
+            const Eigen::Ref<const Eigen::VectorXd>& p) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty("Invalid argument: "
                    << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
     }
-    if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
+    if (static_cast<std::size_t>(p.size()) != control_->get_np()) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
+                   << "p has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)p);
   }
 
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -55,22 +55,22 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
 
   boost::shared_ptr<ActionDataAbstract> default_createData() { return this->ActionModelAbstract::createData(); }
 
-  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> p,
                    const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t maxiter, const double tol) {
     if (boost::python::override quasiStatic = this->get_override("quasiStatic")) {
-      u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
-      if (static_cast<std::size_t>(u.size()) != nu_) {
+      p = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
+      if (static_cast<std::size_t>(p.size()) != control_->get_np()) {
         throw_pretty("Invalid argument: "
-                     << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                     << "p has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
       }
       return;
     }
-    return ActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
+    return ActionModelAbstract::quasiStatic(data, p, x, maxiter, tol);
   }
 
-  void default_quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+  void default_quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> p,
                            const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t maxiter, const double tol) {
-    return this->ActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
+    return this->ActionModelAbstract::quasiStatic(data, p, x, maxiter, tol);
   }
 };
 
