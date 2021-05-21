@@ -90,11 +90,12 @@ class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
-        crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
-        1e-3)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+        crocoddyl.CostModelResidual(
+            STATE,
+            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                                                  pinocchio.SE3.Random())), 1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
 
@@ -106,11 +107,12 @@ class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
-        crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
-        1e-3)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+        crocoddyl.CostModelResidual(
+            STATE,
+            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                                                  pinocchio.SE3.Random())), 1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
     MODEL.armature = 0.1 * np.ones(ROBOT_MODEL.nv)
@@ -122,8 +124,10 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE, ACTUATION.nu), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE, ACTUATION.nu), 1e-7)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE, ACTUATION.nu)),
+                     1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE, ACTUATION.nu)),
+                     1e-7)
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
 
@@ -135,11 +139,12 @@ class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         'gripperPose',
-        crocoddyl.CostModelFramePlacement(
-            STATE, crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId("gripper_left_joint"), pinocchio.SE3.Random())),
-        1e-3)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
+        crocoddyl.CostModelResidual(
+            STATE,
+            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                                                  pinocchio.SE3.Random())), 1e-3)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
@@ -150,8 +155,10 @@ class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFloatingBase(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE, ACTUATION.nu)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE, ACTUATION.nu), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE, ACTUATION.nu), 1e-7)
+    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE, ACTUATION.nu)),
+                     1e-7)
+    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE, ACTUATION.nu)),
+                     1e-7)
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)

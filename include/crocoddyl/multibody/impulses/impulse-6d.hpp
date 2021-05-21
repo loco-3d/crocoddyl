@@ -44,7 +44,6 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   std::size_t get_frame() const;
 
  protected:
-  using Base::ni_;
   using Base::state_;
 
  private:
@@ -66,7 +65,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
-    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
     jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
@@ -80,7 +78,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::frame;
   using Base::Jc;
   using Base::jMf;
-  using Base::joint;
   using Base::pinocchio;
 
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;

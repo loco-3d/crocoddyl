@@ -58,6 +58,25 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   boost::shared_ptr<DifferentialActionDataAbstract> default_createData() {
     return this->DifferentialActionModelAbstract::createData();
   }
+
+  void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+                   const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t maxiter, const double tol) {
+    if (boost::python::override quasiStatic = this->get_override("quasiStatic")) {
+      u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
+      if (static_cast<std::size_t>(u.size()) != nu_) {
+        throw_pretty("Invalid argument: "
+                     << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+      }
+      return;
+    }
+    return DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
+  }
+
+  void default_quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                           Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
+                           const std::size_t maxiter, const double tol) {
+    return this->DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
+  }
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DifferentialActionModel_quasiStatic_wraps,

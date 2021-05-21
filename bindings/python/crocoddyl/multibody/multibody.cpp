@@ -20,6 +20,7 @@ void exposeMultibody() {
   exposeActuationFloatingBase();
   exposeActuationFull();
   exposeActuationModelMultiCopterBase();
+  exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
   exposeContactMultiple();
@@ -30,6 +31,20 @@ void exposeMultibody() {
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
   exposeActionImpulseFwdDynamics();
+  exposeResidualState();
+  exposeResidualCentroidalMomentum();
+  exposeResidualCoMPosition();
+  exposeResidualContactForce();
+  exposeResidualContactFrictionCone();
+  exposeResidualContactCoPPosition();
+  exposeResidualContactWrenchCone();
+  exposeResidualContactControlGrav();
+  exposeResidualControlGrav();
+  exposeResidualFramePlacement();
+  exposeResidualFrameRotation();
+  exposeResidualFrameTranslation();
+  exposeResidualFrameVelocity();
+  exposeResidualImpulseCoM();
   exposeCostState();
   exposeCostCoMPosition();
   exposeCostControlGrav();

@@ -72,34 +72,19 @@ void exposeContactAbstract() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataAbstract> >();
 
-  bp::class_<ContactDataAbstract, boost::noncopyable>(
+  bp::class_<ContactDataAbstract, bp::bases<ForceDataAbstract> >(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
           "Create common data shared between contact models.\n\n"
           ":param model: contact model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("pinocchio", bp::make_getter(&ContactDataAbstract::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data")
-      .add_property("jMf", bp::make_getter(&ContactDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ContactDataAbstract::jMf), "local frame placement of the contact frame")
       .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::fXj), "action matrix from contact to local frames")
-      .add_property("Jc", bp::make_getter(&ContactDataAbstract::Jc, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::Jc), "contact Jacobian")
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
       .add_property("da0_dx", bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
-      .add_property("df_dx", bp::make_getter(&ContactDataAbstract::df_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::df_dx), "Jacobian of the contact forces")
-      .add_property("df_du", bp::make_getter(&ContactDataAbstract::df_du, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::df_du), "Jacobian of the contact forces")
-      .def_readwrite("joint", &ContactDataAbstract::joint, "joint index of the contact frame")
-      .def_readwrite("frame", &ContactDataAbstract::frame, "frame index of the contact frame")
-      .def_readwrite("f", &ContactDataAbstract::f,
-                     "external spatial force at the parent joint level. Note that we could compute the force at the "
-                     "contact frame by using jMf (i.e. data.jMf.actInv(data.f)");
+                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration");
 }
 
 }  // namespace python

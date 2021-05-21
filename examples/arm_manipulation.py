@@ -28,11 +28,13 @@ terminalCostModel = crocoddyl.CostModelSum(state)
 # For this particular example, we formulate three running-cost functions:
 # goal-tracking cost, state and control regularization; and one terminal-cost:
 # goal cost. First, let's create the common cost functions.
-Mref = crocoddyl.FramePlacement(robot_model.getFrameId("gripper_left_joint"),
-                                pinocchio.SE3(np.eye(3), np.array([.0, .0, .4])))
-goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref)
-xRegCost = crocoddyl.CostModelState(state)
-uRegCost = crocoddyl.CostModelControl(state)
+framePlacementResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("gripper_left_joint"),
+                                                               pinocchio.SE3(np.eye(3), np.array([.0, .0, .4])))
+uResidual = crocoddyl.ResidualModelControl(state)
+xResidual = crocoddyl.ResidualModelControl(state)
+goalTrackingCost = crocoddyl.CostModelResidual(state, framePlacementResidual)
+xRegCost = crocoddyl.CostModelResidual(state, xResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 
 # Then let's added the running and terminal cost functions
 runningCostModel.addCost("gripperPose", goalTrackingCost, 1)

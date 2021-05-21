@@ -171,12 +171,14 @@ class ImpulseModelMultipleTpl {
   /**
    * @brief Return the dimension of active impulses
    */
-  std::size_t get_ni() const;
+  std::size_t get_nc() const;
+  DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
 
   /**
    * @brief Return the dimension of all impulses
    */
-  std::size_t get_ni_total() const;
+  std::size_t get_nc_total() const;
+  DEPRECATED("Use get_nc_total().", std::size_t get_ni_total() const;)
 
   /**
    * @brief Return the names of the active impulses
@@ -196,8 +198,8 @@ class ImpulseModelMultipleTpl {
  private:
   boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
-  std::size_t ni_;
-  std::size_t ni_total_;
+  std::size_t nc_;
+  std::size_t nc_total_;
   std::vector<std::string> active_;
   std::vector<std::string> inactive_;
 };
@@ -226,8 +228,8 @@ struct ImpulseDataMultipleTpl {
    */
   template <template <typename Scalar> class Model>
   ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Jc(model->get_ni_total(), model->get_state()->get_nv()),
-        dv0_dq(model->get_ni_total(), model->get_state()->get_nv()),
+      : Jc(model->get_nc_total(), model->get_state()->get_nv()),
+        dv0_dq(model->get_nc_total(), model->get_state()->get_nv()),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {

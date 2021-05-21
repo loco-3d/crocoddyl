@@ -53,7 +53,8 @@ template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d->frame].parent;
+  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);

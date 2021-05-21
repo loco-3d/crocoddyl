@@ -54,8 +54,10 @@ void test_constructor() {
     BOOST_CHECK(support.get_R().isApprox(support_from_reference.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_reference.get_box()));
     BOOST_CHECK(support.get_A().isApprox(support_from_reference.get_A()));
-    BOOST_CHECK(support.get_ub().isApprox(support_from_reference.get_ub()));
-    BOOST_CHECK(support.get_lb().isApprox(support_from_reference.get_lb()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
+      BOOST_CHECK(support.get_ub()[i] == support_from_reference.get_ub()[i]);
+      BOOST_CHECK(support.get_lb()[i] == support_from_reference.get_lb()[i]);
+    }
   }
 
   // Create the wrench support through the copy operator
@@ -66,8 +68,10 @@ void test_constructor() {
     BOOST_CHECK(support.get_R().isApprox(support_from_copy.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_copy.get_box()));
     BOOST_CHECK(support.get_A().isApprox(support_from_copy.get_A()));
-    BOOST_CHECK(support.get_ub().isApprox(support_from_copy.get_ub()));
-    BOOST_CHECK(support.get_lb().isApprox(support_from_copy.get_lb()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
+      BOOST_CHECK(support.get_ub()[i] == support_from_copy.get_ub()[i]);
+      BOOST_CHECK(support.get_lb()[i] == support_from_copy.get_lb()[i]);
+    }
   }
 }
 

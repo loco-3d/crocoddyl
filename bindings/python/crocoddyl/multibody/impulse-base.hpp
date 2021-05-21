@@ -18,7 +18,8 @@ namespace python {
 
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
-  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int ni) : ImpulseModelAbstract(state, ni) {}
+  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc)
+      : ImpulseModelAbstract(state, nc) {}
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
@@ -31,7 +32,7 @@ class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrappe
   }
 
   void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
-    assert_pretty(static_cast<std::size_t>(force.size()) == ni_, "force has wrong dimension");
+    assert_pretty(static_cast<std::size_t>(force.size()) == nc_, "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 

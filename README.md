@@ -23,22 +23,29 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![CI build status](https://travis-ci.org/loco-3d/crocoddyl.svg?branch=devel)](https://travis-ci.org/loco-3d/crocoddyl)
 [![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
 [![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
-[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
-[![conde version](https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![conde install](https://anaconda.org/conda-forge/crocoddyl/badges/installer/conda.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![conde download](https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
 [![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
+[![conda version](https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![PyPI](https://badge.fury.io/py/crocoddyl.svg)](https://pypi.org/project/crocoddyl/)
+[![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/installer/conda.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![conda download](https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
+[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
 
 If you want to follow the current developments, you can directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
-If you want to directly dive into **Crocoddyl**, only one single line is sufficient (assuming you have Conda):
+If you want to directly dive into **Crocoddyl**, only one single line is sufficient
 
 <p align="center">
 conda install crocoddyl -c conda-forge 
-<\p>
-  
+</p>
+
+and if you prefer pip (in Python 3 or 2):
+
+<p align="center">
+pip install --user crocoddyl
+</p>
+
 ## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
 **Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
 
@@ -64,7 +71,7 @@ conda install crocoddyl -c conda-forge
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
- * C++ 98/11/14/17/20 compliant
+ * C++ 14/17/20 compliant
  * extensively tested
  * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
 
@@ -101,9 +108,9 @@ sudo apt-get update
 4. The installation of Crocoddyl:
 
 ```bash
-sudo apt install robotpkg-py27-crocoddyl # for Python 2
-
 sudo apt install robotpkg-py36-crocoddyl # for Python 3
+
+sudo apt install robotpkg-py27-crocoddyl # for Python 2
 ```
 
 Finally you will need to configure your environment variables, e.g.:
@@ -241,4 +248,4 @@ The following people have been involved in the development of **Crocoddyl**:
 ## Acknowledgments
 
 The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
-It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
+It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/), and the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](https://www.inria.fr/fr/centre-inria-de-paris).

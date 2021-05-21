@@ -48,11 +48,18 @@ struct ActivationBoundsTpl {
                        << "The lower and upper bounds are badly defined; ub has to be bigger / equals to lb");
         }
       }
+      // Assign the maximum value for infinity/nan values
+      if (!isfinite(lb(i))) {
+        lb(i) = -std::numeric_limits<Scalar>::max();
+      }
+      if (!isfinite(ub(i))) {
+        ub(i) = std::numeric_limits<Scalar>::max();
+      }
     }
 
     if (beta >= Scalar(0) && beta <= Scalar(1.)) {
-      VectorXs m = Scalar(0.5) * (lower + upper);
-      VectorXs d = Scalar(0.5) * (upper - lower);
+      VectorXs m = Scalar(0.5) * (lb + ub);
+      VectorXs d = Scalar(0.5) * (ub - lb);
       lb = m - beta * d;
       ub = m + beta * d;
     } else {

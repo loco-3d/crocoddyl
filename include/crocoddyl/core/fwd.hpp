@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,12 @@ template <typename Scalar>
 class IntegratedActionModelRK4Tpl;
 template <typename Scalar>
 struct IntegratedActionDataRK4Tpl;
+
+// residual
+template <typename Scalar>
+class ResidualModelAbstractTpl;
+template <typename Scalar>
+struct ResidualDataAbstractTpl;
 
 // activation
 template <typename Scalar>
@@ -130,6 +136,12 @@ struct DataCollectorAbstractTpl;
 template <typename Scalar>
 struct DataCollectorActuationTpl;
 
+// residual
+template <typename Scalar>
+class ResidualModelControlTpl;
+template <typename Scalar>
+struct ResidualDataControlTpl;
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -142,6 +154,11 @@ template <typename Scalar>
 class CostModelSumTpl;
 template <typename Scalar>
 struct CostDataSumTpl;
+
+template <typename Scalar>
+class CostModelResidualTpl;
+template <typename Scalar>
+struct CostDataResidualTpl;
 
 template <typename Scalar>
 class CostModelControlTpl;
@@ -165,6 +182,11 @@ template <typename Scalar>
 class ActivationModelNumDiffTpl;
 template <typename Scalar>
 struct ActivationDataNumDiffTpl;
+
+template <typename Scalar>
+class ResidualModelNumDiffTpl;
+template <typename Scalar>
+struct ResidualDataNumDiffTpl;
 
 template <typename Scalar>
 class StateNumDiffTpl;
@@ -197,6 +219,11 @@ typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
 typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
+
+typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
+typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
+typedef ResidualModelControlTpl<double> ResidualModelControl;
+typedef ResidualDataControlTpl<double> ResidualDataControl;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
@@ -238,7 +265,9 @@ typedef CostDataAbstractTpl<double> CostDataAbstract;
 typedef CostItemTpl<double> CostItem;
 typedef CostModelSumTpl<double> CostModelSum;
 typedef CostDataSumTpl<double> CostDataSum;
-typedef CostModelControlTpl<double> CostModelControl;
+typedef CostModelResidualTpl<double> CostModelResidual;
+typedef CostDataResidualTpl<double> CostDataResidual;
+DEPRECATED("Use ResidualModelControl with CostModelResidual", typedef CostModelControlTpl<double> CostModelControl;)
 
 typedef ShootingProblemTpl<double> ShootingProblem;
 
@@ -248,6 +277,8 @@ typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
+typedef ResidualModelNumDiffTpl<double> ResidualModelNumDiff;
+typedef ResidualDataNumDiffTpl<double> ResidualDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;

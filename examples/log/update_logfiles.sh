@@ -6,7 +6,7 @@ echo "Updating the log files ..."
 update_logfile() {
   FILENAME=$1
   echo "    ${FILENAME}"
-  python ${EXAMPLEPATH}/${FILENAME}.py > ${LOGPATH}/${FILENAME}.log
+  python -u ${EXAMPLEPATH}/${FILENAME}.py > ${LOGPATH}/${FILENAME}.log
 }
 
 update_logfile "arm_manipulation"

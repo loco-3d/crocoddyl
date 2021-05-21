@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,23 +11,60 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
+                                                   boost::shared_ptr<ResidualModelAbstract> residual)
+    : state_(state),
+      activation_(activation),
+      residual_(residual),
+      nu_(residual->get_nu()),
+      unone_(VectorXs::Zero(residual->get_nu())) {
+  if (activation_->get_nr() != residual_->get_nr()) {
+    throw_pretty("Invalid argument: "
+                 << "nr is equals to " + std::to_string(residual_->get_nr()));
+  }
+}
+
+template <typename Scalar>
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                                                   boost::shared_ptr<ActivationModelAbstract> activation,
                                                    const std::size_t nu)
-    : state_(state), activation_(activation), nu_(nu), unone_(VectorXs::Zero(nu)) {}
+    : state_(state),
+      activation_(activation),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr(), nu)),
+      nu_(nu),
+      unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation)
-    : state_(state), activation_(activation), nu_(state->get_nv()), unone_(VectorXs::Zero(state->get_nv())) {}
+    : state_(state),
+      activation_(activation),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, activation->get_nr())),
+      nu_(state->get_nv()),
+      unone_(VectorXs::Zero(state->get_nv())) {}
+
+template <typename Scalar>
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                                                   boost::shared_ptr<ResidualModelAbstract> residual)
+    : state_(state),
+      activation_(boost::make_shared<ActivationModelQuad>(residual->get_nr())),
+      residual_(residual),
+      nu_(residual->get_nu()),
+      unone_(VectorXs::Zero(residual->get_nu())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr,
                                                    const std::size_t nu)
-    : state_(state), activation_(boost::make_shared<ActivationModelQuad>(nr)), nu_(nu), unone_(VectorXs::Zero(nu)) {}
+    : state_(state),
+      activation_(boost::make_shared<ActivationModelQuad>(nr)),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, nr, nu)),
+      nu_(nu),
+      unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
+      residual_(boost::make_shared<ResidualModelAbstract>(state, nr)),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
@@ -63,6 +100,11 @@ const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& CostModelAbstractT
 }
 
 template <typename Scalar>
+const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_residual() const {
+  return residual_;
+}
+
+template <typename Scalar>
 std::size_t CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
@@ -80,14 +122,14 @@ void CostModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, cons
 
 template <typename Scalar>
 template <class ReferenceType>
-ReferenceType CostModelAbstractTpl<Scalar>::get_reference() const {
+ReferenceType CostModelAbstractTpl<Scalar>::get_reference() {
   ReferenceType ref;
   get_referenceImpl(typeid(ref), &ref);
   return ref;
 }
 
 template <typename Scalar>
-void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) const {
+void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) {
   throw_pretty("It has not been implemented the set_referenceImpl() function");
 }
 
