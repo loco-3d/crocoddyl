@@ -123,8 +123,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
                                 boost::make_shared<crocoddyl::ConstraintModelResidual>(
                                     state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
                                                state, model_factory.get_frame_id(), pinocchio::Force::Random(),
-                                               model_factory.get_contact_nc(), actuation->get_nu())),
-                                0.1);
+                                               model_factory.get_contact_nc(), actuation->get_nu())));
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactCoPPositionInequality:
       lb = cop_support.get_lb();
@@ -134,8 +133,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
                                     state,
                                     boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
                                         state, model_factory.get_frame_id(), cop_support, actuation->get_nu()),
-                                    lb, ub),
-                                0.1);
+                                    lb, ub));
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactFrictionConeInequality:
       lb = friction_cone.get_lb();
@@ -146,7 +144,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
                                     boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
                                         state, model_factory.get_frame_id(), friction_cone, actuation->get_nu()),
                                     lb, ub),
-                                0.1);
+                                true);
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactWrenchConeInequality:
       lb = wrench_cone.get_lb();
@@ -157,7 +155,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
                                     boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
                                         state, model_factory.get_frame_id(), wrench_cone, actuation->get_nu()),
                                     lb, ub),
-                                0.1);
+                                true);
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactControlGravInequality:
       lb = Eigen::VectorXd::Zero(state->get_nv());
@@ -166,8 +164,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
           "constraint",
           boost::make_shared<crocoddyl::ConstraintModelResidual>(
               state, boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, actuation->get_nu()), lb,
-              ub),
-          0.1);
+              ub));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactConstraintModelTypes::Type given");
