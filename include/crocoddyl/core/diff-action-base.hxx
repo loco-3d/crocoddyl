@@ -150,8 +150,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::update_has_control_limits() {
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& diff_action_model) {
-  os << "DifferentialActionModel of type '" << boost::core::demangle(typeid(diff_action_model).name()) << "'";
+std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model) {
+  os << boost::core::demangle(typeid(model).name());
   return os;
 }
 

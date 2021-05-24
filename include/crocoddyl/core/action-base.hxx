@@ -150,8 +150,8 @@ void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model) {
-  os << "ActionModel type '" << boost::core::demangle(typeid(action_model).name()) << "'";
+std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& model) {
+  os << boost::core::demangle(typeid(model).name());
   return os;
 }
 
