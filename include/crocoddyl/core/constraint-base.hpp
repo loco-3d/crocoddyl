@@ -190,6 +190,10 @@ struct ConstraintDataAbstractTpl {
         h(model->get_nh()),
         Hx(model->get_nh(), model->get_state()->get_ndx()),
         Hu(model->get_nh(), model->get_nu()) {
+    if (model->get_ng() == 0 && model->get_nh() == 0) {
+      throw_pretty("Invalid argument: "
+                   << "ng and nh cannot be equals to 0");
+    }
     g.setZero();
     Gx.setZero();
     Gu.setZero();
