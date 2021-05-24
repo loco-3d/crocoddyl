@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,15 @@ struct CostItemTpl {
   CostItemTpl(const std::string& name, boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
               const bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
+
+  /**
+   * @brief Print information on the cost item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostItemTpl<Scalar>& model) {
+    os << *model.cost << "(weight: " << model.weight << ")";
+    return os;
+  }
 
   std::string name;
   boost::shared_ptr<CostModelAbstract> cost;
@@ -205,6 +214,12 @@ class CostModelSumTpl {
    * @param[in] name  Cost name
    */
   bool getCostStatus(const std::string& name) const;
+
+  /**
+   * @brief Print information on the stack of costs
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model);
 
  private:
   boost::shared_ptr<StateAbstract> state_;  //!< State description

@@ -196,6 +196,15 @@ class CostModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Print information on the cost item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model) {
+    os << boost::core::demangle(typeid(model).name());
+    return os;
+  }
+
+  /**
    * @brief Modify the cost reference
    */
   template <class ReferenceType>
