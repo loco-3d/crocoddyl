@@ -24,6 +24,10 @@ void test_constructor(StateModelTypes::Type state_type) {
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(state_factory.create(state_type));
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << model;
+
   // Test the initial size of the map
   BOOST_CHECK(model.get_costs().size() == 0);
 }

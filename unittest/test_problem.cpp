@@ -37,6 +37,10 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   crocoddyl::ShootingProblem problem1(x0, models, model);
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << problem1;
+
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
   std::vector<Eigen::VectorXd> us(T);
@@ -65,7 +69,8 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
-void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type, IntegratorTypes::Type integrator_type) {
+void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                          IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
@@ -171,7 +176,8 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
 }
 
-void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type, IntegratorTypes::Type integrator_type) {
+void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                              IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
@@ -262,7 +268,8 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
   }
 }
 
-void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_type, IntegratorTypes::Type integrator_type) {
+void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                             IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
@@ -335,7 +342,8 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   }
 }
 
-void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model_type, IntegratorTypes::Type integrator_type) {
+void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                                 IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
@@ -393,7 +401,8 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   framework::master_test_suite().add(ts);
 }
 
-void register_diff_action_model_unit_tests(DifferentialActionModelTypes::Type action_model_type, IntegratorTypes::Type integrator_type) {
+void register_diff_action_model_unit_tests(DifferentialActionModelTypes::Type action_model_type,
+                                           IntegratorTypes::Type integrator_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << action_model_type << "_" << integrator_type;
   std::cout << "Running " << test_name.str() << std::endl;

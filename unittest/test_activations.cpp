@@ -24,6 +24,10 @@ void test_construct_data(ActivationModelTypes::Type activation_type) {
   ActivationModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model = factory.create(activation_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 }
