@@ -25,6 +25,8 @@ void test_check_data(ActionModelTypes::Type action_model_type) {
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
+  std::cout << "Testing operator<< for " << *model << std::endl;
+
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
