@@ -1,0 +1,54 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef CROCODDYL_CONTROL_FACTORY_HPP_
+#define CROCODDYL_CONTROL_FACTORY_HPP_
+
+#include <boost/shared_ptr.hpp>
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/control-base.hpp"
+// #include "crocoddyl/core/numdiff/control.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+
+namespace crocoddyl {
+namespace unittest {
+
+struct ControlTypes {
+  enum Type {
+    PolyZero,
+    PolyOne,
+    NbControlTypes
+  };
+  static std::vector<Type> init_all() {
+    std::vector<Type> v;
+    v.clear();
+    for (int i = 0; i < NbControlTypes; ++i) {
+      v.push_back((Type)i);
+    }
+    return v;
+  }
+  static const std::vector<Type> all;
+};
+
+std::ostream& operator<<(std::ostream& os, ControlTypes::Type type);
+
+class ControlFactory {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  explicit ControlFactory();
+  ~ControlFactory();
+
+  boost::shared_ptr<crocoddyl::ControlAbstract> create(ControlTypes::Type control_type,
+                                                       const std::size_t nu) const;
+};
+
+}  // namespace unittest
+}  // namespace crocoddyl
+
+#endif  // CROCODDYL_CONTROL_FACTORY_HPP_
