@@ -36,7 +36,7 @@ struct CostItemTpl {
    */
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const CostItemTpl<Scalar>& model) {
-    os << *model.cost << "(weight: " << model.weight << ")";
+    os << *model.cost << " {weight=" << model.weight << "}";
     return os;
   }
 

@@ -229,7 +229,8 @@ std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model)
   os << "CostModelSum:" << std::endl;
   os << "  Active:" << std::endl;
   for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
-    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item = model.get_costs().find(*it)->second;
+    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
+        model.get_costs().find(*it)->second;
     if (it != --active.end()) {
       os << "    " << *it << ": " << *cost_item << std::endl;
     } else {
@@ -238,7 +239,8 @@ std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model)
   }
   os << "  Inactive:" << std::endl;
   for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
-    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item = model.get_costs().find(*it)->second;
+    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
+        model.get_costs().find(*it)->second;
     if (it != --inactive.end()) {
       os << "    " << *it << ": " << *cost_item << std::endl;
     } else {
