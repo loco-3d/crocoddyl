@@ -90,6 +90,11 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelAbstractTpl<Scalar>::cr
 }
 
 template <typename Scalar>
+void CostModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -131,6 +136,12 @@ ReferenceType CostModelAbstractTpl<Scalar>::get_reference() {
 template <typename Scalar>
 void CostModelAbstractTpl<Scalar>::get_referenceImpl(const std::type_info&, void*) {
   throw_pretty("It has not been implemented the set_referenceImpl() function");
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl
