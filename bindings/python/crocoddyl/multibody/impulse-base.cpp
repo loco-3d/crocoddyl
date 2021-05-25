@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -63,7 +64,8 @@ void exposeImpulseAbstract() {
           "state of the multibody system")
       .add_property("ni", bp::make_function(&ImpulseModelAbstract_wrap::get_nc, deprecated<>("Deprecated. Use nc")),
                     "dimension of impulse")
-      .add_property("nc", bp::make_function(&ImpulseModelAbstract_wrap::get_nc), "dimension of impulse");
+      .add_property("nc", bp::make_function(&ImpulseModelAbstract_wrap::get_nc), "dimension of impulse")
+      .def(PrintableVisitor<ImpulseModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
 

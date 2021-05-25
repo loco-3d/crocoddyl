@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,6 +245,11 @@ boost::shared_ptr<ContactDataMultipleTpl<Scalar> > ContactModelMultipleTpl<Scala
 }
 
 template <typename Scalar>
+void ContactModelMultipleTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelMultipleTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -290,6 +295,34 @@ bool ContactModelMultipleTpl<Scalar>::getContactStatus(const std::string& name) 
               << std::endl;
     return false;
   }
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model) {
+  const std::vector<std::string>& active = model.get_active();
+  const std::vector<std::string>& inactive = model.get_inactive();
+  os << "ContactModelMultiple:" << std::endl;
+  os << "  Active:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+    const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
+        model.get_contacts().find(*it)->second;
+    if (it != --active.end()) {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    }
+  }
+  os << "  Inactive:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+    const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
+        model.get_contacts().find(*it)->second;
+    if (it != --inactive.end()) {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *contact_item;
+    }
+  }
+  return os;
 }
 
 }  // namespace crocoddyl

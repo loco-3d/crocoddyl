@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,15 @@ struct ContactItemTpl {
   ContactItemTpl() {}
   ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, const bool active = true)
       : name(name), contact(contact), active(active) {}
+
+  /**
+   * @brief Print information on the contact item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactItemTpl<Scalar>& model) {
+    os << "{" << *model.contact << "}";
+    return os;
+  }
 
   std::string name;
   boost::shared_ptr<ContactModelAbstract> contact;
@@ -208,6 +217,20 @@ class ContactModelMultipleTpl {
    * @brief Return the status of a given contact name
    */
   bool getContactStatus(const std::string& name) const;
+
+  /**
+   * @brief Print information on the contact models
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model);
+
+ protected:
+  /**
+   * @brief Print relevant information of the contact models
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;

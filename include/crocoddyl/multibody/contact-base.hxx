@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,11 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelAbstractTpl<Scala
 }
 
 template <typename Scalar>
+void ContactModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -66,6 +71,12 @@ std::size_t ContactModelAbstractTpl<Scalar>::get_nc() const {
 template <typename Scalar>
 std::size_t ContactModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl

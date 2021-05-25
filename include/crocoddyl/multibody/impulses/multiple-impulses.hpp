@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,15 @@ struct ImpulseItemTpl {
   ImpulseItemTpl() {}
   ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true)
       : name(name), impulse(impulse), active(active) {}
+
+  /**
+   * @brief Print information on the impulse item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ImpulseItemTpl<Scalar>& model) {
+    os << "{" << *model.impulse << "}";
+    return os;
+  }
 
   std::string name;
   boost::shared_ptr<ImpulseModelAbstract> impulse;
@@ -194,6 +203,20 @@ class ImpulseModelMultipleTpl {
    * @brief Return the status of a given impulse name
    */
   bool getImpulseStatus(const std::string& name) const;
+
+  /**
+   * @brief Print information on the impulse models
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ImpulseModelMultipleTpl<Scalar>& model);
+
+ protected:
+  /**
+   * @brief Print relevant information of the impulse models
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  private:
   boost::shared_ptr<StateMultibody> state_;

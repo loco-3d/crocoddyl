@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +50,13 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   const Vector2s& get_gains() const;
 
  protected:
+  /**
+   * @brief Print relevant information of the 6d contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
