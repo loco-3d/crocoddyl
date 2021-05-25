@@ -214,6 +214,12 @@ bool DifferentialActionModelContactFwdDynamicsTpl<Scalar>::checkData(
 }
 
 template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelContactFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+     << ", nu=" << nu_ << ", nc=" << contacts_->get_nc() << "}";
+}
+
+template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }
@@ -264,13 +270,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(co
                  << "The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
-}
-
-template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const DifferentialActionModelContactFwdDynamicsTpl<Scalar>& model) {
-  os << "DifferentialActionModelContactFwdDynamics (" << model.get_contacts()->get_nc_total() << " contacts ["
-     << model.get_contacts()->get_nc() << " active], JMinvJt_damping=" << model.get_damping_factor() << ")";
-  return os;
 }
 
 }  // namespace crocoddyl

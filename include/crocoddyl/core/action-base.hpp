@@ -206,6 +206,13 @@ class ActionModelAbstractTpl {
   friend std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model);
 
  protected:
+  /**
+   * @brief Print relevant information of the action model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state

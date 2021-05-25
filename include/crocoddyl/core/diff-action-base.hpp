@@ -203,6 +203,13 @@ class DifferentialActionModelAbstractTpl {
                                   const DifferentialActionModelAbstractTpl<Scalar>& diff_action_model);
 
  protected:
+  /**
+   * @brief Print relevant information of the differential action model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state

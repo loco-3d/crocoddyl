@@ -94,6 +94,12 @@ bool DifferentialActionModelLQRTpl<Scalar>::checkData(const boost::shared_ptr<Di
 }
 
 template <typename Scalar>
+void DifferentialActionModelLQRTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelLQR {nq=" << state_->get_nq() << ", nu=" << nu_ << ", drift_free=" << drift_free_
+     << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs& DifferentialActionModelLQRTpl<Scalar>::get_Fq() const {
   return Fq_;
 }

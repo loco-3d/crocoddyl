@@ -203,10 +203,8 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& model) {
-  os << "IntegratedActionModelEuler (dt=" << model.get_dt() << ", differential of type '"
-     << boost::core::demangle(typeid(*model.get_differential()).name()) << "')";
-  return os;
+void IntegratedActionModelEulerTpl<Scalar>::print(std::ostream& os) const {
+  os << "IntegratedActionModelEuler {dt=" << time_step_ << ", " << *differential_ << "}";
 }
 
 }  // namespace crocoddyl

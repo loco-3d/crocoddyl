@@ -95,6 +95,11 @@ bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_p
 }
 
 template <typename Scalar>
+void DifferentialActionModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelAbstract";
+}
+
+template <typename Scalar>
 std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
@@ -151,7 +156,7 @@ void DifferentialActionModelAbstractTpl<Scalar>::update_has_control_limits() {
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model) {
-  os << boost::core::demangle(typeid(model).name());
+  model.print(os);
   return os;
 }
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,6 +249,11 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   differential_->quasiStatic(d->differential[0], u, x, maxiter, tol);
+}
+
+template <typename Scalar>
+void IntegratedActionModelRK4Tpl<Scalar>::print(std::ostream& os) const {
+  os << "IntegratedActionModelRK4 {dt=" << time_step_ << ", " << *differential_ << "}";
 }
 
 }  // namespace crocoddyl
