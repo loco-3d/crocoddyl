@@ -34,7 +34,7 @@ void ControlPolyOneTpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::dValue(double, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const {
+void ControlPolyOneTpl<Scalar>::dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
@@ -64,7 +64,7 @@ void ControlPolyOneTpl<Scalar>::multiplyByDValue(double t, const Eigen::Ref<cons
 }
 
 template <typename Scalar>
-void ControlPolyZeroTpl<Scalar>::multiplyDValueTransposeBy(double, const Eigen::Ref<const VectorXs>& p, 
+void ControlPolyOneTpl<Scalar>::multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "
@@ -75,8 +75,8 @@ void ControlPolyZeroTpl<Scalar>::multiplyDValueTransposeBy(double, const Eigen::
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
                 + " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  //out = A;
-  //TODO
+  out.topRows(nu_)    = (1-2*t)*A;
+  out.bottomRows(nu_) = 2*t*A;
 }
 
 }  // namespace crocoddyl

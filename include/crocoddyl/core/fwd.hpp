@@ -109,6 +109,16 @@ class StateAbstractTpl;
 template <typename Scalar>
 class StateVectorTpl;
 
+// control
+template <typename Scalar>
+class ControlAbstractTpl;
+
+template <typename Scalar>
+class ControlPolyZeroTpl;
+
+template <typename Scalar>
+class ControlPolyOneTpl;
+
 // actuation
 template <typename Scalar>
 class ActuationModelAbstractTpl;
@@ -247,6 +257,10 @@ typedef ActivationDataAbstractTpl<double> ActivationDataAbstract;
 
 typedef StateAbstractTpl<double> StateAbstract;
 typedef StateVectorTpl<double> StateVector;
+
+typedef ControlAbstractTpl<double> ControlAbstract;
+typedef ControlPolyZeroTpl<double> ControlPolyZero;
+typedef ControlPolyOneTpl<double> ControlPolyOne;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
