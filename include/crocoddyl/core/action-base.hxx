@@ -96,7 +96,7 @@ bool ActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<ActionDat
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::print(std::ostream& os) const {
-  os << "ActionModelAbstract";
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

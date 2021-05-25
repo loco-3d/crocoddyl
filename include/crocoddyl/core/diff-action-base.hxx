@@ -96,7 +96,7 @@ bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_p
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::print(std::ostream& os) const {
-  os << "DifferentialActionModelAbstract";
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

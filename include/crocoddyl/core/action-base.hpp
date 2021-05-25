@@ -200,10 +200,10 @@ class ActionModelAbstractTpl {
   void set_u_ub(const VectorXs& u_ub);
 
   /**
-   * @brief Print information on the ActionModel
+   * @brief Print information on the action model
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model);
+  friend std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& model);
 
  protected:
   /**
