@@ -108,6 +108,15 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
  protected:
+  /**
+   * @brief Print relevant information of the smooth-1norm model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const {
+    os << "ActivationModelSmooth1Norm {nr=" << nr_ << ", eps=" << eps_ << "}";
+  }
+
   using Base::nr_;  //!< Dimension of the residual vector
   Scalar eps_;      //!< Smoothing factor
 };

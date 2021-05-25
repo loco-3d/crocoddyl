@@ -140,6 +140,13 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
   void set_bounds(const ActivationBounds& bounds) { bounds_ = bounds; };
 
  protected:
+  /**
+   * @brief Print relevant information of the quadratic barrier model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << "ActivationModelQuadraticBarrier {nr=" << nr_ << "}"; }
+
   using Base::nr_;
 
  private:

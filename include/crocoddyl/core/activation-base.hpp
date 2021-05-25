@@ -42,7 +42,23 @@ class ActivationModelAbstractTpl {
 
   std::size_t get_nr() const { return nr_; };
 
+  /**
+   * @brief Print information on the activation model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ActivationModelAbstractTpl<Scalar>& model) {
+    model.print(os);
+    return os;
+  }
+
  protected:
+  /**
+   * @brief Print relevant information of the activation model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << boost::core::demangle(typeid(*this).name()); }
+
   std::size_t nr_;
 };
 

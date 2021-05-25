@@ -109,6 +109,15 @@ class ActivationModelQuadFlatLogTpl : public ActivationModelAbstractTpl<_Scalar>
   void set_alpha(const Scalar alpha) { alpha_ = alpha; };
 
  protected:
+  /**
+   * @brief Print relevant information of the quadratic flat-log model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream &os) const {
+    os << "ActivationModelQuadFlatLog {nr=" << nr_ << ", a=" << alpha_ << "}";
+  }
+
   using Base::nr_;  //!< Dimension of the residual vector
 
  private:
