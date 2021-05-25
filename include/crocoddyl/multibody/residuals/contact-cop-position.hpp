@@ -160,6 +160,13 @@ class ResidualModelContactCoPPositionTpl : public ResidualModelAbstractTpl<_Scal
   void set_reference(const CoPSupport& reference);
 
  protected:
+  /**
+   * @brief Print relevant information of the cop-position residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   using Base::nu_;
   using Base::state_;
   using Base::unone_;

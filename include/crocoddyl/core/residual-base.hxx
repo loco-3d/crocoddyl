@@ -64,6 +64,11 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelAbstractTpl<Sca
 }
 
 template <typename Scalar>
+void ResidualModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& ResidualModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -91,6 +96,12 @@ bool ResidualModelAbstractTpl<Scalar>::get_v_dependent() const {
 template <typename Scalar>
 bool ResidualModelAbstractTpl<Scalar>::get_u_dependent() const {
   return u_dependent_;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ResidualModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl

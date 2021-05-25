@@ -57,6 +57,14 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactWrenchCo
 }
 
 template <typename Scalar>
+void ResidualModelContactWrenchConeTpl<Scalar>::print(std::ostream& os) const {
+  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelContactWrenchCone {frame=" << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
+     << ", box=" << fref_.get_box().transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelContactWrenchConeTpl<Scalar>::get_id() const {
   return id_;
 }

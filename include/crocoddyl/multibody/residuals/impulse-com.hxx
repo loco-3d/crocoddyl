@@ -57,4 +57,9 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelImpulseCoMTpl<S
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
+template <typename Scalar>
+void ResidualModelImpulseCoMTpl<Scalar>::print(std::ostream& os) const {
+  os << "ResidualModelImpulseCoM";
+}
+
 }  // namespace crocoddyl

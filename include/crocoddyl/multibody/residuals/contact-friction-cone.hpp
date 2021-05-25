@@ -136,6 +136,13 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   void set_reference(const FrictionCone& reference);
 
  protected:
+  /**
+   * @brief Print relevant information of the contact-friction-cone residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   using Base::nu_;
   using Base::state_;
   using Base::unone_;

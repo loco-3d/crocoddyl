@@ -106,6 +106,13 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
   void set_reference(const VectorXs& reference);
 
  protected:
+  /**
+   * @brief Print relevant information of the control residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
   using Base::nu_;
   using Base::state_;
   using Base::unone_;
