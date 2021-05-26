@@ -202,6 +202,9 @@ template <typename Scalar>
 class StateNumDiffTpl;
 
 template <typename Scalar>
+class ControlNumDiffTpl;
+
+template <typename Scalar>
 class ActuationModelNumDiffTpl;
 template <typename Scalar>
 struct ActuationDataNumDiffTpl;
@@ -287,6 +290,7 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
+typedef ControlNumDiffTpl<double> ControlNumDiff;
 typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;

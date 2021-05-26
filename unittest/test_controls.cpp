@@ -18,7 +18,6 @@ using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
-typedef crocoddyl::ControlNumDiffTpl<double> ControlNumDiff;
 
 void test_Dvalue_num_diff(ControlTypes::Type control_type) {
   ControlFactory factory;
