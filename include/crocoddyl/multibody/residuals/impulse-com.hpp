@@ -81,7 +81,6 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
- protected:
   /**
    * @brief Print relevant information of the impulse-com residual
    *
@@ -89,6 +88,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;

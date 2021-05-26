@@ -213,7 +213,6 @@ class CostModelAbstractTpl {
   template <class ReferenceType>
   ReferenceType get_reference();
 
- protected:
   /**
    * @brief Print relevant information of the cost model
    *
@@ -221,6 +220,7 @@ class CostModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   /**
    * @copybrief set_reference()
    */

@@ -201,7 +201,6 @@ class DifferentialActionModelAbstractTpl {
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model);
 
- protected:
   /**
    * @brief Print relevant information of the differential action model
    *
@@ -209,6 +208,7 @@ class DifferentialActionModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state

@@ -43,7 +43,6 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
 
   std::size_t get_frame() const;
 
- protected:
   /**
    * @brief Print relevant information of the 3d impulse model
    *
@@ -51,6 +50,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::state_;
 
  private:

@@ -54,7 +54,6 @@ class ContactModelAbstractTpl {
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model);
 
- protected:
   /**
    * @brief Print relevant information of the contact model
    *
@@ -62,6 +61,7 @@ class ContactModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;

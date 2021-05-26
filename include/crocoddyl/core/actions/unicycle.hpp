@@ -45,7 +45,6 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   Scalar get_dt() const;
   void set_dt(const Scalar dt);
 
- protected:
   /**
    * @brief Print relevant information of the unicycle model
    *
@@ -53,6 +52,7 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

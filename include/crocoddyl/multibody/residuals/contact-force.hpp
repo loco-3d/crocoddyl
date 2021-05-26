@@ -144,7 +144,6 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void set_reference(const Force& reference);
 
- protected:
   /**
    * @brief Print relevant information of the contact-force residual
    *
@@ -152,6 +151,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nr_;
   using Base::nu_;
   using Base::state_;

@@ -52,7 +52,6 @@ class ActivationModelAbstractTpl {
     return os;
   }
 
- protected:
   /**
    * @brief Print relevant information of the activation model
    *
@@ -60,6 +59,7 @@ class ActivationModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const { os << boost::core::demangle(typeid(*this).name()); }
 
+ protected:
   std::size_t nr_;
 };
 

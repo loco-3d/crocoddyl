@@ -52,7 +52,6 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   const FrameTranslation& get_xref() const;
   const Vector2s& get_gains() const;
 
- protected:
   /**
    * @brief Print relevant information of the 3d contact model
    *
@@ -60,6 +59,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nc_;
   using Base::nu_;
   using Base::state_;

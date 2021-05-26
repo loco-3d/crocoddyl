@@ -130,7 +130,6 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void set_type(const pinocchio::ReferenceFrame type);
 
- protected:
   /**
    * @brief Print relevant information of the frame-velocity residual
    *
@@ -138,6 +137,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nr_;
   using Base::nu_;
   using Base::state_;

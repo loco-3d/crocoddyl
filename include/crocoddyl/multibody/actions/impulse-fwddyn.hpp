@@ -70,7 +70,6 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   void set_restitution_coefficient(const Scalar r_coeff);
   void set_damping_factor(const Scalar damping);
 
- protected:
   /**
    * @brief Print relevant information of the impulase forward-dynamics model
    *
@@ -78,6 +77,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::state_;  //!< Model of the state
 
  private:

@@ -53,7 +53,6 @@ class ImpulseModelAbstractTpl {
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ImpulseModelAbstractTpl<Scalar>& model);
 
- protected:
   /**
    * @brief Print relevant information of the impulse model
    *
@@ -61,6 +60,7 @@ class ImpulseModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
 };

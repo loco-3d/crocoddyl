@@ -59,7 +59,6 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
   void set_Lxu(const MatrixXs& Lxu);
   void set_Luu(const MatrixXs& Luu);
 
- protected:
   /**
    * @brief Print relevant information of the LQR model
    *
@@ -67,6 +66,7 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

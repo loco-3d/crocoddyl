@@ -58,7 +58,6 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     return data;
   };
 
- protected:
   /**
    * @brief Print relevant information of the quadratic model
    *
@@ -66,6 +65,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const { os << "ActivationModelQuad {nr=" << nr_ << "}"; }
 
+ protected:
   using Base::nr_;
 };
 

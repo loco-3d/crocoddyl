@@ -66,7 +66,6 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   void set_armature(const VectorXs& armature);
   void set_damping_factor(const Scalar damping);
 
- protected:
   /**
    * @brief Print relevant information of the contact forward-dynamics model
    *
@@ -74,6 +73,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

@@ -63,7 +63,6 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   const VectorXs& get_armature() const;
   void set_armature(const VectorXs& armature);
 
- protected:
   /**
    * @brief Print relevant information of the free forward-dynamics model
    *
@@ -71,6 +70,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

@@ -94,7 +94,6 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
- protected:
   /**
    * @brief Print relevant information of the cost-residual model
    *
@@ -102,6 +101,7 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::activation_;
   using Base::nu_;
   using Base::residual_;

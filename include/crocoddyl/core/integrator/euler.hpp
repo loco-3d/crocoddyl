@@ -50,7 +50,6 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
- protected:
   /**
    * @brief Print relevant information of the Euler integrator model
    *
@@ -58,6 +57,7 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   virtual void print(std::ostream& os) const;
 
+ protected:
   using Base::nr_;     //!< Dimension of the cost residual
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state

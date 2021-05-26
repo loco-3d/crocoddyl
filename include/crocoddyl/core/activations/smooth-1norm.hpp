@@ -107,7 +107,6 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
- protected:
   /**
    * @brief Print relevant information of the smooth-1norm model
    *
@@ -117,6 +116,7 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
     os << "ActivationModelSmooth1Norm {nr=" << nr_ << ", eps=" << eps_ << "}";
   }
 
+ protected:
   using Base::nr_;  //!< Dimension of the residual vector
   Scalar eps_;      //!< Smoothing factor
 };
