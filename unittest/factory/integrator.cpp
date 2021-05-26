@@ -53,5 +53,23 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> IntegratorFactory::create(Inte
   return action;
 }
 
+boost::shared_ptr<crocoddyl::ActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
+                                                                           boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                                                           boost::shared_ptr<ControlAbstract> control) const {
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
+  switch (type) {
+    case IntegratorTypes::IntegratorEuler:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model, control);
+      break;
+    case IntegratorTypes::IntegratorRK4:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK4>(model, control);
+      break;
+    default:
+      throw_pretty(__FILE__ ": Wrong IntegratorTypes::Type given");
+      break;
+  }
+  return action;
+}
+
 }  // namespace unittest
 }  // namespace crocoddyl
