@@ -34,6 +34,31 @@ void ControlPolyOneTpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>
 }
 
 template <typename Scalar>
+void ControlPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
+    const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const{
+  if (static_cast<std::size_t>(p_lb.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p_lb has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (static_cast<std::size_t>(p_ub.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  p_lb.head(nu_) = u_lb;
+  p_lb.tail(nu_) = u_lb;
+  p_ub.head(nu_) = u_ub;
+  p_ub.tail(nu_) = u_ub;
+}
+
+template <typename Scalar>
 void ControlPolyOneTpl<Scalar>::dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "

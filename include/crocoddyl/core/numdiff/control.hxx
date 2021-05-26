@@ -33,6 +33,13 @@ void ControlNumDiffTpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>
 }
 
 template <typename Scalar>
+void ControlNumDiffTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
+    const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const
+{
+  control_->convert_bounds(u_lb, u_ub, p_lb, p_ub);
+}
+
+template <typename Scalar>
 void ControlNumDiffTpl<Scalar>::dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const
 {
   VectorXs tmp_p = VectorXs::Zero(np_);

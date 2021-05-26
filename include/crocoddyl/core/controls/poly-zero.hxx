@@ -34,6 +34,29 @@ void ControlPolyZeroTpl<Scalar>::value(double, const Eigen::Ref<const VectorXs>&
 }
 
 template <typename Scalar>
+void ControlPolyZeroTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
+    const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const{
+  if (static_cast<std::size_t>(p_lb.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p_lb has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (static_cast<std::size_t>(p_ub.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  p_lb = u_lb;
+  p_ub = u_ub;
+}
+
+template <typename Scalar>
 void ControlPolyZeroTpl<Scalar>::dValue(double, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "

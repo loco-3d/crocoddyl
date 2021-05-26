@@ -33,7 +33,7 @@ class ControlNumDiffTpl : public ControlAbstractTpl<_Scalar> {
   virtual ~ControlNumDiffTpl();
   
   void resize(const std::size_t nu);
-  
+
   /**
    * @brief Get the value of the control at the specified time
    *
@@ -42,6 +42,9 @@ class ControlNumDiffTpl : public ControlAbstractTpl<_Scalar> {
    * @param[out] u_out  Control value
    */
   void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const;
+
+  void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+                              Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
