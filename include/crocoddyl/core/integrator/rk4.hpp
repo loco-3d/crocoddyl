@@ -26,10 +26,14 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   typedef IntegratedActionDataRK4Tpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
+  typedef ControlAbstractTpl<Scalar> ControlAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                              boost::shared_ptr<ControlAbstract> control,
                               const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelRK4Tpl();
 
@@ -59,6 +63,8 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::u_ub_;                //!< Upper control limits
   using Base::unone_;               //!< Neutral state
 
+  void init();
+  
  private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
