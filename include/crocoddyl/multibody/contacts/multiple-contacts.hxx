@@ -245,11 +245,6 @@ boost::shared_ptr<ContactDataMultipleTpl<Scalar> > ContactModelMultipleTpl<Scala
 }
 
 template <typename Scalar>
-void ContactModelMultipleTpl<Scalar>::print(std::ostream& os) const {
-  os << boost::core::demangle(typeid(*this).name());
-}
-
-template <typename Scalar>
 const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelMultipleTpl<Scalar>::get_state() const {
   return state_;
 }

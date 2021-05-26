@@ -210,14 +210,6 @@ class ImpulseModelMultipleTpl {
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ImpulseModelMultipleTpl<Scalar>& model);
 
- protected:
-  /**
-   * @brief Print relevant information of the impulse models
-   *
-   * @param[out] os  Output stream object
-   */
-  virtual void print(std::ostream& os) const;
-
  private:
   boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;

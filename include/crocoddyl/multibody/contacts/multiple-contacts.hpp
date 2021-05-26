@@ -224,14 +224,6 @@ class ContactModelMultipleTpl {
   template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model);
 
- protected:
-  /**
-   * @brief Print relevant information of the contact models
-   *
-   * @param[out] os  Output stream object
-   */
-  virtual void print(std::ostream& os) const;
-
  private:
   boost::shared_ptr<StateMultibody> state_;
   ContactModelContainer contacts_;

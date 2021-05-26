@@ -232,11 +232,6 @@ boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > ImpulseModelMultipleTpl<Scala
 }
 
 template <typename Scalar>
-void ImpulseModelMultipleTpl<Scalar>::print(std::ostream& os) const {
-  os << boost::core::demangle(typeid(*this).name());
-}
-
-template <typename Scalar>
 const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ImpulseModelMultipleTpl<Scalar>::get_state() const {
   return state_;
 }
