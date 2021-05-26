@@ -26,10 +26,14 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef IntegratedActionDataEulerTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
+  typedef ControlAbstractTpl<Scalar> ControlAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                boost::shared_ptr<ControlAbstract> control,
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelEulerTpl();
 
@@ -65,6 +69,8 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::u_ub_;                //!< Upper control limits
   using Base::unone_;               //!< Neutral state
 
+  void init();
+  
  private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
@@ -91,6 +97,7 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
     dx = VectorXs::Zero(ndx);
     u = VectorXs::Zero(model->get_nu());
     da_dp = MatrixXs::Zero(nv, model->get_np());
+    Lup = MatrixXs::Zero(model->get_nu(), model->get_np());
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
@@ -98,6 +105,7 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs dx;
   VectorXs u;
   MatrixXs da_dp;
+  MatrixXs Lup;   // temporary variables
 
   using Base::cost;
   using Base::Fu;

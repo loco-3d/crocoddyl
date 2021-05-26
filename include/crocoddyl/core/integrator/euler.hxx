@@ -21,17 +21,38 @@ IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
-      time_step2_(time_step * time_step),
-      with_cost_residual_(with_cost_residual),
-      enable_integration_(true) {
-  Base::set_u_lb(differential_->get_u_lb());
-  Base::set_u_ub(differential_->get_u_ub());
+      with_cost_residual_(with_cost_residual)
+{
+  init();
+}
+
+template <typename Scalar>
+IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
+    boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlAbstract> control, 
+    const Scalar time_step, const bool with_cost_residual)
+    : Base(model->get_state(), control, model->get_nr()),
+      differential_(model),
+      time_step_(time_step),
+      with_cost_residual_(with_cost_residual)
+{
+  init();
+}
+
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::init()
+{
+  time_step2_ = time_step_ * time_step_;
+  enable_integration_ = true;
+  VectorXs p_lb(control_->get_np()), p_ub(control_->get_np());
+  control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
+  Base::set_u_lb(p_lb);
+  Base::set_u_ub(p_ub);
   if (time_step_ < Scalar(0.)) {
     time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
-  if (time_step == Scalar(0.)) {
+  if (time_step_ == Scalar(0.)) {
     enable_integration_ = false;
   }
 }
@@ -120,10 +141,17 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
-    d->Lu.noalias() = time_step_ * d->differential->Lu;
+    // d->Lu.noalias() = time_step_ * d->differential->Lu;
+    control_->multiplyDValueTransposeBy(0.0, p, d->differential->Lu, d->Lu);
+    d->Lu *= time_step_;
     d->Lxx.noalias() = time_step_ * d->differential->Lxx;
-    d->Lxu.noalias() = time_step_ * d->differential->Lxu;
-    d->Luu.noalias() = time_step_ * d->differential->Luu;
+    // d->Lxu.noalias() = time_step_ * d->differential->Lxu;
+    control_->multiplyByDValue(0.0, p, d->differential->Lxu, d->Lxu);
+    d->Lxu *= time_step_;
+    // d->Luu.noalias() = time_step_ * d->differential->Luu;
+    control_->multiplyByDValue(0.0, p, d->differential->Luu, d->Lup);
+    control_->multiplyDValueTransposeBy(0.0, p, d->Lup, d->Luu);
+    d->Luu *= time_step_;
   } else {
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
