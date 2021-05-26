@@ -192,12 +192,12 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
     xp.setZero();
 
     const std::size_t ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t nu = model->get_model()->get_nu();
+    const std::size_t np = model->get_model()->get_np();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());
     }
-    for (std::size_t i = 0; i < nu; ++i) {
+    for (std::size_t i = 0; i < np; ++i) {
       data_u.push_back(model->get_model()->createData());
     }
   }

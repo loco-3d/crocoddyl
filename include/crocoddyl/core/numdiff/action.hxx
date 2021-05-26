@@ -14,10 +14,10 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
+    : Base(model->get_state(), model->get_np(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-  u_.resize(model->get_nu());
+  u_.resize(model->get_np());
 }
 
 template <typename Scalar>
@@ -64,6 +64,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   // Computing the d action(x,u) / dx
   data_nd->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+    
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_->calc(data_nd->data_x[ix], data_nd->xp, p);
