@@ -27,7 +27,7 @@ void test_Dvalue_num_diff(ControlTypes::Type control_type) {
   double t = Eigen::VectorXd::Random(1)(0)*0.5 + 1.; // random in [0, 1]
 
   // Get the num diff control
-  ControlNumDiff control_num_diff(control);
+  crocoddyl::ControlNumDiff control_num_diff(control);
 
   // Computing the partial derivatives of the value function
   Eigen::MatrixXd J(Eigen::MatrixXd::Zero(control->get_nu(), control->get_np()));
@@ -47,7 +47,7 @@ void test_multiplyByDValue_num_diff(ControlTypes::Type control_type) {
   const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(5, control->get_nu());
 
   // Get the num diff control
-  ControlNumDiff control_num_diff(control);
+  crocoddyl::ControlNumDiff control_num_diff(control);
 
   // Computing 
   Eigen::MatrixXd A_J(Eigen::MatrixXd::Zero(A.rows(), control->get_np()));
@@ -67,7 +67,7 @@ void test_multiplyDValueTransposeBy_num_diff(ControlTypes::Type control_type) {
   const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(control->get_nu(), 5);
 
   // Get the num diff control
-  ControlNumDiff control_num_diff(control);
+  crocoddyl::ControlNumDiff control_num_diff(control);
 
   // Computing 
   Eigen::MatrixXd JT_A(Eigen::MatrixXd::Zero(control->get_np(), A.cols()));
