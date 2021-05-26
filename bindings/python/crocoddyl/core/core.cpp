@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@ namespace python {
 void exposeCore() {
   exposeDataCollector();
   exposeStateAbstract();
+  exposeControlAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
   exposeDifferentialActionAbstract();
