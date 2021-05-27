@@ -39,6 +39,8 @@ void exposeActivationNumDiff();
 void exposeShootingProblem();
 void exposeSolverAbstract();
 void exposeStateEuclidean();
+void exposeControlPolyZero();
+void exposeControlPolyOne();
 void exposeActionUnicycle();
 void exposeActionLQR();
 void exposeDifferentialActionLQR();

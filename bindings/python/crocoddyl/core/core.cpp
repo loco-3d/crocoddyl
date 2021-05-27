@@ -37,6 +37,8 @@ void exposeCore() {
   exposeShootingProblem();
   exposeSolverAbstract();
   exposeStateEuclidean();
+  exposeControlPolyZero();
+  exposeControlPolyOne();
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();
