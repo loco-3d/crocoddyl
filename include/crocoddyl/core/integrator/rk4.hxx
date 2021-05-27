@@ -166,7 +166,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       d->dyi_dp[i].noalias() = d->dki_dp[i - 1] * rk4_c_[i] * time_step_;
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dp[i], second); // dyi_dp = Jintegrate * dyi_dp
       d->dki_dp[i].noalias() = d->dki_dy[i] * d->dyi_dp[i]; // TODO: optimize this matrix-matrix multiplication
-      d->dki_du[i].bottomRows(nv) += d->differential[i]->Fu;
+      d->dki_du[i].bottomRows(nv) = d->differential[i]->Fu;
       control_->multiplyByDValue(rk4_c_[i], p, d->dki_du[i], d->dfi_dp[i]); // dfi_dp = dki_du * du_dp
       d->dki_dp[i] += d->dfi_dp[i];
 

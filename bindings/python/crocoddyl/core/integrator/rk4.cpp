@@ -93,6 +93,9 @@ void exposeIntegratedActionRK4() {
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK4::dki_du, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the control of the RK4 "
                     "integration method. d(x+dx)/du")
+      .add_property("dki_dp", bp::make_getter(&IntegratedActionDataRK4::dki_dp, bp::return_internal_reference<>()),
+                    "List with the partial derivatives of dynamics with respect to to the control parameters of the RK4 "
+                    "integration method. d(x+dx)/dp")
       .add_property("dli_dx", bp::make_getter(&IntegratedActionDataRK4::dli_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of the cost with respect to to the state of the RK4 "
                     "integration method.")
