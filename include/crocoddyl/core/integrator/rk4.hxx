@@ -182,8 +182,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       control_->multiplyByDValue(rk4_c_[i], p, d->differential[i]->Lxu, d->Lxp[i]); // Lxp = Lxu * du_dp
       d->Lpp_partialx[i].noalias() = d->Lxp[i].transpose() * d->dyi_dp[i];
       d->Lxx_partialp[i].noalias() = d->differential[i]->Lxx * d->dyi_dp[i];
-      control_->multiplyByDValue(0.0, p, d->differential[i]->Luu, d->ddli_dudp[i]); // dlli_dudp = ddli_ddu * du_dp
-      control_->multiplyDValueTransposeBy(0.0, p, d->ddli_dudp[i], d->ddli_ddp[i]); // dlli_ddp = du_dp.T * ddli_dudp
+      control_->multiplyByDValue(rk4_c_[i], p, d->differential[i]->Luu, d->ddli_dudp[i]); // dlli_dudp = ddli_ddu * du_dp
+      control_->multiplyDValueTransposeBy(rk4_c_[i], p, d->ddli_dudp[i], d->ddli_ddp[i]); // dlli_ddp = du_dp.T * ddli_dudp
       d->ddli_ddp[i].noalias() += d->Lpp_partialx[i].transpose() + d->Lpp_partialx[i] +
                                   d->dyi_dp[i].transpose() * d->Lxx_partialp[i];
 
