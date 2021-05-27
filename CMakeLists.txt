@@ -183,7 +183,11 @@ ENDIF(BUILD_BENCHMARK)
 
 # Build the examples
 IF(BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY(examples)
+  IF(BUILD_PYTHON_INTERFACE)
+    ADD_SUBDIRECTORY(examples)
+  ELSE(BUILD_PYTHON_INTERFACE)
+    MESSAGE(WARNING "Python interface is not built, hence cannot build examples.")
+  ENDIF(BUILD_PYTHON_INTERFACE)
 ENDIF(BUILD_EXAMPLES)
 
 # PkgConfig packaging of the project
