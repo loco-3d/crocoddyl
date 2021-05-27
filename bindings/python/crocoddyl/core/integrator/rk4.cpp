@@ -32,6 +32,14 @@ void exposeIntegratedActionRK4() {
           ":param diffModel: differential action model\n"
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
+                    boost::shared_ptr<ControlAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
+          "Initialize the RK4 integrator.\n\n"
+          ":param diffModel: differential action model\n"
+          ":param control: the control parametrization\n"
+          ":param stepTime: step time (default 1e-3)\n"
+          ":param withCostResidual: includes the cost residuals and derivatives."))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
