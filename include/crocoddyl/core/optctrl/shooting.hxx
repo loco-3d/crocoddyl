@@ -24,11 +24,11 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
+      nu_max_(running_models[0]->get_np()),
       nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
+    const std::size_t nu = model->get_np();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -78,11 +78,11 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
+      nu_max_(running_models[0]->get_np()),
       nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
+    const std::size_t nu = model->get_np();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -154,7 +154,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
 #pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_np();
     if (nu != 0) {
       running_models_[i]->calc(running_datas_[i], xs[i], us[i].head(nu));
     } else {
@@ -189,8 +189,8 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 #pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    if (running_models_[i]->get_nu() != 0) {
-      const std::size_t nu = running_models_[i]->get_nu();
+    if (running_models_[i]->get_np() != 0) {
+      const std::size_t nu = running_models_[i]->get_np();
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i].head(nu));
     } else {
       running_models_[i]->calcDiff(running_datas_[i], xs[i]);
@@ -226,8 +226,8 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const VectorXs& x = xs[i];
-    const std::size_t nu = running_models_[i]->get_nu();
-    if (model->get_nu() != 0) {
+    const std::size_t nu = running_models_[i]->get_np();
+    if (model->get_np() != 0) {
       const VectorXs& u = us[i];
       model->calc(data, x, u.head(nu));
     } else {
@@ -262,7 +262,7 @@ void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const st
 #pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_np();
     running_models_[i]->quasiStatic(running_datas_[i], us[i].head(nu), xs[i]);
   }
 }
@@ -273,7 +273,7 @@ std::vector<typename MathBaseTpl<Scalar>::VectorXs> ShootingProblemTpl<Scalar>::
   std::vector<VectorXs> us;
   us.resize(T_);
   for (std::size_t i = 0; i < T_; ++i) {
-    us[i] = VectorXs::Zero(running_models_[i]->get_nu());
+    us[i] = VectorXs::Zero(running_models_[i]->get_np());
   }
   quasiStatic(us, xs);
   return us;
@@ -294,7 +294,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() > nu_max_) {
+  if (model->get_np() > nu_max_) {
     throw_pretty("Invalid argument: "
                  << "nu node is greater than the maximum nu")
   }
@@ -317,7 +317,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() > nu_max_) {
+  if (model->get_np() > nu_max_) {
     throw_pretty("Invalid argument: "
                  << "nu node is greater than the maximum nu")
   }
@@ -350,7 +350,7 @@ void ShootingProblemTpl<Scalar>::updateNode(const std::size_t i, boost::shared_p
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  if (model->get_nu() > nu_max_) {
+  if (model->get_np() > nu_max_) {
     throw_pretty("Invalid argument: "
                  << "nu node is greater than the maximum nu")
   }
@@ -378,7 +378,7 @@ void ShootingProblemTpl<Scalar>::updateModel(const std::size_t i, boost::shared_
     throw_pretty("Invalid argument: "
                  << "ndx is not consistent with the other nodes")
   }
-  if (model->get_nu() > nu_max_) {
+  if (model->get_np() > nu_max_) {
     throw_pretty("Invalid argument: "
                  << "nu node is greater than the maximum nu")
   }
@@ -458,7 +458,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
       throw_pretty("Invalid argument: "
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
-    if (model->get_nu() > nu_max_) {
+    if (model->get_np() > nu_max_) {
       throw_pretty("Invalid argument: "
                    << "nu node is greater than the maximum nu")
     }
