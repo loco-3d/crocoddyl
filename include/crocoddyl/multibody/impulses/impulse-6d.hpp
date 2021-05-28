@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/impulse-base.hpp"
 
 namespace crocoddyl {
 

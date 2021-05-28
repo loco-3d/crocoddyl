@@ -6,8 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
+
 
 namespace crocoddyl {
 namespace python {

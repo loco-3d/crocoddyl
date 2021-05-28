@@ -6,8 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/force-base.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
 

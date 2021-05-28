@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/multibody/states/multibody.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {

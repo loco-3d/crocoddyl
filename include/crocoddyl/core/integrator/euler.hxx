@@ -9,9 +9,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <boost/core/demangle.hpp>
-
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
 

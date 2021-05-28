@@ -11,9 +11,10 @@
 #include <memory>
 #include <utility>
 #include <string>
+#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
