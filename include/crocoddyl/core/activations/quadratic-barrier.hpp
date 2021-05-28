@@ -17,7 +17,6 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
 
-
 namespace crocoddyl {
 
 template <typename _Scalar>

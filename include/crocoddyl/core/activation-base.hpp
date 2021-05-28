@@ -18,7 +18,6 @@
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
-
 namespace crocoddyl {
 
 template <typename _Scalar>

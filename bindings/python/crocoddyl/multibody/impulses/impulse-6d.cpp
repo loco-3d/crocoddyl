@@ -9,7 +9,6 @@
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 
-
 namespace crocoddyl {
 namespace python {
 

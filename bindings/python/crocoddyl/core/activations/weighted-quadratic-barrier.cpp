@@ -10,7 +10,6 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
 
-
 namespace crocoddyl {
 namespace python {
 

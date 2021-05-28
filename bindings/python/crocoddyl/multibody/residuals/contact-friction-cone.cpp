@@ -9,7 +9,6 @@
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 
-
 namespace crocoddyl {
 namespace python {
 
