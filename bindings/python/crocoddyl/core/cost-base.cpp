@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/cost-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -105,7 +106,8 @@ void exposeCostAbstract() {
           "residual",
           bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
           "residual model")
-      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector");
+      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector")
+      .def(PrintableVisitor<CostModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 

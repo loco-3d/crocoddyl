@@ -85,6 +85,11 @@ bool ActionModelLQRTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbst
 }
 
 template <typename Scalar>
+void ActionModelLQRTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelLQR {nx=" << state_->get_nx() << ", nu=" << nu_ << ", drift_free=" << drift_free_ << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_Fx() const {
   return Fx_;
 }

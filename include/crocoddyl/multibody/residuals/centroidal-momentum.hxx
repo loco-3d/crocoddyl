@@ -59,6 +59,12 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelCentroidalMomen
 }
 
 template <typename Scalar>
+void ResidualModelCentroidalMomentumTpl<Scalar>::print(std::ostream& os) const {
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelCentroidalMomentum {href=" << href_.transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector6s& ResidualModelCentroidalMomentumTpl<Scalar>::get_reference() const {
   return href_;
 }

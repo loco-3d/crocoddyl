@@ -152,6 +152,12 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
 }
 
 template <typename Scalar>
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelImpulseFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+     << ", nc=" << impulses_->get_nc() << "}";
+}
+
+template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }
@@ -208,13 +214,6 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar d
                  << "The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
-}
-
-template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const ActionModelImpulseFwdDynamicsTpl<Scalar>& model) {
-  os << "ActionModelImpulseFwdDynamics (r_coeff=" << model.get_restitution_coefficient()
-     << ", JMinvJt_damping=" << model.get_damping_factor() << ")";
-  return os;
 }
 
 }  // namespace crocoddyl

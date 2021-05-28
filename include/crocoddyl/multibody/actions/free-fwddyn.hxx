@@ -166,6 +166,12 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
+void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelFreeFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+     << ", nu=" << nu_ << "}";
+}
+
+template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }

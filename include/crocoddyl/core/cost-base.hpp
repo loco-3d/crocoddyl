@@ -196,6 +196,12 @@ class CostModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Print information on the cost model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model);
+
+  /**
    * @brief Modify the cost reference
    */
   template <class ReferenceType>
@@ -206,6 +212,13 @@ class CostModelAbstractTpl {
    */
   template <class ReferenceType>
   ReferenceType get_reference();
+
+  /**
+   * @brief Print relevant information of the cost model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   /**

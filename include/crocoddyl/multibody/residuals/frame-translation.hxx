@@ -56,6 +56,13 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelFrameTranslatio
 }
 
 template <typename Scalar>
+void ResidualModelFrameTranslationTpl<Scalar>::print(std::ostream& os) const {
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelFrameTranslation {frame=" << pin_model_->frames[id_].name
+     << ", tref=" << xref_.transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelFrameTranslationTpl<Scalar>::get_id() const {
   return id_;
 }

@@ -22,6 +22,10 @@ void test_check_data(DifferentialActionModelTypes::Type action_type) {
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
 

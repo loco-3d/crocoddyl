@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/residual-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -70,7 +71,8 @@ void exposeResidualAbstract() {
       .add_property("v_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_v_dependent),
                     "flag that indicates if the residual function depends on v")
       .add_property("u_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_u_dependent),
-                    "flag that indicates if the residual function depends on u");
+                    "flag that indicates if the residual function depends on u")
+      .def(PrintableVisitor<ResidualModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
 

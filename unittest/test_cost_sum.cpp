@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,10 @@ void test_constructor(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(state_factory.create(state_type));
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << model;
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_costs().size() == 0);

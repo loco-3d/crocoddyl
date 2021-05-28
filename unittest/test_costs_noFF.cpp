@@ -29,6 +29,10 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type, ActivationMode
   CostModelFactory factory;
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, activation_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());

@@ -82,6 +82,13 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     weights_ = weights;
   };
 
+  /**
+   * @brief Print relevant information of the quadratic barrier model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << "ActivationModelWeightedQuadraticBarrier {nr=" << nr_ << "}"; }
+
  protected:
   using Base::nr_;
 

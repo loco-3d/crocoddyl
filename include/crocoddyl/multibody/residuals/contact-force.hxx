@@ -80,6 +80,14 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactForceTpl
 }
 
 template <typename Scalar>
+void ResidualModelContactForceTpl<Scalar>::print(std::ostream& os) const {
+  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelContactForce {frame=" << s->get_pinocchio()->frames[id_].name
+     << ", fref=" << fref_.toVector().head(nr_).transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelContactForceTpl<Scalar>::get_id() const {
   return id_;
 }

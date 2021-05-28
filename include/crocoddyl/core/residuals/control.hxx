@@ -64,6 +64,11 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelControlTpl<Scal
 }
 
 template <typename Scalar>
+void ResidualModelControlTpl<Scalar>::print(std::ostream& os) const {
+  os << "ResidualModelControl";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelControlTpl<Scalar>::get_reference() const {
   return uref_;
 }

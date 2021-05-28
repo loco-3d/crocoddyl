@@ -25,6 +25,10 @@ void test_check_data(ActionModelTypes::Type action_model_type) {
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
@@ -109,7 +113,7 @@ void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_t
   test_partial_derivatives_against_numdiff(model);
 }
 
-void test_partial_derivatives_integrated_action_model(DifferentialActionModelTypes::Type dam_type, 
+void test_partial_derivatives_integrated_action_model(DifferentialActionModelTypes::Type dam_type,
                                                       IntegratorTypes::Type integrator_type) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
@@ -134,7 +138,7 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   framework::master_test_suite().add(ts);
 }
 
-void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::Type dam_type, 
+void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::Type dam_type,
                                                  IntegratorTypes::Type integrator_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << dam_type << "_" << integrator_type;
@@ -151,8 +155,7 @@ bool init_function() {
 
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     for (size_t j = 0; j < IntegratorTypes::all.size(); ++j) {
-      register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i],
-                                                  IntegratorTypes::all[j]);
+      register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::all[j]);
     }
   }
   return true;

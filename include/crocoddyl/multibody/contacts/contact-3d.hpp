@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,13 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
 
   const FrameTranslation& get_xref() const;
   const Vector2s& get_gains() const;
+
+  /**
+   * @brief Print relevant information of the 3d contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::nc_;

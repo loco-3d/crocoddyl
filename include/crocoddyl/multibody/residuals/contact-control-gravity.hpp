@@ -87,6 +87,13 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
 
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
 
+  /**
+   * @brief Print relevant information of the contact-control-grav residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream &os) const;
+
  protected:
   using Base::nu_;
   using Base::state_;

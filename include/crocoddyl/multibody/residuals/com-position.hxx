@@ -50,6 +50,12 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelCoMPositionTpl<
 }
 
 template <typename Scalar>
+void ResidualModelCoMPositionTpl<Scalar>::print(std::ostream& os) const {
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelCoMPosition {cref=" << cref_.transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector3s& ResidualModelCoMPositionTpl<Scalar>::get_reference() const {
   return cref_;
 }

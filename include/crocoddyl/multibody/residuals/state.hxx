@@ -66,6 +66,11 @@ void ResidualModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDat
 }
 
 template <typename Scalar>
+void ResidualModelStateTpl<Scalar>::print(std::ostream& os) const {
+  os << "ResidualModelState";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelStateTpl<Scalar>::get_reference() const {
   return xref_;
 }

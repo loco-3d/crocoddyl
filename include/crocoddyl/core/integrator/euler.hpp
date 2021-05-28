@@ -51,19 +51,17 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
   /**
-   * @brief Print information on the ActionModel
+   * @brief Print relevant information of the Euler integrator model
+   *
+   * @param[out] os  Output stream object
    */
-  template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& problem);
+  virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nr_;     //!< Dimension of the cost residual
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;  //!< Zero control
 
  private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;

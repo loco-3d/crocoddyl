@@ -117,6 +117,14 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
    */
   void set_reference(const Vector3s& reference);
 
+  /**
+   * @brief Print relevant information of the frame-translation residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
+ protected:
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;
