@@ -11,12 +11,11 @@
 
 #include <stdexcept>
 #include <math.h>
+#include <pinocchio/utils/static-if.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-
-#include <pinocchio/utils/static-if.hpp>
 
 namespace crocoddyl {
 

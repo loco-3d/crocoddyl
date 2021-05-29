@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 #define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 
+#include <pinocchio/multibody/model.hpp>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include <pinocchio/multibody/model.hpp>
 
 namespace crocoddyl {
 

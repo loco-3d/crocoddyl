@@ -9,9 +9,10 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {

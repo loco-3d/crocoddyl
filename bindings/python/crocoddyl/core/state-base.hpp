@@ -11,9 +11,10 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_STATE_BASE_HPP_
 
 #include <string>
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {

@@ -10,15 +10,15 @@
 #ifndef CROCODDYL_MULTIBODY_FRAMES_HPP_
 #define CROCODDYL_MULTIBODY_FRAMES_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/friction-cone.hpp"
-#include "crocoddyl/multibody/wrench-cone.hpp"
-#include "crocoddyl/core/mathbase.hpp"
-
 #include <pinocchio/multibody/fwd.hpp>
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/spatial/force.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/multibody/friction-cone.hpp"
+#include "crocoddyl/multibody/wrench-cone.hpp"
 
 namespace crocoddyl {
 

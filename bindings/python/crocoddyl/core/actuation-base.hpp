@@ -10,9 +10,9 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {

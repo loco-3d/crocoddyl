@@ -5,10 +5,9 @@
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
+#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 
 namespace crocoddyl {
 namespace python {
