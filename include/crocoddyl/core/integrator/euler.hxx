@@ -229,8 +229,10 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-
-  differential_->quasiStatic(d->differential, u, x, maxiter, tol);
+  
+  VectorXs uc(control_->get_nu());
+  differential_->quasiStatic(d->differential, uc, x, maxiter, tol);
+  control_->value_inv(0.0, uc, u);
 }
 
 template <typename Scalar>

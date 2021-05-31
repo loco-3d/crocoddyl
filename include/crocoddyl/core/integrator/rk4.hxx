@@ -81,8 +81,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  control_->value(rk4_c_[0], p, d->u);
-  differential_->calc(d->differential[0], x, d->u);
+  control_->value(rk4_c_[0], p, d->u[0]);
+  differential_->calc(d->differential[0], x, d->u[0]);
 
   // Computing the next state (discrete time)
   if (enable_integration_) {
@@ -93,8 +93,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     for (std::size_t i = 1; i < 4; ++i) {
       d->dx_rk4[i].noalias() = time_step_ * rk4_c_[i] * d->ki[i - 1];
       differential_->get_state()->integrate(x, d->dx_rk4[i], d->y[i]);
-      control_->value(rk4_c_[i], p, d->u);
-      differential_->calc(d->differential[i], d->y[i], d->u);
+      control_->value(rk4_c_[i], p, d->u[i]);
+      differential_->calc(d->differential[i], d->y[i], d->u[i]);
       d->ki[i].head(nv) = d->y[i].tail(nv);
       d->ki[i].tail(nv) = d->differential[i]->xout;
       d->integral[i] = d->differential[i]->cost;
@@ -132,8 +132,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  control_->value(0.0, p, d->u);
-  differential_->calcDiff(d->differential[0], x, d->u);
+  control_->value(0.0, p, d->u[0]);
+  differential_->calcDiff(d->differential[0], x, d->u[0]);
 
   if (enable_integration_) {
     d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
@@ -154,8 +154,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     control_->multiplyByDValue(0.0, p, d->ddli_dxdu[0], d->ddli_dxdp[0]);         // dlli_dxdp = dlli_dxdu * du_dp
 
     for (std::size_t i = 1; i < 4; ++i) {
-      control_->value(rk4_c_[i], p, d->u);
-      differential_->calcDiff(d->differential[i], d->y[i], d->u);
+      control_->value(rk4_c_[i], p, d->u[i]);
+      differential_->calcDiff(d->differential[i], d->y[i], d->u[i]);
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
@@ -289,8 +289,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-
-  differential_->quasiStatic(d->differential[0], u, x, maxiter, tol);
+  VectorXs uc(control_->get_nu());
+  differential_->quasiStatic(d->differential[0], uc, x, maxiter, tol);
+  control_->value_inv(0.0, uc, u);
 }
 
 }  // namespace crocoddyl

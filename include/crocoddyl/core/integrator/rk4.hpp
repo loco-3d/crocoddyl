@@ -97,7 +97,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
     }
 
     dx = VectorXs::Zero(ndx);
-    u = VectorXs::Zero(nu);
+    u = std::vector<VectorXs>(4, VectorXs::Zero(nu));
     integral = std::vector<Scalar>(4, Scalar(0.));
 
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
@@ -134,7 +134,7 @@ struct IntegratedActionDataRK4Tpl : public ActionDataAbstractTpl<_Scalar> {
   virtual ~IntegratedActionDataRK4Tpl() {}
 
   VectorXs dx;
-  VectorXs u;
+  std::vector<VectorXs> u;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
