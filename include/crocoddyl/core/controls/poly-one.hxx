@@ -34,6 +34,20 @@ void ControlPolyOneTpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>
 }
 
 template <typename Scalar>
+void ControlPolyOneTpl<Scalar>::value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const{
+  if (static_cast<std::size_t>(p_out.size()) != np_) {
+    throw_pretty("Invalid argument: "
+                << "p_out has wrong dimension (it should be " + std::to_string(np_) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  p_out.head(nu_) = u;
+  p_out.tail(nu_) = u;
+}
+
+template <typename Scalar>
 void ControlPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
     const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const{
   if (static_cast<std::size_t>(p_lb.size()) != np_) {

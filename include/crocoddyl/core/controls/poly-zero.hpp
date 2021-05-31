@@ -33,6 +33,8 @@ class ControlPolyZeroTpl : public ControlAbstractTpl<_Scalar> {
 
   virtual void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const;
 
+  virtual void value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const;
+
   virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 

@@ -52,16 +52,6 @@ class ControlAbstractTpl {
   virtual void resize(const std::size_t nu) = 0;
 
   /**
-   * @brief Generate a zero control
-   */
-//   virtual VectorXs zero() const = 0;
-
-  /**
-   * @brief Generate a random control
-   */
-//   virtual VectorXs rand() const = 0;
-
-  /**
    * @brief Get the value of the control at the specified time
    *
    * @param[in]  t      Time
@@ -69,6 +59,20 @@ class ControlAbstractTpl {
    * @param[out] u_out  Control value
    */
   virtual void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const = 0;
+
+  virtual VectorXs value_u(double t, const Eigen::Ref<const VectorXs>& p) const;
+
+  /**
+   * @brief Get a value of the control parameters that results in the specified control value 
+   * at the specified time
+   *
+   * @param[in]  t      Time
+   * @param[in]  u      Control value
+   * @param[out] p_out  Control parameters
+   */
+  virtual void value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const = 0;
+
+  virtual VectorXs value_inv_p(double t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter space
@@ -90,6 +94,8 @@ class ControlAbstractTpl {
    */
   virtual void dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const = 0;
 
+  virtual MatrixXs dValue_J(double t, const Eigen::Ref<const VectorXs>& p) const;
+
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the parameters)
    *
@@ -100,6 +106,9 @@ class ControlAbstractTpl {
    */
   virtual void multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
+
+  virtual MatrixXs multiplyByDValue_J(double t, const Eigen::Ref<const VectorXs>& p, 
+        const Eigen::Ref<const MatrixXs>& A) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
@@ -113,6 +122,8 @@ class ControlAbstractTpl {
   virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
+  virtual MatrixXs multiplyDValueTransposeBy_J(double t, const Eigen::Ref<const VectorXs>& p, 
+        const Eigen::Ref<const MatrixXs>& A) const;
   /**
    * @brief Return the dimension of the control value
    */
