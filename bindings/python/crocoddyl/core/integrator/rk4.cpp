@@ -93,6 +93,8 @@ void exposeIntegratedActionRK4() {
                     "List with the RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
                     "List with the states where f is evaluated in the RK4 integration scheme")
+      .add_property("u", bp::make_getter(&IntegratedActionDataRK4::u, bp::return_internal_reference<>()),
+                    "Control inputs evaluated in the RK4 integration scheme")
       .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
