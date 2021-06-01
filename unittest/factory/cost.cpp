@@ -71,9 +71,6 @@ std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
     case CostModelNoFFTypes::NbCostModelNoFFTypes:
       os << "NbCostModelNoFFTypes";
       break;
-    case CostModelNoFFTypes::NbCostModelNoFFTypes:
-      os << "NbCostModelNoFFTypes";
-      break;
     default:
       break;
   }

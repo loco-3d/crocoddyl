@@ -201,16 +201,6 @@ template <typename Scalar>
 using CostDataControlGravContactTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
-class CostModelControlGravTpl;
-template <typename Scalar>
-struct CostDataControlGravTpl;
-
-template <typename Scalar>
-class CostModelControlGravContactTpl;
-template <typename Scalar>
-struct CostDataControlGravContactTpl;
-
-template <typename Scalar>
 class CostModelFrameVelocityTpl;
 template <typename Scalar>
 using CostDataFrameVelocityTpl = CostDataResidualTpl<Scalar>;
