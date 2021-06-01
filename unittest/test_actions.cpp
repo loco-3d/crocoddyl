@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,8 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "factory/action.hpp"
+#include "factory/integrator.hpp"
+#include "factory/diff_action.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -22,6 +24,10 @@ void test_check_data(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
@@ -65,11 +71,7 @@ void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 }
 
-void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_model_type) {
-  // create the model
-  ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
-
+void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
 
@@ -88,20 +90,38 @@ void test_partial_derivatives_against_numdiff(ActionModelTypes::Type action_mode
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->Fx - data_num_diff->Fx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Fu - data_num_diff->Fu).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
   } else {
-    BOOST_CHECK((data_num_diff->Lxx).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Lxu).isMuchSmallerThan(1.0, tol));
-    BOOST_CHECK((data_num_diff->Luu).isMuchSmallerThan(1.0, tol));
+    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
+}
+
+void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
+  test_partial_derivatives_against_numdiff(model);
+}
+
+void test_partial_derivatives_integrated_action_model(DifferentialActionModelTypes::Type dam_type,
+                                                      IntegratorTypes::Type integrator_type) {
+  // create the differential action model
+  DifferentialActionModelFactory factory_dam;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
+  // create the integrator
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, dam);
+  test_partial_derivatives_against_numdiff(model);
 }
 
 //----------------------------------------------------------------------------//
@@ -114,13 +134,29 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   ts->add(BOOST_TEST_CASE(boost::bind(&test_check_data, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_action_model, action_model_type)));
+  framework::master_test_suite().add(ts);
+}
+
+void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::Type dam_type,
+                                                 IntegratorTypes::Type integrator_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << dam_type << "_" << integrator_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_integrated_action_model, dam_type, integrator_type)));
   framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
+  }
+
+  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
+    for (size_t j = 0; j < IntegratorTypes::all.size(); ++j) {
+      register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::all[j]);
+    }
   }
   return true;
 }

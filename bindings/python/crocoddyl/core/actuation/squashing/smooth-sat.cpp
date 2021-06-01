@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSquashingSmoothSat() {
+  bp::register_ptr_to_python<boost::shared_ptr<SquashingModelSmoothSat> >();
+
   bp::class_<SquashingModelSmoothSat, bp::bases<SquashingModelAbstract> >(
       "SquashingModelSmoothSat", "Smooth Sat squashing model",
       bp::init<Eigen::VectorXd, Eigen::VectorXd, int>(bp::args("self", "u_lb", "u_ub", "ns"),
@@ -30,10 +32,9 @@ void exposeSquashingSmoothSat() {
            ":param data: squashing data\n"
            ":param s: squashing input.")
       .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"), "Create the squashing data.\n\n")
-      .add_property(
-          "smooth",
-          bp::make_function(&SquashingModelSmoothSat::get_smooth, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SquashingModelSmoothSat::set_smooth), "Smoothness parameter of the smooth sat. function");
+      .add_property("smooth", bp::make_function(&SquashingModelSmoothSat::get_smooth),
+                    bp::make_function(&SquashingModelSmoothSat::set_smooth),
+                    "Smoothness parameter of the smooth sat. function");
 }
 
 }  // namespace python

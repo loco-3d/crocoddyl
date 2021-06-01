@@ -10,16 +10,16 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wrapper<ActuationModelAbstract> {
  public:
-  ActuationModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& nu)
+  ActuationModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu)
       : ActuationModelAbstract(state, nu), bp::wrapper<ActuationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

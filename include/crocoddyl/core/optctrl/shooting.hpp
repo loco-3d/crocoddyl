@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ class ShootingProblemTpl {
    * @param[in] model  action model
    * @param[in] data   action data
    */
-  void updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
+  void updateNode(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                   boost::shared_ptr<ActionDataAbstract> data);
 
   /**
@@ -161,12 +161,12 @@ class ShootingProblemTpl {
    * @param[in] i      node index \f$(0\leq i \lt T+1)\f$
    * @param[in] model  action model
    */
-  void updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
+  void updateModel(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Return the number of running nodes
    */
-  const std::size_t& get_T() const;
+  std::size_t get_T() const;
 
   /**
    * @brief Return the initial state
@@ -209,19 +209,37 @@ class ShootingProblemTpl {
   void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
   /**
+   * @brief Modify the number of threads using with multithreading support
+   *
+   * For values lower than 1, the number of threads is chosen by CROCODDYL_WITH_NTHREADS macro
+   */
+  void set_nthreads(const int nthreads);
+
+  /**
    * @brief Return the dimension of the state tuple
    */
-  const std::size_t& get_nx() const;
+  std::size_t get_nx() const;
 
   /**
    * @brief Return the dimension of the tangent space of the state manifold
    */
-  const std::size_t& get_ndx() const;
+  std::size_t get_ndx() const;
 
   /**
    * @brief Return the maximum dimension of the control vector
    */
-  const std::size_t& get_nu_max() const;
+  std::size_t get_nu_max() const;
+
+  /**
+   * @brief Return the number of threads
+   */
+  std::size_t get_nthreads() const;
+
+  /**
+   * @brief Print information on the 'ShootingProblem'
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem);
 
  protected:
   Scalar cost_;                                                          //!< Total cost
@@ -234,6 +252,7 @@ class ShootingProblemTpl {
   std::size_t nx_;                                                       //!< State dimension
   std::size_t ndx_;                                                      //!< State rate dimension
   std::size_t nu_max_;                                                   //!< Maximum control dimension
+  std::size_t nthreads_;  //!< Number of threach launch by the multi-threading application
 
  private:
   void allocateData();

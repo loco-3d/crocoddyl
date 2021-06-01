@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,8 +11,7 @@ namespace crocoddyl {
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff, const Scalar& JMinvJt_damping,
-    const bool& enable_force)
+    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff, const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr()),
       impulses_(impulses),
       costs_(costs),
@@ -47,9 +46,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  const std::size_t& nq = state_->get_nq();
-  const std::size_t& nv = state_->get_nv();
-  const std::size_t& ni = impulses_->get_ni();
+  const std::size_t nq = state_->get_nq();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = impulses_->get_nc();
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
@@ -65,14 +64,14 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
   impulses_->calc(d->multibody.impulses, x);
 
 #ifndef NDEBUG
-  Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.impulses->Jc.topRows(ni));
+  Eigen::FullPivLU<MatrixXs> Jc_lu(d->multibody.impulses->Jc.topRows(nc));
 
-  if (Jc_lu.rank() < d->multibody.impulses->Jc.topRows(ni).rows() && JMinvJt_damping_ == Scalar(0.)) {
+  if (Jc_lu.rank() < d->multibody.impulses->Jc.topRows(nc).rows() && JMinvJt_damping_ == Scalar(0.)) {
     throw_pretty("It is needed a damping factor since the contact Jacobian is not full-rank");
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->multibody.impulses->Jc.topRows(ni), r_coeff_,
+  pinocchio::impulseDynamics(pinocchio_, d->pinocchio, v, d->multibody.impulses->Jc.topRows(nc), r_coeff_,
                              JMinvJt_damping_);
   d->xnext.head(nq) = q;
   d->xnext.tail(nv) = d->pinocchio.dq_after;
@@ -93,8 +92,8 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  const std::size_t& nv = state_->get_nv();
-  const std::size_t& ni = impulses_->get_ni();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = impulses_->get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -103,36 +102,36 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
   // Computing the dynamics derivatives
   // We resize the Kinv matrix because Eigen cannot call block operations recursively:
   // https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408.
-  // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + ni, nv + ni)
-  d->Kinv.resize(nv + ni, nv + ni);
+  // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
+  d->Kinv.resize(nv + nc, nv + nc);
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, d->vnone, d->pinocchio.dq_after - v,
                                     d->multibody.impulses->fext);
   pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, d->pinocchio, q, d->dgrav_dq);
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc.topRows(ni),
+  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.impulses->Jc.topRows(nc),
                                                d->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, d->pinocchio, q, d->pinocchio.dq_after, d->vnone);
   impulses_->calcDiff(d->multibody.impulses, x);
 
   Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
-  Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, ni);
-  Eigen::Block<MatrixXs> f_partial_dtau = d->Kinv.bottomLeftCorner(ni, nv);
-  Eigen::Block<MatrixXs> f_partial_da = d->Kinv.bottomRightCorner(ni, ni);
+  Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, nc);
+  Eigen::Block<MatrixXs> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
+  Eigen::Block<MatrixXs> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
 
   d->pinocchio.dtau_dq -= d->dgrav_dq;
   d->Fx.topLeftCorner(nv, nv).setIdentity();
   d->Fx.topRightCorner(nv, nv).setZero();
   d->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
-  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
+  d->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * d->multibody.impulses->dv0_dq.topRows(nc);
   d->Fx.bottomRightCorner(nv, nv).noalias() = a_partial_dtau * d->pinocchio.M.template selfadjointView<Eigen::Upper>();
 
   // Computing the cost derivatives
   if (enable_force_) {
-    d->df_dx.topLeftCorner(ni, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
-    d->df_dx.topLeftCorner(ni, nv).noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(ni);
-    d->df_dx.topRightCorner(ni, nv).noalias() = f_partial_da * d->multibody.impulses->Jc.topRows(ni);
+    d->df_dx.topLeftCorner(nc, nv).noalias() = f_partial_dtau * d->pinocchio.dtau_dq;
+    d->df_dx.topLeftCorner(nc, nv).noalias() += f_partial_da * d->multibody.impulses->dv0_dq.topRows(nc);
+    d->df_dx.topRightCorner(nc, nv).noalias() = f_partial_da * d->multibody.impulses->Jc.topRows(nc);
     impulses_->updateVelocityDiff(d->multibody.impulses, d->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(d->multibody.impulses, d->df_dx.topRows(ni));
+    impulses_->updateForceDiff(d->multibody.impulses, d->df_dx.topRows(nc));
   }
   costs_->calcDiff(d->costs, x, u);
 }
@@ -150,6 +149,12 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
   } else {
     return false;
   }
+}
+
+template <typename Scalar>
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelImpulseFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+     << ", nc=" << impulses_->get_nc() << "}";
 }
 
 template <typename Scalar>
@@ -174,12 +179,12 @@ const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<S
 }
 
 template <typename Scalar>
-const Scalar& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
+const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
   return r_coeff_;
 }
 
 template <typename Scalar>
-const Scalar& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor() const {
   return JMinvJt_damping_;
 }
 
@@ -194,7 +199,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_armature(const VectorXs& arma
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const Scalar& r_coeff) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const Scalar r_coeff) {
   if (r_coeff < 0.) {
     throw_pretty("Invalid argument: "
                  << "The restitution coefficient has to be positive");
@@ -203,7 +208,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar& damping) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive");

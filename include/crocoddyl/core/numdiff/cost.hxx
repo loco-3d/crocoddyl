@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>
   data_nd->data_0->cost = 0.0;
   model_->calc(data_nd->data_0, x, u);
   data_nd->cost = data_nd->data_0->cost;
-  data_nd->r = data_nd->data_0->r;
+  data_nd->residual->r = data_nd->data_0->residual->r;
 }
 
 template <typename Scalar>
@@ -35,8 +35,8 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
-  const Scalar& c0 = data_nd->cost;
-  const VectorXs& r0 = data_nd->r;
+  const Scalar c0 = data_nd->cost;
+  const VectorXs& r0 = data_nd->residual->r;
   if (get_with_gauss_approx()) {
     model_->get_activation()->calc(data_nd->data_0->activation, r0);
     model_->get_activation()->calcDiff(data_nd->data_0->activation, r0);
@@ -51,7 +51,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp);
+      reevals_[i](data_nd->xp, u);
     }
     // cost(x+dx, u)
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
@@ -59,37 +59,37 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
     data_nd->Lx(ix) = (data_nd->data_x[ix]->cost - c0) / disturbance_;
     // Check if we need to/can compute the Gauss approximation of the Hessian.
     if (get_with_gauss_approx()) {
-      data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - r0) / disturbance_;
+      data_nd->residual->Rx.col(ix) = (data_nd->data_x[ix]->residual->r - r0) / disturbance_;
     }
     data_nd->dx(ix) = 0.0;
   }
 
   // Computing the d cost(x,u) / du
   data_nd->du.setZero();
-  // call the update function on the pinocchio data
-  for (std::size_t i = 0; i < reevals_.size(); ++i) {
-    reevals_[i](x);
-  }
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
     data_nd->du(iu) = disturbance_;
     data_nd->up = u + data_nd->du;
+    // call the update function
+    for (std::size_t i = 0; i < reevals_.size(); ++i) {
+      reevals_[i](x, data_nd->up);
+    }
     // cost(x, u+du)
     model_->calc(data_nd->data_u[iu], x, data_nd->up);
     // Lu
     data_nd->Lu(iu) = (data_nd->data_u[iu]->cost - c0) / disturbance_;
     // Check if we need to/can compute the Gauss approximation of the Hessian.
     if (get_with_gauss_approx()) {
-      data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - r0) / disturbance_;
+      data_nd->residual->Ru.col(iu) = (data_nd->data_u[iu]->residual->r - r0) / disturbance_;
     }
     data_nd->du(iu) = 0.0;
   }
 
   if (get_with_gauss_approx()) {
     const MatrixXs& Arr = data_nd->data_0->activation->Arr;
-    data_nd->Lxx = data_nd->Rx.transpose() * Arr * data_nd->Rx;
-    data_nd->Lxu = data_nd->Rx.transpose() * Arr * data_nd->Ru;
-    data_nd->Luu = data_nd->Ru.transpose() * Arr * data_nd->Ru;
+    data_nd->Lxx = data_nd->residual->Rx.transpose() * Arr * data_nd->residual->Rx;
+    data_nd->Lxu = data_nd->residual->Rx.transpose() * Arr * data_nd->residual->Ru;
+    data_nd->Luu = data_nd->residual->Ru.transpose() * Arr * data_nd->residual->Ru;
   } else {
     data_nd->Lxx.fill(0.0);
     data_nd->Lxu.fill(0.0);
@@ -109,12 +109,12 @@ const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scal
 }
 
 template <typename Scalar>
-const Scalar& CostModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 

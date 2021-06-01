@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,10 +12,8 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/multibody/force-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
-
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/spatial/force.hpp>
 
 namespace crocoddyl {
 
@@ -31,8 +29,8 @@ class ContactModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc, const std::size_t& nu);
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nc);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc, const std::size_t nu);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);
   virtual ~ContactModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
@@ -47,8 +45,21 @@ class ContactModelAbstractTpl {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const boost::shared_ptr<StateMultibody>& get_state() const;
-  const std::size_t& get_nc() const;
-  const std::size_t& get_nu() const;
+  std::size_t get_nc() const;
+  std::size_t get_nu() const;
+
+  /**
+   * @brief Print information on the contact model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   boost::shared_ptr<StateMultibody> state_;
@@ -57,46 +68,36 @@ class ContactModelAbstractTpl {
 };
 
 template <typename _Scalar>
-struct ContactDataAbstractTpl {
+struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef ForceDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ContactDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : pinocchio(data),
-        joint(0),
-        frame(0),
-        jMf(pinocchio::SE3Tpl<Scalar>::Identity()),
+      : Base(model, data),
         fXj(jMf.inverse().toActionMatrix()),
-        Jc(model->get_nc(), model->get_state()->get_nv()),
         a0(model->get_nc()),
-        da0_dx(model->get_nc(), model->get_state()->get_ndx()),
-        f(pinocchio::ForceTpl<Scalar>::Zero()),
-        df_dx(model->get_nc(), model->get_state()->get_ndx()),
-        df_du(model->get_nc(), model->get_nu()) {
-    Jc.setZero();
+        da0_dx(model->get_nc(), model->get_state()->get_ndx()) {
     a0.setZero();
     da0_dx.setZero();
-    df_dx.setZero();
-    df_du.setZero();
   }
   virtual ~ContactDataAbstractTpl() {}
 
-  typename pinocchio::DataTpl<Scalar>* pinocchio;
-  pinocchio::JointIndex joint;
-  pinocchio::FrameIndex frame;
-  typename pinocchio::SE3Tpl<Scalar> jMf;
+  using Base::df_du;
+  using Base::df_dx;
+  using Base::f;
+  using Base::frame;
+  using Base::Jc;
+  using Base::jMf;
+  using Base::pinocchio;
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
-  MatrixXs Jc;
   VectorXs a0;
   MatrixXs da0_dx;
-  pinocchio::ForceTpl<Scalar> f;
-  MatrixXs df_dx;
-  MatrixXs df_du;
 };
 
 }  // namespace crocoddyl

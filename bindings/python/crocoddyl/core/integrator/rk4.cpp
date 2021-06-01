@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionRK4() {
+  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelRK4> >();
+
   bp::class_<IntegratedActionModelRK4, bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelRK4",
       "RK4 integrator for differential action models.\n\n"
@@ -61,9 +63,8 @@ void exposeIntegratedActionRK4() {
                     bp::make_function(&IntegratedActionModelRK4::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
                     &IntegratedActionModelRK4::set_differential, "differential action model")
-      .add_property(
-          "dt", bp::make_function(&IntegratedActionModelRK4::get_dt, bp::return_value_policy<bp::return_by_value>()),
-          &IntegratedActionModelRK4::set_dt, "step time");
+      .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
+                    "step time");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 

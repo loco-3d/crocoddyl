@@ -45,7 +45,7 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDat
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp);
+      reevals_[i](data_nd->xp, VectorXs::Zero(model_->get_nu()));
     }
     // contact(x+dx, u)
     model_->calc(data_nd->data_x[ix], data_nd->xp);
@@ -79,12 +79,12 @@ const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >& ContactModelNumDiffTp
 }
 
 template <typename Scalar>
-const Scalar& ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 

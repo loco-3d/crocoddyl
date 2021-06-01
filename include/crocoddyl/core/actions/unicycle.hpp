@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,19 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   const Vector2s& get_cost_weights() const;
   void set_cost_weights(const Vector2s& weights);
 
+  Scalar get_dt() const;
+  void set_dt(const Scalar dt);
+
+  /**
+   * @brief Print relevant information of the unicycle model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
 
  private:
   Vector2s cost_weights_;

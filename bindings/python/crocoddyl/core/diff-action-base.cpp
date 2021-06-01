@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -69,21 +70,19 @@ void exposeDifferentialActionAbstract() {
                ":param maxiter: maximum allowed number of iterations\n"
                ":param tol: stopping tolerance criteria (default 1e-9)\n"
                ":return u: quasic-static control"))
-      .add_property("nu",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .def("quasiStatic", &DifferentialActionModelAbstract_wrap::quasiStatic,
+           &DifferentialActionModelAbstract_wrap::default_quasiStatic,
+           bp::args("self", "data", "u", "x", "maxiter", "tol"))
+      .add_property("nu", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu),
                     "dimension of control vector")
-      .add_property("nr",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nr", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .add_property("state",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "state")
       .add_property("has_control_limits",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits),
                     "indicates whether problem has finite control limits")
       .add_property("u_lb",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_lb,
@@ -92,7 +91,8 @@ void exposeDifferentialActionAbstract() {
       .add_property("u_ub",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_ub,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits");
+                    &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();
 

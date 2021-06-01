@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, CTU, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ template <typename Scalar>
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelContactFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
-    const Scalar& JMinvJt_damping, const bool& enable_force)
+    const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
@@ -68,7 +68,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nc = contacts_->get_nc();
+  const std::size_t nc = contacts_->get_nc();
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
@@ -116,8 +116,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = state_->get_nv();
-  const std::size_t& nc = contacts_->get_nc();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = contacts_->get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
@@ -168,7 +168,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
 template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs>& x, const std::size_t&, const Scalar&) {
+    const Eigen::Ref<const VectorXs>& x, std::size_t, Scalar) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -185,8 +185,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   // Check the velocity input is zero
   assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  const std::size_t& nv = state_->get_nv();
-  const std::size_t& nc = contacts_->get_nc();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nc = contacts_->get_nc();
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv));
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   d->pinocchio.tau = pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv), VectorXs::Zero(nv));
@@ -211,6 +211,12 @@ bool DifferentialActionModelContactFwdDynamicsTpl<Scalar>::checkData(
   } else {
     return false;
   }
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelContactFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+     << ", nu=" << nu_ << ", nc=" << contacts_->get_nc() << "}";
 }
 
 template <typename Scalar>
@@ -243,7 +249,7 @@ const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdD
 }
 
 template <typename Scalar>
-const Scalar& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+const Scalar DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_damping_factor() const {
   return JMinvJt_damping_;
 }
 
@@ -258,7 +264,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_armature(const Ve
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar& damping) {
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive");

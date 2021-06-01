@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,8 +54,8 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
@@ -63,20 +63,22 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   const VectorXs& get_armature() const;
   void set_armature(const VectorXs& armature);
 
+  /**
+   * @brief Print relevant information of the free forward-dynamics model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
 
  private:
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;
-  bool with_armature_;
+  bool without_armature_;
   VectorXs armature_;
 };
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,13 +12,12 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& nc, const std::size_t& nu)
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
+                                                         const std::size_t nu)
     : state_(state), nc_(nc), nu_(nu) {}
 
 template <typename Scalar>
-ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const std::size_t& nc)
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
     : state_(state), nc_(nc), nu_(state->get_nv()) {}
 
 template <typename Scalar>
@@ -55,18 +54,29 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelAbstractTpl<Scala
 }
 
 template <typename Scalar>
+void ContactModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ContactModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelAbstractTpl<Scalar>::get_nc() const {
+std::size_t ContactModelAbstractTpl<Scalar>::get_nc() const {
   return nc_;
 }
 
 template <typename Scalar>
-const std::size_t& ContactModelAbstractTpl<Scalar>::get_nu() const {
+std::size_t ContactModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl

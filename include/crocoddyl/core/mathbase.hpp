@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,9 +22,11 @@ struct MathBaseTpl {
   typedef _Scalar Scalar;
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2s;
   typedef Eigen::Matrix<Scalar, 3, 1> Vector3s;
+  typedef Eigen::Matrix<Scalar, 4, 1> Vector4s;
   typedef Eigen::Matrix<Scalar, 6, 1> Vector6s;
   typedef Eigen::Matrix<Scalar, 2, 2> Matrix2s;
   typedef Eigen::Matrix<Scalar, 3, 3> Matrix3s;
+  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46s;
   typedef Eigen::Matrix<Scalar, 6, 6> Matrix6s;
   typedef Eigen::Matrix<Scalar, 1, 2> RowVector2s;
 
@@ -35,6 +37,7 @@ struct MathBaseTpl {
 
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXsRowMajor;
   typedef Eigen::Array<Scalar, Eigen::Dynamic, 1> ArrayXs;
   typedef Eigen::Quaternion<Scalar> Quaternions;
   typedef Eigen::DiagonalMatrix<Scalar, Eigen::Dynamic> DiagonalMatrixXs;

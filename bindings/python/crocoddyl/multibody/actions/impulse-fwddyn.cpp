@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,12 +14,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActionImpulseFwdDynamics() {
+  bp::register_ptr_to_python<boost::shared_ptr<ActionModelImpulseFwdDynamics> >();
+
   bp::class_<ActionModelImpulseFwdDynamics, bp::bases<ActionModelAbstract> >(
       "ActionModelImpulseFwdDynamics",
       "Action model for impulse forward dynamics in multibody systems.\n\n"
       "The impulse is modelled as holonomic constraits in the contact frame. There\n"
       "is also a custom implementation in case of system with armatures. If you want to\n"
-      "include the armature, you need to use setArmature(). On the other hand, the\n"
+      "include the armature, you need to use set_armature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ImpulseModelMultiple>,
                boost::shared_ptr<CostModelSum>, bp::optional<double, double, bool> >(
@@ -84,14 +86,10 @@ void exposeActionImpulseFwdDynamics() {
                     bp::make_function(&ActionModelImpulseFwdDynamics::get_armature, bp::return_internal_reference<>()),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),
                     "set an armature mechanism in the joints")
-      .add_property("r_coeff",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_restitution_coefficient,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("r_coeff", bp::make_function(&ActionModelImpulseFwdDynamics::get_restitution_coefficient),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_restitution_coefficient),
                     "Restitution coefficient that describes elastic impacts")
-      .add_property("JMinvJt_damping",
-                    bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("JMinvJt_damping", bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
                     "Damping factor for cholesky decomposition of JMinvJt");
 

@@ -14,7 +14,7 @@
 #ifndef CROCODDYL_UNITTEST_COMMON_HPP_
 #define CROCODDYL_UNITTEST_COMMON_HPP_
 
-#define NUMDIFF_MODIFIER 3e4
+#define NUMDIFF_MODIFIER 10.
 
 #include <iterator>
 #include <Eigen/Dense>

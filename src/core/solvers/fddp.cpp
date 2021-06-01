@@ -1,10 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#include <omp.h>
+#endif  // CROCODDYL_WITH_MULTITHREADING
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
@@ -17,13 +21,13 @@ SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
 SolverFDDP::~SolverFDDP() {}
 
 bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                       const std::size_t& maxiter, const bool& is_feasible, const double& reginit) {
+                       const std::size_t maxiter, const bool is_feasible, const double reginit) {
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
-    xreg_ = regmin_;
-    ureg_ = regmin_;
+    xreg_ = reg_min_;
+    ureg_ = reg_min_;
   } else {
     xreg_ = reginit;
     ureg_ = reginit;
@@ -38,7 +42,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       } catch (std::exception& e) {
         recalcDiff = false;
         increaseRegularization();
-        if (xreg_ == regmax_) {
+        if (xreg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -85,13 +89,13 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
     }
     if (steplength_ <= th_stepinc_) {
       increaseRegularization();
-      if (xreg_ == regmax_) {
+      if (xreg_ == reg_max_) {
         return false;
       }
     }
     stoppingCriteria();
 
-    const std::size_t& n_callbacks = callbacks_.size();
+    const std::size_t n_callbacks = callbacks_.size();
     for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
@@ -106,12 +110,13 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
-  const std::size_t& T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
     problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
     const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+
     for (std::size_t t = 0; t < T; ++t) {
       models[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
       fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
@@ -126,7 +131,7 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
 void SolverFDDP::updateExpectedImprovement() {
   dg_ = 0;
   dq_ = 0;
-  const std::size_t& T = this->problem_->get_T();
+  const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
     dg_ -= Vx_.back().dot(fs_.back());
     fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
@@ -134,7 +139,7 @@ void SolverFDDP::updateExpectedImprovement() {
   }
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t& nu = models[t]->get_nu();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       dg_ += Qu_[t].head(nu).dot(k_[t].head(nu));
       dq_ -= k_[t].head(nu).dot(Quuk_[t].head(nu));
@@ -147,21 +152,21 @@ void SolverFDDP::updateExpectedImprovement() {
   }
 }
 
-void SolverFDDP::forwardPass(const double& steplength) {
+void SolverFDDP::forwardPass(const double steplength) {
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
-  const std::size_t& T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t& nu = m->get_nu();
+      const std::size_t nu = m->get_nu();
 
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -195,7 +200,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t& nu = m->get_nu();
+      const std::size_t nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {
@@ -229,7 +234,7 @@ void SolverFDDP::forwardPass(const double& steplength) {
 
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
-void SolverFDDP::set_th_acceptnegstep(const double& th_acceptnegstep) {
+void SolverFDDP::set_th_acceptnegstep(const double th_acceptnegstep) {
   if (0. > th_acceptnegstep) {
     throw_pretty("Invalid argument: "
                  << "th_acceptnegstep value has to be positive.");

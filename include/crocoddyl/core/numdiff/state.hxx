@@ -191,12 +191,12 @@ void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorX
                                                   Eigen::Ref<MatrixXs>, const Jcomponent) const {}
 
 template <typename Scalar>
-const Scalar& StateNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar StateNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void StateNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void StateNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

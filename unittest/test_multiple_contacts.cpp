@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,6 +62,10 @@ void test_constructor() {
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << model;
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_contacts().size() == 0);
@@ -199,9 +203,9 @@ void test_calc() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
+  const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
     BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
@@ -216,7 +220,7 @@ void test_calc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calc(datas[i], x2);
     }
@@ -263,10 +267,10 @@ void test_calc_diff() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
-  const std::size_t& ndx = model.get_state()->get_ndx();
+  const std::size_t nv = model.get_state()->get_nv();
+  const std::size_t ndx = model.get_state()->get_ndx();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv) == datas[i]->Jc);
@@ -284,7 +288,7 @@ void test_calc_diff() {
   model.calc(data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calc(datas[i], x2);
       models[i]->calcDiff(datas[i], x2);
@@ -332,10 +336,10 @@ void test_calc_diff_no_recalc() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t& nv = model.get_state()->get_nv();
-  const std::size_t& ndx = model.get_state()->get_ndx();
+  const std::size_t nv = model.get_state()->get_nv();
+  const std::size_t ndx = model.get_state()->get_ndx();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(nc, 0, nc_i, nv).isZero());
     BOOST_CHECK(data->a0.segment(nc, nc_i).isZero());
@@ -351,7 +355,7 @@ void test_calc_diff_no_recalc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t& nc_i = models[i]->get_nc();
+    const std::size_t nc_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this contacts are active
       models[i]->calcDiff(datas[i], x2);
     }
@@ -431,7 +435,7 @@ void test_updateAccelerationDiff() {
   model.updateAccelerationDiff(data, ddv_dx);
 
   // Test
-  BOOST_CHECK((data->ddv_dx - ddv_dx).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((data->ddv_dx - ddv_dx).isZero(1e-9));
 }
 
 void test_updateForceDiff() {

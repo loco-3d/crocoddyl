@@ -31,8 +31,8 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   }
 
   Data* d = static_cast<Data*>(data.get());
-  const Scalar& c = cos(x[2]);
-  const Scalar& s = sin(x[2]);
+  const Scalar c = cos(x[2]);
+  const Scalar s = sin(x[2]);
   d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>() = cost_weights_[1] * u;
@@ -55,16 +55,16 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   Data* d = static_cast<Data*>(data.get());
 
   // Cost derivatives
-  const Scalar& w_x = cost_weights_[0] * cost_weights_[0];
-  const Scalar& w_u = cost_weights_[1] * cost_weights_[1];
-  d->Lx = x.cwiseProduct(MathBase::VectorXs::Constant(state_->get_nx(), w_x));
-  d->Lu = u.cwiseProduct(MathBase::VectorXs::Constant(nu_, w_u));
-  d->Lxx.diagonal() << w_x, w_x, w_x;
-  d->Luu.diagonal() << w_u, w_u;
+  const Scalar w_x = cost_weights_[0] * cost_weights_[0];
+  const Scalar w_u = cost_weights_[1] * cost_weights_[1];
+  d->Lx = x * w_x;
+  d->Lu = u * w_u;
+  d->Lxx.diagonal().setConstant(w_x);
+  d->Luu.diagonal().setConstant(w_u);
 
   // Dynamic derivatives
-  const Scalar& c = cos(x[2]);
-  const Scalar& s = sin(x[2]);
+  const Scalar c = cos(x[2]);
+  const Scalar s = sin(x[2]);
   d->Fx(0, 2) = -s * u[0] * dt_;
   d->Fx(1, 2) = c * u[0] * dt_;
   d->Fu(0, 0) = c * dt_;
@@ -88,6 +88,11 @@ bool ActionModelUnicycleTpl<Scalar>::checkData(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelUnicycle {dt=" << dt_ << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const {
   return cost_weights_;
 }
@@ -95,6 +100,17 @@ const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::ge
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::set_cost_weights(const typename MathBase::Vector2s& weights) {
   cost_weights_ = weights;
+}
+
+template <typename Scalar>
+Scalar ActionModelUnicycleTpl<Scalar>::get_dt() const {
+  return dt_;
+}
+
+template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::set_dt(const Scalar dt) {
+  if (dt <= 0) throw_pretty("Invalid argument: dt should be strictly positive.");
+  dt_ = dt;
 }
 
 }  // namespace crocoddyl

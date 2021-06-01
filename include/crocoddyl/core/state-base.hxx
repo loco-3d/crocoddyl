@@ -9,7 +9,7 @@
 
 namespace crocoddyl {
 template <typename Scalar>
-StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t& nx, const std::size_t& ndx)
+StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t nx, const std::size_t ndx)
     : nx_(nx),
       ndx_(ndx),
       lb_(VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
@@ -101,22 +101,22 @@ std::vector<typename MathBaseTpl<Scalar>::MatrixXs> StateAbstractTpl<Scalar>::Ji
 }
 
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nx() const {
+std::size_t StateAbstractTpl<Scalar>::get_nx() const {
   return nx_;
 }
 
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_ndx() const {
+std::size_t StateAbstractTpl<Scalar>::get_ndx() const {
   return ndx_;
 }
 
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nq() const {
+std::size_t StateAbstractTpl<Scalar>::get_nq() const {
   return nq_;
 }
 
 template <typename Scalar>
-const std::size_t& StateAbstractTpl<Scalar>::get_nv() const {
+std::size_t StateAbstractTpl<Scalar>::get_nv() const {
   return nv_;
 }
 
@@ -131,7 +131,7 @@ const typename MathBaseTpl<Scalar>::VectorXs& StateAbstractTpl<Scalar>::get_ub()
 }
 
 template <typename Scalar>
-bool const& StateAbstractTpl<Scalar>::get_has_limits() const {
+bool StateAbstractTpl<Scalar>::get_has_limits() const {
   return has_limits_;
 }
 

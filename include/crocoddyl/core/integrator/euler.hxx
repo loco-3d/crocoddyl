@@ -1,21 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-
+#include <typeinfo>
+#include <boost/core/demangle.hpp>
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& time_step, const bool& with_cost_residual)
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
@@ -50,7 +50,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -92,7 +92,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t& nv = differential_->get_state()->get_nv();
+  const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -152,12 +152,12 @@ IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
 }
 
 template <typename Scalar>
-const Scalar& IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
+const Scalar IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
   return time_step_;
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar& dt) {
+void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: "
                  << "dt has positive value");
@@ -169,7 +169,7 @@ void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar& dt) {
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::set_differential(
     boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t& nu = model->get_nu();
+  const std::size_t nu = model->get_nu();
   if (nu_ != nu) {
     nu_ = nu;
     unone_ = VectorXs::Zero(nu_);
@@ -184,7 +184,7 @@ void IntegratedActionModelEulerTpl<Scalar>::set_differential(
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                         Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                        const std::size_t& maxiter, const Scalar& tol) {
+                                                        const std::size_t maxiter, const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -198,6 +198,11 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   differential_->quasiStatic(d->differential, u, x, maxiter, tol);
+}
+
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::print(std::ostream& os) const {
+  os << "IntegratedActionModelEuler {dt=" << time_step_ << ", " << *differential_ << "}";
 }
 
 }  // namespace crocoddyl

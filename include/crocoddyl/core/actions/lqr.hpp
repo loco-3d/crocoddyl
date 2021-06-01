@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActionModelLQRTpl(const std::size_t& nx, const std::size_t& nu, bool drift_free = true);
+  ActionModelLQRTpl(const std::size_t nx, const std::size_t nu, const bool drift_free = true);
   virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -57,14 +57,16 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   void set_Lxu(const MatrixXs& Lxu);
   void set_Luu(const MatrixXs& Luu);
 
+  /**
+   * @brief Print relevant information of the LQR model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
 
  private:
   bool drift_free_;

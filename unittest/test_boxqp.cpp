@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,13 +39,13 @@ void test_unconstrained_qp_with_identity_hessian() {
 
   // Checking the solution of the problem. Note that it the negative of the gradient since Hessian
   // is identity matrix
-  BOOST_CHECK((sol.x + gradient).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol.x + gradient).isZero(1e-9));
 
   // Checking the solution against a regularized case
   double reg = random_real_in_range(1e-9, 1e2);
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x + gradient / (1 + reg)).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol_reg.x + gradient / (1 + reg)).isZero(1e-9));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nx);
@@ -70,14 +70,14 @@ void test_unconstrained_qp() {
 
   // Checking the solution against the KKT solution
   Eigen::VectorXd xkkt = -hessian.inverse() * gradient;
-  BOOST_CHECK((sol.x - xkkt).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol.x - xkkt).isZero(1e-9));
 
   // Checking the solution against a regularized KKT problem
   double reg = random_real_in_range(1e-9, 1e2);
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
   Eigen::VectorXd xkkt_reg = -(hessian + reg * Eigen::MatrixXd::Identity(nx, nx)).inverse() * gradient;
-  BOOST_CHECK((sol_reg.x - xkkt_reg).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol_reg.x - xkkt_reg).isZero(1e-9));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nx);
@@ -120,12 +120,12 @@ void test_box_qp_with_identity_hessian() {
 
   // Checking the solution of the problem. Note that it the negative of the gradient since Hessian
   // is identity matrix
-  BOOST_CHECK((sol.x - negbounded_gradient).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol.x - negbounded_gradient).isZero(1e-9));
 
   // Checking the solution against a regularized case
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x - negbounded_gradient / (1 + reg)).isMuchSmallerThan(1.0, 1e-9));
+  BOOST_CHECK((sol_reg.x - negbounded_gradient / (1 + reg)).isZero(1e-9));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nf);

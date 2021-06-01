@@ -9,9 +9,10 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
-#include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -57,6 +58,25 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
 
   boost::shared_ptr<DifferentialActionDataAbstract> default_createData() {
     return this->DifferentialActionModelAbstract::createData();
+  }
+
+  void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<Eigen::VectorXd> u,
+                   const Eigen::Ref<const Eigen::VectorXd>& x, const std::size_t maxiter, const double tol) {
+    if (boost::python::override quasiStatic = this->get_override("quasiStatic")) {
+      u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x, maxiter, tol);
+      if (static_cast<std::size_t>(u.size()) != nu_) {
+        throw_pretty("Invalid argument: "
+                     << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+      }
+      return;
+    }
+    return DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
+  }
+
+  void default_quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                           Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
+                           const std::size_t maxiter, const double tol) {
+    return this->DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
   }
 };
 

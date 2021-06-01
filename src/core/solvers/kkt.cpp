@@ -13,18 +13,19 @@ namespace crocoddyl {
 
 SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
-      regfactor_(10.),
-      regmin_(1e-9),
-      regmax_(1e9),
+      reg_incfactor_(10.),
+      reg_decfactor_(10.),
+      reg_min_(1e-9),
+      reg_max_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
       was_feasible_(false) {
   allocateData();
-  const unsigned int& n_alphas = 10;
+  const std::size_t n_alphas = 10;
   xreg_ = 0.;
   ureg_ = 0.;
   alphas_.resize(n_alphas);
-  for (unsigned int n = 0; n < n_alphas; ++n) {
+  for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., (double)n);
   }
 }
@@ -32,7 +33,7 @@ SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
 SolverKKT::~SolverKKT() {}
 
 bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const std::size_t& maxiter, const bool& is_feasible, const double&) {
+                      const std::size_t maxiter, const bool is_feasible, const double) {
   setCandidate(init_xs, init_us, is_feasible);
   bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -41,7 +42,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
         computeDirection(recalc);
       } catch (std::exception& e) {
         recalc = false;
-        if (xreg_ == regmax_) {
+        if (xreg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -67,7 +68,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       }
     }
     stoppingCriteria();
-    const std::size_t& n_callbacks = callbacks_.size();
+    const std::size_t n_callbacks = callbacks_.size();
     if (n_callbacks != 0) {
       for (std::size_t c = 0; c < n_callbacks; ++c) {
         CallbackAbstract& callback = *callbacks_[c];
@@ -81,10 +82,10 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
   return false;
 }
 
-void SolverKKT::computeDirection(const bool& recalc) {
-  const std::size_t& T = problem_->get_T();
+void SolverKKT::computeDirection(const bool recalc) {
+  const std::size_t T = problem_->get_T();
   if (recalc) {
-    calc();
+    calcDiff();
   }
   computePrimalDual();
   const Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> p_x = primal_.segment(0, ndx_);
@@ -94,21 +95,21 @@ void SolverKKT::computeDirection(const bool& recalc) {
   std::size_t iu = 0;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t& ndxi = models[t]->get_state()->get_ndx();
-    const std::size_t& nui = models[t]->get_nu();
+    const std::size_t ndxi = models[t]->get_state()->get_ndx();
+    const std::size_t nui = models[t]->get_nu();
     dxs_[t] = p_x.segment(ix, ndxi);
     dus_[t] = p_u.segment(iu, nui);
     lambdas_[t] = dual_.segment(ix, ndxi);
     ix += ndxi;
     iu += nui;
   }
-  const std::size_t& ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
   dxs_.back() = p_x.segment(ix, ndxi);
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
 
-double SolverKKT::tryStep(const double& steplength) {
-  const std::size_t& T = problem_->get_T();
+double SolverKKT::tryStep(const double steplength) {
+  const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
@@ -126,15 +127,15 @@ double SolverKKT::tryStep(const double& steplength) {
 }
 
 double SolverKKT::stoppingCriteria() {
-  const std::size_t& T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   std::size_t ix = 0;
   std::size_t iu = 0;
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    const std::size_t& ndxi = models[t]->get_state()->get_ndx();
-    const std::size_t& nui = models[t]->get_nu();
+    const std::size_t ndxi = models[t]->get_state()->get_ndx();
+    const std::size_t nui = models[t]->get_nu();
 
     dF.segment(ix, ndxi) = lambdas_[t];
     dF.segment(ix, ndxi).noalias() -= d->Fx.transpose() * lambdas_[t + 1];
@@ -142,7 +143,7 @@ double SolverKKT::stoppingCriteria() {
     ix += ndxi;
     iu += nui;
   }
-  const std::size_t& ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
   dF.segment(ix, ndxi) = lambdas_.back();
   stop_ = (kktref_.segment(0, ndx_ + nu_) + dF).squaredNorm() + kktref_.segment(ndx_ + nu_, ndx_).squaredNorm();
   return stop_;
@@ -170,28 +171,28 @@ const std::vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
 
 const std::vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const { return lambdas_; }
 
-const std::size_t& SolverKKT::get_nx() const { return nx_; }
+std::size_t SolverKKT::get_nx() const { return nx_; }
 
-const std::size_t& SolverKKT::get_ndx() const { return ndx_; }
+std::size_t SolverKKT::get_ndx() const { return ndx_; }
 
-const std::size_t& SolverKKT::get_nu() const { return nu_; }
+std::size_t SolverKKT::get_nu() const { return nu_; }
 
-double SolverKKT::calc() {
+double SolverKKT::calcDiff() {
   cost_ = problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
 
   // offset on constraint xnext = f(x,u) due to x0 = ref.
-  const std::size_t& cx0 = problem_->get_runningModels()[0]->get_state()->get_ndx();
+  const std::size_t cx0 = problem_->get_runningModels()[0]->get_state()->get_ndx();
 
   std::size_t ix = 0;
   std::size_t iu = 0;
-  const std::size_t& T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   kkt_.block(ndx_ + nu_, 0, ndx_, ndx_) = Eigen::MatrixXd::Identity(ndx_, ndx_);
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
-    const std::size_t& ndxi = m->get_state()->get_ndx();
-    const std::size_t& nui = m->get_nu();
+    const std::size_t ndxi = m->get_state()->get_ndx();
+    const std::size_t nui = m->get_nu();
 
     // Computing the gap at the initial state
     if (t == 0) {
@@ -215,7 +216,7 @@ double SolverKKT::calc() {
     iu += nui;
   }
   const boost::shared_ptr<ActionDataAbstract>& df = problem_->get_terminalData();
-  const std::size_t& ndxf = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxf = problem_->get_terminalModel()->get_state()->get_ndx();
   kkt_.block(ix, ix, ndxf, ndxf) = df->Lxx;
   kktref_.segment(ix, ndxf) = df->Lx;
   kkt_.block(0, ndx_ + nu_, ndx_ + nu_, ndx_) = kkt_.block(ndx_ + nu_, 0, ndx_, ndx_ + nu_).transpose();
@@ -229,23 +230,23 @@ void SolverKKT::computePrimalDual() {
 }
 
 void SolverKKT::increaseRegularization() {
-  xreg_ *= regfactor_;
-  if (xreg_ > regmax_) {
-    xreg_ = regmax_;
+  xreg_ *= reg_incfactor_;
+  if (xreg_ > reg_max_) {
+    xreg_ = reg_max_;
   }
   ureg_ = xreg_;
 }
 
 void SolverKKT::decreaseRegularization() {
-  xreg_ /= regfactor_;
-  if (xreg_ < regmin_) {
-    xreg_ = regmin_;
+  xreg_ /= reg_decfactor_;
+  if (xreg_ < reg_min_) {
+    xreg_ = reg_min_;
   }
   ureg_ = xreg_;
 }
 
 void SolverKKT::allocateData() {
-  const std::size_t& T = problem_->get_T();
+  const std::size_t T = problem_->get_T();
   dxs_.resize(T + 1);
   dus_.resize(T);
   lambdas_.resize(T + 1);
@@ -255,15 +256,15 @@ void SolverKKT::allocateData() {
   nx_ = 0;
   ndx_ = 0;
   nu_ = 0;
-  const std::size_t& nx = problem_->get_nx();
-  const std::size_t& ndx = problem_->get_ndx();
+  const std::size_t nx = problem_->get_nx();
+  const std::size_t ndx = problem_->get_ndx();
   for (std::size_t t = 0; t < T; ++t) {
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
       xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
-    const std::size_t& nu = problem_->get_runningModels()[t]->get_nu();
+    const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dxs_[t] = Eigen::VectorXd::Zero(ndx);
     dus_[t] = Eigen::VectorXd::Zero(nu);

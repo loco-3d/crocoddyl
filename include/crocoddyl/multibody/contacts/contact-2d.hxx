@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const std::size_t& nu, const Vector2s& gains)
+                                             const std::size_t nu, const Vector2s& gains)
     : Base(state, 2, nu), xref_(xref), gains_(gains) {}
 
 template <typename Scalar>
@@ -53,9 +53,10 @@ template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, d->joint, pinocchio::LOCAL,
+  const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d->frame].parent;
+  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
-  const std::size_t& nv = state_->get_nv();
+  const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
@@ -113,6 +114,11 @@ template <typename Scalar>
 boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel2DTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+}
+
+template <typename Scalar>
+void ContactModel2DTpl<Scalar>::print(std::ostream& os) const {
+  os << "ContactModel2D {frame=" << state_->get_pinocchio()->frames[xref_.id].name << "}";
 }
 
 template <typename Scalar>

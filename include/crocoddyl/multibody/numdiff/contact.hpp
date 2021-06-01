@@ -26,7 +26,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef ContactDataNumDiffTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef boost::function<void(const typename MathBaseTpl<Scalar>::VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
 
   /**
    * @brief Construct a new ContactModelNumDiff object from a ContactModelAbstract.
@@ -73,16 +73,16 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Get the disturbance_ object
    *
-   * @return const Scalar&
+   * @return Scalar
    */
-  const Scalar& get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Set the disturbance_ object
    *
    * @param disturbance is the value used to find the numerical derivative
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Register functions that take a pinocchio model, a pinocchio data, a state and a control.
@@ -136,7 +136,7 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
     dx.setZero();
     xp.setZero();
 
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t ndx = model->get_model()->get_state()->get_ndx();
     data_0 = model->get_model()->createData(data);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(data));

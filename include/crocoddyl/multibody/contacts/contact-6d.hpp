@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 
+#include <pinocchio/spatial/motion.hpp>
+#include <pinocchio/multibody/data.hpp>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-
-#include <pinocchio/spatial/motion.hpp>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
@@ -35,7 +35,7 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t& nu,
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
   ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
                     const Vector2s& gains = Vector2s::Zero());
@@ -48,6 +48,13 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
 
   const FramePlacement& get_Mref() const;
   const Vector2s& get_gains() const;
+
+  /**
+   * @brief Print relevant information of the 6d contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::nc_;
@@ -84,7 +91,6 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()) {
     frame = model->get_Mref().id;
-    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     v_partial_dq.setZero();
@@ -103,7 +109,6 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::fXj;
   using Base::Jc;
   using Base::jMf;
-  using Base::joint;
   using Base::pinocchio;
 
   pinocchio::SE3Tpl<Scalar> rMf;

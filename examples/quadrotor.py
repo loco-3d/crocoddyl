@@ -24,21 +24,21 @@ l_lim = 0.1
 tau_f = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
                   [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
 
-actModel = crocoddyl.ActuationModelMultiCopterBase(state, 4, tau_f)
+actModel = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
 
 runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 
-# Needed objects to create the costs
-Mref = crocoddyl.FramePlacement(robot_model.getFrameId("base_link"), pinocchio.SE3(target_quat.matrix(), target_pos))
-wBasePos, wBaseOri, wBaseVel = 0.1, 1000, 1000
-stateWeights = np.array([wBasePos] * 3 + [wBaseOri] * 3 + [wBaseVel] * robot_model.nv)
-
 # Costs
-goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref, actModel.nu)
-xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelWeightedQuad(stateWeights), state.zero(),
-                                    actModel.nu)
-uRegCost = crocoddyl.CostModelControl(state, actModel.nu)
+xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
+xActivation = crocoddyl.ActivationModelWeightedQuad(np.array([0.1] * 3 + [1000.] * 3 + [1000.] * robot_model.nv))
+uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
+goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("base_link"),
+                                                             pinocchio.SE3(target_quat.matrix(), target_pos),
+                                                             actModel.nu)
+goalTrackingCost = crocoddyl.CostModelResidual(state, goalTrackingResidual)
 runningCostModel.addCost("xReg", xRegCost, 1e-6)
 runningCostModel.addCost("uReg", uRegCost, 1e-6)
 runningCostModel.addCost("trackPose", goalTrackingCost, 1e-2)

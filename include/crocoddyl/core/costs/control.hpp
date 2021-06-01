@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,8 +10,8 @@
 #define CROCODDYL_CORE_COSTS_CONTROL_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 
 namespace crocoddyl {
 
@@ -19,28 +19,28 @@ namespace crocoddyl {
  * @brief Control cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respetively. Note
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respectively. Note
  * that the dimension of the residual vector is obtained from `nu`.
  *
  * Both cost and residual derivatives are computed analytically.
  * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
  * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in `CostModelResidualTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelControlTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelControlTpl<Scalar> ResidualModelControl;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
@@ -76,7 +76,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
+                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu);
 
   /**
    * @brief Initialize the control cost model
@@ -110,18 +110,8 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t& nu);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
   virtual ~CostModelControlTpl();
-
-  /**
-   * @brief Compute the control cost
-   *
-   * @param[in] data  Control cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the derivatives of the control cost
@@ -133,9 +123,6 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
-  DEPRECATED("Use set_reference<MathbTpl<Scalare>::VectorXs>()", void set_uref(const VectorXs& uref_in));
-  DEPRECATED("Use get_reference<MathbTpl<Scalare>::VectorXs>()", const VectorXs& get_uref() const);
-
  protected:
   /**
    * @brief Modify the control reference
@@ -145,10 +132,11 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the state control
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 

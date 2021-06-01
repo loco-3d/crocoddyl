@@ -6,15 +6,15 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/multibody/frames.hpp"
+
 #include <eigenpy/memory.hpp>
 #include <eigenpy/eigen-to-python.hpp>
 
+#include <pinocchio/bindings/python/utils/std-aligned-vector.hpp>
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
-
-#include "pinocchio/bindings/python/utils/std-aligned-vector.hpp"
 
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameTranslation)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameRotation)

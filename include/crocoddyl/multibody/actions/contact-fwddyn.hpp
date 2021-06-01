@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, 2020 CTU, INRIA
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,8 +42,8 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ActuationModelAbstract> actuation,
                                                boost::shared_ptr<ContactModelMultiple> contacts,
                                                boost::shared_ptr<CostModelSum> costs,
-                                               const Scalar& JMinvJt_damping = Scalar(0.),
-                                               const bool& enable_force = false);
+                                               const Scalar JMinvJt_damping = Scalar(0.),
+                                               const bool enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -53,27 +53,29 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
   virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  const Scalar& get_damping_factor() const;
+  const Scalar get_damping_factor() const;
 
   void set_armature(const VectorXs& armature);
-  void set_damping_factor(const Scalar& damping);
+  void set_damping_factor(const Scalar damping);
+
+  /**
+   * @brief Print relevant information of the contact forward-dynamics model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
 
  private:
   boost::shared_ptr<ActuationModelAbstract> actuation_;

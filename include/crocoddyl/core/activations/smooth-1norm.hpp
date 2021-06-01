@@ -51,7 +51,7 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] nr   Dimension of the residual vector
    * @param[in] eps  Smoothing factor (default: 1.)
    */
-  explicit ActivationModelSmooth1NormTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps) {
+  explicit ActivationModelSmooth1NormTpl(const std::size_t nr, const Scalar eps = Scalar(1.)) : Base(nr), eps_(eps) {
     if (eps < Scalar(0.)) {
       throw_pretty("Invalid argument: "
                    << "eps should be a positive value");
@@ -106,6 +106,15 @@ class ActivationModelSmooth1NormTpl : public ActivationModelAbstractTpl<_Scalar>
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  /**
+   * @brief Print relevant information of the smooth-1norm model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const {
+    os << "ActivationModelSmooth1Norm {nr=" << nr_ << ", eps=" << eps_ << "}";
+  }
 
  protected:
   using Base::nr_;  //!< Dimension of the residual vector

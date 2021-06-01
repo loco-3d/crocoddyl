@@ -31,7 +31,7 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        self.assertEqual(self.IMPULSE.ni, self.IMPULSE_DER.ni, "Wrong ni.")
+        self.assertEqual(self.IMPULSE.nc, self.IMPULSE_DER.nc, "Wrong ni.")
 
     def test_calc(self):
         # Run calc for both action models
@@ -77,8 +77,8 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
                                                       pinocchio.utils.zero(nv))
 
     def test_ni_dimension(self):
-        ni = sum([impulse.ni for impulse in self.IMPULSES.values()])
-        self.assertEqual(self.impulseSum.ni, ni, "Wrong nc.")
+        nc = sum([impulse.nc for impulse in self.IMPULSES.values()])
+        self.assertEqual(self.impulseSum.nc, nc, "Wrong nc.")
 
     def test_calc(self):
         # Run calc for both action models
@@ -103,7 +103,7 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
 
 
 class Impulse3DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadHyQ().model
+    ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     # gains = pinocchio.utils.rand(2)
@@ -113,7 +113,7 @@ class Impulse3DTest(ImpulseModelAbstractTestCase):
 
 
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadHyQ().model
+    ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
@@ -125,7 +125,7 @@ class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
 
 
 class Impulse6DTest(ImpulseModelAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadICub().model
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     frame = ROBOT_MODEL.getFrameId('r_sole')
@@ -134,7 +134,7 @@ class Impulse6DTest(ImpulseModelAbstractTestCase):
 
 
 class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.loadICub().model
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)

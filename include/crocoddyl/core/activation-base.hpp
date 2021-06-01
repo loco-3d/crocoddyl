@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/core/demangle.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
@@ -30,7 +31,7 @@ class ActivationModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelAbstractTpl(const std::size_t& nr) : nr_(nr){};
+  explicit ActivationModelAbstractTpl(const std::size_t nr) : nr_(nr){};
   virtual ~ActivationModelAbstractTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) = 0;
@@ -40,7 +41,23 @@ class ActivationModelAbstractTpl {
     return boost::allocate_shared<ActivationDataAbstract>(Eigen::aligned_allocator<ActivationDataAbstract>(), this);
   };
 
-  const std::size_t& get_nr() const { return nr_; };
+  std::size_t get_nr() const { return nr_; };
+
+  /**
+   * @brief Print information on the activation model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ActivationModelAbstractTpl<Scalar>& model) {
+    model.print(os);
+    return os;
+  }
+
+  /**
+   * @brief Print relevant information of the activation model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << boost::core::demangle(typeid(*this).name()); }
 
  protected:
   std::size_t nr_;

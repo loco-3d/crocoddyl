@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/quadratic-barrier.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -28,6 +28,8 @@ void exposeActivationQuadraticBarrier() {
       .add_property("lb", bp::make_getter(&ActivationBounds::lb, bp::return_internal_reference<>()), "lower bounds")
       .add_property("ub", bp::make_getter(&ActivationBounds::ub, bp::return_internal_reference<>()), "upper bounds")
       .add_property("beta", &ActivationBounds::beta, "beta");
+
+  boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelQuadraticBarrier> >();
 
   bp::class_<ActivationModelQuadraticBarrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuadraticBarrier",
