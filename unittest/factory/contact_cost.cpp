@@ -19,8 +19,7 @@
 namespace crocoddyl {
 namespace unittest {
 
-const std::vector<ContactCostModelTypes::Type>
-    ContactCostModelTypes::all(ContactCostModelTypes::init_all());
+const std::vector<ContactCostModelTypes::Type> ContactCostModelTypes::all(ContactCostModelTypes::init_all());
 
 std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type) {
   switch (type) {
@@ -51,22 +50,19 @@ std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type) {
 ContactCostModelFactory::ContactCostModelFactory() {}
 ContactCostModelFactory::~ContactCostModelFactory() {}
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
-ContactCostModelFactory::create(
+boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFactory::create(
     ContactCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
-    ActivationModelTypes::Type activation_type,
-    ActuationModelTypes::Type actuation_type) const {
+    ActivationModelTypes::Type activation_type, ActuationModelTypes::Type actuation_type) const {
   // Create contact action model with no cost
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
-      action;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> action;
   switch (model_type) {
-  case PinocchioModelTypes::Talos:
-    action = DifferentialActionModelFactory().create_contactFwdDynamics(
-        StateModelTypes::StateMultibody_Talos, actuation_type, false);
-    break;
-  default:
-    throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
-    break;
+    case PinocchioModelTypes::Talos:
+      action = DifferentialActionModelFactory().create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
+                                                                          actuation_type, false);
+      break;
+    default:
+      throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
+      break;
   }
   action->get_costs()->removeCost("state");
   action->get_costs()->removeCost("control");
@@ -75,8 +71,7 @@ ContactCostModelFactory::create(
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          action->get_state());
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(action->get_state());
   const std::size_t nu = action->get_actuation()->get_nu();
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   switch (cost_type) {
@@ -119,5 +114,5 @@ ContactCostModelFactory::create(
   return action;
 }
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl

@@ -17,10 +17,10 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_partial_derivatives_against_contact_numdiff(
-    ContactCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
-    ActivationModelTypes::Type activation_type,
-    ActuationModelTypes::Type actuation_type) {
+void test_partial_derivatives_against_contact_numdiff(ContactCostModelTypes::Type cost_type,
+                                                      PinocchioModelTypes::Type model_type,
+                                                      ActivationModelTypes::Type activation_type,
+                                                      ActuationModelTypes::Type actuation_type) {
   // create the model
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> &model =
       ContactCostModelFactory().create(cost_type, model_type, activation_type, actuation_type);
@@ -59,13 +59,12 @@ void test_partial_derivatives_against_contact_numdiff(
 
 //----------------------------------------------------------------------------//
 
-void register_contact_cost_model_unit_tests(
-    ContactCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
-    ActivationModelTypes::Type activation_type,
-    ActuationModelTypes::Type actuation_type) {
+void register_contact_cost_model_unit_tests(ContactCostModelTypes::Type cost_type,
+                                            PinocchioModelTypes::Type model_type,
+                                            ActivationModelTypes::Type activation_type,
+                                            ActuationModelTypes::Type actuation_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << cost_type << "_" << activation_type << "_"
-            << actuation_type << "_" << model_type;
+  test_name << "test_" << cost_type << "_" << activation_type << "_" << actuation_type << "_" << model_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite *ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_contact_numdiff, cost_type, model_type,

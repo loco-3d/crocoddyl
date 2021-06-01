@@ -71,6 +71,9 @@ std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
     case CostModelNoFFTypes::NbCostModelNoFFTypes:
       os << "NbCostModelNoFFTypes";
       break;
+    case CostModelNoFFTypes::NbCostModelNoFFTypes:
+      os << "NbCostModelNoFFTypes";
+      break;
     default:
       break;
   }
@@ -80,9 +83,10 @@ std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
 CostModelFactory::CostModelFactory() {}
 CostModelFactory::~CostModelFactory() {}
 
-boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
-    CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
-    ActivationModelTypes::Type activation_type, std::size_t nu) const {
+boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostModelTypes::Type cost_type,
+                                                                         StateModelTypes::Type state_type,
+                                                                         ActivationModelTypes::Type activation_type,
+                                                                         std::size_t nu) const {
   StateModelFactory state_factory;
   ActivationModelFactory activation_factory;
   boost::shared_ptr<crocoddyl::CostModelAbstract> cost;
@@ -181,5 +185,5 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTyp
   return factory.create(rand_type, state_type, ActivationModelTypes::ActivationModelQuad, nu);
 }
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl

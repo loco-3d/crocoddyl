@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type);
 std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type);
 
 class CostModelFactory {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
@@ -81,4 +81,4 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
 }  // namespace unittest
 }  // namespace crocoddyl
 
-#endif // CROCODDYL_COST_FACTORY_HPP_
+#endif  // CROCODDYL_COST_FACTORY_HPP_

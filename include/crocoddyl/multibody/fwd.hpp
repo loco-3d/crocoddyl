@@ -166,11 +166,6 @@ template <typename Scalar>
 using CostDataFrameTranslationTpl = CostDataResidualTpl<Scalar>;
 
 template <typename Scalar>
-class CostModelControlGravTpl;
-template <typename Scalar>
-struct CostDataControlGravTpl;
-
-template <typename Scalar>
 class CostModelCentroidalMomentumTpl;
 template <typename Scalar>
 using CostDataCentroidalMomentumTpl = CostDataResidualTpl<Scalar>;

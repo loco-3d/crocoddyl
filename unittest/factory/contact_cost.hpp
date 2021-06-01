@@ -41,7 +41,7 @@ struct ContactCostModelTypes {
 std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type);
 
 class ContactCostModelFactory {
-public:
+ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
@@ -49,14 +49,13 @@ public:
   explicit ContactCostModelFactory();
   ~ContactCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
-  create(ContactCostModelTypes::Type cost_type,
-         PinocchioModelTypes::Type model_type,
-         ActivationModelTypes::Type activation_type,
-         ActuationModelTypes::Type actuation_type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(ContactCostModelTypes::Type cost_type,
+                                                                       PinocchioModelTypes::Type model_type,
+                                                                       ActivationModelTypes::Type activation_type,
+                                                                       ActuationModelTypes::Type actuation_type) const;
 };
 
-} // namespace unittest
-} // namespace crocoddyl
+}  // namespace unittest
+}  // namespace crocoddyl
 
-#endif // CROCODDYL_CONTACT_COST_FACTORY_HPP_
+#endif  // CROCODDYL_CONTACT_COST_FACTORY_HPP_
