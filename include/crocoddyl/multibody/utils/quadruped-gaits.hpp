@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,11 +24,11 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-#include "crocoddyl/multibody/costs/com-position.hpp"
-#include "crocoddyl/multibody/costs/frame-translation.hpp"
-#include "crocoddyl/multibody/costs/frame-velocity.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/core/costs/control.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
+#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
@@ -47,18 +47,18 @@ class SimpleQuadrupedGaitProblem {
                                                                      const std::size_t supportKnots);
 
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > createFootStepModels(
-      double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, double stepLength,
-      double stepHeight, std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const double timeStep, Eigen::Vector3d& comPos0, std::vector<Eigen::Vector3d>& feetPos0, const double stepLength,
+      const double stepHeight, const std::size_t numKnots, const std::vector<pinocchio::FrameIndex>& supportFootIds,
       const std::vector<pinocchio::FrameIndex>& swingFootIds);
 
   boost::shared_ptr<ActionModelAbstract> createSwingFootModel(
-      double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
+      const double timeStep, const std::vector<pinocchio::FrameIndex>& supportFootIds,
       const Eigen::Vector3d& comTask = Eigen::Vector3d::Constant(std::numeric_limits<double>::infinity()),
       const std::vector<crocoddyl::FramePlacement>& swingFootTask = std::vector<crocoddyl::FramePlacement>());
 
   boost::shared_ptr<ActionModelAbstract> createFootSwitchModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask,
-      bool pseudoImpulse = false);
+      const bool pseudoImpulse = false);
 
   boost::shared_ptr<ActionModelAbstract> createPseudoImpulseModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask);

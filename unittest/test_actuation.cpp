@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,7 @@ void test_construct_data(ActuationModelTypes::Type actuation_type, StateModelTyp
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
+  if (!data) throw std::runtime_error("[test_construct_data] Data pointer is dead.");
 }
 
 void test_calc_returns_tau(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
@@ -68,9 +69,9 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isMuchSmallerThan(1.0, tol));
-  BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
+  BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//
@@ -87,8 +88,9 @@ void register_actuation_model_unit_tests(ActuationModelTypes::Type actuation_typ
 }
 
 bool init_function() {
-  register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull,
-                                      StateModelTypes::StateMultibody_TalosArm);
+  for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
+    register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull, StateModelTypes::all[i]);
+  }
   register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,
                                       StateModelTypes::StateMultibody_HyQ);
   register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFloatingBase,

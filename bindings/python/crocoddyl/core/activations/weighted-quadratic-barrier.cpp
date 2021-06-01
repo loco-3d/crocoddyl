@@ -1,19 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeActivationWeightedQuadraticBarrier() {
+  boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelWeightedQuadraticBarrier> >();
+
   bp::class_<ActivationModelWeightedQuadraticBarrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModelWeightedQuadraticBarrier",
       "Inequality activation model.\n\n"

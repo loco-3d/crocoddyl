@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,10 +15,12 @@ void exposeMultibody() {
   exposeFrames();
   exposeFrictionCone();
   exposeWrenchCone();
+  exposeCoPSupport();
   exposeStateMultibody();
   exposeActuationFloatingBase();
   exposeActuationFull();
   exposeActuationModelMultiCopterBase();
+  exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
   exposeContactMultiple();
@@ -29,6 +31,20 @@ void exposeMultibody() {
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
   exposeActionImpulseFwdDynamics();
+  exposeResidualState();
+  exposeResidualCentroidalMomentum();
+  exposeResidualCoMPosition();
+  exposeResidualContactForce();
+  exposeResidualContactFrictionCone();
+  exposeResidualContactCoPPosition();
+  exposeResidualContactWrenchCone();
+  exposeResidualContactControlGrav();
+  exposeResidualControlGrav();
+  exposeResidualFramePlacement();
+  exposeResidualFrameRotation();
+  exposeResidualFrameTranslation();
+  exposeResidualFrameVelocity();
+  exposeResidualImpulseCoM();
   exposeCostState();
   exposeCostCoMPosition();
   exposeCostControlGrav();

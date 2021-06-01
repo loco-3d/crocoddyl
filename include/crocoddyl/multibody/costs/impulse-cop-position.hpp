@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,14 +10,10 @@
 #define CROCODDYL_MULTIBODY_COSTS_IMPULSE_COP_POSITION_HPP_
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-#include "crocoddyl/multibody/impulses/impulse-6d.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -55,24 +51,22 @@ namespace crocoddyl {
  * `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelImpulseCoPPositionTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
-  typedef CostDataImpulseCoPPositionTpl<Scalar> Data;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ActivationModelQuadraticBarrierTpl<Scalar> ActivationModelQuadraticBarrier;
   typedef ActivationBoundsTpl<Scalar> ActivationBounds;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef CoPSupportTpl<Scalar> CoPSupport;
   typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
+  typedef typename MathBase::Matrix3s Matrix3s;
 
   /**
    * @brief Initialize the impulse CoP cost model
@@ -97,43 +91,6 @@ class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   CostModelImpulseCoPPositionTpl(boost::shared_ptr<StateMultibody> state, const FrameCoPSupport& cop_support);
   virtual ~CostModelImpulseCoPPositionTpl();
 
-  /**
-   * @brief Compute the impulse CoP cost
-   *
-   * The CoP residual is computed based on the \f$\mathbf{A}\f$ matrix, the force vector is computed by
-   * `ActionModelImpulseFwdDynamicsTpl` which is stored in `DataCollectorImpulseTpl.
-   *
-   * @param[in] data  Impulse CoP data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Compute the derivatives of the impulse CoP cost
-   *
-   * The CoP derivatives are based on the force derivatives computed by
-   * `ActionModelImpulseFwdDynamicsTpl` which are stored in `DataCollectorImpulseTpl`.
-   *
-   * @param[in] data  Impulse CoP data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief Create the impulse CoP cost data
-   *
-   * Each cost model has its own data that needs to be allocated.
-   * This function returns the allocated data for a predefined cost.
-   *
-   * @param[in] data  Shared data (it should be of type `DataCollectorImpulseTpl`)
-   * @return the cost data.
-   */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
  protected:
   /**
    * @brief Return the frame CoP support
@@ -143,81 +100,15 @@ class CostModelImpulseCoPPositionTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Modify the frame CoP support
    */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
 
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
 
  private:
   FrameCoPSupport cop_support_;  //!< Frame name of the impulse foot and support region of the CoP
-};
-
-template <typename _Scalar>
-struct CostDataImpulseCoPPositionTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-  typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef typename MathBase::MatrixXs MatrixXs;
-
-  template <template <typename Scalar> class Model>
-  CostDataImpulseCoPPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Ru(model->get_activation()->get_nr(), model->get_state()->get_nv()) {
-    Arr_Ru.setZero();
-
-    // Check that proper shared data has been passed
-    DataCollectorImpulseTpl<Scalar>* d = dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorImpulse");
-    }
-
-    // Get the active 6d impulse (avoids data casting at runtime)
-    FrameCoPSupport cop_support = model->template get_reference<FrameCoPSupport>();
-    const boost::shared_ptr<StateMultibody>& state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-    std::string frame_name = state->get_pinocchio()->frames[cop_support.get_id()].name;
-    bool found_impulse = false;
-    for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d->impulses->impulses.begin();
-         it != d->impulses->impulses.end(); ++it) {
-      if (it->second->frame == cop_support.get_id()) {
-        ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-        if (d3d != NULL) {
-          throw_pretty("Domain error: a 6d impulse model is required in " + frame_name +
-                       "in order to compute the CoP");
-          break;
-        }
-        ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-        if (d6d != NULL) {
-          found_impulse = true;
-          impulse = it->second;
-          break;
-        }
-      }
-    }
-    if (!found_impulse) {
-      throw_pretty("Domain error: there isn't defined impulse data for " + frame_name);
-    }
-  }
-
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  MatrixXs Arr_Ru;
-  boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > impulse;  //!< impulse force
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl

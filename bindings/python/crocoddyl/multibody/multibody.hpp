@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,10 +18,12 @@ namespace python {
 void exposeFrames();
 void exposeFrictionCone();
 void exposeWrenchCone();
+void exposeCoPSupport();
 void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
 void exposeActuationModelMultiCopterBase();
+void exposeForceAbstract();
 void exposeContactAbstract();
 void exposeImpulseAbstract();
 void exposeContactMultiple();
@@ -32,6 +34,20 @@ void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
+void exposeResidualState();
+void exposeResidualCentroidalMomentum();
+void exposeResidualCoMPosition();
+void exposeResidualContactForce();
+void exposeResidualContactFrictionCone();
+void exposeResidualContactCoPPosition();
+void exposeResidualContactWrenchCone();
+void exposeResidualContactControlGrav();
+void exposeResidualControlGrav();
+void exposeResidualFramePlacement();
+void exposeResidualFrameRotation();
+void exposeResidualFrameTranslation();
+void exposeResidualFrameVelocity();
+void exposeResidualImpulseCoM();
 void exposeCostState();
 void exposeCostCoMPosition();
 void exposeCostControlGrav();

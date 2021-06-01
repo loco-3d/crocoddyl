@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/impulse-base.hpp"
 
 namespace crocoddyl {
 
@@ -33,7 +33,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
+  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t frame);
   virtual ~ImpulseModel3DTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -41,10 +41,16 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  const std::size_t& get_frame() const;
+  std::size_t get_frame() const;
+
+  /**
+   * @brief Print relevant information of the 3d impulse model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::ni_;
   using Base::state_;
 
  private:
@@ -67,7 +73,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_frame();
-    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
     jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
@@ -81,7 +86,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::frame;
   using Base::Jc;
   using Base::jMf;
-  using Base::joint;
   using Base::pinocchio;
 
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;

@@ -85,6 +85,13 @@ class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar
     new_weights_ = true;
   };
 
+  /**
+   * @brief Print relevant information of the quadratic-weighted model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << "ActivationModelQuad {nr=" << nr_ << "}"; }
+
  protected:
   using Base::nr_;
 

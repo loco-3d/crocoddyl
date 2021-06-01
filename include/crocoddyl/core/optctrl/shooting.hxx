@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
-#define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
 namespace crocoddyl {
@@ -24,10 +24,11 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()) {
+      nu_max_(running_models[0]->get_nu()),
+      nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t& nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -56,6 +57,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
                  << "ndx in terminal node is not consistent with the other nodes")
   }
   allocateData();
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>
@@ -73,10 +78,11 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()) {
+      nu_max_(running_models[0]->get_nu()),
+      nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t& nu = model->get_nu();
+    const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
     }
@@ -85,7 +91,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     throw_pretty("Invalid argument: "
                  << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
   }
-  std::size_t Td = running_datas.size();
+  const std::size_t Td = running_datas.size();
   if (Td != T_) {
     throw_pretty("Invalid argument: "
                  << "the number of running models and datas are not the same (" + std::to_string(T_) +
@@ -111,6 +117,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     throw_pretty("Invalid argument: "
                  << "terminal action data is not consistent with the terminal action model")
   }
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>
@@ -141,10 +151,10 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     if (nu != 0) {
       running_models_[i]->calc(running_datas_[i], xs[i], us[i].head(nu));
     } else {
@@ -154,6 +164,9 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   terminal_model_->calc(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp simd reduction(+ : cost_)
+#endif
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
@@ -173,11 +186,11 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
-      const std::size_t& nu = running_models_[i]->get_nu();
+      const std::size_t nu = running_models_[i]->get_nu();
       running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i].head(nu));
     } else {
       running_models_[i]->calcDiff(running_datas_[i], xs[i]);
@@ -186,6 +199,9 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp simd reduction(+ : cost_)
+#endif
   for (std::size_t i = 0; i < T_; ++i) {
     cost_ += running_datas_[i]->cost;
   }
@@ -210,7 +226,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     const VectorXs& x = xs[i];
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     if (model->get_nu() != 0) {
       const VectorXs& u = us[i];
       model->calc(data, x, u.head(nu));
@@ -243,10 +259,10 @@ void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us, const st
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for
+#pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t& nu = running_models_[i]->get_nu();
+    const std::size_t nu = running_models_[i]->get_nu();
     running_models_[i]->quasiStatic(running_datas_[i], us[i].head(nu), xs[i]);
   }
 }
@@ -315,7 +331,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(boost::shared_ptr<ActionModelAbs
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
+void ShootingProblemTpl<Scalar>::updateNode(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
                                             boost::shared_ptr<ActionDataAbstract> data) {
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
@@ -349,7 +365,7 @@ void ShootingProblemTpl<Scalar>::updateNode(std::size_t i, boost::shared_ptr<Act
 }
 
 template <typename Scalar>
-void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
+void ShootingProblemTpl<Scalar>::updateModel(const std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be lower than " + std::to_string(T_ + 1) + ")");
@@ -377,7 +393,7 @@ void ShootingProblemTpl<Scalar>::updateModel(std::size_t i, boost::shared_ptr<Ac
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_T() const {
+std::size_t ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
 
@@ -388,9 +404,10 @@ const typename MathBaseTpl<Scalar>::VectorXs& ShootingProblemTpl<Scalar>::get_x0
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::allocateData() {
+  running_datas_.resize(T_);
   for (std::size_t i = 0; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    running_datas_.push_back(model->createData());
+    running_datas_[i] = model->createData();
   }
   terminal_data_ = terminal_model_->createData();
 }
@@ -423,7 +440,7 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
   if (x0_in.size() != x0_.size()) {
     throw_pretty("Invalid argument: "
-                 << "invalid size of x0 provided.");
+                 << "invalid size of x0 provided: Expected " << x0_.size() << ", received " << x0_in.size());
   }
   x0_ = x0_in;
 }
@@ -471,18 +488,58 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nx() const {
+void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
+#ifndef CROCODDYL_WITH_MULTITHREADING
+  (void)nthreads;
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
+            << std::endl;
+#else
+  if (nthreads < 1) {
+    nthreads_ = CROCODDYL_WITH_NTHREADS;
+  } else {
+    nthreads_ = static_cast<std::size_t>(nthreads);
+  }
+#endif
+}
+
+template <typename Scalar>
+std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
   return nx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_ndx() const {
+std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
 }
 
 template <typename Scalar>
-const std::size_t& ShootingProblemTpl<Scalar>::get_nu_max() const {
+std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
   return nu_max_;
+}
+
+template <typename Scalar>
+std::size_t ShootingProblemTpl<Scalar>::get_nthreads() const {
+#ifndef CROCODDYL_WITH_MULTITHREADING
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
+            << std::endl;
+#endif
+  return nthreads_;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ShootingProblemTpl<Scalar>& problem) {
+  os << "ShootingProblem (T=" << problem.get_T() << ", nx=" << problem.get_nx() << ", ndx=" << problem.get_ndx()
+     << ", nu_max=" << problem.get_nu_max() << ") " << std::endl;
+  os << "  Models:" << std::endl;
+  const std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >& runningModels =
+      problem.get_runningModels();
+  for (std::size_t t = 0; t < problem.get_T(); ++t) {
+    os << "    " << t << ": " << *runningModels[t] << std::endl;
+  }
+  os << "    " << problem.get_T() << ": " << *problem.get_terminalModel();
+  return os;
 }
 
 }  // namespace crocoddyl

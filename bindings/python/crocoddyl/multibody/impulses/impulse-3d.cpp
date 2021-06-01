@@ -1,18 +1,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeImpulse3D() {
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModel3D> >();
+
   bp::class_<ImpulseModel3D, bp::bases<ImpulseModelAbstract> >(
       "ImpulseModel3D",
       "Rigid 3D impulse model.\n\n"
@@ -47,9 +49,7 @@ void exposeImpulse3D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("frame",
-                    bp::make_function(&ImpulseModel3D::get_frame, bp::return_value_policy<bp::return_by_value>()),
-                    "reference frame id");
+      .add_property("frame", bp::make_function(&ImpulseModel3D::get_frame), "reference frame id");
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseData3D> >();
 

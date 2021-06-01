@@ -28,7 +28,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelQuadTpl(const std::size_t& nr) : Base(nr){};
+  explicit ActivationModelQuadTpl(const std::size_t nr) : Base(nr){};
   virtual ~ActivationModelQuadTpl(){};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
@@ -57,6 +57,13 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->Arr.diagonal().fill((Scalar)1.);
     return data;
   };
+
+  /**
+   * @brief Print relevant information of the quadratic model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << "ActivationModelQuad {nr=" << nr_ << "}"; }
 
  protected:
   using Base::nr_;

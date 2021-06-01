@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,10 @@ void test_construct_data(ContactModelTypes::Type contact_type, PinocchioModelTyp
   // create the model
   ContactModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
 
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
@@ -162,7 +166,7 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::ContactModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the contact derivatives
@@ -174,8 +178,8 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against NumDiff
-  double tol = NUMDIFF_MODIFIER * model_num_diff.get_disturbance();
-  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isMuchSmallerThan(1.0, tol));
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//

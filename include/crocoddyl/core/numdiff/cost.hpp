@@ -29,7 +29,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  typedef boost::function<void(const VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
 
   /**
    * @brief Initialize the numdiff cost model
@@ -71,12 +71,12 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the disturbance value used by the numdiff routine
    */
-  const Scalar& get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Modify the disturbance value used by the numdiff routine
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
@@ -147,8 +147,8 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
     du.setZero();
     up.setZero();
 
-    const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t& nu = model->get_model()->get_nu();
+    const std::size_t ndx = model->get_model()->get_state()->get_ndx();
+    const std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData(shared_data);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(shared_data));
@@ -167,9 +167,7 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::Lx;
   using Base::Lxu;
   using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
+  using Base::residual;
   using Base::shared;
 
   VectorXs dx;  //!< State disturbance.

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,13 @@
 #define CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 
 #include <stdexcept>
+
+#include <pinocchio/algorithm/compute-all-terms.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/contact-dynamics.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -20,13 +27,6 @@
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
-
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/contact-dynamics.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
 
@@ -48,8 +48,8 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
 
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
-                                   boost::shared_ptr<CostModelSum> costs, const Scalar& r_coeff = Scalar(0.),
-                                   const Scalar& JMinvJt_damping = Scalar(0.), const bool& enable_force = false);
+                                   boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
+                                   const Scalar JMinvJt_damping = Scalar(0.), const bool enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -63,21 +63,22 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
-  const Scalar& get_restitution_coefficient() const;
-  const Scalar& get_damping_factor() const;
+  const Scalar get_restitution_coefficient() const;
+  const Scalar get_damping_factor() const;
 
   void set_armature(const VectorXs& armature);
-  void set_restitution_coefficient(const Scalar& r_coeff);
-  void set_damping_factor(const Scalar& damping);
+  void set_restitution_coefficient(const Scalar r_coeff);
+  void set_damping_factor(const Scalar damping);
+
+  /**
+   * @brief Print relevant information of the impulase forward-dynamics model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::state_;  //!< Model of the state
 
  private:
   boost::shared_ptr<ImpulseModelMultiple> impulses_;
@@ -107,9 +108,9 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         multibody(&pinocchio, model->get_impulses()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         vnone(model->get_state()->get_nv()),
-        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_ni_total(),
-             model->get_state()->get_nv() + model->get_impulses()->get_ni_total()),
-        df_dx(model->get_impulses()->get_ni_total(), model->get_state()->get_ndx()),
+        Kinv(model->get_state()->get_nv() + model->get_impulses()->get_nc_total(),
+             model->get_state()->get_nv() + model->get_impulses()->get_nc_total()),
+        df_dx(model->get_impulses()->get_nc_total(), model->get_state()->get_ndx()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
     vnone.setZero();

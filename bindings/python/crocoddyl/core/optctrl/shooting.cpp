@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
@@ -91,8 +92,7 @@ void exposeShootingProblem() {
            "Update a model and allocated new data for a specific node.\n\n"
            ":param i: index of the node (0 <= i <= T + 1)\n"
            ":param model: new model")
-      .add_property("T", bp::make_function(&ShootingProblem::get_T, bp::return_value_policy<bp::return_by_value>()),
-                    "number of running nodes")
+      .add_property("T", bp::make_function(&ShootingProblem::get_T), "number of running nodes")
       .add_property("x0", bp::make_function(&ShootingProblem::get_x0, bp::return_internal_reference<>()),
                     &ShootingProblem::set_x0, "initial state")
       .add_property(
@@ -111,14 +111,16 @@ void exposeShootingProblem() {
           "terminalData",
           bp::make_function(&ShootingProblem::get_terminalData, bp::return_value_policy<bp::return_by_value>()),
           "terminal data")
-      .add_property("nx", bp::make_function(&ShootingProblem::get_nx, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of state tuple")
-      .add_property("ndx",
-                    bp::make_function(&ShootingProblem::get_ndx, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nthreads", bp::make_function(&ShootingProblem::get_nthreads),
+                    bp::make_function(&ShootingProblem::set_nthreads),
+                    "number of threads launch by the multi-threading support (if you set nthreads <= 1, then "
+                    "nthreads=CROCODDYL_WITH_NTHREADS)")
+      .add_property("nx", bp::make_function(&ShootingProblem::get_nx), "dimension of state tuple")
+      .add_property("ndx", bp::make_function(&ShootingProblem::get_ndx),
                     "dimension of the tangent space of the state manifold")
-      .add_property("nu_max",
-                    bp::make_function(&ShootingProblem::get_nu_max, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of the maximum control vector");
+      .add_property("nu_max", bp::make_function(&ShootingProblem::get_nu_max),
+                    "dimension of the maximum control vector")
+      .def(PrintableVisitor<ShootingProblem>());
 }
 
 }  // namespace python

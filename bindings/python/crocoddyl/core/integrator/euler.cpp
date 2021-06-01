@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionEuler() {
+  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelEuler> >();
+
   bp::class_<IntegratedActionModelEuler, bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelEuler",
       "Sympletic Euler integrator for differential action models.\n\n"

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,8 +27,17 @@ struct ContactItemTpl {
   typedef ContactModelAbstractTpl<Scalar> ContactModelAbstract;
 
   ContactItemTpl() {}
-  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true)
+  ContactItemTpl(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, const bool active = true)
       : name(name), contact(contact), active(active) {}
+
+  /**
+   * @brief Print information on the contact item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactItemTpl<Scalar>& model) {
+    os << "{" << *model.contact << "}";
+    return os;
+  }
 
   std::string name;
   boost::shared_ptr<ContactModelAbstract> contact;
@@ -71,7 +80,7 @@ class ContactModelMultipleTpl {
    * @param[in] state  Multibody state
    * @param[in] nu     Dimension of control vector
    */
-  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nu);
+  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
 
   /**
    * @brief Initialize the multi-contact model
@@ -90,7 +99,7 @@ class ContactModelMultipleTpl {
    * @param[in] contact  Contact model
    * @param[in] active   Contact status (active by default)
    */
-  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, bool active = true);
+  void addContact(const std::string& name, boost::shared_ptr<ContactModelAbstract> contact, const bool active = true);
 
   /**
    * @brief Remove contact item
@@ -105,7 +114,7 @@ class ContactModelMultipleTpl {
    * @param[in] name     Contact name
    * @param[in] active   Contact status (True for active)
    */
-  void changeContactStatus(const std::string& name, bool active);
+  void changeContactStatus(const std::string& name, const bool active);
 
   /**
    * @brief Compute the contact Jacobian and contact acceleration
@@ -182,17 +191,17 @@ class ContactModelMultipleTpl {
   /**
    * @brief Return the dimension of active contacts
    */
-  const std::size_t& get_nc() const;
+  std::size_t get_nc() const;
 
   /**
    * @brief Return the dimension of all contacts
    */
-  const std::size_t& get_nc_total() const;
+  std::size_t get_nc_total() const;
 
   /**
    * @brief Return the dimension of control vector
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the names of the active contacts
@@ -208,6 +217,12 @@ class ContactModelMultipleTpl {
    * @brief Return the status of a given contact name
    */
   bool getContactStatus(const std::string& name) const;
+
+  /**
+   * @brief Print information on the contact models
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model);
 
  private:
   boost::shared_ptr<StateMultibody> state_;

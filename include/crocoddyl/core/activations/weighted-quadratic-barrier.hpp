@@ -9,10 +9,11 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_BARRIER_HPP_
 
+#include <pinocchio/utils/static-if.hpp>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include <pinocchio/utils/static-if.hpp>
+
 namespace crocoddyl {
 
 template <typename _Scalar>
@@ -81,6 +82,13 @@ class ActivationModelWeightedQuadraticBarrierTpl : public ActivationModelAbstrac
     }
     weights_ = weights;
   };
+
+  /**
+   * @brief Print relevant information of the quadratic barrier model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const { os << "ActivationModelWeightedQuadraticBarrier {nr=" << nr_ << "}"; }
 
  protected:
   using Base::nr_;

@@ -49,7 +49,7 @@ class ActivationModelSmooth2NormTpl : public ActivationModelAbstractTpl<_Scalar>
    * @param[in] nr   Dimension of the residual vector
    * @param[in] eps  Smoothing factor (default: 1.)
    */
-  explicit ActivationModelSmooth2NormTpl(const std::size_t& nr, const Scalar& eps = Scalar(1.)) : Base(nr), eps_(eps) {
+  explicit ActivationModelSmooth2NormTpl(const std::size_t nr, const Scalar eps = Scalar(1.)) : Base(nr), eps_(eps) {
     if (eps < Scalar(0.)) {
       throw_pretty("Invalid argument: "
                    << "eps should be a positive value");
@@ -99,6 +99,15 @@ class ActivationModelSmooth2NormTpl : public ActivationModelAbstractTpl<_Scalar>
   };
 
  protected:
+  /**
+   * @brief Print relevant information of the smooth-1norm model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const {
+    os << "ActivationModelSmooth2Norm {nr=" << nr_ << ", eps=" << eps_ << "}";
+  }
+
   using Base::nr_;  //!< Dimension of the residual vector
   Scalar eps_;      //!< Smoothing factor
 };

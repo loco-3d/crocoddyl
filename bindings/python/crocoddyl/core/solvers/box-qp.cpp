@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -61,19 +62,19 @@ void exposeSolverBoxQP() {
       .add_property("solution",
                     bp::make_function(&BoxQP::get_solution, bp::return_value_policy<bp::copy_const_reference>()),
                     "QP solution.")
-      .add_property("nx", bp::make_function(&BoxQP::get_nx, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&BoxQP::set_nx), "dimension of the decision vector.")
-      .add_property("maxiter",
-                    bp::make_function(&BoxQP::get_maxiter, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&BoxQP::set_maxiter), "maximum number of allowed iterations.")
-      .add_property("th_acceptStep",
-                    bp::make_function(&BoxQP::get_th_acceptstep, bp::return_value_policy<bp::copy_const_reference>()),
+      .add_property("nx", bp::make_function(&BoxQP::get_nx), bp::make_function(&BoxQP::set_nx),
+                    "dimension of the decision vector.")
+      .add_property("maxIter", bp::make_function(&BoxQP::get_maxiter), bp::make_function(&BoxQP::set_maxiter),
+                    "maximum number of allowed iterations.")
+      .add_property("maxiter", bp::make_function(&BoxQP::get_maxiter, deprecated<>("Deprecated. Use maxIter")),
+                    bp::make_function(&BoxQP::set_maxiter, deprecated<>("Deprecated. Use maxIter")),
+                    "maximum number of allowed iterations.")
+      .add_property("th_acceptStep", bp::make_function(&BoxQP::get_th_acceptstep),
                     bp::make_function(&BoxQP::set_th_acceptstep), "acceptable reduction ration.")
-      .add_property("th_grad",
-                    bp::make_function(&BoxQP::get_th_grad, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&BoxQP::set_th_grad), "convergence tolerance.")
-      .add_property("reg", bp::make_function(&BoxQP::get_reg, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&BoxQP::set_reg), "regularization value.")
+      .add_property("th_grad", bp::make_function(&BoxQP::get_th_grad), bp::make_function(&BoxQP::set_th_grad),
+                    "convergence tolerance.")
+      .add_property("reg", bp::make_function(&BoxQP::get_reg), bp::make_function(&BoxQP::set_reg),
+                    "regularization value.")
       .add_property("alphas",
                     bp::make_function(&BoxQP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
                     bp::make_function(&BoxQP::set_alphas), "list of step length (alpha) values");

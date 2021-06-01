@@ -57,17 +57,17 @@ class StateAbstractTpl {
    * @param[in] nx   Dimension of state configuration tuple
    * @param[in] ndx  Dimension of state tangent vector
    */
-  StateAbstractTpl(const std::size_t& nx, const std::size_t& ndx);
+  StateAbstractTpl(const std::size_t nx, const std::size_t ndx);
   StateAbstractTpl();
   virtual ~StateAbstractTpl();
 
   /**
-   * @brief Generate a zero reference state
+   * @brief Generate a zero state
    */
   virtual VectorXs zero() const = 0;
 
   /**
-   * @brief Generate a random reference state
+   * @brief Generate a random state
    */
   virtual VectorXs rand() const = 0;
 
@@ -237,22 +237,22 @@ class StateAbstractTpl {
   /**
    * @brief Return the dimension of the state tuple
    */
-  const std::size_t& get_nx() const;
+  std::size_t get_nx() const;
 
   /**
    * @brief Return the dimension of the tangent space of the state manifold
    */
-  const std::size_t& get_ndx() const;
+  std::size_t get_ndx() const;
 
   /**
    * @brief Return the dimension of the configuration tuple
    */
-  const std::size_t& get_nq() const;
+  std::size_t get_nq() const;
 
   /**
    * @brief Return the dimension of tangent space of the configuration manifold
    */
-  const std::size_t& get_nv() const;
+  std::size_t get_nv() const;
 
   /**
    * @brief Return the state lower bound
@@ -267,7 +267,7 @@ class StateAbstractTpl {
   /**
    * @brief Indicate if the state has defined limits
    */
-  bool const& get_has_limits() const;
+  bool get_has_limits() const;
 
   /**
    * @brief Modify the state lower bound

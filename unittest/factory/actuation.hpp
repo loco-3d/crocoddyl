@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,20 @@ class ActuationModelFactory {
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> create(ActuationModelTypes::Type actuation_type,
                                                               StateModelTypes::Type state_type) const;
 };
+
+/**
+ * @brief Update the actuation model needed for numerical differentiation.
+ * We use the address of the object to avoid a copy from the
+ * "boost::bind".
+ *
+ * @param model[in]  Pinocchio model
+ * @param data[out]  Pinocchio data
+ * @param x[in]      State vector
+ * @param u[in]      Control vector
+ */
+void updateActuation(const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
+                     const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data, const Eigen::VectorXd& x,
+                     const Eigen::VectorXd& u);
 
 }  // namespace unittest
 }  // namespace crocoddyl
