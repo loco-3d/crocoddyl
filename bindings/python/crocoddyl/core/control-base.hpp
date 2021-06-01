@@ -35,6 +35,14 @@ class ControlAbstract_wrap : public ControlAbstract, public bp::wrapper<ControlA
     return bp::call<Eigen::VectorXd>(this->get_override("value").ptr(), t, (Eigen::VectorXd)p);
   }
 
+  void value_inv(double t, const Eigen::Ref<const Eigen::VectorXd>& u, Eigen::Ref<Eigen::VectorXd> p_out) const{
+    p_out = value_inv_wrap(t, u);
+  }
+
+  Eigen::VectorXd value_inv_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u) const{
+    return bp::call<Eigen::VectorXd>(this->get_override("value_inv").ptr(), t, (Eigen::VectorXd)u);
+  }
+
   void convert_bounds(const Eigen::Ref<const Eigen::VectorXd>& u_lb, const Eigen::Ref<const Eigen::VectorXd>& u_ub,
                       Eigen::Ref<Eigen::VectorXd> p_lb, Eigen::Ref<Eigen::VectorXd> p_ub) const{
     bp::list res = convert_bounds_wrap(u_lb, u_ub);

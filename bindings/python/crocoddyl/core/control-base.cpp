@@ -28,6 +28,11 @@ void exposeControlAbstract() {
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
            ":return u value (dim control.nu).")
+      .def("value_inv", pure_virtual(&ControlAbstract_wrap::value_inv_wrap), bp::args("self", "t", "u"),
+           "Compute a value of the control parameters corresponding to the given control value.\n\n"
+           ":param t: normalized time in [0, 1].\n"
+           ":param u: control parameters (dim control.nu).\n"
+           ":return p value (dim control.np).")
       .def("convert_bounds", pure_virtual(&ControlAbstract_wrap::convert_bounds_wrap), bp::args("self", "u_lb", "u_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
            ":param u_lb: lower bounds on u (dim control.nu).\n"
