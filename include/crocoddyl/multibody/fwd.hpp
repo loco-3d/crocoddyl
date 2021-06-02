@@ -158,6 +158,11 @@ class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
 
+template <typename Scalar>
+class ResidualModelPairCollisionsTpl;
+template <typename Scalar>
+struct ResidualDataPairCollisionsTpl;
+
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
@@ -249,6 +254,11 @@ template <typename Scalar>
 class CostModelImpulseCoPPositionTpl;
 template <typename Scalar>
 using CostDataImpulseCoPPositionTpl = CostDataResidualTpl<Scalar>;
+
+template <typename Scalar>
+class CostModelPairCollisionsTpl;
+template <typename Scalar>
+using CostDataPairCollisionsTpl = CostDataResidualTpl<Scalar>;
 
 // impulse
 template <typename Scalar>
@@ -398,6 +408,8 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
+typedef ResidualModelPairCollisionsTpl<double> ResidualModelPairCollisions;
+typedef ResidualDataPairCollisionsTpl<double> ResidualDataPairCollisions;
 
 DEPRECATED("Use ResidualModelFrameTranslation with CostModelResidual",
            typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;)
@@ -449,9 +461,12 @@ DEPRECATED("Use ResidualDataContactFrictionCone", typedef CostDataResidualTpl<do
 DEPRECATED("Use ResidualModelContactCoPPosition with CostModelResidual",
            typedef CostModelImpulseCoPPositionTpl<double> CostModelImpulseCoPPosition;)
 DEPRECATED("Use ResidualDataContactCoPPosition", typedef CostDataResidualTpl<double> CostDataImpulseCoPPosition;)
-DEPRECATED("Use ResidualModelContactWrenchCone with CostModelResidual",
+DEPRECATED("Use ResidualModelImpulseWrenchCone with CostModelResidual",
            typedef CostModelImpulseWrenchConeTpl<double> CostModelImpulseWrenchCone;)
-DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<double> CostDataImpulseWrenchCone;)
+DEPRECATED("Use ResidualDataImpulseWrenchCone", typedef CostDataResidualTpl<double> CostDataImpulseWrenchCone;)
+DEPRECATED("Use ResidualModelPairCollisions with CostModelResidual",
+           typedef CostModelPairCollisionsTpl<double> CostModelPairCollisions;)
+DEPRECATED("Use ResidualDataPairCollisions", typedef CostDataResidualTpl<double> CostDataPairCollisions;)
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
