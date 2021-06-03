@@ -45,7 +45,7 @@ void exposeMultibody() {
   exposeResidualFrameTranslation();
   exposeResidualFrameVelocity();
   exposeResidualImpulseCoM();
-  exposeResidualPairCollisions();
+  exposeResidualPairCollision();
   exposeCostState();
   exposeCostCoMPosition();
   exposeCostControlGrav();
@@ -64,7 +64,6 @@ void exposeMultibody() {
   exposeCostImpulseFrictionCone();
   exposeCostImpulseWrenchCone();
   exposeCostImpulseCoPPosition();
-  exposeCostPairCollisions();
   exposeContact2D();
   exposeContact3D();
   exposeContact6D();

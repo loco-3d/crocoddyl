@@ -6,22 +6,24 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISIONS_HPP_
-#define CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISIONS_HPP_
+#ifndef CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
+#define CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
 
+#ifdef PINOCCHIO_WITH_HPP_FCL
+#include "pinocchio/multibody/fcl.hpp"
+#endif
+#include <pinocchio/multibody/geometry.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/algorithm/geometry.hpp>
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "pinocchio/multibody/geometry.hpp"
-#include "pinocchio/algorithm/jacobian.hpp"
-#include "pinocchio/algorithm/geometry.hpp"
-#include "pinocchio/multibody/fcl.hpp"
+
 
 namespace crocoddyl {
 
 /**
- * @brief Pair collisions residual
+ * @brief Pair collision residual
  *
  * This residual function defines the euclidean distance between a geometric collision pair as 
  * \f$\mathbf{r}=\mathbf{p}_1-\mathbf{p}_2^*\f$, where \f$\mathbf{p}_1,\mathbf{p}_2^*\in~\mathbb{R}^3\f$
@@ -37,25 +39,24 @@ namespace crocoddyl {
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelPairCollisionsTpl : public ResidualModelAbstractTpl<_Scalar> {
+class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualModelAbstractTpl<Scalar> Base;
-  typedef ResidualDataPairCollisionsTpl<Scalar> Data;
+  typedef ResidualDataPairCollisionTpl<Scalar> Data;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef pinocchio::GeometryModel GeometryModel;
   
-  typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the pair collisions residual model
+   * @brief Initialize the pair collision residual model
    *
    * @param[in] state  State of the multibody system
    * @param[in] nu   Dimension of the control vector
@@ -64,19 +65,19 @@ class ResidualModelPairCollisionsTpl : public ResidualModelAbstractTpl<_Scalar> 
    * @param[in] joint_id   Index of the nearest joint on which the collision link is attached
    */
   
-  ResidualModelPairCollisionsTpl(boost::shared_ptr<StateMultibody> state,
-                             const std::size_t& nu,
+  ResidualModelPairCollisionTpl(boost::shared_ptr<StateMultibody> state,
+                             const std::size_t nu,
                              boost::shared_ptr<GeometryModel> geom_model,
-                             const pinocchio::PairIndex& pair_id, 
-                             const pinocchio::JointIndex& joint_id);
+                             const pinocchio::PairIndex pair_id, 
+                             const pinocchio::JointIndex joint_id);
 
  
-  virtual ~ResidualModelPairCollisionsTpl();
+  virtual ~ResidualModelPairCollisionTpl();
 
    /**
-   * @brief Compute the pair collisions residual
+   * @brief Compute the pair collision residual
    *
-   * @param[in] data  Pair collisions residual data
+   * @param[in] data  Pair collision residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -84,9 +85,9 @@ class ResidualModelPairCollisionsTpl : public ResidualModelAbstractTpl<_Scalar> 
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
-   * @brief Compute the derivatives of the pair collisions residual
+   * @brief Compute the derivatives of the pair collision residual
    *
-   * @param[in] data  Pair collisions residual data
+   * @param[in] data  Pair collision residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -98,7 +99,17 @@ class ResidualModelPairCollisionsTpl : public ResidualModelAbstractTpl<_Scalar> 
   /**
    * @brief Return the Pinocchio geometry model
    */
-  const pinocchio::GeometryModel& get_geometryModel() const;
+  const pinocchio::GeometryModel& get_geometry() const;
+  
+  /**
+   * @brief Return the reference collision pair id
+   */
+  pinocchio::PairIndex get_pair_id() const;
+  
+  /**
+   * @brief Modify the reference collision pair id
+   */
+  void set_pair_id(const pinocchio::PairIndex pair_id);
 
  protected:
   using Base::nu_;
@@ -114,7 +125,7 @@ class ResidualModelPairCollisionsTpl : public ResidualModelAbstractTpl<_Scalar> 
 };
 
 template <typename _Scalar>
-struct ResidualDataPairCollisionsTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -124,11 +135,12 @@ struct ResidualDataPairCollisionsTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
   typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename MathBase::Vector3s Vector3s;
 
   template <template <typename Scalar> class Model>
-  ResidualDataPairCollisionsTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
+  ResidualDataPairCollisionTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
    : Base(model, data),
-     geom_data(pinocchio::GeometryData(model->get_geometryModel())),
+     geometry(pinocchio::GeometryData(model->get_geometry())),
      J(Matrix6xs::Zero(6, model->get_state()->get_nv())) {
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
@@ -138,9 +150,10 @@ struct ResidualDataPairCollisionsTpl : public ResidualDataAbstractTpl<_Scalar> {
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
-  pinocchio::GeometryData geom_data;    //!< Pinocchio geometry data
+  pinocchio::GeometryData geometry;        //!< Pinocchio geometry data
   pinocchio::DataTpl<Scalar>* pinocchio;   //!< Pinocchio data
-  Matrix6xs J;           //!< Jacobian at the collision joint
+  Matrix6xs J;                             //!< Jacobian at the collision joint
+  Vector3s d;                              //!< Vector from joint joint_id to collision point in world frame
   using Base::r;
   using Base::Ru;
   using Base::Rx;
@@ -152,6 +165,6 @@ struct ResidualDataPairCollisionsTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/multibody/residuals/pair-collisions.hxx"
+#include "crocoddyl/multibody/residuals/pair-collision.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISIONS_HPP_
+#endif  // CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_

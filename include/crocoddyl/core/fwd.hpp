@@ -98,9 +98,9 @@ template <typename Scalar>
 struct ActivationDataSmooth2NormTpl;
 
 template <typename Scalar>
-class ActivationModelNorm2BarrierTpl;
+class ActivationModel2NormBarrierTpl;
 template <typename Scalar>
-struct ActivationDataNorm2BarrierTpl;
+struct ActivationData2NormBarrierTpl;
 
 template <typename Scalar>
 class ActivationModelAbstractTpl;
@@ -247,8 +247,8 @@ typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmooth1Norm;
 typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmooth1Norm;
 typedef ActivationModelSmooth2NormTpl<double> ActivationModelSmooth2Norm;
 typedef ActivationDataSmooth2NormTpl<double> ActivationDataSmooth2Norm;
-typedef ActivationModelNorm2BarrierTpl<double> ActivationModelNorm2Barrier;
-typedef ActivationDataNorm2BarrierTpl<double> ActivationDataNorm2Barrier;
+typedef ActivationModel2NormBarrierTpl<double> ActivationModel2NormBarrier;
+typedef ActivationData2NormBarrierTpl<double> ActivationData2NormBarrier;
 typedef ActivationModelAbstractTpl<double> ActivationModelAbstract;
 typedef ActivationDataAbstractTpl<double> ActivationDataAbstract;
 

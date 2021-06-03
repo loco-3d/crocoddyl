@@ -49,7 +49,7 @@ void exposeActivationQuadraticBarrier();
 void exposeActivationWeightedQuadraticBarrier();
 void exposeActivationSmooth1Norm();
 void exposeActivationSmooth2Norm();
-void exposeActivationNorm2Barrier();
+void exposeActivation2NormBarrier();
 void exposeSolverDDP();
 void exposeSolverKKT();
 void exposeSolverFDDP();
