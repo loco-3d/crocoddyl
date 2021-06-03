@@ -119,6 +119,9 @@ class ControlPolyZeroTpl;
 template <typename Scalar>
 class ControlPolyOneTpl;
 
+template <typename Scalar>
+class ControlPolyTwoRK4Tpl;
+
 // actuation
 template <typename Scalar>
 class ActuationModelAbstractTpl;
@@ -264,6 +267,7 @@ typedef StateVectorTpl<double> StateVector;
 typedef ControlAbstractTpl<double> ControlAbstract;
 typedef ControlPolyZeroTpl<double> ControlPolyZero;
 typedef ControlPolyOneTpl<double> ControlPolyOne;
+typedef ControlPolyTwoRK4Tpl<double> ControlPolyTwoRK4;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
