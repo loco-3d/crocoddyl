@@ -39,6 +39,7 @@ void exposeCore() {
   exposeStateEuclidean();
   exposeControlPolyZero();
   exposeControlPolyOne();
+  exposeControlPolyTwoRK4();
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();

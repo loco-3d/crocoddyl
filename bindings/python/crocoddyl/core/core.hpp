@@ -41,6 +41,7 @@ void exposeSolverAbstract();
 void exposeStateEuclidean();
 void exposeControlPolyZero();
 void exposeControlPolyOne();
+void exposeControlPolyTwoRK4();
 void exposeActionUnicycle();
 void exposeActionLQR();
 void exposeDifferentialActionLQR();
