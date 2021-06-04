@@ -47,7 +47,7 @@ IF(DEFINED BUILD_UNIT_TESTS)
   MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
     If you are manually building Crocoddyl from source in an existing build folder,\
     we suggest that you delete your build folder and make a new one.")
-  SET(BUILD_TESTING ${BUILD_UNIT_TESTS})
+  OPTION(BUILD_TESTING ${BUILD_UNIT_TESTS})
 ENDIF(DEFINED BUILD_UNIT_TESTS)
 
 IF(ENABLE_VECTORIZATION)
