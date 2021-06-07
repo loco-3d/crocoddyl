@@ -4,7 +4,7 @@ import numpy as np
 
 
 class SimpleQuadrupedalGaitProblem:
-    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot):
+    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control=None):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
@@ -14,6 +14,11 @@ class SimpleQuadrupedalGaitProblem:
         self.rfFootId = self.rmodel.getFrameId(rfFoot)
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
+        self.integrator = integrator
+        if(control is None):
+            self.control = crocoddyl.ControlPolyZero(self.actuation.nu)
+        else:
+            self.control = control
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["standing"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
@@ -68,7 +73,7 @@ class SimpleQuadrupedalGaitProblem:
         comModels += comBackwardModels + [comBackwardTermModel]
 
         # Defining the shooting problem
-        problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
+        problem = crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
         return problem
 
     def createCoMGoalProblem(self, x0, comGoTo, timeStep, numKnots):
@@ -105,7 +110,7 @@ class SimpleQuadrupedalGaitProblem:
         comModels += comForwardModels + [comForwardTermModel]
 
         # Defining the shooting problem
-        problem = crocoddyl.ShootingProblem(x0, comModels, comModels[-1])
+        problem = crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
         return problem
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -156,7 +161,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createTrottingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -204,7 +209,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + rflhStep
         loco3dModel += doubleSupport + lfrhStep
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createPacingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -253,7 +258,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + rightSteps
         loco3dModel += doubleSupport + leftSteps
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createBoundingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
@@ -294,7 +299,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += doubleSupport + hindSteps
         loco3dModel += doubleSupport + frontSteps
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createJumpingProblem(self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots):
@@ -351,7 +356,7 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel += landingPhase
         loco3dModel += landed
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight, timeStep, numKnots, supportFootIds,
@@ -462,7 +467,10 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
+        if(self.integrator=='euler'):
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
+        elif(self.integrator=='rk4'):
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
         return model
 
     def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=False):
@@ -526,7 +534,10 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
+        if(self.integrator=='euler'):
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
+        elif(self.integrator=='rk4'):
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.0)
         return model
 
     def createImpulseModel(self, supportFootIds, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0):
