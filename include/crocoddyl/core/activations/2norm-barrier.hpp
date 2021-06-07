@@ -49,7 +49,8 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
    * The default `alpha` value is defined as 0.1.
    *
    * @param[in] nr   Dimension of the residual vector
-   * @param[in] alpha  Threshold factor (default: 0.1)
+   * @param[in] alpha   Threshold factor (default: 0.1)
+   * @param[in] true_hessian  Boolean indicating whether to use the Gauss-Newton approximation or true Hessian in computing the derivatives
    */
   explicit ActivationModel2NormBarrierTpl(const std::size_t nr, const Scalar alpha = Scalar(0.1), const bool true_hessian = false ) : 
     Base(nr), alpha_(alpha), true_hessian_(true_hessian) {
