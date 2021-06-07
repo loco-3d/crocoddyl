@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {

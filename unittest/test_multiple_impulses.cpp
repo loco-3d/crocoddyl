@@ -64,6 +64,10 @@ void test_constructor() {
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << model;
+
   // Test the initial size of the map
   BOOST_CHECK(model.get_impulses().size() == 0);
 }

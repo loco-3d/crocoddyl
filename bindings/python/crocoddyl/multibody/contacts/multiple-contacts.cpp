@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -43,16 +44,17 @@ void exposeContactMultiple() {
       .def_readwrite("name", &ContactItem::name, "contact name")
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model")
-      .def_readwrite("active", &ContactItem::active, "contact status");
+      .def_readwrite("active", &ContactItem::active, "contact status")
+      .def(PrintableVisitor<ContactItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
 
-  bp::class_<ContactModelMultiple>(
-      "ContactModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<int> >(bp::args("self", "state", "nu"),
-                                                                      "Initialize the multiple contact model.\n\n"
-                                                                      ":param state: state of the multibody system\n"
-                                                                      ":param nu: dimension of control vector"))
+  bp::class_<ContactModelMultiple>("ContactModelMultiple",
+                                   bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t> >(
+                                       bp::args("self", "state", "nu"),
+                                       "Initialize the multiple contact model.\n\n"
+                                       ":param state: state of the multibody system\n"
+                                       ":param nu: dimension of control vector"))
       .def("addContact", &ContactModelMultiple::addContact,
            ContactModelMultiple_addContact_wrap(bp::args("self", "name", "contact", "active"),
                                                 "Add a contact item.\n\n"
@@ -122,7 +124,8 @@ void exposeContactMultiple() {
           "name of inactive contact items")
       .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
            "Return the contact status of a given contact name.\n\n"
-           ":param name: contact name");
+           ":param name: contact name")
+      .def(PrintableVisitor<ContactModelMultiple>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
 

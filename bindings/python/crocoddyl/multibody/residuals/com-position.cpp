@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {

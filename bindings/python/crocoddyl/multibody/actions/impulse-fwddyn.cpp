@@ -8,7 +8,6 @@
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
-#include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -92,8 +91,7 @@ void exposeActionImpulseFwdDynamics() {
                     "Restitution coefficient that describes elastic impacts")
       .add_property("JMinvJt_damping", bp::make_function(&ActionModelImpulseFwdDynamics::get_damping_factor),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_damping_factor),
-                    "Damping factor for cholesky decomposition of JMinvJt")
-      .def(PrintableVisitor<ActionModelImpulseFwdDynamics>());
+                    "Damping factor for cholesky decomposition of JMinvJt");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataImpulseFwdDynamics> >();
 

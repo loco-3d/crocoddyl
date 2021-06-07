@@ -102,6 +102,13 @@ class ResidualModelCentroidalMomentumTpl : public ResidualModelAbstractTpl<_Scal
    */
   void set_reference(const Vector6s& href);
 
+  /**
+   * @brief Print relevant information of the centroidal-momentum residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   using Base::nu_;
   using Base::state_;

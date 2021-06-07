@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/impulse-base.hpp"
-
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/impulse-base.hpp"
 
 namespace crocoddyl {
 
@@ -42,6 +42,13 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   std::size_t get_frame() const;
+
+  /**
+   * @brief Print relevant information of the 6d impulse model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::state_;

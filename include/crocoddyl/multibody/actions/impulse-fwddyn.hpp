@@ -11,6 +11,13 @@
 
 #include <stdexcept>
 
+#include <pinocchio/algorithm/compute-all-terms.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/contact-dynamics.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
@@ -20,13 +27,6 @@
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
-
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/contact-dynamics.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
 
@@ -71,19 +71,14 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   void set_damping_factor(const Scalar damping);
 
   /**
-   * @brief Print information on the action model
+   * @brief Print relevant information of the impulase forward-dynamics model
+   *
+   * @param[out] os  Output stream object
    */
-  template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ActionModelImpulseFwdDynamicsTpl<Scalar>& model);
+  virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::state_;  //!< Model of the state
 
  private:
   boost::shared_ptr<ImpulseModelMultiple> impulses_;

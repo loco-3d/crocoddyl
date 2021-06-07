@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 
+#include <pinocchio/spatial/motion.hpp>
+#include <pinocchio/multibody/data.hpp>
+
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/frames.hpp"
-
-#include <pinocchio/spatial/motion.hpp>
-#include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
@@ -48,6 +48,13 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
 
   const FramePlacement& get_Mref() const;
   const Vector2s& get_gains() const;
+
+  /**
+   * @brief Print relevant information of the 6d contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::nc_;

@@ -18,11 +18,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct IntegratorTypes {
-  enum Type {
-    IntegratorEuler,
-    IntegratorRK4,
-    NbIntegratorTypes
-  };
+  enum Type { IntegratorEuler, IntegratorRK4, NbIntegratorTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -43,12 +39,12 @@ class IntegratorFactory {
   explicit IntegratorFactory();
   ~IntegratorFactory();
 
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(IntegratorTypes::Type type,
-                                                           boost::shared_ptr<DifferentialActionModelAbstract> model) const;
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
+      IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model) const;
 
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(IntegratorTypes::Type type,
-                                                           boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                                           boost::shared_ptr<ControlAbstract> control) const;
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
+      IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model,
+      boost::shared_ptr<ControlAbstract> control) const;
 
 };
 

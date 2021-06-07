@@ -8,7 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integr-action-base.hpp"
-#include "python/crocoddyl/utils/printable.hpp"
+// #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
@@ -71,8 +71,7 @@ void exposeIntegratedActionEuler() {
                     &IntegratedActionModelEuler::set_differential, "differential action model")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
-          &IntegratedActionModelEuler::set_dt, "step time")
-      .def(PrintableVisitor<IntegratedActionModelEuler>());
+          &IntegratedActionModelEuler::set_dt, "step time");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 

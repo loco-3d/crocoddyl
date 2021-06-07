@@ -59,4 +59,9 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelControlGravTpl<
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
+template <typename Scalar>
+void ResidualModelControlGravTpl<Scalar>::print(std::ostream &os) const {
+  os << "ResidualModelControlGrav";
+}
+
 }  // namespace crocoddyl

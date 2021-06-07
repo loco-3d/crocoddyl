@@ -48,10 +48,11 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
                            const Scalar tol = Scalar(1e-9));
 
   /**
-   * @brief Print information on the ActionModel
+   * @brief Print relevant information of the Euler integrator model
+   *
+   * @param[out] os  Output stream object
    */
-  template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const IntegratedActionModelEulerTpl<Scalar>& problem);
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active

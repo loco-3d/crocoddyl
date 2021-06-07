@@ -63,6 +63,13 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelFrameVelocityTp
 }
 
 template <typename Scalar>
+void ResidualModelFrameVelocityTpl<Scalar>::print(std::ostream& os) const {
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  os << "ResidualModelFrameVelocity {frame=" << pin_model_->frames[id_].name
+     << ", vref=" << vref_.toVector().transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelFrameVelocityTpl<Scalar>::get_id() const {
   return id_;
 }

@@ -196,11 +196,17 @@ class DifferentialActionModelAbstractTpl {
   void set_u_ub(const VectorXs& u_ub);
 
   /**
-   * @brief Print information on the DifferentialActionModel
+   * @brief Print information on the differential action model
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os,
-                                  const DifferentialActionModelAbstractTpl<Scalar>& diff_action_model);
+  friend std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the differential action model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   std::size_t nu_;                          //!< Control dimension

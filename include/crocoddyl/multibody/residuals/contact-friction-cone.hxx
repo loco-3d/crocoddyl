@@ -60,6 +60,13 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactFriction
 }
 
 template <typename Scalar>
+void ResidualModelContactFrictionConeTpl<Scalar>::print(std::ostream& os) const {
+  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
+  os << "ResidualModelContactFrictionCone {frame=" << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
+     << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelContactFrictionConeTpl<Scalar>::get_id() const {
   return id_;
 }

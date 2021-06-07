@@ -36,8 +36,8 @@ std::ostream& operator<<(std::ostream& os, IntegratorTypes::Type type) {
 IntegratorFactory::IntegratorFactory() {}
 IntegratorFactory::~IntegratorFactory() {}
 
-boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
-                                                                           boost::shared_ptr<DifferentialActionModelAbstract> model) const {
+boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(
+    IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model) const {
   boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:

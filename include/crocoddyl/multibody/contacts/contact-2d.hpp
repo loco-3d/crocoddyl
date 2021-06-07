@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,15 +9,15 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_2D_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/frames.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/contact-base.hpp"
-
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
+
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/contact-base.hpp"
 
 namespace crocoddyl {
 
@@ -51,6 +51,13 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
 
   const FrameTranslation& get_xref() const;
   const Vector2s& get_gains() const;
+
+  /**
+   * @brief Print relevant information of the 2d contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::nc_;

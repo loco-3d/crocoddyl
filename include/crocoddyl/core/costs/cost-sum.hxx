@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -220,6 +220,34 @@ bool CostModelSumTpl<Scalar>::getCostStatus(const std::string& name) const {
     std::cout << "Warning: we couldn't get the status of the " << name << " cost item, it doesn't exist." << std::endl;
     return false;
   }
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model) {
+  const std::vector<std::string>& active = model.get_active();
+  const std::vector<std::string>& inactive = model.get_inactive();
+  os << "CostModelSum:" << std::endl;
+  os << "  Active:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
+        model.get_costs().find(*it)->second;
+    if (it != --active.end()) {
+      os << "    " << *it << ": " << *cost_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *cost_item << std::endl;
+    }
+  }
+  os << "  Inactive:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+    const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
+        model.get_costs().find(*it)->second;
+    if (it != --inactive.end()) {
+      os << "    " << *it << ": " << *cost_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *cost_item;
+    }
+  }
+  return os;
 }
 
 }  // namespace crocoddyl

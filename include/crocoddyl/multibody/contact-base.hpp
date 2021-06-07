@@ -48,6 +48,19 @@ class ContactModelAbstractTpl {
   std::size_t get_nc() const;
   std::size_t get_nu() const;
 
+  /**
+   * @brief Print information on the contact model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the contact model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;

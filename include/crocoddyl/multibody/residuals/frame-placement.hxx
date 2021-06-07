@@ -65,6 +65,16 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelFramePlacementT
 }
 
 template <typename Scalar>
+void ResidualModelFramePlacementTpl<Scalar>::print(std::ostream& os) const {
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
+  typename SE3::Quaternion qref;
+  pinocchio::quaternion::assignQuaternion(qref, pref_.rotation());
+  os << "ResidualModelFramePlacement {frame=" << pin_model_->frames[id_].name
+     << ", tref=" << pref_.translation().transpose().format(fmt) << ", qref=" << qref.coeffs().transpose().format(fmt)
+     << "}";
+}
+
+template <typename Scalar>
 pinocchio::FrameIndex ResidualModelFramePlacementTpl<Scalar>::get_id() const {
   return id_;
 }

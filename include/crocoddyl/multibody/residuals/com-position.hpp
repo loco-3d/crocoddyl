@@ -95,6 +95,13 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void set_reference(const Vector3s& cref);
 
+  /**
+   * @brief Print relevant information of the com-position residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   using Base::nu_;
   using Base::state_;

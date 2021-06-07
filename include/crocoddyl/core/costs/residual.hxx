@@ -84,4 +84,9 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelResidualTpl<Scalar>::cr
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
 }
 
+template <typename Scalar>
+void CostModelResidualTpl<Scalar>::print(std::ostream& os) const {
+  os << "CostModelResidual {" << *residual_ << ", " << *activation_ << "}";
+}
+
 }  // namespace crocoddyl

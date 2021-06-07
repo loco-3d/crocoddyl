@@ -47,7 +47,7 @@ IF(DEFINED BUILD_UNIT_TESTS)
   MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
     If you are manually building Crocoddyl from source in an existing build folder,\
     we suggest that you delete your build folder and make a new one.")
-  SET(BUILD_TESTING ${BUILD_UNIT_TESTS})
+  OPTION(BUILD_TESTING ${BUILD_UNIT_TESTS})
 ENDIF(DEFINED BUILD_UNIT_TESTS)
 
 IF(ENABLE_VECTORIZATION)
@@ -183,7 +183,11 @@ ENDIF(BUILD_BENCHMARK)
 
 # Build the examples
 IF(BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY(examples)
+  IF(BUILD_PYTHON_INTERFACE)
+    ADD_SUBDIRECTORY(examples)
+  ELSE(BUILD_PYTHON_INTERFACE)
+    MESSAGE(WARNING "Python interface is not built, hence cannot build examples.")
+  ENDIF(BUILD_PYTHON_INTERFACE)
 ENDIF(BUILD_EXAMPLES)
 
 # PkgConfig packaging of the project

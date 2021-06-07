@@ -30,6 +30,10 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type, StateM
   const boost::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
       residual_factory.create(residual_type, state_type, actuation_model->get_nu());
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // Create the corresponding shared data
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());

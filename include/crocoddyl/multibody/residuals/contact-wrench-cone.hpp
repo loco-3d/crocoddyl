@@ -143,6 +143,13 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
    */
   void set_reference(const WrenchCone& reference);
 
+  /**
+   * @brief Print relevant information of the contact-wrench-cone residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   using Base::nu_;
   using Base::state_;

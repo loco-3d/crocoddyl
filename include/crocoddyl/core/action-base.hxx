@@ -96,6 +96,11 @@ bool ActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 std::size_t ActionModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
@@ -151,8 +156,8 @@ void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& action_model) {
-  os << "ActionModel type '" << boost::core::demangle(typeid(action_model).name()) << "'";
+std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& model) {
+  model.print(os);
   return os;
 }
 

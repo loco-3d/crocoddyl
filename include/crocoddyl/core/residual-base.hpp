@@ -156,6 +156,19 @@ class ResidualModelAbstractTpl {
    */
   bool get_u_dependent() const;
 
+  /**
+   * @brief Print information on the residual model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ResidualModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the residual model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   std::size_t nr_;                          //!< Residual vector dimension

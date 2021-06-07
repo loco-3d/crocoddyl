@@ -47,6 +47,19 @@ class ImpulseModelAbstractTpl {
   DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
   std::size_t get_nu() const;
 
+  /**
+   * @brief Print information on the impulse model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ImpulseModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the impulse model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;

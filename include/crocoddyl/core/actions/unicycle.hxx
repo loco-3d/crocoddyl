@@ -88,6 +88,11 @@ bool ActionModelUnicycleTpl<Scalar>::checkData(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelUnicycle {dt=" << dt_ << "}";
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ActionModelUnicycleTpl<Scalar>::get_cost_weights() const {
   return cost_weights_;
 }
