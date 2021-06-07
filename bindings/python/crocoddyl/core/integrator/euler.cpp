@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/integr-action-base.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
@@ -17,7 +17,7 @@ namespace python {
 void exposeIntegratedActionEuler() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelEuler> >();
 
-  bp::class_<IntegratedActionModelEuler, bp::bases<IntegratedActionModelAbstract> >(
+  bp::class_<IntegratedActionModelEuler, bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
       "IntegratedActionModelEuler",
       "Sympletic Euler integrator for differential action models.\n\n"
       "This class implements a sympletic Euler integrator (a.k.a semi-implicit\n"
@@ -76,7 +76,7 @@ void exposeIntegratedActionEuler() {
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 
-  bp::class_<IntegratedActionDataEuler, bp::bases<ActionDataAbstract> >(
+  bp::class_<IntegratedActionDataEuler, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataEuler", "Sympletic Euler integrator data.",
       bp::init<IntegratedActionModelEuler*>(bp::args("self", "model"),
                                             "Create sympletic Euler integrator data.\n\n"

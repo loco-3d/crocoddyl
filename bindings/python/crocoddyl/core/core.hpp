@@ -20,6 +20,7 @@ void exposeControlAbstract();
 void exposeActuationAbstract();
 void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
+void exposeIntegratedActionAbstract();
 void exposeResidualAbstract();
 void exposeActivationAbstract();
 void exposeSquashingAbstract();

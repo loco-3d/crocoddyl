@@ -17,6 +17,7 @@ void exposeCore() {
   exposeControlAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
+  exposeIntegratedActionAbstract();
   exposeDifferentialActionAbstract();
   exposeResidualAbstract();
   exposeActivationAbstract();

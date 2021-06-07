@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/integr-action-base.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
 namespace crocoddyl {
@@ -16,7 +16,7 @@ namespace python {
 void exposeIntegratedActionRK4() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelRK4> >();
 
-  bp::class_<IntegratedActionModelRK4, bp::bases<IntegratedActionModelAbstract> >(
+  bp::class_<IntegratedActionModelRK4, bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
       "IntegratedActionModelRK4",
       "RK4 integrator for differential action models.\n\n"
       "This class implements an RK4 integrator\n"
@@ -76,7 +76,7 @@ void exposeIntegratedActionRK4() {
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
-  bp::class_<IntegratedActionDataRK4, bp::bases<ActionDataAbstract> >(
+  bp::class_<IntegratedActionDataRK4, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataRK4", "RK4 integrator data.",
       bp::init<IntegratedActionModelRK4*>(bp::args("self", "model"),
                                           "Create RK4 integrator data.\n\n"
