@@ -17,7 +17,7 @@ namespace python {
 void exposeIntegratedActionEuler() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelEuler> >();
 
-  bp::class_<IntegratedActionModelEuler, bp::bases<ActionModelAbstract> >(
+  bp::class_<IntegratedActionModelEuler, bp::bases<IntegratedActionModelAbstract> >(
       "IntegratedActionModelEuler",
       "Sympletic Euler integrator for differential action models.\n\n"
       "This class implements a sympletic Euler integrator (a.k.a semi-implicit\n"

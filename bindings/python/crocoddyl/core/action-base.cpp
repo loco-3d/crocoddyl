@@ -77,9 +77,6 @@ void exposeActionAbstract() {
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")
       .add_property(
-          "np", bp::make_function(&ActionModelAbstract_wrap::get_np, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of control parameter vector")
-      .add_property(
           "nr", bp::make_function(&ActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector")
       .add_property(
