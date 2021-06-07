@@ -25,9 +25,9 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   Data* d = static_cast<Data*>(data.get());
@@ -47,9 +47,9 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u.size()) != control_->get_np()) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(control_->get_np()) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
   Data* d = static_cast<Data*>(data.get());
