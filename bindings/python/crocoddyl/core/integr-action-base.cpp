@@ -63,6 +63,9 @@ void exposeIntegratedActionAbstract() {
           "nr", bp::make_function(&IntegratedActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
           "dimension of cost-residual vector")
       .add_property(
+          "nu_diff", bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu_diff, bp::return_value_policy<bp::return_by_value>()),
+          "dimension of control vector of the differentiable model")
+      .add_property(
           "state",
           bp::make_function(&IntegratedActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state")
