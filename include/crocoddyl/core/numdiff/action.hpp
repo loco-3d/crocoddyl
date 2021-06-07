@@ -124,7 +124,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
   using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::control_;             //!< Control discretization
+  using Base::nu_;                  //!< Control dimension
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
@@ -183,21 +183,21 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
         Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
-        dp(model->get_np()),
+        du(model->get_nu()),
         xp(model->get_model()->get_state()->get_nx()) {
     Rx.setZero();
     Ru.setZero();
     dx.setZero();
-    dp.setZero();
+    du.setZero();
     xp.setZero();
 
     const std::size_t ndx = model->get_model()->get_state()->get_ndx();
-    const std::size_t np = model->get_model()->get_np();
+    const std::size_t nu = model->get_model()->get_nu();
     data_0 = model->get_model()->createData();
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData());
     }
-    for (std::size_t i = 0; i < np; ++i) {
+    for (std::size_t i = 0; i < nu; ++i) {
       data_u.push_back(model->get_model()->createData());
     }
   }
@@ -216,7 +216,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   MatrixXs Rx;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
   MatrixXs Ru;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
   VectorXs dx;                     //!< State disturbance
-  VectorXs dp;                     //!< Control parameters disturbance
+  VectorXs du;                     //!< Control disturbance
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
   std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation

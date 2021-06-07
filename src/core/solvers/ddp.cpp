@@ -148,7 +148,7 @@ double SolverDDP::stoppingCriteria() {
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
 
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t nu = models[t]->get_np();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       stop_ += Qu_[t].head(nu).squaredNorm();
     }
@@ -161,7 +161,7 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   const std::size_t T = this->problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t nu = models[t]->get_np();
+    const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
       d_[0] += Qu_[t].head(nu).dot(k_[t].head(nu));
       d_[1] -= k_[t].head(nu).dot(Quuk_[t].head(nu));
@@ -233,7 +233,7 @@ void SolverDDP::backwardPass() {
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
     const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const std::size_t nu = m->get_np();
+    const std::size_t nu = m->get_nu();
 
     Qxx_[t] = d->Lxx;
     Qx_[t] = d->Lx;
@@ -313,8 +313,8 @@ void SolverDDP::forwardPass(const double steplength) {
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-    if (m->get_np() != 0) {
-      const std::size_t nu = m->get_np();
+    if (m->get_nu() != 0) {
+      const std::size_t nu = m->get_nu();
 
       us_try_[t].head(nu).noalias() = us_[t].head(nu);
       us_try_[t].head(nu).noalias() -= k_[t].head(nu) * steplength;
@@ -347,7 +347,7 @@ void SolverDDP::forwardPass(const double steplength) {
 
 void SolverDDP::computeGains(const std::size_t t) {
   START_PROFILER("SolverDDP::computeGains");
-  const std::size_t nu = problem_->get_runningModels()[t]->get_np();
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     START_PROFILER("SolverDDP::Quu_inv");
     Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
@@ -432,7 +432,7 @@ void SolverDDP::allocateData() {
     dx_[t] = Eigen::VectorXd::Zero(ndx);
 
     FuTVxx_p_[t] = MatrixXdRowMajor::Zero(nu, ndx);
-    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(model->get_np());
+    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(model->get_nu());
     Quuk_[t] = Eigen::VectorXd(nu);
   }
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
