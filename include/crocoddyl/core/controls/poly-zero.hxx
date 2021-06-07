@@ -34,7 +34,7 @@ void ControlPolyZeroTpl<Scalar>::value(double, const Eigen::Ref<const VectorXs>&
 }
 
 template <typename Scalar>
-void ControlPolyZeroTpl<Scalar>::value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const{
+void ControlPolyZeroTpl<Scalar>::value_inv(double, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const{
   if (static_cast<std::size_t>(p_out.size()) != np_) {
     throw_pretty("Invalid argument: "
                 << "p_out has wrong dimension (it should be " + std::to_string(np_) + ")");
