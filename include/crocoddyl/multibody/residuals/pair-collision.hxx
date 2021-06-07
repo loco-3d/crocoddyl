@@ -50,7 +50,6 @@ void ResidualModelPairCollisionTpl<Scalar>::calcDiff(const boost::shared_ptr<Res
 
   // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
   d->d = d->geometry.distanceResults[pair_id_].nearest_points[0] - d->pinocchio->oMi[joint_id_].translation();
-  d->J.setZero();
   pinocchio::getJointJacobian(pin_model_, *d->pinocchio, joint_id_,
                               pinocchio::LOCAL_WORLD_ALIGNED, d->J);
   

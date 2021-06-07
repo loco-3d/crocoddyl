@@ -51,8 +51,8 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
    * @param[in] nr   Dimension of the residual vector
    * @param[in] alpha  Threshold factor (default: 0.1)
    */
-  explicit ActivationModel2NormBarrierTpl(const std::size_t nr, const Scalar& alpha = Scalar(0.1) ) : 
-    Base(nr), alpha_(alpha) {
+  explicit ActivationModel2NormBarrierTpl(const std::size_t nr, const Scalar alpha = Scalar(0.1), const bool true_hessian = false ) : 
+    Base(nr), alpha_(alpha), true_hessian_(true_hessian) {
 		if (alpha < Scalar(0.)) {
 			throw_pretty("Invalid argument: "
                    << "alpha should be a positive value");
@@ -97,10 +97,13 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
     
     if(d->d < alpha_) {
       data->Ar = (d->d - alpha_) / d->d * r;
-      data->Arr.diagonal() = r.array().square() / std::pow(d->d, 2); //GN Hessian approximation
-      
-      //data->Arr.diagonal() = alpha_ * r.array().square() / std::pow(d->d, 3); // True Hessian
-      //data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
+      if (true_hessian_) {
+		  data->Arr.diagonal() = alpha_ * r.array().square() / std::pow(d->d, 3); // True Hessian
+		  data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
+	  }
+	  else {
+		  data->Arr.diagonal() = r.array().square() / std::pow(d->d, 2); //GN Hessian approximation
+	  }
     }
     else {
       data->Ar.setZero();
@@ -125,8 +128,9 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
   void set_alpha(const Scalar& alpha) { alpha_ = alpha; };
 
  protected:
-  using Base::nr_;  //!< Dimension of the residual vector
-  Scalar alpha_;    //!< Threshold factor
+  using Base::nr_;    //!< Dimension of the residual vector
+  Scalar alpha_;      //!< Threshold factor
+  bool true_hessian_; //!< Use true hessian in calcDiff if true, Gauss-Newton approximation if false
 };
 
 template <typename _Scalar>

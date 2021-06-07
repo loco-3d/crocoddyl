@@ -21,10 +21,11 @@ void exposeActivation2NormBarrier() {
       "If the residual is over an alpha threshold, this function imposes a quadratic term. \n"
       "In short, the activation value is 0 if the residual is major to alpha, otherwise, it is \n"
       "equals to 0.5 *(||r|| - alpha)^2",
-      bp::init<std::size_t, double>(bp::args("self", "nr", "alpha"),
+      bp::init<std::size_t, bp::optional<double,bool> >(bp::args("self", "nr", "alpha", "true_hessian"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector\n"
-                    ":param alpha: activation threshold"))
+                    ":param alpha: activation threshold (default 0.1)\n"
+                    ":param true_hessian: use true hessian in calcDiff if true, else Gauss-Newton approximation"))
       .def("calc", &ActivationModel2NormBarrier::calc, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
