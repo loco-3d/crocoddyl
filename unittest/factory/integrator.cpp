@@ -36,9 +36,9 @@ std::ostream& operator<<(std::ostream& os, IntegratorTypes::Type type) {
 IntegratorFactory::IntegratorFactory() {}
 IntegratorFactory::~IntegratorFactory() {}
 
-boost::shared_ptr<crocoddyl::ActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
+boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
                                                                            boost::shared_ptr<DifferentialActionModelAbstract> model) const {
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
       action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model);
@@ -53,10 +53,10 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> IntegratorFactory::create(Inte
   return action;
 }
 
-boost::shared_ptr<crocoddyl::ActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
+boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
                                                                            boost::shared_ptr<DifferentialActionModelAbstract> model,
                                                                            boost::shared_ptr<ControlAbstract> control) const {
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
       action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model, control);

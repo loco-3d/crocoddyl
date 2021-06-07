@@ -12,7 +12,7 @@
 #include <iterator>
 
 #include "control.hpp"
-#include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/integr-action-base.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -43,10 +43,10 @@ class IntegratorFactory {
   explicit IntegratorFactory();
   ~IntegratorFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(IntegratorTypes::Type type,
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(IntegratorTypes::Type type,
                                                            boost::shared_ptr<DifferentialActionModelAbstract> model) const;
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(IntegratorTypes::Type type,
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(IntegratorTypes::Type type,
                                                            boost::shared_ptr<DifferentialActionModelAbstract> model,
                                                            boost::shared_ptr<ControlAbstract> control) const;
 

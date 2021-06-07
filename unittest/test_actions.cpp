@@ -77,7 +77,7 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
 
   // Generating random values for the state and control
   const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_np());
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);
@@ -121,7 +121,7 @@ void test_partial_derivatives_integrated_action_model(DifferentialActionModelTyp
   const boost::shared_ptr<crocoddyl::ControlAbstract>& ctrl = factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, dam, ctrl);
+  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model = factory_int.create(integrator_type, dam, ctrl);
   test_partial_derivatives_against_numdiff(model);
 }
 

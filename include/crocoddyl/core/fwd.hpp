@@ -43,6 +43,11 @@ struct DifferentialActionDataLQRTpl;
 
 // integrated action
 template <typename Scalar>
+class IntegratedActionModelAbstractTpl;
+template <typename Scalar>
+class IntegratedActionDataAbstractTpl;
+
+template <typename Scalar>
 class IntegratedActionModelEulerTpl;
 template <typename Scalar>
 struct IntegratedActionDataEulerTpl;
@@ -231,6 +236,8 @@ typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract
 typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
 typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
 
+typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
+typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
