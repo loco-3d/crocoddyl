@@ -15,7 +15,6 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
 
@@ -83,7 +82,7 @@ class ActionModelAbstractTpl {
    *
    * @param[in] data  Action data
    * @param[in] x     State point
-   * @param[in] u     Control input parameters
+   * @param[in] u     Control input
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
@@ -97,7 +96,7 @@ class ActionModelAbstractTpl {
    *
    * @param[in] data  Action data
    * @param[in] x     State point
-   * @param[in] u     Control input parameters
+   * @param[in] u     Control input
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
@@ -214,13 +213,13 @@ class ActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  std::size_t nu_;                              //!< Control dimension
-  std::size_t nr_;                              //!< Dimension of the cost residual
-  boost::shared_ptr<StateAbstract> state_;      //!< Model of the state
-  VectorXs unone_;                              //!< Neutral state
-  VectorXs u_lb_;                               //!< Lower control limits
-  VectorXs u_ub_;                               //!< Upper control limits
-  bool has_control_limits_;                     //!< Indicates whether any of the control limits is finite
+  std::size_t nu_;                          //!< Control dimension
+  std::size_t nr_;                          //!< Dimension of the cost residual
+  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  VectorXs unone_;                          //!< Neutral state
+  VectorXs u_lb_;                           //!< Lower control limits
+  VectorXs u_ub_;                           //!< Upper control limits
+  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined limits)

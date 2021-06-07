@@ -11,7 +11,6 @@
 #include <boost/core/demangle.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/controls/poly-zero.hpp"
 
 namespace crocoddyl {
 
@@ -45,9 +44,9 @@ template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
                                                  Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
                                                  const std::size_t maxiter, const Scalar tol) {
-  if (static_cast<std::size_t>(u.size()) != get_nu()) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(get_nu()) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -61,7 +60,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
   if (nu_ == 0) {
     // TODO(cmastalli): create a method for autonomous systems
   } else {
-    VectorXs du = VectorXs::Zero(get_nu());
+    VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
       calc(data, x, u);
       calcDiff(data, x, u);
@@ -79,7 +78,7 @@ template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStatic_x(
     const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, const std::size_t maxiter,
     const Scalar tol) {
-  VectorXs u(get_nu());
+  VectorXs u(nu_);
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);
   return u;
@@ -132,9 +131,9 @@ bool ActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::set_u_lb(const VectorXs& u_lb) {
-  if (static_cast<std::size_t>(u_lb.size()) != get_nu()) {
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "lower bound has wrong dimension (it should be " + std::to_string(get_nu()) + ")");
+                 << "lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   u_lb_ = u_lb;
   update_has_control_limits();
@@ -142,9 +141,9 @@ void ActionModelAbstractTpl<Scalar>::set_u_lb(const VectorXs& u_lb) {
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
-  if (static_cast<std::size_t>(u_ub.size()) != get_nu()) {
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "upper bound has wrong dimension (it should be " + std::to_string(get_nu()) + ")");
+                 << "upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   u_ub_ = u_ub;
   update_has_control_limits();

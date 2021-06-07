@@ -130,8 +130,6 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::u_ub_;                //!< Upper control limits
   using Base::unone_;               //!< Neutral state
 
-  VectorXs u_;  //!< Control inputs
-
  private:
   /**
    * @brief Make sure that when we finite difference the Action Model, the user
@@ -183,7 +181,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
         Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
-        du(model->get_nu()),
+        du(model->get_model()->get_nu()),
         xp(model->get_model()->get_state()->get_nx()) {
     Rx.setZero();
     Ru.setZero();

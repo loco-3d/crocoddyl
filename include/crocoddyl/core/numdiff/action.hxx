@@ -17,7 +17,6 @@ ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> mod
     : Base(model->get_state(), model->get_nu(), model->get_nr()), model_(model) {
   with_gauss_approx_ = with_gauss_approx;
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-  u_.resize(model->get_nu());
 }
 
 template <typename Scalar>
@@ -64,7 +63,6 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   // Computing the d action(x,u) / dx
   data_nd->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    
     data_nd->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     model_->calc(data_nd->data_x[ix], data_nd->xp, u);
@@ -83,9 +81,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
 
   // Computing the d action(x,u) / du
   data_nd->du.setZero();
-  for (unsigned iu = 0; iu < nu_; ++iu) {
+  for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     data_nd->du(iu) = disturbance_;
-    model_->calc(data_nd->data_u[iu], x, u+data_nd->du);
+    model_->calc(data_nd->data_u[iu], x, u + data_nd->du);
 
     const VectorXs& xn = data_nd->data_u[iu]->xnext;
     const Scalar c = data_nd->data_u[iu]->cost;
