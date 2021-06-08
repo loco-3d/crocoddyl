@@ -6,9 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/activations/2norm-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/activations/2norm-barrier.hpp"
 
 namespace crocoddyl {
 namespace python {
