@@ -1,10 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh, LAAS-CNRS, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef PINOCCHIO_WITH_HPP_FCL
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
@@ -76,3 +78,4 @@ void exposeResidualPairCollision() {
 
 }  // namespace python
 }  // namespace crocoddyl
+#endif

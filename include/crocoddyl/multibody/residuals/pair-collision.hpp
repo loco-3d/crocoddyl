@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,6 @@
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #include <pinocchio/multibody/fcl.hpp>
-#endif
 #include <pinocchio/multibody/geometry.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/geometry.hpp>
@@ -161,5 +160,7 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/pair-collision.hxx"
+
+#endif  // PINOCCHIO_WITH_HPP_FCL
 
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_

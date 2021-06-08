@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/pair-collision.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
