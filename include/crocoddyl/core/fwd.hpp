@@ -57,6 +57,11 @@ template <typename Scalar>
 struct IntegratedActionDataEulerTpl;
 
 template <typename Scalar>
+class IntegratedActionModelRK3Tpl;
+template <typename Scalar>
+struct IntegratedActionDataRK3Tpl;
+
+template <typename Scalar>
 class IntegratedActionModelRK4Tpl;
 template <typename Scalar>
 struct IntegratedActionDataRK4Tpl;
@@ -257,6 +262,8 @@ typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
 typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
+typedef IntegratedActionModelRK3Tpl<double> IntegratedActionModelRK3;
+typedef IntegratedActionDataRK3Tpl<double> IntegratedActionDataRK3;
 typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
 typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;
 

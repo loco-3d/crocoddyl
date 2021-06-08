@@ -26,6 +26,7 @@ void exposeCore() {
   exposeActuationSquashing();
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
+  exposeIntegratedActionRK3();
   exposeIntegratedActionRK4();
   exposeCostAbstract();
   exposeResidualControl();

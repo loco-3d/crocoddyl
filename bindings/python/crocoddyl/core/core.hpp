@@ -28,6 +28,7 @@ void exposeSquashingSmoothSat();
 void exposeActuationSquashing();
 void exposeDataCollectorActuation();
 void exposeIntegratedActionEuler();
+void exposeIntegratedActionRK3();
 void exposeIntegratedActionRK4();
 void exposeCostAbstract();
 void exposeResidualControl();
