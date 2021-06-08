@@ -19,23 +19,20 @@ namespace crocoddyl {
 template <typename Scalar>
 IntegratedActionModelRK3Tpl<Scalar>::IntegratedActionModelRK3Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual)
-{
+    : Base(model, time_step, with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
 IntegratedActionModelRK3Tpl<Scalar>::IntegratedActionModelRK3Tpl(
-  boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlAbstract> control,
-  const Scalar time_step, const bool with_cost_residual)
-  : Base(model, control, time_step, with_cost_residual)
-{
+    boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlAbstract> control,
+    const Scalar time_step, const bool with_cost_residual)
+    : Base(model, control, time_step, with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::init()
-{
+void IntegratedActionModelRK3Tpl<Scalar>::init() {
   VectorXs p_lb(nu_), p_ub(nu_);
   control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
   Base::set_u_lb(p_lb);
@@ -44,13 +41,13 @@ void IntegratedActionModelRK3Tpl<Scalar>::init()
     time_step_ = Scalar(1e-3);
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
-  enable_integration_ = true; 
+  enable_integration_ = true;
   if (time_step_ == Scalar(0.)) {
     enable_integration_ = false;
   }
   rk3_c_.push_back(Scalar(0.));
-  rk3_c_.push_back(Scalar(1./3.));
-  rk3_c_.push_back(Scalar(2./3.));
+  rk3_c_.push_back(Scalar(1. / 3.));
+  rk3_c_.push_back(Scalar(2. / 3.));
 }
 
 template <typename Scalar>
@@ -132,19 +129,22 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
     d->dki_dx[0] = d->dki_dy[0];
     d->dki_dudiff[0].bottomRows(nv) = d->differential[0]->Fu;
-    control_->multiplyByDValue(0.0, p, d->dki_dudiff[0], d->dki_du[0]); // dki_du = dki_dudiff * dudiff_du
+    control_->multiplyByDValue(0.0, p, d->dki_dudiff[0], d->dki_du[0]);  // dki_du = dki_dudiff * dudiff_du
 
     d->dli_dx[0] = d->differential[0]->Lx;
     // d->dli_dudiff[0] = d->differential[0]->Lu;
     // control_->multiplyByDValue(0.0, p, d->differential[0]->Lu, d->dli_du[0]); // dli_du = dli_dudiff * dudiff_du
-    control_->multiplyDValueTransposeBy(0.0, p, d->differential[0]->Lu, d->dli_du[0]); // dli_du = dli_dudiff * dudiff_du
+    control_->multiplyDValueTransposeBy(0.0, p, d->differential[0]->Lu,
+                                        d->dli_du[0]);  // dli_du = dli_dudiff * dudiff_du
 
     d->ddli_ddx[0] = d->differential[0]->Lxx;
     d->ddli_ddudiff[0] = d->differential[0]->Luu;
-    control_->multiplyByDValue(0.0, p, d->ddli_ddudiff[0], d->ddli_dudiffdu[0]);          // ddli_dudiffdu = ddli_ddudiff * dudiff_du
-    control_->multiplyDValueTransposeBy(0.0, p, d->ddli_dudiffdu[0], d->ddli_ddu[0]); // ddli_ddu = dudiff_du.T * ddli_dudiffdu
+    control_->multiplyByDValue(0.0, p, d->ddli_ddudiff[0],
+                               d->ddli_dudiffdu[0]);  // ddli_dudiffdu = ddli_ddudiff * dudiff_du
+    control_->multiplyDValueTransposeBy(0.0, p, d->ddli_dudiffdu[0],
+                                        d->ddli_ddu[0]);  // ddli_ddu = dudiff_du.T * ddli_dudiffdu
     d->ddli_dxdudiff[0] = d->differential[0]->Lxu;
-    control_->multiplyByDValue(0.0, p, d->ddli_dxdudiff[0], d->ddli_dxdu[0]);         // ddli_dxdu = ddli_dxdudiff * dudiff_du
+    control_->multiplyByDValue(0.0, p, d->ddli_dxdudiff[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdudiff * dudiff_du
 
     for (std::size_t i = 1; i < 3; ++i) {
       control_->value(rk3_c_[i], p, d->u_diff[i]);
@@ -157,31 +157,37 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i];
 
       d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk3_c_[i] * time_step_;
-      differential_->get_state()->JintegrateTransport(x, d->dx_rk3[i], d->dyi_du[i], second); // dyi_du = Jintegrate * dyi_du
-      d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i]; // TODO: optimize this matrix-matrix multiplication
+      differential_->get_state()->JintegrateTransport(x, d->dx_rk3[i], d->dyi_du[i],
+                                                      second);  // dyi_du = Jintegrate * dyi_du
+      d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
       d->dki_dudiff[i].bottomRows(nv) = d->differential[i]->Fu;
-      control_->multiplyByDValue(rk3_c_[i], p, d->dki_dudiff[i], d->dfi_du[i]); // dfi_du = dki_dudiff * dudiff_du
+      control_->multiplyByDValue(rk3_c_[i], p, d->dki_dudiff[i], d->dfi_du[i]);  // dfi_du = dki_dudiff * dudiff_du
       d->dki_du[i] += d->dfi_du[i];
 
       d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
       // d->dli_dudiff[i].noalias() = d->differential[i]->Lu.transpose();
-      // control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Lu.transpose(), d->dli_du[i]); // dli_du = Lu * dudiff_du
-      control_->multiplyDValueTransposeBy(rk3_c_[i], p, d->differential[i]->Lu, d->dli_du[i]); // dli_du = Lu * dudiff_du
+      // control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Lu.transpose(), d->dli_du[i]); // dli_du = Lu *
+      // dudiff_du
+      control_->multiplyDValueTransposeBy(rk3_c_[i], p, d->differential[i]->Lu,
+                                          d->dli_du[i]);  // dli_du = Lu * dudiff_du
       d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
 
       d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
       d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
 
-      control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Lxu, d->Lxu_i[i]); // Lxu = Lxudiff * dudiff_du
+      control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Lxu, d->Lxu_i[i]);  // Lxu = Lxudiff * dudiff_du
       d->Luu_partialx[i].noalias() = d->Lxu_i[i].transpose() * d->dyi_du[i];
       d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-      control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Luu, d->ddli_dudiffdu[i]); // ddli_dudiffdu = ddli_ddudiff * dudiff_du
-      control_->multiplyDValueTransposeBy(rk3_c_[i], p, d->ddli_dudiffdu[i], d->ddli_ddu[i]); // ddli_ddu = dudiff_du.T * ddli_dudiffdu
-      d->ddli_ddu[i].noalias() += d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
-                                  d->dyi_du[i].transpose() * d->Lxx_partialu[i];
+      control_->multiplyByDValue(rk3_c_[i], p, d->differential[i]->Luu,
+                                 d->ddli_dudiffdu[i]);  // ddli_dudiffdu = ddli_ddudiff * dudiff_du
+      control_->multiplyDValueTransposeBy(rk3_c_[i], p, d->ddli_dudiffdu[i],
+                                          d->ddli_ddu[i]);  // ddli_ddu = dudiff_du.T * ddli_dudiffdu
+      d->ddli_ddu[i].noalias() +=
+          d->Luu_partialx[i].transpose() + d->Luu_partialx[i] + d->dyi_du[i].transpose() * d->Lxx_partialu[i];
 
       d->ddli_dxdudiff[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
-      control_->multiplyByDValue(rk3_c_[i], p, d->ddli_dxdudiff[i], d->ddli_dxdu[i]); // ddli_dxdu = ddli_dxdudiff * dudiff_du
+      control_->multiplyByDValue(rk3_c_[i], p, d->ddli_dxdudiff[i],
+                                 d->ddli_dxdu[i]);  // ddli_dxdu = ddli_dxdudiff * dudiff_du
       d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
     }
 

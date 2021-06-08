@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ControlTypes {
-  enum Type { PolyZero, PolyOne, PolyTwoRK4, NbControlTypes };
+  enum Type { PolyZero, PolyOne, PolyTwoRK3, PolyTwoRK4, NbControlTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

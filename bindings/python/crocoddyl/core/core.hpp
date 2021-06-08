@@ -43,6 +43,7 @@ void exposeSolverAbstract();
 void exposeStateEuclidean();
 void exposeControlParametrizationPolyZero();
 void exposeControlParametrizationPolyOne();
+void exposeControlParametrizationPolyTwoRK3();
 void exposeControlParametrizationPolyTwoRK4();
 void exposeActionUnicycle();
 void exposeActionLQR();

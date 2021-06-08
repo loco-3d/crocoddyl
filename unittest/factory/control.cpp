@@ -10,6 +10,7 @@
 #include "control.hpp"
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/controls/poly-one.hpp"
+#include "crocoddyl/core/controls/poly-two-rk3.hpp"
 #include "crocoddyl/core/controls/poly-two-rk4.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -25,6 +26,9 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
       break;
     case ControlTypes::PolyOne:
       os << "PolyOne";
+      break;
+    case ControlTypes::PolyTwoRK3:
+      os << "PolyTwoRK3";
       break;
     case ControlTypes::PolyTwoRK4:
       os << "PolyTwoRK4";
@@ -50,6 +54,9 @@ boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory
       break;
     case ControlTypes::PolyOne:
       control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
+      break;
+    case ControlTypes::PolyTwoRK3:
+      control = boost::make_shared<crocoddyl::ControlPolyTwoRK3>(nu);
       break;
     case ControlTypes::PolyTwoRK4:
       control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK4>(nu);
