@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC,
+//                          University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/integr-action-base.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
 namespace crocoddyl {
@@ -16,7 +17,7 @@ namespace python {
 void exposeIntegratedActionRK4() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelRK4> >();
 
-  bp::class_<IntegratedActionModelRK4, bp::bases<ActionModelAbstract> >(
+  bp::class_<IntegratedActionModelRK4, bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
       "IntegratedActionModelRK4",
       "RK4 integrator for differential action models.\n\n"
       "This class implements an RK4 integrator\n"
@@ -30,6 +31,14 @@ void exposeIntegratedActionRK4() {
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
           "Initialize the RK4 integrator.\n\n"
           ":param diffModel: differential action model\n"
+          ":param stepTime: step time (default 1e-3)\n"
+          ":param withCostResidual: includes the cost residuals and derivatives."))
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
+                    boost::shared_ptr<ControlAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
+          "Initialize the RK4 integrator.\n\n"
+          ":param diffModel: differential action model\n"
+          ":param control: the control parametrization\n"
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
@@ -68,7 +77,7 @@ void exposeIntegratedActionRK4() {
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
-  bp::class_<IntegratedActionDataRK4, bp::bases<ActionDataAbstract> >(
+  bp::class_<IntegratedActionDataRK4, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataRK4", "RK4 integrator data.",
       bp::init<IntegratedActionModelRK4*>(bp::args("self", "model"),
                                           "Create RK4 integrator data.\n\n"
@@ -85,11 +94,16 @@ void exposeIntegratedActionRK4() {
                     "List with the RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
                     "List with the states where f is evaluated in the RK4 integration scheme")
+      .add_property("u_diff", bp::make_getter(&IntegratedActionDataRK4::u_diff, bp::return_internal_reference<>()),
+                    "Control inputs evaluated in the RK4 integration scheme")
       .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the state of the RK4 "
                     "integration method. d(x+dx)/dx")
+      .add_property("dki_dudiff", bp::make_getter(&IntegratedActionDataRK4::dki_dudiff, bp::return_internal_reference<>()),
+                    "List with the partial derivatives of dynamics with respect to to the control of the differential model "
+                    "integration method. d(x+dx)/dudiff")
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK4::dki_du, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the control of the RK4 "
                     "integration method. d(x+dx)/du")

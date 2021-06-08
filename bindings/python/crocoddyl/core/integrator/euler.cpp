@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
+//                          University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/integr-action-base.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
@@ -16,7 +17,7 @@ namespace python {
 void exposeIntegratedActionEuler() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelEuler> >();
 
-  bp::class_<IntegratedActionModelEuler, bp::bases<ActionModelAbstract> >(
+  bp::class_<IntegratedActionModelEuler, bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
       "IntegratedActionModelEuler",
       "Sympletic Euler integrator for differential action models.\n\n"
       "This class implements a sympletic Euler integrator (a.k.a semi-implicit\n"
@@ -27,6 +28,14 @@ void exposeIntegratedActionEuler() {
           "Initialize the sympletic Euler integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
+          ":param withCostResidual: includes the cost residuals and derivatives."))
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
+                    boost::shared_ptr<ControlAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
+          "Initialize the Euler integrator.\n\n"
+          ":param diffModel: differential action model\n"
+          ":param control: the control parametrization\n"
+          ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                 const Eigen::Ref<const Eigen::VectorXd>&,
@@ -66,7 +75,7 @@ void exposeIntegratedActionEuler() {
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 
-  bp::class_<IntegratedActionDataEuler, bp::bases<ActionDataAbstract> >(
+  bp::class_<IntegratedActionDataEuler, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataEuler", "Sympletic Euler integrator data.",
       bp::init<IntegratedActionModelEuler*>(bp::args("self", "model"),
                                             "Create sympletic Euler integrator data.\n\n"
