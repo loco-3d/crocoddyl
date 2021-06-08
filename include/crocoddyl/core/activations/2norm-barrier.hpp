@@ -22,7 +22,7 @@ namespace crocoddyl {
  *
  * This activation function describes a quadratic barrier of the 2-norm of a
  * residual vector, i.e. \f[ \begin{equation} \frac{1}{2} (d - \alpha)^2 \end{equation} \f] if \f$d < \alpha\f$ ,
- * else \f$0$\f, where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the 
+ * else \f$0$\f, where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the
  * barrier is active, \f$nr\f$ is the dimension of the residual vector.
  *
  * The computation of the function and it derivatives are carried out in `calc()` and `caldDiff()`, respectively.
@@ -40,28 +40,30 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
   typedef ActivationModelAbstractTpl<Scalar> Base;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef ActivationData2NormBarrierTpl<Scalar> Data;
-  
+
   typedef typename MathBase::VectorXs VectorXs;
 
-   /**
+  /**
    * @brief Initialize the 2norm-barrier activation model
    *
    * The default `alpha` value is defined as 0.1.
    *
-   * @param[in] nr   Dimension of the residual vector
-   * @param[in] alpha   Threshold factor (default: 0.1)
-   * @param[in] true_hessian  Boolean indicating whether to use the Gauss-Newton approximation or true Hessian in computing the derivatives (default: false)
+   * @param[in] nr            Dimension of the residual vector
+   * @param[in] alpha         Threshold factor (default: 0.1)
+   * @param[in] true_hessian  Boolean indicating whether to use the Gauss-Newton approximation or true Hessian in
+   * computing the derivatives (default: false)
    */
-  explicit ActivationModel2NormBarrierTpl(const std::size_t nr, const Scalar alpha = Scalar(0.1), const bool true_hessian = false ) : 
-    Base(nr), alpha_(alpha), true_hessian_(true_hessian) {
-		if (alpha < Scalar(0.)) {
-			throw_pretty("Invalid argument: "
+  explicit ActivationModel2NormBarrierTpl(const std::size_t nr, const Scalar alpha = Scalar(0.1),
+                                          const bool true_hessian = false)
+      : Base(nr), alpha_(alpha), true_hessian_(true_hessian) {
+    if (alpha < Scalar(0.)) {
+      throw_pretty("Invalid argument: "
                    << "alpha should be a positive value");
-        }
-	};
+    }
+  };
   virtual ~ActivationModel2NormBarrierTpl(){};
 
-   /**
+  /**
    * @brief Compute the 2norm-barrier function
    *
    * @param[in] data  2norm-barrier activation data
@@ -75,14 +77,13 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     d->d = r.norm();
-    if(d->d < alpha_) {
+    if (d->d < alpha_) {
       data->a_value = Scalar(0.5) * (d->d - alpha_) * (d->d - alpha_);
-    }
-    else {
+    } else {
       data->a_value = Scalar(0.0);
     }
   };
-  
+
   /**
    * @brief Compute the derivatives of the 2norm-barrier function
    *
@@ -95,18 +96,16 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
                    << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-    
-    if(d->d < alpha_) {
+
+    if (d->d < alpha_) {
       data->Ar = (d->d - alpha_) / d->d * r;
       if (true_hessian_) {
-		  data->Arr.diagonal() = alpha_ * r.array().square() / std::pow(d->d, 3); // True Hessian
-		  data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
-	  }
-	  else {
-		  data->Arr.diagonal() = r.array().square() / std::pow(d->d, 2); //GN Hessian approximation
-	  }
-    }
-    else {
+        data->Arr.diagonal() = alpha_ * r.array().square() / std::pow(d->d, 3);  // True Hessian
+        data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
+      } else {
+        data->Arr.diagonal() = r.array().square() / std::pow(d->d, 2);  // GN Hessian approximation
+      }
+    } else {
       data->Ar.setZero();
       data->Arr.setZero();
     }
@@ -120,18 +119,18 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
-  
+
   /**
-  * @brief Get and set the threshold factor
-  *
-  */
+   * @brief Get and set the threshold factor
+   *
+   */
   const Scalar& get_alpha() const { return alpha_; };
   void set_alpha(const Scalar& alpha) { alpha_ = alpha; };
 
  protected:
-  using Base::nr_;    //!< Dimension of the residual vector
-  Scalar alpha_;      //!< Threshold factor
-  bool true_hessian_; //!< Use true hessian in calcDiff if true, Gauss-Newton approximation if false
+  using Base::nr_;     //!< Dimension of the residual vector
+  Scalar alpha_;       //!< Threshold factor
+  bool true_hessian_;  //!< Use true hessian in calcDiff if true, Gauss-Newton approximation if false
 };
 
 template <typename _Scalar>
@@ -142,13 +141,10 @@ struct ActivationData2NormBarrierTpl : public ActivationDataAbstractTpl<_Scalar>
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
-  explicit ActivationData2NormBarrierTpl(Activation* const activation)
-    : Base(activation),
-      d(Scalar(0))
-  {}
+  explicit ActivationData2NormBarrierTpl(Activation* const activation) : Base(activation), d(Scalar(0)) {}
 
   Scalar d;  //!< Norm of the residual
-  
+
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;
