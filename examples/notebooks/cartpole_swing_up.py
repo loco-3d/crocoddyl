@@ -8,7 +8,7 @@ import crocoddyl
 
 class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract):
     def __init__(self):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(4), 1, 6)  # nu = 1; nr = 6
+        crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(4), 1, 6)  # nv = 1; nu = 6
         self.unone = np.zeros(self.nu)
 
         self.m1 = 1.
