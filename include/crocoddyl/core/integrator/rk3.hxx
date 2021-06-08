@@ -226,7 +226,7 @@ bool IntegratedActionModelRK3Tpl<Scalar>::checkData(const boost::shared_ptr<Acti
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
     return differential_->checkData(d->differential[0]) && differential_->checkData(d->differential[2]) &&
-           differential_->checkData(d->differential[1]) && differential_->checkData(d->differential[3]);
+           differential_->checkData(d->differential[1]);
   } else {
     return false;
   }
