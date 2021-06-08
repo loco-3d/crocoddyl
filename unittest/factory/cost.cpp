@@ -28,7 +28,7 @@ namespace unittest {
 const std::vector<CostModelTypes::Type> CostModelTypes::all(CostModelTypes::init_all());
 const std::vector<CostModelNoFFTypes::Type> CostModelNoFFTypes::all(CostModelNoFFTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os, CostModelTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
   switch (type) {
     case CostModelTypes::CostModelResidualState:
       os << "CostModelResidualState";
