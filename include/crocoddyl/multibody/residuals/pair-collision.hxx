@@ -18,8 +18,8 @@ ResidualModelPairCollisionTpl<Scalar>::ResidualModelPairCollisionTpl(boost::shar
                                                                      const pinocchio::PairIndex pair_id,
                                                                      const pinocchio::JointIndex joint_id)
     : Base(state, 3, nu, true, false, false),
-      geom_model_(geom_model),
       pin_model_(*state->get_pinocchio()),
+      geom_model_(geom_model),
       pair_id_(pair_id),
       joint_id_(joint_id) {}
 
@@ -45,7 +45,7 @@ void ResidualModelPairCollisionTpl<Scalar>::calc(const boost::shared_ptr<Residua
 
 template <typename Scalar>
 void ResidualModelPairCollisionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
-                                                     const Eigen::Ref<const VectorXs> &x,
+                                                     const Eigen::Ref<const VectorXs> &,
                                                      const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
 

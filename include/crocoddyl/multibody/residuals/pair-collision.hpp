@@ -10,7 +10,7 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
-#include "pinocchio/multibody/fcl.hpp"
+#include <pinocchio/multibody/fcl.hpp>
 #endif
 #include <pinocchio/multibody/geometry.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
