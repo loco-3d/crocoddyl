@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,9 @@
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/2norm-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "../random_generator.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -48,6 +50,9 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
     case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
       os << "ActivationModelWeightedQuadraticBarrier";
       break;
+    case ActivationModelTypes::ActivationModel2NormBarrier:
+      os << "ActivationModel2NormBarrier";
+      break;
     case ActivationModelTypes::NbActivationModelTypes:
       os << "NbActivationModelTypes";
       break;
@@ -68,6 +73,7 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
   Eigen::VectorXd weights = 1. * Eigen::VectorXd::Random(nr);
   double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double eps = fabs(Eigen::VectorXd::Random(1)[0]);
+  bool hessian = random_boolean();
 
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
@@ -94,6 +100,9 @@ boost::shared_ptr<crocoddyl::ActivationModelAbstract> ActivationModelFactory::cr
     case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
       activation = boost::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
           crocoddyl::ActivationBounds(lb, ub), weights);
+      break;
+    case ActivationModelTypes::ActivationModel2NormBarrier:
+      activation = boost::make_shared<crocoddyl::ActivationModel2NormBarrier>(nr, alpha, hessian);
       break;
     default:
       throw_pretty(__FILE__ ":\n Construct wrong ActivationModelTypes::Type");
