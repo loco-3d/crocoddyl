@@ -25,7 +25,7 @@ void exposeActivation2NormBarrier() {
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector\n"
                     ":param alpha: activation threshold (default 0.1)\n"
-                    ":param true_hessian: use true hessian in calcDiff if true, else Gauss-Newton approximation"))
+                    ":param true_hessian: use true hessian in calcDiff if true, else Gauss-Newton approximation (default false)"))
       .def("calc", &ActivationModel2NormBarrier::calc, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
