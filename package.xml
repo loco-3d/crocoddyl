@@ -21,6 +21,8 @@
   <depend condition="$ROS_PYTHON_VERSION == 2">python-numpy</depend>
   <depend condition="$ROS_PYTHON_VERSION == 3">python3</depend>
   <depend condition="$ROS_PYTHON_VERSION == 3">python3-numpy</depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-scipy</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-scipy</test_depend>
   <depend>boost</depend>
   <depend>eigenpy</depend>
   <depend>example-robot-data</depend>
