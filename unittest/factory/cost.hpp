@@ -55,8 +55,22 @@ struct CostModelNoFFTypes {
   static const std::vector<Type> all;
 };
 
+struct CostModelCollisionTypes {
+  enum Type { CostModelResidualPairCollision, NbCostModelCollisionTypes };
+  static std::vector<Type> init_all() {
+    std::vector<Type> v;
+    v.clear();
+    for (int i = 0; i < NbCostModelCollisionTypes; ++i) {
+      v.push_back((Type)i);
+    }
+    return v;
+  }
+  static const std::vector<Type> all;
+};
+
 std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type);
 std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type);
+std::ostream& operator<<(std::ostream& os, CostModelCollisionTypes::Type type);
 
 class CostModelFactory {
  public:
@@ -73,6 +87,9 @@ class CostModelFactory {
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
   boost::shared_ptr<crocoddyl::CostModelAbstract> create(
       CostModelNoFFTypes::Type cost_type, ActivationModelTypes::Type activation_type,
+      std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
+  boost::shared_ptr<crocoddyl::CostModelAbstract> create(
+      CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
