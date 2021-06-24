@@ -188,6 +188,8 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   return cost;
 }
 
+#ifdef PINOCCHIO_WITH_HPP_FCL
+
 boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostModelCollisionTypes::Type cost_type,
 																		 StateModelTypes::Type state_type,
                                                                          std::size_t nu) const {
@@ -233,6 +235,8 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   }
   return cost;
 }
+
+#endif  // PINOCCHIO_WITH_HPP_FCL
 
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTypes::Type state_type, std::size_t nu) {
   static bool once = true;
