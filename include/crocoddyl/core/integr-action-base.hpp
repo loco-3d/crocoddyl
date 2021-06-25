@@ -28,14 +28,15 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef IntegratedActionDataEulerTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
-  typedef ControlAbstractTpl<Scalar> ControlAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ControlParametrizationModelAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelAbstractTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                                   const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   IntegratedActionModelAbstractTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                  boost::shared_ptr<ControlAbstract> control,
+                                  boost::shared_ptr<ControlParametrizationModelAbstract> control,
                                   const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelAbstractTpl();
 
@@ -43,7 +44,7 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   const Scalar get_dt() const;
 
   void set_dt(const Scalar dt);
-  void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
+  // void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
   /**
    * @brief Return the dimension of the control input of the differential action model
@@ -61,7 +62,8 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
   void init();
   
-  boost::shared_ptr<ControlAbstract> control_;  //!< Model of the control discretization
+  boost::shared_ptr<ControlParametrizationModelAbstract> control_;  //!< Model of the control discretization
+  boost::shared_ptr<ControlParametrizationDataAbstract> controlData_;
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
   Scalar time_step2_;

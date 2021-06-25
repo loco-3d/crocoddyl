@@ -25,14 +25,15 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   typedef IntegratedActionDataEulerTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
-  typedef ControlAbstractTpl<Scalar> ControlAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ControlParametrizationModelAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                boost::shared_ptr<ControlAbstract> control,
+                                boost::shared_ptr<ControlParametrizationModelAbstract> control,
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelEulerTpl();
 
@@ -58,7 +59,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
-  using Base::control_;             //!< Control discretization
+  using Base::control_;             //!< Control parametrization
+  using Base::controlData_;         //!< Data for the control parametrization
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits

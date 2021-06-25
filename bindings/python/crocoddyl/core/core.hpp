@@ -16,7 +16,7 @@ namespace python {
 
 void exposeDataCollector();
 void exposeStateAbstract();
-void exposeControlAbstract();
+void exposeControlParametrizationAbstract();
 void exposeActuationAbstract();
 void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
@@ -40,9 +40,9 @@ void exposeActivationNumDiff();
 void exposeShootingProblem();
 void exposeSolverAbstract();
 void exposeStateEuclidean();
-void exposeControlPolyZero();
-void exposeControlPolyOne();
-void exposeControlPolyTwoRK4();
+void exposeControlParametrizationPolyZero();
+void exposeControlParametrizationPolyOne();
+void exposeControlParametrizationPolyTwoRK4();
 void exposeActionUnicycle();
 void exposeActionLQR();
 void exposeDifferentialActionLQR();

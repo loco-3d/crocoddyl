@@ -41,18 +41,18 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
 ControlFactory::ControlFactory() {}
 ControlFactory::~ControlFactory() {}
 
-boost::shared_ptr<crocoddyl::ControlAbstract> ControlFactory::create(ControlTypes::Type control_type,
-                                                                     const std::size_t nu) const {
-  boost::shared_ptr<crocoddyl::ControlAbstract> control;
+boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory::create(ControlTypes::Type control_type,
+                                                                                         const std::size_t nu) const {
+  boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> control;
   switch (control_type) {
     case ControlTypes::PolyZero:
-      control = boost::make_shared<crocoddyl::ControlPolyZero>(nu);
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyZero>(nu);
       break;
     case ControlTypes::PolyOne:
-      control = boost::make_shared<crocoddyl::ControlPolyOne>(nu);
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
       break;
     case ControlTypes::PolyTwoRK4:
-      control = boost::make_shared<crocoddyl::ControlPolyTwoRK4>(nu);
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK4>(nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ControlTypes::Type given");

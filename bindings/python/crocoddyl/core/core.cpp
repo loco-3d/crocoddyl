@@ -14,7 +14,7 @@ namespace python {
 void exposeCore() {
   exposeDataCollector();
   exposeStateAbstract();
-  exposeControlAbstract();
+  exposeControlParametrizationAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
   exposeIntegratedActionAbstract();
@@ -38,9 +38,9 @@ void exposeCore() {
   exposeShootingProblem();
   exposeSolverAbstract();
   exposeStateEuclidean();
-  exposeControlPolyZero();
-  exposeControlPolyOne();
-  exposeControlPolyTwoRK4();
+  exposeControlParametrizationPolyZero();
+  exposeControlParametrizationPolyOne();
+  exposeControlParametrizationPolyTwoRK4();
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();

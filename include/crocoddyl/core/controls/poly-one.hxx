@@ -9,46 +9,35 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlPolyOneTpl<Scalar>::ControlPolyOneTpl(const std::size_t nu) : ControlAbstractTpl<Scalar>(nu, 2*nu) {}
+ControlParametrizationModelPolyOneTpl<Scalar>::ControlParametrizationModelPolyOneTpl(const std::size_t nu) : 
+ControlParametrizationModelAbstractTpl<Scalar>(nu, 2*nu) {}
 
 template <typename Scalar>
-ControlPolyOneTpl<Scalar>::~ControlPolyOneTpl() {}
+ControlParametrizationModelPolyOneTpl<Scalar>::~ControlParametrizationModelPolyOneTpl() {}
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::resize(const std::size_t nu){
-  nu_ = nu;
-  np_ = 2*nu;
-}
-
-template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const {
+void ControlParametrizationModelPolyOneTpl<Scalar>::calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, 
+                                                         double t, const Eigen::Ref<const VectorXs>& p) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (static_cast<std::size_t>(u_out.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                << "u_out has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  u_out = (1-2*t)*p.head(nu_) + 2*t*p.tail(nu_);
+  data->u = (1-2*t)*p.head(nu_) + 2*t*p.tail(nu_);
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const{
-  if (static_cast<std::size_t>(p_out.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p_out has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
+void ControlParametrizationModelPolyOneTpl<Scalar>::params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double, 
+                                        const Eigen::Ref<const VectorXs>& u) const{
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  p_out.head(nu_) = u;
-  p_out.tail(nu_) = u;
+  data->p.head(nu_) = u;
+  data->p.tail(nu_) = u;
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
+void ControlParametrizationModelPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
     const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const{
   if (static_cast<std::size_t>(p_lb.size()) != np_) {
     throw_pretty("Invalid argument: "
@@ -73,21 +62,18 @@ void ControlPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>&
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const {
+void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, 
+                                                             double t, const Eigen::Ref<const VectorXs>& p) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (static_cast<std::size_t>(J_out.rows()) != nu_ || static_cast<std::size_t>(J_out.cols()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "J_out has wrong dimension (it should be " + std::to_string(nu_) + "," + std::to_string(np_) + ")");
-  }
-  J_out.leftCols(nu_).diagonal()  = MathBase::VectorXs::Constant(nu_, 1-2*t);
-  J_out.rightCols(nu_).diagonal() = MathBase::VectorXs::Constant(nu_, 2*t);
+  data->J.leftCols(nu_).diagonal()  = MathBase::VectorXs::Constant(nu_, 1-2*t);
+  data->J.rightCols(nu_).diagonal() = MathBase::VectorXs::Constant(nu_, 2*t);
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "
@@ -103,7 +89,7 @@ void ControlPolyOneTpl<Scalar>::multiplyByDValue(double t, const Eigen::Ref<cons
 }
 
 template <typename Scalar>
-void ControlPolyOneTpl<Scalar>::multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
   if (static_cast<std::size_t>(p.size()) != np_) {
     throw_pretty("Invalid argument: "

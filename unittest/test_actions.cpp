@@ -122,7 +122,7 @@ void test_partial_derivatives_integrated_action_model(DifferentialActionModelTyp
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlAbstract>& ctrl = factory_ctrl.create(control_type, dam->get_nu());
+  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl = factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
   const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model = factory_int.create(integrator_type, dam, ctrl);

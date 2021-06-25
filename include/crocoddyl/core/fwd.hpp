@@ -116,16 +116,19 @@ class StateVectorTpl;
 
 // control
 template <typename Scalar>
-class ControlAbstractTpl;
+class ControlParametrizationModelAbstractTpl;
 
 template <typename Scalar>
-class ControlPolyZeroTpl;
+class ControlParametrizationDataAbstractTpl;
 
 template <typename Scalar>
-class ControlPolyOneTpl;
+class ControlParametrizationModelPolyZeroTpl;
 
 template <typename Scalar>
-class ControlPolyTwoRK4Tpl;
+class ControlParametrizationModelPolyOneTpl;
+
+template <typename Scalar>
+class ControlParametrizationModelPolyTwoRK4Tpl;
 
 // actuation
 template <typename Scalar>
@@ -210,7 +213,7 @@ template <typename Scalar>
 class StateNumDiffTpl;
 
 template <typename Scalar>
-class ControlNumDiffTpl;
+class ControlParametrizationModelNumDiffTpl;
 
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
@@ -271,10 +274,11 @@ typedef ActivationDataAbstractTpl<double> ActivationDataAbstract;
 typedef StateAbstractTpl<double> StateAbstract;
 typedef StateVectorTpl<double> StateVector;
 
-typedef ControlAbstractTpl<double> ControlAbstract;
-typedef ControlPolyZeroTpl<double> ControlPolyZero;
-typedef ControlPolyOneTpl<double> ControlPolyOne;
-typedef ControlPolyTwoRK4Tpl<double> ControlPolyTwoRK4;
+typedef ControlParametrizationModelAbstractTpl<double> ControlParametrizationModelAbstract;
+typedef ControlParametrizationDataAbstractTpl<double> ControlParametrizationDataAbstract;
+typedef ControlParametrizationModelPolyZeroTpl<double> ControlParametrizationModelPolyZero;
+typedef ControlParametrizationModelPolyOneTpl<double> ControlParametrizationModelPolyOne;
+typedef ControlParametrizationModelPolyTwoRK4Tpl<double> ControlParametrizationModelPolyTwoRK4;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
@@ -301,7 +305,7 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
-typedef ControlNumDiffTpl<double> ControlNumDiff;
+typedef ControlParametrizationModelNumDiffTpl<double> ControlParametrizationModelNumDiff;
 typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;

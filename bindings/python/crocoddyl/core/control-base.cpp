@@ -12,52 +12,53 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeControlAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ControlAbstract> >();
+void exposeControlParametrizationAbstract() {
+  bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationModelAbstract> >();
 
-  bp::class_<ControlAbstract_wrap, boost::noncopyable>(
-      "ControlAbstract",
-      "Abstract class for the control representation.\n\n"
+  bp::class_<ControlParametrizationModelAbstract_wrap, boost::noncopyable>(
+      "ControlParametrizationModelAbstract",
+      "Abstract class for the control parametrization.\n\n"
       "A control is a function of time (normalized in [0,1]) and the control parameters p.",
       bp::init<int, int>(bp::args("self", "nu", "np"),
                          "Initialize the control dimensions.\n\n"
                          ":param nu: dimension of control space\n"
                          ":param np: dimension of control parameter space"))
-      .def("value", pure_virtual(&ControlAbstract_wrap::value_wrap), bp::args("self", "t", "p"),
+      .def("createData", &ControlParametrizationModelAbstract_wrap::createData, &ControlParametrizationModelAbstract_wrap::default_createData,
+           bp::args("self"),
+           "Create the control-parametrization data.\n\n"
+           "Each control parametrization model has its own data that needs to be allocated.\n"
+           "This function returns the allocated data for a predefined control parametrization model.\n"
+           ":return data.")
+      .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "p"),
            "Compute the control value.\n\n"
+           ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
-           ":return u value (dim control.nu).")
-      .def("value_inv", pure_virtual(&ControlAbstract_wrap::value_inv_wrap), bp::args("self", "t", "u"),
+           ":param p: control parameters (dim control.np).")
+      .def("calcDiff", pure_virtual(&ControlParametrizationModelAbstract_wrap::calcDiff), bp::args("self", "data", "t", "p"),
            "Compute a value of the control parameters corresponding to the given control value.\n\n"
+           ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).\n"
-           ":return p value (dim control.np).")
-      .def("convert_bounds", pure_virtual(&ControlAbstract_wrap::convert_bounds_wrap), bp::args("self", "u_lb", "u_ub"),
+           ":param u: control parameters (dim control.nu).")
+      .def("convert_bounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convert_bounds_wrap), bp::args("self", "u_lb", "u_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
            ":param u_lb: lower bounds on u (dim control.nu).\n"
            ":param u_ub: upper bounds on u (dim control.nu).\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
-      .def("dValue", pure_virtual(&ControlAbstract_wrap::dValue_wrap), bp::args("self", "t", "p"),
-           "Compute the derivative of the control with respect to the parameters.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
-           ":return Partial derivative of the value function (dim control.nu x control.np).")
-      .def("multiplyByDValue", pure_virtual(&ControlAbstract_wrap::multiplyByDValue_wrap), bp::args("self", "t", "p", "A"),
+      .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap), bp::args("self", "t", "p", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the parameters.\n\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
            ":param A: matrix to multiply (dim na x control.nu).\n"
            ":return Product between A and the partial derivative of the value function (dim na x control.np).")
-      .def("multiplyDValueTransposeBy", pure_virtual(&ControlAbstract_wrap::multiplyDValueTransposeBy_wrap), bp::args("self", "t", "p", "A"),
+      .def("multiplyJacobianTransposeBy", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyJacobianTransposeBy_wrap), bp::args("self", "t", "p", "A"),
            "Compute the product between the transpose of the derivative of the control with respect to the parameters\n"
            "and a given matrix A.\n\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
            ":param A: matrix to multiply (dim control.nu x na).\n"
            ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x na).")
-      .add_property("nu", bp::make_function(&ControlAbstract_wrap::get_nu), "dimension of control tuple")
-      .add_property("np", bp::make_function(&ControlAbstract_wrap::get_np),
+      .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu), "dimension of control tuple")
+      .add_property("np", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_np),
                     "dimension of the control parameters");
 }
 

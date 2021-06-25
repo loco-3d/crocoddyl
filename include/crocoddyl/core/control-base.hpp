@@ -20,7 +20,7 @@
 namespace crocoddyl {
 
 /**
- * @brief Abstract class for the control trajectory discretization
+ * @brief Abstract class for the control trajectory parametrization
  * 
  * The control trajectory is a function of the (normalized) time.
  * Normalized time is between 0 and 1, where 0 represents the beginning of the time step, 
@@ -30,12 +30,13 @@ namespace crocoddyl {
  *
  */
 template <typename _Scalar>
-class ControlAbstractTpl {
+class ControlParametrizationModelAbstractTpl {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -45,11 +46,20 @@ class ControlAbstractTpl {
    * @param[in] nx   Dimension of control
    * @param[in] np   Dimension of control parameters
    */
-  ControlAbstractTpl(const std::size_t nu, const std::size_t np);
-  ControlAbstractTpl();
-  virtual ~ControlAbstractTpl();
+  ControlParametrizationModelAbstractTpl(const std::size_t nu, const std::size_t np);
+  virtual ~ControlParametrizationModelAbstractTpl();
 
-  virtual void resize(const std::size_t nu) = 0;
+  /**
+   * @brief Create the action data
+   *
+   * @return the action data
+   */
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
+  virtual bool checkData(const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
 
   /**
    * @brief Get the value of the control at the specified time
@@ -58,9 +68,10 @@ class ControlAbstractTpl {
    * @param[in]  p      Control parameters
    * @param[out] u_out  Control value
    */
-  virtual void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const = 0;
+  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                    const Eigen::Ref<const VectorXs>& p) const = 0;
 
-  virtual VectorXs value_u(double t, const Eigen::Ref<const VectorXs>& p) const;
+  // virtual VectorXs calc_u(double t, const Eigen::Ref<const VectorXs>& p) const;
 
   /**
    * @brief Get a value of the control parameters that results in the specified control value 
@@ -70,9 +81,10 @@ class ControlAbstractTpl {
    * @param[in]  u      Control value
    * @param[out] p_out  Control parameters
    */
-  virtual void value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const = 0;
+  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                      const Eigen::Ref<const VectorXs>& u) const = 0;
 
-  virtual VectorXs value_inv_p(double t, const Eigen::Ref<const VectorXs>& u) const;
+  // virtual VectorXs params_p(double t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter space
@@ -92,9 +104,10 @@ class ControlAbstractTpl {
    * @param[in]  p      Control parameters
    * @param[out] J_out  Jacobian of the control value with respect to the parameters
    */
-  virtual void dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const = 0;
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                        const Eigen::Ref<const VectorXs>& p) const = 0;
 
-  virtual MatrixXs dValue_J(double t, const Eigen::Ref<const VectorXs>& p) const;
+  // virtual MatrixXs calcDiff_J(double t, const Eigen::Ref<const VectorXs>& p) const;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the parameters)
@@ -104,10 +117,10 @@ class ControlAbstractTpl {
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
-  virtual MatrixXs multiplyByDValue_J(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual MatrixXs multiplyByJacobian_J(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A) const;
 
   /**
@@ -119,10 +132,10 @@ class ControlAbstractTpl {
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the matrix A
    */
-  virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
-  virtual MatrixXs multiplyDValueTransposeBy_J(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual MatrixXs multiplyJacobianTransposeBy_J(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A) const;
   /**
    * @brief Return the dimension of the control value
@@ -138,6 +151,33 @@ class ControlAbstractTpl {
 
   std::size_t nu_;  //!< Control dimension
   std::size_t np_;  //!< Control parameters dimension
+};
+
+
+template <typename _Scalar>
+struct ControlParametrizationDataAbstractTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Model>
+  explicit ControlParametrizationDataAbstractTpl(Model<Scalar>* const model)
+      : u(model->get_nu()),
+        p(model->get_np()),
+        J(model->get_nu(), model->get_np()) 
+  {
+    u.setZero();
+    p.setZero();
+    J.setZero();
+  }
+  virtual ~ControlParametrizationDataAbstractTpl() {}
+
+  VectorXs u;     //!< value of the control
+  VectorXs p;     //!< value of the control parameters
+  MatrixXs J;     //!< Jacobian of the control
 };
 
 }  // namespace crocoddyl

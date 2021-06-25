@@ -19,36 +19,38 @@ namespace crocoddyl {
  * @brief A polynomial function of time of degree zero, that is a constant
  */
 template <typename _Scalar>
-class ControlPolyZeroTpl : public ControlAbstractTpl<_Scalar> {
+class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
 
-  explicit ControlPolyZeroTpl(const std::size_t nu);
-  virtual ~ControlPolyZeroTpl();
+  explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nu);
+  virtual ~ControlParametrizationModelPolyZeroTpl();
 
-  virtual void resize(const std::size_t nu);
+  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                    const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const;
-
-  virtual void value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const;
+  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                      const Eigen::Ref<const VectorXs>& u) const;
 
   virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
-  virtual void dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const;
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+                        const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
   
-  virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
-  using ControlAbstractTpl<Scalar>::nu_;
-  using ControlAbstractTpl<Scalar>::np_;
+  using ControlParametrizationModelAbstractTpl<Scalar>::nu_;
+  using ControlParametrizationModelAbstractTpl<Scalar>::np_;
 };
 
 }  // namespace crocoddyl
