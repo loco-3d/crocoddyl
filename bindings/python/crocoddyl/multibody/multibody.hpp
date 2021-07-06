@@ -23,6 +23,7 @@ void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
 void exposeActuationModelMultiCopterBase();
+void exposeForceAbstract();
 void exposeContactAbstract();
 void exposeImpulseAbstract();
 void exposeContactMultiple();
@@ -33,6 +34,25 @@ void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
+void exposeResidualState();
+void exposeResidualCentroidalMomentum();
+void exposeResidualCoMPosition();
+void exposeResidualContactForce();
+void exposeResidualContactFrictionCone();
+void exposeResidualContactCoPPosition();
+void exposeResidualContactWrenchCone();
+void exposeResidualContactControlGrav();
+void exposeResidualControlGrav();
+void exposeResidualFramePlacement();
+void exposeResidualFrameRotation();
+void exposeResidualFrameTranslation();
+void exposeResidualFrameVelocity();
+void exposeResidualImpulseCoM();
+
+#ifdef PINOCCHIO_WITH_HPP_FCL
+void exposeResidualPairCollision();
+#endif
+
 void exposeCostState();
 void exposeCostCoMPosition();
 void exposeCostControlGrav();

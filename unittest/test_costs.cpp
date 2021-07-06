@@ -28,6 +28,10 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::T
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
@@ -127,8 +131,8 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
 
   // Checking the partial derivatives against NumDiff
   double tol = sqrt(model_num_diff.get_disturbance());
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(NUMDIFF_MODIFIER * tol));
   if (model_num_diff.get_with_gauss_approx()) {
     // The num diff is not precise enough to be tested here.
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));

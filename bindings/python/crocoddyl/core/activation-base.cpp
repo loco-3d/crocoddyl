@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -36,7 +37,8 @@ void exposeActivationAbstract() {
       .def("createData", &ActivationModelAbstract_wrap::createData, &ActivationModelAbstract_wrap::default_createData,
            bp::args("self"), "Create the activation data.\n\n")
       .add_property("nr", bp::make_function(&ActivationModelAbstract_wrap::get_nr),
-                    "dimension of cost-residual vector");
+                    "dimension of cost-residual vector")
+      .def(PrintableVisitor<ActivationModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
 

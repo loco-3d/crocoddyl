@@ -32,6 +32,10 @@ void test_construct_data(ImpulseModelTypes::Type impulse_type, PinocchioModelTyp
   ImpulseModelFactory factory;
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> model = factory.create(impulse_type, model_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model->get_state()->get_pinocchio().get());
   boost::shared_ptr<crocoddyl::ImpulseDataAbstract> data = model->createData(&pinocchio_data);

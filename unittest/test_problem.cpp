@@ -13,6 +13,7 @@
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "factory/action.hpp"
 #include "factory/diff_action.hpp"
+#include "factory/integrator.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -35,6 +36,10 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   }
   crocoddyl::ShootingProblem problem1(x0, models, model);
   crocoddyl::ShootingProblem problem2(x0, models, model, datas, model->createData());
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << problem1;
 
   // create random trajectory
   std::vector<Eigen::VectorXd> xs(T + 1);
@@ -64,12 +69,13 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 }
 
-void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type) {
+void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                          IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
@@ -170,12 +176,13 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
 }
 
-void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type) {
+void test_calcDiff_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                              IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
@@ -261,12 +268,13 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
   }
 }
 
-void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_type) {
+void test_rollout_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                             IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, diffModel);
 
   // create the shooting problem
   std::size_t T = 20;
@@ -334,12 +342,13 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   }
 }
 
-void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model_type) {
+void test_quasiStatic_diffAction(DifferentialActionModelTypes::Type action_model_type,
+                                 IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel = factory.create(action_model_type);
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(diffModel);
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
@@ -392,15 +401,16 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   framework::master_test_suite().add(ts);
 }
 
-void register_diff_action_model_unit_tests(DifferentialActionModelTypes::Type action_model_type) {
+void register_diff_action_model_unit_tests(DifferentialActionModelTypes::Type action_model_type,
+                                           IntegratorTypes::Type integrator_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << action_model_type;
+  test_name << "test_" << action_model_type << "_" << integrator_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diffAction, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff_diffAction, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_quasiStatic_diffAction, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_rollout_diffAction, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diffAction, action_model_type, integrator_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff_diffAction, action_model_type, integrator_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_quasiStatic_diffAction, action_model_type, integrator_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_rollout_diffAction, action_model_type, integrator_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -409,7 +419,9 @@ bool init_function() {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
   }
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_diff_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
+    for (size_t j = 0; j < IntegratorTypes::all.size(); ++j) {
+      register_diff_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::all[j]);
+    }
   }
   return true;
 }

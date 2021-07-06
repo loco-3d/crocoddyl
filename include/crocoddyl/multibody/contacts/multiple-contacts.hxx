@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
       const std::size_t nc_i = m_i->contact->get_nc();
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
       m_i->contact->updateForce(d_i, force_i);
-      data->fext[d_i->joint] = d_i->f;
+      const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
+      data->fext[joint] = d_i->f;
       nc += nc_i;
     } else {
       m_i->contact->setZeroForce(d_i);
@@ -289,6 +290,34 @@ bool ContactModelMultipleTpl<Scalar>::getContactStatus(const std::string& name) 
               << std::endl;
     return false;
   }
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model) {
+  const std::vector<std::string>& active = model.get_active();
+  const std::vector<std::string>& inactive = model.get_inactive();
+  os << "ContactModelMultiple:" << std::endl;
+  os << "  Active:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+    const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
+        model.get_contacts().find(*it)->second;
+    if (it != --active.end()) {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    }
+  }
+  os << "  Inactive:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+    const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
+        model.get_contacts().find(*it)->second;
+    if (it != --inactive.end()) {
+      os << "    " << *it << ": " << *contact_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *contact_item;
+    }
+  }
+  return os;
 }
 
 }  // namespace crocoddyl

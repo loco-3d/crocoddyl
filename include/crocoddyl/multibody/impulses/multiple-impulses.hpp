@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,15 @@ struct ImpulseItemTpl {
   ImpulseItemTpl() {}
   ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true)
       : name(name), impulse(impulse), active(active) {}
+
+  /**
+   * @brief Print information on the impulse item
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ImpulseItemTpl<Scalar>& model) {
+    os << "{" << *model.impulse << "}";
+    return os;
+  }
 
   std::string name;
   boost::shared_ptr<ImpulseModelAbstract> impulse;
@@ -171,12 +180,14 @@ class ImpulseModelMultipleTpl {
   /**
    * @brief Return the dimension of active impulses
    */
-  std::size_t get_ni() const;
+  std::size_t get_nc() const;
+  DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
 
   /**
    * @brief Return the dimension of all impulses
    */
-  std::size_t get_ni_total() const;
+  std::size_t get_nc_total() const;
+  DEPRECATED("Use get_nc_total().", std::size_t get_ni_total() const;)
 
   /**
    * @brief Return the names of the active impulses
@@ -193,11 +204,17 @@ class ImpulseModelMultipleTpl {
    */
   bool getImpulseStatus(const std::string& name) const;
 
+  /**
+   * @brief Print information on the impulse models
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ImpulseModelMultipleTpl<Scalar>& model);
+
  private:
   boost::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
-  std::size_t ni_;
-  std::size_t ni_total_;
+  std::size_t nc_;
+  std::size_t nc_total_;
   std::vector<std::string> active_;
   std::vector<std::string> inactive_;
 };
@@ -226,8 +243,8 @@ struct ImpulseDataMultipleTpl {
    */
   template <template <typename Scalar> class Model>
   ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Jc(model->get_ni_total(), model->get_state()->get_nv()),
-        dv0_dq(model->get_ni_total(), model->get_state()->get_nv()),
+      : Jc(model->get_nc_total(), model->get_state()->get_nv()),
+        dv0_dq(model->get_nc_total(), model->get_state()->get_nv()),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {

@@ -8,11 +8,12 @@
 
 #include "impulse_cost.hpp"
 #include "action.hpp"
-#include "crocoddyl/multibody/costs/impulse-com.hpp"
-#include "crocoddyl/multibody/costs/contact-impulse.hpp"
-#include "crocoddyl/multibody/costs/impulse-cop-position.hpp"
-#include "crocoddyl/multibody/costs/impulse-friction-cone.hpp"
-#include "crocoddyl/multibody/costs/impulse-wrench-cone.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/residuals/impulse-com.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
+#include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
+#include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
+#include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -22,20 +23,20 @@ const std::vector<ImpulseCostModelTypes::Type> ImpulseCostModelTypes::all(Impuls
 
 std::ostream& operator<<(std::ostream& os, ImpulseCostModelTypes::Type type) {
   switch (type) {
-    case ImpulseCostModelTypes::CostModelImpulseCoM:
-      os << "CostModelImpulseCoM";
+    case ImpulseCostModelTypes::CostModelResidualImpulseCoM:
+      os << "CostModelResidualImpulseCoM";
       break;
-    case ImpulseCostModelTypes::CostModelContactImpulse:
-      os << "CostModelContactImpulse";
+    case ImpulseCostModelTypes::CostModelResidualContactForce:
+      os << "CostModelResidualContactForce";
       break;
-    case ImpulseCostModelTypes::CostModelImpulseCoPPosition:
-      os << "CostModelImpulseCoPPosition";
+    case ImpulseCostModelTypes::CostModelResidualContactCoPPosition:
+      os << "CostModelResidualContactCoPPosition";
       break;
-    case ImpulseCostModelTypes::CostModelImpulseFrictionCone:
-      os << "CostModelImpulseFrictionCone";
+    case ImpulseCostModelTypes::CostModelResidualContactFrictionCone:
+      os << "CostModelResidualContactFrictionCone";
       break;
-    case ImpulseCostModelTypes::CostModelImpulseWrenchCone:
-      os << "CostModelImpulseWrenchCone";
+    case ImpulseCostModelTypes::CostModelResidualContactWrenchCone:
+      os << "CostModelResidualContactWrenchCone";
       break;
     case ImpulseCostModelTypes::NbImpulseCostModelTypes:
       os << "NbImpulseCostModelTypes";
@@ -71,30 +72,35 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
       boost::static_pointer_cast<crocoddyl::StateMultibody>(action->get_state());
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   switch (cost_type) {
-    case ImpulseCostModelTypes::CostModelImpulseCoM:
-      cost = boost::make_shared<crocoddyl::CostModelImpulseCoM>(state,
-                                                                ActivationModelFactory().create(activation_type, 3));
+    case ImpulseCostModelTypes::CostModelResidualImpulseCoM:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
+          state, ActivationModelFactory().create(activation_type, 3),
+          boost::make_shared<crocoddyl::ResidualModelImpulseCoM>(state));
       break;
-    case ImpulseCostModelTypes::CostModelContactImpulse:
-      cost = boost::make_shared<crocoddyl::CostModelContactImpulse>(
+    case ImpulseCostModelTypes::CostModelResidualContactForce:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state, ActivationModelFactory().create(activation_type, 6),
-          crocoddyl::FrameForce(model_factory.get_frame_id(), pinocchio::Force::Random()));
+          boost::make_shared<crocoddyl::ResidualModelContactForce>(
+              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), 0));
       break;
-    case ImpulseCostModelTypes::CostModelImpulseCoPPosition:
-      cost = boost::make_shared<crocoddyl::CostModelImpulseCoPPosition>(
+    case ImpulseCostModelTypes::CostModelResidualContactCoPPosition:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state, ActivationModelFactory().create(activation_type, 4),
-          crocoddyl::FrameCoPSupport(model_factory.get_frame_id(), Eigen::Vector2d(0.1, 0.1)));
+          boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
+              state, model_factory.get_frame_id(), CoPSupport(Eigen::Matrix3d::Identity(), Eigen::Vector2d(0.1, 0.1)),
+              0));
       break;
-    case ImpulseCostModelTypes::CostModelImpulseFrictionCone:
-      cost = boost::make_shared<crocoddyl::CostModelImpulseFrictionCone>(
+    case ImpulseCostModelTypes::CostModelResidualContactFrictionCone:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state, ActivationModelFactory().create(activation_type, 5),
-          crocoddyl::FrameFrictionCone(model_factory.get_frame_id(), crocoddyl::FrictionCone(R, 1.)));
+          boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(state, model_factory.get_frame_id(),
+                                                                          crocoddyl::FrictionCone(R, 1.), 0));
       break;
-    case ImpulseCostModelTypes::CostModelImpulseWrenchCone:
-      cost = boost::make_shared<crocoddyl::CostModelImpulseWrenchCone>(
+    case ImpulseCostModelTypes::CostModelResidualContactWrenchCone:
+      cost = boost::make_shared<crocoddyl::CostModelResidual>(
           state, ActivationModelFactory().create(activation_type, 17),
-          crocoddyl::FrameWrenchCone(model_factory.get_frame_id(),
-                                     crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1))));
+          boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
+              state, model_factory.get_frame_id(), crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1)), 0));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ImpulseCostModelTypes::Type given");

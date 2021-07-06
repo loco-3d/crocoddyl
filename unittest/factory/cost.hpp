@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,14 +21,14 @@ namespace unittest {
 
 struct CostModelTypes {
   enum Type {
-    CostModelState,
-    CostModelControl,
-    CostModelCoMPosition,
-    // CostModelCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
-    CostModelFramePlacement,
-    CostModelFrameRotation,
-    CostModelFrameTranslation,
-    CostModelFrameVelocity,
+    CostModelResidualState,
+    CostModelResidualControl,
+    CostModelResidualCoMPosition,
+    // CostModelResidualCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
+    CostModelResidualFramePlacement,
+    CostModelResidualFrameRotation,
+    CostModelResidualFrameTranslation,
+    CostModelResidualFrameVelocity,
     NbCostModelTypes
   };
   static std::vector<Type> init_all() {
@@ -43,7 +43,7 @@ struct CostModelTypes {
 };
 
 struct CostModelNoFFTypes {
-  enum Type { CostModelControlGrav, NbCostModelNoFFTypes };
+  enum Type { CostModelResidualControlGrav, NbCostModelNoFFTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

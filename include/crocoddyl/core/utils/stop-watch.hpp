@@ -24,7 +24,10 @@
 #ifndef CROCODDYL_CORE_UTILS_STOPWATCH_H_
 #define CROCODDYL_CORE_UTILS_STOPWATCH_H_
 
-#include "crocoddyl/core/utils/Stdafx.hh"
+#include <iostream>
+#include <map>
+#include <ctime>
+#include <sstream>
 
 #ifndef WIN32
 /* The classes below are exported */

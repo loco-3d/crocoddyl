@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,9 +11,12 @@
 #include <memory>
 #include <utility>
 #include <string>
+#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -43,7 +46,8 @@ void exposeImpulseMultiple() {
       .def_readwrite("name", &ImpulseItem::name, "impulse name")
       .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
                     "impulse model")
-      .def_readwrite("active", &ImpulseItem::active, "impulse status");
+      .def_readwrite("active", &ImpulseItem::active, "impulse status")
+      .def(PrintableVisitor<ImpulseItem>());
   ;
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
@@ -106,8 +110,13 @@ void exposeImpulseMultiple() {
       .add_property(
           "state", bp::make_function(&ImpulseModelMultiple::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
-      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_ni), "dimension of the active impulse vector")
-      .add_property("ni_total", bp::make_function(&ImpulseModelMultiple::get_ni_total),
+      .add_property("nc", bp::make_function(&ImpulseModelMultiple::get_nc), "dimension of the active impulse vector")
+      .add_property("nc_total", bp::make_function(&ImpulseModelMultiple::get_nc_total),
+                    "dimension of the total impulse vector")
+      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_nc, deprecated<>("Deprecated. Use nc.")),
+                    "dimension of the active impulse vector")
+      .add_property("ni_total",
+                    bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
                     "dimension of the total impulse vector")
       .add_property(
           "active",
@@ -119,7 +128,8 @@ void exposeImpulseMultiple() {
           "name of inactive impulse items")
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
-           ":param name: impulse name");
+           ":param name: impulse name")
+      .def(PrintableVisitor<ImpulseModelMultiple>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
 

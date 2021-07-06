@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,10 +11,9 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -22,31 +21,30 @@ namespace crocoddyl {
  * @brief State cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
- * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respetively, which belong to the
+ * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respectively, which belong to the
  * state manifold \f$\mathcal{X}\f$. Note that the dimension of the residual vector is obtained from
  * `StateAbstract::get_ndx()`.
  *
- * Both cost and residual derivatives are computed analytically.
- * For the computation of the cost Hessian, we use the Gauss-Newton approximation, e.g.
- * \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
+ * Both cost and residual derivatives are computed analytically. For the computation of the cost Hessian, we use the
+ * Gauss-Newton approximation, e.g. \f$\mathbf{l_{xx}} = \mathbf{l_{x}}^T \mathbf{l_{x}} \f$.
  *
- * As described in CostModelAbstractTpl(), the cost value and its derivatives are calculated by `calc` and `calcDiff`,
- * respectively.
+ * As described in `CostModelResidualTpl()`, the cost value and its derivatives are calculated by `calc` and
+ * `calcDiff`, respectively.
  *
- * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelResidualTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
+class CostModelStateTpl : public CostModelResidualTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelAbstractTpl<Scalar> Base;
+  typedef CostModelResidualTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ResidualModelStateTpl<Scalar> ResidualModelState;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -143,16 +141,6 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   virtual ~CostModelStateTpl();
 
   /**
-   * @brief Compute the state cost
-   *
-   * @param[in] data  State cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-
-  /**
    * @brief Compute the derivatives of the state cost
    *
    * @param[in] data  State cost data
@@ -162,64 +150,26 @@ class CostModelStateTpl : public CostModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
-  /**
-   * @brief Create the state cost data
-   */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
-  DEPRECATED("Use set_reference<MathBaseTpl<Scalar>::VectorXs>()", void set_xref(const VectorXs& xref_in));
-  DEPRECATED("Use get_reference<MathBaseTpl<Scalar>::VectorXs>()", const VectorXs& get_xref() const);
-
  protected:
+  /**
+   * @brief Return the state reference
+   */
+  virtual void get_referenceImpl(const std::type_info& ti, void* pv);
+
   /**
    * @brief Modify the state reference
    */
   virtual void set_referenceImpl(const std::type_info& ti, const void* pv);
 
-  /**
-   * @brief Return the state reference
-   */
-  virtual void get_referenceImpl(const std::type_info& ti, void* pv) const;
-
   using Base::activation_;
   using Base::nu_;
+  using Base::residual_;
   using Base::state_;
   using Base::unone_;
 
  private:
   VectorXs xref_;                                                         //!< Reference state
   boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
-};
-
-template <typename _Scalar>
-struct CostDataStateTpl : public CostDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::MatrixXs MatrixXs;
-
-  template <template <typename Scalar> class Model>
-  CostDataStateTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), Arr_Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()) {
-    Arr_Rx.setZero();
-  }
-
-  MatrixXs Arr_Rx;
-
-  using Base::activation;
-  using Base::cost;
-  using Base::Lu;
-  using Base::Luu;
-  using Base::Lx;
-  using Base::Lxu;
-  using Base::Lxx;
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
-  using Base::shared;
 };
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -45,7 +46,8 @@ void exposeCostSum() {
       .add_property("cost", bp::make_getter(&CostItem::cost, bp::return_value_policy<bp::return_by_value>()),
                     "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight")
-      .def_readwrite("active", &CostItem::active, "cost status");
+      .def_readwrite("active", &CostItem::active, "cost status")
+      .def(PrintableVisitor<CostItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
 
@@ -120,7 +122,8 @@ void exposeCostSum() {
                     "name of inactive cost items")
       .def("getCostStatus", &CostModelSum::getCostStatus, bp::args("self", "name"),
            "Return the cost status of a given cost name.\n\n"
-           ":param name: cost name");
+           ":param name: cost name")
+      .def(PrintableVisitor<CostModelSum>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataSum> >();
 

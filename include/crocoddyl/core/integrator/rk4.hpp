@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,14 +50,18 @@ class IntegratedActionModelRK4Tpl : public ActionModelAbstractTpl<_Scalar> {
   void set_dt(const Scalar dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
 
+  /**
+   * @brief Print relevant information of the Runge-Kutta 4 integrator model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
+  using Base::nr_;     //!< Dimension of the cost residual
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
+  using Base::unone_;  //!< Zero control
 
  private:
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;

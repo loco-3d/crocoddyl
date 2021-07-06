@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -21,10 +23,10 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "ni"),
+      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "nc"),
                                                        "Initialize the impulse model.\n\n"
                                                        ":param state: state of the multibody system\n"
-                                                       ":param ni: dimension of impulse model"))
+                                                       ":param nc: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -37,11 +39,11 @@ void exposeImpulseAbstract() {
       .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"
-           ":param force: force vector (dimension ni)")
+           ":param force: force vector (dimension nc)")
       .def("updateForceDiff", &ImpulseModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dx"),
            "Update the Jacobian of the impulse force.\n\n"
            ":param data: impulse data\n"
-           ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
+           ":param df_dx: Jacobian of the impulse force (dimension nc*ndx)")
       .def("setZeroForce", &ImpulseModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
            "Set zero the spatial force.\n\n"
            ":param data: contact data")
@@ -60,30 +62,22 @@ void exposeImpulseAbstract() {
           "state",
           bp::make_function(&ImpulseModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
-      .add_property("ni", bp::make_function(&ImpulseModelAbstract_wrap::get_ni), "dimension of impulse");
+      .add_property("ni", bp::make_function(&ImpulseModelAbstract_wrap::get_nc, deprecated<>("Deprecated. Use nc")),
+                    "dimension of impulse")
+      .add_property("nc", bp::make_function(&ImpulseModelAbstract_wrap::get_nc), "dimension of impulse")
+      .def(PrintableVisitor<ImpulseModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
 
-  bp::class_<ImpulseDataAbstract, boost::noncopyable>(
+  bp::class_<ImpulseDataAbstract, bp::bases<ForceDataAbstract> >(
       "ImpulseDataAbstract", "Abstract class for impulse data.\n\n",
       bp::init<ImpulseModelAbstract*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
           "Create common data shared between impulse models.\n\n"
           ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
-      .add_property("pinocchio", bp::make_getter(&ImpulseDataAbstract::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data")
-      .add_property("jMf", bp::make_getter(&ImpulseDataAbstract::jMf, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ImpulseDataAbstract::jMf), "local frame placement of the impulse frame")
-      .add_property("Jc", bp::make_getter(&ImpulseDataAbstract::Jc, bp::return_internal_reference<>()),
-                    bp::make_setter(&ImpulseDataAbstract::Jc), "impulse Jacobian")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
-                    bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
-      .add_property("df_dx", bp::make_getter(&ImpulseDataAbstract::df_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ImpulseDataAbstract::df_dx), "Jacobian of the contact impulse")
-      .def_readwrite("joint", &ImpulseDataAbstract::joint, "joint index of the impulse frame")
-      .def_readwrite("frame", &ImpulseDataAbstract::frame, "frame index of the impulse frame")
-      .def_readwrite("f", &ImpulseDataAbstract::f, "external spatial impulse");
+                    bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity");
 }
 
 }  // namespace python

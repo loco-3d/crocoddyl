@@ -140,8 +140,8 @@ class GepettoDisplay(DisplayAbstract):
                         forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
                         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
                         forceName = self.forceGroup + "/" + key
-                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
+                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
                         self.robot.viewer.gui.setVisibility(forceName, "ON")
                         # Display the friction cones
                         position = pose
@@ -175,36 +175,37 @@ class GepettoDisplay(DisplayAbstract):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.todict().items():
                         if model.differential.contacts.contacts[key].active:
-                            oMf = contact.pinocchio.oMi[contact.joint] * contact.jMf
-                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[contact.joint].rotation.T,
-                                                 contact.jMf.translation)
+                            joint = model.differential.state.pinocchio.frames[contact.frame].parent
+                            oMf = contact.pinocchio.oMi[joint] * contact.jMf
+                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[joint].rotation.T, contact.jMf.translation)
                             force = fiMo.actInv(contact.f)
                             R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                    if contact.joint == self.robot.model.frames[c.cost.reference.id].parent:
+                                    if contact.frame == c.cost.reference.id:
                                         R = c.cost.reference.cone.R
                                         mu = c.cost.reference.cone.mu
                                         continue
-                            fc.append({"key": str(contact.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                            fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.todict().items():
                     if model.impulses.impulses[key].active:
-                        oMf = impulse.pinocchio.oMi[impulse.joint] * impulse.jMf
-                        fiMo = pinocchio.SE3(impulse.pinocchio.oMi[impulse.joint].rotation.T, impulse.jMf.translation)
+                        joint = model.state.pinocchio.frames[impulse.frame].parent
+                        oMf = impulse.pinocchio.oMi[joint] * impulse.jMf
+                        fiMo = pinocchio.SE3(impulse.pinocchio.oMi[joint].rotation.T, impulse.jMf.translation)
                         force = fiMo.actInv(impulse.f)
                         R = np.eye(3)
                         mu = 0.7
                         for k, c in model.costs.costs.todict().items():
                             if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if impulse.joint == self.robot.model.frames[c.cost.id].parent:
+                                if impulse.frame == c.cost.id:
                                     R = c.cost.cone.R
                                     mu = c.cost.cone.mu
                                     continue
-                        fc.append({"key": str(impulse.joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                        fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                 fs.append(fc)
         return fs
 
@@ -376,7 +377,7 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.u_regs.append(solver.u_reg)
         self.x_regs.append(solver.x_reg)
         self.stops.append(solver.stoppingCriteria())
-        self.grads.append(-np.asscalar(solver.expectedImprovement()[1]))
+        self.grads.append(-solver.expectedImprovement()[1].item())
 
 
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):

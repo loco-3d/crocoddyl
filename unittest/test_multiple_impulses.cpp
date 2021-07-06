@@ -64,6 +64,10 @@ void test_constructor() {
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
       state_factory.create(StateModelTypes::StateMultibody_RandomHumanoid)));
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << model;
+
   // Test the initial size of the map
   BOOST_CHECK(model.get_impulses().size() == 0);
 }
@@ -77,24 +81,24 @@ void test_addImpulse() {
   // add an active impulse
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_1 = create_random_impulse();
   model.addImpulse("random_impulse_1", rand_impulse_1);
-  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
-  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni());
+  BOOST_CHECK(model.get_nc() == rand_impulse_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_impulse_1->get_nc());
 
   // add an inactive impulse
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_2 = create_random_impulse();
   model.addImpulse("random_impulse_2", rand_impulse_2, false);
-  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni());
-  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_nc() == rand_impulse_1->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_impulse_1->get_nc() + rand_impulse_2->get_nc());
 
   // change the random impulse 2 status
   model.changeImpulseStatus("random_impulse_2", true);
-  BOOST_CHECK(model.get_ni() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
-  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_nc() == rand_impulse_1->get_nc() + rand_impulse_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_impulse_1->get_nc() + rand_impulse_2->get_nc());
 
   // change the random impulse 1 status
   model.changeImpulseStatus("random_impulse_1", false);
-  BOOST_CHECK(model.get_ni() == rand_impulse_2->get_ni());
-  BOOST_CHECK(model.get_ni_total() == rand_impulse_1->get_ni() + rand_impulse_2->get_ni());
+  BOOST_CHECK(model.get_nc() == rand_impulse_2->get_nc());
+  BOOST_CHECK(model.get_nc_total() == rand_impulse_1->get_nc() + rand_impulse_2->get_nc());
 }
 
 void test_addImpulse_error_message() {
@@ -137,11 +141,11 @@ void test_removeImpulse() {
   // add an active impulse
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse = create_random_impulse();
   model.addImpulse("random_impulse", rand_impulse);
-  BOOST_CHECK(model.get_ni() == rand_impulse->get_ni());
+  BOOST_CHECK(model.get_nc() == rand_impulse->get_nc());
 
   // remove the impulse
   model.removeImpulse("random_impulse");
-  BOOST_CHECK(model.get_ni() == 0);
+  BOOST_CHECK(model.get_nc() == 0);
 }
 
 void test_removeImpulse_error_message() {
@@ -199,7 +203,7 @@ void test_calc() {
   std::size_t ni = 0;
   const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
     ni += ni_i;
@@ -213,7 +217,7 @@ void test_calc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calc(datas[i], x2);
     }
@@ -261,7 +265,7 @@ void test_calc_diff() {
   std::size_t ni = 0;
   const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
@@ -278,7 +282,7 @@ void test_calc_diff() {
   model.calc(data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calc(datas[i], x2);
       models[i]->calcDiff(datas[i], x2);
@@ -327,7 +331,7 @@ void test_calc_diff_no_recalc() {
   std::size_t ni = 0;
   const std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     models[i]->calcDiff(datas[i], x1);
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv).isZero());
     BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
@@ -342,7 +346,7 @@ void test_calc_diff_no_recalc() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calcDiff(data, x2);
   for (std::size_t i = 0; i < 5; ++i) {
-    const std::size_t ni_i = models[i]->get_ni();
+    const std::size_t ni_i = models[i]->get_nc();
     if (i < 3) {  // we need to update data because this impulses are active
       models[i]->calcDiff(datas[i], x2);
     }
@@ -377,7 +381,7 @@ void test_updateForce() {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // create random forces
-  Eigen::VectorXd forces = Eigen::VectorXd::Random(model.get_ni());
+  Eigen::VectorXd forces = Eigen::VectorXd::Random(model.get_nc());
 
   // update forces
   model.updateForce(data, forces);
@@ -440,7 +444,7 @@ void test_updateForceDiff() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data = model.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model.get_ni(), model.get_state()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model.get_nc(), model.get_state()->get_nv());
 
   // call update force diff
   model.updateForceDiff(data, df_dx);
@@ -484,7 +488,7 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   boost::shared_ptr<crocoddyl::ImpulseDataMultiple> data2 = model2.createData(&pinocchio_data);
 
   // create force diff
-  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model1.get_ni(), model1.get_state()->get_nv());
+  Eigen::MatrixXd df_dx = Eigen::MatrixXd::Random(model1.get_nc(), model1.get_state()->get_nv());
 
   // call that trigger assert
   std::string error_message = GetErrorMessages(boost::bind(&updateForceDiff, model1, data2, df_dx));
@@ -534,7 +538,7 @@ void test_get_impulses() {
   }
 }
 
-void test_get_ni() {
+void test_get_nc() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ImpulseModelMultiple model(boost::static_pointer_cast<crocoddyl::StateMultibody>(
@@ -554,10 +558,10 @@ void test_get_ni() {
   std::size_t ni = 0;
   crocoddyl::ImpulseModelMultiple::ImpulseModelContainer::const_iterator it_m, end_m;
   for (it_m = model.get_impulses().begin(), end_m = model.get_impulses().end(); it_m != end_m; ++it_m) {
-    ni += it_m->second->impulse->get_ni();
+    ni += it_m->second->impulse->get_nc();
   }
 
-  BOOST_CHECK(ni == model.get_ni());
+  BOOST_CHECK(ni == model.get_nc());
 }
 
 //----------------------------------------------------------------------------//
@@ -574,7 +578,7 @@ void register_unit_tests() {
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateForce)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_updateVelocityDiff)));
   framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_impulses)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_ni)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_get_nc)));
 }
 
 bool init_function() {

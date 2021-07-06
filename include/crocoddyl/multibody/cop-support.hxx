@@ -13,7 +13,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl()
-    : R_(Matrix3s::Identity()), box_(std::numeric_limits<Scalar>::max(), std::numeric_limits<Scalar>::max()) {
+    : R_(Matrix3s::Identity()),
+      box_(std::numeric_limits<Scalar>::infinity(), std::numeric_limits<Scalar>::infinity()) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
@@ -49,14 +50,14 @@ void CoPSupportTpl<Scalar>::update() {
   A_.setZero();
   ub_.setZero();
   lb_.setOnes();
-  lb_ *= -std::numeric_limits<Scalar>::max();
+  lb_ *= -std::numeric_limits<Scalar>::infinity();
 
   // CoP information
   // This matrix is defined as
-  // [0 0 -W  1  0;
-  //  0 0 -W -1  0;
-  //  0 0 -L  0  1;
-  //  0 0 -L  0 -1]
+  // [0  0 -W  1  0  0;
+  //  0  0 -W -1  0  0;
+  //  0  0 -L  0  1  0;
+  //  0  0 -L  0 -1  0]
   const Scalar L = box_(0) / Scalar(2.);
   const Scalar W = box_(1) / Scalar(2.);
   A_.row(0) << -W * R_.col(2).transpose(), R_.col(0).transpose();
@@ -99,12 +100,12 @@ template <typename Scalar>
 void CoPSupportTpl<Scalar>::set_box(const Vector2s& box) {
   box_ = box;
   if (box_(0) < Scalar(0.)) {
-    box_(0) = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+    box_(0) = std::numeric_limits<Scalar>::infinity();
+    std::cerr << "Warning: box(0) has to be a positive value, set to inf float" << std::endl;
   }
   if (box_(1) < Scalar(0.)) {
-    box_(1) = std::numeric_limits<Scalar>::max();
-    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+    box_(1) = std::numeric_limits<Scalar>::infinity();
+    std::cerr << "Warning: box(0) has to be a positive value, set to inf float" << std::endl;
   }
 }
 

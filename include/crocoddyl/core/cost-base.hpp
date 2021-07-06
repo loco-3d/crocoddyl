@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,9 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -38,7 +40,7 @@ namespace crocoddyl {
  * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$, \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$, \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
  * Jacobians and Hessians, respectively.
- * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -53,6 +55,7 @@ class CostModelAbstractTpl {
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -61,7 +64,17 @@ class CostModelAbstractTpl {
   /**
    * @brief Initialize the cost model
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state       State of the dynamical system
+   * @param[in] activation  Activation model
+   * @param[in] residual    Residual model
+   */
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
+                       boost::shared_ptr<ResidualModelAbstract> residual);
+
+  /**
+   * @brief Initialize the cost model
+   *
+   * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    * @param[in] nu          Dimension of control vector
    */
@@ -73,7 +86,7 @@ class CostModelAbstractTpl {
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State of the multibody system
+   * @param[in] state       State of the dynamical system
    * @param[in] activation  Activation model
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation);
@@ -83,7 +96,17 @@ class CostModelAbstractTpl {
    *
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state     State of the dynamical system
+   * @param[in] residual  Residual model
+   */
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual);
+
+  /**
+   * @copybrief CostModelAbstractTpl()
+   *
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
+   *
+   * @param[in] state  State of the system
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
@@ -95,7 +118,7 @@ class CostModelAbstractTpl {
    * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state  State of the dynamical system
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
@@ -128,7 +151,7 @@ class CostModelAbstractTpl {
    * @brief Create the cost data
    *
    * The default data contains objects to store the values of the cost, residual vector and their derivatives (first
-   * and second order derivatives). However, it is possible to specialized this function is we need to create
+   * and second order derivatives). However, it is possible to specialized this function if we need to create
    * additional data, for instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector
@@ -163,9 +186,20 @@ class CostModelAbstractTpl {
   const boost::shared_ptr<ActivationModelAbstract>& get_activation() const;
 
   /**
+   * @brief Return the residual model
+   */
+  const boost::shared_ptr<ResidualModelAbstract>& get_residual() const;
+
+  /**
    * @brief Return the dimension of the control input
    */
   std::size_t get_nu() const;
+
+  /**
+   * @brief Print information on the cost model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model);
 
   /**
    * @brief Modify the cost reference
@@ -177,7 +211,14 @@ class CostModelAbstractTpl {
    * @brief Return the cost reference
    */
   template <class ReferenceType>
-  ReferenceType get_reference() const;
+  ReferenceType get_reference();
+
+  /**
+   * @brief Print relevant information of the cost model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   /**
@@ -188,10 +229,11 @@ class CostModelAbstractTpl {
   /**
    * @copybrief get_reference()
    */
-  virtual void get_referenceImpl(const std::type_info&, void*) const;
+  virtual void get_referenceImpl(const std::type_info&, void*);
 
   boost::shared_ptr<StateAbstract> state_;                 //!< State description
   boost::shared_ptr<ActivationModelAbstract> activation_;  //!< Activation model
+  boost::shared_ptr<ResidualModelAbstract> residual_;      //!< Residual model
   std::size_t nu_;                                         //!< Control dimension
   VectorXs unone_;                                         //!< No control vector
 };
@@ -203,6 +245,7 @@ struct CostDataAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -211,37 +254,37 @@ struct CostDataAbstractTpl {
   CostDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
+        residual(model->get_residual()->createData(data)),
         cost(Scalar(0.)),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
-        Luu(model->get_nu(), model->get_nu()),
-        r(model->get_activation()->get_nr()),
-        Rx(model->get_activation()->get_nr(), model->get_state()->get_ndx()),
-        Ru(model->get_activation()->get_nr(), model->get_nu()) {
+        Luu(model->get_nu(), model->get_nu()) {
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
-    r.setZero();
-    Rx.setZero();
-    Ru.setZero();
   }
   virtual ~CostDataAbstractTpl() {}
 
+  DEPRECATED("Use residual.r", const VectorXs& get_r() const { return residual->r; };)
+  DEPRECATED("Use residual.Rx", const MatrixXs& get_Rx() const { return residual->Rx; };)
+  DEPRECATED("Use residual.Ru", const MatrixXs& get_Ru() const { return residual->Ru; };)
+  DEPRECATED("Use residual.r", void set_r(const VectorXs& r) { residual->r = r; };)
+  DEPRECATED("Use residual.Rx", void set_Rx(const MatrixXs& Rx) { residual->Rx = Rx; };)
+  DEPRECATED("Use residual.Ru", void set_Ru(const MatrixXs& Ru) { residual->Ru = Ru; };)
+
   DataCollectorAbstract* shared;
   boost::shared_ptr<ActivationDataAbstract> activation;
+  boost::shared_ptr<ResidualDataAbstract> residual;
   Scalar cost;
   VectorXs Lx;
   VectorXs Lu;
   MatrixXs Lxx;
   MatrixXs Lxu;
   MatrixXs Luu;
-  VectorXs r;
-  MatrixXs Rx;
-  MatrixXs Ru;
 };
 
 }  // namespace crocoddyl

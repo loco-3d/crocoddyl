@@ -1,18 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/cost-base.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeCostAbstract() {
+// TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<CostModelAbstract> >();
 
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
@@ -26,17 +32,28 @@ void exposeCostAbstract() {
       "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
       "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>,
+               boost::shared_ptr<ResidualModelAbstract> >(bp::args("self", "state", "activation", "residual"),
+                                                          "Initialize the cost model.\n\n"
+                                                          ":param state: state description\n"
+                                                          ":param activation: activation model\n"
+                                                          ":param residual: residual model"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
-          ":param activation: Activation model\n"
+          ":param activation: activation model\n"
           ":param nu: dimension of control vector (default state.nv)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
-          ":param activation: Activation model"))
+          ":param activation: activation model"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
+          bp::args("self", "state", "residual"),
+          "Initialize the cost model.\n\n"
+          ":param state: state description\n"
+          ":param residual: residual model"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
@@ -85,7 +102,12 @@ void exposeCostAbstract() {
           "activation",
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
           "activation model")
-      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector");
+      .add_property(
+          "residual",
+          bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
+          "residual model")
+      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector")
+      .def(PrintableVisitor<CostModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 
@@ -101,6 +123,9 @@ void exposeCostAbstract() {
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
                     "activation data")
+      .add_property("residual",
+                    bp::make_getter(&CostDataAbstract::residual, bp::return_value_policy<bp::return_by_value>()),
+                    "residual data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),
@@ -113,12 +138,23 @@ void exposeCostAbstract() {
                     bp::make_setter(&CostDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_internal_reference<>()),
                     bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
-      .add_property("r", bp::make_getter(&CostDataAbstract::r, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::r), "cost residual")
-      .add_property("Rx", bp::make_getter(&CostDataAbstract::Rx, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Rx), "Jacobian of the cost residual")
-      .add_property("Ru", bp::make_getter(&CostDataAbstract::Ru, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Ru), "Jacobian of the cost residual");
+      .add_property("r",
+                    bp::make_function(&CostDataAbstract::get_r,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.r.")),
+                    bp::make_function(&CostDataAbstract::set_r, deprecated<>("Deprecated. Use residual.r.")),
+                    "cost residual")
+      .add_property("Rx",
+                    bp::make_function(&CostDataAbstract::get_Rx,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Rx.")),
+                    bp::make_function(&CostDataAbstract::set_Rx, deprecated<>("Deprecated. Use residual.Rx.")),
+                    "Jacobian of the cost residual")
+      .add_property("Ru",
+                    bp::make_function(&CostDataAbstract::get_Ru,
+                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
+                    bp::make_function(&CostDataAbstract::set_Ru, deprecated<>("Deprecated. Use residual.Ru.")),
+                    "Jacobian of the cost residual");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

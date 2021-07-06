@@ -71,6 +71,8 @@ void exposeActionAbstract() {
                ":param maxiter: maximum allowed number of iterations\n"
                ":param tol: stopping tolerance criteria (default 1e-9)\n"
                ":return u: quasic-static control"))
+      .def("quasiStatic", &ActionModelAbstract_wrap::quasiStatic, &ActionModelAbstract_wrap::default_quasiStatic,
+           bp::args("self", "data", "u", "x", "maxiter", "tol"))
       .add_property(
           "nu", bp::make_function(&ActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
           "dimension of control vector")

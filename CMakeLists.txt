@@ -19,7 +19,7 @@ INCLUDE(cmake/apple.cmake)
 
 # Print initial message
 MESSAGE(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-MESSAGE(STATUS "Copyright (C) 2018-2021 CNRS-LAAS, University of Edinburgh")
+MESSAGE(STATUS "Copyright (C) 2018-2021 CNRS-LAAS, University of Edinburgh, INRIA")
 MESSAGE(STATUS "All rights reserved.")
 MESSAGE(STATUS "Released under the BSD 3-Clause License.")
 
@@ -40,10 +40,15 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" ON)
 
+IF(DEFINED BUILD_UNIT_TESTS)
+  MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
+    If you are manually building Crocoddyl from source in an existing build folder,\
+    we suggest that you delete your build folder and make a new one.")
+  OPTION(BUILD_TESTING ${BUILD_UNIT_TESTS})
+ENDIF(DEFINED BUILD_UNIT_TESTS)
 
 IF(ENABLE_VECTORIZATION)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -55,12 +60,13 @@ PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
 # If needed, fix CMake policy for APPLE systems
 APPLY_DEFAULT_APPLE_CONFIGURATION()
 
+CHECK_MINIMAL_CXX_STANDARD(14 ENFORCE)
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 
 # Add the different required and optional dependencies
 ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.7.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.7.0")
-ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
 OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
@@ -96,7 +102,6 @@ IF(BUILD_WITH_CODEGEN_SUPPORT)
     ADD_DEFINITIONS(-DPINOCCHIO_CPPAD_REQUIRES_MATRIX_BASE_PLUGIN)
     SET(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DPINOCCHIO_CPPAD_REQUIRES_MATRIX_BASE_PLUGIN)")
   ENDIF(NOT ${EIGEN3_VERSION} VERSION_GREATER "3.3.0")
-  CHECK_MINIMAL_CXX_STANDARD(11 ENFORCE)
 ENDIF()
 
 # Add OpenMP
@@ -164,13 +169,12 @@ IF(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
-  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Build the unit tests
-IF(BUILD_UNIT_TESTS)
+IF(BUILD_TESTING)
   ADD_SUBDIRECTORY(unittest)
-ENDIF(BUILD_UNIT_TESTS)
+ENDIF(BUILD_TESTING)
 
 # Build the benchmark
 IF(BUILD_BENCHMARK)
@@ -179,7 +183,11 @@ ENDIF(BUILD_BENCHMARK)
 
 # Build the examples
 IF(BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY(examples)
+  IF(BUILD_PYTHON_INTERFACE)
+    ADD_SUBDIRECTORY(examples)
+  ELSE(BUILD_PYTHON_INTERFACE)
+    MESSAGE(WARNING "Python interface is not built, hence cannot build examples.")
+  ENDIF(BUILD_PYTHON_INTERFACE)
 ENDIF(BUILD_EXAMPLES)
 
 # PkgConfig packaging of the project

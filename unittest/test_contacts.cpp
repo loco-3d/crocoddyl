@@ -32,6 +32,10 @@ void test_construct_data(ContactModelTypes::Type contact_type, PinocchioModelTyp
   ContactModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(contact_type, model_type);
 
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model = model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
