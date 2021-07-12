@@ -1026,34 +1026,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.reg_min = 1e-9
         self.th_step = .5
 
-    def calcDiff(self):
-        self.cost = self.problem.calc(self.xs, self.us)
-        self.cost = self.problem.calcDiff(self.xs, self.us)
-        if not self.isFeasible:
-            self.fs[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
-            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
-                self.fs[i + 1] = m.state.diff(x, d.xnext)
-
-        return self.cost
-
-    def computeDirection(self, recalc=True):
-        if recalc:
-            self.calcDiff()
-        self.backwardPass()
-        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
-
-    def stoppingCriteria(self):
-        return sum([np.dot(q.T, q) for q in self.Qu])
-
-    def expectedImprovement(self):
-        d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
-        d2 = sum([-np.dot(k.T, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
-        return np.array([d1, d2])
-
-    def tryStep(self, stepLength=1):
-        self.forwardPass(stepLength)
-        return self.cost - self.cost_try
-
     def solve(self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None):
         self.setCandidate(init_xs, init_us, isFeasible)
         self.x_reg = regInit if regInit is not None else self.reg_min
@@ -1104,39 +1076,32 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 return self.xs, self.us, True
         return self.xs, self.us, False
 
-    def increaseRegularization(self):
-        self.x_reg *= self.reg_incFactor
-        if self.x_reg > self.reg_max:
-            self.x_reg = self.reg_max
-        self.u_reg = self.x_reg
+    def computeDirection(self, recalc=True):
+        if recalc:
+            self.calcDiff()
+        self.backwardPass()
+        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
-    def decreaseRegularization(self):
-        self.x_reg /= self.reg_decFactor
-        if self.x_reg < self.reg_min:
-            self.x_reg = self.reg_min
-        self.u_reg = self.x_reg
+    def tryStep(self, stepLength=1):
+        self.forwardPass(stepLength)
+        return self.cost - self.cost_try
 
-    def allocateData(self):
-        models = self.problem.runningModels.tolist() + [self.problem.terminalModel]
-        self.Vxx = [np.zeros([m.state.ndx, m.state.ndx]) for m in models]
-        self.Vx = [np.zeros([m.state.ndx]) for m in models]
+    def stoppingCriteria(self):
+        return sum([np.dot(q.T, q) for q in self.Qu])
 
-        self.Q = [np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu]) for m in self.problem.runningModels]
-        self.q = [np.zeros([m.state.ndx + m.nu]) for m in self.problem.runningModels]
-        self.Qxx = [Q[:m.state.ndx, :m.state.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
-        self.Qxu = [Q[:m.state.ndx, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
-        self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
-        self.Quu = [Q[m.state.ndx:, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
-        self.Qx = [q[:m.state.ndx] for m, q in zip(self.problem.runningModels, self.q)]
-        self.Qu = [q[m.state.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
+    def expectedImprovement(self):
+        d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
+        d2 = sum([-np.dot(k.T, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
+        return np.array([d1, d2])
 
-        self.K = [np.zeros([m.nu, m.state.ndx]) for m in self.problem.runningModels]
-        self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
-
-        self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
-        self.us_try = [np.nan] * self.problem.T
-        self.fs = [np.zeros(self.problem.runningModels[0].state.ndx)
-                     ] + [np.zeros(m.state.ndx) for m in self.problem.runningModels]
+    def calcDiff(self):
+        self.cost = self.problem.calc(self.xs, self.us)
+        self.cost = self.problem.calcDiff(self.xs, self.us)
+        if not self.isFeasible:
+            self.fs[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
+            for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
+                self.fs[i + 1] = m.state.diff(x, d.xnext)
+        return self.cost
 
     def backwardPass(self):
         self.Vx[-1][:] = self.problem.terminalData.Lx
@@ -1176,17 +1141,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
 
-    def computeGains(self, t):
-        try:
-            if self.Quu[t].shape[0] > 0:
-                Lb = scl.cho_factor(self.Quu[t])
-                self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
-                self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
-            else:
-                pass
-        except scl.LinAlgError:
-            raise ArithmeticError('backward error')
-
     def forwardPass(self, stepLength, warning='ignore'):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
@@ -1208,6 +1162,51 @@ class DDPDerived(crocoddyl.SolverAbstract):
         raiseIfNan(ctry, ArithmeticError('forward error'))
         self.cost_try = ctry
         return xtry, utry, ctry
+
+    def computeGains(self, t):
+        try:
+            if self.Quu[t].shape[0] > 0:
+                Lb = scl.cho_factor(self.Quu[t])
+                self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
+                self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
+            else:
+                pass
+        except scl.LinAlgError:
+            raise ArithmeticError('backward error')
+
+    def increaseRegularization(self):
+        self.x_reg *= self.reg_incFactor
+        if self.x_reg > self.reg_max:
+            self.x_reg = self.reg_max
+        self.u_reg = self.x_reg
+
+    def decreaseRegularization(self):
+        self.x_reg /= self.reg_decFactor
+        if self.x_reg < self.reg_min:
+            self.x_reg = self.reg_min
+        self.u_reg = self.x_reg
+
+    def allocateData(self):
+        models = self.problem.runningModels.tolist() + [self.problem.terminalModel]
+        self.Vxx = [np.zeros([m.state.ndx, m.state.ndx]) for m in models]
+        self.Vx = [np.zeros([m.state.ndx]) for m in models]
+
+        self.Q = [np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu]) for m in self.problem.runningModels]
+        self.q = [np.zeros([m.state.ndx + m.nu]) for m in self.problem.runningModels]
+        self.Qxx = [Q[:m.state.ndx, :m.state.ndx] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qxu = [Q[:m.state.ndx, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
+        self.Quu = [Q[m.state.ndx:, m.state.ndx:] for m, Q in zip(self.problem.runningModels, self.Q)]
+        self.Qx = [q[:m.state.ndx] for m, q in zip(self.problem.runningModels, self.q)]
+        self.Qu = [q[m.state.ndx:] for m, q in zip(self.problem.runningModels, self.q)]
+
+        self.K = [np.zeros([m.nu, m.state.ndx]) for m in self.problem.runningModels]
+        self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
+
+        self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
+        self.us_try = [np.nan] * self.problem.T
+        self.fs = [np.zeros(self.problem.runningModels[0].state.ndx)
+                   ] + [np.zeros(m.state.ndx) for m in self.problem.runningModels]
 
 
 class FDDPDerived(DDPDerived):
