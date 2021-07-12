@@ -1030,9 +1030,9 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
-            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
+            self.fs[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
-                self.gaps[i + 1] = m.state.diff(x, d.xnext)
+                self.fs[i + 1] = m.state.diff(x, d.xnext)
 
         return self.cost
 
@@ -1135,7 +1135,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
         self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
         self.us_try = [np.nan] * self.problem.T
-        self.gaps = [np.zeros(self.problem.runningModels[0].state.ndx)
+        self.fs = [np.zeros(self.problem.runningModels[0].state.ndx)
                      ] + [np.zeros(m.state.ndx) for m in self.problem.runningModels]
 
     def backwardPass(self):
@@ -1148,7 +1148,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
         # Compute and store the Vx gradient at end of the interval (rollout state)
         if not self.isFeasible:
-            self.Vx[-1] += np.dot(self.Vxx[-1], self.gaps[-1])
+            self.Vx[-1] += np.dot(self.Vxx[-1], self.fs[-1])
 
         for t, (model, data) in rev_enumerate(zip(self.problem.runningModels, self.problem.runningDatas)):
             self.Qxx[t][:, :] = data.Lxx + np.dot(data.Fx.T, np.dot(self.Vxx[t + 1], data.Fx))
@@ -1171,7 +1171,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             # Compute and store the Vx gradient at end of the interval (rollout state)
             if not self.isFeasible:
-                self.Vx[t] += np.dot(self.Vxx[t], self.gaps[t])
+                self.Vx[t] += np.dot(self.Vxx[t], self.fs[t])
 
             raiseIfNan(self.Vxx[t], ArithmeticError('backward error'))
             raiseIfNan(self.Vx[t], ArithmeticError('backward error'))
@@ -1289,23 +1289,23 @@ class FDDPDerived(DDPDerived):
         self.dg = 0.
         self.dq = 0.
         if not self.isFeasible:
-            self.dg -= np.dot(self.Vx[-1].T, self.gaps[-1])
-            self.dq += np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], self.gaps[-1]))
+            self.dg -= np.dot(self.Vx[-1].T, self.fs[-1])
+            self.dq += np.dot(self.fs[-1].T, np.dot(self.Vxx[-1], self.fs[-1]))
         for t in range(self.problem.T):
             self.dg += np.dot(self.Qu[t].T, self.k[t])
             self.dq -= np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t]))
             if not self.isFeasible:
-                self.dg -= np.dot(self.Vx[t].T, self.gaps[t])
-                self.dq += np.dot(self.gaps[t].T, np.dot(self.Vxx[t], self.gaps[t]))
+                self.dg -= np.dot(self.Vx[t].T, self.fs[t])
+                self.dq += np.dot(self.fs[t].T, np.dot(self.Vxx[t], self.fs[t]))
 
     def expectedImprovement(self):
         self.dv = 0.
         if not self.isFeasible:
             dx = self.problem.runningModels[-1].state.diff(self.xs_try[-1], self.xs[-1])
-            self.dv -= np.dot(self.gaps[-1].T, np.dot(self.Vxx[-1], dx))
+            self.dv -= np.dot(self.fs[-1].T, np.dot(self.Vxx[-1], dx))
             for t in range(self.problem.T):
                 dx = self.problem.runningModels[t].state.diff(self.xs_try[t], self.xs[t])
-                self.dv -= np.dot(self.gaps[t].T, np.dot(self.Vxx[t], dx))
+                self.dv -= np.dot(self.fs[t].T, np.dot(self.Vxx[t], dx))
         d1 = self.dg + self.dv
         d2 = self.dq - 2 * self.dv
         return np.array([d1, d2])
@@ -1314,11 +1314,11 @@ class FDDPDerived(DDPDerived):
         self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
-            self.gaps[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
+            self.fs[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
             for i, (m, d, x) in enumerate(zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])):
-                self.gaps[i + 1] = m.state.diff(x, d.xnext)
+                self.fs[i + 1] = m.state.diff(x, d.xnext)
         elif not self.wasFeasible:
-            self.gaps[:] = [np.zeros_like(f) for f in self.gaps]
+            self.fs[:] = [np.zeros_like(f) for f in self.fs]
         return self.cost
 
     def forwardPass(self, stepLength, warning='ignore'):
@@ -1330,7 +1330,7 @@ class FDDPDerived(DDPDerived):
             if self.isFeasible or stepLength == 1:
                 xtry[t] = xnext.copy()
             else:
-                xtry[t] = m.state.integrate(xnext, self.gaps[t] * (stepLength - 1))
+                xtry[t] = m.state.integrate(xnext, self.fs[t] * (stepLength - 1))
             utry[t] = us[t] - self.k[t] * stepLength - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
             with np.warnings.catch_warnings():
                 np.warnings.simplefilter(warning)
@@ -1342,7 +1342,7 @@ class FDDPDerived(DDPDerived):
         if self.isFeasible or stepLength == 1:
             xtry[-1] = xnext.copy()
         else:
-            xtry[-1] = self.problem.terminalModel.state.integrate(xnext, self.gaps[-1] * (stepLength - 1))
+            xtry[-1] = self.problem.terminalModel.state.integrate(xnext, self.fs[-1] * (stepLength - 1))
         with np.warnings.catch_warnings():
             np.warnings.simplefilter(warning)
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
