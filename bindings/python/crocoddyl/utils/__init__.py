@@ -1162,11 +1162,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
             self.computeGains(t)
 
-            if self.u_reg == 0:
-                self.Vx[t][:] = self.Qx[t] - np.dot(self.K[t].T, self.Qu[t])
-            else:
-                self.Vx[t][:] = self.Qx[t] - 2 * np.dot(self.K[t].T, self.Qu[t])
-                self.Vx[t][:] += np.dot(self.K[t].T, np.dot(self.Quu[t], self.k[t]))
+            self.Vx[t][:] = self.Qx[t] - np.dot(self.K[t].T, self.Qu[t])
             self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
             self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)  # ensure symmetric
 
