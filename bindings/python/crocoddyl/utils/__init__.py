@@ -1026,7 +1026,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.reg_min = 1e-9
         self.th_step = .5
 
-    def calc(self):
+    def calcDiff(self):
         self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
@@ -1038,7 +1038,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
     def computeDirection(self, recalc=True):
         if recalc:
-            self.calc()
+            self.calcDiff()
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
@@ -1277,7 +1277,7 @@ class FDDPDerived(DDPDerived):
 
     def computeDirection(self, recalc=True):
         if recalc:
-            self.calc()
+            self.calcDiff()
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
@@ -1310,7 +1310,7 @@ class FDDPDerived(DDPDerived):
         d2 = self.dq - 2 * self.dv
         return np.array([d1, d2])
 
-    def calc(self):
+    def calcDiff(self):
         self.cost = self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
