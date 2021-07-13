@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, INRIA
+// Copyright (C) 2021, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ struct DifferentialActionDataConstraintFwdDynamicsTpl : public DifferentialActio
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
-  DataCollectorActMultibodyInContact2Tpl<Scalar> multibody;
+  DataCollectorActMultibodyInConstraintTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
 
   using Base::cost;

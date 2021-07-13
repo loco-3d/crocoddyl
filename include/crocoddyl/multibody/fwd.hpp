@@ -321,13 +321,13 @@ template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
-struct DataCollectorContact2Tpl;
+struct DataCollectorConstraintTpl;
 
 template <typename Scalar>
-struct DataCollectorMultibodyInContact2Tpl;
+struct DataCollectorMultibodyInConstraintTpl;
 
 template <typename Scalar>
-struct DataCollectorActMultibodyInContact2Tpl;
+struct DataCollectorActMultibodyInConstraintTpl;
 
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
@@ -505,9 +505,9 @@ typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
 
-typedef DataCollectorContact2Tpl<double> DataCollectorContact2;
-typedef DataCollectorMultibodyInContact2Tpl<double> DataCollectorMultibodyInContact2;
-typedef DataCollectorActMultibodyInContact2Tpl<double> DataCollectorActMultibodyInContact2;
+typedef DataCollectorConstraintTpl<double> DataCollectorContact2;
+typedef DataCollectorMultibodyInConstraintTpl<double> DataCollectorMultibodyInContact2;
+typedef DataCollectorActMultibodyInConstraintTpl<double> DataCollectorActMultibodyInContact2;
 
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
