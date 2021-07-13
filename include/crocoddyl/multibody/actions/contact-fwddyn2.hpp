@@ -40,11 +40,11 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   typedef DifferentialActionDataContactFwdDynamics2Tpl<Scalar> DifferentialActionDataContactFwdDynamics2;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef pinocchio::RigidContactModelTpl<Scalar, 0> RigidContactModel;
+  typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
 
   DifferentialActionModelContactFwdDynamics2Tpl(boost::shared_ptr<StateMultibody> state,
                                                 boost::shared_ptr<ActuationModelAbstract> actuation,
-                                                const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) &
+                                                const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) &
                                                     contacts,
                                                 boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
   ~DifferentialActionModelContactFwdDynamics2Tpl();
@@ -59,7 +59,7 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   //                         1e-9);
 
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
-  const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) & get_contacts() const;
+  const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & get_contacts() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
@@ -79,7 +79,7 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
 
  private:
   boost::shared_ptr<ActuationModelAbstract> actuation_;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) contacts_;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contacts_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;
   Scalar mu_contacts;
@@ -93,20 +93,20 @@ struct DifferentialActionDataContactFwdDynamics2Tpl : public DifferentialActionD
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef pinocchio::RigidContactDataTpl<Scalar, 0> RigidContactData;
-  typedef pinocchio::RigidContactModelTpl<Scalar, 0> RigidContactModel;
+  typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
+  typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
 
   template <template <typename Scalar> class Model>
   explicit DifferentialActionDataContactFwdDynamics2Tpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(),
-                  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData)()),
+                  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData)()),
         costs(model->get_costs()->createData(&multibody)) {
     costs->shareMemory(this);
 
     for (unsigned int i = 0; i < model->get_contacts().size(); i++) {
-      multibody.contacts.push_back(RigidContactData(model->get_contacts()[i]));
+      multibody.contacts.push_back(RigidConstraintData(model->get_contacts()[i]));
     }
   }
 

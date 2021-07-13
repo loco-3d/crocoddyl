@@ -20,20 +20,20 @@ namespace crocoddyl {
 template <typename Scalar>
 struct DataCollectorContact2Tpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  typedef pinocchio::RigidContactDataTpl<Scalar, 0> RigidContactData;
+  typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
 
-  DataCollectorContact2Tpl<Scalar>(const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) & contacts)
+  DataCollectorContact2Tpl<Scalar>(const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) & contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
   virtual ~DataCollectorContact2Tpl() {}
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts;
 };
 
 template <typename Scalar>
 struct DataCollectorMultibodyInContact2Tpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorContact2Tpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  typedef pinocchio::RigidContactDataTpl<Scalar, 0> RigidContactData;
+  typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
   DataCollectorMultibodyInContact2Tpl(pinocchio::DataTpl<Scalar>* const pinocchio,
-                                      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts)
+                                      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorContact2Tpl<Scalar>(contacts) {}
   virtual ~DataCollectorMultibodyInContact2Tpl() {}
 };
@@ -42,10 +42,10 @@ template <typename Scalar>
 struct DataCollectorActMultibodyInContact2Tpl : DataCollectorMultibodyInContact2Tpl<Scalar>,
                                                 DataCollectorActuationTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  typedef pinocchio::RigidContactDataTpl<Scalar, 0> RigidContactData;
+  typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
   DataCollectorActMultibodyInContact2Tpl(pinocchio::DataTpl<Scalar>* const pinocchio,
                                          boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-                                         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts)
+                                         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
       : DataCollectorMultibodyInContact2Tpl<Scalar>(pinocchio, contacts),
         DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyInContact2Tpl() {}
