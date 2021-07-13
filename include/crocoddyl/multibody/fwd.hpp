@@ -55,7 +55,7 @@ template <typename Scalar>
 class DifferentialActionModelContactFwdDynamics2Tpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamics2Tpl;
-  
+
 // numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
@@ -328,7 +328,7 @@ struct DataCollectorMultibodyInContact2Tpl;
 
 template <typename Scalar>
 struct DataCollectorActMultibodyInContact2Tpl;
-  
+
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
@@ -374,7 +374,7 @@ typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDa
 
 typedef DifferentialActionModelContactFwdDynamics2Tpl<double> DifferentialActionModelContactFwdDynamics2;
 typedef DifferentialActionDataContactFwdDynamics2Tpl<double> DifferentialActionDataContactFwdDynamics2;
-  
+
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
 typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
@@ -508,7 +508,7 @@ typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyI
 typedef DataCollectorContact2Tpl<double> DataCollectorContact2;
 typedef DataCollectorMultibodyInContact2Tpl<double> DataCollectorMultibodyInContact2;
 typedef DataCollectorActMultibodyInContact2Tpl<double> DataCollectorActMultibodyInContact2;
-  
+
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
 

@@ -14,7 +14,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeDifferentialActionContactFwdDynamics2() {
-  typedef pinocchio::RigidContactModelTpl<double,0> RigidContactModel;
+  typedef pinocchio::RigidContactModelTpl<double, 0> RigidContactModel;
   bp::class_<DifferentialActionModelContactFwdDynamics2, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelContactFwdDynamics2",
       "Differential action model for contact forward dynamics in multibody systems.\n\n"
@@ -22,12 +22,9 @@ void exposeDifferentialActionContactFwdDynamics2() {
       "is also a custom implementation in case of system with armatures. If you want to\n"
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>,
-      boost::shared_ptr<ActuationModelAbstract>,
-      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel),
-      boost::shared_ptr<CostModelSum>,
-      double >(
-               bp::args("self", "state", "actuation", "contacts", "costs", "mu"),
+      bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
+               PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel), boost::shared_ptr<CostModelSum>, double>(
+          bp::args("self", "state", "actuation", "contacts", "costs", "mu"),
           "Initialize the constrained forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
           "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
@@ -93,16 +90,15 @@ void exposeDifferentialActionContactFwdDynamics2() {
       .add_property("mu",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_mu,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::set_mu),
-                    "set damping parmeter mu");
+                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::set_mu), "set damping parmeter mu");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics2> >();
 
   bp::class_<DifferentialActionDataContactFwdDynamics2, bp::bases<DifferentialActionDataAbstract> >(
       "DifferentialActionDataContactFwdDynamics2", "Action data for the contact forward dynamics system.",
       bp::init<DifferentialActionModelContactFwdDynamics2*>(bp::args("self", "model"),
-                                                           "Create contact forward-dynamics action data.\n\n"
-                                                           ":param model: contact forward-dynamics action model"))
+                                                            "Create contact forward-dynamics action data.\n\n"
+                                                            ":param model: contact forward-dynamics action model"))
       .add_property(
           "pinocchio",
           bp::make_getter(&DifferentialActionDataContactFwdDynamics2::pinocchio, bp::return_internal_reference<>()),
