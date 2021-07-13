@@ -26,7 +26,7 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -37,17 +37,17 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
-  typedef DifferentialActionDataContactFwdDynamics2Tpl<Scalar> DifferentialActionDataContactFwdDynamics2;
+  typedef DifferentialActionDataConstraintFwdDynamicsTpl<Scalar> DifferentialActionDataConstraintFwdDynamics;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
 
-  DifferentialActionModelContactFwdDynamics2Tpl(boost::shared_ptr<StateMultibody> state,
+  DifferentialActionModelConstraintFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                                 boost::shared_ptr<ActuationModelAbstract> actuation,
                                                 const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) &
                                                     contacts,
                                                 boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
-  ~DifferentialActionModelContactFwdDynamics2Tpl();
+  ~DifferentialActionModelConstraintFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -86,7 +86,7 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataContactFwdDynamics2Tpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataConstraintFwdDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -97,7 +97,7 @@ struct DifferentialActionDataContactFwdDynamics2Tpl : public DifferentialActionD
   typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataContactFwdDynamics2Tpl(Model<Scalar>* const model)
+  explicit DifferentialActionDataConstraintFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(),
