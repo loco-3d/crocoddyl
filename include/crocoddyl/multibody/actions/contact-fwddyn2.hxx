@@ -21,7 +21,7 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::DifferentialActionModelContactFwdDynamics2Tpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
-    const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) & contacts,
+    const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contacts,
     boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
@@ -146,8 +146,8 @@ DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::get_actuation() const {
 }
 
 template <typename Scalar>
-const std::vector<pinocchio::RigidContactModelTpl<Scalar, 0>,
-                  Eigen::aligned_allocator<pinocchio::RigidContactModelTpl<Scalar, 0> > >&
+const std::vector<pinocchio::RigidConstraintModelTpl<Scalar, 0>,
+                  Eigen::aligned_allocator<pinocchio::RigidConstraintModelTpl<Scalar, 0> > >&
 DifferentialActionModelContactFwdDynamics2Tpl<Scalar>::get_contacts() const {
   return contacts_;
 }

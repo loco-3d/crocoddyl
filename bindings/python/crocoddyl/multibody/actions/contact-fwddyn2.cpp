@@ -14,7 +14,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeDifferentialActionContactFwdDynamics2() {
-  typedef pinocchio::RigidContactModelTpl<double, 0> RigidContactModel;
+  typedef pinocchio::RigidConstraintModelTpl<double, 0> RigidConstraintModel;
   bp::class_<DifferentialActionModelContactFwdDynamics2, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelContactFwdDynamics2",
       "Differential action model for contact forward dynamics in multibody systems.\n\n"
@@ -23,7 +23,7 @@ void exposeDifferentialActionContactFwdDynamics2() {
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
-               PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel), boost::shared_ptr<CostModelSum>, double>(
+               PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel), boost::shared_ptr<CostModelSum>, double>(
           bp::args("self", "state", "actuation", "contacts", "costs", "mu"),
           "Initialize the constrained forward-dynamics action model.\n\n"
           "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
