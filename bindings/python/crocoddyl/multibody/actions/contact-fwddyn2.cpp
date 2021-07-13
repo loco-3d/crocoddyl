@@ -13,10 +13,10 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeDifferentialActionContactFwdDynamics2() {
+void exposeDifferentialActionConstraintFwdDynamics() {
   typedef pinocchio::RigidConstraintModelTpl<double, 0> RigidConstraintModel;
-  bp::class_<DifferentialActionModelContactFwdDynamics2, bp::bases<DifferentialActionModelAbstract> >(
-      "DifferentialActionModelContactFwdDynamics2",
+  bp::class_<DifferentialActionModelConstraintFwdDynamics, bp::bases<DifferentialActionModelAbstract> >(
+      "DifferentialActionModelConstraintFwdDynamics",
       "Differential action model for contact forward dynamics in multibody systems.\n\n"
       "The contact is modelled as holonomic constraits in the contact frame. There\n"
       "is also a custom implementation in case of system with armatures. If you want to\n"
@@ -34,10 +34,10 @@ void exposeDifferentialActionContactFwdDynamics2() {
           ":param contacts: multiple contact model\n"
           ":param costs: stack of cost functions\n"
           ":param mu: damping parameter of type double\n"))
-      .def<void (DifferentialActionModelContactFwdDynamics2::*)(
+      .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &DifferentialActionModelContactFwdDynamics2::calc, bp::args("self", "data", "x", "u"),
+          "calc", &DifferentialActionModelConstraintFwdDynamics::calc, bp::args("self", "data", "x", "u"),
           "Compute the next state and cost value.\n\n"
           "It describes the time-continuous evolution of the multibody system with contact. The\n"
           "contacts are modelled as holonomic constraints.\n"
@@ -45,13 +45,13 @@ void exposeDifferentialActionContactFwdDynamics2() {
           ":param data: contact forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
-      .def<void (DifferentialActionModelContactFwdDynamics2::*)(
+      .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (DifferentialActionModelContactFwdDynamics2::*)(
+      .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &DifferentialActionModelContactFwdDynamics2::calcDiff, bp::args("self", "data", "x", "u"),
+          "calcDiff", &DifferentialActionModelConstraintFwdDynamics::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the differential multibody system and its cost\n"
           "functions.\n\n"
           "It computes the partial derivatives of the differential multibody system and the\n"
@@ -61,54 +61,54 @@ void exposeDifferentialActionContactFwdDynamics2() {
           ":param data: contact forward-dynamics action data\n"
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n")
-      .def<void (DifferentialActionModelContactFwdDynamics2::*)(
+      .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &DifferentialActionModelContactFwdDynamics2::createData, bp::args("self"),
+      .def("createData", &DifferentialActionModelConstraintFwdDynamics::createData, bp::args("self"),
            "Create the contact forward dynamics differential action data.")
       .add_property("pinocchio",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_pinocchio,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_pinocchio,
                                       bp::return_internal_reference<>()),
                     "multibody model (i.e. pinocchio model)")
       .add_property("actuation",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_actuation,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_actuation,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "actuation model")
       .add_property("contacts",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_contacts,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_contacts,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "multiple contact model")
       .add_property("costs",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_costs,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_costs,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "total cost model")
       .add_property("armature",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_armature,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::set_armature),
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::set_armature),
                     "set an armature mechanism in the joints")
       .add_property("mu",
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::get_mu,
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_mu,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&DifferentialActionModelContactFwdDynamics2::set_mu), "set damping parmeter mu");
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::set_mu), "set damping parmeter mu");
 
-  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics2> >();
+  bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataConstraintFwdDynamics> >();
 
-  bp::class_<DifferentialActionDataContactFwdDynamics2, bp::bases<DifferentialActionDataAbstract> >(
-      "DifferentialActionDataContactFwdDynamics2", "Action data for the contact forward dynamics system.",
-      bp::init<DifferentialActionModelContactFwdDynamics2*>(bp::args("self", "model"),
+  bp::class_<DifferentialActionDataConstraintFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
+      "DifferentialActionDataConstraintFwdDynamics", "Action data for the contact forward dynamics system.",
+      bp::init<DifferentialActionModelConstraintFwdDynamics*>(bp::args("self", "model"),
                                                             "Create contact forward-dynamics action data.\n\n"
                                                             ":param model: contact forward-dynamics action model"))
       .add_property(
           "pinocchio",
-          bp::make_getter(&DifferentialActionDataContactFwdDynamics2::pinocchio, bp::return_internal_reference<>()),
+          bp::make_getter(&DifferentialActionDataConstraintFwdDynamics::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
       .add_property(
           "multibody",
-          bp::make_getter(&DifferentialActionDataContactFwdDynamics2::multibody, bp::return_internal_reference<>()),
+          bp::make_getter(&DifferentialActionDataConstraintFwdDynamics::multibody, bp::return_internal_reference<>()),
           "multibody data")
       .add_property("costs",
-                    bp::make_getter(&DifferentialActionDataContactFwdDynamics2::costs,
+                    bp::make_getter(&DifferentialActionDataConstraintFwdDynamics::costs,
                                     bp::return_value_policy<bp::return_by_value>()),
                     "total cost data");
 }
