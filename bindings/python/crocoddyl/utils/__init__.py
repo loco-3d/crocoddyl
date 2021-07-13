@@ -1045,7 +1045,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                         continue
                 break
             self.d = self.expectedImprovement()
-            d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
+            d1, d2 = self.d[0], self.d[1]
 
             for a in self.alphas:
                 try:
@@ -1069,8 +1069,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            if self.callbacks is not None:
-                [c(self) for c in self.callbacks]
+            if self.getCallbacks is not None:
+                [c(self) for c in self.getCallbacks()]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
@@ -1243,7 +1243,8 @@ class FDDPDerived(DDPDerived):
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
                     continue
-                d1, d2 = self.expectedImprovement()
+                self.d = self.expectedImprovement()
+                d1, d2 = self.d[0], self.d[1]
 
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 if self.dV_exp >= 0.:  # descend direction
@@ -1267,8 +1268,8 @@ class FDDPDerived(DDPDerived):
             self.stepLength = a
             self.iter = i
             self.stop = self.stoppingCriteria()
-            if self.callbacks is not None:
-                [c(self) for c in self.callbacks]
+            if self.getCallbacks is not None:
+                [c(self) for c in self.getCallbacks()]
 
             if self.wasFeasible and self.stop < self.th_stop:
                 return self.xs, self.us, True
