@@ -40,13 +40,13 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   typedef DifferentialActionDataContactFwdDynamics2Tpl<Scalar> DifferentialActionDataContactFwdDynamics2;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef pinocchio::RigidContactModelTpl<Scalar,0> RigidContactModel;
-  
+  typedef pinocchio::RigidContactModelTpl<Scalar, 0> RigidContactModel;
+
   DifferentialActionModelContactFwdDynamics2Tpl(boost::shared_ptr<StateMultibody> state,
                                                 boost::shared_ptr<ActuationModelAbstract> actuation,
-                                               const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel)& contacts,
-                                                boost::shared_ptr<CostModelSum> costs,
-                                                const Scalar mu_contacts);
+                                                const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) &
+                                                    contacts,
+                                                boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
   ~DifferentialActionModelContactFwdDynamics2Tpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -54,11 +54,12 @@ class DifferentialActionModelContactFwdDynamics2Tpl : public DifferentialActionM
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
-  //virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-  //                         const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100, const Scalar& tol = 1e-9);
-  
+  // virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+  //                         const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100, const Scalar& tol =
+  //                         1e-9);
+
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
-  const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel)& get_contacts() const;
+  const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactModel) & get_contacts() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
   const VectorXs& get_armature() const;
@@ -92,22 +93,23 @@ struct DifferentialActionDataContactFwdDynamics2Tpl : public DifferentialActionD
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef pinocchio::RigidContactDataTpl<Scalar,0> RigidContactData;
-  typedef pinocchio::RigidContactModelTpl<Scalar,0> RigidContactModel;
-  
+  typedef pinocchio::RigidContactDataTpl<Scalar, 0> RigidContactData;
+  typedef pinocchio::RigidContactModelTpl<Scalar, 0> RigidContactModel;
+
   template <template <typename Scalar> class Model>
   explicit DifferentialActionDataContactFwdDynamics2Tpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData(), PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData)() ),
+        multibody(&pinocchio, model->get_actuation()->createData(),
+                  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData)()),
         costs(model->get_costs()->createData(&multibody)) {
     costs->shareMemory(this);
 
-    for(unsigned int i=0; i<model->get_contacts().size(); i++) {
+    for (unsigned int i = 0; i < model->get_contacts().size(); i++) {
       multibody.contacts.push_back(RigidContactData(model->get_contacts()[i]));
     }
   }
-    
+
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyInContact2Tpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
