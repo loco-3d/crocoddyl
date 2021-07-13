@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, INRIA
+// Copyright (C) 2021, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,37 +18,37 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-struct DataCollectorContact2Tpl : virtual DataCollectorAbstractTpl<Scalar> {
+struct DataCollectorConstraintTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
 
-  DataCollectorContact2Tpl<Scalar>(const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) & contacts)
+  DataCollectorConstraintTpl<Scalar>(const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) & contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
-  virtual ~DataCollectorContact2Tpl() {}
+  virtual ~DataCollectorConstraintTpl() {}
   PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts;
 };
 
 template <typename Scalar>
-struct DataCollectorMultibodyInContact2Tpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorContact2Tpl<Scalar> {
+struct DataCollectorMultibodyInConstraintTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorConstraintTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
-  DataCollectorMultibodyInContact2Tpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+  DataCollectorMultibodyInConstraintTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
                                       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
-      : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorContact2Tpl<Scalar>(contacts) {}
-  virtual ~DataCollectorMultibodyInContact2Tpl() {}
+      : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorConstraintTpl<Scalar>(contacts) {}
+  virtual ~DataCollectorMultibodyInConstraintTpl() {}
 };
 
 template <typename Scalar>
-struct DataCollectorActMultibodyInContact2Tpl : DataCollectorMultibodyInContact2Tpl<Scalar>,
+struct DataCollectorActMultibodyInConstraintTpl : DataCollectorMultibodyInConstraintTpl<Scalar>,
                                                 DataCollectorActuationTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
-  DataCollectorActMultibodyInContact2Tpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+  DataCollectorActMultibodyInConstraintTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
                                          boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
                                          PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
-      : DataCollectorMultibodyInContact2Tpl<Scalar>(pinocchio, contacts),
+      : DataCollectorMultibodyInConstraintTpl<Scalar>(pinocchio, contacts),
         DataCollectorActuationTpl<Scalar>(actuation) {}
-  virtual ~DataCollectorActMultibodyInContact2Tpl() {}
+  virtual ~DataCollectorActMultibodyInConstraintTpl() {}
 };
 
 }  // namespace crocoddyl

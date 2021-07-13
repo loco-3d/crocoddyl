@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, INRIA
+// Copyright (C) 2021, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn2.hpp"
+#include "crocoddyl/multibody/actions/constraint-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace python {
