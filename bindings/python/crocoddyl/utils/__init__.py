@@ -1087,7 +1087,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return self.cost - self.cost_try
 
     def stoppingCriteria(self):
-        return sum([np.dot(q.T, q) for q in self.Qu])
+        return abs(self.d[0])
 
     def expectedImprovement(self):
         d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
