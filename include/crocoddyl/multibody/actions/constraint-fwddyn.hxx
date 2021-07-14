@@ -105,7 +105,8 @@ boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::createData() {
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > data =
       boost::make_shared<DifferentialActionDataConstraintFwdDynamics>(this);
-  DifferentialActionDataConstraintFwdDynamics* d = static_cast<DifferentialActionDataConstraintFwdDynamics*>(data.get());
+  DifferentialActionDataConstraintFwdDynamics* d =
+      static_cast<DifferentialActionDataConstraintFwdDynamics*>(data.get());
   pinocchio::initContactDynamics(pinocchio_, d->pinocchio, contacts_);
 
   return data;

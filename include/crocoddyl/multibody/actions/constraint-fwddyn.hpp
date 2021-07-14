@@ -42,11 +42,10 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
 
-  DifferentialActionModelConstraintFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                                boost::shared_ptr<ActuationModelAbstract> actuation,
-                                                const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) &
-                                                    contacts,
-                                                boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
+  DifferentialActionModelConstraintFwdDynamicsTpl(
+      boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
+      const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contacts,
+      boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
   ~DifferentialActionModelConstraintFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
