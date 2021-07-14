@@ -23,17 +23,17 @@ void exposeDifferentialActionConstraintFwdDynamics() {
       "include the armature, you need to use setArmature(). On the other hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
-               PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel), boost::shared_ptr<CostModelSum>, double>(
-          bp::args("self", "state", "actuation", "contacts", "costs", "mu"),
-          "Initialize the constrained forward-dynamics action model.\n\n"
-          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
-          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
-          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
-          ":param state: multibody state\n"
-          ":param actuation: abstract actuation model\n"
-          ":param contacts: multiple contact model\n"
-          ":param costs: stack of cost functions\n"
-          ":param mu: damping parameter of type double\n"))
+               PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel), boost::shared_ptr<CostModelSum>,
+               double>(bp::args("self", "state", "actuation", "contacts", "costs", "mu"),
+                       "Initialize the constrained forward-dynamics action model.\n\n"
+                       "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+                       "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+                       "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
+                       ":param state: multibody state\n"
+                       ":param actuation: abstract actuation model\n"
+                       ":param contacts: multiple contact model\n"
+                       ":param costs: stack of cost functions\n"
+                       ":param mu: damping parameter of type double\n"))
       .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -90,15 +90,16 @@ void exposeDifferentialActionConstraintFwdDynamics() {
       .add_property("mu",
                     bp::make_function(&DifferentialActionModelConstraintFwdDynamics::get_mu,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::set_mu), "set damping parmeter mu");
+                    bp::make_function(&DifferentialActionModelConstraintFwdDynamics::set_mu),
+                    "set damping parmeter mu");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataConstraintFwdDynamics> >();
 
   bp::class_<DifferentialActionDataConstraintFwdDynamics, bp::bases<DifferentialActionDataAbstract> >(
       "DifferentialActionDataConstraintFwdDynamics", "Action data for the contact forward dynamics system.",
       bp::init<DifferentialActionModelConstraintFwdDynamics*>(bp::args("self", "model"),
-                                                            "Create contact forward-dynamics action data.\n\n"
-                                                            ":param model: contact forward-dynamics action model"))
+                                                              "Create contact forward-dynamics action data.\n\n"
+                                                              ":param model: contact forward-dynamics action model"))
       .add_property(
           "pinocchio",
           bp::make_getter(&DifferentialActionDataConstraintFwdDynamics::pinocchio, bp::return_internal_reference<>()),

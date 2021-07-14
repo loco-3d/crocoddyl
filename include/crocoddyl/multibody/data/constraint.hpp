@@ -33,19 +33,19 @@ struct DataCollectorMultibodyInConstraintTpl : DataCollectorMultibodyTpl<Scalar>
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
   DataCollectorMultibodyInConstraintTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
-                                      PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
+                                        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorConstraintTpl<Scalar>(contacts) {}
   virtual ~DataCollectorMultibodyInConstraintTpl() {}
 };
 
 template <typename Scalar>
 struct DataCollectorActMultibodyInConstraintTpl : DataCollectorMultibodyInConstraintTpl<Scalar>,
-                                                DataCollectorActuationTpl<Scalar> {
+                                                  DataCollectorActuationTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef pinocchio::RigidConstraintDataTpl<Scalar, 0> RigidConstraintData;
   DataCollectorActMultibodyInConstraintTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
-                                         boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-                                         PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
+                                           boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+                                           PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintData) contacts)
       : DataCollectorMultibodyInConstraintTpl<Scalar>(pinocchio, contacts),
         DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyInConstraintTpl() {}
