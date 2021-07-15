@@ -107,7 +107,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
 
     dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dki_dudiff = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
+    dki_dw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
     dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     dfi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
@@ -115,14 +115,13 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-    dli_dudiff = std::vector<VectorXs>(4, VectorXs::Zero(nu_diff));
+    dli_dw = std::vector<VectorXs>(4, VectorXs::Zero(nu_diff));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
     ddli_ddx  = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddudiff  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu_diff));
-    ddli_dudiffdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu));
+    ddli_ddw  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu_diff));
+    ddli_dwdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu));
     ddli_ddu  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    // std::cout<<"ddli_ddu = "<<nu<<"\n";
-    ddli_dxdudiff = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
+    ddli_dxdw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
     ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
     Lxu_i = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
@@ -145,7 +144,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   std::vector<VectorXs> dx_rk4;
 
   std::vector<MatrixXs> dki_dx;
-  std::vector<MatrixXs> dki_dudiff;
+  std::vector<MatrixXs> dki_dw;
   std::vector<MatrixXs> dki_du;
   std::vector<MatrixXs> dfi_du;
   std::vector<MatrixXs> dyi_dx;
@@ -153,13 +152,13 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_dudiff; // not used
+  std::vector<VectorXs> dli_dw; // not used
   std::vector<VectorXs> dli_du;
   std::vector<MatrixXs> ddli_ddx;
-  std::vector<MatrixXs> ddli_ddudiff;
-  std::vector<MatrixXs> ddli_dudiffdu;
+  std::vector<MatrixXs> ddli_ddw;
+  std::vector<MatrixXs> ddli_dwdu;
   std::vector<MatrixXs> ddli_ddu;
-  std::vector<MatrixXs> ddli_dxdudiff;
+  std::vector<MatrixXs> ddli_dxdw;
   std::vector<MatrixXs> ddli_dxdu;
   std::vector<MatrixXs> Luu_partialx;
   std::vector<MatrixXs> Lxu_i;
