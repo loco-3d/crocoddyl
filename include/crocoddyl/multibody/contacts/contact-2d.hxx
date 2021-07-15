@@ -9,14 +9,25 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const std::size_t nu, const Vector2s& gains)
-    : Base(state, 2, nu), xref_(xref), gains_(gains) {}
+ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Vector2s& xref, const std::size_t nu, const Vector2s& gains)
+    : Base(state, 2, nu), id_(id), xref_(xref), gains_(gains) {}
 
 template <typename Scalar>
-ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Vector2s& xref, const Vector2s& gains)
+    : Base(state, 2), id_(id), xref_(xref), gains_(gains) {}
+
+template <typename Scalar>
+ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 2), xref_(xref), gains_(gains) {}
+    : Base(state, 2, nu), id_(xref.id), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {}
+
+template <typename Scalar>
+ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
+    : Base(state, 2), id_(xref.id), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {}
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::~ContactModel2DTpl() {}
@@ -25,10 +36,10 @@ template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
 
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
@@ -40,8 +51,8 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->a0[1] = d->a.linear()[2] + d->vw[0] * d->vv[1] - d->vw[1] * d->vv[0];
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[0] - xref_.translation[0]);
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[2] - xref_.translation[2]);
+    d->a0[0] += gains_[0] * (d->pinocchio->oMf[id_].translation()[0] - xref_[0]);
+    d->a0[1] += gains_[0] * (d->pinocchio->oMf[id_].translation()[2] - xref_[1]);
   }
   if (gains_[1] != 0.) {
     d->a0[0] += gains_[1] * d->vv[0];
@@ -80,7 +91,7 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[xref_.id].rotation();
+    d->oRf = d->pinocchio->oMf[id_].rotation();
     typename MathBase::Matrix2s oRf2D;
     oRf2D(0, 0) = d->oRf(0, 0);
     oRf2D(1, 0) = d->oRf(2, 0);
@@ -118,17 +129,38 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel2DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ContactModel2DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel2D {frame=" << state_->get_pinocchio()->frames[xref_.id].name << "}";
+  os << "ContactModel2D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
 }
 
 template <typename Scalar>
-const FrameTranslationTpl<Scalar>& ContactModel2DTpl<Scalar>::get_xref() const {
+pinocchio::FrameIndex ContactModel2DTpl<Scalar>::get_id() const {
+  return id_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_reference() const {
   return xref_;
+}
+
+template <typename Scalar>
+FrameTranslationTpl<Scalar> ContactModel2DTpl<Scalar>::get_xref() const {
+  Vector3s x(xref_[0], 0., xref_[1]);
+  return FrameTranslationTpl<Scalar>(id_, x);
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_gains() const {
   return gains_;
+}
+
+template <typename Scalar>
+void ContactModel2DTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+  id_ = id;
+}
+
+template <typename Scalar>
+void ContactModel2DTpl<Scalar>::set_reference(const Vector2s& reference) {
+  xref_ = reference;
 }
 
 }  // namespace crocoddyl

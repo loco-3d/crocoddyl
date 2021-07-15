@@ -8,12 +8,16 @@
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/contacts/contact-2d.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeContact2D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel2D> >();
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<ContactModel2D, bp::bases<ContactModelAbstract> >(
       "ContactModel2D",
@@ -22,7 +26,24 @@ void exposeContact2D() {
       "directions.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, int, bp::optional<Eigen::Vector2d> >(
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector2d, std::size_t,
+               bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "xref", "nu", "gains"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param id: reference frame id of the contact\n"
+          ":param xref: contact position used for the Baumgarte stabilization\n"
+          ":param nu: dimension of control vector\n"
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector2d,
+                    bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "xref", "gains"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param id: reference frame id of the contact\n"
+          ":param xref: contact position used for the Baumgarte stabilization\n"
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, std::size_t, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "xref", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
@@ -59,11 +80,17 @@ void exposeContact2D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("xref", bp::make_function(&ContactModel2D::get_xref, bp::return_internal_reference<>()),
+      .add_property("id", &ContactModel2D::get_id, &ContactModel2D::set_id, "reference frame id")
+      .add_property("reference", bp::make_function(&ContactModel2D::get_reference, bp::return_internal_reference<>()),
+                    &ContactModel2D::set_reference, "reference contact translation")
+      .add_property("xref",
+                    bp::make_function(&ContactModel2D::get_xref, deprecated<>("Deprecated. Use id or reference.")),
                     "reference frame translation")
       .add_property("gains",
                     bp::make_function(&ContactModel2D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
+
+#pragma GCC diagnostic pop
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData2D> >();
 
