@@ -18,6 +18,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * @brief Impulse friction cone cost
  *
@@ -100,5 +103,7 @@ class CostModelImpulseFrictionConeTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/impulse-friction-cone.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_FRICTION_CONE_HPP_

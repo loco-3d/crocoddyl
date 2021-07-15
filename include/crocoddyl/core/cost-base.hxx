@@ -130,9 +130,12 @@ void CostModelAbstractTpl<Scalar>::set_referenceImpl(const std::type_info&, cons
 template <typename Scalar>
 template <class ReferenceType>
 ReferenceType CostModelAbstractTpl<Scalar>::get_reference() {
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   ReferenceType ref;
   get_referenceImpl(typeid(ref), &ref);
   return ref;
+#pragma GCC diagnostic pop
 }
 
 template <typename Scalar>

@@ -19,6 +19,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * @brief Frame rotation cost
  *
@@ -127,5 +130,7 @@ class CostModelFrameRotationTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/frame-rotation.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_ROTATION_HPP_

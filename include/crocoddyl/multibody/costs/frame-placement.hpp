@@ -18,6 +18,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * @brief Frame placement cost
  *
@@ -124,5 +127,7 @@ class CostModelFramePlacementTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/frame-placement.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_PLACEMENT_HPP_

@@ -19,6 +19,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * @brief Frame translation cost
  *
@@ -124,5 +127,7 @@ class CostModelFrameTranslationTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/frame-translation.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_FRAME_TRANSLATION_HPP_

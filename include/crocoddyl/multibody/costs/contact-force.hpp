@@ -17,6 +17,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * @brief Define a contact force cost function
  *
@@ -143,5 +146,7 @@ class CostModelContactForceTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/contact-force.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_CONTACT_FORCE_HPP_

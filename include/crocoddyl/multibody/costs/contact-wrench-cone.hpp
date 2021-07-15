@@ -18,6 +18,9 @@
 
 namespace crocoddyl {
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 template <typename _Scalar>
 class CostModelContactWrenchConeTpl : public CostModelResidualTpl<_Scalar> {
  public:
@@ -64,5 +67,7 @@ class CostModelContactWrenchConeTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/contact-wrench-cone.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_CONTACT_WRENCH_CONE_HPP_

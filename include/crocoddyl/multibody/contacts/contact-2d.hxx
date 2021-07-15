@@ -22,6 +22,9 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> s
   id_ = id;
 }
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
@@ -38,6 +41,8 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> s
   id_ = xref.id;
   std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
 }
+
+#pragma GCC diagnostic pop
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::~ContactModel2DTpl() {}
@@ -145,11 +150,16 @@ const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_ref
   return xref_;
 }
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 template <typename Scalar>
 FrameTranslationTpl<Scalar> ContactModel2DTpl<Scalar>::get_xref() const {
   Vector3s x(xref_[0], 0., xref_[1]);
   return FrameTranslationTpl<Scalar>(id_, x);
 }
+
+#pragma GCC diagnostic pop
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_gains() const {
