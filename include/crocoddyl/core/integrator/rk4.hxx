@@ -11,8 +11,6 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
-using namespace std;
-
 namespace crocoddyl {
 
 template <typename Scalar>
