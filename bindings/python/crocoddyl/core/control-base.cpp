@@ -19,7 +19,7 @@ void exposeControlParametrizationAbstract() {
       "ControlParametrizationModelAbstract",
       "Abstract class for the control parametrization.\n\n"
       "A control is a function of time (normalized in [0,1]) and the control parameters p.",
-      bp::init<int, int>(bp::args("self", "nu", "np"),
+      bp::init<std::size_t, std::size_t>(bp::args("self", "nu", "np"),
                          "Initialize the control dimensions.\n\n"
                          ":param nu: dimension of control space\n"
                          ":param np: dimension of control parameter space"))

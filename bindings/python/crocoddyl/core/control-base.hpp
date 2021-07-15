@@ -23,7 +23,7 @@ class ControlParametrizationModelAbstract_wrap :
   public bp::wrapper<ControlParametrizationModelAbstract> {
  public:
 
-  ControlParametrizationModelAbstract_wrap(int nu, int np) : 
+  ControlParametrizationModelAbstract_wrap(std::size_t nu, std::size_t np) : 
     ControlParametrizationModelAbstract(nu, np), bp::wrapper<ControlParametrizationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, 

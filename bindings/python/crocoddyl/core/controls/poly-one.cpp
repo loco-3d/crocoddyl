@@ -22,7 +22,7 @@ void exposeControlParametrizationPolyOne() {
       "This control is a line function of time (normalized in [0,1])."
       "The first half of the parameter vector contains the initial value of u, "
       "whereas the second half contains the value of u at t=0.5.",
-      bp::init<int>(bp::args("self", "nu"),
+      bp::init<std::size_t>(bp::args("self", "nu"),
                          "Initialize the control dimensions.\n\n"
                          ":param nu: dimension of control space\n"))
       .def<void (ControlParametrizationModelPolyOne::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
