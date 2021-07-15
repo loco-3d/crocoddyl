@@ -35,11 +35,30 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
 
+  /**
+   * @brief Initialize the 6d contact model
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] pref   Contact placement used for the Baumgarte stabilization
+   * @param[in] nu     Dimension of the control vector
+   * @param[in] gains  Baumgarte stabilization gains
+   */
   ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
                     const std::size_t nu, const Vector2s& gains = Vector2s::Zero());
+
+  /**
+   * @brief Initialize the 6d contact model
+   *
+   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] pref   Contact placement used for the Baumgarte stabilization
+   * @param[in] gains  Baumgarte stabilization gains
+   */
   ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
                     const Vector2s& gains = Vector2s::Zero());
-
   DEPRECATED("Use constructor which is not based on FramePlacement.",
              ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacementTpl<Scalar>& Mref,
                                const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
@@ -48,17 +67,61 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
                                const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel6DTpl();
 
+  /**
+   * @brief Compute the 3d contact Jacobian and drift
+   *
+   * @param[in] data  3d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the derivatives of the 6d contact holonomic constraint
+   *
+   * @param[in] data  6d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Convert the force into a stack of spatial forces
+   *
+   * @param[in] data   6d contact data
+   * @param[in] force  6d force
+   */
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+
+  /**
+   * @brief Create the 6d contact data
+   */
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
+  /**
+   * @brief Return the reference frame id
+   */
   pinocchio::FrameIndex get_id() const;
+
+  /**
+   * @brief Return the reference frame placement
+   */
   const SE3& get_reference() const;
   DEPRECATED("Use get_reference() or get_id()", FramePlacementTpl<Scalar> get_Mref() const;)
+
+  /**
+   * @brief Return the Baumgarte stabilization gains
+   */
   const Vector2s& get_gains() const;
 
+  /**
+   * @brief Modify the reference frame id
+   */
   void set_id(const pinocchio::FrameIndex id);
+
+  /**
+   * @brief Modify the reference frame placement
+   */
   void set_reference(const SE3& reference);
 
   /**

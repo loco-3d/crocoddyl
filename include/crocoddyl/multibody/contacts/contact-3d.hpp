@@ -106,12 +106,15 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   pinocchio::FrameIndex get_id() const;
 
   /**
-   * @brief Return the reference frame placement
+   * @brief Return the reference frame translation
    */
   const Vector3s& get_reference() const;
 
   DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
 
+  /**
+   * @brief Return the Baumgarte stabilization gains
+   */
   const Vector2s& get_gains() const;
 
   /**
@@ -120,7 +123,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   void set_id(const pinocchio::FrameIndex id);
 
   /**
-   * @brief Modify the reference frame placement
+   * @brief Modify the reference frame translation
    */
   void set_reference(const Vector3s& reference);
 
