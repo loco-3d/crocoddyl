@@ -44,7 +44,8 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   const Scalar get_dt() const;
 
   void set_dt(const Scalar dt);
-  // void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
+  DEPRECATED("The DifferentialActionModel should be set at construction time",
+    void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model));
 
   /**
    * @brief Return the dimension of the control input of the differential action model
