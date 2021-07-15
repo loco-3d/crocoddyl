@@ -331,12 +331,10 @@ class SimpleQuadrupedalGaitProblem:
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
 
         f0 = jumpLength
-        footTask = [
-            crocoddyl.FramePlacement(self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)),
-            crocoddyl.FramePlacement(self.rfFootId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)),
-            crocoddyl.FramePlacement(self.lhFootId, pinocchio.SE3(np.eye(3), lhFootPos0 + f0)),
-            crocoddyl.FramePlacement(self.rhFootId, pinocchio.SE3(np.eye(3), rhFootPos0 + f0))
-        ]
+        footTask = [[self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
+                    [self.rfFootId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
+                    [self.lhFootId, pinocchio.SE3(np.eye(3), lhFootPos0 + f0)],
+                    [self.rhFootId, pinocchio.SE3(np.eye(3), rhFootPos0 + f0)]]
         landingPhase = [
             self.createFootSwitchModel([self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId], footTask, False)
         ]
@@ -388,7 +386,7 @@ class SimpleQuadrupedalGaitProblem:
                         [stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)])
                 tref = p + dp
 
-                swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
+                swingFootTask += [[i, pinocchio.SE3(np.eye(3), tref)]]
 
             comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
             footSwingModel += [
@@ -417,8 +415,8 @@ class SimpleQuadrupedalGaitProblem:
         # foot
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
-            xref = crocoddyl.FrameTranslation(i, np.array([0., 0., 0.]))
-            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.array([0., 50.]))
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), self.actuation.nu,
+                                                           np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -435,11 +433,10 @@ class SimpleQuadrupedalGaitProblem:
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
-                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i.id,
-                                                                                   i.placement.translation,
+                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i[0], i[1].translation,
                                                                                    self.actuation.nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * 6 + [1.] *
                                 (self.rmodel.nv - 6))
@@ -490,8 +487,8 @@ class SimpleQuadrupedalGaitProblem:
         # foot
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
-            xref = crocoddyl.FrameTranslation(i, np.array([0., 0., 0.]))
-            supportContactModel = crocoddyl.ContactModel3D(self.state, xref, self.actuation.nu, np.array([0., 50.]))
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), self.actuation.nu,
+                                                           np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -504,14 +501,14 @@ class SimpleQuadrupedalGaitProblem:
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
         if swingFootTask is not None:
             for i in swingFootTask:
-                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i.id, i.placement,
+                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i[0], i[1],
                                                                                self.actuation.nu)
-                frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i.id, pinocchio.Motion.Zero(),
+                frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i[0], pinocchio.Motion.Zero(),
                                                                              self.actuation.nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, framePlacementResidual)
                 impulseFootVelCost = crocoddyl.CostModelResidual(self.state, frameVelocityResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e7)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_impulseVel", impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_impulseVel", impulseFootVelCost, 1e6)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
@@ -547,10 +544,10 @@ class SimpleQuadrupedalGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i.id,
-                                                                                   i.placement.translation, 0)
+                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i[0], i[1].translation,
+                                                                                   0)
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e7)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7)
 
         stateWeights = np.array([1.] * 6 + [10.] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, 0)

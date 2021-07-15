@@ -53,10 +53,10 @@ if WITHDISPLAY:
 # Create two contact models used along the motion
 contactModel1Foot = crocoddyl.ContactModelMultiple(state, actuation.nu)
 contactModel2Feet = crocoddyl.ContactModelMultiple(state, actuation.nu)
-framePlacementLeft = crocoddyl.FramePlacement(leftFootId, pinocchio.SE3.Identity())
-framePlacementRight = crocoddyl.FramePlacement(rightFootId, pinocchio.SE3.Identity())
-supportContactModelLeft = crocoddyl.ContactModel6D(state, framePlacementLeft, actuation.nu, np.array([0, 40]))
-supportContactModelRight = crocoddyl.ContactModel6D(state, framePlacementRight, actuation.nu, np.array([0, 40]))
+supportContactModelLeft = crocoddyl.ContactModel6D(state, leftFootId, pinocchio.SE3.Identity(), actuation.nu,
+                                                   np.array([0, 40]))
+supportContactModelRight = crocoddyl.ContactModel6D(state, rightFootId, pinocchio.SE3.Identity(), actuation.nu,
+                                                    np.array([0, 40]))
 contactModel1Foot.addContact(rightFoot + "_contact", supportContactModelRight)
 contactModel2Feet.addContact(leftFoot + "_contact", supportContactModelLeft)
 contactModel2Feet.addContact(rightFoot + "_contact", supportContactModelRight)
