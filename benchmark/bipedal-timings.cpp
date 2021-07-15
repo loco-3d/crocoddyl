@@ -21,8 +21,8 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 
-#include "crocoddyl/core/residuals/cost-sum.hpp"
-#include "crocoddyl/core/residuals/residual.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
