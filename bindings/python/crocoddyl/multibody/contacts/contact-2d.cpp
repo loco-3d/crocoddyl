@@ -80,7 +80,6 @@ void exposeContact2D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("id", &ContactModel2D::get_id, &ContactModel2D::set_id, "reference frame id")
       .add_property("reference", bp::make_function(&ContactModel2D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel2D::set_reference, "reference contact translation")
       .add_property("xref",

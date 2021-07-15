@@ -79,7 +79,6 @@ void exposeContact6D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("id", &ContactModel6D::get_id, &ContactModel6D::set_id, "reference frame id")
       .add_property("reference", bp::make_function(&ContactModel6D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel6D::set_reference, "reference contact placement")
       .add_property("Mref",

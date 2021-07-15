@@ -99,11 +99,6 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   /**
-   * @brief Return the reference frame id
-   */
-  pinocchio::FrameIndex get_id() const;
-
-  /**
    * @brief Return the reference frame placement
    */
   const SE3& get_reference() const;
@@ -113,11 +108,6 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @brief Return the Baumgarte stabilization gains
    */
   const Vector2s& get_gains() const;
-
-  /**
-   * @brief Modify the reference frame id
-   */
-  void set_id(const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the reference frame placement
@@ -132,14 +122,14 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::id_;
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
 
  private:
-  pinocchio::FrameIndex id_;  //!< Reference frame id of the contact
-  SE3 pref_;                  //!< Contact placement used for the Baumgarte stabilization
-  Vector2s gains_;            //!< Baumgarte stabilization gains
+  SE3 pref_;        //!< Contact placement used for the Baumgarte stabilization
+  Vector2s gains_;  //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>

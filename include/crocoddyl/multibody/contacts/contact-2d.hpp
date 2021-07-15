@@ -102,11 +102,6 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   /**
-   * @brief Return the reference frame id
-   */
-  pinocchio::FrameIndex get_id() const;
-
-  /**
    * @brief Return the reference frame translation
    */
   const Vector2s& get_reference() const;
@@ -117,11 +112,6 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @brief Create the 2d contact data
    */
   const Vector2s& get_gains() const;
-
-  /**
-   * @brief Modify the reference frame id
-   */
-  void set_id(const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the reference frame translation
@@ -136,14 +126,14 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::id_;
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
 
  private:
-  pinocchio::FrameIndex id_;  //!< Reference frame id of the contact
-  Vector2s xref_;             //!< Contact position used for the Baumgarte stabilization
-  Vector2s gains_;            //!< Baumgarte stabilization gains
+  Vector2s xref_;   //!< Contact position used for the Baumgarte stabilization
+  Vector2s gains_;  //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>

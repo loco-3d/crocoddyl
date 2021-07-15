@@ -14,11 +14,11 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
                                                          const std::size_t nu)
-    : state_(state), nc_(nc), nu_(nu) {}
+    : state_(state), nc_(nc), nu_(nu), id_(0) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
-    : state_(state), nc_(nc), nu_(state->get_nv()) {}
+    : state_(state), nc_(nc), nu_(state->get_nv()), id_(0) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::~ContactModelAbstractTpl() {}
@@ -71,6 +71,16 @@ std::size_t ContactModelAbstractTpl<Scalar>::get_nc() const {
 template <typename Scalar>
 std::size_t ContactModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+pinocchio::FrameIndex ContactModelAbstractTpl<Scalar>::get_id() const {
+  return id_;
+}
+
+template <typename Scalar>
+void ContactModelAbstractTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+  id_ = id;
 }
 
 template <class Scalar>

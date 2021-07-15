@@ -11,23 +11,31 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 2, nu), id_(id), xref_(xref), gains_(gains) {}
+    : Base(state, 2, nu), xref_(xref), gains_(gains) {
+  id_ = id;
+}
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const Vector2s& gains)
-    : Base(state, 2), id_(id), xref_(xref), gains_(gains) {}
+    : Base(state, 2), xref_(xref), gains_(gains) {
+  id_ = id;
+}
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 2, nu), id_(xref.id), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {}
+    : Base(state, 2, nu), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
+  id_ = xref.id;
+}
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
-    : Base(state, 2), id_(xref.id), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {}
+    : Base(state, 2), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
+  id_ = xref.id;
+}
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::~ContactModel2DTpl() {}
@@ -131,11 +139,6 @@ void ContactModel2DTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-pinocchio::FrameIndex ContactModel2DTpl<Scalar>::get_id() const {
-  return id_;
-}
-
-template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_reference() const {
   return xref_;
 }
@@ -149,11 +152,6 @@ FrameTranslationTpl<Scalar> ContactModel2DTpl<Scalar>::get_xref() const {
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_gains() const {
   return gains_;
-}
-
-template <typename Scalar>
-void ContactModel2DTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
-  id_ = id;
 }
 
 template <typename Scalar>

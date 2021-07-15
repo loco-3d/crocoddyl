@@ -49,6 +49,16 @@ class ContactModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the reference frame id
+   */
+  pinocchio::FrameIndex get_id() const;
+
+  /**
+   * @brief Modify the reference frame id
+   */
+  void set_id(const pinocchio::FrameIndex id);
+
+  /**
    * @brief Print information on the contact model
    */
   template <class Scalar>
@@ -65,6 +75,7 @@ class ContactModelAbstractTpl {
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;
+  pinocchio::FrameIndex id_;  //!< Reference frame id of the contact
 };
 
 template <typename _Scalar>

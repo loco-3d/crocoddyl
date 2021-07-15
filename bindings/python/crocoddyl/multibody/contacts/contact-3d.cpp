@@ -79,7 +79,6 @@ void exposeContact3D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("id", &ContactModel3D::get_id, &ContactModel3D::set_id, "reference frame id")
       .add_property("reference", bp::make_function(&ContactModel3D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel3D::set_reference, "reference contact translation")
       .add_property("xref",
