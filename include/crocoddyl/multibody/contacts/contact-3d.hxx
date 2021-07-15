@@ -19,13 +19,14 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> s
     : Base(state, 3), id_(id), xref_(xref), gains_(gains) {}
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const std::size_t nu, const Vector2s& gains)
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
+                                             const Vector2s& gains)
     : Base(state, 3, nu), id_(xref.id), xref_(xref.translation), gains_(gains) {}
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const Vector2s& gains)
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
     : Base(state, 3), id_(xref.id), xref_(xref.translation), gains_(gains) {}
 
 template <typename Scalar>

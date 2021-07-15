@@ -48,21 +48,21 @@ void exposeContact3D() {
           ":param state: state of the multibody system\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "xref", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param Mref: reference frame translation\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
       .def("calc", &ContactModel3D::calc, bp::args("self", "data", "x"),
-           "Compute the 3D contact Jacobian and drift.\n\n"
+           "Compute the 3d contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state vector")
       .def("calcDiff", &ContactModel3D::calcDiff, bp::args("self", "data", "x"),
-           "Compute the derivatives of the 3D contact holonomic constraint.\n\n"
+           "Compute the derivatives of the 3d contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            "It assumes that calc has been run first.\n"

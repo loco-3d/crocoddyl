@@ -33,39 +33,96 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef ContactData3DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
-  typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the 3d contact model
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] xref   Contact position used for the Baumgarte stabilization
+   * @param[in] nu     Dimension of the control vector
+   * @param[in] gains  Baumgarte stabilization gains
+   */
   ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
                     const std::size_t nu, const Vector2s& gains = Vector2s::Zero());
+
+  /**
+   * @brief Initialize the 3d contact model
+   *
+   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] xref   Contact position used for the Baumgarte stabilization
+   * @param[in] gains  Baumgarte stabilization gains
+   */
   ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
                     const Vector2s& gains = Vector2s::Zero());
   DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
                                const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
   DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
                                const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel3DTpl();
 
+  /**
+   * @brief Compute the 3d contact Jacobian and drift
+   *
+   * @param[in] data  3d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the derivatives of the 3d contact holonomic constraint
+   *
+   * @param[in] data  3d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Convert the force into a stack of spatial forces
+   *
+   * @param[in] data   3d contact data
+   * @param[in] force  3d force
+   */
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+
+  /**
+   * @brief Create the 3d contact data
+   */
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
+  /**
+   * @brief Return the reference frame id
+   */
   pinocchio::FrameIndex get_id() const;
 
+  /**
+   * @brief Return the reference frame placement
+   */
   const Vector3s& get_reference() const;
 
   DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
 
   const Vector2s& get_gains() const;
 
+  /**
+   * @brief Modify the reference frame id
+   */
   void set_id(const pinocchio::FrameIndex id);
 
+  /**
+   * @brief Modify the reference frame placement
+   */
   void set_reference(const Vector3s& reference);
 
   /**
