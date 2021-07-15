@@ -134,14 +134,11 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
-    // d->Lu.noalias() = time_step_ * d->differential->Lu;
     control_->multiplyJacobianTransposeBy(0.0, u, d->differential->Lu, d->Lu);
     d->Lu *= time_step_;
     d->Lxx.noalias() = time_step_ * d->differential->Lxx;
-    // d->Lxu.noalias() = time_step_ * d->differential->Lxu;
     control_->multiplyByJacobian(0.0, u, d->differential->Lxu, d->Lxu);
     d->Lxu *= time_step_;
-    // d->Luu.noalias() = time_step_ * d->differential->Luu;
     control_->multiplyByJacobian(0.0, u, d->differential->Luu, d->Ludiffu);
     control_->multiplyJacobianTransposeBy(0.0, u, d->Ludiffu, d->Luu);
     d->Luu *= time_step_;
