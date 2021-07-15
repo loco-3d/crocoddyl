@@ -10,7 +10,7 @@
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/integr-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 
 namespace crocoddyl {
 

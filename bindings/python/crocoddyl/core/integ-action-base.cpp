@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/integr-action-base.hpp"
+#include "python/crocoddyl/core/integ-action-base.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {

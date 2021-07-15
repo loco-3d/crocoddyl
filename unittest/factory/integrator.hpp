@@ -12,7 +12,7 @@
 #include <iterator>
 
 #include "control.hpp"
-#include "crocoddyl/core/integr-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 
 namespace crocoddyl {
 namespace unittest {

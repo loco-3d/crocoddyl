@@ -12,7 +12,7 @@
 #include <boost/core/demangle.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/integr-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 #include "crocoddyl/core/controls/poly-zero.hpp"
 
 namespace crocoddyl {

@@ -9,7 +9,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_INTEGRATED_ACTION_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_INTEGRATED_ACTION_BASE_HPP_
 
-#include "crocoddyl/core/integr-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
