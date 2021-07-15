@@ -18,6 +18,7 @@
 #include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -38,10 +39,16 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t nu,
+  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
+                    const std::size_t nu, const Vector2s& gains = Vector2s::Zero());
+  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                    const Vector2s& gains = Vector2s::Zero());
+  DEPRECATED("Use constructor which is not based on FrameTranslation.",
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                               const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
+  DEPRECATED("Use constructor which is not based on FrameTranslation.",
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+                               const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel3DTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -49,8 +56,17 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  const FrameTranslation& get_xref() const;
+  pinocchio::FrameIndex get_id() const;
+
+  const Vector3s& get_reference() const;
+
+  DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
+
   const Vector2s& get_gains() const;
+
+  void set_id(const pinocchio::FrameIndex id);
+
+  void set_reference(const Vector3s& reference);
 
   /**
    * @brief Print relevant information of the 3d contact model
@@ -65,8 +81,9 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::state_;
 
  private:
-  FrameTranslation xref_;
-  Vector2s gains_;
+  pinocchio::FrameIndex id_;  //!< Reference frame id of the contact
+  Vector3s xref_;             //!< Contact position used for the Baumgarte stabilization
+  Vector2s gains_;            //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>
@@ -95,7 +112,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
         fXjdv_dq(6, model->get_state()->get_nv()),
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()) {
-    frame = model->get_xref().id;
+    frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
