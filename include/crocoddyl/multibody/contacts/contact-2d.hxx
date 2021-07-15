@@ -28,6 +28,7 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> s
                                              const Vector2s& gains)
     : Base(state, 2, nu), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
   id_ = xref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
 }
 
 template <typename Scalar>
@@ -35,6 +36,7 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> s
                                              const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
     : Base(state, 2), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
   id_ = xref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
 }
 
 template <typename Scalar>

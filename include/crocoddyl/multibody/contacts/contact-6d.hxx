@@ -35,6 +35,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> s
                                              const Vector2s& gains)
     : Base(state, 6, nu), pref_(Mref.placement), gains_(gains) {
   id_ = Mref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FramePlacement." << std::endl;
 }
 
 template <typename Scalar>
@@ -42,6 +43,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> s
                                              const FramePlacementTpl<Scalar>& Mref, const Vector2s& gains)
     : Base(state, 6), pref_(Mref.placement), gains_(gains) {
   id_ = Mref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FramePlacement." << std::endl;
 }
 
 template <typename Scalar>
