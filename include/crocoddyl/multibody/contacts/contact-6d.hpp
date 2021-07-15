@@ -15,6 +15,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -29,16 +30,22 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef ContactData6DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
-  typedef FramePlacementTpl<Scalar> FramePlacement;
+  typedef pinocchio::SE3Tpl<Scalar> SE3;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref, const std::size_t nu,
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
+                    const std::size_t nu, const Vector2s& gains = Vector2s::Zero());
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
                     const Vector2s& gains = Vector2s::Zero());
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& xref,
-                    const Vector2s& gains = Vector2s::Zero());
+
+  DEPRECATED("Use constructor which is not based on FramePlacement.",
+             ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacementTpl<Scalar>& Mref,
+                               const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
+  DEPRECATED("Use constructor which is not based on FramePlacement.",
+             ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacementTpl<Scalar>& Mref,
+                               const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel6DTpl();
 
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -46,8 +53,13 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  const FramePlacement& get_Mref() const;
+  pinocchio::FrameIndex get_id() const;
+  const SE3& get_reference() const;
+  DEPRECATED("Use get_reference() or get_id()", FramePlacementTpl<Scalar> get_Mref() const;)
   const Vector2s& get_gains() const;
+
+  void set_id(const pinocchio::FrameIndex id);
+  void set_reference(const SE3& reference);
 
   /**
    * @brief Print relevant information of the 6d contact model
@@ -62,8 +74,9 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::state_;
 
  private:
-  FramePlacement Mref_;
-  Vector2s gains_;
+  pinocchio::FrameIndex id_;  //!< Reference frame id of the contact
+  SE3 pref_;                  //!< Contact placement used for the Baumgarte stabilization
+  Vector2s gains_;            //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>
@@ -73,14 +86,8 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;
-  typedef typename MathBase::Vector2s Vector2s;
-  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
-
-  typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ContactData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
@@ -90,7 +97,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
         a_partial_dq(6, model->get_state()->get_nv()),
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()) {
-    frame = model->get_Mref().id;
+    frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     v_partial_dq.setZero();

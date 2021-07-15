@@ -16,14 +16,25 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
-                                             const std::size_t nu, const Vector2s& gains)
-    : Base(state, 6, nu), Mref_(Mref), gains_(gains) {}
+ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const SE3& pref, const std::size_t nu, const Vector2s& gains)
+    : Base(state, 6, nu), id_(id), pref_(pref), gains_(gains) {}
 
 template <typename Scalar>
-ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Mref,
+ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const SE3& pref, const Vector2s& gains)
+    : Base(state, 6), id_(id), pref_(pref), gains_(gains) {}
+
+template <typename Scalar>
+ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FramePlacementTpl<Scalar>& Mref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 6), Mref_(Mref), gains_(gains) {}
+    : Base(state, 6, nu), id_(Mref.id), pref_(Mref.placement), gains_(gains) {}
+
+template <typename Scalar>
+ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FramePlacementTpl<Scalar>& Mref, const Vector2s& gains)
+    : Base(state, 6), id_(Mref.id), pref_(Mref.placement), gains_(gains) {}
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::~ContactModel6DTpl() {}
@@ -32,18 +43,18 @@ template <typename Scalar>
 void ContactModel6DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id, pinocchio::LOCAL, d->Jc);
+  pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->Jc);
 
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
   d->a0 = d->a.toVector();
 
   if (gains_[0] != 0.) {
-    d->rMf = Mref_.placement.inverse() * d->pinocchio->oMf[Mref_.id];
+    d->rMf = pref_.inverse() * d->pinocchio->oMf[id_];
     d->a0 += gains_[0] * pinocchio::log6(d->rMf).toVector();
   }
   if (gains_[1] != 0.) {
-    d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, Mref_.id);
+    d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_);
     d->a0 += gains_[1] * d->v.toVector();
   }
 }
@@ -88,17 +99,37 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel6DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ContactModel6DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[Mref_.id].name << "}";
+  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
 }
 
 template <typename Scalar>
-const FramePlacementTpl<Scalar>& ContactModel6DTpl<Scalar>::get_Mref() const {
-  return Mref_;
+pinocchio::FrameIndex ContactModel6DTpl<Scalar>::get_id() const {
+  return id_;
+}
+
+template <typename Scalar>
+const pinocchio::SE3Tpl<Scalar>& ContactModel6DTpl<Scalar>::get_reference() const {
+  return pref_;
+}
+
+template <typename Scalar>
+FramePlacementTpl<Scalar> ContactModel6DTpl<Scalar>::get_Mref() const {
+  return FramePlacementTpl<Scalar>(id_, pref_);
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel6DTpl<Scalar>::get_gains() const {
   return gains_;
+}
+
+template <typename Scalar>
+void ContactModel6DTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+  id_ = id;
+}
+
+template <typename Scalar>
+void ContactModel6DTpl<Scalar>::set_reference(const SE3& reference) {
+  pref_ = reference;
 }
 
 }  // namespace crocoddyl

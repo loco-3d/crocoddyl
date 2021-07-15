@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -15,13 +16,33 @@ namespace python {
 void exposeContact6D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel6D> >();
 
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::class_<ContactModel6D, bp::bases<ContactModelAbstract> >(
       "ContactModel6D",
       "Rigid 6D contact model.\n\n"
       "It defines a rigid 6D contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, int, bp::optional<Eigen::Vector2d> >(
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3, std::size_t,
+               bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "pref", "nu", "gains"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param id: reference frame id of the contact\n"
+          ":param pref: contact placement used for the Baumgarte stabilization\n"
+          ":param nu: dimension of control vector\n"
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3,
+                    bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "pref", "gains"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param id: reference frame id of the contact\n"
+          ":param pref: contact placement used for the Baumgarte stabilization\n"
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, std::size_t, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "Mref", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
@@ -58,11 +79,17 @@ void exposeContact6D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .add_property("Mref", bp::make_function(&ContactModel6D::get_Mref, bp::return_internal_reference<>()),
+      .add_property("id", &ContactModel6D::get_id, &ContactModel6D::set_id, "reference frame id")
+      .add_property("reference", bp::make_function(&ContactModel6D::get_reference, bp::return_internal_reference<>()),
+                    &ContactModel6D::set_reference, "reference contact placement")
+      .add_property("Mref",
+                    bp::make_function(&ContactModel6D::get_Mref, deprecated<>("Deprecated. Use id or reference.")),
                     "reference frame placement")
       .add_property("gains",
                     bp::make_function(&ContactModel6D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
+
+#pragma GCC diagnostic pop
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData6D> >();
 
