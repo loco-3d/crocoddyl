@@ -22,7 +22,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(const boost::shared_ptr
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  data->u = (1-2*t)*p.head(nu_) + 2*t*p.tail(nu_);
+  data->u_diff = (1-2*t)*p.head(nu_) + 2*t*p.tail(nu_);
 }
 
 template <typename Scalar>
@@ -32,8 +32,8 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::params(const boost::shared_p
     throw_pretty("Invalid argument: "
                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  data->p.head(nu_) = u;
-  data->p.tail(nu_) = u;
+  data->u_params.head(nu_) = u;
+  data->u_params.tail(nu_) = u;
 }
 
 template <typename Scalar>

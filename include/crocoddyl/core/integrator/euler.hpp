@@ -92,7 +92,7 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
     dx = VectorXs::Zero(ndx);
     u_diff = VectorXs::Zero(model->get_nu_diff());
     da_du = MatrixXs::Zero(nv, model->get_nu());
-    Ludiffu = MatrixXs::Zero(model->get_nu_diff(), model->get_nu());
+    Lwu = MatrixXs::Zero(model->get_nu_diff(), model->get_nu());
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
@@ -100,7 +100,7 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
   VectorXs dx;
   VectorXs u_diff;
   MatrixXs da_du;
-  MatrixXs Ludiffu;   // temporary variables
+  MatrixXs Lwu;   // cost Hessian wrt w (u_diff) and u (u_params)
 
   using Base::cost;
   using Base::Fu;

@@ -48,13 +48,13 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared
   VectorXs tmp_p = VectorXs::Zero(np_);
   VectorXs u0 = VectorXs::Zero(nu_);
   calc(data, t, p);
-  u0 = data->u;
+  u0 = data->u_diff;
   data->J.setZero();
   for (std::size_t i = 0; i < np_; ++i) {
     tmp_p = p;
     tmp_p(i) += disturbance_;
     calc(data, t, tmp_p);
-    data->J.col(i) = data->u - u0;
+    data->J.col(i) = data->u_diff - u0;
   }
   data->J /= disturbance_;
 }

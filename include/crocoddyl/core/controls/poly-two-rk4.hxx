@@ -27,7 +27,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(const boost::shared_
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> > &p2 = p.tail(nu_);
   // u_out = (t*t)*(2*p2-4*p1+2*p0) + t*(4*p1-p2-3*p0) + p0;
   Scalar t2 = t*t;
-  data->u = (2*t2-t)*p2 + (4*(t-t2))*p1 + (1-3*t+2*t2)*p0;
+  data->u_diff = (2*t2-t)*p2 + (4*(t-t2))*p1 + (1-3*t+2*t2)*p0;
 }
 
 template <typename Scalar>
@@ -37,9 +37,9 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::params(const boost::share
     throw_pretty("Invalid argument: "
                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  data->p.head(nu_)         = u;
-  data->p.segment(nu_, nu_) = u;
-  data->p.tail(nu_)         = u;
+  data->u_params.head(nu_)         = u;
+  data->u_params.segment(nu_, nu_) = u;
+  data->u_params.tail(nu_)         = u;
 }
 
 template <typename Scalar>

@@ -22,7 +22,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(const boost::shared_pt
     throw_pretty("Invalid argument: "
                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  data->u = p;
+  data->u_diff = p;
 }
 
 template <typename Scalar>
@@ -32,7 +32,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::params(const boost::shared_
     throw_pretty("Invalid argument: "
                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  data->p = u;
+  data->u_params = u;
 }
 
 template <typename Scalar>

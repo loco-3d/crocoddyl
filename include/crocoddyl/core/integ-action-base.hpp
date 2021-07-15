@@ -17,6 +17,25 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Abstract class for an integrated action model
+ *
+ * An integrated action model is a special kind of action model that is obtained by applying 
+ * a numerical integration scheme to a differential (i.e. continuous time) action model.
+ * Different integration schemes can be implemented inheriting from this base class.
+ * 
+ * The numerical integration introduces also the possibility to parametrize the control
+ * trajectory inside an integration step, for instance using polynomials. This requires
+ * introducing some notation to clarify the difference between the control inputs of
+ * the differential model and the control inputs to the integrated model. We have decided
+ * to use u_diff and u_params to refer to the control inputs of the differential and integrated
+ * action model, respectively. Since these names are much longer than the classic one-letter
+ * names, they make the names of the derivative variables hard to read. Therefore, we have
+ * decided to introduce also a 1-letter version for these names, that is u for u_params
+ * and w for u_diff. 
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
