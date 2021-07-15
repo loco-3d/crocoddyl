@@ -36,6 +36,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Matrix3s Matrix3s;
 
   /**
    * @brief Initialize the 2d contact model
@@ -152,6 +153,7 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Matrix2s Matrix2s;
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Vector3s Vector3s;
@@ -210,7 +212,7 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
   Vector3s vw;
   Matrix3s vv_skew;
   Matrix3s vw_skew;
-  Matrix3s oRf;
+  Matrix2s oRf;
 };
 
 }  // namespace crocoddyl

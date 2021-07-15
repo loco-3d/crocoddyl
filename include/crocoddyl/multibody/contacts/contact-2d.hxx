@@ -91,13 +91,12 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[id_].rotation();
-    typename MathBase::Matrix2s oRf2D;
-    oRf2D(0, 0) = d->oRf(0, 0);
-    oRf2D(1, 0) = d->oRf(2, 0);
-    oRf2D(0, 1) = d->oRf(0, 2);
-    oRf2D(1, 1) = d->oRf(2, 2);
-    d->da0_dx.leftCols(nv).noalias() += gains_[0] * oRf2D * d->Jc;
+    const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+    d->oRf(0, 0) = oRf(0, 0);
+    d->oRf(1, 0) = oRf(2, 0);
+    d->oRf(0, 1) = oRf(0, 2);
+    d->oRf(1, 1) = oRf(2, 2);
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
     d->da0_dx.leftCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(0) * d->v_partial_dq;
@@ -115,9 +114,8 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
-  Vector3s force_bis(3);
-  force_bis << force[0], 0.0, force[1];
-  data->f.linear() = d->jMf.rotation() * force_bis;
+  const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();
+  data->f.linear() = R.col(0) * force[0] + R.col(2) * force[1];
   data->f.angular() = d->jMf.translation().cross(data->f.linear());
 }
 
