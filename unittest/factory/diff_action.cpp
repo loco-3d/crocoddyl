@@ -170,12 +170,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
-      contact->addContact(
-          "lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                    state,
-                    crocoddyl::FrameTranslation(state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                                Eigen::Vector3d::Zero()),
-                    actuation->get_nu()));
+      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
+                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
+                                    Eigen::Vector3d::Zero(), actuation->get_nu()));
       if (with_friction) {
         cost->addCost("lf_cone",
                       boost::make_shared<crocoddyl::CostModelResidual>(

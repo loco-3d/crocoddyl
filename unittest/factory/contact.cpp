@@ -60,16 +60,13 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
   }
   switch (contact_type) {
     case ContactModelTypes::ContactModel2D:
-      contact = boost::make_shared<crocoddyl::ContactModel2D>(
-          state, crocoddyl::FrameTranslation(frame_id, Eigen::Vector3d::Zero()), nu);
+      contact = boost::make_shared<crocoddyl::ContactModel2D>(state, frame_id, Eigen::Vector2d::Zero(), nu);
       break;
     case ContactModelTypes::ContactModel3D:
-      contact = boost::make_shared<crocoddyl::ContactModel3D>(
-          state, crocoddyl::FrameTranslation(frame_id, Eigen::Vector3d::Zero()), nu);
+      contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(), nu);
       break;
     case ContactModelTypes::ContactModel6D:
-      contact = boost::make_shared<crocoddyl::ContactModel6D>(
-          state, crocoddyl::FramePlacement(frame_id, pinocchio::SE3()), nu);
+      contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(), nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactModelTypes::Type given");
