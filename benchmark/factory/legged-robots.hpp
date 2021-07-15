@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,11 +22,12 @@
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/frame-translation.hpp"
-#include "crocoddyl/multibody/costs/com-position.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/core/costs/control.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 
@@ -37,12 +38,6 @@ template <typename Scalar>
 void build_contact_action_models(RobotEENames robotNames,
                                  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
                                  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& terminalModel) {
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector2s Vector2s;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
-  typedef typename crocoddyl::FramePlacementTpl<Scalar> FramePlacement;
-  typedef typename crocoddyl::FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<Scalar>
       DifferentialActionModelContactFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
@@ -51,12 +46,17 @@ void build_contact_action_models(RobotEENames robotNames,
   typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
   typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
-  typedef typename crocoddyl::CostModelFramePlacementTpl<Scalar> CostModelFramePlacement;
-  typedef typename crocoddyl::CostModelCoMPositionTpl<Scalar> CostModelCoMPosition;
-  typedef typename crocoddyl::CostModelStateTpl<Scalar> CostModelState;
-  typedef typename crocoddyl::CostModelControlTpl<Scalar> CostModelControl;
+  typedef typename crocoddyl::CostModelResidualTpl<Scalar> CostModelResidual;
+  typedef typename crocoddyl::ResidualModelFramePlacementTpl<Scalar> ResidualModelFramePlacement;
+  typedef typename crocoddyl::ResidualModelCoMPositionTpl<Scalar> ResidualModelCoMPosition;
+  typedef typename crocoddyl::ResidualModelStateTpl<Scalar> ResidualModelState;
+  typedef typename crocoddyl::ResidualModelControlTpl<Scalar> ResidualModelControl;
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
+  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector2s Vector2s;
+  typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
+  typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
+  typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(robotNames.urdf_path, pinocchio::JointModelFreeFlyer(), modeld);
@@ -74,16 +74,17 @@ void build_contact_action_models(RobotEENames robotNames,
 
   boost::shared_ptr<ActuationModelFloatingBase> actuation = boost::make_shared<ActuationModelFloatingBase>(state);
 
-  FramePlacement Mref(model.getFrameId(robotNames.ee_name),
-                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))));
-
-  boost::shared_ptr<CostModelAbstract> comCost =
-      boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost =
-      boost::make_shared<CostModelFramePlacement>(state, Mref, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> xRegCost =
-      boost::make_shared<CostModelState>(state, default_state, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> comCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFramePlacement>(
+                 state, model.getFrameId(robotNames.ee_name),
+                 pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))),
+                 actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelState>(state, default_state, actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelControl>(state, actuation->get_nu()));
 
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state, actuation->get_nu());
@@ -102,17 +103,16 @@ void build_contact_action_models(RobotEENames robotNames,
   for (std::size_t i = 0; i < robotNames.contact_names.size(); ++i) {
     switch (robotNames.contact_types[i]) {
       case Contact3D: {
-        FrameTranslation contact_ref(model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero());
         boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel3D>(
-            state, contact_ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+            state, model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero(), actuation->get_nu(),
+            Vector2s(Scalar(0.), Scalar(50.)));
         contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
         break;
       }
       case Contact6D: {
-        FramePlacement contact_ref(model.getFrameId(robotNames.contact_names[i]),
-                                   pinocchio::SE3Tpl<Scalar>::Identity());
         boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel6D>(
-            state, contact_ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+            state, model.getFrameId(robotNames.contact_names[i]), pinocchio::SE3Tpl<Scalar>::Identity(),
+            actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
         contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
         break;
       }
