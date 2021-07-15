@@ -81,8 +81,9 @@ void exposeContact3D() {
            ":return contact data.")
       .add_property("id", &ContactModel3D::get_id, &ContactModel3D::set_id, "reference frame id")
       .add_property("reference", bp::make_function(&ContactModel3D::get_reference, bp::return_internal_reference<>()),
-                    &ContactModel3D::set_reference, "reference frame translation")
-      .add_property("xref", bp::make_function(&ContactModel3D::get_xref, deprecated<>("Deprecated. Use update().")),
+                    &ContactModel3D::set_reference, "reference contact translation")
+      .add_property("xref",
+                    bp::make_function(&ContactModel3D::get_xref, deprecated<>("Deprecated. Use id or reference.")),
                     "reference frame translation")
       .add_property("gains",
                     bp::make_function(&ContactModel3D::get_gains, bp::return_value_policy<bp::return_by_value>()),

@@ -36,7 +36,6 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the 3d contact model
@@ -150,13 +149,9 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;
-  typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-
   typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ContactData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
