@@ -71,11 +71,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convert_bounds(const Eige
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
-                                          const Eigen::Ref<const VectorXs>& p) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
+                                          const Eigen::Ref<const VectorXs>&) const {
   // u_out = (2*t2-t)*p2 + (4*(t-t2))*p1 + (1-3*t+2*t2)*p0;
   Scalar t2 = t*t;
   data->J.leftCols(nu_).diagonal()        = MathBase::VectorXs::Constant(nu_, 1-3*t+2*t2);
@@ -84,12 +80,8 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(const boost::sha
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>&, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols())!=nu_ || static_cast<std::size_t>(out.cols())!=np_) {
     throw_pretty("Invalid argument: "
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
@@ -102,12 +94,8 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(double
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>&, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows())!=nu_ || static_cast<std::size_t>(out.rows())!=np_) {
     throw_pretty("Invalid argument: "
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 

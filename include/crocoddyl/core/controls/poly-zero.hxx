@@ -60,21 +60,13 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convert_bounds(const Eigen:
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double, 
-                                          const Eigen::Ref<const VectorXs>& p) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
+                                          const Eigen::Ref<const VectorXs>&) const {
   data->J.setIdentity();
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, const Eigen::Ref<const VectorXs>&, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols())!=nu_ || static_cast<std::size_t>(out.cols())!=np_) {
     throw_pretty("Invalid argument: "
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
@@ -84,12 +76,8 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, 
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(double, const Eigen::Ref<const VectorXs>& p, 
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(double, const Eigen::Ref<const VectorXs>&, 
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows())!=nu_ || static_cast<std::size_t>(out.rows())!=np_) {
     throw_pretty("Invalid argument: "
                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) 
