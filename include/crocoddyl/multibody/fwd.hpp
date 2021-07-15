@@ -367,14 +367,14 @@ typedef FrictionConeTpl<double> FrictionCone;
 typedef WrenchConeTpl<double> WrenchCone;
 typedef CoPSupportTpl<double> CoPSupport;
 
-typedef FrameTranslationTpl<double> FrameTranslation;
-typedef FrameRotationTpl<double> FrameRotation;
-typedef FramePlacementTpl<double> FramePlacement;
-typedef FrameMotionTpl<double> FrameMotion;
-typedef FrameForceTpl<double> FrameForce;
-typedef FrameFrictionConeTpl<double> FrameFrictionCone;
-typedef FrameWrenchConeTpl<double> FrameWrenchCone;
-typedef FrameCoPSupportTpl<double> FrameCoPSupport;
+DEPRECATED("Do not use FrameTranslation", typedef FrameTranslationTpl<double> FrameTranslation;)
+DEPRECATED("Do not use FrameTranslation", typedef FrameRotationTpl<double> FrameRotation;)
+DEPRECATED("Do not use FramePlacement", typedef FramePlacementTpl<double> FramePlacement;)
+DEPRECATED("Do not use FrameMotion", typedef FrameMotionTpl<double> FrameMotion;)
+DEPRECATED("Do not use FrameForce", typedef FrameForceTpl<double> FrameForce;)
+DEPRECATED("Do not use FrameFrictionCone", typedef FrameFrictionConeTpl<double> FrameFrictionCone;)
+DEPRECATED("Do not use FrameWrenchCone", typedef FrameWrenchConeTpl<double> FrameWrenchCone;)
+DEPRECATED("Do not use FrameCopSupport", typedef FrameCoPSupportTpl<double> FrameCoPSupport;)
 
 typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMomentum;
 typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;

@@ -14,8 +14,10 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+
+#define IGNORE_DEPRECATED_HEADER  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#include "crocoddyl/multibody/frames.hpp"
 
 namespace crocoddyl {
 

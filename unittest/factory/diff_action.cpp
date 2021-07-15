@@ -21,7 +21,6 @@
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
