@@ -16,7 +16,7 @@ namespace python {
 void exposeContact6D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel6D> >();
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<ContactModel6D, bp::bases<ContactModelAbstract> >(
