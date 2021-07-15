@@ -16,7 +16,7 @@ class SimpleQuadrupedalGaitProblem:
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         self.integrator = integrator
         if(control is None):
-            self.control = crocoddyl.ControlPolyZero(self.actuation.nu)
+            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         else:
             self.control = control
         # Defining default state
@@ -26,6 +26,8 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the friction coefficient and normal
         self.mu = 0.7
         self.Rsurf = np.eye(3)
+        self.stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * 6 + [1.] *
+                                (self.rmodel.nv - 6))
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
         """ Create a shooting problem for a CoM forward/backward task.
@@ -446,10 +448,8 @@ class SimpleQuadrupedalGaitProblem:
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
                 costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
 
-        stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * 6 + [1.] *
-                                (self.rmodel.nv - 6))
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
-        stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
+        stateActivation = crocoddyl.ActivationModelWeightedQuad(self.stateWeights**2)
         ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
