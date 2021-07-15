@@ -29,7 +29,7 @@ void exposeIntegratedActionEuler() {
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
                     boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
           "Initialize the Euler integrator.\n\n"
@@ -65,8 +65,9 @@ void exposeIntegratedActionEuler() {
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
            "Create the Euler integrator data.")
-      .add_property("differential", 
-                    bp::make_function(&IntegratedActionModelEuler::get_differential, bp::return_value_policy<bp::return_by_value>()), 
+      .add_property("differential",
+                    bp::make_function(&IntegratedActionModelEuler::get_differential,
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "Get the differential action model.")
       .add_property(
           "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),

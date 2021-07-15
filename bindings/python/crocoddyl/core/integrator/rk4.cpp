@@ -33,7 +33,7 @@ void exposeIntegratedActionRK4() {
           ":param diffModel: differential action model\n"
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
                     boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
           "Initialize the RK4 integrator.\n\n"
@@ -68,8 +68,9 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
-      .add_property("differential", 
-                    bp::make_function(&IntegratedActionModelRK4::get_differential, bp::return_value_policy<bp::return_by_value>()), 
+      .add_property("differential",
+                    bp::make_function(&IntegratedActionModelRK4::get_differential,
+                                      bp::return_value_policy<bp::return_by_value>()),
                     "Get the differential action model.")
       .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
                     "step time");
@@ -100,9 +101,10 @@ void exposeIntegratedActionRK4() {
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the state of the RK4 "
                     "integration method. d(x+dx)/dx")
-      .add_property("dki_dw", bp::make_getter(&IntegratedActionDataRK4::dki_dw, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of dynamics with respect to to the control of the differential model "
-                    "integration method. d(x+dx)/dw")
+      .add_property(
+          "dki_dw", bp::make_getter(&IntegratedActionDataRK4::dki_dw, bp::return_internal_reference<>()),
+          "List with the partial derivatives of dynamics with respect to to the control of the differential model "
+          "integration method. d(x+dx)/dw")
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK4::dki_du, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the control of the RK4 "
                     "integration method. d(x+dx)/du")

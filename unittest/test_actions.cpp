@@ -114,7 +114,7 @@ void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_t
   test_partial_derivatives_against_numdiff(model);
 }
 
-void test_partial_derivatives_integrated_action_model(DifferentialActionModelTypes::Type dam_type, 
+void test_partial_derivatives_integrated_action_model(DifferentialActionModelTypes::Type dam_type,
                                                       IntegratorTypes::Type integrator_type,
                                                       ControlTypes::Type control_type) {
   // create the differential action model
@@ -122,10 +122,12 @@ void test_partial_derivatives_integrated_action_model(DifferentialActionModelTyp
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl = factory_ctrl.create(control_type, dam->get_nu());
+  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model = factory_int.create(integrator_type, dam, ctrl);
+  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+      factory_int.create(integrator_type, dam, ctrl);
   test_partial_derivatives_against_numdiff(model);
 }
 
@@ -143,14 +145,15 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   framework::master_test_suite().add(ts);
 }
 
-void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::Type dam_type, 
+void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::Type dam_type,
                                                  IntegratorTypes::Type integrator_type,
                                                  ControlTypes::Type control_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << dam_type << "_" << integrator_type << "_" << control_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_integrated_action_model, dam_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_partial_derivatives_integrated_action_model, dam_type, integrator_type, control_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -162,8 +165,7 @@ bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     for (size_t j = 0; j < IntegratorTypes::all.size(); ++j) {
       for (size_t k = 0; k < ControlTypes::all.size(); ++k) {
-        register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i],
-                                                    IntegratorTypes::all[j],
+        register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::all[j],
                                                     ControlTypes::all[k]);
       }
     }

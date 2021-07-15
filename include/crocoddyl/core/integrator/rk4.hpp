@@ -54,23 +54,23 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
    */
   virtual void print(std::ostream& os) const;
 
-protected:
+ protected:
+  using Base::control_;      //!< Control discretization
+  using Base::controlData_;  //!< Control discretization data
+  using Base::differential_;
+  using Base::enable_integration_;
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
-  using Base::control_;             //!< Control discretization
-  using Base::controlData_;         //!< Control discretization data
   using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
-  using Base::differential_;
   using Base::time_step_;
+  using Base::u_lb_;   //!< Lower control limits
+  using Base::u_ub_;   //!< Upper control limits
+  using Base::unone_;  //!< Neutral state
   using Base::with_cost_residual_;
-  using Base::enable_integration_;
 
   void init();
-  
+
  private:
   std::vector<Scalar> rk4_c_;
 };
@@ -117,10 +117,10 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
     dli_dw = std::vector<VectorXs>(4, VectorXs::Zero(nu_diff));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
-    ddli_ddx  = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddw  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu_diff));
+    ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
+    ddli_ddw = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu_diff));
     ddli_dwdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu));
-    ddli_ddu  = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
+    ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
     ddli_dxdw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
     ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
@@ -152,7 +152,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_dw; // not used
+  std::vector<VectorXs> dli_dw;  // not used
   std::vector<VectorXs> dli_du;
   std::vector<MatrixXs> ddli_ddx;
   std::vector<MatrixXs> ddli_ddw;

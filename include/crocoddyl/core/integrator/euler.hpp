@@ -56,20 +56,20 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::control_;      //!< Control parametrization
+  using Base::controlData_;  //!< Data for the control parametrization
+  using Base::differential_;
+  using Base::enable_integration_;
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
-  using Base::control_;             //!< Control parametrization
-  using Base::controlData_;         //!< Data for the control parametrization
   using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
-  using Base::differential_;
-  using Base::time_step_;
   using Base::time_step2_;
+  using Base::time_step_;
+  using Base::u_lb_;   //!< Lower control limits
+  using Base::u_ub_;   //!< Upper control limits
+  using Base::unone_;  //!< Neutral state
   using Base::with_cost_residual_;
-  using Base::enable_integration_;
 
   void init();
 };
@@ -100,7 +100,7 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
   VectorXs dx;
   VectorXs u_diff;
   MatrixXs da_du;
-  MatrixXs Lwu;   // cost Hessian wrt w (u_diff) and u (u_params)
+  MatrixXs Lwu;  // cost Hessian wrt w (u_diff) and u (u_params)
 
   using Base::cost;
   using Base::Fu;

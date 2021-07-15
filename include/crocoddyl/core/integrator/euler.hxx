@@ -16,23 +16,21 @@ namespace crocoddyl {
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual)
-{
+    : Base(model, time_step, with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlParametrizationModelAbstract> control, 
-    const Scalar time_step, const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual)
-{
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    const bool with_cost_residual)
+    : Base(model, control, time_step, with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::init()
-{
+void IntegratedActionModelEulerTpl<Scalar>::init() {
   controlData_ = control_->createData();
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
@@ -183,7 +181,7 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  
+
   VectorXs uc(control_->get_nu());
   differential_->quasiStatic(d->differential, uc, x, maxiter, tol);
   control_->params(controlData_, 0.0, uc);

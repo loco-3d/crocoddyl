@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
 ControlFactory::ControlFactory() {}
 ControlFactory::~ControlFactory() {}
 
-boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory::create(ControlTypes::Type control_type,
-                                                                                         const std::size_t nu) const {
+boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory::create(
+    ControlTypes::Type control_type, const std::size_t nu) const {
   boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> control;
   switch (control_type) {
     case ControlTypes::PolyZero:

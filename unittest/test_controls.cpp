@@ -24,7 +24,7 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
   // Generating random values for the control parameters
   const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_np());
-  double t = Eigen::VectorXd::Random(1)(0)*0.5 + 1.; // random in [0, 1]
+  double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
 
   // Get the num diff control
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
@@ -43,13 +43,13 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
   // Generating random values for the control parameters, the time, and the matrix to multiply
   const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_np());
-  double t = Eigen::VectorXd::Random(1)(0)*0.5 + 1.; // random in [0, 1]
+  double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
   const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(5, control->get_nu());
 
   // Get the num diff control
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
 
-  // Computing 
+  // Computing
   Eigen::MatrixXd A_J(Eigen::MatrixXd::Zero(A.rows(), control->get_np()));
   Eigen::MatrixXd A_J_num_diff(Eigen::MatrixXd::Zero(A.rows(), control->get_np()));
   control->multiplyByJacobian(t, p, A, A_J);
@@ -63,13 +63,13 @@ void test_multiplyJacobianTransposeBy_num_diff(ControlTypes::Type control_type) 
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
   // Generating random values for the control parameters, the time, and the matrix to multiply
   const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_np());
-  double t = Eigen::VectorXd::Random(1)(0)*0.5 + 1.; // random in [0, 1]
+  double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
   const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(control->get_nu(), 5);
 
   // Get the num diff control
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
 
-  // Computing 
+  // Computing
   Eigen::MatrixXd JT_A(Eigen::MatrixXd::Zero(control->get_np(), A.cols()));
   Eigen::MatrixXd JT_A_num_diff(Eigen::MatrixXd::Zero(control->get_np(), A.cols()));
   control->multiplyJacobianTransposeBy(t, p, A, JT_A);

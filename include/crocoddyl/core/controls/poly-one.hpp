@@ -17,7 +17,7 @@ namespace crocoddyl {
 
 /**
  * @brief A polynomial function of time of degree one, that is a linear function
- * 
+ *
  * The size of the parameters p is twice the size of the control input u.
  * The first half of p represents the value of u at time 0.
  * The second half of p represents the value of u at time 0.5.
@@ -34,23 +34,23 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
   explicit ControlParametrizationModelPolyOneTpl(const std::size_t nu);
   virtual ~ControlParametrizationModelPolyOneTpl();
 
-  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                     const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                       const Eigen::Ref<const VectorXs>& u) const;
 
   virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
-  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                         const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+                                  Eigen::Ref<MatrixXs> out) const;
 
-  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
+                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
   using ControlParametrizationModelAbstractTpl<Scalar>::nu_;

@@ -20,10 +20,10 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for an integrated action model
  *
- * An integrated action model is a special kind of action model that is obtained by applying 
+ * An integrated action model is a special kind of action model that is obtained by applying
  * a numerical integration scheme to a differential (i.e. continuous time) action model.
  * Different integration schemes can be implemented inheriting from this base class.
- * 
+ *
  * The numerical integration introduces also the possibility to parametrize the control
  * trajectory inside an integration step, for instance using polynomials. This requires
  * introducing some notation to clarify the difference between the control inputs of
@@ -32,7 +32,7 @@ namespace crocoddyl {
  * action model, respectively. Since these names are much longer than the classic one-letter
  * names, they make the names of the derivative variables hard to read. Therefore, we have
  * decided to introduce also a 1-letter version for these names, that is u for u_params
- * and w for u_diff. 
+ * and w for u_diff.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -53,10 +53,10 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelAbstractTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                  const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+                                   const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   IntegratedActionModelAbstractTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                  boost::shared_ptr<ControlParametrizationModelAbstract> control,
-                                  const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+                                   boost::shared_ptr<ControlParametrizationModelAbstract> control,
+                                   const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelAbstractTpl();
 
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
@@ -64,7 +64,7 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
   void set_dt(const Scalar dt);
   DEPRECATED("The DifferentialActionModel should be set at construction time",
-    void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model));
+             void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model));
 
   /**
    * @brief Return the dimension of the control input of the differential action model
@@ -73,15 +73,15 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::nu_;                  //!< Dimension of the control
   using Base::nr_;                  //!< Dimension of the cost residual
+  using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
   using Base::unone_;               //!< Neutral state
 
   void init();
-  
+
   boost::shared_ptr<ControlParametrizationModelAbstract> control_;  //!< Model of the control discretization
   boost::shared_ptr<ControlParametrizationDataAbstract> controlData_;
   boost::shared_ptr<DifferentialActionModelAbstract> differential_;

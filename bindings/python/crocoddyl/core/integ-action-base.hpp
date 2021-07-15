@@ -15,10 +15,13 @@
 namespace crocoddyl {
 namespace python {
 
-class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract, public bp::wrapper<IntegratedActionModelAbstract> {
+class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract,
+                                           public bp::wrapper<IntegratedActionModelAbstract> {
  public:
-  IntegratedActionModelAbstract_wrap(boost::shared_ptr<DifferentialActionModelAbstract> model, double timestep, bool with_cost_residual)
-      : IntegratedActionModelAbstract(model, timestep, with_cost_residual), bp::wrapper<IntegratedActionModelAbstract>() {}
+  IntegratedActionModelAbstract_wrap(boost::shared_ptr<DifferentialActionModelAbstract> model, double timestep,
+                                     bool with_cost_residual)
+      : IntegratedActionModelAbstract(model, timestep, with_cost_residual),
+        bp::wrapper<IntegratedActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
@@ -53,9 +56,10 @@ class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract,
     return IntegratedActionModelAbstract::createData();
   }
 
-  boost::shared_ptr<ActionDataAbstract> default_createData() { return this->IntegratedActionModelAbstract::createData(); }
+  boost::shared_ptr<ActionDataAbstract> default_createData() {
+    return this->IntegratedActionModelAbstract::createData();
+  }
 };
-
 
 }  // namespace python
 }  // namespace crocoddyl

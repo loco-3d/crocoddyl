@@ -53,9 +53,9 @@ boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::c
   return action;
 }
 
-boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(IntegratorTypes::Type type,
-                                                                           boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                                                           boost::shared_ptr<ControlParametrizationModelAbstract> control) const {
+boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::create(
+    IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control) const {
   boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:

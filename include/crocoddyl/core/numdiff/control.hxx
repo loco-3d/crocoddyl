@@ -21,30 +21,31 @@ template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                     double t, const Eigen::Ref<const VectorXs>& p) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const Eigen::Ref<const VectorXs>& p) const {
   control_->calc(data, t, p);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                       double t, const Eigen::Ref<const VectorXs>& u) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::params(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const Eigen::Ref<const VectorXs>& u) const {
   control_->params(data, t, u);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, 
-    const Eigen::Ref<const VectorXs>& u_ub, Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb,
+                                                                   const Eigen::Ref<const VectorXs>& u_ub,
+                                                                   Eigen::Ref<VectorXs> p_lb,
+                                                                   Eigen::Ref<VectorXs> p_ub) const {
   control_->convert_bounds(u_lb, u_ub, p_lb, p_ub);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                         double t, const Eigen::Ref<const VectorXs>& p) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const Eigen::Ref<const VectorXs>& p) const {
   VectorXs tmp_p = VectorXs::Zero(np_);
   VectorXs u0 = VectorXs::Zero(nu_);
   calc(data, t, p);
@@ -60,18 +61,19 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
-      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p,
+                                                                       const Eigen::Ref<const MatrixXs>& A,
+                                                                       Eigen::Ref<MatrixXs> out) const {
   MatrixXs J(nu_, np_);
   calcDiff(data_, t, p);
   out.noalias() = A * data_->J;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
-      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
-{
+void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(double t,
+                                                                                const Eigen::Ref<const VectorXs>& p,
+                                                                                const Eigen::Ref<const MatrixXs>& A,
+                                                                                Eigen::Ref<MatrixXs> out) const {
   MatrixXs J(nu_, np_);
   calcDiff(data_, t, p);
   out.noalias() = data_->J.transpose() * A;

@@ -24,27 +24,25 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
       control_(new ControlParametrizationModelPolyZero(model->get_nu())),
       differential_(model),
       time_step_(time_step),
-      with_cost_residual_(with_cost_residual)
-{
+      with_cost_residual_(with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlParametrizationModelAbstract> control, 
-    const Scalar time_step, const bool with_cost_residual)
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    const bool with_cost_residual)
     : Base(model->get_state(), control->get_np(), model->get_nr()),
       control_(control),
       differential_(model),
       time_step_(time_step),
-      with_cost_residual_(with_cost_residual)
-{
+      with_cost_residual_(with_cost_residual) {
   init();
 }
 
 template <typename Scalar>
-void IntegratedActionModelAbstractTpl<Scalar>::init()
-{
+void IntegratedActionModelAbstractTpl<Scalar>::init() {
   controlData_ = control_->createData();
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
@@ -103,7 +101,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
   nr_ = model->get_nr();
   state_ = model->get_state();
   differential_ = model;
-  
+
   VectorXs p_lb(nu_), p_ub(nu_);
   control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
   Base::set_u_lb(p_lb);

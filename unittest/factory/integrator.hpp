@@ -45,7 +45,6 @@ class IntegratorFactory {
   boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
       IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model,
       boost::shared_ptr<ControlParametrizationModelAbstract> control) const;
-
 };
 
 }  // namespace unittest

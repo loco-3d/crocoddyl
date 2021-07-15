@@ -30,23 +30,23 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nu);
   virtual ~ControlParametrizationModelPolyZeroTpl();
 
-  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                     const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                       const Eigen::Ref<const VectorXs>& u) const;
 
   virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
-  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t, 
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                         const Eigen::Ref<const VectorXs>& p) const;
 
-  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
-  
-  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+                                  Eigen::Ref<MatrixXs> out) const;
+
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
+                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
   using ControlParametrizationModelAbstractTpl<Scalar>::nu_;

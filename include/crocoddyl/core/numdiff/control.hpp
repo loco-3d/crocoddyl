@@ -32,7 +32,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
 
   explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> state);
   virtual ~ControlParametrizationModelNumDiffTpl();
-  
+
   void resize(const std::size_t nu);
 
   /**
@@ -42,14 +42,14 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  p      Control parameters
    * @param[out] u_out  Control value
    */
-  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, 
-            double t, const Eigen::Ref<const VectorXs>& p) const;
+  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+            const Eigen::Ref<const VectorXs>& p) const;
 
-  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, 
-              double t, const Eigen::Ref<const VectorXs>& u) const;
+  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+              const Eigen::Ref<const VectorXs>& u) const;
 
   void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
-                              Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
+                      Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
@@ -58,19 +58,20 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  p      Control parameters
    * @param[out] J_out  Jacobian of the control value with respect to the parameters
    */
-  void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                double t, const Eigen::Ref<const VectorXs>& p) const;
+  void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+                const Eigen::Ref<const VectorXs>& p) const;
 
   /**
-   * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the parameters)
+   * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
+   * parameters)
    *
    * @param[in]  t      Time
    * @param[in]  p      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+                          Eigen::Ref<MatrixXs> out) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
@@ -79,10 +80,11 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  t      Time
    * @param[in]  p      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
-   * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the matrix A
+   * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
+   * matrix A
    */
-  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, 
-        const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+                                   Eigen::Ref<MatrixXs> out) const;
 
   const Scalar get_disturbance() const;
   void set_disturbance(const Scalar disturbance);
@@ -93,7 +95,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * from.
    */
   boost::shared_ptr<Base> control_;
-  
+
   boost::shared_ptr<ControlParametrizationDataAbstract> data_;
 
   /**
@@ -102,8 +104,8 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   Scalar disturbance_;
 
  protected:
-  using Base::nu_;
   using Base::np_;
+  using Base::nu_;
 };
 
 }  // namespace crocoddyl

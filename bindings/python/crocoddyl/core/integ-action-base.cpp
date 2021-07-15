@@ -21,7 +21,7 @@ void exposeIntegratedActionAbstract() {
       "IntegratedActionModelAbstract",
       "Abstract class for integrated action models.\n\n"
       "In crocoddyl, an integrated action model trasforms a differential action model in a (discrete) action model.\n",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, double, bool >(
+      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, double, bool>(
           bp::args("self", "model", "timestep", "with_cost_residual"),
           "Initialize the action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
@@ -37,8 +37,8 @@ void exposeIntegratedActionAbstract() {
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &IntegratedActionModelAbstract::calc,
-                                                                                    bp::args("self", "data", "x"))
+                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &IntegratedActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&IntegratedActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
@@ -49,33 +49,39 @@ void exposeIntegratedActionAbstract() {
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input\n")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &IntegratedActionModelAbstract_wrap::createData, &IntegratedActionModelAbstract_wrap::default_createData,
-           bp::args("self"),
+      .def("createData", &IntegratedActionModelAbstract_wrap::createData,
+           &IntegratedActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the action data.\n\n"
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
-      .add_property(
-          "nu", bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of control vector")
-      .add_property(
-          "nr", bp::make_function(&IntegratedActionModelAbstract_wrap::get_nr, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of cost-residual vector")
-      .add_property(
-          "nu_diff", bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu_diff, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of control vector of the differentiable model")
-      .add_property(
-          "state",
-          bp::make_function(&IntegratedActionModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
-          "state")
-      .add_property("has_control_limits", bp::make_function(&IntegratedActionModelAbstract_wrap::get_has_control_limits),
+      .add_property("nu",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of control vector")
+      .add_property("nr",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nr,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of cost-residual vector")
+      .add_property("nu_diff",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu_diff,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "dimension of control vector of the differentiable model")
+      .add_property("state",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_state,
+                                      bp::return_value_policy<bp::return_by_value>()),
+                    "state")
+      .add_property("has_control_limits",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_has_control_limits),
                     "indicates whether problem has finite control limits")
-      .add_property("u_lb", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
-                    &IntegratedActionModelAbstract_wrap::set_u_lb, "lower control limits")
-      .add_property("u_ub", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
-                    &IntegratedActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .add_property(
+          "u_lb", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
+          &IntegratedActionModelAbstract_wrap::set_u_lb, "lower control limits")
+      .add_property(
+          "u_ub", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
+          &IntegratedActionModelAbstract_wrap::set_u_ub, "upper control limits")
       .def(PrintableVisitor<IntegratedActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataAbstract> >();
@@ -88,11 +94,12 @@ void exposeIntegratedActionAbstract() {
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",
       bp::init<IntegratedActionModelAbstract*>(bp::args("self", "model"),
-                                     "Create common data shared between AMs.\n\n"
-                                     "The action data uses the model in order to first process it.\n"
-                                     ":param model: action model"))
-      .add_property("cost", bp::make_getter(&IntegratedActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::cost), "cost value")
+                                               "Create common data shared between AMs.\n\n"
+                                               "The action data uses the model in order to first process it.\n"
+                                               ":param model: action model"))
+      .add_property(
+          "cost", bp::make_getter(&IntegratedActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&IntegratedActionDataAbstract::cost), "cost value")
       .add_property("xnext", bp::make_getter(&IntegratedActionDataAbstract::xnext, bp::return_internal_reference<>()),
                     bp::make_setter(&IntegratedActionDataAbstract::xnext), "next state")
       .add_property("r", bp::make_getter(&IntegratedActionDataAbstract::r, bp::return_internal_reference<>()),
