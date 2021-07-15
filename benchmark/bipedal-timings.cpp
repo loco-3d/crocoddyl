@@ -21,8 +21,8 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 
-#include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/residuals/cost-sum.hpp"
+#include "crocoddyl/core/residuals/residual.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
@@ -74,9 +74,6 @@ int main(int argc, char* argv[]) {
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 
-  crocoddyl::FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
-                                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)));
-
   boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost = boost::make_shared<crocoddyl::CostModelResidual>(
       state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
                  state, model.getFrameId("arm_right_7_joint"),
@@ -100,14 +97,14 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ContactModelMultiple> contact_models =
       boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
 
-  crocoddyl::FramePlacement xref(model.getFrameId(RF), pinocchio::SE3::Identity());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<crocoddyl::ContactModel6D>(state, xref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
+      boost::make_shared<crocoddyl::ContactModel6D>(state, model.getFrameId(RF), pinocchio::SE3::Identity(),
+                                                    actuation->get_nu(), Eigen::Vector2d(0., 50.));
   contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
 
-  crocoddyl::FrameTranslation x2ref(model.getFrameId(LF), Eigen::Vector3d::Zero());
   boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
-      boost::make_shared<crocoddyl::ContactModel3D>(state, x2ref, actuation->get_nu(), Eigen::Vector2d(0., 50.));
+      boost::make_shared<crocoddyl::ContactModel3D>(state, model.getFrameId(LF), Eigen::Vector3d::Zero(),
+                                                    actuation->get_nu(), Eigen::Vector2d(0., 50.));
   contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> runningDAM =
