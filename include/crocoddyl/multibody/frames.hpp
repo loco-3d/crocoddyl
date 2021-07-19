@@ -10,9 +10,10 @@
 #ifndef CROCODDYL_MULTIBODY_FRAMES_HPP_
 #define CROCODDYL_MULTIBODY_FRAMES_HPP_
 
-#ifndef IGNORE_DEPRECATED_HEADER
+#ifndef CROCODDYL_IGNORE_DEPRECATED_HEADER
 #pragma message("Do not include `frames.hpp` as it is deprecated")
-#define IGNORE_DEPRECATED_HEADER
+#else
+#undef CROCODDYL_IGNORE_DEPRECATED_HEADER
 #endif
 
 #include <pinocchio/multibody/fwd.hpp>
