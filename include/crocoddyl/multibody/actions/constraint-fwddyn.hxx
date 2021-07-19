@@ -6,16 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn2.hpp"
-
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -62,8 +52,9 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::calc(
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
 
   actuation_->calc(d->multibody.actuation, x, u);
-  d->xout = pinocchio::contactDynamics(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau, contacts_,
-                                       d->multibody.contacts, mu_contacts);
+  // TODO: Add mu
+  d->xout = pinocchio::constraintDynamics(pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau, contacts_,
+                                          d->multibody.contacts);  //, mu_contacts);
   pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, false);
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
@@ -92,8 +83,8 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::calcDiff(
 
   // Computing the dynamics derivatives
   actuation_->calcDiff(d->multibody.actuation, x, u);
-  pinocchio::computeContactDynamicsDerivatives(
-      pinocchio_, d->pinocchio, contacts_, d->multibody.contacts, Scalar(0.), d->Fx.leftCols(nv), d->Fx.rightCols(nv),
+  pinocchio::computeConstraintDynamicsDerivatives(
+      pinocchio_, d->pinocchio, contacts_, d->multibody.contacts, d->Fx.leftCols(nv), d->Fx.rightCols(nv),
       d->pinocchio.ddq_dtau, d->pinocchio.dlambda_dq, d->pinocchio.dlambda_dv, d->pinocchio.dlambda_dtau);
 
   d->Fu.noalias() = d->pinocchio.ddq_dtau * d->multibody.actuation->dtau_du;
@@ -107,7 +98,7 @@ DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::createData() {
       boost::make_shared<DifferentialActionDataConstraintFwdDynamics>(this);
   DifferentialActionDataConstraintFwdDynamics* d =
       static_cast<DifferentialActionDataConstraintFwdDynamics*>(data.get());
-  pinocchio::initContactDynamics(pinocchio_, d->pinocchio, contacts_);
+  pinocchio::initConstraintDynamics(pinocchio_, d->pinocchio, contacts_);
 
   return data;
 }
