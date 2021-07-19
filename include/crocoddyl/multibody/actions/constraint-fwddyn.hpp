@@ -12,12 +12,19 @@
 #include <stdexcept>
 
 #include <pinocchio/algorithm/contact-info.hpp>
-#include <pinocchio/algorithm/contact-dynamics.hpp>
-#include <pinocchio/algorithm/contact-dynamics-derivatives.hpp>
+#include <pinocchio/algorithm/constrained-dynamics.hpp>
+#include <pinocchio/algorithm/constrained-dynamics-derivatives.hpp>
+#include <pinocchio/algorithm/compute-all-terms.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
+#include <pinocchio/algorithm/rnea.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/data/contacts2.hpp"
+#include "crocoddyl/multibody/data/constraint.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
@@ -130,6 +137,6 @@ struct DifferentialActionDataConstraintFwdDynamicsTpl : public DifferentialActio
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/multibody/actions/contact-fwddyn2.hxx>
+#include <crocoddyl/multibody/actions/constraint-fwddyn.hxx>
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
