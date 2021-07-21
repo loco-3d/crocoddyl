@@ -179,7 +179,9 @@ class SimpleBipedGaitProblem:
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
             supportContactModel = \
-                crocoddyl.ContactModel6D(self.state, i, pinocchio.SE3.Identity(), self.actuation.nu, np.array([0., 0.]))
+                crocoddyl.ContactModel6D(self.state, i,
+                                         pinocchio.SE3.Identity(),
+                                         self.actuation.nu, np.array([0., 0.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
