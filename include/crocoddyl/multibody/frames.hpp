@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_FRAMES_HPP_
 #define CROCODDYL_MULTIBODY_FRAMES_HPP_
 
-
 CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER("crocoddyl/multibody/frames.hpp")
 
 #include <pinocchio/multibody/fwd.hpp>

@@ -15,7 +15,8 @@
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
-#define CROCODDYL_IGNORE_DEPRECATED_HEADER  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#define CROCODDYL_IGNORE_DEPRECATED_HEADER  // TODO: Remove once the deprecated FrameXX has been removed in a future
+                                            // release
 #include "crocoddyl/multibody/frames.hpp"
 #undef CROCODDYL_IGNORE_DEPRECATED_HEADER
 
