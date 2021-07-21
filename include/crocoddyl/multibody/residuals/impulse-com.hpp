@@ -14,7 +14,6 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

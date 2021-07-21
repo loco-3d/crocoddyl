@@ -13,10 +13,14 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
+#include "crocoddyl/multibody/frames-deprecated.hpp"
+
 namespace crocoddyl {
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 template <typename _Scalar>
 class CostModelImpulseWrenchConeTpl : public CostModelResidualTpl<_Scalar> {
@@ -57,5 +61,7 @@ class CostModelImpulseWrenchConeTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/impulse-wrench-cone.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_IMPULSE_WRENCH_CONE_HPP_

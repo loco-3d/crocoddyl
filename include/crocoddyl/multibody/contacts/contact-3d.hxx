@@ -9,14 +9,40 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                                             const std::size_t nu, const Vector2s& gains)
-    : Base(state, 3, nu), xref_(xref), gains_(gains) {}
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Vector3s& xref, const std::size_t nu, const Vector2s& gains)
+    : Base(state, 3, nu), xref_(xref), gains_(gains) {
+  id_ = id;
+}
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Vector3s& xref, const Vector2s& gains)
+    : Base(state, 3), xref_(xref), gains_(gains) {
+  id_ = id;
+}
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+template <typename Scalar>
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 3), xref_(xref), gains_(gains) {}
+    : Base(state, 3, nu), xref_(xref.translation), gains_(gains) {
+  id_ = xref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
+}
+
+template <typename Scalar>
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+                                             const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
+    : Base(state, 3), xref_(xref.translation), gains_(gains) {
+  id_ = xref.id;
+  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
+}
+
+#pragma GCC diagnostic pop
 
 template <typename Scalar>
 ContactModel3DTpl<Scalar>::~ContactModel3DTpl() {}
@@ -25,10 +51,10 @@ template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
 
   d->Jc = d->fJf.template topRows<3>();
   d->vw = d->v.angular();
@@ -36,7 +62,7 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->a0 = d->a.linear() + d->vw.cross(d->vv);
 
   if (gains_[0] != 0.) {
-    d->a0 += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation);
+    d->a0 += gains_[0] * (d->pinocchio->oMf[id_].translation() - xref_);
   }
   if (gains_[1] != 0.) {
     d->a0 += gains_[1] * d->vv;
@@ -63,7 +89,7 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       d->fXjda_dv.template topRows<3>() + d->vw_skew * d->Jc - d->vv_skew * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
-    d->oRf = d->pinocchio->oMf[xref_.id].rotation();
+    d->oRf = d->pinocchio->oMf[id_].rotation();
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
@@ -91,17 +117,32 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[xref_.id].name << "}";
+  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
 }
 
 template <typename Scalar>
-const FrameTranslationTpl<Scalar>& ContactModel3DTpl<Scalar>::get_xref() const {
+const typename MathBaseTpl<Scalar>::Vector3s& ContactModel3DTpl<Scalar>::get_reference() const {
   return xref_;
 }
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+template <typename Scalar>
+FrameTranslationTpl<Scalar> ContactModel3DTpl<Scalar>::get_xref() const {
+  return FrameTranslationTpl<Scalar>(id_, xref_);
+}
+
+#pragma GCC diagnostic pop
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel3DTpl<Scalar>::get_gains() const {
   return gains_;
+}
+
+template <typename Scalar>
+void ContactModel3DTpl<Scalar>::set_reference(const Vector3s& reference) {
+  xref_ = reference;
 }
 
 }  // namespace crocoddyl

@@ -13,8 +13,9 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/impulse-com.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+
+#include "crocoddyl/multibody/frames-deprecated.hpp"
 
 namespace crocoddyl {
 

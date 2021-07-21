@@ -13,10 +13,14 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
+#include "crocoddyl/multibody/frames-deprecated.hpp"
+
 namespace crocoddyl {
+
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 /**
  * @brief Define a contact impulse cost function
@@ -116,5 +120,7 @@ class CostModelContactImpulseTpl : public CostModelResidualTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/costs/contact-impulse.hxx"
+
+#pragma GCC diagnostic pop
 
 #endif  // CROCODDYL_MULTIBODY_COSTS_CONTACT_IMPULSE_HPP_
