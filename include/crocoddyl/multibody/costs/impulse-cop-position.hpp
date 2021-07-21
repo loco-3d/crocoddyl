@@ -13,7 +13,9 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
-#include "crocoddyl/multibody/frames.hpp"
+
+#include "crocoddyl/multibody/frames-deprecated.hpp"
+
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 

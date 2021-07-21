@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/frames-deprecated.hpp"
 
 #include <eigenpy/memory.hpp>
 #include <eigenpy/eigen-to-python.hpp>
