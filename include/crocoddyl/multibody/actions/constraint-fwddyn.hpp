@@ -14,6 +14,7 @@
 #include <stdexcept>
 
 #include <pinocchio/algorithm/contact-info.hpp>
+#include <pinocchio/algorithm/proximal.hpp>
 #include <pinocchio/algorithm/constrained-dynamics.hpp>
 #include <pinocchio/algorithm/constrained-dynamics-derivatives.hpp>
 #include <pinocchio/algorithm/compute-all-terms.hpp>
