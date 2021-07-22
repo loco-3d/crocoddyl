@@ -34,10 +34,10 @@ void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 void exposeDifferentialActionConstraintFwdDynamics();
 #endif
-  
+
 void exposeActionImpulseFwdDynamics();
 void exposeResidualState();
 void exposeResidualCentroidalMomentum();

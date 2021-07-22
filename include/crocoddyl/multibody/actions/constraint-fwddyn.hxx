@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 
 namespace crocoddyl {
 
@@ -168,7 +168,8 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_armature(const
 }
 
 template <typename Scalar>
-const pinocchio::ProximalSettingsTpl<Scalar> & DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::get_settings() const {
+const pinocchio::ProximalSettingsTpl<Scalar>& DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::get_settings()
+    const {
   return settings_;
 }
 
@@ -179,4 +180,4 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_mu(const Proxi
 
 }  // namespace crocoddyl
 
-#endif // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)

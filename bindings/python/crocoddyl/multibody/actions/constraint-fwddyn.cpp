@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
@@ -119,5 +119,4 @@ void exposeDifferentialActionConstraintFwdDynamics() {
 }  // namespace python
 }  // namespace crocoddyl
 
-
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)

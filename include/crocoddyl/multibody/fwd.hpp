@@ -14,8 +14,6 @@
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 
-
-
 namespace crocoddyl {
 
 // actuation
@@ -55,13 +53,13 @@ class DifferentialActionModelContactFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 template <typename Scalar>
 class DifferentialActionModelConstraintFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataConstraintFwdDynamicsTpl;
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
-  
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+
 // numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
@@ -326,7 +324,7 @@ struct DataCollectorMultibodyInContactTpl;
 template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 template <typename Scalar>
 struct DataCollectorConstraintTpl;
 
@@ -335,8 +333,8 @@ struct DataCollectorMultibodyInConstraintTpl;
 
 template <typename Scalar>
 struct DataCollectorActMultibodyInConstraintTpl;
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
-  
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
 

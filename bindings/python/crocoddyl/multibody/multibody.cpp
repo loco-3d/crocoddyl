@@ -30,9 +30,9 @@ void exposeMultibody() {
   exposeDataCollectorImpulses();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
   exposeDifferentialActionConstraintFwdDynamics();
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
   exposeActionImpulseFwdDynamics();
   exposeResidualState();
   exposeResidualCentroidalMomentum();

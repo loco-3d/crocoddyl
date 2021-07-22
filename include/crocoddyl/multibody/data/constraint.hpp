@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_DATA_CONSTRAINTS_HPP_
 #define CROCODDYL_CORE_DATA_CONSTRAINTS_HPP_
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 
 #include <boost/shared_ptr.hpp>
 
@@ -55,6 +55,6 @@ struct DataCollectorActMultibodyInConstraintTpl : DataCollectorMultibodyInConstr
 
 }  // namespace crocoddyl
 
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_CONSTRAINTS_HPP_
