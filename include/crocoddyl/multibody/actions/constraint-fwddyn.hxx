@@ -174,7 +174,7 @@ const pinocchio::ProximalSettingsTpl<Scalar>& DifferentialActionModelConstraintF
 }
 
 template <typename Scalar>
-void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_mu(const ProximalSettings& settings) {
+void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_settings(const ProximalSettings& settings) {
   settings_ = settings;
 }
 
