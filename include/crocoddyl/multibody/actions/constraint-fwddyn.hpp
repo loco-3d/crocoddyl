@@ -50,11 +50,12 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef pinocchio::RigidConstraintModelTpl<Scalar, 0> RigidConstraintModel;
+  typedef pinocchio::ProximalSettingsTpl<Scalar> ProximalSettings;
 
   DifferentialActionModelConstraintFwdDynamicsTpl(
       boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
       const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contacts,
-      boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts);
+      boost::shared_ptr<CostModelSum> costs, const ProximalSettings& settings);
   ~DifferentialActionModelConstraintFwdDynamicsTpl();
 
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -73,8 +74,9 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   const VectorXs& get_armature() const;
   void set_armature(const VectorXs& armature);
 
-  const Scalar& get_mu() const;
-  void set_mu(const Scalar mu_contacts);
+  const ProximalSettings& get_settings() const;
+  void set_settings(const ProximalSettings& settings);
+  
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
@@ -90,7 +92,7 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) contacts_;
   boost::shared_ptr<CostModelSum> costs_;
   pinocchio::ModelTpl<Scalar>& pinocchio_;
-  Scalar mu_contacts;
+  ProximalSettings settings_;
 };
 
 template <typename _Scalar>
