@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -176,3 +178,5 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_mu(const Scala
 }
 
 }  // namespace crocoddyl
+
+#endif // PINOCCHIO_VERSION_AT_LEAST(2,9,0)

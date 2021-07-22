@@ -9,6 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN2_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN2_HPP_
 
+#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+
 #include <stdexcept>
 
 #include <pinocchio/algorithm/contact-info.hpp>
@@ -138,5 +140,7 @@ struct DifferentialActionDataConstraintFwdDynamicsTpl : public DifferentialActio
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/constraint-fwddyn.hxx>
+
+#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
