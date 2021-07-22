@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN2_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN2_HPP_
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 
 #include <stdexcept>
 
@@ -77,7 +77,6 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
 
   const ProximalSettings& get_settings() const;
   void set_settings(const ProximalSettings& settings);
-  
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
@@ -144,6 +143,6 @@ struct DifferentialActionDataConstraintFwdDynamicsTpl : public DifferentialActio
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/constraint-fwddyn.hxx>
 
-#endif //PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
