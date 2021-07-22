@@ -378,8 +378,10 @@ typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataF
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
 
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 typedef DifferentialActionModelConstraintFwdDynamicsTpl<double> DifferentialActionModelConstraintFwdDynamics;
 typedef DifferentialActionDataConstraintFwdDynamicsTpl<double> DifferentialActionDataConstraintFwdDynamics;
+#endif
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
@@ -511,9 +513,11 @@ typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
 
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 typedef DataCollectorConstraintTpl<double> DataCollectorContact2;
 typedef DataCollectorMultibodyInConstraintTpl<double> DataCollectorMultibodyInContact2;
 typedef DataCollectorActMultibodyInConstraintTpl<double> DataCollectorActMultibodyInContact2;
+#endif
 
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
