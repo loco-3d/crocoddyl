@@ -14,13 +14,13 @@ template <typename Scalar>
 DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::DifferentialActionModelConstraintFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel) & contacts,
-    boost::shared_ptr<CostModelSum> costs, const Scalar mu_contacts)
+    boost::shared_ptr<CostModelSum> costs, const ProximalSettings& settings)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
       pinocchio_(*state->get_pinocchio().get()),
-      mu_contacts(mu_contacts) {
+      settings_(settings) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
@@ -168,13 +168,13 @@ void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_armature(const
 }
 
 template <typename Scalar>
-const Scalar& DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::get_mu() const {
-  return mu_contacts;
+const pinocchio::ProximalSettingsTpl<Scalar> & DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::get_settings() const {
+  return settings_;
 }
 
 template <typename Scalar>
-void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_mu(const Scalar mu_contacts_) {
-  mu_contacts = mu_contacts_;
+void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::set_mu(const ProximalSettings& settings) {
+  settings_ = settings;
 }
 
 }  // namespace crocoddyl
