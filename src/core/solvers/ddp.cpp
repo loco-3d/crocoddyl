@@ -139,16 +139,7 @@ double SolverDDP::tryStep(const double steplength) {
 }
 
 double SolverDDP::stoppingCriteria() {
-  stop_ = 0.;
-  const std::size_t T = this->problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-
-  for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t nu = models[t]->get_nu();
-    if (nu != 0) {
-      stop_ += Qu_[t].head(nu).squaredNorm();
-    }
-  }
+  stop_ = abs(d_[0]);
   return stop_;
 }
 
