@@ -9,6 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_FWD_HPP_
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
+#include <pinocchio/config.hpp>
+
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 
@@ -50,6 +52,13 @@ template <typename Scalar>
 class DifferentialActionModelContactFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
+
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+template <typename Scalar>
+class DifferentialActionModelConstraintFwdDynamicsTpl;
+template <typename Scalar>
+struct DifferentialActionDataConstraintFwdDynamicsTpl;
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
 
 // numdiff
 template <typename Scalar>
@@ -315,6 +324,17 @@ struct DataCollectorMultibodyInContactTpl;
 template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+template <typename Scalar>
+struct DataCollectorConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInConstraintTpl;
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
@@ -357,6 +377,11 @@ typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionMode
 typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
+
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+typedef DifferentialActionModelConstraintFwdDynamicsTpl<double> DifferentialActionModelConstraintFwdDynamics;
+typedef DifferentialActionDataConstraintFwdDynamicsTpl<double> DifferentialActionDataConstraintFwdDynamics;
+#endif
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
@@ -487,6 +512,13 @@ typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
+
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+typedef DataCollectorConstraintTpl<double> DataCollectorContact2;
+typedef DataCollectorMultibodyInConstraintTpl<double> DataCollectorMultibodyInContact2;
+typedef DataCollectorActMultibodyInConstraintTpl<double> DataCollectorActMultibodyInContact2;
+#endif
+
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
 
