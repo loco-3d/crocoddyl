@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 import time
@@ -15,7 +13,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the anymal model
-anymal = example_robot_data.load('anymal')
+anymal = example_robot_data.load("anymal")
 robot_model = anymal.model
 lims = robot_model.effortLimit
 lims *= 0.5  # reduced artificially the torque limits
@@ -48,17 +46,13 @@ elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    solver.setCallbacks([
-        crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackVerbose(),
-    ])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-xs = [robot_model.defaultState] * (solver.problem.T + 1)
-us = solver.problem.quasiStatic([anymal.model.defaultState] * solver.problem.T)
-
 # Solve the DDP problem
+xs = [x0] * (solver.problem.T + 1)
+us = solver.problem.quasiStatic([x0] * solver.problem.T)
 solver.solve(xs, us, 100, False, 0.1)
 
 # Plotting the entire motion
