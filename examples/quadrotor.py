@@ -53,28 +53,28 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 # Creating the shooting problem and the FDDP solver
 T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
-fddp = crocoddyl.SolverFDDP(problem)
+solver = crocoddyl.SolverFDDP(problem)
 
-fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
-    fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the FDDP solver
-fddp.solve()
+solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = fddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2)
 
@@ -86,4 +86,4 @@ if WITHDISPLAY:
         'world/wp',
         target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
 
-    display.displayFromSolver(fddp)
+    display.displayFromSolver(solver)

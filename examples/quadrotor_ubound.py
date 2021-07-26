@@ -52,30 +52,30 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 runningModel.u_lb = np.array([l_lim, l_lim, l_lim, l_lim])
 runningModel.u_ub = np.array([u_lim, u_lim, u_lim, u_lim])
 
-# Creating the shooting problem and the boxddp solver
+# Creating the shooting problem and the solver solver
 T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
-boxddp = crocoddyl.SolverBoxDDP(problem)
-boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+solver = crocoddyl.SolverBoxDDP(problem)
+solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-# Solving the problem with the boxddp solver
-boxddp.solve([], [], 200)
+# Solving the problem with the solver solver
+solver.solve([], [], 200)
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = boxddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
@@ -87,4 +87,4 @@ if WITHDISPLAY:
         'world/wp',
         target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
 
-    display.displayFromSolver(boxddp)
+    display.displayFromSolver(solver)

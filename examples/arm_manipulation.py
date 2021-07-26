@@ -62,32 +62,32 @@ x0 = np.concatenate([q0, pinocchio.utils.zero(robot_model.nv)])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = crocoddyl.SolverDDP(problem)
+solver = crocoddyl.SolverDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
-    ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
-    ddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    ddp.setCallbacks([
+    solver.setCallbacks([
         crocoddyl.CallbackLogger(),
         crocoddyl.CallbackVerbose(),
     ])
 else:
-    ddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
-ddp.solve()
+solver.solve()
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:
-    log = ddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)
-    display.displayFromSolver(ddp)
+    display.displayFromSolver(solver)

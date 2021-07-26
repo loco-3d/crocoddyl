@@ -42,30 +42,30 @@ T = 100
 x0 = np.array([3.14, 0, 0., 0.])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 problem.nthreads = 1  # TODO(cmastalli): Remove after Crocoddyl supports multithreading with Python-derived models
-fddp = crocoddyl.SolverFDDP(problem)
+solver = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF, False)
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF, False)
-    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
-    fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the FDDP solver
-fddp.solve()
+solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = fddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
 # Display the entire motion
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(robot, floor=False)
-    display.displayFromSolver(fddp)
+    display.displayFromSolver(solver)
