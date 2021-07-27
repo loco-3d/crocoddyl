@@ -12,47 +12,43 @@ WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 hector = example_robot_data.load('hector')
 robot_model = hector.model
 
-target_pos = np.array([1, 0, 1])
-target_quat = pinocchio.Quaternion(1, 0, 0, 0)
+target_pos = np.array([1., 0., 1.])
+target_quat = pinocchio.Quaternion(1., 0., 0., 0.)
 
 state = crocoddyl.StateMultibody(robot_model)
-d_cog = 0.1525
-cf = 6.6e-5
-cm = 1e-6
-u_lim = 5
-l_lim = 0.1
-tau_f = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
-                  [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
 
-actModel = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
+d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5., 0.1
+tau_f = np.array([[0., 0., 0., 0.], [0., 0., 0., 0.], [1., 1., 1., 1.], [0., d_cog, 0., -d_cog],
+                  [-d_cog, 0., d_cog, 0.], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+actuation = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
 
-runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
-terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
+nu = actuation.nu
+runningCostModel = crocoddyl.CostModelSum(state, nu)
+terminalCostModel = crocoddyl.CostModelSum(state, nu)
 
 # Costs
-xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
+xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelWeightedQuad(np.array([0.1] * 3 + [1000.] * 3 + [1000.] * robot_model.nv))
-uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
+uResidual = crocoddyl.ResidualModelControl(state, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("base_link"),
-                                                             pinocchio.SE3(target_quat.matrix(), target_pos),
-                                                             actModel.nu)
+                                                             pinocchio.SE3(target_quat.matrix(), target_pos), nu)
 goalTrackingCost = crocoddyl.CostModelResidual(state, goalTrackingResidual)
 runningCostModel.addCost("xReg", xRegCost, 1e-6)
 runningCostModel.addCost("uReg", uRegCost, 1e-6)
 runningCostModel.addCost("trackPose", goalTrackingCost, 1e-2)
-terminalCostModel.addCost("goalPose", goalTrackingCost, 100)
+terminalCostModel.addCost("goalPose", goalTrackingCost, 100.)
 
 dt = 3e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, terminalCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel), dt)
 runningModel.u_lb = np.array([l_lim, l_lim, l_lim, l_lim])
 runningModel.u_ub = np.array([u_lim, u_lim, u_lim, u_lim])
 
-# Creating the shooting problem and the solver solver
+# Creating the shooting problem and the BoxDDP solver
 T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverBoxDDP(problem)
@@ -70,7 +66,7 @@ elif WITHPLOT:
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-# Solving the problem with the solver solver
+# Solving the problem with the BoxDDP solver
 solver.solve([], [], 200)
 
 # Plotting the entire motion
