@@ -66,9 +66,9 @@ for i, phase in enumerate(GAITPHASES):
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    xs = [talos_legs.model.defaultState] * (solver[i].problem.T + 1)
-    us = solver[i].problem.quasiStatic([talos_legs.model.defaultState] * solver[i].problem.T)
-    solver[i].solve(xs, us, 100, False, 0.1)
+    xs = [x0] * (solver[i].problem.T + 1)
+    us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
+    solver[i].solve(xs, us, 100, False)
 
     # Defining the final state as initial one for the next phase
     x0 = solver[i].xs[-1]

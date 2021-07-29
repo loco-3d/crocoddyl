@@ -35,7 +35,7 @@ endEffectorId = rmodel.getFrameId(endEffector)
 rightFootId = rmodel.getFrameId(rightFoot)
 leftFootId = rmodel.getFrameId(leftFoot)
 q0 = rmodel.referenceConfigurations["half_sitting"]
-rmodel.defaultState = np.concatenate([q0, np.zeros(rmodel.nv)])
+x0 = np.concatenate([q0, np.zeros(rmodel.nv)])
 pinocchio.forwardKinematics(rmodel, rdata, q0)
 pinocchio.updateFramePlacements(rmodel, rdata)
 rfPos0 = rdata.oMf[rightFootId].translation
@@ -73,12 +73,12 @@ xub = np.concatenate([
     maxfloat * np.ones(state.nv)
 ])
 bounds = crocoddyl.ActivationBounds(xlb, xub, 1.)
-xLimitResidual = crocoddyl.ResidualModelState(state, rmodel.defaultState, actuation.nu)
+xLimitResidual = crocoddyl.ResidualModelState(state, x0, actuation.nu)
 xLimitActivation = crocoddyl.ActivationModelQuadraticBarrier(bounds)
 limitCost = crocoddyl.CostModelResidual(state, xLimitActivation, xLimitResidual)
 
 # Cost for state and control
-xResidual = crocoddyl.ResidualModelState(state, rmodel.defaultState, actuation.nu)
+xResidual = crocoddyl.ResidualModelState(state, x0, actuation.nu)
 xActivation = crocoddyl.ActivationModelWeightedQuad(
     np.array([0] * 3 + [10.] * 3 + [0.01] * (state.nv - 6) + [10] * state.nv)**2)
 uResidual = crocoddyl.ResidualModelControl(state, actuation.nu)
@@ -141,8 +141,8 @@ else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm
-xs = [rmodel.defaultState] * (solver.problem.T + 1)
-us = solver.problem.quasiStatic([rmodel.defaultState] * solver.problem.T)
+xs = [x0] * (solver.problem.T + 1)
+us = solver.problem.quasiStatic([x0] * solver.problem.T)
 solver.solve(xs, us, 500, False, 1e-9)
 
 # Visualizing the solution in gepetto-viewer
@@ -158,7 +158,7 @@ finalPosEff = np.array(rdata.oMf[rmodel.getFrameId("gripper_left_joint")].transl
 
 print('Finally reached = ', finalPosEff)
 print('Distance between hand and target = ', np.linalg.norm(finalPosEff - target))
-print('Distance to default state = ', np.linalg.norm(rmodel.defaultState - np.array(xT.flat)))
+print('Distance to default state = ', np.linalg.norm(x0 - np.array(xT.flat)))
 print('XY distance to CoM reference = ', np.linalg.norm(com[:2] - comRef[:2]))
 
 # Plotting the entire motion

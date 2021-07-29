@@ -71,8 +71,8 @@ else:
     boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the both solvers
-xs = [anymal.model.defaultState] * (boxfddp.problem.T + 1)
-us = boxddp.problem.quasiStatic([anymal.model.defaultState] * boxddp.problem.T)
+xs = [x0] * (boxfddp.problem.T + 1)
+us = boxddp.problem.quasiStatic([x0] * boxddp.problem.T)
 
 print('*** SOLVE with Box-FDDP ***')
 boxfddp.th_stop = 1e-7
