@@ -152,6 +152,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
+  if(control_->get_nu() > differential_->get_nu())
+   std::cerr << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero" << std::endl;
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
