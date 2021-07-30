@@ -26,15 +26,16 @@
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/costs/frame-placement.hpp"
-#include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
-#include "crocoddyl/multibody/costs/com-position.hpp"
-#include "crocoddyl/multibody/costs/contact-force.hpp"
-#include "crocoddyl/multibody/costs/frame-translation.hpp"
-#include "crocoddyl/multibody/costs/frame-velocity.hpp"
-#include "crocoddyl/multibody/costs/frame-rotation.hpp"
-#include "crocoddyl/core/costs/control.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/residuals/frame-placement.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
+#include "crocoddyl/multibody/residuals/frame-translation.hpp"
+#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -59,12 +60,17 @@ using namespace crocoddyl::unittest;
 template <typename Scalar>
 void change_env(boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > ad_model,
                 const Eigen::Ref<const typename crocoddyl::MathBaseTpl<Scalar>::VectorXs>& env_vector) {
+  typedef typename crocoddyl::ResidualModelFrameTranslationTpl<Scalar> ResidualModelFrameTranslation;
+
   crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m =
       static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(ad_model.get());
   crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>* md =
       static_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>*>(m->get_differential().get());
-  crocoddyl::FrameTranslationTpl<Scalar> Tref(md->get_pinocchio().getFrameId("gripper_left_joint"), env_vector);
-  md->get_costs()->get_costs().find("gripperTrans")->second->cost->set_reference(Tref);
+  boost::shared_ptr<ResidualModelFrameTranslation> residual =
+      boost::static_pointer_cast<ResidualModelFrameTranslation>(
+          md->get_costs()->get_costs().find("gripperTrans")->second->cost->get_residual());
+  residual->set_id(md->get_pinocchio().getFrameId("gripper_left_joint"));
+  residual->set_reference(env_vector);
 }
 
 template <typename Scalar>
@@ -72,17 +78,14 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
-  typedef typename crocoddyl::FramePlacementTpl<Scalar> FramePlacement;
-  typedef typename crocoddyl::FrameTranslationTpl<Scalar> FrameTranslation;
-  typedef typename crocoddyl::FrameRotationTpl<Scalar> FrameRotation;
-  typedef typename crocoddyl::FrameMotionTpl<Scalar> FrameMotion;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
-  typedef typename crocoddyl::CostModelFramePlacementTpl<Scalar> CostModelFramePlacement;
-  typedef typename crocoddyl::CostModelFrameTranslationTpl<Scalar> CostModelFrameTranslation;
-  typedef typename crocoddyl::CostModelFrameRotationTpl<Scalar> CostModelFrameRotation;
-  typedef typename crocoddyl::CostModelFrameVelocityTpl<Scalar> CostModelFrameVelocity;
-  typedef typename crocoddyl::CostModelStateTpl<Scalar> CostModelState;
-  typedef typename crocoddyl::CostModelControlTpl<Scalar> CostModelControl;
+  typedef typename crocoddyl::CostModelResidualTpl<Scalar> CostModelResidual;
+  typedef typename crocoddyl::ResidualModelFramePlacementTpl<Scalar> ResidualModelFramePlacement;
+  typedef typename crocoddyl::ResidualModelFrameTranslationTpl<Scalar> ResidualModelFrameTranslation;
+  typedef typename crocoddyl::ResidualModelFrameRotationTpl<Scalar> ResidualModelFrameRotation;
+  typedef typename crocoddyl::ResidualModelFrameVelocityTpl<Scalar> ResidualModelFrameVelocity;
+  typedef typename crocoddyl::ResidualModelStateTpl<Scalar> ResidualModelState;
+  typedef typename crocoddyl::ResidualModelControlTpl<Scalar> ResidualModelControl;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef typename crocoddyl::ActuationModelFullTpl<Scalar> ActuationModelFull;
@@ -108,20 +111,26 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
-  FramePlacement Mref(model.getFrameId("gripper_left_joint"),
-                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
-  FrameTranslation Tref(model.getFrameId("gripper_left_joint"), Vector3s(Scalar(0), Scalar(0), Scalar(.4)));
-  FrameRotation Rref(model.getFrameId("gripper_left_joint"), Matrix3s::Identity());
-  FrameMotion Vref(model.getFrameId("gripper_left_joint"),
-                   pinocchio::MotionTpl<Scalar>(Vector3s(Scalar(0), Scalar(0), Scalar(.4)),
-                                                Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelFramePlacement>(state, Mref);
-  boost::shared_ptr<CostModelAbstract> goalTranslationCost =
-      boost::make_shared<CostModelFrameTranslation>(state, Tref);
-  boost::shared_ptr<CostModelAbstract> goalRotationCost = boost::make_shared<CostModelFrameRotation>(state, Rref);
-  boost::shared_ptr<CostModelAbstract> goalVelocityCost = boost::make_shared<CostModelFrameVelocity>(state, Vref);
-  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state);
-  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state);
+  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFramePlacement>(
+                 state, model.getFrameId("gripper_left_joint"),
+                 pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(0), Scalar(0), Scalar(.4)))));
+  boost::shared_ptr<CostModelAbstract> goalTranslationCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFrameTranslation>(state, model.getFrameId("gripper_left_joint"),
+                                                               Vector3s(Scalar(0), Scalar(0), Scalar(.4))));
+  boost::shared_ptr<CostModelAbstract> goalRotationCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFrameRotation>(state, model.getFrameId("gripper_left_joint"),
+                                                            Matrix3s::Identity()));
+  boost::shared_ptr<CostModelAbstract> goalVelocityCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFrameVelocity>(
+                 state, model.getFrameId("gripper_left_joint"),
+                 pinocchio::MotionTpl<Scalar>(Vector3s(Scalar(0), Scalar(0), Scalar(.4)),
+                                              Vector3s(Scalar(0), Scalar(0), Scalar(.4))),
+                 pinocchio::ReferenceFrame::LOCAL));
+  boost::shared_ptr<CostModelAbstract> xRegCost =
+      boost::make_shared<CostModelResidual>(state, boost::make_shared<ResidualModelState>(state));
+  boost::shared_ptr<CostModelAbstract> uRegCost =
+      boost::make_shared<CostModelResidual>(state, boost::make_shared<ResidualModelControl>(state));
 
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state);
@@ -145,10 +154,11 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_arm_ac
   boost::shared_ptr<ActivationModelWeightedQuadraticBarrier> weighted_activation_bounded =
       boost::make_shared<ActivationModelWeightedQuadraticBarrier>(bounds, xweights);
 
-  boost::shared_ptr<CostModelAbstract> jointLimitCost = boost::make_shared<CostModelState>(state, activation_bounded);
+  boost::shared_ptr<CostModelAbstract> jointLimitCost =
+      boost::make_shared<CostModelResidual>(state, activation_bounded, boost::make_shared<ResidualModelState>(state));
 
-  boost::shared_ptr<CostModelAbstract> jointLimitCost2 =
-      boost::make_shared<CostModelState>(state, weighted_activation_bounded);
+  boost::shared_ptr<CostModelAbstract> jointLimitCost2 = boost::make_shared<CostModelResidual>(
+      state, weighted_activation_bounded, boost::make_shared<ResidualModelState>(state));
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
@@ -184,15 +194,14 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector6s Vector6s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
-  typedef typename crocoddyl::FramePlacementTpl<Scalar> FramePlacement;
-  typedef typename crocoddyl::FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
-  typedef typename crocoddyl::CostModelFramePlacementTpl<Scalar> CostModelFramePlacement;
-  typedef typename crocoddyl::CostModelStateTpl<Scalar> CostModelState;
-  typedef typename crocoddyl::CostModelControlTpl<Scalar> CostModelControl;
-  typedef typename crocoddyl::CostModelCoMPositionTpl<Scalar> CostModelCoMPosition;
-  typedef typename crocoddyl::CostModelContactForceTpl<Scalar> CostModelContactForce;
-  typedef typename crocoddyl::CostModelCentroidalMomentumTpl<Scalar> CostModelCentroidalMomentum;
+  typedef typename crocoddyl::CostModelResidualTpl<Scalar> CostModelResidual;
+  typedef typename crocoddyl::ResidualModelFramePlacementTpl<Scalar> ResidualModelFramePlacement;
+  typedef typename crocoddyl::ResidualModelStateTpl<Scalar> ResidualModelState;
+  typedef typename crocoddyl::ResidualModelControlTpl<Scalar> ResidualModelControl;
+  typedef typename crocoddyl::ResidualModelCoMPositionTpl<Scalar> ResidualModelCoMPosition;
+  typedef typename crocoddyl::ResidualModelContactForceTpl<Scalar> ResidualModelContactForce;
+  typedef typename crocoddyl::ResidualModelCentroidalMomentumTpl<Scalar> ResidualModelCentroidalMomentum;
   typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModelAbstract;
   typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
@@ -202,7 +211,6 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   typedef typename crocoddyl::ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
-  typedef typename crocoddyl::FrameForceTpl<Scalar> FrameForce;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef typename crocoddyl::ActuationModelFloatingBaseTpl<Scalar> ActuationModelFloatingBase;
   typedef typename crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<Scalar>
@@ -227,19 +235,22 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
 
   boost::shared_ptr<ActuationModelFloatingBase> actuation = boost::make_shared<ActuationModelFloatingBase>(state);
 
-  FramePlacement Mref(model.getFrameId("arm_right_7_joint"),
-                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))));
-
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost =
-      boost::make_shared<CostModelFramePlacement>(state, Mref, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> centroidalCost =
-      boost::make_shared<CostModelCentroidalMomentum>(state, Vector6s::Zero(), actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> comCost =
-      boost::make_shared<CostModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelContactForce>(
-      state, FrameForce(model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero()), 6, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state, actuation->get_nu());
-  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state, actuation->get_nu());
+  boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelFramePlacement>(
+                 state, model.getFrameId("arm_right_7_joint"),
+                 pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))),
+                 actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> centroidalCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelCentroidalMomentum>(state, Vector6s::Zero(), actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> comCost = boost::make_shared<CostModelResidual>(
+      state, boost::shared_ptr<ResidualModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelContactForce>(
+                 state, model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero(), 6, actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> xRegCost =
+      boost::make_shared<CostModelResidual>(state, boost::make_shared<ResidualModelState>(state, actuation->get_nu()));
+  boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelResidual>(
+      state, boost::make_shared<ResidualModelControl>(state, actuation->get_nu()));
 
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state, actuation->get_nu());
@@ -255,14 +266,13 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   boost::shared_ptr<ContactModelMultiple> contact_models =
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  FramePlacement xref(model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity());
   boost::shared_ptr<ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<ContactModel6D>(state, xref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+      boost::make_shared<ContactModel6D>(state, model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity(),
+                                         actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
   contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
 
-  FrameTranslation x2ref(model.getFrameId(LF), Vector3s::Zero());
-  boost::shared_ptr<ContactModelAbstract> support_contact_model3D =
-      boost::make_shared<ContactModel3D>(state, x2ref, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  boost::shared_ptr<ContactModelAbstract> support_contact_model3D = boost::make_shared<ContactModel3D>(
+      state, model.getFrameId(LF), Vector3s::Zero(), actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
   contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
 
   // Next, we need to create an action model for running and terminal knots. The
@@ -287,6 +297,8 @@ void test_codegen_4DoFArm() {
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
+  typedef typename crocoddyl::ResidualModelFrameTranslationTpl<Scalar> ResidualModelFrameTranslation;
+
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelD = build_arm_action_model<Scalar>();
   boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD = build_arm_action_model<ADScalar>();
 
@@ -310,8 +322,12 @@ void test_codegen_4DoFArm() {
       static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(runningModelD.get());
   crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>* md =
       static_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>*>(m->get_differential().get());
-  crocoddyl::FrameTranslationTpl<Scalar> Tref(md->get_pinocchio().getFrameId("gripper_left_joint"), new_ref);
-  md->get_costs()->get_costs().find("gripperTrans")->second->cost->set_reference(Tref);
+
+  boost::shared_ptr<ResidualModelFrameTranslation> residual =
+      boost::static_pointer_cast<ResidualModelFrameTranslation>(
+          md->get_costs()->get_costs().find("gripperTrans")->second->cost->get_residual());
+  residual->set_id(md->get_pinocchio().getFrameId("gripper_left_joint"));
+  residual->set_reference(new_ref);
   /*************************************************************/
 
   VectorXs x_rand = runningModelCG->get_state()->rand();
