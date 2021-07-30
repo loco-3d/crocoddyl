@@ -160,16 +160,16 @@ struct ControlParametrizationDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit ControlParametrizationDataAbstractTpl(Model<Scalar>* const model)
-      : w(model->get_nw()), u(model->get_nu()), J(model->get_nw(), model->get_nu()) {
+      : w(model->get_nw()), u(model->get_nu()), dw_du(model->get_nw(), model->get_nu()) {
     w.setZero();
     u.setZero();
-    J.setZero();
+    dw_du.setZero();
   }
   virtual ~ControlParametrizationDataAbstractTpl() {}
 
-  VectorXs w;     //!< value of the differential control
-  VectorXs u;     //!< value of the control parameters
-  MatrixXs J;     //!< Jacobian of the differential control with respect to the parameters
+  VectorXs w;       //!< value of the differential control
+  VectorXs u;       //!< value of the control parameters
+  MatrixXs dw_du;   //!< Jacobian of the differential control with respect to the parameters
 };
 
 }  // namespace crocoddyl

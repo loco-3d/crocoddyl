@@ -54,14 +54,14 @@ template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
     const Eigen::Ref<const VectorXs>& u) const {
-  data->J.setZero();
+  data->dw_du.setZero();
   for (std::size_t i = 0; i < nu_; ++i) {
     dataNumDiff_->du = u;
     dataNumDiff_->du(i) += disturbance_;
     calc(dataCalcDiff_, t, dataNumDiff_->du);
-    data->J.col(i) = dataCalcDiff_->w - data->w;
+    data->dw_du.col(i) = dataCalcDiff_->w - data->w;
   }
-  data->J /= disturbance_;
+  data->dw_du /= disturbance_;
 }
 
 template <typename Scalar>
@@ -71,7 +71,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t,
   MatrixXs J(nw_, nu_);
   calc(data0_, t, u);
   calcDiff(data0_, t, u);
-  out.noalias() = A * data0_->J;
+  out.noalias() = A * data0_->dw_du;
 }
 
 template <typename Scalar>
@@ -82,7 +82,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
   MatrixXs J(nw_, nu_);
   calc(data0_, t, u);
   calcDiff(data0_, t, u);
-  out.noalias() = data0_->J.transpose() * A;
+  out.noalias() = data0_->dw_du.transpose() * A;
 }
 
 template <typename Scalar>

@@ -86,9 +86,9 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&) const {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   d->tmp_t2 = t * t;
-  d->J.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 3 * t + 2 * d->tmp_t2);
-  d->J.middleCols(nw_, nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 4 * (t - d->tmp_t2));
-  d->J.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * d->tmp_t2 - t);
+  d->dw_du.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 3 * t + 2 * d->tmp_t2);
+  d->dw_du.middleCols(nw_, nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 4 * (t - d->tmp_t2));
+  d->dw_du.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * d->tmp_t2 - t);
 }
 
 template <typename Scalar>

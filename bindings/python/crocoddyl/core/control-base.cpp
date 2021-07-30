@@ -87,8 +87,8 @@ void exposeControlParametrizationAbstract() {
                     bp::make_setter(&ControlParametrizationDataAbstract::w), "differential control")
       .add_property("u", bp::make_getter(&ControlParametrizationDataAbstract::u, bp::return_internal_reference<>()),
                     bp::make_setter(&ControlParametrizationDataAbstract::u), "control parameters")
-      .add_property("J", bp::make_getter(&ControlParametrizationDataAbstract::J, bp::return_internal_reference<>()),
-                    bp::make_setter(&ControlParametrizationDataAbstract::J), "Jacobian of the differential control wrt the control parameters");
+      .add_property("dw_du", bp::make_getter(&ControlParametrizationDataAbstract::dw_du, bp::return_internal_reference<>()),
+                    bp::make_setter(&ControlParametrizationDataAbstract::dw_du), "Jacobian of the differential control wrt the control parameters");
 }
 
 }  // namespace python

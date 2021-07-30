@@ -66,7 +66,7 @@ template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
     const Eigen::Ref<const VectorXs>&) const {
-  data->J.setIdentity();
+  data->dw_du.setIdentity();
 }
 
 template <typename Scalar>

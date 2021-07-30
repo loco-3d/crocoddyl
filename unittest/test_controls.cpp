@@ -37,7 +37,7 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   control->calcDiff(data, t, p);
   control_num_diff.calcDiff(data_num_diff, t, p);
 
-  BOOST_CHECK((data->J - data_num_diff->J).isZero(1e-9));
+  BOOST_CHECK((data->dw_du - data_num_diff->dw_du).isZero(1e-9));
 }
 
 void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
