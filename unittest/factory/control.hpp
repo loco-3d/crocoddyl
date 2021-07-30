@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CONTROL_FACTORY_HPP_
 #define CROCODDYL_CONTROL_FACTORY_HPP_
 
-#include <boost/shared_ptr.hpp>
+// #include <boost/shared_ptr.hpp>
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"

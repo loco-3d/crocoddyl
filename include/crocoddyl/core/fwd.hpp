@@ -130,6 +130,9 @@ class ControlParametrizationModelPolyOneTpl;
 template <typename Scalar>
 class ControlParametrizationModelPolyTwoRK4Tpl;
 
+template <typename Scalar>
+class ControlParametrizationDataPolyTwoRK4Tpl;
+
 // actuation
 template <typename Scalar>
 class ActuationModelAbstractTpl;
@@ -216,6 +219,9 @@ template <typename Scalar>
 class ControlParametrizationModelNumDiffTpl;
 
 template <typename Scalar>
+class ControlParametrizationDataNumDiffTpl;
+
+template <typename Scalar>
 class ActuationModelNumDiffTpl;
 template <typename Scalar>
 struct ActuationDataNumDiffTpl;
@@ -279,6 +285,7 @@ typedef ControlParametrizationDataAbstractTpl<double> ControlParametrizationData
 typedef ControlParametrizationModelPolyZeroTpl<double> ControlParametrizationModelPolyZero;
 typedef ControlParametrizationModelPolyOneTpl<double> ControlParametrizationModelPolyOne;
 typedef ControlParametrizationModelPolyTwoRK4Tpl<double> ControlParametrizationModelPolyTwoRK4;
+typedef ControlParametrizationDataPolyTwoRK4Tpl<double> ControlParametrizationDataPolyTwoRK4;
 
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
@@ -306,6 +313,7 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
 typedef ControlParametrizationModelNumDiffTpl<double> ControlParametrizationModelNumDiff;
+typedef ControlParametrizationDataNumDiffTpl<double> ControlParametrizationDataNumDiff;
 typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;

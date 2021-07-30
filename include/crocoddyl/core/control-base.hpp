@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <boost/shared_ptr.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
@@ -43,10 +44,10 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Initialize the control dimensions
    *
-   * @param[in] nx   Dimension of control
+   * @param[in] nw   Dimension of control
    * @param[in] np   Dimension of control parameters
    */
-  ControlParametrizationModelAbstractTpl(const std::size_t nu, const std::size_t np);
+  ControlParametrizationModelAbstractTpl(const std::size_t nw, const std::size_t np);
   virtual ~ControlParametrizationModelAbstractTpl();
 
   /**
@@ -64,27 +65,23 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  t      Time
+   * @param[in]  data   Data structure containing the control vector to write
+   * @param[in]  t      Time in [0,1]
    * @param[in]  p      Control parameters
-   * @param[out] u_out  Control value
    */
   virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                     const Eigen::Ref<const VectorXs>& p) const = 0;
 
-  // virtual VectorXs calc_u(double t, const Eigen::Ref<const VectorXs>& p) const;
-
   /**
-   * @brief Get a value of the control parameters that results in the specified control value
-   * at the specified time
+   * @brief Get a value of the control parameters such that the control at the specified time
+   * t is equal to the specified value u
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control value
-   * @param[out] p_out  Control parameters
+   * @param[in]  data   Data structure containing the control parameters vector to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control values
    */
   virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                       const Eigen::Ref<const VectorXs>& u) const = 0;
-
-  // virtual VectorXs params_p(double t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter space
@@ -100,14 +97,12 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
-   * @param[in]  t      Time
+   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  t      Time in [0,1]
    * @param[in]  p      Control parameters
-   * @param[out] J_out  Jacobian of the control value with respect to the parameters
    */
   virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                         const Eigen::Ref<const VectorXs>& p) const = 0;
-
-  // virtual MatrixXs calcDiff_J(double t, const Eigen::Ref<const VectorXs>& p) const;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
@@ -142,7 +137,7 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Return the dimension of the control value
    */
-  std::size_t get_nu() const;
+  std::size_t get_nw() const;
 
   /**
    * @brief Return the dimension of control parameters
@@ -150,7 +145,7 @@ class ControlParametrizationModelAbstractTpl {
   std::size_t get_np() const;
 
  protected:
-  std::size_t nu_;  //!< Control dimension
+  std::size_t nw_;  //!< Control dimension
   std::size_t np_;  //!< Control parameters dimension
 };
 
@@ -165,7 +160,7 @@ struct ControlParametrizationDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit ControlParametrizationDataAbstractTpl(Model<Scalar>* const model)
-      : u_diff(model->get_nu()), u_params(model->get_np()), J(model->get_nu(), model->get_np()) {
+      : u_diff(model->get_nw()), u_params(model->get_np()), J(model->get_nw(), model->get_np()) {
     u_diff.setZero();
     u_params.setZero();
     J.setZero();

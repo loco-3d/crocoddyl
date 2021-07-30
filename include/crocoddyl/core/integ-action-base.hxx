@@ -21,8 +21,8 @@ template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
-      control_(new ControlParametrizationModelPolyZero(model->get_nu())),
       differential_(model),
+      control_(new ControlParametrizationModelPolyZero(model->get_nu())),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
   init();
@@ -34,8 +34,8 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
     : Base(model->get_state(), control->get_np(), model->get_nr()),
-      control_(control),
       differential_(model),
+      control_(control),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
   init();
@@ -43,7 +43,6 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
 
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::init() {
-  controlData_ = control_->createData();
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
   VectorXs p_lb(control_->get_np()), p_ub(control_->get_np());
@@ -70,6 +69,12 @@ IntegratedActionModelAbstractTpl<Scalar>::get_differential() const {
 }
 
 template <typename Scalar>
+const boost::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
+IntegratedActionModelAbstractTpl<Scalar>::get_control() const {
+  return control_;
+}
+
+template <typename Scalar>
 const Scalar IntegratedActionModelAbstractTpl<Scalar>::get_dt() const {
   return time_step_;
 }
@@ -85,7 +90,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
 }
 
 template <typename Scalar>
-std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nu_diff() const {
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nw() const {
   return differential_->get_nu();
 }
 

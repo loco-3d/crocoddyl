@@ -50,7 +50,8 @@ void exposeControlParametrizationPolyTwoRK4() {
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calcDiff", &ControlParametrizationModelPolyTwoRK4::calcDiff, bp::args("self", "data", "t", "p"),
-          "Compute the derivative of the control with respect to the parameters.\n\n"
+          "Compute the Jacobian of the control value with respect to the control parameters.\n"
+          "It assumes that calc has been run first.\n\n"
           ":param data: the data on which the method operates.\n"
           ":param t: normalized time in [0, 1].\n"
           ":param p: control parameters (dim control.np).")
@@ -72,7 +73,7 @@ void exposeControlParametrizationPolyTwoRK4() {
           ":param A: matrix to multiply (dim control.nu x na).\n"
           ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x "
           "na).")
-      .add_property("nu", bp::make_function(&ControlParametrizationModelPolyTwoRK4::get_nu),
+      .add_property("nw", bp::make_function(&ControlParametrizationModelPolyTwoRK4::get_nw),
                     "dimension of control tuple")
       .add_property("np", bp::make_function(&ControlParametrizationModelPolyTwoRK4::get_np),
                     "dimension of the control parameters");

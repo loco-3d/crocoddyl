@@ -10,7 +10,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ControlParametrizationModelPolyZeroTpl<Scalar>::ControlParametrizationModelPolyZeroTpl(const std::size_t nu)
-    : ControlParametrizationModelAbstractTpl<Scalar>(nu, nu) {}
+    : Base(nu, nu) {}
 
 template <typename Scalar>
 ControlParametrizationModelPolyZeroTpl<Scalar>::~ControlParametrizationModelPolyZeroTpl() {}
@@ -30,9 +30,9 @@ template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
     const Eigen::Ref<const VectorXs>& u) const {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
   data->u_params = u;
 }
@@ -50,13 +50,13 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convert_bounds(const Eigen:
     throw_pretty("Invalid argument: "
                  << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
+  if (static_cast<std::size_t>(u_lb.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
+  if (static_cast<std::size_t>(u_ub.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
   p_lb = u_lb;
   p_ub = u_ub;
@@ -73,7 +73,7 @@ template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, const Eigen::Ref<const VectorXs>&,
                                                                         const Eigen::Ref<const MatrixXs>& A,
                                                                         Eigen::Ref<MatrixXs> out) const {
-  if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nu_ ||
+  if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != np_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
@@ -87,7 +87,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy
                                                                                  const Eigen::Ref<const VectorXs>&,
                                                                                  const Eigen::Ref<const MatrixXs>& A,
                                                                                  Eigen::Ref<MatrixXs> out) const {
-  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nu_ ||
+  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != np_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +

@@ -27,36 +27,53 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationModelAbstractTpl<_Scalar> Base;
   typedef ControlParametrizationDataAbstractTpl<_Scalar> ControlParametrizationDataAbstract;
+  typedef ControlParametrizationDataNumDiffTpl<_Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> state);
   virtual ~ControlParametrizationModelNumDiffTpl();
 
-  void resize(const std::size_t nu);
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  t      Time
+   * @param[in]  data   Data structure containing the control vector to write
+   * @param[in]  t      Time in [0,1]
    * @param[in]  p      Control parameters
-   * @param[out] u_out  Control value
    */
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
             const Eigen::Ref<const VectorXs>& p) const;
 
+  /**
+   * @brief Get a value of the control parameters such that the control at the specified time
+   * t is equal to the specified value u
+   *
+   * @param[in]  data   Data structure containing the control parameters vector to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control values
+   */
   void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
               const Eigen::Ref<const VectorXs>& u) const;
 
+  /**
+   * @brief Convert the bounds on the control to bounds on the control parameters
+   *
+   * @param[in]  u_lb   Control lower bound
+   * @param[in]  u_ub   Control upper bound
+   * @param[in]  p_lb   Control parameter lower bound
+   * @param[in]  p_ub   Control parameter upper bound
+   */
   void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                       Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
-   * @param[in]  t      Time
+   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  t      Time in [0,1]
    * @param[in]  p      Control parameters
-   * @param[out] J_out  Jacobian of the control value with respect to the parameters
    */
   void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                 const Eigen::Ref<const VectorXs>& p) const;
@@ -96,7 +113,9 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    */
   boost::shared_ptr<Base> control_;
 
-  boost::shared_ptr<ControlParametrizationDataAbstract> data_;
+  boost::shared_ptr<ControlParametrizationDataAbstract> data0_;         //!< Data used in methods multiplyByJacobian
+  boost::shared_ptr<ControlParametrizationDataAbstract> dataCalcDiff_;  //!< Data used for finite differences in calcDiff
+  boost::shared_ptr<ControlParametrizationDataNumDiff>  dataNumDiff_;   //!< Data used for storing dp
 
   /**
    * @brief This the increment used in the finite differentiation and integration.
@@ -105,7 +124,28 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
 
  protected:
   using Base::np_;
-  using Base::nu_;
+  using Base::nw_;
+};
+
+template <typename _Scalar>
+struct ControlParametrizationDataNumDiffTpl: public ControlParametrizationDataAbstractTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
+
+  template <template <typename Scalar> class Model>
+  explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model)
+      : Base(model) {
+    dp = VectorXs::Zero(model->get_np());
+  }
+
+  virtual ~ControlParametrizationDataNumDiffTpl() {}
+
+  VectorXs dp;        //!< temporary variable used for finite differencing
 };
 
 }  // namespace crocoddyl

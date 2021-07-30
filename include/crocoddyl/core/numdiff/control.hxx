@@ -8,17 +8,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/exception.hpp"
+#include <iostream>
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> control)
-    : Base(control->get_nu(), control->get_np()), control_(control), disturbance_(1e-6) {
-  data_ = control_->createData();
+    : Base(control->get_nw(), control->get_np()), control_(control), disturbance_(1e-6) {
+  data0_ = control_->createData();
+  dataCalcDiff_ = control_->createData(); 
+  dataNumDiff_ = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
+
+template <typename Scalar>
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> > ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
+  return control_->createData();
+}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
@@ -46,16 +54,12 @@ template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
     const Eigen::Ref<const VectorXs>& p) const {
-  VectorXs tmp_p = VectorXs::Zero(np_);
-  VectorXs u0 = VectorXs::Zero(nu_);
-  calc(data, t, p);
-  u0 = data->u_diff;
   data->J.setZero();
   for (std::size_t i = 0; i < np_; ++i) {
-    tmp_p = p;
-    tmp_p(i) += disturbance_;
-    calc(data, t, tmp_p);
-    data->J.col(i) = data->u_diff - u0;
+    dataNumDiff_->dp = p;
+    dataNumDiff_->dp(i) += disturbance_;
+    calc(dataCalcDiff_, t, dataNumDiff_->dp);
+    data->J.col(i) = dataCalcDiff_->u_diff - data->u_diff;
   }
   data->J /= disturbance_;
 }
@@ -64,9 +68,10 @@ template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p,
                                                                        const Eigen::Ref<const MatrixXs>& A,
                                                                        Eigen::Ref<MatrixXs> out) const {
-  MatrixXs J(nu_, np_);
-  calcDiff(data_, t, p);
-  out.noalias() = A * data_->J;
+  MatrixXs J(nw_, np_);
+  calc(data0_, t, p);
+  calcDiff(data0_, t, p);
+  out.noalias() = A * data0_->J;
 }
 
 template <typename Scalar>
@@ -74,9 +79,10 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
                                                                                 const Eigen::Ref<const VectorXs>& p,
                                                                                 const Eigen::Ref<const MatrixXs>& A,
                                                                                 Eigen::Ref<MatrixXs> out) const {
-  MatrixXs J(nu_, np_);
-  calcDiff(data_, t, p);
-  out.noalias() = data_->J.transpose() * A;
+  MatrixXs J(nw_, np_);
+  calc(data0_, t, p);
+  calcDiff(data0_, t, p);
+  out.noalias() = data0_->J.transpose() * A;
 }
 
 template <typename Scalar>

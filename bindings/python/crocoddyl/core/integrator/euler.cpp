@@ -28,7 +28,7 @@ void exposeIntegratedActionEuler() {
           "Initialize the sympletic Euler integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time\n"
-          ":param withCostResidual: includes the cost residuals and derivatives."))
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
       .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
                     boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
@@ -36,7 +36,7 @@ void exposeIntegratedActionEuler() {
           ":param diffModel: differential action model\n"
           ":param control: the control parametrization\n"
           ":param stepTime: step time (default 1e-3)\n"
-          ":param withCostResidual: includes the cost residuals and derivatives."))
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
       .def<void (IntegratedActionModelEuler::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                 const Eigen::Ref<const Eigen::VectorXd>&,
                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -85,7 +85,9 @@ void exposeIntegratedActionEuler() {
           bp::make_getter(&IntegratedActionDataEuler::differential, bp::return_value_policy<bp::return_by_value>()),
           "differential action data")
       .add_property("dx", bp::make_getter(&IntegratedActionDataEuler::dx, bp::return_internal_reference<>()),
-                    "state rate.");
+                    "state rate.")
+      .add_property("Lwu", bp::make_getter(&IntegratedActionDataEuler::Lwu, bp::return_internal_reference<>()),
+                    "Hessian of the cost wrt the differential control (w) and the control parameters (u).");;
 }
 
 }  // namespace python

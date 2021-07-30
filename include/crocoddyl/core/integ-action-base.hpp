@@ -14,6 +14,7 @@
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/control-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -44,11 +45,10 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionModelAbstractTpl<Scalar> Base;
-  typedef IntegratedActionDataEulerTpl<Scalar> Data;
+  typedef IntegratedActionDataAbstractTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> ControlParametrizationModelAbstract;
-  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -59,17 +59,33 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
                                    const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelAbstractTpl();
 
+  /**
+   * @brief Return the differential action model associated to this integrated action model
+   */
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
+
+  /**
+   * @brief Return the control parametrization model associated to this integrated action model
+   */
+  const boost::shared_ptr<ControlParametrizationModelAbstract>& get_control() const;
+
+  /**
+   * @brief Return the time step used for the integration
+   */
   const Scalar get_dt() const;
 
+  /**
+   * @brief Set the time step for the integration
+   */
   void set_dt(const Scalar dt);
+
   DEPRECATED("The DifferentialActionModel should be set at construction time",
              void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model));
 
   /**
    * @brief Return the dimension of the control input of the differential action model
    */
-  std::size_t get_nu_diff() const;
+  std::size_t get_nw() const;
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
@@ -82,13 +98,13 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
   void init();
 
-  boost::shared_ptr<ControlParametrizationModelAbstract> control_;  //!< Model of the control discretization
-  boost::shared_ptr<ControlParametrizationDataAbstract> controlData_;
-  boost::shared_ptr<DifferentialActionModelAbstract> differential_;
-  Scalar time_step_;
-  Scalar time_step2_;
-  bool with_cost_residual_;
-  bool enable_integration_;
+  boost::shared_ptr<DifferentialActionModelAbstract> differential_;     //!< Differential action model that is integrated
+  boost::shared_ptr<ControlParametrizationModelAbstract> control_;      //!< Model of the control parametrization
+  
+  Scalar time_step_;                                                    //!< Time step used for integration
+  Scalar time_step2_;                                                   //!< Square of the time step used for integration
+  bool with_cost_residual_;                                             //!< Flag indicating whether a cost residual is used
+  bool enable_integration_;                                             //!< False for the terminal horizon node, where integration is not needed
 };
 
 template <typename _Scalar>
@@ -98,12 +114,17 @@ struct IntegratedActionDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataAbstractTpl(Model<Scalar>* const model) : Base(model) {}
+  explicit IntegratedActionDataAbstractTpl(Model<Scalar>* const model) : Base(model) {
+    controlData = model->get_control()->createData();
+  }
   virtual ~IntegratedActionDataAbstractTpl() {}
+
+  boost::shared_ptr<ControlParametrizationDataAbstract> controlData;   //!< Data of the control parametrization model
 
   using Base::cost;
   using Base::Fu;

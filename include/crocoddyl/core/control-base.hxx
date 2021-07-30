@@ -11,9 +11,9 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelAbstractTpl<Scalar>::ControlParametrizationModelAbstractTpl(const std::size_t nu,
+ControlParametrizationModelAbstractTpl<Scalar>::ControlParametrizationModelAbstractTpl(const std::size_t nw,
                                                                                        const std::size_t np)
-    : nu_(nu), np_(np) {}
+    : nw_(nw), np_(np) {}
 
 template <typename Scalar>
 ControlParametrizationModelAbstractTpl<Scalar>::~ControlParametrizationModelAbstractTpl() {}
@@ -30,28 +30,19 @@ bool ControlParametrizationModelAbstractTpl<Scalar>::checkData(
     const boost::shared_ptr<ControlParametrizationDataAbstract>&) {
   return false;
 }
+
 // template <typename Scalar>
-// typename MathBaseTpl<Scalar>::VectorXs ControlParametrizationModelAbstractTpl<Scalar>::calc_u(double t, const
-// Eigen::Ref<const VectorXs>& p) const{
-//   VectorXs u(nu_);
-//   calc(t, p, u);
-//   return u;
+// void ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
+//   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
+// {
+//   out = 
 // }
 
 // template <typename Scalar>
-// typename MathBaseTpl<Scalar>::VectorXs ControlParametrizationModelAbstractTpl<Scalar>::params_p(double t, const
-// Eigen::Ref<const VectorXs>& u) const{
-//   VectorXs p(np_);
-//   value_inv(t, u, p);
-//   return p;
-// }
+// void ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
+//                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
+// {
 
-// template <typename Scalar>
-// typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Scalar>::dValue_J(double t, const
-// Eigen::Ref<const VectorXs>& p) const{
-//   MatrixXs J(nu_, np_);
-//   dValue(t, p, J);
-//   return J;
 // }
 
 template <typename Scalar>
@@ -71,8 +62,8 @@ typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Sc
 }
 
 template <typename Scalar>
-std::size_t ControlParametrizationModelAbstractTpl<Scalar>::get_nu() const {
-  return nu_;
+std::size_t ControlParametrizationModelAbstractTpl<Scalar>::get_nw() const {
+  return nw_;
 }
 
 template <typename Scalar>

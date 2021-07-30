@@ -56,20 +56,19 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::control_;      //!< Control parametrization
-  using Base::controlData_;  //!< Data for the control parametrization
-  using Base::differential_;
-  using Base::enable_integration_;
+  using Base::control_;             //!< Control parametrization
+  using Base::differential_;        //!< Differential action model
+  using Base::enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
-  using Base::time_step2_;
-  using Base::time_step_;
-  using Base::u_lb_;   //!< Lower control limits
-  using Base::u_ub_;   //!< Upper control limits
-  using Base::unone_;  //!< Neutral state
-  using Base::with_cost_residual_;
+  using Base::time_step2_;          //!< Square of the time step used for integration
+  using Base::time_step_;           //!< Time step used for integration
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+  using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 
   void init();
 };
@@ -90,17 +89,15 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nv = model->get_state()->get_nv();
     dx = VectorXs::Zero(ndx);
-    u_diff = VectorXs::Zero(model->get_nu_diff());
     da_du = MatrixXs::Zero(nv, model->get_nu());
-    Lwu = MatrixXs::Zero(model->get_nu_diff(), model->get_nu());
+    Lwu = MatrixXs::Zero(model->get_nw(), model->get_nu());
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
-  VectorXs u_diff;
   MatrixXs da_du;
-  MatrixXs Lwu;  // cost Hessian wrt w (u_diff) and u (u_params)
+  MatrixXs Lwu;  // Hessian of the cost function with respect to the control input (w) and control parameters (u)
 
   using Base::cost;
   using Base::Fu;

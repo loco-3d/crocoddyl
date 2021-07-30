@@ -22,12 +22,12 @@ void exposeIntegratedActionAbstract() {
       "Abstract class for integrated action models.\n\n"
       "In crocoddyl, an integrated action model trasforms a differential action model in a (discrete) action model.\n",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, double, bool>(
-          bp::args("self", "model", "timestep", "with_cost_residual"),
-          "Initialize the action model.\n\n"
-          "You can also describe autonomous systems by setting nu = 0.\n"
-          ":param model: differential action model,\n"
+          bp::args("self", "diffModel", "timeStep", "withCostResidual"),
+          "Initialize the integrated-action model.\n\n"
+           "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
+          ":param diffModel: differential action model,\n"
           ":param timestep: integration time step,\n"
-          ":param with_cost_residual: bool flag"))
+          ":param withCostResidual: bool flag"))
       .def("calc", pure_virtual(&IntegratedActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the next state and cost value.\n\n"
            "It describes the time-discrete evolution of our dynamical system\n"
@@ -57,6 +57,10 @@ void exposeIntegratedActionAbstract() {
            "Each action model (AM) has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined AM.\n"
            ":return AM data.")
+      // .def("control", &IntegratedActionModelAbstract_wrap::get_control,
+      //      &IntegratedActionModelAbstract_wrap::get_control, bp::args("self"),
+      //      "The control parametrization model.\n\n"
+      //      ":return Control parametrization model.")
       .add_property("nu",
                     bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu,
                                       bp::return_value_policy<bp::return_by_value>()),
@@ -65,8 +69,8 @@ void exposeIntegratedActionAbstract() {
                     bp::make_function(&IntegratedActionModelAbstract_wrap::get_nr,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "dimension of cost-residual vector")
-      .add_property("nu_diff",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu_diff,
+      .add_property("nw",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nw,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "dimension of control vector of the differentiable model")
       .add_property("state",
@@ -118,6 +122,8 @@ void exposeIntegratedActionAbstract() {
                     bp::make_setter(&IntegratedActionDataAbstract::Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_getter(&IntegratedActionDataAbstract::Luu, bp::return_internal_reference<>()),
                     bp::make_setter(&IntegratedActionDataAbstract::Luu), "Hessian of the cost");
+      // .add_property("control", bp::make_getter(&IntegratedActionDataAbstract::controlData, bp::return_internal_reference<>()),
+      //               bp::make_setter(&IntegratedActionDataAbstract::controlData), "Data of the control parametrization model");
 }
 
 }  // namespace python

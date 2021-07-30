@@ -55,19 +55,19 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::control_;      //!< Control discretization
-  using Base::controlData_;  //!< Control discretization data
-  using Base::differential_;
-  using Base::enable_integration_;
+  using Base::control_;             //!< Control parametrization
+  using Base::differential_;        //!< Differential action model
+  using Base::enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
-  using Base::time_step_;
-  using Base::u_lb_;   //!< Lower control limits
-  using Base::u_ub_;   //!< Upper control limits
-  using Base::unone_;  //!< Neutral state
-  using Base::with_cost_residual_;
+  using Base::time_step2_;          //!< Square of the time step used for integration
+  using Base::time_step_;           //!< Time step used for integration
+  using Base::u_lb_;                //!< Lower control limits
+  using Base::u_ub_;                //!< Upper control limits
+  using Base::unone_;               //!< Neutral state
+  using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 
   void init();
 
@@ -90,7 +90,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nx = model->get_state()->get_nx();
     const std::size_t nv = model->get_state()->get_nv();
-    const std::size_t nu_diff = model->get_nu_diff();
+    const std::size_t nw = model->get_nw();
     const std::size_t nu = model->get_nu();
 
     for (std::size_t i = 0; i < 4; ++i) {
@@ -99,7 +99,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     }
 
     dx = VectorXs::Zero(ndx);
-    u_diff = std::vector<VectorXs>(4, VectorXs::Zero(nu_diff));
+    u_diff = std::vector<VectorXs>(4, VectorXs::Zero(nw));
     integral = std::vector<Scalar>(4, Scalar(0.));
 
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
@@ -107,7 +107,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
 
     dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dki_dw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
+    dki_dw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nw));
     dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     dfi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
@@ -115,13 +115,13 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-    dli_dw = std::vector<VectorXs>(4, VectorXs::Zero(nu_diff));
+    dli_dw = std::vector<VectorXs>(4, VectorXs::Zero(nw));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
     ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddw = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu_diff));
-    ddli_dwdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu_diff, nu));
+    ddli_ddw = std::vector<MatrixXs>(4, MatrixXs::Zero(nw, nw));
+    ddli_dwdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nw, nu));
     ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    ddli_dxdw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu_diff));
+    ddli_dxdw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nw));
     ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
     Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
     Lxu_i = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));

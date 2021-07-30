@@ -44,9 +44,9 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
 
   void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
               const Eigen::Ref<const Eigen::VectorXd>& u) const {
-    if (static_cast<std::size_t>(u.size()) != nu_) {
+    if (static_cast<std::size_t>(u.size()) != nw_) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                   << "u has wrong dimension (it should be " + std::to_string(nw_) + ")");
     }
     return bp::call<void>(this->get_override("params").ptr(), data, t, (Eigen::VectorXd)u);
   }
@@ -62,22 +62,6 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
     return this->ControlParametrizationModelAbstract::createData();
   }
 
-  // void value(double t, const Eigen::Ref<const Eigen::VectorXd>& p, Eigen::Ref<Eigen::VectorXd> u_out) const{
-  //   u_out = value_wrap(t, p);
-  // }
-
-  // Eigen::VectorXd value_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& p) const{
-  //   return bp::call<Eigen::VectorXd>(this->get_override("value").ptr(), t, (Eigen::VectorXd)p);
-  // }
-
-  // void value_inv(double t, const Eigen::Ref<const Eigen::VectorXd>& u, Eigen::Ref<Eigen::VectorXd> p_out) const{
-  //   p_out = value_inv_wrap(t, u);
-  // }
-
-  // Eigen::VectorXd value_inv_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u) const{
-  //   return bp::call<Eigen::VectorXd>(this->get_override("value_inv").ptr(), t, (Eigen::VectorXd)u);
-  // }
-
   void convert_bounds(const Eigen::Ref<const Eigen::VectorXd>& u_lb, const Eigen::Ref<const Eigen::VectorXd>& u_ub,
                       Eigen::Ref<Eigen::VectorXd> p_lb, Eigen::Ref<Eigen::VectorXd> p_ub) const {
     bp::list res = convert_bounds_wrap(u_lb, u_ub);
@@ -91,15 +75,7 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
         bp::call<bp::list>(this->get_override("convert_bounds").ptr(), (Eigen::VectorXd)u_lb, (Eigen::VectorXd)u_ub);
     return p_bounds;
   }
-
-  // void dValue(double t, const Eigen::Ref<const Eigen::VectorXd>& p, Eigen::Ref<Eigen::MatrixXd> J_out) const{
-  //   J_out = dValue_wrap(t, p);
-  // }
-
-  // Eigen::MatrixXd dValue_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& p) const{
-  //   return bp::call<Eigen::MatrixXd>(this->get_override("dValue").ptr(), t, (Eigen::VectorXd)p);
-  // }
-
+  
   void multiplyByJacobian(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
                           const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
     out = multiplyByJacobian_wrap(t, p, A);

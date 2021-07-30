@@ -55,12 +55,12 @@ IntegratedActionModelRK4Tpl<Scalar>::~IntegratedActionModelRK4Tpl() {}
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& u_params) {
+                                               const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u_params.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
@@ -71,8 +71,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  control_->calc(controlData_, rk4_c_[0], u_params);
-  d->u_diff[0] = controlData_->u_diff;
+  control_->calc(d->controlData, rk4_c_[0], u);
+  d->u_diff[0] = d->controlData->u_diff;
   differential_->calc(d->differential[0], x, d->u_diff[0]);
 
   // Computing the next state (discrete time)
@@ -84,8 +84,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     for (std::size_t i = 1; i < 4; ++i) {
       d->dx_rk4[i].noalias() = time_step_ * rk4_c_[i] * d->ki[i - 1];
       differential_->get_state()->integrate(x, d->dx_rk4[i], d->y[i]);
-      control_->calc(controlData_, rk4_c_[i], u_params);
-      d->u_diff[i] = controlData_->u_diff;
+      control_->calc(d->controlData, rk4_c_[i], u);
+      d->u_diff[i] = d->controlData->u_diff;
       differential_->calc(d->differential[i], d->y[i], d->u_diff[i]);
       d->ki[i].head(nv) = d->y[i].tail(nv);
       d->ki[i].tail(nv) = d->differential[i]->xout;
@@ -110,12 +110,12 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                                    const Eigen::Ref<const VectorXs>& x,
-                                                   const Eigen::Ref<const VectorXs>& u_params) {
+                                                   const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(u_params.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
@@ -124,31 +124,31 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  control_->calc(controlData_, 0.0, u_params);
-  d->u_diff[0] = controlData_->u_diff;
+  control_->calc(d->controlData, 0.0, u);
+  d->u_diff[0] = d->controlData->u_diff;
   differential_->calcDiff(d->differential[0], x, d->u_diff[0]);
 
   if (enable_integration_) {
     d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
     d->dki_dx[0] = d->dki_dy[0];
     d->dki_dw[0].bottomRows(nv) = d->differential[0]->Fu;
-    control_->multiplyByJacobian(0.0, u_params, d->dki_dw[0], d->dki_du[0]);  // dki_du = dki_dw * dw_du
+    control_->multiplyByJacobian(0.0, u, d->dki_dw[0], d->dki_du[0]);  // dki_du = dki_dw * dw_du
 
     d->dli_dx[0] = d->differential[0]->Lx;
-    control_->multiplyJacobianTransposeBy(0.0, u_params, d->differential[0]->Lu,
+    control_->multiplyJacobianTransposeBy(0.0, u, d->differential[0]->Lu,
                                           d->dli_du[0]);  // dli_du = dli_dw * dw_du
 
     d->ddli_ddx[0] = d->differential[0]->Lxx;
     d->ddli_ddw[0] = d->differential[0]->Luu;
-    control_->multiplyByJacobian(0.0, u_params, d->ddli_ddw[0], d->ddli_dwdu[0]);  // ddli_dwdu = ddli_ddw * dw_du
-    control_->multiplyJacobianTransposeBy(0.0, u_params, d->ddli_dwdu[0],
+    control_->multiplyByJacobian(0.0, u, d->ddli_ddw[0], d->ddli_dwdu[0]);  // ddli_dwdu = ddli_ddw * dw_du
+    control_->multiplyJacobianTransposeBy(0.0, u, d->ddli_dwdu[0],
                                           d->ddli_ddu[0]);  // ddli_ddu = dw_du.T * ddli_dwdu
     d->ddli_dxdw[0] = d->differential[0]->Lxu;
-    control_->multiplyByJacobian(0.0, u_params, d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
+    control_->multiplyByJacobian(0.0, u, d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
     for (std::size_t i = 1; i < 4; ++i) {
-      control_->calc(controlData_, rk4_c_[i], u_params);
-      d->u_diff[i] = controlData_->u_diff;
+      control_->calc(d->controlData, rk4_c_[i], u);
+      d->u_diff[i] = d->controlData->u_diff;
       differential_->calcDiff(d->differential[i], d->y[i], d->u_diff[i]);
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
@@ -162,29 +162,29 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                                                       second);  // dyi_du = Jintegrate * dyi_du
       d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
       d->dki_dw[i].bottomRows(nv) = d->differential[i]->Fu;
-      control_->multiplyByJacobian(rk4_c_[i], u_params, d->dki_dw[i], d->dfi_du[i]);  // dfi_du = dki_dw * dw_du
+      control_->multiplyByJacobian(rk4_c_[i], u, d->dki_dw[i], d->dfi_du[i]);  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
 
       d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
-      control_->multiplyJacobianTransposeBy(rk4_c_[i], u_params, d->differential[i]->Lu,
+      control_->multiplyJacobianTransposeBy(rk4_c_[i], u, d->differential[i]->Lu,
                                             d->dli_du[i]);  // dli_du = Lu * dw_du
       d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
 
       d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
       d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
 
-      control_->multiplyByJacobian(rk4_c_[i], u_params, d->differential[i]->Lxu, d->Lxu_i[i]);  // Lxu = Lxw * dw_du
+      control_->multiplyByJacobian(rk4_c_[i], u, d->differential[i]->Lxu, d->Lxu_i[i]);  // Lxu = Lxw * dw_du
       d->Luu_partialx[i].noalias() = d->Lxu_i[i].transpose() * d->dyi_du[i];
       d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-      control_->multiplyByJacobian(rk4_c_[i], u_params, d->differential[i]->Luu,
+      control_->multiplyByJacobian(rk4_c_[i], u, d->differential[i]->Luu,
                                    d->ddli_dwdu[i]);  // ddli_dwdu = ddli_ddw * dw_du
-      control_->multiplyJacobianTransposeBy(rk4_c_[i], u_params, d->ddli_dwdu[i],
+      control_->multiplyJacobianTransposeBy(rk4_c_[i], u, d->ddli_dwdu[i],
                                             d->ddli_ddu[i]);  // ddli_ddu = dw_du.T * ddli_dwdu
       d->ddli_ddu[i].noalias() +=
           d->Luu_partialx[i].transpose() + d->Luu_partialx[i] + d->dyi_du[i].transpose() * d->Lxx_partialu[i];
 
       d->ddli_dxdw[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
-      control_->multiplyByJacobian(rk4_c_[i], u_params, d->ddli_dxdw[i],
+      control_->multiplyByJacobian(rk4_c_[i], u, d->ddli_dxdw[i],
                                    d->ddli_dxdu[i]);  // ddli_dxdu = ddli_dxdw * dw_du
       d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
     }
@@ -252,10 +252,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  VectorXs uc(control_->get_nu());
+  VectorXs uc(control_->get_nw());
   differential_->quasiStatic(d->differential[0], uc, x, maxiter, tol);
-  control_->params(controlData_, 0.0, uc);
-  u = controlData_->u_params;
+  control_->params(d->controlData, 0.0, uc);
+  u = d->controlData->u_params;
 }
 
 template <typename Scalar>

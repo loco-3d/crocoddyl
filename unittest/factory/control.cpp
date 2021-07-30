@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/make_shared.hpp>
+// #include <boost/make_shared.hpp>
 #include "control.hpp"
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/controls/poly-one.hpp"

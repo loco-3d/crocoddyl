@@ -26,31 +26,81 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
 
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nu);
   virtual ~ControlParametrizationModelPolyZeroTpl();
 
+  /**
+   * @brief Get the value of the control at the specified time
+   *
+   * @param[in]  data   Data structure containing the control vector to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  p      Control parameters
+   */
   virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                     const Eigen::Ref<const VectorXs>& p) const;
 
+  /**
+   * @brief Get a value of the control parameters such that the control at the specified time
+   * t is equal to the specified value u
+   *
+   * @param[in]  data   Data structure containing the control parameters vector to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control values
+   */
   virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                       const Eigen::Ref<const VectorXs>& u) const;
 
+  /**
+   * @brief Map the specified bounds from the control space to the parameter space
+   *
+   * @param[in]  u_lb   Control lower bound
+   * @param[in]  u_ub   Control lower bound
+   * @param[out] p_lb   Control parameters lower bound
+   * @param[out] p_ub   Control parameters upper bound
+   */
   virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
+  /**
+   * @brief Get the value of the Jacobian of the control with respect to the parameters
+   *
+   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  p      Control parameters
+   */
   virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                         const Eigen::Ref<const VectorXs>& p) const;
 
+  /**
+   * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
+   * parameters)
+   *
+   * @param[in]  t      Time
+   * @param[in]  p      Control parameters
+   * @param[in]  A      A matrix to multiply times the Jacobian
+   * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
+   */
   virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
                                   Eigen::Ref<MatrixXs> out) const;
 
+  /**
+   * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
+   * a specified matrix
+   *
+   * @param[in]  t      Time
+   * @param[in]  p      Control parameters
+   * @param[in]  A      A matrix to multiply times the Jacobian
+   * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
+   * matrix A
+   */
   virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
-  using ControlParametrizationModelAbstractTpl<Scalar>::nu_;
-  using ControlParametrizationModelAbstractTpl<Scalar>::np_;
+  using Base::nw_;
+  using Base::np_;
 };
 
 }  // namespace crocoddyl
