@@ -44,12 +44,6 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(const boost::shared_pt
   Eigen::Ref<Matrix6xs> Rq(data->Rx.leftCols(nv));
   Eigen::Ref<Matrix6xs> Rv(data->Rx.rightCols(nv));
   pinocchio::getCentroidalDynamicsDerivatives(*pin_model_.get(), *d->pinocchio, Rq, d->dhd_dq, d->dhd_dv, Rv);
-
-  // The derivative computation in pinocchio does not take the frame of reference into
-  // account. So we need to update the com frame as well.
-  for (int i = 0; i < d->pinocchio->Jcom.cols(); ++i) {
-    data->Rx.template block<3, 1>(3, i) -= d->pinocchio->Jcom.col(i).cross(d->pinocchio->hg.linear());
-  }
 }
 
 template <typename Scalar>
