@@ -14,6 +14,7 @@
 #include <pinocchio/algorithm/centroidal.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <pinocchio/algorithm/centroidal-derivatives.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
@@ -139,6 +140,7 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   pinocchio::jacobianCenterOfMass(*model, *data, q);
   pinocchio::computeCentroidalMomentum(*model, *data, q, v);
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
+  pinocchio::computeRNEADerivatives(*model, *data, q, v, a);
 }
 
 }  // namespace unittest

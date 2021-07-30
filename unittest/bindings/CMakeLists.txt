@@ -7,7 +7,6 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   costs
   contacts
   impulses
-  momemtum_cost
   squashing
   )
 
