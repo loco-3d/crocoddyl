@@ -29,24 +29,24 @@ void exposeControlParametrizationAbstract() {
            "Each control parametrization model has its own data that needs to be allocated.\n"
            "This function returns the allocated data for a predefined control parametrization model.\n"
            ":return data.")
-      .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "p"),
+      .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "u"),
            "Compute the differential control value.\n\n"
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).")
+           ":param u: control parameters (dim control.nu).")
       .def("calcDiff", pure_virtual(&ControlParametrizationModelAbstract_wrap::calcDiff),
-           bp::args("self", "data", "t", "p"),
+           bp::args("self", "data", "t", "u"),
            "Compute the Jacobian of the differential control with respect to the control parameters.\n"
            "It assumes that calc has been run first.\n\n"
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).")
+           ":param u: control parameters (dim control.nu).")
       .def("convertBounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convertBounds_wrap),
            bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the differential control w to bounds on the control parameters.\n\n"
            ":param w_lb: lower bounds on w (dim control.nw).\n"
            ":param w_ub: upper bounds on w (dim control.nw).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
+           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu).")
       .def("params", pure_virtual(&ControlParametrizationModelAbstract_wrap::params),
            bp::args("self", "data", "t", "w"),
            "Compute a value of the parameters p resulting in the specified value of the differential control w.\n\n"
@@ -54,27 +54,27 @@ void exposeControlParametrizationAbstract() {
            ":param t: normalized time in [0, 1].\n"
            ":param w: differential control value (dim control.nw).")
       .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap),
-           bp::args("self", "t", "p", "A"),
+           bp::args("self", "t", "u", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
            "parameters.\n\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
+           ":param u: control parameters (dim control.nu).\n"
            ":param A: matrix to multiply (dim na x control.nw).\n"
-           ":return Product between A and the partial derivative of the calc function (dim na x control.np).")
+           ":return Product between A and the partial derivative of the calc function (dim na x control.nu).")
       .def(
           "multiplyJacobianTransposeBy",
           pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyJacobianTransposeBy_wrap),
-          bp::args("self", "t", "p", "A"),
+          bp::args("self", "t", "u", "A"),
           "Compute the product between the transpose of the derivative of the control with respect to the parameters\n"
           "and a given matrix A.\n\n"
           ":param t: normalized time in [0, 1].\n"
-          ":param p: control parameters (dim control.np).\n"
+          ":param u: control parameters (dim control.nu).\n"
           ":param A: matrix to multiply (dim control.nw x na).\n"
-          ":return Product between the partial derivative of the calc function (transposed) and A (dim control.np x "
+          ":return Product between the partial derivative of the calc function (transposed) and A (dim control.nu x "
           "na).")
       .add_property("nw", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nw),
                     "dimension of control tuple")
-      .add_property("np", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_np),
+      .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu),
                     "dimension of the control parameters");
 
   bp::class_<ControlParametrizationDataAbstract, boost::noncopyable>(

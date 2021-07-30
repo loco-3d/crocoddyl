@@ -33,10 +33,10 @@ template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::init() {
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
-  VectorXs p_lb(nu_), p_ub(nu_);
-  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
-  Base::set_u_lb(p_lb);
-  Base::set_u_ub(p_ub);
+  VectorXs u_lb(nu_), u_ub(nu_);
+  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), u_lb, u_ub);
+  Base::set_u_lb(u_lb);
+  Base::set_u_ub(u_ub);
   if (time_step_ < Scalar(0.)) {
     time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;

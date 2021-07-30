@@ -23,15 +23,15 @@ boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> > ControlParamet
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-    const Eigen::Ref<const VectorXs>& p) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
+    const Eigen::Ref<const VectorXs>& u) const {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = p.head(nw_);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = p.segment(nw_, nw_);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = p.tail(nw_);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
   d->tmp_t2 = t * t;
   d->w = (2 * d->tmp_t2 - t) * p2 
               + (4 * (t - d->tmp_t2)) * p1 
@@ -54,15 +54,15 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::params(
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                                                                       const Eigen::Ref<const VectorXs>& w_ub,
-                                                                      Eigen::Ref<VectorXs> p_lb,
-                                                                      Eigen::Ref<VectorXs> p_ub) const {
-  if (static_cast<std::size_t>(p_lb.size()) != np_) {
+                                                                      Eigen::Ref<VectorXs> u_lb,
+                                                                      Eigen::Ref<VectorXs> u_ub) const {
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p_lb has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  if (static_cast<std::size_t>(p_ub.size()) != np_) {
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(w_lb.size()) != nw_) {
     throw_pretty("Invalid argument: "
@@ -72,12 +72,12 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen
     throw_pretty("Invalid argument: "
                  << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  p_lb.head(nw_)          = w_lb;
-  p_lb.segment(nw_, nw_)  = w_lb;
-  p_lb.tail(nw_)          = w_lb;
-  p_ub.head(nw_)          = w_ub;
-  p_ub.segment(nw_, nw_)  = w_ub;
-  p_ub.tail(nw_)          = w_ub;
+  u_lb.head(nw_)          = w_lb;
+  u_lb.segment(nw_, nw_)  = w_lb;
+  u_lb.tail(nw_)          = w_lb;
+  u_ub.head(nw_)          = w_ub;
+  u_ub.segment(nw_, nw_)  = w_ub;
+  u_ub.tail(nw_)          = w_ub;
 }
 
 template <typename Scalar>
@@ -96,7 +96,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(double
                                                                           const Eigen::Ref<const MatrixXs>& A,
                                                                           Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
-      static_cast<std::size_t>(out.cols()) != np_) {
+      static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
@@ -113,7 +113,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTranspose
                                                                                    const Eigen::Ref<const MatrixXs>& A,
                                                                                    Eigen::Ref<MatrixXs> out) const {
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
-      static_cast<std::size_t>(out.rows()) != np_) {
+      static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");

@@ -20,34 +20,34 @@ namespace python {
 class ControlParametrizationModelAbstract_wrap : public ControlParametrizationModelAbstract,
                                                  public bp::wrapper<ControlParametrizationModelAbstract> {
  public:
-  ControlParametrizationModelAbstract_wrap(std::size_t nu, std::size_t np)
-      : ControlParametrizationModelAbstract(nu, np), bp::wrapper<ControlParametrizationModelAbstract>() {}
+  ControlParametrizationModelAbstract_wrap(std::size_t nw, std::size_t nu)
+      : ControlParametrizationModelAbstract(nw, nu), bp::wrapper<ControlParametrizationModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-            const Eigen::Ref<const Eigen::VectorXd>& p) const {
-    if (static_cast<std::size_t>(p.size()) != np_) {
+            const Eigen::Ref<const Eigen::VectorXd>& u) const {
+    if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
-                   << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
+                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data, t, (Eigen::VectorXd)p);
+    return bp::call<void>(this->get_override("calc").ptr(), data, t, (Eigen::VectorXd)u);
   }
 
   void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                const Eigen::Ref<const Eigen::VectorXd>& p) const {
-    if (static_cast<std::size_t>(p.size()) != np_) {
+                const Eigen::Ref<const Eigen::VectorXd>& u) const {
+    if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
-                   << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
+                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, t, (Eigen::VectorXd)p);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data, t, (Eigen::VectorXd)u);
   }
 
   void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-              const Eigen::Ref<const Eigen::VectorXd>& u) const {
-    if (static_cast<std::size_t>(u.size()) != nw_) {
+              const Eigen::Ref<const Eigen::VectorXd>& w) const {
+    if (static_cast<std::size_t>(w.size()) != nw_) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                   << "w has wrong dimension (it should be " + std::to_string(nw_) + ")");
     }
-    return bp::call<void>(this->get_override("params").ptr(), data, t, (Eigen::VectorXd)u);
+    return bp::call<void>(this->get_override("params").ptr(), data, t, (Eigen::VectorXd)w);
   }
 
   boost::shared_ptr<ControlParametrizationDataAbstract> createData() {
@@ -62,10 +62,10 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
   }
 
   void convertBounds(const Eigen::Ref<const Eigen::VectorXd>& w_lb, const Eigen::Ref<const Eigen::VectorXd>& w_ub,
-                      Eigen::Ref<Eigen::VectorXd> p_lb, Eigen::Ref<Eigen::VectorXd> p_ub) const {
+                      Eigen::Ref<Eigen::VectorXd> u_lb, Eigen::Ref<Eigen::VectorXd> u_ub) const {
     bp::list res = convertBounds_wrap(w_lb, w_ub);
-    p_lb.derived() = bp::extract<Eigen::VectorXd>(res[0])();
-    p_ub.derived() = bp::extract<Eigen::VectorXd>(res[1])();
+    u_lb.derived() = bp::extract<Eigen::VectorXd>(res[0])();
+    u_ub.derived() = bp::extract<Eigen::VectorXd>(res[1])();
   }
 
   bp::list convertBounds_wrap(const Eigen::Ref<const Eigen::VectorXd>& w_lb,
@@ -75,25 +75,25 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
     return p_bounds;
   }
 
-  void multiplyByJacobian(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
+  void multiplyByJacobian(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
                           const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyByJacobian_wrap(t, p, A);
+    out = multiplyByJacobian_wrap(t, u, A);
   }
 
-  Eigen::MatrixXd multiplyByJacobian_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
+  Eigen::MatrixXd multiplyByJacobian_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
                                           const Eigen::Ref<const Eigen::MatrixXd>& A) const {
-    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyByJacobian").ptr(), t, (Eigen::VectorXd)p,
+    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyByJacobian").ptr(), t, (Eigen::VectorXd)u,
                                      (Eigen::MatrixXd)A);
   }
 
-  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
+  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
                                    const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyJacobianTransposeBy_wrap(t, p, A);
+    out = multiplyJacobianTransposeBy_wrap(t, u, A);
   }
 
-  Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
+  Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
                                                    const Eigen::Ref<const Eigen::MatrixXd>& A) const {
-    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyJacobianTransposeBy").ptr(), t, (Eigen::VectorXd)p,
+    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyJacobianTransposeBy").ptr(), t, (Eigen::VectorXd)u,
                                      (Eigen::MatrixXd)A);
   }
 };

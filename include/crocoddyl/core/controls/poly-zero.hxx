@@ -18,12 +18,12 @@ ControlParametrizationModelPolyZeroTpl<Scalar>::~ControlParametrizationModelPoly
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
-    const Eigen::Ref<const VectorXs>& p) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
+    const Eigen::Ref<const VectorXs>& u) const {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  data->w = p;
+  data->w = u;
 }
 
 template <typename Scalar>
@@ -40,15 +40,15 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                                                                     const Eigen::Ref<const VectorXs>& w_ub,
-                                                                    Eigen::Ref<VectorXs> p_lb,
-                                                                    Eigen::Ref<VectorXs> p_ub) const {
-  if (static_cast<std::size_t>(p_lb.size()) != np_) {
+                                                                    Eigen::Ref<VectorXs> u_lb,
+                                                                    Eigen::Ref<VectorXs> u_ub) const {
+  if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p_lb has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  if (static_cast<std::size_t>(p_ub.size()) != np_) {
+  if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(w_lb.size()) != nw_) {
     throw_pretty("Invalid argument: "
@@ -58,8 +58,8 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
     throw_pretty("Invalid argument: "
                  << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  p_lb = w_lb;
-  p_ub = w_ub;
+  u_lb = w_lb;
+  u_ub = w_ub;
 }
 
 template <typename Scalar>
@@ -74,7 +74,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, 
                                                                         const Eigen::Ref<const MatrixXs>& A,
                                                                         Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
-      static_cast<std::size_t>(out.cols()) != np_) {
+      static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
@@ -88,7 +88,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy
                                                                                  const Eigen::Ref<const MatrixXs>& A,
                                                                                  Eigen::Ref<MatrixXs> out) const {
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
-      static_cast<std::size_t>(out.rows()) != np_) {
+      static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");

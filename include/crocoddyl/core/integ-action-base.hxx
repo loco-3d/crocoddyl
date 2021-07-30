@@ -33,7 +33,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
-    : Base(model->get_state(), control->get_np(), model->get_nr()),
+    : Base(model->get_state(), control->get_nu(), model->get_nr()),
       differential_(model),
       control_(control),
       time_step_(time_step),
@@ -45,10 +45,10 @@ template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::init() {
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
-  VectorXs p_lb(control_->get_np()), p_ub(control_->get_np());
-  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
-  Base::set_u_lb(p_lb);
-  Base::set_u_ub(p_ub);
+  VectorXs u_lb(control_->get_nu()), u_ub(control_->get_nu());
+  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), u_lb, u_ub);
+  Base::set_u_lb(u_lb);
+  Base::set_u_ub(u_ub);
   if (time_step_ < Scalar(0.)) {
     time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;
@@ -100,7 +100,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
   const std::size_t nu_diff = model->get_nu();
   if (control_->get_nu() != nu_diff) {
     control_->resize(nu_diff);
-    nu_ = control_->get_np();
+    nu_ = control_->get_nu();
     unone_ = VectorXs::Zero(nu_);
   }
   nr_ = model->get_nr();

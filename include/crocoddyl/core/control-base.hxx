@@ -12,8 +12,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ControlParametrizationModelAbstractTpl<Scalar>::ControlParametrizationModelAbstractTpl(const std::size_t nw,
-                                                                                       const std::size_t np)
-    : nw_(nw), np_(np) {}
+                                                                                       const std::size_t nu)
+    : nw_(nw), nu_(nu) {}
 
 template <typename Scalar>
 ControlParametrizationModelAbstractTpl<Scalar>::~ControlParametrizationModelAbstractTpl() {}
@@ -31,33 +31,19 @@ bool ControlParametrizationModelAbstractTpl<Scalar>::checkData(
   return false;
 }
 
-// template <typename Scalar>
-// void ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, 
-//   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
-// {
-//   out = 
-// }
-
-// template <typename Scalar>
-// void ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
-//                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const
-// {
-
-// }
-
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
-    double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A) const {
-  MatrixXs AJ(A.rows(), np_);
-  multiplyByJacobian(t, p, A, AJ);
+    double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A) const {
+  MatrixXs AJ(A.rows(), nu_);
+  multiplyByJacobian(t, u, A, AJ);
   return AJ;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
-    double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A) const {
-  MatrixXs JTA(np_, A.cols());
-  multiplyJacobianTransposeBy(t, p, A, JTA);
+    double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A) const {
+  MatrixXs JTA(nu_, A.cols());
+  multiplyJacobianTransposeBy(t, u, A, JTA);
   return JTA;
 }
 
@@ -67,8 +53,8 @@ std::size_t ControlParametrizationModelAbstractTpl<Scalar>::get_nw() const {
 }
 
 template <typename Scalar>
-std::size_t ControlParametrizationModelAbstractTpl<Scalar>::get_np() const {
-  return np_;
+std::size_t ControlParametrizationModelAbstractTpl<Scalar>::get_nu() const {
+  return nu_;
 }
 
 }  // namespace crocoddyl

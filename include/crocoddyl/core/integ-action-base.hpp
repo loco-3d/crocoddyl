@@ -29,11 +29,8 @@ namespace crocoddyl {
  * trajectory inside an integration step, for instance using polynomials. This requires
  * introducing some notation to clarify the difference between the control inputs of
  * the differential model and the control inputs to the integrated model. We have decided
- * to use u_diff and u_params to refer to the control inputs of the differential and integrated
- * action model, respectively. Since these names are much longer than the classic one-letter
- * names, they make the names of the derivative variables hard to read. Therefore, we have
- * decided to introduce also a 1-letter version for these names, that is u for u_params
- * and w for u_diff.
+ * to use w to refer to the control inputs of the differential model and u for the control
+ * inputs of the integrated action model.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */

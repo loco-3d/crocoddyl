@@ -44,10 +44,10 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Initialize the control dimensions
    *
-   * @param[in] nw   Dimension of control
-   * @param[in] np   Dimension of control parameters
+   * @param[in] nw   Dimension of differential control
+   * @param[in] nu   Dimension of control parameters
    */
-  ControlParametrizationModelAbstractTpl(const std::size_t nw, const std::size_t np);
+  ControlParametrizationModelAbstractTpl(const std::size_t nw, const std::size_t nu);
   virtual ~ControlParametrizationModelAbstractTpl();
 
   /**
@@ -67,10 +67,10 @@ class ControlParametrizationModelAbstractTpl {
    *
    * @param[in]  data   Data structure containing the control vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                    const Eigen::Ref<const VectorXs>& p) const = 0;
+                    const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
@@ -78,45 +78,45 @@ class ControlParametrizationModelAbstractTpl {
    *
    * @param[in]  data   Data structure containing the control parameters vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  u      Control values
+   * @param[in]  w      Control values
    */
   virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                      const Eigen::Ref<const VectorXs>& u) const = 0;
+                      const Eigen::Ref<const VectorXs>& w) const = 0;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter space
    *
-   * @param[in]  u_lb   Control lower bound
-   * @param[in]  u_ub   Control lower bound
-   * @param[out] p_lb   Control parameters lower bound
-   * @param[out] p_ub   Control parameters upper bound
+   * @param[in]  w_lb   Control lower bound
+   * @param[in]  w_ub   Control lower bound
+   * @param[out] u_lb   Control parameters lower bound
+   * @param[out] u_ub   Control parameters upper bound
    */
-  virtual void convertBounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
-                             Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const = 0;
+  virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
+                             Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const = 0;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
    * @param[in]  data   Data structure containing the Jacobian matrix to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                        const Eigen::Ref<const VectorXs>& p) const = 0;
+                        const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
                                   Eigen::Ref<MatrixXs> out) const = 0;
 
-  virtual MatrixXs multiplyByJacobian_J(double t, const Eigen::Ref<const VectorXs>& p,
+  virtual MatrixXs multiplyByJacobian_J(double t, const Eigen::Ref<const VectorXs>& u,
                                         const Eigen::Ref<const MatrixXs>& A) const;
 
   /**
@@ -124,12 +124,12 @@ class ControlParametrizationModelAbstractTpl {
    * a specified matrix
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& u,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(double t, const Eigen::Ref<const VectorXs>& p,
@@ -142,11 +142,11 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Return the dimension of control parameters
    */
-  std::size_t get_np() const;
+  std::size_t get_nu() const;
 
  protected:
   std::size_t nw_;  //!< Control dimension
-  std::size_t np_;  //!< Control parameters dimension
+  std::size_t nu_;  //!< Control parameters dimension
 };
 
 template <typename _Scalar>
@@ -160,7 +160,7 @@ struct ControlParametrizationDataAbstractTpl {
 
   template <template <typename Scalar> class Model>
   explicit ControlParametrizationDataAbstractTpl(Model<Scalar>* const model)
-      : w(model->get_nw()), u(model->get_np()), J(model->get_nw(), model->get_np()) {
+      : w(model->get_nw()), u(model->get_nu()), J(model->get_nw(), model->get_nu()) {
     w.setZero();
     u.setZero();
     J.setZero();

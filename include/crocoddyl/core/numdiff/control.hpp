@@ -41,10 +41,10 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    *
    * @param[in]  data   Data structure containing the control vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-            const Eigen::Ref<const VectorXs>& p) const;
+            const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
@@ -52,42 +52,42 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    *
    * @param[in]  data   Data structure containing the control parameters vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  u      Control values
+   * @param[in]  w      Control values
    */
   void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-              const Eigen::Ref<const VectorXs>& u) const;
+              const Eigen::Ref<const VectorXs>& w) const;
 
   /**
    * @brief Convert the bounds on the control to bounds on the control parameters
    *
-   * @param[in]  u_lb   Control lower bound
-   * @param[in]  u_ub   Control upper bound
-   * @param[in]  p_lb   Control parameter lower bound
-   * @param[in]  p_ub   Control parameter upper bound
+   * @param[in]  w_lb   Control lower bound
+   * @param[in]  w_ub   Control upper bound
+   * @param[in]  u_lb   Control parameter lower bound
+   * @param[in]  u_ub   Control parameter upper bound
    */
-  void convertBounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
-                      Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
+  void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
+                      Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
    * @param[in]  data   Data structure containing the Jacobian matrix to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                const Eigen::Ref<const VectorXs>& p) const;
+                const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
                           Eigen::Ref<MatrixXs> out) const;
 
   /**
@@ -95,12 +95,12 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * a specified matrix
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
                                    Eigen::Ref<MatrixXs> out) const;
 
   const Scalar get_disturbance() const;
@@ -123,7 +123,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   Scalar disturbance_;
 
  protected:
-  using Base::np_;
+  using Base::nu_;
   using Base::nw_;
 };
 
@@ -140,12 +140,12 @@ struct ControlParametrizationDataNumDiffTpl: public ControlParametrizationDataAb
   template <template <typename Scalar> class Model>
   explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model)
       : Base(model) {
-    dp = VectorXs::Zero(model->get_np());
+    du = VectorXs::Zero(model->get_nu());
   }
 
   virtual ~ControlParametrizationDataNumDiffTpl() {}
 
-  VectorXs dp;        //!< temporary variable used for finite differencing
+  VectorXs du;        //!< temporary variable used for finite differencing
 };
 
 }  // namespace crocoddyl

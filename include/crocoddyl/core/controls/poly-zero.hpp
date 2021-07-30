@@ -36,10 +36,10 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
    *
    * @param[in]  data   Data structure containing the control vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                    const Eigen::Ref<const VectorXs>& p) const;
+                    const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
@@ -57,32 +57,32 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
    *
    * @param[in]  w_lb   Control lower bound
    * @param[in]  w_ub   Control lower bound
-   * @param[out] p_lb   Control parameters lower bound
-   * @param[out] p_ub   Control parameters upper bound
+   * @param[out] u_lb   Control parameters lower bound
+   * @param[out] u_ub   Control parameters upper bound
    */
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
-                              Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
+                              Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
    * @param[in]  data   Data structure containing the Jacobian matrix to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    */
   virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                        const Eigen::Ref<const VectorXs>& p) const;
+                        const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
+  virtual void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
                                   Eigen::Ref<MatrixXs> out) const;
 
   /**
@@ -90,17 +90,17 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
    * a specified matrix
    *
    * @param[in]  t      Time
-   * @param[in]  p      Control parameters
+   * @param[in]  u      Control parameters
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
+  virtual void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& u,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
   using Base::nw_;
-  using Base::np_;
+  using Base::nu_;
 };
 
 }  // namespace crocoddyl
