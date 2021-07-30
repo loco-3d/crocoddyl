@@ -39,7 +39,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::params(
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyOneTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb,
+void ControlParametrizationModelPolyOneTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& u_lb,
                                                                    const Eigen::Ref<const VectorXs>& u_ub,
                                                                    Eigen::Ref<VectorXs> p_lb,
                                                                    Eigen::Ref<VectorXs> p_ub) const {
@@ -68,13 +68,13 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::convert_bounds(const Eigen::
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-    const Eigen::Ref<const VectorXs>& p) const {
+    const Eigen::Ref<const VectorXs>&) const {
   data->J.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 2 * t);
   data->J.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * t);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& p,
+void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>&,
                                                                        const Eigen::Ref<const MatrixXs>& A,
                                                                        Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
@@ -89,7 +89,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t,
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(double t,
-                                                                                const Eigen::Ref<const VectorXs>& p,
+                                                                                const Eigen::Ref<const VectorXs>&,
                                                                                 const Eigen::Ref<const MatrixXs>& A,
                                                                                 Eigen::Ref<MatrixXs> out) const {
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||

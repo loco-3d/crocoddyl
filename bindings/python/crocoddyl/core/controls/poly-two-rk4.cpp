@@ -18,13 +18,13 @@ void exposeControlParametrizationPolyTwoRK4() {
 
   bp::class_<ControlParametrizationModelPolyTwoRK4, bp::bases<ControlParametrizationModelAbstract> >(
       "ControlParametrizationModelPolyTwoRK4",
-      "Constant control.\n\n"
-      "This control is a line function of time (normalized in [0,1])."
-      "The first half of the parameter vector contains the initial value of u, "
-      "whereas the second half contains the value of u at t=0.5.",
-      bp::init<std::size_t>(bp::args("self", "nu"),
+      "Quadratic control.\n\n"
+      "This control is a quadratic function of time (normalized in [0,1])."
+      "The first third of the parameter vector contains the initial value of the differential control w, "
+      "the second third contains the value of w at t=0.5, and the last third is the final value of w at time t=1.",
+      bp::init<std::size_t>(bp::args("self", "nw"),
                             "Initialize the control dimensions.\n\n"
-                            ":param nu: dimension of control space\n"))
+                            ":param nw: dimension of differential control space\n"))
       .def<void (ControlParametrizationModelPolyTwoRK4::*)(
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>("calc", &ControlParametrizationModelPolyTwoRK4::calc,
@@ -36,15 +36,15 @@ void exposeControlParametrizationPolyTwoRK4() {
       .def<void (ControlParametrizationModelPolyTwoRK4::*)(
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>("params", &ControlParametrizationModelPolyTwoRK4::params,
-                                                           bp::args("self", "data", "t", "u"),
+                                                           bp::args("self", "data", "t", "w"),
                                                            "Compute the control parameters.\n\n"
                                                            ":param data: the data on which the method operates.\n"
                                                            ":param t: normalized time in [0, 1].\n"
-                                                           ":param u: control value (dim control.nu).")
-      .def("convert_bounds", &ControlParametrizationModelPolyTwoRK4::convert_bounds, bp::args("self", "u_lb", "u_ub"),
+                                                           ":param w: control value (dim control.nw).")
+      .def("convertBounds", &ControlParametrizationModelPolyTwoRK4::convertBounds, bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param u_lb: lower bounds on u (dim control.nu).\n"
-           ":param u_ub: upper bounds on u (dim control.nu).\n"
+           ":param w_lb: lower bounds on u (dim control.nw).\n"
+           ":param w_ub: upper bounds on u (dim control.nw).\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
       .def<void (ControlParametrizationModelPolyTwoRK4::*)(
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
@@ -61,7 +61,7 @@ void exposeControlParametrizationPolyTwoRK4() {
            "parameters.\n\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
-           ":param A: matrix to multiply (dim na x control.nu).\n"
+           ":param A: matrix to multiply (dim na x control.nw).\n"
            ":return Product between A and the partial derivative of the value function (dim na x control.np).")
       .def(
           "multiplyJacobianTransposeBy", &ControlParametrizationModelPolyTwoRK4::multiplyJacobianTransposeBy_J,
@@ -70,13 +70,9 @@ void exposeControlParametrizationPolyTwoRK4() {
           "and a given matrix A.\n\n"
           ":param t: normalized time in [0, 1].\n"
           ":param p: control parameters (dim control.np).\n"
-          ":param A: matrix to multiply (dim control.nu x na).\n"
+          ":param A: matrix to multiply (dim control.nw x na).\n"
           ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x "
-          "na).")
-      .add_property("nw", bp::make_function(&ControlParametrizationModelPolyTwoRK4::get_nw),
-                    "dimension of control tuple")
-      .add_property("np", bp::make_function(&ControlParametrizationModelPolyTwoRK4::get_np),
-                    "dimension of the control parameters");
+          "na).");
 }
 
 }  // namespace python

@@ -19,12 +19,11 @@ void exposeControlParametrizationPolyZero() {
   bp::class_<ControlParametrizationModelPolyZero, bp::bases<ControlParametrizationModelAbstract> >(
       "ControlParametrizationModelPolyZero",
       "Constant control.\n\n"
-      "This control is a line function of time (normalized in [0,1])."
-      "The first half of the parameter vector contains the initial value of u, "
-      "whereas the second half contains the value of u at t=0.5.",
-      bp::init<std::size_t>(bp::args("self", "nu"),
+      "This control is a constant."
+      "The parameter vector corresponds to the constant value of the differential control w, that is w=p.",
+      bp::init<std::size_t>(bp::args("self", "nw"),
                             "Initialize the control dimensions.\n\n"
-                            ":param nu: dimension of control space\n"))
+                            ":param nw: dimension of differential control space\n"))
       .def<void (ControlParametrizationModelPolyZero::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyZero::calc, bp::args("self", "data", "t", "p"),
@@ -38,11 +37,11 @@ void exposeControlParametrizationPolyZero() {
           "Compute the control parameters.\n\n"
           ":param data: the data on which the method operates.\n"
           ":param t: normalized time in [0, 1].\n"
-          ":param u: control value (dim control.nu).")
-      .def("convert_bounds", &ControlParametrizationModelPolyZero::convert_bounds, bp::args("self", "u_lb", "u_ub"),
+          ":param w: control value (dim control.nw).")
+      .def("convertBounds", &ControlParametrizationModelPolyZero::convertBounds, bp::args("self", "u_lb", "u_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param u_lb: lower bounds on u (dim control.nu).\n"
-           ":param u_ub: upper bounds on u (dim control.nu).\n"
+           ":param w_lb: lower bounds on w (dim control.nw).\n"
+           ":param w_ub: upper bounds on w (dim control.nw).\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
       .def<void (ControlParametrizationModelPolyZero::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
@@ -58,7 +57,7 @@ void exposeControlParametrizationPolyZero() {
            "parameters.\n\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
-           ":param A: matrix to multiply (dim na x control.nu).\n"
+           ":param A: matrix to multiply (dim na x control.nw).\n"
            ":return Product between A and the partial derivative of the value function (dim na x control.np).")
       .def(
           "multiplyJacobianTransposeBy", &ControlParametrizationModelPolyZero::multiplyJacobianTransposeBy_J,
@@ -67,13 +66,9 @@ void exposeControlParametrizationPolyZero() {
           "and a given matrix A.\n\n"
           ":param t: normalized time in [0, 1].\n"
           ":param p: control parameters (dim control.np).\n"
-          ":param A: matrix to multiply (dim control.nu x na).\n"
+          ":param A: matrix to multiply (dim control.nw x na).\n"
           ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x "
-          "na).")
-      .add_property("nw", bp::make_function(&ControlParametrizationModelPolyZero::get_nw),
-                    "dimension of control tuple")
-      .add_property("np", bp::make_function(&ControlParametrizationModelPolyZero::get_np),
-                    "dimension of the control parameters");
+          "na).");
 }
 
 }  // namespace python

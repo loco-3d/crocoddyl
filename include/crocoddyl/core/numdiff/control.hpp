@@ -65,7 +65,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  p_lb   Control parameter lower bound
    * @param[in]  p_ub   Control parameter upper bound
    */
-  void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+  void convertBounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                       Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**

@@ -10,7 +10,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_CONTROL_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_CONTROL_BASE_HPP_
 
-#include <string>
 #include "python/crocoddyl/core/core.hpp"
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -62,20 +61,20 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
     return this->ControlParametrizationModelAbstract::createData();
   }
 
-  void convert_bounds(const Eigen::Ref<const Eigen::VectorXd>& u_lb, const Eigen::Ref<const Eigen::VectorXd>& u_ub,
+  void convertBounds(const Eigen::Ref<const Eigen::VectorXd>& w_lb, const Eigen::Ref<const Eigen::VectorXd>& w_ub,
                       Eigen::Ref<Eigen::VectorXd> p_lb, Eigen::Ref<Eigen::VectorXd> p_ub) const {
-    bp::list res = convert_bounds_wrap(u_lb, u_ub);
+    bp::list res = convertBounds_wrap(w_lb, w_ub);
     p_lb.derived() = bp::extract<Eigen::VectorXd>(res[0])();
     p_ub.derived() = bp::extract<Eigen::VectorXd>(res[1])();
   }
 
-  bp::list convert_bounds_wrap(const Eigen::Ref<const Eigen::VectorXd>& u_lb,
-                               const Eigen::Ref<const Eigen::VectorXd>& u_ub) const {
+  bp::list convertBounds_wrap(const Eigen::Ref<const Eigen::VectorXd>& w_lb,
+                               const Eigen::Ref<const Eigen::VectorXd>& w_ub) const {
     bp::list p_bounds =
-        bp::call<bp::list>(this->get_override("convert_bounds").ptr(), (Eigen::VectorXd)u_lb, (Eigen::VectorXd)u_ub);
+        bp::call<bp::list>(this->get_override("convertBounds").ptr(), (Eigen::VectorXd)w_lb, (Eigen::VectorXd)w_ub);
     return p_bounds;
   }
-  
+
   void multiplyByJacobian(double t, const Eigen::Ref<const Eigen::VectorXd>& p,
                           const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
     out = multiplyByJacobian_wrap(t, p, A);

@@ -64,7 +64,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
    * @param[out] p_lb   Control parameters lower bound
    * @param[out] p_ub   Control parameters upper bound
    */
-  virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+  virtual void convertBounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**

@@ -46,7 +46,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
   VectorXs p_lb(control_->get_np()), p_ub(control_->get_np());
-  control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
+  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
   Base::set_u_lb(p_lb);
   Base::set_u_ub(p_ub);
   if (time_step_ < Scalar(0.)) {
@@ -108,7 +108,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
   differential_ = model;
 
   VectorXs p_lb(nu_), p_ub(nu_);
-  control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
+  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
   Base::set_u_lb(p_lb);
   Base::set_u_ub(p_ub);
 }

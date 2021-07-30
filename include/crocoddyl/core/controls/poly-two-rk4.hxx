@@ -52,7 +52,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::params(
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb,
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& u_lb,
                                                                       const Eigen::Ref<const VectorXs>& u_ub,
                                                                       Eigen::Ref<VectorXs> p_lb,
                                                                       Eigen::Ref<VectorXs> p_ub) const {

@@ -19,9 +19,9 @@ void exposeControlParametrizationAbstract() {
       "ControlParametrizationModelAbstract",
       "Abstract class for the control parametrization.\n\n"
       "A control is a function of time (normalized in [0,1]) and the control parameters p.",
-      bp::init<std::size_t, std::size_t>(bp::args("self", "nu", "np"),
+      bp::init<std::size_t, std::size_t>(bp::args("self", "nw", "np"),
                                          "Initialize the control dimensions.\n\n"
-                                         ":param nu: dimension of control space\n"
+                                         ":param nw: dimension of differential control space\n"
                                          ":param np: dimension of control parameter space"))
       .def("createData", &ControlParametrizationModelAbstract_wrap::createData,
            &ControlParametrizationModelAbstract_wrap::default_createData, bp::args("self"),
@@ -30,31 +30,37 @@ void exposeControlParametrizationAbstract() {
            "This function returns the allocated data for a predefined control parametrization model.\n"
            ":return data.")
       .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "p"),
-           "Compute the control value.\n\n"
+           "Compute the differential control value.\n\n"
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).")
       .def("calcDiff", pure_virtual(&ControlParametrizationModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "t", "p"),
-           "Compute the Jacobian of the control value with respect to the control parameters.\n"
+           "Compute the Jacobian of the differential control with respect to the control parameters.\n"
            "It assumes that calc has been run first.\n\n"
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).")
-      .def("convert_bounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convert_bounds_wrap),
-           bp::args("self", "u_lb", "u_ub"),
-           "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param u_lb: lower bounds on u (dim control.nu).\n"
-           ":param u_ub: upper bounds on u (dim control.nu).\n"
+           ":param p: control parameters (dim control.np).")
+      .def("convertBounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convertBounds_wrap),
+           bp::args("self", "w_lb", "w_ub"),
+           "Convert the bounds on the differential control w to bounds on the control parameters.\n\n"
+           ":param w_lb: lower bounds on w (dim control.nw).\n"
+           ":param w_ub: upper bounds on w (dim control.nw).\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
+      .def("params", pure_virtual(&ControlParametrizationModelAbstract_wrap::params),
+           bp::args("self", "data", "t", "w"),
+           "Compute a value of the parameters p resulting in the specified value of the differential control w.\n\n"
+           ":param data: the data on which the method operates.\n"
+           ":param t: normalized time in [0, 1].\n"
+           ":param w: differential control value (dim control.nw).")
       .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap),
            bp::args("self", "t", "p", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
            "parameters.\n\n"
            ":param t: normalized time in [0, 1].\n"
            ":param p: control parameters (dim control.np).\n"
-           ":param A: matrix to multiply (dim na x control.nu).\n"
-           ":return Product between A and the partial derivative of the value function (dim na x control.np).")
+           ":param A: matrix to multiply (dim na x control.nw).\n"
+           ":return Product between A and the partial derivative of the calc function (dim na x control.np).")
       .def(
           "multiplyJacobianTransposeBy",
           pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyJacobianTransposeBy_wrap),
@@ -63,13 +69,26 @@ void exposeControlParametrizationAbstract() {
           "and a given matrix A.\n\n"
           ":param t: normalized time in [0, 1].\n"
           ":param p: control parameters (dim control.np).\n"
-          ":param A: matrix to multiply (dim control.nu x na).\n"
-          ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x "
+          ":param A: matrix to multiply (dim control.nw x na).\n"
+          ":return Product between the partial derivative of the calc function (transposed) and A (dim control.np x "
           "na).")
       .add_property("nw", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nw),
                     "dimension of control tuple")
       .add_property("np", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_np),
                     "dimension of the control parameters");
+
+  bp::class_<ControlParametrizationDataAbstract, boost::noncopyable>(
+      "ControlParametrizationDataAbstract",
+      "Abstract class for control parametrization data.\n",
+      bp::init<ControlParametrizationModelAbstract*>(bp::args("self", "model"),
+                                     "Create common data shared between control parametrization models.\n\n"
+                                     ":param model: control parametrization model"))
+      .add_property("u_diff", bp::make_getter(&ControlParametrizationDataAbstract::u_diff, bp::return_internal_reference<>()),
+                    bp::make_setter(&ControlParametrizationDataAbstract::u_diff), "differential control")
+      .add_property("u_params", bp::make_getter(&ControlParametrizationDataAbstract::u_params, bp::return_internal_reference<>()),
+                    bp::make_setter(&ControlParametrizationDataAbstract::u_params), "control parameters")
+      .add_property("J", bp::make_getter(&ControlParametrizationDataAbstract::J, bp::return_internal_reference<>()),
+                    bp::make_setter(&ControlParametrizationDataAbstract::J), "Jacobian of the differential control wrt the control parameters");
 }
 
 }  // namespace python

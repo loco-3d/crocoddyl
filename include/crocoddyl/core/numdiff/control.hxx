@@ -43,11 +43,11 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::params(
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb,
+void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& u_lb,
                                                                    const Eigen::Ref<const VectorXs>& u_ub,
                                                                    Eigen::Ref<VectorXs> p_lb,
                                                                    Eigen::Ref<VectorXs> p_ub) const {
-  control_->convert_bounds(u_lb, u_ub, p_lb, p_ub);
+  control_->convertBounds(u_lb, u_ub, p_lb, p_ub);
 }
 
 template <typename Scalar>
