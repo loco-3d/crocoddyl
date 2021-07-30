@@ -59,7 +59,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
     dataNumDiff_->dp = p;
     dataNumDiff_->dp(i) += disturbance_;
     calc(dataCalcDiff_, t, dataNumDiff_->dp);
-    data->J.col(i) = dataCalcDiff_->u_diff - data->u_diff;
+    data->J.col(i) = dataCalcDiff_->w - data->w;
   }
   data->J /= disturbance_;
 }

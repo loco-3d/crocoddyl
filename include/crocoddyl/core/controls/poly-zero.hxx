@@ -9,8 +9,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelPolyZeroTpl<Scalar>::ControlParametrizationModelPolyZeroTpl(const std::size_t nu)
-    : Base(nu, nu) {}
+ControlParametrizationModelPolyZeroTpl<Scalar>::ControlParametrizationModelPolyZeroTpl(const std::size_t nw)
+    : Base(nw, nw) {}
 
 template <typename Scalar>
 ControlParametrizationModelPolyZeroTpl<Scalar>::~ControlParametrizationModelPolyZeroTpl() {}
@@ -23,23 +23,23 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
     throw_pretty("Invalid argument: "
                  << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  data->u_diff = p;
+  data->w = p;
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
-    const Eigen::Ref<const VectorXs>& u) const {
-  if (static_cast<std::size_t>(u.size()) != nw_) {
+    const Eigen::Ref<const VectorXs>& w) const {
+  if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  data->u_params = u;
+  data->u = w;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& u_lb,
-                                                                    const Eigen::Ref<const VectorXs>& u_ub,
+void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
+                                                                    const Eigen::Ref<const VectorXs>& w_ub,
                                                                     Eigen::Ref<VectorXs> p_lb,
                                                                     Eigen::Ref<VectorXs> p_ub) const {
   if (static_cast<std::size_t>(p_lb.size()) != np_) {
@@ -50,16 +50,16 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
     throw_pretty("Invalid argument: "
                  << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (static_cast<std::size_t>(u_lb.size()) != nw_) {
+  if (static_cast<std::size_t>(w_lb.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  if (static_cast<std::size_t>(u_ub.size()) != nw_) {
+  if (static_cast<std::size_t>(w_ub.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  p_lb = u_lb;
-  p_ub = u_ub;
+  p_lb = w_lb;
+  p_ub = w_ub;
 }
 
 template <typename Scalar>

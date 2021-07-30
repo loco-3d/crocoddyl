@@ -115,7 +115,6 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
 
     dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-    dli_dw = std::vector<VectorXs>(4, VectorXs::Zero(nw));
     dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
     ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
     ddli_ddw = std::vector<MatrixXs>(4, MatrixXs::Zero(nw, nw));
@@ -152,7 +151,6 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_dw;  // not used
   std::vector<VectorXs> dli_du;
   std::vector<MatrixXs> ddli_ddx;
   std::vector<MatrixXs> ddli_ddw;

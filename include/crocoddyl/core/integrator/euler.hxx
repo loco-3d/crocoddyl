@@ -70,7 +70,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
 
   // Computing the acceleration and cost
   control_->calc(d->controlData, 0.0, u);
-  differential_->calc(d->differential, x, d->controlData->u_diff);
+  differential_->calc(d->differential, x, d->controlData->w);
 
   // Computing the next state (discrete time)
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
@@ -113,7 +113,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   control_->calc(d->controlData, 0.0, u);
-  differential_->calcDiff(d->differential, x, d->controlData->u_diff);
+  differential_->calcDiff(d->differential, x, d->controlData->w);
 
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
@@ -181,10 +181,10 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  VectorXs uc(control_->get_nw());
-  differential_->quasiStatic(d->differential, uc, x, maxiter, tol);
-  control_->params(d->controlData, 0.0, uc);
-  u = d->controlData->u_params;
+  d->controlData->w *= 0.;
+  differential_->quasiStatic(d->differential, d->controlData->w, x, maxiter, tol);
+  control_->params(d->controlData, 0.0, d->controlData->w);
+  u = d->controlData->u;
 }
 
 template <typename Scalar>

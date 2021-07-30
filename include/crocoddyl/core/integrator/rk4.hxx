@@ -72,7 +72,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 
   // Computing the acceleration and cost
   control_->calc(d->controlData, rk4_c_[0], u);
-  d->u_diff[0] = d->controlData->u_diff;
+  d->u_diff[0] = d->controlData->w;
   differential_->calc(d->differential[0], x, d->u_diff[0]);
 
   // Computing the next state (discrete time)
@@ -85,7 +85,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
       d->dx_rk4[i].noalias() = time_step_ * rk4_c_[i] * d->ki[i - 1];
       differential_->get_state()->integrate(x, d->dx_rk4[i], d->y[i]);
       control_->calc(d->controlData, rk4_c_[i], u);
-      d->u_diff[i] = d->controlData->u_diff;
+      d->u_diff[i] = d->controlData->w;
       differential_->calc(d->differential[i], d->y[i], d->u_diff[i]);
       d->ki[i].head(nv) = d->y[i].tail(nv);
       d->ki[i].tail(nv) = d->differential[i]->xout;
@@ -125,7 +125,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   control_->calc(d->controlData, 0.0, u);
-  d->u_diff[0] = d->controlData->u_diff;
+  d->u_diff[0] = d->controlData->w;
   differential_->calcDiff(d->differential[0], x, d->u_diff[0]);
 
   if (enable_integration_) {
@@ -148,7 +148,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
     for (std::size_t i = 1; i < 4; ++i) {
       control_->calc(d->controlData, rk4_c_[i], u);
-      d->u_diff[i] = d->controlData->u_diff;
+      d->u_diff[i] = d->controlData->w;
       differential_->calcDiff(d->differential[i], d->y[i], d->u_diff[i]);
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
 
@@ -252,10 +252,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 
   // Static casting the data
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  VectorXs uc(control_->get_nw());
-  differential_->quasiStatic(d->differential[0], uc, x, maxiter, tol);
-  control_->params(d->controlData, 0.0, uc);
-  u = d->controlData->u_params;
+  d->controlData->w *= 0.;
+  differential_->quasiStatic(d->differential[0], d->controlData->w, x, maxiter, tol);
+  control_->params(d->controlData, 0.0, d->controlData->w);
+  u = d->controlData->u;
 }
 
 template <typename Scalar>

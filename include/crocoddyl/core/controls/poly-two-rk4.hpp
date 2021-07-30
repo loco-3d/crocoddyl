@@ -36,7 +36,7 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
   typedef ControlParametrizationDataPolyTwoRK4Tpl<Scalar> Data;
 
-  explicit ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nu);
+  explicit ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyTwoRK4Tpl();
 
   virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
@@ -57,20 +57,20 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    *
    * @param[in]  data   Data structure containing the control parameters vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  u      Control values
+   * @param[in]  w      Control values
    */
   virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                      const Eigen::Ref<const VectorXs>& u) const;
+                      const Eigen::Ref<const VectorXs>& w) const;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter space
    *
-   * @param[in]  u_lb   Control lower bound
-   * @param[in]  u_ub   Control lower bound
+   * @param[in]  w_lb   Control lower bound
+   * @param[in]  w_ub   Control lower bound
    * @param[out] p_lb   Control parameters lower bound
    * @param[out] p_ub   Control parameters upper bound
    */
-  virtual void convertBounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+  virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
                               Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
 
   /**

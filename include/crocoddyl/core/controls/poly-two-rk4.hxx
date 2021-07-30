@@ -9,8 +9,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nu)
-    : Base(nu, 3 * nu) {}
+ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nw)
+    : Base(nw, 3 * nw) {}
 
 template <typename Scalar>
 ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::~ControlParametrizationModelPolyTwoRK4Tpl() {}
@@ -33,7 +33,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = p.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = p.tail(nw_);
   d->tmp_t2 = t * t;
-  d->u_diff = (2 * d->tmp_t2 - t) * p2 
+  d->w = (2 * d->tmp_t2 - t) * p2 
               + (4 * (t - d->tmp_t2)) * p1 
               + (1 - 3 * t + 2 * d->tmp_t2) * p0;
 }
@@ -41,19 +41,19 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
-    const Eigen::Ref<const VectorXs>& u) const {
-  if (static_cast<std::size_t>(u.size()) != nw_) {
+    const Eigen::Ref<const VectorXs>& w) const {
+  if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  data->u_params.head(nw_) = u;
-  data->u_params.segment(nw_, nw_) = u;
-  data->u_params.tail(nw_) = u;
+  data->u.head(nw_) = w;
+  data->u.segment(nw_, nw_) = w;
+  data->u.tail(nw_) = w;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& u_lb,
-                                                                      const Eigen::Ref<const VectorXs>& u_ub,
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
+                                                                      const Eigen::Ref<const VectorXs>& w_ub,
                                                                       Eigen::Ref<VectorXs> p_lb,
                                                                       Eigen::Ref<VectorXs> p_ub) const {
   if (static_cast<std::size_t>(p_lb.size()) != np_) {
@@ -64,20 +64,20 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen
     throw_pretty("Invalid argument: "
                  << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
   }
-  if (static_cast<std::size_t>(u_lb.size()) != nw_) {
+  if (static_cast<std::size_t>(w_lb.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  if (static_cast<std::size_t>(u_ub.size()) != nw_) {
+  if (static_cast<std::size_t>(w_ub.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "u_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
+                 << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  p_lb.head(nw_) = u_lb;
-  p_lb.segment(nw_, nw_) = u_lb;
-  p_lb.tail(nw_) = u_lb;
-  p_ub.head(nw_) = u_ub;
-  p_ub.segment(nw_, nw_) = u_ub;
-  p_ub.tail(nw_) = u_ub;
+  p_lb.head(nw_)          = w_lb;
+  p_lb.segment(nw_, nw_)  = w_lb;
+  p_lb.tail(nw_)          = w_lb;
+  p_ub.head(nw_)          = w_ub;
+  p_ub.segment(nw_, nw_)  = w_ub;
+  p_ub.tail(nw_)          = w_ub;
 }
 
 template <typename Scalar>
