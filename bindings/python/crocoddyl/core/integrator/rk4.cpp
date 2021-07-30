@@ -83,9 +83,9 @@ void exposeIntegratedActionRK4() {
                                           "Create RK4 integrator data.\n\n"
                                           ":param model: RK4 integrator model"))
       .add_property(
-          "differential",
-          bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
-          "differential action data")
+          "differentials",
+          bp::make_getter(&IntegratedActionDataRK4::differentials, bp::return_value_policy<bp::return_by_value>()),
+          "array of differential action data")
       .add_property(
           "integral",
           bp::make_getter(&IntegratedActionDataRK4::integral, bp::return_value_policy<bp::return_by_value>()),
@@ -94,8 +94,8 @@ void exposeIntegratedActionRK4() {
                     "List with the RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
                     "List with the states where f is evaluated in the RK4 integration scheme")
-      .add_property("u_diff", bp::make_getter(&IntegratedActionDataRK4::u_diff, bp::return_internal_reference<>()),
-                    "Control inputs evaluated in the RK4 integration scheme")
+      .add_property("ws", bp::make_getter(&IntegratedActionDataRK4::ws, bp::return_internal_reference<>()),
+                    "Differential control inputs evaluated in the RK4 integration scheme")
       .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),

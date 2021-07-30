@@ -94,12 +94,12 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     const std::size_t nu = model->get_nu();
 
     for (std::size_t i = 0; i < 4; ++i) {
-      differential.push_back(
+      differentials.push_back(
           boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
     }
 
     dx = VectorXs::Zero(ndx);
-    u_diff = std::vector<VectorXs>(4, VectorXs::Zero(nw));
+    ws = std::vector<VectorXs>(4, VectorXs::Zero(nw));
     integral = std::vector<Scalar>(4, Scalar(0.));
 
     ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
@@ -135,8 +135,8 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   virtual ~IntegratedActionDataRK4Tpl() {}
 
   VectorXs dx;
-  std::vector<VectorXs> u_diff;
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
+  std::vector<VectorXs> ws;
+  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differentials;
   std::vector<Scalar> integral;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
