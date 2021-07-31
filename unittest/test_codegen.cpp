@@ -243,7 +243,7 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   boost::shared_ptr<CostModelAbstract> centroidalCost = boost::make_shared<CostModelResidual>(
       state, boost::make_shared<ResidualModelCentroidalMomentum>(state, Vector6s::Zero(), actuation->get_nu()));
   boost::shared_ptr<CostModelAbstract> comCost = boost::make_shared<CostModelResidual>(
-      state, boost::shared_ptr<ResidualModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu()));
+      state, boost::make_shared<ResidualModelCoMPosition>(state, Vector3s::Zero(), actuation->get_nu()));
   boost::shared_ptr<CostModelAbstract> contactForceCost = boost::make_shared<CostModelResidual>(
       state, boost::make_shared<ResidualModelContactForce>(
                  state, model.getFrameId(RF), pinocchio::ForceTpl<Scalar>::Zero(), 6, actuation->get_nu()));
