@@ -45,7 +45,7 @@ struct DifferentialActionDataLQRTpl;
 template <typename Scalar>
 class IntegratedActionModelAbstractTpl;
 template <typename Scalar>
-class IntegratedActionDataAbstractTpl;
+struct IntegratedActionDataAbstractTpl;
 
 template <typename Scalar>
 class IntegratedActionModelEulerTpl;
@@ -117,9 +117,8 @@ class StateVectorTpl;
 // control
 template <typename Scalar>
 class ControlParametrizationModelAbstractTpl;
-
 template <typename Scalar>
-class ControlParametrizationDataAbstractTpl;
+struct ControlParametrizationDataAbstractTpl;
 
 template <typename Scalar>
 class ControlParametrizationModelPolyZeroTpl;
@@ -129,9 +128,8 @@ class ControlParametrizationModelPolyOneTpl;
 
 template <typename Scalar>
 class ControlParametrizationModelPolyTwoRK4Tpl;
-
 template <typename Scalar>
-class ControlParametrizationDataPolyTwoRK4Tpl;
+struct ControlParametrizationDataPolyTwoRK4Tpl;
 
 // actuation
 template <typename Scalar>
@@ -217,9 +215,8 @@ class StateNumDiffTpl;
 
 template <typename Scalar>
 class ControlParametrizationModelNumDiffTpl;
-
 template <typename Scalar>
-class ControlParametrizationDataNumDiffTpl;
+struct ControlParametrizationDataNumDiffTpl;
 
 template <typename Scalar>
 class ActuationModelNumDiffTpl;
