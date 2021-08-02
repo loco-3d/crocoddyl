@@ -9,9 +9,6 @@
 #ifndef CROCODDYL_CORE_CONTROL_BASE_HPP_
 #define CROCODDYL_CORE_CONTROL_BASE_HPP_
 
-#include <vector>
-#include <string>
-#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 
 #include "crocoddyl/core/fwd.hpp"
