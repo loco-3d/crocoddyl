@@ -17,24 +17,33 @@ namespace python {
 void exposeIntegratedActionAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelAbstract> >();
 
-  bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable>(
+  bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable, bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelAbstract",
       "Abstract class for integrated action models.\n\n"
       "In Crocoddyl, an integrated action model transforms a differential action model in a (discrete) action "
       "model.\n",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, double, bool>(
-          bp::args("self", "diffModel", "timeStep", "withCostResidual"),
+      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "model", "timeStep", "withCostResidual"),
           "Initialize the integrated-action model.\n\n"
-          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
-          ":param diffModel: differential action model,\n"
-          ":param timestep: integration time step,\n"
-          ":param withCostResidual: bool flag"))
+          "You can also integrate autonomous systems (i.e., when model.nu is equals to 0).\n"
+          ":param diffModel: differential action model\n"
+          ":param timestep: integration time step (default 1e-3)\n"
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+                    boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "model", "control", "stepTime", "withCostResidual"),
+          "Initialize the integrated-action integrator.\n\n"
+          "You can also integrate autonomous systems (i.e., when model.nu is equals to 0).\n"
+          ":param model: differential action model\n"
+          ":param control: the control parametrization\n"
+          ":param stepTime: step time (default 1e-3)\n"
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
       .def("calc", pure_virtual(&IntegratedActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the next state and cost value.\n\n"
            "It describes the time-discrete evolution of our dynamical system\n"
            "in which we obtain the next state. Additionally it computes the\n"
            "cost value associated to this discrete state and control pair.\n"
-           ":param data: action data\n"
+           ":param data: integrated-action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
@@ -46,7 +55,7 @@ void exposeIntegratedActionAbstract() {
            "cost function. It assumes that calc has been run first.\n"
            "This function builds a quadratic approximation of the\n"
            "action model (i.e. linear dynamics and quadratic cost).\n"
-           ":param data: action data\n"
+           ":param data: integrated-action data\n"
            ":param x: time-discrete state vector\n"
            ":param u: time-discrete control input\n")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
@@ -54,35 +63,18 @@ void exposeIntegratedActionAbstract() {
           "calcDiff", &IntegratedActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelAbstract_wrap::createData,
            &IntegratedActionModelAbstract_wrap::default_createData, bp::args("self"),
-           "Create the action data.\n\n"
-           "Each action model (AM) has its own data that needs to be allocated.\n"
-           "This function returns the allocated data for a predefined AM.\n"
-           ":return AM data.")
-      // .def("control", &IntegratedActionModelAbstract_wrap::get_control,
-      //      &IntegratedActionModelAbstract_wrap::get_control, bp::args("self"),
-      //      "The control parametrization model.\n\n"
-      //      ":return Control parametrization model.")
-      .add_property("nu",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nu,
+           "Create the integrated-action data.\n\n"
+           "Each integrated-action model (IAM) has its own data that needs to be allocated.\n"
+           "This function returns the allocated data for a predefined IAM.\n"
+           ":return integrated-action data.")
+      .add_property("differential",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector")
-      .add_property("nr",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_nr,
+                    "differential action model")
+      .add_property("control",
+                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_control,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of cost-residual vector")
-      .add_property("state",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_state,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    "state")
-      .add_property("has_control_limits",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_has_control_limits),
-                    "indicates whether problem has finite control limits")
-      .add_property(
-          "u_lb", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_lb, bp::return_internal_reference<>()),
-          &IntegratedActionModelAbstract_wrap::set_u_lb, "lower control limits")
-      .add_property(
-          "u_ub", bp::make_function(&IntegratedActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
-          &IntegratedActionModelAbstract_wrap::set_u_ub, "upper control limits")
+                    "control parametrization model")
       .def(PrintableVisitor<IntegratedActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataAbstract> >();

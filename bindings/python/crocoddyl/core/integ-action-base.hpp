@@ -18,9 +18,15 @@ namespace python {
 class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract,
                                            public bp::wrapper<IntegratedActionModelAbstract> {
  public:
-  IntegratedActionModelAbstract_wrap(boost::shared_ptr<DifferentialActionModelAbstract> model, double timestep,
-                                     bool with_cost_residual)
+  IntegratedActionModelAbstract_wrap(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                     const double timestep = 1e-3, const bool with_cost_residual = true)
       : IntegratedActionModelAbstract(model, timestep, with_cost_residual),
+        bp::wrapper<IntegratedActionModelAbstract>() {}
+
+  IntegratedActionModelAbstract_wrap(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                     boost::shared_ptr<ControlParametrizationModelAbstract> control,
+                                     const double timestep = 1e-3, const bool with_cost_residual = true)
+      : IntegratedActionModelAbstract(model, control, timestep, with_cost_residual),
         bp::wrapper<IntegratedActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -51,7 +57,7 @@ class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract,
 
   boost::shared_ptr<ActionDataAbstract> createData() {
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ActionDataAbstract> >(createData.ptr());
+      return bp::call<boost::shared_ptr<IntegratedActionDataAbstract> >(createData.ptr());
     }
     return IntegratedActionModelAbstract::createData();
   }
