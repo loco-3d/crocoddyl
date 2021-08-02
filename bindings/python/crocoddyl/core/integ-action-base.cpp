@@ -89,38 +89,18 @@ void exposeIntegratedActionAbstract() {
 
   bp::class_<IntegratedActionDataAbstract, bp::bases<ActionDataAbstract> >(
       "IntegratedActionDataAbstract",
-      "Abstract class for integrated action data.\n\n"
+      "Abstract class for integrated-action data.\n\n"
       "In Crocoddyl, an action data contains all the required information for processing an\n"
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",
       bp::init<IntegratedActionModelAbstract*>(bp::args("self", "model"),
-                                               "Create common data shared between AMs.\n\n"
+                                               "Create common data shared between integrated-action models.\n\n"
                                                "The action data uses the model in order to first process it.\n"
                                                ":param model: action model"))
-      .add_property(
-          "cost", bp::make_getter(&IntegratedActionDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&IntegratedActionDataAbstract::cost), "cost value")
-      .add_property("xnext", bp::make_getter(&IntegratedActionDataAbstract::xnext, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::xnext), "next state")
-      .add_property("r", bp::make_getter(&IntegratedActionDataAbstract::r, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::r), "cost residual")
-      .add_property("Fx", bp::make_getter(&IntegratedActionDataAbstract::Fx, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Fx), "Jacobian of the dynamics")
-      .add_property("Fu", bp::make_getter(&IntegratedActionDataAbstract::Fu, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Fu), "Jacobian of the dynamics")
-      .add_property("Lx", bp::make_getter(&IntegratedActionDataAbstract::Lx, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Lx), "Jacobian of the cost")
-      .add_property("Lu", bp::make_getter(&IntegratedActionDataAbstract::Lu, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Lu), "Jacobian of the cost")
-      .add_property("Lxx", bp::make_getter(&IntegratedActionDataAbstract::Lxx, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Lxx), "Hessian of the cost")
-      .add_property("Lxu", bp::make_getter(&IntegratedActionDataAbstract::Lxu, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Lxu), "Hessian of the cost")
-      .add_property("Luu", bp::make_getter(&IntegratedActionDataAbstract::Luu, bp::return_internal_reference<>()),
-                    bp::make_setter(&IntegratedActionDataAbstract::Luu), "Hessian of the cost");
-      // .add_property("control", bp::make_getter(&IntegratedActionDataAbstract::controlData, bp::return_internal_reference<>()),
-      //               bp::make_setter(&IntegratedActionDataAbstract::controlData), "Data of the control parametrization model");
+      .add_property("control",
+                    bp::make_getter(&IntegratedActionDataAbstract::control, bp::return_internal_reference<>()),
+                    "Data of the control parametrization model");
 }
 
 }  // namespace python
