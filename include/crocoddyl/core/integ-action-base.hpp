@@ -56,6 +56,8 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
                                    const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelAbstractTpl();
 
+  virtual boost::shared_ptr<ActionDataAbstract> createData();
+
   /**
    * @brief Return the differential action model associated to this integrated action model
    */

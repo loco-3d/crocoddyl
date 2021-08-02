@@ -63,6 +63,15 @@ template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::~IntegratedActionModelAbstractTpl() {}
 
 template <typename Scalar>
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelAbstractTpl<Scalar>::createData() {
+  if (control_->get_nu() > differential_->get_nu())
+    std::cerr
+        << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero"
+        << std::endl;
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
 const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 IntegratedActionModelAbstractTpl<Scalar>::get_differential() const {
   return differential_;
