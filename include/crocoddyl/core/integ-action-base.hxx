@@ -106,12 +106,12 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
     boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t nu_diff = model->get_nu();
-  if (control_->get_nu() != nu_diff) {
-    control_->resize(nu_diff);
-    nu_ = control_->get_nu();
-    unone_ = VectorXs::Zero(nu_);
+  if (control_->get_nw() != model->get_nu()) {
+    throw_pretty("Invalid argument: "
+                 << "control.nw (" + std::to_string(control_->get_nw()) + ") is not equals to model.nu (" +
+                        std::to_string(model->get_nu()) + ")");
   }
+
   nr_ = model->get_nr();
   state_ = model->get_state();
   differential_ = model;
