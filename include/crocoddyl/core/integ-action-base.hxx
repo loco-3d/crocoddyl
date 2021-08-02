@@ -38,6 +38,11 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
       control_(control),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
+  if (control->get_nw() != model->get_nu()) {
+    throw_pretty("Invalid argument: "
+                 << "control.nw (" + std::to_string(control->get_nw()) + ") is not equals to model.nu (" +
+                        std::to_string(model->get_nu()) + ")");
+  }
   init();
 }
 
