@@ -16,7 +16,8 @@ template <typename Scalar>
 ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::~ControlParametrizationModelPolyTwoRK4Tpl() {}
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> > ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::createData() {
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
@@ -33,9 +34,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
   d->tmp_t2 = t * t;
-  d->w = (2 * d->tmp_t2 - t) * p2 
-              + (4 * (t - d->tmp_t2)) * p1 
-              + (1 - 3 * t + 2 * d->tmp_t2) * p0;
+  d->w = (2 * d->tmp_t2 - t) * p2 + (4 * (t - d->tmp_t2)) * p1 + (1 - 3 * t + 2 * d->tmp_t2) * p0;
 }
 
 template <typename Scalar>
@@ -53,9 +52,9 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::params(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
-                                                                      const Eigen::Ref<const VectorXs>& w_ub,
-                                                                      Eigen::Ref<VectorXs> u_lb,
-                                                                      Eigen::Ref<VectorXs> u_ub) const {
+                                                                     const Eigen::Ref<const VectorXs>& w_ub,
+                                                                     Eigen::Ref<VectorXs> u_lb,
+                                                                     Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -72,12 +71,12 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen
     throw_pretty("Invalid argument: "
                  << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  u_lb.head(nw_)          = w_lb;
-  u_lb.segment(nw_, nw_)  = w_lb;
-  u_lb.tail(nw_)          = w_lb;
-  u_ub.head(nw_)          = w_ub;
-  u_ub.segment(nw_, nw_)  = w_ub;
-  u_ub.tail(nw_)          = w_ub;
+  u_lb.head(nw_) = w_lb;
+  u_lb.segment(nw_, nw_) = w_lb;
+  u_lb.tail(nw_) = w_lb;
+  u_ub.head(nw_) = w_ub;
+  u_ub.segment(nw_, nw_) = w_ub;
+  u_ub.tail(nw_) = w_ub;
 }
 
 template <typename Scalar>

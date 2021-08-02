@@ -65,7 +65,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
    * @param[out] u_ub   Control parameters upper bound
    */
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
-                              Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
+                             Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
@@ -103,8 +103,8 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
-  using Base::nw_;
   using Base::nu_;
+  using Base::nw_;
 };
 
 }  // namespace crocoddyl

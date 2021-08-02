@@ -163,8 +163,7 @@ void test_calc_against_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstra
 
 void register_test_calc_integrated_action_model(DifferentialActionModelTypes::Type dam_type,
                                                 IntegratorTypes::Type integrator_type,
-                                                ControlTypes::Type control_type1, 
-                                                ControlTypes::Type control_type2) {
+                                                ControlTypes::Type control_type1, ControlTypes::Type control_type2) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
   const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
@@ -182,8 +181,8 @@ void register_test_calc_integrated_action_model(DifferentialActionModelTypes::Ty
       factory_int.create(integrator_type, dam, ctrl2);
 
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_calc_integrated_action_model_" << dam_type << "_" << integrator_type << "_" << 
-    control_type1 << "_" << control_type2;
+  test_name << "test_calc_integrated_action_model_" << dam_type << "_" << integrator_type << "_" << control_type1
+            << "_" << control_type2;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_calc, model1, model2)));
@@ -231,10 +230,10 @@ bool init_function() {
   }
 
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_test_calc_integrated_action_model(DifferentialActionModelTypes::all[i], 
-      IntegratorTypes::IntegratorEuler, ControlTypes::PolyZero, ControlTypes::PolyOne);
-    register_test_calc_integrated_action_model(DifferentialActionModelTypes::all[i], 
-      IntegratorTypes::IntegratorEuler, ControlTypes::PolyOne, ControlTypes::PolyTwoRK4);
+    register_test_calc_integrated_action_model(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
+                                               ControlTypes::PolyZero, ControlTypes::PolyOne);
+    register_test_calc_integrated_action_model(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
+                                               ControlTypes::PolyOne, ControlTypes::PolyTwoRK4);
   }
   return true;
 }

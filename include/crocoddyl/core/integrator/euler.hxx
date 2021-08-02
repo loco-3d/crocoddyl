@@ -69,7 +69,6 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  control_->calc(d->controlData, 0.0, u);
   differential_->calc(d->differential, x, d->controlData->w);
 
   // Computing the next state (discrete time)
@@ -152,8 +151,10 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
-  if(control_->get_nu() > differential_->get_nu())
-   std::cerr << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero" << std::endl;
+  if (control_->get_nu() > differential_->get_nu())
+    std::cerr
+        << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero"
+        << std::endl;
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 

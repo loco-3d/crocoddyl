@@ -167,9 +167,9 @@ struct ControlParametrizationDataAbstractTpl {
   }
   virtual ~ControlParametrizationDataAbstractTpl() {}
 
-  VectorXs w;       //!< value of the differential control
-  VectorXs u;       //!< value of the control parameters
-  MatrixXs dw_du;   //!< Jacobian of the differential control with respect to the parameters
+  VectorXs w;      //!< value of the differential control
+  VectorXs u;      //!< value of the control parameters
+  MatrixXs dw_du;  //!< Jacobian of the differential control with respect to the parameters
 };
 
 }  // namespace crocoddyl

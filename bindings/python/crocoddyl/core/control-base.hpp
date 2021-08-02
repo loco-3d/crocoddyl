@@ -62,14 +62,14 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
   }
 
   void convertBounds(const Eigen::Ref<const Eigen::VectorXd>& w_lb, const Eigen::Ref<const Eigen::VectorXd>& w_ub,
-                      Eigen::Ref<Eigen::VectorXd> u_lb, Eigen::Ref<Eigen::VectorXd> u_ub) const {
+                     Eigen::Ref<Eigen::VectorXd> u_lb, Eigen::Ref<Eigen::VectorXd> u_ub) const {
     bp::list res = convertBounds_wrap(w_lb, w_ub);
     u_lb.derived() = bp::extract<Eigen::VectorXd>(res[0])();
     u_ub.derived() = bp::extract<Eigen::VectorXd>(res[1])();
   }
 
   bp::list convertBounds_wrap(const Eigen::Ref<const Eigen::VectorXd>& w_lb,
-                               const Eigen::Ref<const Eigen::VectorXd>& w_ub) const {
+                              const Eigen::Ref<const Eigen::VectorXd>& w_ub) const {
     bp::list p_bounds =
         bp::call<bp::list>(this->get_override("convertBounds").ptr(), (Eigen::VectorXd)w_lb, (Eigen::VectorXd)w_ub);
     return p_bounds;

@@ -20,11 +20,12 @@ void exposeIntegratedActionAbstract() {
   bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable>(
       "IntegratedActionModelAbstract",
       "Abstract class for integrated action models.\n\n"
-      "In crocoddyl, an integrated action model trasforms a differential action model in a (discrete) action model.\n",
+      "In Crocoddyl, an integrated action model transforms a differential action model in a (discrete) action "
+      "model.\n",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, double, bool>(
           bp::args("self", "diffModel", "timeStep", "withCostResidual"),
           "Initialize the integrated-action model.\n\n"
-           "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
+          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
           ":param diffModel: differential action model,\n"
           ":param timestep: integration time step,\n"
           ":param withCostResidual: bool flag"))
@@ -93,7 +94,7 @@ void exposeIntegratedActionAbstract() {
   bp::class_<IntegratedActionDataAbstract, bp::bases<ActionDataAbstract> >(
       "IntegratedActionDataAbstract",
       "Abstract class for integrated action data.\n\n"
-      "In crocoddyl, an action data contains all the required information for processing an\n"
+      "In Crocoddyl, an action data contains all the required information for processing an\n"
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",

@@ -40,9 +40,9 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::params(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
-                                                                   const Eigen::Ref<const VectorXs>& w_ub,
-                                                                   Eigen::Ref<VectorXs> u_lb,
-                                                                   Eigen::Ref<VectorXs> u_ub) const {
+                                                                  const Eigen::Ref<const VectorXs>& w_ub,
+                                                                  Eigen::Ref<VectorXs> u_lb,
+                                                                  Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");

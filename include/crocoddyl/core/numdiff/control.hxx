@@ -16,7 +16,7 @@ template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> control)
     : Base(control->get_nw(), control->get_nu()), control_(control), disturbance_(1e-6) {
   data0_ = control_->createData();
-  dataCalcDiff_ = control_->createData(); 
+  dataCalcDiff_ = control_->createData();
   dataNumDiff_ = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
@@ -24,7 +24,8 @@ template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> > ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
   return control_->createData();
 }
 
@@ -44,9 +45,9 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::params(
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
-                                                                   const Eigen::Ref<const VectorXs>& w_ub,
-                                                                   Eigen::Ref<VectorXs> u_lb,
-                                                                   Eigen::Ref<VectorXs> u_ub) const {
+                                                                  const Eigen::Ref<const VectorXs>& w_ub,
+                                                                  Eigen::Ref<VectorXs> u_lb,
+                                                                  Eigen::Ref<VectorXs> u_ub) const {
   control_->convertBounds(w_lb, w_ub, u_lb, u_ub);
 }
 

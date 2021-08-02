@@ -71,7 +71,7 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    * @param[out] u_ub   Control parameters upper bound
    */
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
-                              Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
+                             Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
@@ -109,12 +109,12 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
-  using Base::nw_;
   using Base::nu_;
+  using Base::nw_;
 };
 
 template <typename _Scalar>
-struct ControlParametrizationDataPolyTwoRK4Tpl: public ControlParametrizationDataAbstractTpl<_Scalar> {
+struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -124,8 +124,7 @@ struct ControlParametrizationDataPolyTwoRK4Tpl: public ControlParametrizationDat
   typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataPolyTwoRK4Tpl(Model<Scalar>* const model)
-      : Base(model) {}
+  explicit ControlParametrizationDataPolyTwoRK4Tpl(Model<Scalar>* const model) : Base(model) {}
 
   virtual ~ControlParametrizationDataPolyTwoRK4Tpl() {}
 

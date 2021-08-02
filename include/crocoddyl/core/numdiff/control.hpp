@@ -66,7 +66,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  u_ub   Control parameter upper bound
    */
   void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
-                      Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
+                     Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
@@ -113,9 +113,10 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    */
   boost::shared_ptr<Base> control_;
 
-  boost::shared_ptr<ControlParametrizationDataAbstract> data0_;         //!< Data used in methods multiplyByJacobian
-  boost::shared_ptr<ControlParametrizationDataAbstract> dataCalcDiff_;  //!< Data used for finite differences in calcDiff
-  boost::shared_ptr<ControlParametrizationDataNumDiff>  dataNumDiff_;   //!< Data used for storing dp
+  boost::shared_ptr<ControlParametrizationDataAbstract> data0_;  //!< Data used in methods multiplyByJacobian
+  boost::shared_ptr<ControlParametrizationDataAbstract>
+      dataCalcDiff_;                                                  //!< Data used for finite differences in calcDiff
+  boost::shared_ptr<ControlParametrizationDataNumDiff> dataNumDiff_;  //!< Data used for storing dp
 
   /**
    * @brief This the increment used in the finite differentiation and integration.
@@ -128,7 +129,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
 };
 
 template <typename _Scalar>
-struct ControlParametrizationDataNumDiffTpl: public ControlParametrizationDataAbstractTpl<_Scalar> {
+struct ControlParametrizationDataNumDiffTpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -138,14 +139,13 @@ struct ControlParametrizationDataNumDiffTpl: public ControlParametrizationDataAb
   typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model)
-      : Base(model) {
+  explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model) : Base(model) {
     du = VectorXs::Zero(model->get_nu());
   }
 
   virtual ~ControlParametrizationDataNumDiffTpl() {}
 
-  VectorXs du;        //!< temporary variable used for finite differencing
+  VectorXs du;  //!< temporary variable used for finite differencing
 };
 
 }  // namespace crocoddyl

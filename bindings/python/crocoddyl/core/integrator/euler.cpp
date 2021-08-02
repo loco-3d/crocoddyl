@@ -87,7 +87,7 @@ void exposeIntegratedActionEuler() {
       .add_property("dx", bp::make_getter(&IntegratedActionDataEuler::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("Lwu", bp::make_getter(&IntegratedActionDataEuler::Lwu, bp::return_internal_reference<>()),
-                    "Hessian of the cost wrt the differential control (w) and the control parameters (u).");;
+                    "Hessian of the cost wrt the differential control (w) and the control parameters (u).");
 }
 
 }  // namespace python

@@ -95,13 +95,13 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
   void init();
 
-  boost::shared_ptr<DifferentialActionModelAbstract> differential_;     //!< Differential action model that is integrated
-  boost::shared_ptr<ControlParametrizationModelAbstract> control_;      //!< Model of the control parametrization
-  
-  Scalar time_step_;                                                    //!< Time step used for integration
-  Scalar time_step2_;                                                   //!< Square of the time step used for integration
-  bool with_cost_residual_;                                             //!< Flag indicating whether a cost residual is used
-  bool enable_integration_;                                             //!< False for the terminal horizon node, where integration is not needed
+  boost::shared_ptr<DifferentialActionModelAbstract> differential_;  //!< Differential action model that is integrated
+  boost::shared_ptr<ControlParametrizationModelAbstract> control_;   //!< Model of the control parametrization
+
+  Scalar time_step_;         //!< Time step used for integration
+  Scalar time_step2_;        //!< Square of the time step used for integration
+  bool with_cost_residual_;  //!< Flag indicating whether a cost residual is used
+  bool enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
 };
 
 template <typename _Scalar>

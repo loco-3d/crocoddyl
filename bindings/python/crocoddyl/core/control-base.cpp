@@ -78,17 +78,19 @@ void exposeControlParametrizationAbstract() {
                     "dimension of the control parameters");
 
   bp::class_<ControlParametrizationDataAbstract, boost::noncopyable>(
-      "ControlParametrizationDataAbstract",
-      "Abstract class for control parametrization data.\n",
-      bp::init<ControlParametrizationModelAbstract*>(bp::args("self", "model"),
-                                     "Create common data shared between control parametrization models.\n\n"
-                                     ":param model: control parametrization model"))
+      "ControlParametrizationDataAbstract", "Abstract class for control parametrization data.\n",
+      bp::init<ControlParametrizationModelAbstract*>(
+          bp::args("self", "model"),
+          "Create common data shared between control parametrization models.\n\n"
+          ":param model: control parametrization model"))
       .add_property("w", bp::make_getter(&ControlParametrizationDataAbstract::w, bp::return_internal_reference<>()),
                     bp::make_setter(&ControlParametrizationDataAbstract::w), "differential control")
       .add_property("u", bp::make_getter(&ControlParametrizationDataAbstract::u, bp::return_internal_reference<>()),
                     bp::make_setter(&ControlParametrizationDataAbstract::u), "control parameters")
-      .add_property("dw_du", bp::make_getter(&ControlParametrizationDataAbstract::dw_du, bp::return_internal_reference<>()),
-                    bp::make_setter(&ControlParametrizationDataAbstract::dw_du), "Jacobian of the differential control wrt the control parameters");
+      .add_property("dw_du",
+                    bp::make_getter(&ControlParametrizationDataAbstract::dw_du, bp::return_internal_reference<>()),
+                    bp::make_setter(&ControlParametrizationDataAbstract::dw_du),
+                    "Jacobian of the differential control wrt the control parameters");
 }
 
 }  // namespace python
