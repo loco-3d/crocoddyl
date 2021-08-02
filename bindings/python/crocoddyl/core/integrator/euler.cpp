@@ -64,10 +64,7 @@ void exposeIntegratedActionEuler() {
                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
-           "Create the Euler integrator data.")
-      .add_property(
-          "dt", bp::make_function(&IntegratedActionModelEuler::get_dt, bp::return_value_policy<bp::return_by_value>()),
-          &IntegratedActionModelEuler::set_dt, "step time");
+           "Create the Euler integrator data.");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 
