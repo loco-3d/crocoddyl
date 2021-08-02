@@ -23,12 +23,6 @@ void exposeControlParametrizationAbstract() {
                                          "Initialize the control dimensions.\n\n"
                                          ":param nw: dimension of differential control space\n"
                                          ":param np: dimension of control parameter space"))
-      .def("createData", &ControlParametrizationModelAbstract_wrap::createData,
-           &ControlParametrizationModelAbstract_wrap::default_createData, bp::args("self"),
-           "Create the control-parametrization data.\n\n"
-           "Each control parametrization model has its own data that needs to be allocated.\n"
-           "This function returns the allocated data for a predefined control parametrization model.\n"
-           ":return data.")
       .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "u"),
            "Compute the differential control value.\n\n"
            ":param data: the data on which the method operates.\n"
@@ -41,18 +35,24 @@ void exposeControlParametrizationAbstract() {
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
            ":param u: control parameters (dim control.nu).")
-      .def("convertBounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convertBounds_wrap),
-           bp::args("self", "w_lb", "w_ub"),
-           "Convert the bounds on the differential control w to bounds on the control parameters.\n\n"
-           ":param w_lb: lower bounds on w (dim control.nw).\n"
-           ":param w_ub: upper bounds on w (dim control.nw).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu).")
+      .def("createData", &ControlParametrizationModelAbstract_wrap::createData,
+           &ControlParametrizationModelAbstract_wrap::default_createData, bp::args("self"),
+           "Create the control-parametrization data.\n\n"
+           "Each control parametrization model has its own data that needs to be allocated.\n"
+           "This function returns the allocated data for a predefined control parametrization model.\n"
+           ":return data.")
       .def("params", pure_virtual(&ControlParametrizationModelAbstract_wrap::params),
            bp::args("self", "data", "t", "w"),
            "Compute a value of the parameters p resulting in the specified value of the differential control w.\n\n"
            ":param data: the data on which the method operates.\n"
            ":param t: normalized time in [0, 1].\n"
            ":param w: differential control value (dim control.nw).")
+      .def("convertBounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convertBounds_wrap),
+           bp::args("self", "w_lb", "w_ub"),
+           "Convert the bounds on the differential control w to bounds on the control parameters.\n\n"
+           ":param w_lb: lower bounds on w (dim control.nw).\n"
+           ":param w_ub: upper bounds on w (dim control.nw).\n"
+           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu).")
       .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap),
            bp::args("self", "t", "u", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "

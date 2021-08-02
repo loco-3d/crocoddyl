@@ -50,18 +50,6 @@ class ControlParametrizationModelAbstractTpl {
   virtual ~ControlParametrizationModelAbstractTpl();
 
   /**
-   * @brief Create the action data
-   *
-   * @return the action data
-   */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
-
-  /**
-   * @brief Checks that a specific data belongs to this model
-   */
-  virtual bool checkData(const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
-
-  /**
    * @brief Get the value of the control at the specified time
    *
    * @param[in]  data   Data structure containing the control vector to write
@@ -70,6 +58,23 @@ class ControlParametrizationModelAbstractTpl {
    */
   virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                     const Eigen::Ref<const VectorXs>& u) const = 0;
+
+  /**
+   * @brief Get the value of the Jacobian of the control with respect to the parameters
+   *
+   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control parameters
+   */
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+                        const Eigen::Ref<const VectorXs>& u) const = 0;
+
+  /**
+   * @brief Create the action data
+   *
+   * @return the action data
+   */
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
@@ -93,15 +98,6 @@ class ControlParametrizationModelAbstractTpl {
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
                              Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const = 0;
 
-  /**
-   * @brief Get the value of the Jacobian of the control with respect to the parameters
-   *
-   * @param[in]  data   Data structure containing the Jacobian matrix to write
-   * @param[in]  t      Time in [0,1]
-   * @param[in]  u      Control parameters
-   */
-  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                        const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
@@ -133,6 +129,12 @@ class ControlParametrizationModelAbstractTpl {
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(double t, const Eigen::Ref<const VectorXs>& p,
                                                  const Eigen::Ref<const MatrixXs>& A) const;
+
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
+  virtual bool checkData(const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
+
   /**
    * @brief Return the dimension of the control value
    */
