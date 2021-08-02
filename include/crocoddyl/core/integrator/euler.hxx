@@ -16,36 +16,14 @@ namespace crocoddyl {
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {
-  init();
-}
+    : Base(model, time_step, with_cost_residual) {}
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual) {
-  init();
-}
-
-template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::init() {
-  time_step2_ = time_step_ * time_step_;
-  enable_integration_ = true;
-  VectorXs u_lb(nu_), u_ub(nu_);
-  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), u_lb, u_ub);
-  Base::set_u_lb(u_lb);
-  Base::set_u_ub(u_ub);
-  if (time_step_ < Scalar(0.)) {
-    time_step_ = Scalar(1e-3);
-    time_step2_ = time_step_ * time_step_;
-    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
-  if (time_step_ == Scalar(0.)) {
-    enable_integration_ = false;
-  }
-}
+    : Base(model, control, time_step, with_cost_residual) {}
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}

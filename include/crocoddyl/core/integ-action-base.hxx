@@ -50,7 +50,7 @@ template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::init() {
   time_step2_ = time_step_ * time_step_;
   enable_integration_ = true;
-  VectorXs u_lb(control_->get_nu()), u_ub(control_->get_nu());
+  VectorXs u_lb(nu_), u_ub(nu_);
   control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), u_lb, u_ub);
   Base::set_u_lb(u_lb);
   Base::set_u_ub(u_ub);

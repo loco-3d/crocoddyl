@@ -59,18 +59,11 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   using Base::control_;             //!< Control parametrization
   using Base::differential_;        //!< Differential action model
   using Base::enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
   using Base::time_step2_;          //!< Square of the time step used for integration
   using Base::time_step_;           //!< Time step used for integration
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
   using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
-
-  void init();
 };
 
 template <typename _Scalar>

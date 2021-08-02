@@ -17,7 +17,10 @@ template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual) {
-  init();
+  rk4_c_.push_back(Scalar(0.));
+  rk4_c_.push_back(Scalar(0.5));
+  rk4_c_.push_back(Scalar(0.5));
+  rk4_c_.push_back(Scalar(1.));
 }
 
 template <typename Scalar>
@@ -26,23 +29,6 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual) {
-  init();
-}
-
-template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::init() {
-  VectorXs p_lb(nu_), p_ub(nu_);
-  control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
-  Base::set_u_lb(p_lb);
-  Base::set_u_ub(p_ub);
-  if (time_step_ < Scalar(0.)) {
-    time_step_ = Scalar(1e-3);
-    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
-  enable_integration_ = true;
-  if (time_step_ == Scalar(0.)) {
-    enable_integration_ = false;
-  }
   rk4_c_.push_back(Scalar(0.));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(0.5));
