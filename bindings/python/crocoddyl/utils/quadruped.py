@@ -15,7 +15,7 @@ class SimpleQuadrupedalGaitProblem:
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         self.integrator = integrator
-        if(control is None):
+        if control is None:
             self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         else:
             self.control = control
@@ -461,9 +461,9 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        if(self.integrator=='euler'):
+        if self.integrator is 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
-        elif(self.integrator=='rk4'):
+        elif self.integrator is 'rk4':
             model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
         return model
 
@@ -529,10 +529,10 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        if(self.integrator=='euler'):
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
-        elif(self.integrator=='rk4'):
-            model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.0)
+        if self.integrator is 'euler':
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
+        elif self.integrator is 'rk4':
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.)
         return model
 
     def createImpulseModel(self, supportFootIds, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0):
