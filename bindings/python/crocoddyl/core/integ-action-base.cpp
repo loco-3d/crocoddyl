@@ -23,17 +23,17 @@ void exposeIntegratedActionAbstract() {
       "In Crocoddyl, an integrated action model transforms a differential action model in a (discrete) action "
       "model.\n",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
-          bp::args("self", "model", "timeStep", "withCostResidual"),
+          bp::args("self", "diffModel", "timeStep", "withCostResidual"),
           "Initialize the integrated-action model.\n\n"
-          "You can also integrate autonomous systems (i.e., when model.nu is equals to 0).\n"
+          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
           ":param diffModel: differential action model\n"
           ":param timestep: integration time step (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
       .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
                     boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
-          bp::args("self", "model", "control", "stepTime", "withCostResidual"),
+          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
           "Initialize the integrated-action integrator.\n\n"
-          "You can also integrate autonomous systems (i.e., when model.nu is equals to 0).\n"
+          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
           ":param model: differential action model\n"
           ":param control: the control parametrization\n"
           ":param stepTime: step time (default 1e-3)\n"
