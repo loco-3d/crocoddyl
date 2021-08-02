@@ -16,12 +16,6 @@ template <typename Scalar>
 ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::~ControlParametrizationModelPolyTwoRK4Tpl() {}
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
-ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-}
-
-template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
     const Eigen::Ref<const VectorXs>& u) const {
@@ -46,6 +40,12 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(
   d->dw_du.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 3 * t + 2 * d->tmp_t2);
   d->dw_du.middleCols(nw_, nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 4 * (t - d->tmp_t2));
   d->dw_du.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * d->tmp_t2 - t);
+}
+
+template <typename Scalar>
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::createData() {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
