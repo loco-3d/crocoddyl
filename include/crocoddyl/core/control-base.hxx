@@ -5,8 +5,8 @@
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
 #include <boost/make_shared.hpp>
-#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 
