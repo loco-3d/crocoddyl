@@ -90,13 +90,15 @@ void exposeIntegratedActionAbstract() {
       "user-defined action model. The action data typically is allocated onces by running\n"
       "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
       "and cost function, respectively.",
-      bp::init<IntegratedActionModelAbstract*>(bp::args("self", "model"),
-                                               "Create common data shared between integrated-action models.\n\n"
-                                               "The action data uses the model in order to first process it.\n"
-                                               ":param model: action model"))
-      .add_property("control",
-                    bp::make_getter(&IntegratedActionDataAbstract::control, bp::return_internal_reference<>()),
-                    "Data of the control parametrization model");
+      bp::init<IntegratedActionModelAbstract*>(
+          bp::args("self", "model"),
+          "Create common data shared between integrated-action models.\n\n"
+          "The integrated-action data uses its model in order to first process it.\n"
+          ":param model: integrated-action model"))
+      .add_property(
+          "control",
+          bp::make_getter(&IntegratedActionDataAbstract::control, bp::return_value_policy<bp::return_by_value>()),
+          "Data of the control parametrization model");
 }
 
 }  // namespace python

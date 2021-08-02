@@ -77,6 +77,8 @@ void exposeControlParametrizationAbstract() {
       .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu),
                     "dimension of the control parameters");
 
+  bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataAbstract> >();
+
   bp::class_<ControlParametrizationDataAbstract, boost::noncopyable>(
       "ControlParametrizationDataAbstract", "Abstract class for control parametrization data.\n",
       bp::init<ControlParametrizationModelAbstract*>(
