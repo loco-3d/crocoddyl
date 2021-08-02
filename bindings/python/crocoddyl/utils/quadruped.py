@@ -121,7 +121,7 @@ class SimpleQuadrupedalGaitProblem:
         :return shooting problem
         """
         # Compute the current foot positions
-        q0 = x0[:self.rmodel.nq]
+        q0 = x0[:self.state.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
         rfFootPos0 = self.rdata.oMf[self.rfFootId].translation

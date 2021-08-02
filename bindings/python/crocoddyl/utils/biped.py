@@ -4,9 +4,7 @@ import numpy as np
 
 
 class SimpleBipedGaitProblem:
-    """ Defines a simple 3d locomotion problem
-    """
-    def __init__(self, rmodel, rightFoot, leftFoot):
+    def __init__(self, rmodel, rightFoot, leftFoot, integrator='euler', control=None):
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
@@ -14,6 +12,11 @@ class SimpleBipedGaitProblem:
         # Getting the frame id for all the legs
         self.rfId = self.rmodel.getFrameId(rightFoot)
         self.lfId = self.rmodel.getFrameId(leftFoot)
+        self.integrator = integrator
+        if control is None:
+            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
+        else:
+            self.control = control
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
@@ -61,7 +64,7 @@ class SimpleBipedGaitProblem:
         loco3dModel += doubleSupport + rStep
         loco3dModel += doubleSupport + lStep
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createJumpingProblem(self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots, final=False):
@@ -109,7 +112,7 @@ class SimpleBipedGaitProblem:
         loco3dModel += landingPhase
         loco3dModel += landed
 
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel, loco3dModel[-1])
+        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
     def createFootstepModels(self, comPos0, feetPos0, stepLength, stepHeight, timeStep, numKnots, supportFootIds,
@@ -217,7 +220,10 @@ class SimpleBipedGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
+        if self.integrator is 'euler':
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
+        elif self.integrator is 'rk4':
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
         return model
 
     def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=True):
@@ -282,7 +288,10 @@ class SimpleBipedGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
+        if self.integrator is 'euler':
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
+        elif self.integrator is 'rk4':
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.)
         return model
 
     def createImpulseModel(self, supportFootIds, swingFootTask):
