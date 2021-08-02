@@ -86,47 +86,41 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataRK4Tpl(Model<Scalar>* const model) : Base(model) {
-    const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nx = model->get_state()->get_nx();
-    const std::size_t nv = model->get_state()->get_nv();
-    const std::size_t nw = model->get_control()->get_nw();
-    const std::size_t nu = model->get_nu();
+  explicit IntegratedActionDataRK4Tpl(Model<Scalar>* const model)
+      : Base(model),
+        integral(4, Scalar(0.)),
+        dx(model->get_state()->get_ndx()),
+        ki(4, VectorXs::Zero(model->get_state()->get_ndx())),
+        y(4, VectorXs::Zero(model->get_state()->get_nx())),
+        ws(4, VectorXs::Zero(model->get_control()->get_nw())),
+        dx_rk4(4, VectorXs::Zero(model->get_state()->get_ndx())),
+        dki_dx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        dki_dw(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_control()->get_nw())),
+        dki_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        dki_dy(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        dfi_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        dyi_dx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        dyi_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        dli_dx(4, VectorXs::Zero(model->get_state()->get_ndx())),
+        dli_du(4, VectorXs::Zero(model->get_nu())),
+        ddli_ddx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        ddli_ddw(4, MatrixXs::Zero(model->get_control()->get_nw(), model->get_control()->get_nw())),
+        ddli_dwdu(4, MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu())),
+        ddli_ddu(4, MatrixXs::Zero(model->get_nu(), model->get_nu())),
+        ddli_dxdw(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_control()->get_nw())),
+        ddli_dxdu(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        Luu_partialx(4, MatrixXs::Zero(model->get_nu(), model->get_nu())),
+        Lxu_i(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        Lxx_partialx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        Lxx_partialu(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())) {
+    dx.setZero();
 
     for (std::size_t i = 0; i < 4; ++i) {
       differentials.push_back(
           boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
     }
 
-    dx = VectorXs::Zero(ndx);
-    ws = std::vector<VectorXs>(4, VectorXs::Zero(nw));
-    integral = std::vector<Scalar>(4, Scalar(0.));
-
-    ki = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-    y = std::vector<VectorXs>(4, VectorXs::Zero(nx));
-    dx_rk4 = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-
-    dki_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dki_dw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nw));
-    dki_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dfi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dyi_dx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    dyi_du = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    dki_dy = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-
-    dli_dx = std::vector<VectorXs>(4, VectorXs::Zero(ndx));
-    dli_du = std::vector<VectorXs>(4, VectorXs::Zero(nu));
-    ddli_ddx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    ddli_ddw = std::vector<MatrixXs>(4, MatrixXs::Zero(nw, nw));
-    ddli_dwdu = std::vector<MatrixXs>(4, MatrixXs::Zero(nw, nu));
-    ddli_ddu = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    ddli_dxdw = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nw));
-    ddli_dxdu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    Luu_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(nu, nu));
-    Lxu_i = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-    Lxx_partialx = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, ndx));
-    Lxx_partialu = std::vector<MatrixXs>(4, MatrixXs::Zero(ndx, nu));
-
+    const std::size_t nv = model->get_state()->get_nv();
     dyi_dx[0].diagonal().array() = (Scalar)1;
     for (std::size_t i = 0; i < 4; ++i) {
       dki_dy[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
@@ -134,30 +128,33 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   }
   virtual ~IntegratedActionDataRK4Tpl() {}
 
-  VectorXs dx;
-  std::vector<VectorXs> ws;
   std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differentials;
   std::vector<Scalar> integral;
+  VectorXs dx;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
+  std::vector<VectorXs> ws;
   std::vector<VectorXs> dx_rk4;
 
   std::vector<MatrixXs> dki_dx;
   std::vector<MatrixXs> dki_dw;
   std::vector<MatrixXs> dki_du;
+  std::vector<MatrixXs> dki_dy;
   std::vector<MatrixXs> dfi_du;
+
   std::vector<MatrixXs> dyi_dx;
   std::vector<MatrixXs> dyi_du;
-  std::vector<MatrixXs> dki_dy;
 
   std::vector<VectorXs> dli_dx;
   std::vector<VectorXs> dli_du;
+
   std::vector<MatrixXs> ddli_ddx;
   std::vector<MatrixXs> ddli_ddw;
   std::vector<MatrixXs> ddli_dwdu;
   std::vector<MatrixXs> ddli_ddu;
   std::vector<MatrixXs> ddli_dxdw;
   std::vector<MatrixXs> ddli_dxdu;
+
   std::vector<MatrixXs> Luu_partialx;
   std::vector<MatrixXs> Lxu_i;
   std::vector<MatrixXs> Lxx_partialx;
