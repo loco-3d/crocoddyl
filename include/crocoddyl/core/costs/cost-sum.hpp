@@ -34,7 +34,6 @@ struct CostItemTpl {
   /**
    * @brief Print information on the cost item
    */
-  template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const CostItemTpl<Scalar>& model) {
     os << "{w=" << model.weight << ", " << *model.cost << "}";
     return os;

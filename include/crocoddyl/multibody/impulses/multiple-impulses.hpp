@@ -33,7 +33,6 @@ struct ImpulseItemTpl {
   /**
    * @brief Print information on the impulse item
    */
-  template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ImpulseItemTpl<Scalar>& model) {
     os << "{" << *model.impulse << "}";
     return os;

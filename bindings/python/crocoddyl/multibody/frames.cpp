@@ -16,6 +16,9 @@
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameTranslation)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameRotation)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FramePlacement)
@@ -225,3 +228,5 @@ void exposeFrames() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#pragma GCC diagnostic pop

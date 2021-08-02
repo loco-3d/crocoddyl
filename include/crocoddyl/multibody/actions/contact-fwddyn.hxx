@@ -135,10 +135,10 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   actuation_->calcDiff(d->multibody.actuation, x, u);
   contacts_->calcDiff(d->multibody.contacts, x);
 
-  Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
-  Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, nc);
-  Eigen::Block<MatrixXs> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
-  Eigen::Block<MatrixXs> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
+  const Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
+  const Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, nc);
+  const Eigen::Block<MatrixXs> f_partial_dtau = d->Kinv.bottomLeftCorner(nc, nv);
+  const Eigen::Block<MatrixXs> f_partial_da = d->Kinv.bottomRightCorner(nc, nc);
 
   d->Fx.leftCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dq;
   d->Fx.rightCols(nv).noalias() = -a_partial_dtau * d->pinocchio.dtau_dv;
@@ -182,19 +182,24 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
       static_cast<DifferentialActionDataContactFwdDynamicsTpl<Scalar>*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  // Check the velocity input is zero
-  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
-
+  const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
   const std::size_t nc = contacts_->get_nc();
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv));
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
-  d->pinocchio.tau = pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(nv), VectorXs::Zero(nv));
 
-  d->tmp_xstatic.head(state_->get_nq()) = q;
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
+  // Check the velocity input is zero
+  assert_pretty(x.tail(nv).isZero(), "The velocity input should be zero for quasi-static to work.");
+
+  d->tmp_xstatic.head(nq) = q;
+  d->tmp_xstatic.tail(nv).setZero();
+  u.setZero();
+
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv));
+  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
+  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u);
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u);
   contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
+
   // Allocates memory
   d->tmp_Jstatic.resize(nv, nu_ + nc);
   d->tmp_Jstatic << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.topRows(nc).transpose();

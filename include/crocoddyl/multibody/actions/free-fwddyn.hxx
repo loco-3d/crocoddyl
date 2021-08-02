@@ -151,15 +151,19 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
+  const std::size_t nq = state_->get_nq();
+  const std::size_t nv = state_->get_nv();
+
   // Check the velocity input is zero
-  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
+  assert_pretty(x.tail(nv).isZero(), "The velocity input should be zero for quasi-static to work.");
 
-  d->pinocchio.tau =
-      pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
+  d->tmp_xstatic.head(nq) = q;
+  d->tmp_xstatic.tail(nv).setZero();
+  u.setZero();
 
-  d->tmp_xstatic.head(state_->get_nq()) = q;
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
+  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u);
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u);
 
   u.noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
