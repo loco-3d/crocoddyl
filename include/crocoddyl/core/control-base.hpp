@@ -26,8 +26,8 @@ namespace crocoddyl {
  * The control trajectory is a function of the (normalized) time.
  * Normalized time is between 0 and 1, where 0 represents the beginning of the time step,
  * and 1 represents its end.
- * The trajectory depends on the control parameters p, whose size may be larger than the
- * size of the control inputs u.
+ * The trajectory depends on the control parameters u, whose size may be larger than the
+ * size of the control inputs w.
  */
 template <typename _Scalar>
 class ControlParametrizationModelAbstractTpl {
@@ -43,7 +43,7 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Initialize the control dimensions
    *
-   * @param[in] nw   Dimension of differential control
+   * @param[in] nw   Dimension of control inputs
    * @param[in] nu   Dimension of control parameters
    */
   ControlParametrizationModelAbstractTpl(const std::size_t nw, const std::size_t nu);
@@ -77,18 +77,17 @@ class ControlParametrizationModelAbstractTpl {
   virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
-   * @brief Get a value of the control parameters such that the control at the specified time
-   * t is equal to the specified value u
+   * @brief Update the control parameters u for a specified time t given the control input w
    *
    * @param[in]  data   Data structure containing the control parameters vector to write
    * @param[in]  t      Time in [0,1]
-   * @param[in]  w      Control values
+   * @param[in]  w      Control inputs
    */
   virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
                       const Eigen::Ref<const VectorXs>& w) const = 0;
 
   /**
-   * @brief Map the specified bounds from the control space to the parameter space
+   * @brief Convert the bounds on the control inputs w to bounds on the control parameters u
    *
    * @param[in]  w_lb   Control lower bound
    * @param[in]  w_ub   Control lower bound
@@ -136,7 +135,7 @@ class ControlParametrizationModelAbstractTpl {
   virtual bool checkData(const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
 
   /**
-   * @brief Return the dimension of the control value
+   * @brief Return the dimension of the control inputs
    */
   std::size_t get_nw() const;
 
