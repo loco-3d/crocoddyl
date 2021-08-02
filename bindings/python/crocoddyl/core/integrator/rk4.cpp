@@ -84,14 +84,14 @@ void exposeIntegratedActionRK4() {
           "integral",
           bp::make_getter(&IntegratedActionDataRK4::integral, bp::return_value_policy<bp::return_by_value>()),
           "List with the RK4 terms related to the cost")
+      .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
+                    "state rate.")
       .add_property("ki", bp::make_getter(&IntegratedActionDataRK4::ki, bp::return_internal_reference<>()),
                     "List with the RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
                     "List with the states where f is evaluated in the RK4 integration scheme")
       .add_property("ws", bp::make_getter(&IntegratedActionDataRK4::ws, bp::return_internal_reference<>()),
                     "Differential control inputs evaluated in the RK4 integration scheme")
-      .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
-                    "state rate.")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the state of the RK4 "
                     "integration method. d(x+dx)/dx")

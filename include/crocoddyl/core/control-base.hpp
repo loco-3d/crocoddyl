@@ -28,7 +28,6 @@ namespace crocoddyl {
  * and 1 represents its end.
  * The trajectory depends on the control parameters p, whose size may be larger than the
  * size of the control inputs u.
- *
  */
 template <typename _Scalar>
 class ControlParametrizationModelAbstractTpl {
