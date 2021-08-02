@@ -17,9 +17,8 @@ robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0., 0., 0.
 robot.viewer.gui.refresh()
 
 # Create the cost functions
-Mref = crocoddyl.FrameTranslation(robot_model.getFrameId("gripper_left_joint"), np.matrix(target).T)
 state = crocoddyl.StateMultibody(robot.model)
-goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, Mref)
+goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), target)
 xRegCost = crocoddyl.CostModelState(state)
 uRegCost = crocoddyl.CostModelControl(state)
 

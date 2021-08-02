@@ -93,10 +93,8 @@ class SimpleBipedGaitProblem:
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
 
         f0 = jumpLength
-        footTask = [
-            crocoddyl.FramePlacement(self.lfId, pinocchio.SE3(np.eye(3), self.lfId + f0)),
-            crocoddyl.FramePlacement(self.rfId, pinocchio.SE3(np.eye(3), self.rfId + f0))
-        ]
+        footTask = [[self.lfId, pinocchio.SE3(np.eye(3), self.lfId + f0)],
+                    [self.rfId, pinocchio.SE3(np.eye(3), self.rfId + f0)]]
         landingPhase = [self.createFootSwitchModel([self.lfId, self.rfId], footTask, False)]
         f0[2] = df
         if final is True:
@@ -151,7 +149,7 @@ class SimpleBipedGaitProblem:
                         [stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)])
                 tref = p + dp
 
-                swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
+                swingFootTask += [[i, pinocchio.SE3(np.eye(3), tref)]]
 
             comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
             footSwingModel += [
@@ -178,37 +176,38 @@ class SimpleBipedGaitProblem:
         """
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
-        contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
+        nu = self.actuation.nu
+        contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
             supportContactModel = \
-                crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.array([0., 0.]))
+                crocoddyl.ContactModel6D(self.state, i,
+                                         pinocchio.SE3.Identity(),
+                                         nu, np.array([0., 0.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
-        costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
+        costModel = crocoddyl.CostModelSum(self.state, nu)
         if isinstance(comTask, np.ndarray):
-            comResidual = crocoddyl.ResidualModelCoMPosition(self.state, comTask, self.actuation.nu)
+            comResidual = crocoddyl.ResidualModelCoMPosition(self.state, comTask, nu)
             comTrack = crocoddyl.CostModelResidual(self.state, comResidual)
             costModel.addCost("comTrack", comTrack, 1e6)
         for i in supportFootIds:
             cone = crocoddyl.WrenchCone(self.Rsurf, self.mu, np.array([0.1, 0.05]))
-            wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, self.actuation.nu)
+            wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, nu)
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
             wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchActivation, wrenchResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
 
         if swingFootTask is not None:
             for i in swingFootTask:
-                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i.id, i.placement,
-                                                                               self.actuation.nu)
+                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i[0], i[1], nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, framePlacementResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
-        stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
+        stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
+        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
@@ -244,36 +243,36 @@ class SimpleBipedGaitProblem:
 
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
-        contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
+        nu = self.actuation.nu
+        contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
-            supportContactModel = crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.array([0., 0.]))
+            supportContactModel = crocoddyl.ContactModel6D(self.state, i, pinocchio.SE3.Identity(), nu,
+                                                           np.array([0., 0.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
-        costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
+        costModel = crocoddyl.CostModelSum(self.state, nu)
         for i in supportFootIds:
             cone = crocoddyl.WrenchCone(self.Rsurf, self.mu, np.array([0.1, 0.05]))
-            wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, self.actuation.nu)
+            wrenchResidual = crocoddyl.ResidualModelContactWrenchCone(self.state, i, cone, nu)
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
             wrenchCone = crocoddyl.CostModelResidual(self.state, wrenchActivation, wrenchResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
 
         if swingFootTask is not None:
             for i in swingFootTask:
-                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i.id, i.placement,
-                                                                               self.actuation.nu)
-                frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i.id, pinocchio.Motion.Zero(),
-                                                                             pinocchio.LOCAL, self.actuation.nu)
+                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i[0], i[1], nu)
+                frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i[0], pinocchio.Motion.Zero(),
+                                                                             pinocchio.LOCAL, nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, framePlacementResidual)
                 impulseFootVelCost = crocoddyl.CostModelResidual(self.state, frameVelocityResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_impulseVel", impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_impulseVel", impulseFootVelCost, 1e6)
 
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
-        stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, self.actuation.nu)
+        stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        ctrlResidual = crocoddyl.ResidualModelControl(self.state, self.actuation.nu)
+        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
@@ -304,10 +303,10 @@ class SimpleBipedGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i.id,
-                                                                                   i.placement.translation, 0)
+                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i[0], i[1].translation,
+                                                                                   0)
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
-                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8)
 
         stateWeights = np.array([1.] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, 0)
@@ -333,7 +332,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
             xs.extend(s.xs[:-1])
             us.extend(s.us)
             if bounds:
-                models = s.problem.runningModels + [s.problem.terminalModel]
+                models = s.problem.runningModels.tolist() + [s.problem.terminalModel]
                 for m in models:
                     us_lb += [m.u_lb]
                     us_ub += [m.u_ub]
@@ -343,7 +342,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         rmodel = solver.problem.runningModels[0].state.pinocchio
         xs, us = solver.xs, solver.us
         if bounds:
-            models = s.problem.runningModels + [s.problem.terminalModel]
+            models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
             for m in models:
                 us_lb += [m.u_lb]
                 us_ub += [m.u_ub]

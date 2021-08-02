@@ -43,8 +43,7 @@ runningModels = []
 terminalModels = []
 for p in ps:
     # Create the tracking cost
-    Mref = crocoddyl.FrameTranslation(robot_model.getFrameId("gripper_left_joint"), np.matrix(p).T)
-    goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, Mref)
+    goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), p)
 
     actuation = crocoddyl.ActuationModelFull(state)
 

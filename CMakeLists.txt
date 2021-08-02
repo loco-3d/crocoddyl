@@ -65,7 +65,7 @@ CHECK_MINIMAL_CXX_STANDARD(14 ENFORCE)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 
 # Add the different required and optional dependencies
-ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
+ADD_PROJECT_DEPENDENCY(pinocchio 2.6.3 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.6.3")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.7.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.7.0")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 

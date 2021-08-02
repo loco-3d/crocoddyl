@@ -158,6 +158,12 @@ class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
 
+#ifdef PINOCCHIO_WITH_HPP_FCL
+template <typename Scalar>
+class ResidualModelPairCollisionTpl;
+template <typename Scalar>
+struct ResidualDataPairCollisionTpl;
+#endif
 // cost
 template <typename Scalar>
 class CostModelFrameTranslationTpl;
@@ -361,14 +367,14 @@ typedef FrictionConeTpl<double> FrictionCone;
 typedef WrenchConeTpl<double> WrenchCone;
 typedef CoPSupportTpl<double> CoPSupport;
 
-typedef FrameTranslationTpl<double> FrameTranslation;
-typedef FrameRotationTpl<double> FrameRotation;
-typedef FramePlacementTpl<double> FramePlacement;
-typedef FrameMotionTpl<double> FrameMotion;
-typedef FrameForceTpl<double> FrameForce;
-typedef FrameFrictionConeTpl<double> FrameFrictionCone;
-typedef FrameWrenchConeTpl<double> FrameWrenchCone;
-typedef FrameCoPSupportTpl<double> FrameCoPSupport;
+DEPRECATED("Do not use FrameTranslation", typedef FrameTranslationTpl<double> FrameTranslation;)
+DEPRECATED("Do not use FrameTranslation", typedef FrameRotationTpl<double> FrameRotation;)
+DEPRECATED("Do not use FramePlacement", typedef FramePlacementTpl<double> FramePlacement;)
+DEPRECATED("Do not use FrameMotion", typedef FrameMotionTpl<double> FrameMotion;)
+DEPRECATED("Do not use FrameForce", typedef FrameForceTpl<double> FrameForce;)
+DEPRECATED("Do not use FrameFrictionCone", typedef FrameFrictionConeTpl<double> FrameFrictionCone;)
+DEPRECATED("Do not use FrameWrenchCone", typedef FrameWrenchConeTpl<double> FrameWrenchCone;)
+DEPRECATED("Do not use FrameCopSupport", typedef FrameCoPSupportTpl<double> FrameCoPSupport;)
 
 typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMomentum;
 typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;
@@ -398,6 +404,11 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
+
+#ifdef PINOCCHIO_WITH_HPP_FCL
+typedef ResidualModelPairCollisionTpl<double> ResidualModelPairCollision;
+typedef ResidualDataPairCollisionTpl<double> ResidualDataPairCollision;
+#endif
 
 DEPRECATED("Use ResidualModelFrameTranslation with CostModelResidual",
            typedef CostModelFrameTranslationTpl<double> CostModelFrameTranslation;)

@@ -238,18 +238,16 @@ class GepettoDisplay(DisplayAbstract):
             for i, data in enumerate(datas):
                 model = models[i]
                 if hasattr(data, "differential"):
-                    if hasattr(data.differential, "pinocchio"):
-                        # Update the frame placement if there is not contact.
-                        # Note that, in non-contact cases, the action model does not compute it for efficiency reason
-                        if len(data.differential.multibody.contacts.contacts.todict().items()) == 0:
-                            pinocchio.updateFramePlacement(model.differential.pinocchio, data.differential.pinocchio,
-                                                           frameId)
-                        pose = data.differential.pinocchio.oMf[frameId]
-                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+                    # Update the frame placement if there is not contact.
+                    # Note that, in non-contact cases, the action model does not compute it for efficiency reason
+                    if len(data.differential.multibody.contacts.contacts.todict().items()) == 0:
+                        pinocchio.updateFramePlacement(model.differential.state.pinocchio,
+                                                       data.differential.multibody.pinocchio, frameId)
+                    pose = data.differential.multibody.pinocchio.oMf[frameId]
+                    p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
-                    if hasattr(data, "pinocchio"):
-                        pose = data.pinocchio.oMf[frameId]
-                        p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
+                    pose = data.multibody.pinocchio.oMf[frameId]
+                    p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
 
     def _addRobot(self):

@@ -32,7 +32,7 @@ J. Martin-Saumell, J. Sola, C. Mastalli, and A. Santamaria-Navarro. [Squash-Box 
 *ii. Model predictive control:*
 
 <a id="6">[6]</a>
-E. Dantec, R. Budhiraja, A. Roig, T.G. Lembono, G. Saurel, O. Stasse, P. Fernbach, S. Tonneau, S. Vijayakumar, S. Calinon, M. Taïx, N. Mansard. [Whole Body Model Predictive Control with a Memory of Motion: Experiments on a Torque-Controlled Talos](https://hal.archives-ouvertes.fr/hal-02995796/file/HAL_MPC_memory_collision.pdf), IEEE International Conference on Robotics and Automation (ICRA), 2021
+E. Dantec, R. Budhiraja, A. Roig, T.S. Lembono, G. Saurel, O. Stasse, P. Fernbach, S. Tonneau, S. Vijayakumar, S. Calinon, M. Taïx, N. Mansard. [Whole Body Model Predictive Control with a Memory of Motion: Experiments on a Torque-Controlled Talos](https://hal.archives-ouvertes.fr/hal-02995796/file/HAL_MPC_memory_collision.pdf), IEEE International Conference on Robotics and Automation (ICRA), 2021
 
 <a id="7">[7]</a>
 T. Corbères, T. Flayols, P.A. Léziart, R. Budhiraja, N. Mansard
@@ -47,7 +47,7 @@ S. Kleff, A. Meduri, R. Budhiraja, N. Mansard and L. Righetti.
 *iii. Machine learning:*
 
 <a id="9">[9]</a>
-T. G. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
+T.S. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 &nbsp;
 

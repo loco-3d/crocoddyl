@@ -46,7 +46,6 @@ class ActivationModelAbstractTpl {
   /**
    * @brief Print information on the activation model
    */
-  template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ActivationModelAbstractTpl<Scalar>& model) {
     model.print(os);
     return os;

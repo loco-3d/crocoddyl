@@ -15,9 +15,11 @@
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 #include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/frames.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
+
+#include "crocoddyl/multibody/frames-deprecated.hpp"
 
 namespace crocoddyl {
 
@@ -32,25 +34,89 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef ContactData3DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
-  typedef FrameTranslationTpl<Scalar> FrameTranslation;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref, const std::size_t nu,
+  /**
+   * @brief Initialize the 3d contact model
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] xref   Contact position used for the Baumgarte stabilization
+   * @param[in] nu     Dimension of the control vector
+   * @param[in] gains  Baumgarte stabilization gains
+   */
+  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
+                    const std::size_t nu, const Vector2s& gains = Vector2s::Zero());
+
+  /**
+   * @brief Initialize the 3d contact model
+   *
+   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the contact
+   * @param[in] xref   Contact position used for the Baumgarte stabilization
+   * @param[in] gains  Baumgarte stabilization gains
+   */
+  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector3s& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslation& xref,
-                    const Vector2s& gains = Vector2s::Zero());
+  DEPRECATED("Use constructor which is not based on FrameTranslation.",
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
+                               const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
+  DEPRECATED("Use constructor which is not based on FrameTranslation.",
+             ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
+                               const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel3DTpl();
 
+  /**
+   * @brief Compute the 3d contact Jacobian and drift
+   *
+   * @param[in] data  3d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the derivatives of the 3d contact holonomic constraint
+   *
+   * @param[in] data  3d contact data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Convert the force into a stack of spatial forces
+   *
+   * @param[in] data   3d contact data
+   * @param[in] force  3d force
+   */
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+
+  /**
+   * @brief Create the 3d contact data
+   */
   virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  const FrameTranslation& get_xref() const;
+  /**
+   * @brief Return the reference frame translation
+   */
+  const Vector3s& get_reference() const;
+
+  DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
+
+  /**
+   * @brief Return the Baumgarte stabilization gains
+   */
   const Vector2s& get_gains() const;
+
+  /**
+   * @brief Modify the reference frame translation
+   */
+  void set_reference(const Vector3s& reference);
 
   /**
    * @brief Print relevant information of the 3d contact model
@@ -60,13 +126,14 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::id_;
   using Base::nc_;
   using Base::nu_;
   using Base::state_;
 
  private:
-  FrameTranslation xref_;
-  Vector2s gains_;
+  Vector3s xref_;   //!< Contact position used for the Baumgarte stabilization
+  Vector2s gains_;  //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>
@@ -76,13 +143,9 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ContactDataAbstractTpl<Scalar> Base;
-  typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-
   typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   ContactData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
@@ -95,7 +158,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
         fXjdv_dq(6, model->get_state()->get_nv()),
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()) {
-    frame = model->get_xref().id;
+    frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();

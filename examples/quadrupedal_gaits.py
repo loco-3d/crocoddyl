@@ -67,32 +67,32 @@ GAITPHASES = [{
 }]
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
-ddp = [None] * len(GAITPHASES)
+solver = [None] * len(GAITPHASES)
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            ddp[i] = crocoddyl.SolverFDDP(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
         elif key == 'trotting':
             # Creating a trotting problem
-            ddp[i] = crocoddyl.SolverFDDP(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'pacing':
             # Creating a pacing problem
-            ddp[i] = crocoddyl.SolverFDDP(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                          value['stepKnots'], value['supportKnots']))
         elif key == 'bounding':
             # Creating a bounding problem
-            ddp[i] = crocoddyl.SolverFDDP(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'jumping':
             # Creating a jumping problem
-            ddp[i] = crocoddyl.SolverFDDP(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createJumpingProblem(x0, value['jumpHeight'], value['jumpLength'], value['timeStep'],
                                           value['groundKnots'], value['flyingKnots']))
 
@@ -100,43 +100,40 @@ for i, phase in enumerate(GAITPHASES):
     print('*** SOLVE ' + key + ' ***')
     if WITHDISPLAY and WITHPLOT:
         display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-        ddp[i].setCallbacks(
+        solver[i].setCallbacks(
             [crocoddyl.CallbackLogger(),
              crocoddyl.CallbackVerbose(),
              crocoddyl.CallbackDisplay(display)])
     elif WITHDISPLAY:
         display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+        solver[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
     elif WITHPLOT:
-        ddp[i].setCallbacks([
-            crocoddyl.CallbackLogger(),
-            crocoddyl.CallbackVerbose(),
-        ])
+        solver[i].setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
     else:
-        ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
+        solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    xs = [anymal.model.defaultState] * (ddp[i].problem.T + 1)
-    us = ddp[i].problem.quasiStatic([anymal.model.defaultState] * ddp[i].problem.T)
-    ddp[i].solve(xs, us, 100, False, 0.1)
+    xs = [x0] * (solver[i].problem.T + 1)
+    us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
+    solver[i].solve(xs, us, 100, False)
 
     # Defining the final state as initial one for the next phase
-    x0 = ddp[i].xs[-1]
+    x0 = solver[i].xs[-1]
 
 # Display the entire motion
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     for i, phase in enumerate(GAITPHASES):
-        display.displayFromSolver(ddp[i])
+        display.displayFromSolver(solver[i])
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = ddp[0].getCallbacks()[0]
-    plotSolution(ddp, figIndex=1, show=False)
+    log = solver[0].getCallbacks()[0]
+    plotSolution(solver, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
         title = list(phase.keys())[0] + " (phase " + str(i) + ")"
-        log = ddp[i].getCallbacks()[0]
+        log = solver[i].getCallbacks()[0]
         crocoddyl.plotConvergence(log.costs,
                                   log.u_regs,
                                   log.x_regs,

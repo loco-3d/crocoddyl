@@ -265,13 +265,8 @@ void SolverDDP::backwardPass() {
     Vx_[t] = Qx_[t];
     Vxx_[t] = Qxx_[t];
     if (nu != 0) {
-      if (std::isnan(ureg_)) {
-        Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
-      } else {
-        Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
-        Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
-        Vx_[t].noalias() -= 2 * (K_[t].topRows(nu).transpose() * Qu_[t].head(nu));
-      }
+      Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
+      Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
       START_PROFILER("SolverDDP::Vxx");
       Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
       STOP_PROFILER("SolverDDP::Vxx");

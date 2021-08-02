@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>crocoddyl</name>
-  <version>1.7.0</version>
+  <version>1.8.0</version>
   <description>Crocoddyl optimal control library</description>
   <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm.
   Please check the README.md at the repository URL for additional detail. -->
@@ -21,6 +21,8 @@
   <depend condition="$ROS_PYTHON_VERSION == 2">python-numpy</depend>
   <depend condition="$ROS_PYTHON_VERSION == 3">python3</depend>
   <depend condition="$ROS_PYTHON_VERSION == 3">python3-numpy</depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-scipy</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-scipy</test_depend>
   <depend>boost</depend>
   <depend>eigenpy</depend>
   <depend>example-robot-data</depend>

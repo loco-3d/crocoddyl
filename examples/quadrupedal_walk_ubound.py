@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 import time
@@ -15,7 +13,7 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the anymal model
-anymal = example_robot_data.load('anymal')
+anymal = example_robot_data.load("anymal")
 robot_model = anymal.model
 lims = robot_model.effortLimit
 lims *= 0.5  # reduced artificially the torque limits
@@ -34,7 +32,7 @@ x0 = np.concatenate([q0, v0])
 walking_gait = {'stepLength': 0.25, 'stepHeight': 0.25, 'timeStep': 1e-2, 'stepKnots': 25, 'supportKnots': 2}
 
 # Setting up the control-limited DDP solver
-boxddp = crocoddyl.SolverBoxDDP(
+solver = crocoddyl.SolverBoxDDP(
     gait.createWalkingProblem(x0, walking_gait['stepLength'], walking_gait['stepHeight'], walking_gait['timeStep'],
                               walking_gait['stepKnots'], walking_gait['supportKnots']))
 
@@ -43,31 +41,27 @@ print('*** SOLVE ***')
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    boxddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackVerbose(),
-    ])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
-
-xs = [robot_model.defaultState] * (boxddp.problem.T + 1)
-us = boxddp.problem.quasiStatic([anymal.model.defaultState] * boxddp.problem.T)
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solve the DDP problem
-boxddp.solve(xs, us, 100, False, 0.1)
+xs = [x0] * (solver.problem.T + 1)
+us = solver.problem.quasiStatic([x0] * solver.problem.T)
+solver.solve(xs, us, 100, False, 0.1)
 
 # Plotting the entire motion
 if WITHPLOT:
     # Plot control vs limits
-    plotSolution(boxddp, bounds=True, figIndex=1, show=False)
+    plotSolution(solver, bounds=True, figIndex=1, show=False)
 
     # Plot convergence
-    log = boxddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,
@@ -81,5 +75,5 @@ if WITHPLOT:
 if WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     while True:
-        display.displayFromSolver(boxddp)
+        display.displayFromSolver(solver)
         time.sleep(2.0)

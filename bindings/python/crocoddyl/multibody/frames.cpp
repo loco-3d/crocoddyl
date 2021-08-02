@@ -6,7 +6,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/frames.hpp"
+#include "crocoddyl/multibody/frames-deprecated.hpp"
 
 #include <eigenpy/memory.hpp>
 #include <eigenpy/eigen-to-python.hpp>
@@ -15,6 +15,9 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameTranslation)
 EIGENPY_DEFINE_STRUCT_ALLOCATOR_SPECIALIZATION(crocoddyl::FrameRotation)
@@ -225,3 +228,5 @@ void exposeFrames() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#pragma GCC diagnostic pop

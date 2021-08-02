@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh, CNRS, INRIA
+// Copyright (C) 2020-2021, University of Edinburgh, CNRS, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,10 +34,23 @@
 #define CROCODDYL_PRAGMA_MESSAGE(the_message) CROCODDYL_PRAGMA(GCC message #the_message)
 #define CROCODDYL_PRAGMA_WARNING(the_message) CROCODDYL_PRAGMA(GCC warning #the_message)
 #define CROCODDYL_PRAGMA_DEPRECATED(the_message) CROCODDYL_PRAGMA_WARNING(Deprecated : #the_message)
+
+#ifndef CROCODDYL_IGNORE_DEPRECATED_HEADER
 #define CROCODDYL_PRAGMA_DEPRECATED_HEADER(old_header, new_header) \
   CROCODDYL_PRAGMA_WARNING(                                        \
       Deprecated header file                                       \
       : old_header has been replaced by new_header.\n Please use new_header instead of old_header.)
-#endif
+#else
+#define CROCODDYL_PRAGMA_DEPRECATED_HEADER(old_header, new_header)
+#endif  // CROCODDYL_IGNORE_DEPRECATED_HEADER
 
+#ifndef CROCODDYL_IGNORE_DEPRECATED_HEADER
+#define CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER(remove_header) \
+  CROCODDYL_PRAGMA_WARNING(Deprecated header file            \
+                           : remove_header has now been deprecated.\n It would be removed in the upcoming releases.)
+#else
+#define CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER(remove_header)
+#endif  // CROCODDYL_IGNORE_TO_BE_REMOVED_HEADER
+
+#endif  // defined(__GNUC__) || defined(__clang__
 #endif  // CROCODDYL_CORE_UTILS_DEPRECATE_HPP_

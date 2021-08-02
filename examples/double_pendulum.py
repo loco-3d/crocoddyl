@@ -10,21 +10,22 @@ WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
 # Loading the double pendulum model
-robot = example_robot_data.load('double_pendulum')
-robot_model = robot.model
+pendulum = example_robot_data.load('double_pendulum')
+model = pendulum.model
 
-state = crocoddyl.StateMultibody(robot_model)
-actModel = ActuationModelDoublePendulum(state, actLink=1)
+state = crocoddyl.StateMultibody(model)
+actuation = ActuationModelDoublePendulum(state, actLink=1)
 
-weights = np.array([1, 1, 1, 1] + [0.1] * 2)
-runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
-terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
-xResidual = crocoddyl.ResidualModelState(state, state.zero(), actModel.nu)
+nu = actuation.nu
+runningCostModel = crocoddyl.CostModelSum(state, nu)
+terminalCostModel = crocoddyl.CostModelSum(state, nu)
+
+xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelQuad(state.ndx)
-uResidual = crocoddyl.ResidualModelControl(state, actModel.nu)
+uResidual = crocoddyl.ResidualModelControl(state, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
-xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(weights), actModel.nu)
+xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(np.array([1.] * 4 + [0.1] * 2)), nu)
 
 dt = 1e-2
 
@@ -33,39 +34,39 @@ runningCostModel.addCost("xGoal", xPendCost, 1e-5 / dt)
 terminalCostModel.addCost("xGoal", xPendCost, 1e4)
 
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actModel, terminalCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel), dt)
 
 # Creating the shooting problem and the FDDP solver
 T = 100
-x0 = np.array([3.14, 0, 0., 0.])
+x0 = np.array([3.14, 0., 0., 0.])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 problem.nthreads = 1  # TODO(cmastalli): Remove after Crocoddyl supports multithreading with Python-derived models
-fddp = crocoddyl.SolverFDDP(problem)
+solver = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF, False)
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF, False)
-    fddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 else:
-    fddp.setCallbacks([crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the FDDP solver
-fddp.solve()
+solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = fddp.getCallbacks()[0]
+    log = solver.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(robot, floor=False)
-    display.displayFromSolver(fddp)
+    display = crocoddyl.GepettoDisplay(pendulum, floor=False)
+    display.displayFromSolver(solver)

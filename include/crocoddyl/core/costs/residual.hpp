@@ -44,6 +44,7 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
