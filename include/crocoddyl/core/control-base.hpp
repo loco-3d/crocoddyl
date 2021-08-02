@@ -97,10 +97,9 @@ class ControlParametrizationModelAbstractTpl {
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
                              Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const = 0;
 
-
   /**
-   * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
-   * parameters)
+   * @brief Compute the product between the given matrix A and the derivative of the control input with respect to the
+   * control parameters (i.e., A*dw_du).
    *
    * @param[in]  t      Time
    * @param[in]  u      Control parameters
@@ -114,8 +113,8 @@ class ControlParametrizationModelAbstractTpl {
                                         const Eigen::Ref<const MatrixXs>& A) const;
 
   /**
-   * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
-   * a specified matrix
+   * @brief Compute the product between the transpose of the derivative of the control input with respect to the
+   * control parameters and a given matrix A (i.e., dw_du^T*A)
    *
    * @param[in]  t      Time
    * @param[in]  u      Control parameters
