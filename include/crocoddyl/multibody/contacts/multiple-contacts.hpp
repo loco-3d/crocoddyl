@@ -33,7 +33,6 @@ struct ContactItemTpl {
   /**
    * @brief Print information on the contact item
    */
-  template <class Scalar>
   friend std::ostream& operator<<(std::ostream& os, const ContactItemTpl<Scalar>& model) {
     os << "{" << *model.contact << "}";
     return os;
