@@ -90,7 +90,7 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nx = model->get_state()->get_nx();
     const std::size_t nv = model->get_state()->get_nv();
-    const std::size_t nw = model->get_nw();
+    const std::size_t nw = model->get_control()->get_nw();
     const std::size_t nu = model->get_nu();
 
     for (std::size_t i = 0; i < 4; ++i) {

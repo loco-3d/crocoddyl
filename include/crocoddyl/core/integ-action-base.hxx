@@ -90,11 +90,6 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
 }
 
 template <typename Scalar>
-std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nw() const {
-  return differential_->get_nu();
-}
-
-template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
     boost::shared_ptr<DifferentialActionModelAbstract> model) {
   const std::size_t nu_diff = model->get_nu();

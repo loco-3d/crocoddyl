@@ -79,11 +79,6 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   DEPRECATED("The DifferentialActionModel should be set at construction time",
              void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model));
 
-  /**
-   * @brief Return the dimension of the control input of the differential action model
-   */
-  std::size_t get_nw() const;
-
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
   using Base::nr_;                  //!< Dimension of the cost residual
