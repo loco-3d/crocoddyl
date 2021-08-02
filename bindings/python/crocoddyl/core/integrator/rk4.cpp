@@ -68,10 +68,6 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
-      .add_property("differential",
-                    bp::make_function(&IntegratedActionModelRK4::get_differential,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    "Get the differential action model.")
       .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
                     "step time");
 
