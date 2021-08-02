@@ -77,8 +77,8 @@ void exposeIntegratedActionRK4() {
                                           "Create RK4 integrator data.\n\n"
                                           ":param model: RK4 integrator model"))
       .add_property(
-          "differentials",
-          bp::make_getter(&IntegratedActionDataRK4::differentials, bp::return_value_policy<bp::return_by_value>()),
+          "differential",
+          bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
           "array of differential action data")
       .add_property(
           "integral",
