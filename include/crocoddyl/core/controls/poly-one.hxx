@@ -27,6 +27,14 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
+void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const Eigen::Ref<const VectorXs>&) const {
+  data->dw_du.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 2 * t);
+  data->dw_du.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * t);
+}
+
+template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
     const Eigen::Ref<const VectorXs>& w) const {
@@ -63,14 +71,6 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::convertBounds(const Eigen::R
   u_lb.tail(nw_) = w_lb;
   u_ub.head(nw_) = w_ub;
   u_ub.tail(nw_) = w_ub;
-}
-
-template <typename Scalar>
-void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-    const Eigen::Ref<const VectorXs>&) const {
-  data->dw_du.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 2 * t);
-  data->dw_du.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * t);
 }
 
 template <typename Scalar>

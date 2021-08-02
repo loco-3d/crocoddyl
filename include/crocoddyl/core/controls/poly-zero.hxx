@@ -27,6 +27,13 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
+void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
+    const Eigen::Ref<const VectorXs>&) const {
+  data->dw_du.setIdentity();
+}
+
+template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
     const Eigen::Ref<const VectorXs>& w) const {
@@ -60,13 +67,6 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
   }
   u_lb = w_lb;
   u_ub = w_ub;
-}
-
-template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
-    const Eigen::Ref<const VectorXs>&) const {
-  data->dw_du.setIdentity();
 }
 
 template <typename Scalar>
