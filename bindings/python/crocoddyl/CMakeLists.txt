@@ -20,6 +20,10 @@ TARGET_LINK_BOOST_PYTHON(${PROJECT_NAME}_pywrap)
 # Unfortunately, using literals does not work in a macro. As such, this turns them off for the entire wrapper:
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-conversion")
 
+IF(UNIX AND NOT APPLE)
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}_pywrap PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
+ENDIF()
+
 INSTALL(TARGETS ${PROJECT_NAME}_pywrap DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME})
 
 FOREACH(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
