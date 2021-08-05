@@ -52,7 +52,7 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
       os << "DifferentialActionModelContactFwdDynamics_Talos";
       break;
-#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)      
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
     case DifferentialActionModelTypes::DifferentialActionModelConstraintFwdDynamics_Talos:
       os << "DifferentialActionModelConstraintFwdDynamics_Talos";
       break;
@@ -111,7 +111,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
 #if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
     case DifferentialActionModelTypes::DifferentialActionModelConstraintFwdDynamics_Talos:
       action = create_constraintFwdDynamics(StateModelTypes::StateMultibody_Talos,
-					    ActuationModelTypes::ActuationModelFloatingBase);
+                                            ActuationModelTypes::ActuationModelFloatingBase);
       break;
 #endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
@@ -273,11 +273,10 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   return action;
 }
 
-
 #if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics>
 DifferentialActionModelFactory::create_constraintFwdDynamics(StateModelTypes::Type state_type,
-							     ActuationModelTypes::Type actuation_type) const {
+                                                             ActuationModelTypes::Type actuation_type) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
@@ -288,48 +287,35 @@ DifferentialActionModelFactory::create_constraintFwdDynamics(StateModelTypes::Ty
 
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
   const pinocchio::Model& pin_model = *(state->get_pinocchio());
-  
+
   switch (state_type) {
-  case StateModelTypes::StateMultibody_TalosArm: {
-    const pinocchio::Frame& frame_lf1 = pin_model.frames[pin_model.getFrameId("gripper_left_fingertip_1_link")];
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
-						      frame_lf1.parent,
-						      frame_lf1.placement));
-    break;
-  }
-  case StateModelTypes::StateMultibody_HyQ: {
-    const pinocchio::Frame& frame_lf2 = pin_model.frames[pin_model.getFrameId("lf_foot")];
-    const pinocchio::Frame& frame_rf2 = pin_model.frames[pin_model.getFrameId("rf_foot")];
-    const pinocchio::Frame& frame_lh2 = pin_model.frames[pin_model.getFrameId("lh_foot")];
-    const pinocchio::Frame& frame_rh2 = pin_model.frames[pin_model.getFrameId("rh_foot")];
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
-						      frame_lf2.parent,
-						      frame_lf2.placement));
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
-						      frame_rf2.parent,
-						      frame_rf2.placement));
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
-						      frame_lh2.parent,
-						      frame_lh2.placement));
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
-						      frame_rh2.parent,
-						      frame_rh2.placement));      
-    break;
-  }
-  case StateModelTypes::StateMultibody_Talos: {
-    const pinocchio::Frame& frame_lf3 = pin_model.frames[pin_model.getFrameId("left_sole_link")];
-    const pinocchio::Frame& frame_rf3 = pin_model.frames[pin_model.getFrameId("right_sole_link")];
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D,
-						      frame_lf3.parent,
-						      frame_lf3.placement));
-    contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D,
-						      frame_rf3.parent,
-						      frame_rf3.placement));      
-    break; }
-  default: {
-    throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
-    break;
-  }
+    case StateModelTypes::StateMultibody_TalosArm: {
+      const pinocchio::Frame& frame_lf1 = pin_model.frames[pin_model.getFrameId("gripper_left_fingertip_1_link")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D, frame_lf1.parent, frame_lf1.placement));
+      break;
+    }
+    case StateModelTypes::StateMultibody_HyQ: {
+      const pinocchio::Frame& frame_lf2 = pin_model.frames[pin_model.getFrameId("lf_foot")];
+      const pinocchio::Frame& frame_rf2 = pin_model.frames[pin_model.getFrameId("rf_foot")];
+      const pinocchio::Frame& frame_lh2 = pin_model.frames[pin_model.getFrameId("lh_foot")];
+      const pinocchio::Frame& frame_rh2 = pin_model.frames[pin_model.getFrameId("rh_foot")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D, frame_lf2.parent, frame_lf2.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D, frame_rf2.parent, frame_rf2.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D, frame_lh2.parent, frame_lh2.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D, frame_rh2.parent, frame_rh2.placement));
+      break;
+    }
+    case StateModelTypes::StateMultibody_Talos: {
+      const pinocchio::Frame& frame_lf3 = pin_model.frames[pin_model.getFrameId("left_sole_link")];
+      const pinocchio::Frame& frame_rf3 = pin_model.frames[pin_model.getFrameId("right_sole_link")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D, frame_lf3.parent, frame_lf3.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D, frame_rf3.parent, frame_rf3.placement));
+      break;
+    }
+    default: {
+      throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
+      break;
+    }
   }
   cost->addCost("state",
                 CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
@@ -339,12 +325,13 @@ DifferentialActionModelFactory::create_constraintFwdDynamics(StateModelTypes::Ty
                 CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 0.1);
-  pinocchio::ProximalSettings prox(1e-12,0.,1);
-  
-  action = boost::make_shared<crocoddyl::DifferentialActionModelConstraintFwdDynamics>(state, actuation, contact, cost,prox);
+  pinocchio::ProximalSettings prox(1e-12, 0., 1);
+
+  action = boost::make_shared<crocoddyl::DifferentialActionModelConstraintFwdDynamics>(state, actuation, contact, cost,
+                                                                                       prox);
   return action;
 }
 #endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
-  
+
 }  // namespace unittest
 }  // namespace crocoddyl

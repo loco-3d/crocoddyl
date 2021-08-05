@@ -109,15 +109,14 @@ template <typename Scalar>
 bool DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::checkData(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
   boost::shared_ptr<DifferentialActionDataConstraintFwdDynamics> d =
-    boost::dynamic_pointer_cast<DifferentialActionDataConstraintFwdDynamics>(data);
+      boost::dynamic_pointer_cast<DifferentialActionDataConstraintFwdDynamics>(data);
   if (d != NULL) {
     return true;
   } else {
     return false;
   }
 }
-  
-  
+
 /*
 template <typename Scalar>
 void DifferentialActionModelConstraintFwdDynamicsTpl<Scalar>::quasiStatic(const

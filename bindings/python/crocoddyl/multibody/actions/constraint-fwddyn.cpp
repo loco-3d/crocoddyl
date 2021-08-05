@@ -6,12 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/actions/constraint-fwddyn.hpp"
 
-#if PINOCCHIO_VERSION_AT_LEAST(2,9,0)
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
 
 namespace crocoddyl {
 namespace python {
@@ -27,16 +26,17 @@ void exposeDifferentialActionConstraintFwdDynamics() {
       "stack of cost functions are implemented in CostModelSum().",
       bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
                PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidConstraintModel), boost::shared_ptr<CostModelSum>,
-      DifferentialActionModelConstraintFwdDynamics::ProximalSettings>(bp::args("self", "state", "actuation", "contacts", "costs", "settings"),
-                       "Initialize the constrained forward-dynamics action model.\n\n"
-                       "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
-                       "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
-                       "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
-                       ":param state: multibody state\n"
-                       ":param actuation: abstract actuation model\n"
-                       ":param contacts: multiple contact model\n"
-                       ":param costs: stack of cost functions\n"
-                       ":param settings: damping settings for the proximal constraint resolution\n"))
+               DifferentialActionModelConstraintFwdDynamics::ProximalSettings>(
+          bp::args("self", "state", "actuation", "contacts", "costs", "settings"),
+          "Initialize the constrained forward-dynamics action model.\n\n"
+          "The damping factor is needed when the contact Jacobian is not full-rank. Otherwise,\n"
+          "a good damping factor could be 1e-12. In addition, if you have cost based on forces,\n"
+          "you need to enable the computation of the force Jacobians (i.e. enable_force=True)."
+          ":param state: multibody state\n"
+          ":param actuation: abstract actuation model\n"
+          ":param contacts: multiple contact model\n"
+          ":param costs: stack of cost functions\n"
+          ":param settings: damping settings for the proximal constraint resolution\n"))
       .def<void (DifferentialActionModelConstraintFwdDynamics::*)(
           const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(

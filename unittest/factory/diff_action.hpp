@@ -65,9 +65,9 @@ class DifferentialActionModelFactory {
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
 #if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
-  boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics> create_constraintFwdDynamics(StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics> create_constraintFwdDynamics(
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
 #endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
-
 };
 
 }  // namespace unittest

@@ -76,7 +76,7 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   void set_armature(const VectorXs& armature);
 
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
-  
+
   const ProximalSettings& get_settings() const;
   void set_settings(const ProximalSettings& settings);
 
