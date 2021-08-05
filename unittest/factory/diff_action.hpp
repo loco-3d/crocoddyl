@@ -15,6 +15,7 @@
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/contact-fwddyn2.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -28,6 +29,7 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelContactFwdDynamics_TalosArm,
     DifferentialActionModelContactFwdDynamics_HyQ,
     DifferentialActionModelContactFwdDynamics_Talos,
+    DifferentialActionModelContactFwdDynamics2_Cassie,
     DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
     DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
@@ -60,6 +62,9 @@ class DifferentialActionModelFactory {
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2> create_cassieContactFwdDynamics2() const;
+
+
 };
 
 }  // namespace unittest

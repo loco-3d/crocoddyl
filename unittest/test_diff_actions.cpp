@@ -58,9 +58,17 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   // create the corresponding data object and set the cost to nan
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
   data->cost = nan("");
+  Eigen::VectorXd x(model->get_state()->get_nx());
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie) {
+    x << 0.   ,  0.   ,  1.104,  0.   ,  0.   ,  0.   ,  1.   ,  0.   ,
+      0.   ,  0.298,  0.   ,  0.   ,  0.   ,  0.   ,  0.   , -1.398,
+      1.398, -1.398,  0.   ,  0.   ,  0.298,  0.   ,  0.   ,  0.   ,
+      0.   ,  0.   , -1.398,  1.398, -1.398, Eigen::VectorXd::Zero(28);
+  }
+  else {
+    x = model->get_state()->rand();
+  }
 
-  // Getting the cost value computed by calc()
-  const Eigen::VectorXd& x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
   model->calc(data, x, u);
 
@@ -116,7 +124,16 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
   const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x(model->get_state()->get_nx());
+  if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie) {
+    x << 0.   ,  0.   ,  1.104,  0.   ,  0.   ,  0.   ,  1.   ,  0.   ,
+      0.   ,  0.298,  0.   ,  0.   ,  0.   ,  0.   ,  0.   , -1.398,
+      1.398, -1.398,  0.   ,  0.   ,  0.298,  0.   ,  0.   ,  0.   ,
+      0.   ,  0.   , -1.398,  1.398, -1.398, Eigen::VectorXd::Zero(28);
+  }
+  else {
+    x = model->get_state()->rand();
+  }
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives

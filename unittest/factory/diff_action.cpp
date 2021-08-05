@@ -9,6 +9,9 @@
 #include "diff_action.hpp"
 #include "cost.hpp"
 #include "contact.hpp"
+
+#include <pinocchio/parsers/sdf.hpp>
+
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
@@ -51,6 +54,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
       os << "DifferentialActionModelContactFwdDynamics_Talos";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie:
+      os << "DifferentialActionModelContactFwdDynamics2_Cassie";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm";
@@ -102,6 +108,9 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie:
+      action = create_cassieContactFwdDynamics2();
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       action =
@@ -262,5 +271,105 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   return action;
 }
 
+
+
+boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2>
+DifferentialActionModelFactory::create_cassieContactFwdDynamics2() const {
+  
+  const std::string filename = "/home/rbudhira/devel/src/misc/cassie-gazebo-sim/cassie/cassie_v2.sdf";
+  
+  pinocchio::JointModelFreeFlyer root_joint;
+  pinocchio::Model model;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidContactModel) contact_models;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidContactModel) contact_models_empty;
+  pinocchio::sdf::buildModel(filename, root_joint, model, contact_models);
+
+  for(int i=0; i<contact_models.size(); ++i) {
+    std::cerr<<i<<"joint 1 name"<<model.names[contact_models[i].joint1_id]<<std::endl;
+    std::cerr<<i<<"joint 2 name"<<model.names[contact_models[i].joint2_id]<<std::endl;
+  }
+  
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2> action;
+;
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  boost::shared_ptr<crocoddyl::CostModelSum> cost;
+
+  boost::shared_ptr<crocoddyl::StateMultibody> state =
+    boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
+
+  std::vector<std::string> actuated_joints {"left-roll-op",
+      "left-yaw-op",
+      "left-pitch-op",
+      "left-knee-op",
+      "left-knee-shin-joint",
+      "left-shin-tarsus-joint",
+      "left-foot-op",
+      "right-roll-op",
+      "right-yaw-op",
+      "right-pitch-op",
+      "right-knee-op",
+      "left-knee-shin-joint",
+      "left-shin-tarsus-joint",
+      "right-foot-op"};
+
+  std::vector<pinocchio::JointIndex> actuated_dofs;
+  for(std::size_t j=0;j<actuated_joints.size(); j++) {
+    actuated_dofs.push_back(model.idx_vs[model.getJointId(actuated_joints[j])]);
+  }
+  
+  Eigen::MatrixXd actuation_matrix(model.nv, actuated_dofs.size());
+  actuation_matrix.setZero();
+  for(std::size_t j=0;j<actuated_dofs.size(); j++) {
+    actuation_matrix(actuated_dofs[j], j) = 1.;
+  }
+
+  Eigen::MatrixXd spring_actuation_matrix(model.nv, model.nv);
+  Eigen::MatrixXd damping_actuation_matrix(model.nv, model.nv);
+
+  spring_actuation_matrix.setZero();
+  damping_actuation_matrix.setZero();
+
+  Eigen::VectorXd x_base(model.nq + model.nv);
+  x_base << 0.   ,  0.   ,  1.104,  0.   ,  0.   ,  0.   ,  1.   ,  0.   ,
+    0.   ,  0.298,  0.   ,  0.   ,  0.   ,  0.   ,  0.   , -1.398,
+    1.398, -1.398,  0.   ,  0.   ,  0.298,  0.   ,  0.   ,  0.   ,
+    0.   ,  0.   , -1.398,  1.398, -1.398, Eigen::VectorXd::Zero(28);
+  // actuation =
+  //   boost::make_shared<crocoddyl::ActuationModelFloatingBaseWithPassiveJoints>(
+  //                                                      state,
+  //                                                      actuation_matrix,
+  //                                                      spring_actuation_matrix,
+  //                                                      damping_actuation_matrix);
+
+  actuation =
+    boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
+  
+  cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
+  
+  cost->addCost("state", boost::make_shared<crocoddyl::CostModelState>(
+                          state,
+                          boost::make_shared<crocoddyl::ActivationModelQuad>(state->get_ndx()),
+			  x_base,
+                          actuation->get_nu()),
+                0.1);
+
+  cost->addCost("control", boost::make_shared<crocoddyl::CostModelControl>(
+                           state,
+                           boost::make_shared<crocoddyl::ActivationModelQuad>(actuation->get_nu()),
+                           Eigen::VectorXd::Random(actuation->get_nu())),
+                0.1);
+  
+  cost->addCost("com", boost::make_shared<crocoddyl::CostModelCoMPosition>(
+                          state,
+                          boost::make_shared<crocoddyl::ActivationModelQuad>(3),
+                          Eigen::Vector3d::Random(),
+                          actuation->get_nu()),
+                0.1);
+  
+  action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics2>(state, actuation, contact_models, cost, 1);
+  //action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics2>(state, actuation, contact_models_empty, cost, 1e-5);
+  return action;
+}
+  
 }  // namespace unittest
 }  // namespace crocoddyl
