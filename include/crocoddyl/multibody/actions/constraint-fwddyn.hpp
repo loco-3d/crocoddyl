@@ -31,7 +31,7 @@
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 
@@ -75,6 +75,8 @@ class DifferentialActionModelConstraintFwdDynamicsTpl : public DifferentialActio
   const VectorXs& get_armature() const;
   void set_armature(const VectorXs& armature);
 
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+  
   const ProximalSettings& get_settings() const;
   void set_settings(const ProximalSettings& settings);
 
