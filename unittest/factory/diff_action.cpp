@@ -9,9 +9,6 @@
 #include "diff_action.hpp"
 #include "cost.hpp"
 #include "contact.hpp"
-
-#include <pinocchio/parsers/sdf.hpp>
-
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
@@ -55,9 +52,11 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
       os << "DifferentialActionModelContactFwdDynamics_Talos";
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie:
-      os << "DifferentialActionModelContactFwdDynamics2_Cassie";
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)      
+    case DifferentialActionModelTypes::DifferentialActionModelConstraintFwdDynamics_Talos:
+      os << "DifferentialActionModelConstraintFwdDynamics_Talos";
       break;
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm";
       break;
@@ -109,9 +108,12 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics2_Cassie:
-      action = create_cassieContactFwdDynamics2();
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+    case DifferentialActionModelTypes::DifferentialActionModelConstraintFwdDynamics_Talos:
+      action = create_constraintFwdDynamics(StateModelTypes::StateMultibody_Talos,
+					    ActuationModelTypes::ActuationModelFloatingBase);
       break;
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       action =
           create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
@@ -272,104 +274,76 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
 }
 
 
-
-boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2>
-DifferentialActionModelFactory::create_cassieContactFwdDynamics2() const {
-  
-  const std::string filename = "/home/rbudhira/devel/src/misc/cassie-gazebo-sim/cassie/cassie_v2.sdf";
-  
-  pinocchio::JointModelFreeFlyer root_joint;
-  pinocchio::Model model;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidContactModel) contact_models;
-  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidContactModel) contact_models_empty;
-  pinocchio::sdf::buildModel(filename, root_joint, model, contact_models);
-
-  for(int i=0; i<contact_models.size(); ++i) {
-    std::cerr<<i<<"joint 1 name"<<model.names[contact_models[i].joint1_id]<<std::endl;
-    std::cerr<<i<<"joint 2 name"<<model.names[contact_models[i].joint2_id]<<std::endl;
-  }
-  
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2> action;
-;
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics>
+DifferentialActionModelFactory::create_constraintFwdDynamics(StateModelTypes::Type state_type,
+							     ActuationModelTypes::Type actuation_type) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics> action;
+  boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(pinocchio::RigidConstraintModel) contact;
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
+  state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
+  actuation = ActuationModelFactory().create(actuation_type, state_type);
 
-  boost::shared_ptr<crocoddyl::StateMultibody> state =
-    boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
-
-  std::vector<std::string> actuated_joints {"left-roll-op",
-      "left-yaw-op",
-      "left-pitch-op",
-      "left-knee-op",
-      "left-knee-shin-joint",
-      "left-shin-tarsus-joint",
-      "left-foot-op",
-      "right-roll-op",
-      "right-yaw-op",
-      "right-pitch-op",
-      "right-knee-op",
-      "left-knee-shin-joint",
-      "left-shin-tarsus-joint",
-      "right-foot-op"};
-
-  std::vector<pinocchio::JointIndex> actuated_dofs;
-  for(std::size_t j=0;j<actuated_joints.size(); j++) {
-    actuated_dofs.push_back(model.idx_vs[model.getJointId(actuated_joints[j])]);
-  }
-  
-  Eigen::MatrixXd actuation_matrix(model.nv, actuated_dofs.size());
-  actuation_matrix.setZero();
-  for(std::size_t j=0;j<actuated_dofs.size(); j++) {
-    actuation_matrix(actuated_dofs[j], j) = 1.;
-  }
-
-  Eigen::MatrixXd spring_actuation_matrix(model.nv, model.nv);
-  Eigen::MatrixXd damping_actuation_matrix(model.nv, model.nv);
-
-  spring_actuation_matrix.setZero();
-  damping_actuation_matrix.setZero();
-
-  Eigen::VectorXd x_base(model.nq + model.nv);
-  x_base << 0.   ,  0.   ,  1.104,  0.   ,  0.   ,  0.   ,  1.   ,  0.   ,
-    0.   ,  0.298,  0.   ,  0.   ,  0.   ,  0.   ,  0.   , -1.398,
-    1.398, -1.398,  0.   ,  0.   ,  0.298,  0.   ,  0.   ,  0.   ,
-    0.   ,  0.   , -1.398,  1.398, -1.398, Eigen::VectorXd::Zero(28);
-  // actuation =
-  //   boost::make_shared<crocoddyl::ActuationModelFloatingBaseWithPassiveJoints>(
-  //                                                      state,
-  //                                                      actuation_matrix,
-  //                                                      spring_actuation_matrix,
-  //                                                      damping_actuation_matrix);
-
-  actuation =
-    boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
-  
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-  
-  cost->addCost("state", boost::make_shared<crocoddyl::CostModelState>(
-                          state,
-                          boost::make_shared<crocoddyl::ActivationModelQuad>(state->get_ndx()),
-			  x_base,
-                          actuation->get_nu()),
-                0.1);
 
-  cost->addCost("control", boost::make_shared<crocoddyl::CostModelControl>(
-                           state,
-                           boost::make_shared<crocoddyl::ActivationModelQuad>(actuation->get_nu()),
-                           Eigen::VectorXd::Random(actuation->get_nu())),
+  switch (state_type) {
+    case StateModelTypes::StateMultibody_TalosArm:
+      const pinocchio::Model& pin_model = *(state->get_pinocchio());
+      const pinocchio::Frame& frame_lf = pin_model.frames[pin_model.getFrameId("gripper_left_fingertip_1_link")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
+							frame_lf.parent,
+							frame_lf.placement));
+      break;
+    case StateModelTypes::StateMultibody_HyQ:
+      const pinocchio::Model& pin_model = *(state->get_pinocchio());
+      const pinocchio::Frame& frame_lf = pin_model.frames[pin_model.getFrameId("lf_foot")];
+      const pinocchio::Frame& frame_rf = pin_model.frames[pin_model.getFrameId("rf_foot")];
+      const pinocchio::Frame& frame_lh = pin_model.frames[pin_model.getFrameId("lh_foot")];
+      const pinocchio::Frame& frame_rh = pin_model.frames[pin_model.getFrameId("rh_foot")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
+							frame_lf.parent,
+							frame_lf.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
+							frame_rf.parent,
+							frame_rf.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
+							frame_lh.parent,
+							frame_lh.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_3D,
+							frame_rh.parent,
+							frame_rh.placement));      
+      break;
+    case StateModelTypes::StateMultibody_Talos:
+      const pinocchio::Model& pin_model = *(state->get_pinocchio());
+      const pinocchio::Frame& frame_lf = pin_model.frames[pin_model.getFrameId("left_sole_link")];
+      const pinocchio::Frame& frame_rf = pin_model.frames[pin_model.getFrameId("right_sole_link")];
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D,
+							frame_lf.parent,
+							frame_lf.placement));
+      contact.push_back(pinocchio::RigidConstraintModel(pinocchio::CONTACT_6D,
+							frame_rf.parent,
+							frame_rf.placement));      
+      break;
+    default:
+      throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
+      break;
+  }
+  cost->addCost("state",
+                CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 0.1);
-  
-  cost->addCost("com", boost::make_shared<crocoddyl::CostModelCoMPosition>(
-                          state,
-                          boost::make_shared<crocoddyl::ActivationModelQuad>(3),
-                          Eigen::Vector3d::Random(),
-                          actuation->get_nu()),
+  cost->addCost("control",
+                CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 0.1);
+  pinocchio::ProximalSettings prox(1e-12,0.,1);
   
-  action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics2>(state, actuation, contact_models, cost, 1);
-  //action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics2>(state, actuation, contact_models_empty, cost, 1e-5);
+  action = boost::make_shared<crocoddyl::DifferentialActionModelConstraintFwdDynamics>(state, actuation, contact, cost,prox);
   return action;
 }
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
   
 }  // namespace unittest
 }  // namespace crocoddyl

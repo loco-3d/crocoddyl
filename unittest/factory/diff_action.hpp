@@ -15,7 +15,7 @@
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn2.hpp"
+#include "crocoddyl/multibody/actions/constraint-fwddyn.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -29,7 +29,9 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelContactFwdDynamics_TalosArm,
     DifferentialActionModelContactFwdDynamics_HyQ,
     DifferentialActionModelContactFwdDynamics_Talos,
-    DifferentialActionModelContactFwdDynamics2_Cassie,
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+    DifferentialActionModelConstraintFwdDynamics_Talos,
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
     DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
     DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
@@ -62,8 +64,9 @@ class DifferentialActionModelFactory {
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics2> create_cassieContactFwdDynamics2() const;
-
+#if PINOCCHIO_VERSION_AT_LEAST(2, 9, 0)
+  boost::shared_ptr<crocoddyl::DifferentialActionModelConstraintFwdDynamics> create_constraintFwdDynamics(StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+#endif  // PINOCCHIO_VERSION_AT_LEAST(2,9,0)
 
 };
 
