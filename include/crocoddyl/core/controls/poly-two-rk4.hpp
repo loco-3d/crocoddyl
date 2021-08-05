@@ -118,9 +118,6 @@ struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDa
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
 
   template <template <typename Scalar> class Model>
