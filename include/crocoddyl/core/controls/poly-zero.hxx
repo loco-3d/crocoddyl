@@ -17,7 +17,7 @@ ControlParametrizationModelPolyZeroTpl<Scalar>::~ControlParametrizationModelPoly
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -28,14 +28,14 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
   data->dw_du.setIdentity();
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
@@ -70,7 +70,8 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, const Eigen::Ref<const VectorXs>&,
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(const Scalar,
+                                                                        const Eigen::Ref<const VectorXs>&,
                                                                         const Eigen::Ref<const MatrixXs>& A,
                                                                         Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
@@ -83,7 +84,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(double, 
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(double,
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(const Scalar,
                                                                                  const Eigen::Ref<const VectorXs>&,
                                                                                  const Eigen::Ref<const MatrixXs>& A,
                                                                                  Eigen::Ref<MatrixXs> out) const {

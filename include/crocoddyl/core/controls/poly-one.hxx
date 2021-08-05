@@ -17,7 +17,7 @@ ControlParametrizationModelPolyOneTpl<Scalar>::~ControlParametrizationModelPolyO
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -28,7 +28,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>&) const {
   data->dw_du.leftCols(nw_).diagonal().array() = 1 - 2 * t;
   data->dw_du.rightCols(nw_).diagonal().array() = 2 * t;
@@ -36,7 +36,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
@@ -74,7 +74,8 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::convertBounds(const Eigen::R
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>&,
+void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(const Scalar t,
+                                                                       const Eigen::Ref<const VectorXs>&,
                                                                        const Eigen::Ref<const MatrixXs>& A,
                                                                        Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
@@ -88,7 +89,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(double t,
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(double t,
+void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(const Scalar t,
                                                                                 const Eigen::Ref<const VectorXs>&,
                                                                                 const Eigen::Ref<const MatrixXs>& A,
                                                                                 Eigen::Ref<MatrixXs> out) const {
