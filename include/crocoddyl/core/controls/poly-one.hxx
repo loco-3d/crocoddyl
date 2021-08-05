@@ -30,8 +30,8 @@ template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
     const Eigen::Ref<const VectorXs>&) const {
-  data->dw_du.leftCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 1 - 2 * t);
-  data->dw_du.rightCols(nw_).diagonal() = MathBase::VectorXs::Constant(nw_, 2 * t);
+  data->dw_du.leftCols(nw_).diagonal().array() = 1 - 2 * t;
+  data->dw_du.rightCols(nw_).diagonal().array() = 2 * t;
 }
 
 template <typename Scalar>
