@@ -461,9 +461,9 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        if self.integrator is 'euler':
+        if self.integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
-        elif self.integrator is 'rk4':
+        elif self.integrator == 'rk4':
             model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
         return model
 
@@ -529,9 +529,9 @@ class SimpleQuadrupedalGaitProblem:
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                      costModel, 0., True)
-        if self.integrator is 'euler':
+        if self.integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
-        elif self.integrator is 'rk4':
+        elif self.integrator == 'rk4':
             model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.)
         return model
 
