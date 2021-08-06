@@ -21,6 +21,15 @@ namespace crocoddyl {
  * The size of the parameters p is twice the size of the control input u.
  * The first half of p represents the value of u at time 0.
  * The second half of p represents the value of u at time 0.5.
+ *
+ * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * where the former computes control input \f$\mathbf{w}\f from a set of control parameters \f$\mathbf{u}\f,
+ * and the latters defines useful operations across the Jacobian of the control-parametrization model.
+ * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
+ * dual of `calc`.
+ * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`, `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
 class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
@@ -38,7 +47,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  data   Data structure containing the control vector to write
+   * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -48,7 +57,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
-   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -59,7 +68,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
    * @brief Get a value of the control parameters such that the control at the specified time
    * t is equal to the specified value u
    *
-   * @param[in]  data   Data structure containing the control parameters vector to write
+   * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */

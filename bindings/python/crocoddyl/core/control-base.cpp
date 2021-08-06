@@ -25,16 +25,16 @@ void exposeControlParametrizationAbstract() {
                                          ":param nu: dimension of control parameters"))
       .def("calc", pure_virtual(&ControlParametrizationModelAbstract_wrap::calc), bp::args("self", "t", "u"),
            "Compute the control inputs.\n\n"
-           ":param data: the data on which the method operates.\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).")
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param u: control parameters (dim control.nu)")
       .def("calcDiff", pure_virtual(&ControlParametrizationModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "t", "u"),
            "Compute the Jacobian of the control inputs with respect to the control parameters.\n"
            "It assumes that calc has been run first.\n\n"
-           ":param data: the data on which the method operates.\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).")
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param u: control parameters (dim control.nu)")
       .def("createData", &ControlParametrizationModelAbstract_wrap::createData,
            &ControlParametrizationModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the control-parametrization data.\n\n"
@@ -44,15 +44,15 @@ void exposeControlParametrizationAbstract() {
       .def("params", pure_virtual(&ControlParametrizationModelAbstract_wrap::params),
            bp::args("self", "data", "t", "w"),
            "Update the control parameters u for a specified time t given the control input w.\n\n"
-           ":param data: the data on which the method operates.\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param w: control inputs (dim control.nw).")
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param w: control inputs (dim control.nw)")
       .def("convertBounds", pure_virtual(&ControlParametrizationModelAbstract_wrap::convertBounds_wrap),
            bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the control inputs w to bounds on the control parameters u.\n\n"
-           ":param w_lb: control lower bounds (dim control.nw).\n"
-           ":param w_ub: control upper bounds (dim control.nw).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu).")
+           ":param w_lb: control lower bounds (dim control.nw)\n"
+           ":param w_ub: control upper bounds (dim control.nw)\n"
+           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
       .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap),
            bp::args("self", "t", "u", "A"),
            "Compute the product between the given matrix A and the derivative of the control input \n"

@@ -39,7 +39,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  data   Data structure containing the control vector to write
+   * @param[in]  data   Control-parametrization numdiff data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -50,7 +50,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @brief Get a value of the control parameters such that the control at the specified time
    * t is equal to the specified value u
    *
-   * @param[in]  data   Data structure containing the control parameters vector to write
+   * @param[in]  data   Control-parametrization numdiff data
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */
@@ -71,7 +71,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
-   * @param[in]  data   Data structure containing the Jacobian matrix to write
+   * @param[in]  data   Control-parametrization numdiff data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */

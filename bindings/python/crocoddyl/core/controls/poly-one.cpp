@@ -29,16 +29,16 @@ void exposeControlParametrizationPolyOne() {
                                                         double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyOne::calc, bp::args("self", "data", "t", "u"),
           "Compute the control value.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param u: control parameters (dim control.nu).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyOne::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                         double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyOne::params, bp::args("self", "data", "t", "w"),
           "Compute the control parameters.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param w: control value (dim control.nw).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param w: control value (dim control.nw)")
       .def("convertBounds", &ControlParametrizationModelPolyOne::convertBounds, bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
            ":param w_lb: lower bounds on u (dim control.nw).\n"
@@ -49,9 +49,9 @@ void exposeControlParametrizationPolyOne() {
           "calcDiff", &ControlParametrizationModelPolyOne::calcDiff, bp::args("self", "data", "t", "u"),
           "Compute the Jacobian of the control value with respect to the control parameters.\n"
           "It assumes that calc has been run first.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param u: control parameters (dim control.nu).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
       .def("multiplyByJacobian", &ControlParametrizationModelPolyOne::multiplyByJacobian_J,
            bp::args("self", "t", "u", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "

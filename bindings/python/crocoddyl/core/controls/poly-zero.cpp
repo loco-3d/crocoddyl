@@ -28,29 +28,29 @@ void exposeControlParametrizationPolyZero() {
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyZero::calc, bp::args("self", "data", "t", "u"),
           "Compute the control value.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param u: control parameters (dim control.nu).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyZero::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyZero::params, bp::args("self", "data", "t", "u"),
           "Compute the control parameters.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param w: control value (dim control.nw).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param w: control value (dim control.nw)")
       .def("convertBounds", &ControlParametrizationModelPolyZero::convertBounds, bp::args("self", "u_lb", "u_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param w_lb: lower bounds on w (dim control.nw).\n"
-           ":param w_ub: upper bounds on w (dim control.nw).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu).")
+           ":param w_lb: lower bounds on w (dim control.nw)\n"
+           ":param w_ub: upper bounds on w (dim control.nw)\n"
+           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyZero::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calcDiff", &ControlParametrizationModelPolyZero::calcDiff, bp::args("self", "data", "t", "u"),
           "Compute the Jacobian of the control value with respect to the control parameters.\n"
           "It assumes that calc has been run first.\n\n"
-          ":param data: the data on which the method operates.\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param u: control parameters (dim control.nu).")
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
       .def("multiplyByJacobian", &ControlParametrizationModelPolyZero::multiplyByJacobian_J,
            bp::args("self", "t", "u", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
