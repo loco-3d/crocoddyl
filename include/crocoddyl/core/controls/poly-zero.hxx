@@ -27,10 +27,26 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
+#ifndef NDEBUG
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
+#else
+void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Scalar,
+    const Eigen::Ref<const VectorXs>&) const {
+#endif
+  // The Hessian has constant values which were set in createData.
+  assert_pretty(MatrixXs(data->dw_du.diagonal().asDiagonal()).isApprox(MatrixXs::Identity(nu_, nu_)),
+                "dw_du has wrong value");
+}
+
+template <typename Scalar>
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelPolyZeroTpl<Scalar>::createData() {
+  boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   data->dw_du.setIdentity();
+  return data;
 }
 
 template <typename Scalar>

@@ -32,10 +32,11 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> Data;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyZeroTpl();
@@ -59,6 +60,13 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
    */
   virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
                         const Eigen::Ref<const VectorXs>& u) const;
+
+  /**
+   * @brief Create the control-parametrization data
+   *
+   * @return the control-parametrization data
+   */
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
