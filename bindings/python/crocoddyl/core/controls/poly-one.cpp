@@ -18,7 +18,7 @@ void exposeControlParametrizationPolyOne() {
 
   bp::class_<ControlParametrizationModelPolyOne, bp::bases<ControlParametrizationModelAbstract> >(
       "ControlParametrizationModelPolyOne",
-      "Linear control.\n\n"
+      "Linear polynomial control.\n\n"
       "This control is a linear function of time (normalized in [0,1])."
       "The first half of the parameter vector contains the initial value of the differential control w, "
       "whereas the second half contains the value of w at t=0.5.",
@@ -53,23 +53,33 @@ void exposeControlParametrizationPolyOne() {
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def("multiplyByJacobian", &ControlParametrizationModelPolyOne::multiplyByJacobian_J,
-           bp::args("self", "t", "u", "A"),
+           bp::args("self", "data", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
            "parameters.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).\n"
-           ":param A: matrix to multiply (dim na x control.nw).\n"
-           ":return Product between A and the partial derivative of the value function (dim na x control.nu).")
+           "It assumes that calc has been run first.\n"
+           ":param data: control-parametrization data\n"
+           ":param A: matrix to multiply (dim na x control.nw)\n"
+           ":return Product between A and the partial derivative of the value function (dim na x control.nu)")
       .def(
           "multiplyJacobianTransposeBy", &ControlParametrizationModelPolyOne::multiplyJacobianTransposeBy_J,
-          bp::args("self", "t", "u", "A"),
+          bp::args("self", "data", "A"),
           "Compute the product between the transpose of the derivative of the control with respect to the parameters\n"
           "and a given matrix A.\n\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param u: control parameters (dim control.nu).\n"
-          ":param A: matrix to multiply (dim control.nw x na).\n"
+          "It assumes that calc has been run first.\n"
+          ":param data: control-parametrization data\n"
+          ":param A: matrix to multiply (dim control.nw x na)\n"
           ":return Product between the partial derivative of the value function (transposed) and A (dim control.nu x "
-          "na).");
+          "na)");
+
+  boost::python::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataPolyOne> >();
+
+  bp::class_<ControlParametrizationDataPolyOne, bp::bases<ControlParametrizationDataAbstract> >(
+      "ControlParametrizationDataPolyOne", "Control-parametrization data for the linear polynomial control.",
+      bp::init<ControlParametrizationModelPolyOne*>(bp::args("self", "model"),
+                                                    "Create control-parametrization data.\n\n"
+                                                    ":param model: linear polynomial control model"))
+      .add_property("c", bp::make_getter(&ControlParametrizationDataPolyOne::c, bp::return_internal_reference<>()),
+                    "polynomial coefficients of the linear control model that depends on time");
 }
 
 }  // namespace python

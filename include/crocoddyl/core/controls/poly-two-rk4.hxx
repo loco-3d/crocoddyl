@@ -23,23 +23,25 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
   d->tmp_t2 = t * t;
-  d->w = (2 * d->tmp_t2 - t) * p2 + (4 * (t - d->tmp_t2)) * p1 + (1 - 3 * t + 2 * d->tmp_t2) * p0;
+  d->c[2] = 2 * d->tmp_t2 - t;
+  d->c[1] = -2 * d->c[2];
+  d->c[0] = 1 - 2 * t + d->c[2];
+  d->w = d->c[2] * p2 + d->c[1] * p1 + d->c[0] * p0;
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
-  d->tmp_t2 = t * t;
-  d->dw_du.leftCols(nw_).diagonal().array() = 1 - 3 * t + 2 * d->tmp_t2;
-  d->dw_du.middleCols(nw_, nw_).diagonal().array() = 4 * (t - d->tmp_t2);
-  d->dw_du.rightCols(nw_).diagonal().array() = 2 * d->tmp_t2 - t;
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  d->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
+  d->dw_du.middleCols(nw_, nw_).diagonal().array() = d->c[1];
+  d->dw_du.rightCols(nw_).diagonal().array() = d->c[2];
 }
 
 template <typename Scalar>
@@ -91,37 +93,35 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(const Scalar t,
-                                                                          const Eigen::Ref<const VectorXs>&,
-                                                                          const Eigen::Ref<const MatrixXs>& A,
-                                                                          Eigen::Ref<MatrixXs> out) const {
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
   }
-  Scalar tmp_t2 = t * t;
-  out.leftCols(nw_) = (1 - 3 * t + 2 * tmp_t2) * A;
-  out.middleCols(nw_, nw_) = (4 * (t - tmp_t2)) * A;
-  out.rightCols(nw_) = (2 * tmp_t2 - t) * A;
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  out.leftCols(nw_) = d->c[0] * A;
+  out.middleCols(nw_, nw_) = d->c[1] * A;
+  out.rightCols(nw_) = d->c[2] * A;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTransposeBy(const Scalar t,
-                                                                                   const Eigen::Ref<const VectorXs>&,
-                                                                                   const Eigen::Ref<const MatrixXs>& A,
-                                                                                   Eigen::Ref<MatrixXs> out) const {
+void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTransposeBy(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out) const {
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  Scalar tmp_t2 = t * t;
-  out.topRows(nw_) = (1 - 3 * t + 2 * tmp_t2) * A;
-  out.middleRows(nw_, nw_) = (4 * (t - tmp_t2)) * A;
-  out.bottomRows(nw_) = (2 * tmp_t2 - t) * A;
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  out.topRows(nw_) = d->c[0] * A;
+  out.middleRows(nw_, nw_) = d->c[1] * A;
+  out.bottomRows(nw_) = d->c[2] * A;
 }
 
 }  // namespace crocoddyl

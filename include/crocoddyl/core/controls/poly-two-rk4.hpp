@@ -61,6 +61,8 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
+   * It assumes that `calc()` has been run first
+   *
    * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
@@ -101,25 +103,27 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByJacobian(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
    * a specified matrix
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  virtual void multiplyJacobianTransposeBy(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:
@@ -132,13 +136,18 @@ struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDa
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Vector3s Vector3s;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataPolyTwoRK4Tpl(Model<Scalar>* const model) : Base(model) {}
+  explicit ControlParametrizationDataPolyTwoRK4Tpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
+    c.setZero();
+  }
 
   virtual ~ControlParametrizationDataPolyTwoRK4Tpl() {}
 
+  Vector3s c;     //!< Polynomial coefficients of the second-order control model that depends on time
   Scalar tmp_t2;  //!< Temporary variable to store the square of the time
 };
 

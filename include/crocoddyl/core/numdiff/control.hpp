@@ -26,12 +26,17 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationModelAbstractTpl<_Scalar> Base;
-  typedef ControlParametrizationDataAbstractTpl<_Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationDataNumDiffTpl<_Scalar> Data;
+  typedef ControlParametrizationDataAbstractTpl<_Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> state);
+  /**
+   * @brief Construct a new ControlParametrizationModelNumDiff object
+   *
+   * @param model
+   */
+  explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model);
   virtual ~ControlParametrizationModelNumDiffTpl();
 
   /**
@@ -87,28 +92,44 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * @param[in]  data   Control-parametrization numdiff data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  void multiplyByJacobian(const Scalar t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
-                          Eigen::Ref<MatrixXs> out) const;
+  void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+                          const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
    * a specified matrix
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * @param[in]  data   Control-parametrization numdiff data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  void multiplyJacobianTransposeBy(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                    const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
+  /**
+   * @brief Get the model_ object
+   *
+   * @return Base&
+   */
+  const boost::shared_ptr<Base>& get_model() const;
+
+  /**
+   * @brief Get the disturbance_ object
+   *
+   * @return Scalar
+   */
   const Scalar get_disturbance() const;
+
+  /**
+   * @brief Set the disturbance_ object
+   *
+   * @param disturbance is the value used to find the numerical derivative
+   */
   void set_disturbance(const Scalar disturbance);
 
  private:
@@ -116,12 +137,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @brief This is the control we need to compute the numerical differentiation
    * from.
    */
-  boost::shared_ptr<Base> control_;
-
-  boost::shared_ptr<ControlParametrizationDataAbstract> data0_;  //!< Data used in methods multiplyByJacobian
-  boost::shared_ptr<ControlParametrizationDataAbstract>
-      dataCalcDiff_;                                                  //!< Data used for finite differences in calcDiff
-  boost::shared_ptr<ControlParametrizationDataNumDiff> dataNumDiff_;  //!< Data used for storing dp
+  boost::shared_ptr<Base> model_;
 
   /**
    * @brief This the increment used in the finite differentiation and integration.
@@ -144,13 +160,21 @@ struct ControlParametrizationDataNumDiffTpl : public ControlParametrizationDataA
   typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model) : Base(model) {
-    du = VectorXs::Zero(model->get_nu());
+  explicit ControlParametrizationDataNumDiffTpl(Model<Scalar>* const model) : Base(model), du(model->get_nu()) {
+    du.setZero();
+
+    const std::size_t nu = model->get_model()->get_nu();
+    data_0 = model->get_model()->createData();
+    for (std::size_t i = 0; i < nu; ++i) {
+      data_u.push_back(model->get_model()->createData());
+    }
   }
 
   virtual ~ControlParametrizationDataNumDiffTpl() {}
 
-  VectorXs du;  //!< temporary variable used for finite differencing
+  VectorXs du;                                   //!< temporary variable used for finite differencing
+  boost::shared_ptr<Base> data_0;                //!< The data that contains the final results
+  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation
 };
 
 }  // namespace crocoddyl

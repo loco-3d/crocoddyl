@@ -54,23 +54,23 @@ void exposeControlParametrizationAbstract() {
            ":param w_ub: control upper bounds (dim control.nw)\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
       .def("multiplyByJacobian", pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyByJacobian_wrap),
-           bp::args("self", "t", "u", "A"),
+           bp::args("self", "data", "A"),
            "Compute the product between the given matrix A and the derivative of the control input \n"
            "with respect to the control parameters (i.e., A*dw_du).\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).\n"
-           ":param A: matrix to multiply (dim na x control.nw).\n"
-           ":return Product between A and the partial derivative of the calc function (dim na x control.nu).")
+           "It assumes that calc has been run first.\n"
+           ":param data: control-parametrization data\n"
+           ":param A: matrix to multiply (dim na x control.nw)\n"
+           ":return Product between A and the partial derivative of the calc function (dim na x control.nu)")
       .def("multiplyJacobianTransposeBy",
            pure_virtual(&ControlParametrizationModelAbstract_wrap::multiplyJacobianTransposeBy_wrap),
-           bp::args("self", "t", "u", "A"),
+           bp::args("self", "data", "A"),
            "Compute the product between the transpose of the derivative of the control input \n"
            "with respect to the control parameters and a given matrix A (i.e., dw_du^T*A).\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control parameters (dim control.nu).\n"
-           ":param A: matrix to multiply (dim control.nw x na).\n"
+           "It assumes that calc has been run first.\n"
+           ":param data: control-parametrization data\n"
+           ":param A: matrix to multiply (dim control.nw x na)\n"
            ":return Product between the partial derivative of the calc function (transposed) and A (dim control.nu x "
-           "na).")
+           "na)")
       .add_property("nw", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nw),
                     "dimension of control inputs")
       .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu),

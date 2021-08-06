@@ -68,6 +68,8 @@ class ControlParametrizationModelAbstractTpl {
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
+   * It assumes that `calc()` has been run first
+   *
    * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
@@ -107,32 +109,33 @@ class ControlParametrizationModelAbstractTpl {
    * @brief Compute the product between the given matrix A and the derivative of the control input with respect to the
    * control parameters (i.e., A*dw_du).
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
    * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByJacobian(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
-  virtual MatrixXs multiplyByJacobian_J(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual MatrixXs multiplyByJacobian_J(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                         const Eigen::Ref<const MatrixXs>& A) const;
 
   /**
    * @brief Compute the product between the transpose of the derivative of the control input with respect to the
    * control parameters and a given matrix A (i.e., dw_du^T*A)
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  virtual void multiplyJacobianTransposeBy(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
 
-  virtual MatrixXs multiplyJacobianTransposeBy_J(const Scalar t, const Eigen::Ref<const VectorXs>& p,
+  virtual MatrixXs multiplyJacobianTransposeBy_J(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                                  const Eigen::Ref<const MatrixXs>& A) const;
 
   /**

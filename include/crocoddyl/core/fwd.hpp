@@ -130,6 +130,8 @@ class ControlParametrizationModelPolyZeroTpl;
 
 template <typename Scalar>
 class ControlParametrizationModelPolyOneTpl;
+template <typename Scalar>
+struct ControlParametrizationDataPolyOneTpl;
 
 template <typename Scalar>
 class ControlParametrizationModelPolyTwoRK4Tpl;
@@ -288,6 +290,7 @@ typedef ControlParametrizationModelAbstractTpl<double> ControlParametrizationMod
 typedef ControlParametrizationDataAbstractTpl<double> ControlParametrizationDataAbstract;
 typedef ControlParametrizationModelPolyZeroTpl<double> ControlParametrizationModelPolyZero;
 typedef ControlParametrizationModelPolyOneTpl<double> ControlParametrizationModelPolyOne;
+typedef ControlParametrizationDataPolyOneTpl<double> ControlParametrizationDataPolyOne;
 typedef ControlParametrizationModelPolyTwoRK4Tpl<double> ControlParametrizationModelPolyTwoRK4;
 typedef ControlParametrizationDataPolyTwoRK4Tpl<double> ControlParametrizationDataPolyTwoRK4;
 

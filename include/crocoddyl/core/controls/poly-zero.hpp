@@ -54,6 +54,8 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
   /**
    * @brief Get the value of the Jacobian of the control with respect to the parameters
    *
+   * It assumes that `calc()` has been run first
+   *
    * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
@@ -94,25 +96,27 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
    * parameters)
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  virtual void multiplyByJacobian(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
    * a specified matrix
    *
-   * @param[in]  t      Time
-   * @param[in]  u      Control parameters
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  virtual void multiplyJacobianTransposeBy(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+  virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
  protected:

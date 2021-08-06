@@ -100,7 +100,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
     d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
 
-    control_->multiplyByJacobian(0.0, u, da_du, d->da_du);
+    control_->multiplyByJacobian(d->control, da_du, d->da_du);
     d->Fu.topRows(nv).noalias() = time_step2_ * d->da_du;
     d->Fu.bottomRows(nv).noalias() = time_step_ * d->da_du;
 
@@ -109,13 +109,13 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
-    control_->multiplyJacobianTransposeBy(0.0, u, d->differential->Lu, d->Lu);
+    control_->multiplyJacobianTransposeBy(d->control, d->differential->Lu, d->Lu);
     d->Lu *= time_step_;
     d->Lxx.noalias() = time_step_ * d->differential->Lxx;
-    control_->multiplyByJacobian(0.0, u, d->differential->Lxu, d->Lxu);
+    control_->multiplyByJacobian(d->control, d->differential->Lxu, d->Lxu);
     d->Lxu *= time_step_;
-    control_->multiplyByJacobian(0.0, u, d->differential->Luu, d->Lwu);
-    control_->multiplyJacobianTransposeBy(0.0, u, d->Lwu, d->Luu);
+    control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
+    control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
     d->Luu *= time_step_;
   } else {
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);

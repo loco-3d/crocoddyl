@@ -33,17 +33,17 @@ bool ControlParametrizationModelAbstractTpl<Scalar>::checkData(
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
-    const Scalar t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A) const {
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) const {
   MatrixXs AJ(A.rows(), nu_);
-  multiplyByJacobian(t, u, A, AJ);
+  multiplyByJacobian(data, A, AJ);
   return AJ;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
-    const Scalar t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A) const {
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) const {
   MatrixXs JTA(nu_, A.cols());
-  multiplyJacobianTransposeBy(t, u, A, JTA);
+  multiplyJacobianTransposeBy(data, A, JTA);
   return JTA;
 }
 

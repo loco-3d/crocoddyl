@@ -86,10 +86,9 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(const Scalar,
-                                                                        const Eigen::Ref<const VectorXs>&,
-                                                                        const Eigen::Ref<const MatrixXs>& A,
-                                                                        Eigen::Ref<MatrixXs> out) const {
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out) const {
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -100,10 +99,9 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(const Sc
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(const Scalar,
-                                                                                 const Eigen::Ref<const VectorXs>&,
-                                                                                 const Eigen::Ref<const MatrixXs>& A,
-                                                                                 Eigen::Ref<MatrixXs> out) const {
+void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out) const {
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "

@@ -75,25 +75,24 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
     return p_bounds;
   }
 
-  void multiplyByJacobian(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
+  void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                           const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyByJacobian_wrap(t, u, A);
+    out = multiplyByJacobian_wrap(data, A);
   }
 
-  Eigen::MatrixXd multiplyByJacobian_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
+  Eigen::MatrixXd multiplyByJacobian_wrap(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                           const Eigen::Ref<const Eigen::MatrixXd>& A) const {
-    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyByJacobian").ptr(), t, (Eigen::VectorXd)u,
-                                     (Eigen::MatrixXd)A);
+    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyByJacobian").ptr(), data, (Eigen::MatrixXd)A);
   }
 
-  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
+  void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                    const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyJacobianTransposeBy_wrap(t, u, A);
+    out = multiplyJacobianTransposeBy_wrap(data, A);
   }
 
-  Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(double t, const Eigen::Ref<const Eigen::VectorXd>& u,
+  Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
                                                    const Eigen::Ref<const Eigen::MatrixXd>& A) const {
-    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyJacobianTransposeBy").ptr(), t, (Eigen::VectorXd)u,
+    return bp::call<Eigen::MatrixXd>(this->get_override("multiplyJacobianTransposeBy").ptr(), data,
                                      (Eigen::MatrixXd)A);
   }
 };
