@@ -31,14 +31,14 @@ ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& u) const {
   control_->calc(data, t, u);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& w) const {
   control_->params(data, t, w);
 }
@@ -53,7 +53,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::R
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& u) const {
   data->dw_du.setZero();
   for (std::size_t i = 0; i < nu_; ++i) {
@@ -66,7 +66,8 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& u,
+void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(const Scalar t,
+                                                                       const Eigen::Ref<const VectorXs>& u,
                                                                        const Eigen::Ref<const MatrixXs>& A,
                                                                        Eigen::Ref<MatrixXs> out) const {
   MatrixXs J(nw_, nu_);
@@ -76,7 +77,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(double t,
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(double t,
+void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(const Scalar t,
                                                                                 const Eigen::Ref<const VectorXs>& u,
                                                                                 const Eigen::Ref<const MatrixXs>& A,
                                                                                 Eigen::Ref<MatrixXs> out) const {
@@ -92,7 +93,7 @@ const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance() co
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
+void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance value is positive");

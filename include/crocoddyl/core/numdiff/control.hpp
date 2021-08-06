@@ -43,7 +43,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
-  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
             const Eigen::Ref<const VectorXs>& u) const;
 
   /**
@@ -54,7 +54,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */
-  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
+  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
               const Eigen::Ref<const VectorXs>& w) const;
 
   /**
@@ -87,7 +87,7 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    */
-  void multiplyByJacobian(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyByJacobian(const Scalar t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
                           Eigen::Ref<MatrixXs> out) const;
 
   /**
@@ -100,8 +100,8 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
    */
-  void multiplyJacobianTransposeBy(double t, const Eigen::Ref<const VectorXs>& u, const Eigen::Ref<const MatrixXs>& A,
-                                   Eigen::Ref<MatrixXs> out) const;
+  void multiplyJacobianTransposeBy(const Scalar t, const Eigen::Ref<const VectorXs>& u,
+                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
 
   const Scalar get_disturbance() const;
   void set_disturbance(const Scalar disturbance);
