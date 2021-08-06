@@ -34,8 +34,6 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> state);
   virtual ~ControlParametrizationModelNumDiffTpl();
 
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
-
   /**
    * @brief Get the value of the control at the specified time
    *
@@ -45,6 +43,23 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    */
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
             const Eigen::Ref<const VectorXs>& u) const;
+
+  /**
+   * @brief Get the value of the Jacobian of the control with respect to the parameters
+   *
+   * @param[in]  data   Control-parametrization numdiff data
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control parameters
+   */
+  void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+                const Eigen::Ref<const VectorXs>& u) const;
+
+  /**
+   * @brief Create the control-parametrization data
+   *
+   * @return the control-parametrization data
+   */
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
@@ -67,16 +82,6 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
    */
   void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
                      Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
-
-  /**
-   * @brief Get the value of the Jacobian of the control with respect to the parameters
-   *
-   * @param[in]  data   Control-parametrization numdiff data
-   * @param[in]  t      Time in [0,1]
-   * @param[in]  u      Control parameters
-   */
-  void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, double t,
-                const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the

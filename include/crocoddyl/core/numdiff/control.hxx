@@ -24,16 +24,30 @@ template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
-ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
-  return control_->createData();
-}
-
-template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& u) const {
   control_->calc(data, t, u);
+}
+
+template <typename Scalar>
+void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+    const Eigen::Ref<const VectorXs>& u) const {
+  data->dw_du.setZero();
+  for (std::size_t i = 0; i < nu_; ++i) {
+    dataNumDiff_->du = u;
+    dataNumDiff_->du(i) += disturbance_;
+    calc(dataCalcDiff_, t, dataNumDiff_->du);
+    data->dw_du.col(i) = dataCalcDiff_->w - data->w;
+  }
+  data->dw_du /= disturbance_;
+}
+
+template <typename Scalar>
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
+  return control_->createData();
 }
 
 template <typename Scalar>
@@ -51,19 +65,6 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::R
   control_->convertBounds(w_lb, w_ub, u_lb, u_ub);
 }
 
-template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
-    const Eigen::Ref<const VectorXs>& u) const {
-  data->dw_du.setZero();
-  for (std::size_t i = 0; i < nu_; ++i) {
-    dataNumDiff_->du = u;
-    dataNumDiff_->du(i) += disturbance_;
-    calc(dataCalcDiff_, t, dataNumDiff_->du);
-    data->dw_du.col(i) = dataCalcDiff_->w - data->w;
-  }
-  data->dw_du /= disturbance_;
-}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(const Scalar t,
