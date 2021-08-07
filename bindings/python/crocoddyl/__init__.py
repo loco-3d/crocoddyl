@@ -240,10 +240,14 @@ class GepettoDisplay(DisplayAbstract):
                 if hasattr(data, "differential"):
                     # Update the frame placement if there is not contact.
                     # Note that, in non-contact cases, the action model does not compute it for efficiency reason
-                    if len(data.differential.multibody.contacts.contacts.todict().items()) == 0:
+                    if isinstance(data.differential, libcrocoddyl_pywrap.StdVec_DiffActionData):
+                        differential = data.differential[0]
+                    else:
+                        differential = data.differential
+                    if len(differential.multibody.contacts.contacts.todict().items()) == 0:
                         pinocchio.updateFramePlacement(model.differential.state.pinocchio,
                                                        data.differential.multibody.pinocchio, frameId)
-                    pose = data.differential.multibody.pinocchio.oMf[frameId]
+                    pose = differential.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                     pose = data.multibody.pinocchio.oMf[frameId]
