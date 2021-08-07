@@ -23,7 +23,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   d->c[1] = 2 * t;
   d->c[0] = 1 - d->c[1];
   data->w = d->c[0] * u.head(nw_) + d->c[1] * u.tail(nw_);
@@ -33,7 +33,7 @@ template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   data->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
   data->dw_du.rightCols(nw_).diagonal().array() = d->c[1];
 }
@@ -93,7 +93,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   out.leftCols(nw_) = d->c[0] * A;
   out.rightCols(nw_) = d->c[1] * A;
 }
@@ -108,7 +108,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   out.topRows(nw_) = d->c[0] * A;
   out.bottomRows(nw_) = d->c[1] * A;
 }

@@ -44,7 +44,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
   control_->calc(d->control, 0., u);
@@ -87,7 +87,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
   control_->calc(d->control, 0., u);
@@ -161,7 +161,7 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   }
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   d->control->w *= 0.;
   differential_->quasiStatic(d->differential, d->control->w, x, maxiter, tol);

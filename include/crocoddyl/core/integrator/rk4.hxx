@@ -54,7 +54,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
   control_->calc(d->control, rk4_c_[0], u);
@@ -108,7 +108,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   const std::size_t nv = differential_->get_state()->get_nv();
 
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   control_->calc(d->control, 0., u);
   d->ws[0] = d->control->w;
@@ -237,7 +237,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
   }
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   d->control->w *= 0.;
   differential_->quasiStatic(d->differential[0], d->control->w, x, maxiter, tol);
   control_->params(d->control, 0.0, d->control->w);

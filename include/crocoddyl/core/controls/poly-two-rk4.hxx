@@ -23,7 +23,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
@@ -38,7 +38,7 @@ template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   d->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
   d->dw_du.middleCols(nw_, nw_).diagonal().array() = d->c[1];
   d->dw_du.rightCols(nw_).diagonal().array() = d->c[2];
@@ -102,7 +102,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   out.leftCols(nw_) = d->c[0] * A;
   out.middleCols(nw_, nw_) = d->c[1] * A;
   out.rightCols(nw_) = d->c[2] * A;
@@ -118,7 +118,7 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTranspose
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   out.topRows(nw_) = d->c[0] * A;
   out.middleRows(nw_, nw_) = d->c[1] * A;
   out.bottomRows(nw_) = d->c[2] * A;
