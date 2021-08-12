@@ -16,23 +16,14 @@ namespace crocoddyl {
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()),
-      differential_(model),
-      time_step_(time_step),
-      time_step2_(time_step * time_step),
-      with_cost_residual_(with_cost_residual),
-      enable_integration_(true) {
-  Base::set_u_lb(differential_->get_u_lb());
-  Base::set_u_ub(differential_->get_u_ub());
-  if (time_step_ < Scalar(0.)) {
-    time_step_ = Scalar(1e-3);
-    time_step2_ = time_step_ * time_step_;
-    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
-  if (time_step == Scalar(0.)) {
-    enable_integration_ = false;
-  }
-}
+    : Base(model, time_step, with_cost_residual) {}
+
+template <typename Scalar>
+IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    const bool with_cost_residual)
+    : Base(model, control, time_step, with_cost_residual) {}
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
@@ -53,10 +44,11 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  differential_->calc(d->differential, x, u);
+  control_->calc(d->control, 0., u);
+  differential_->calc(d->differential, x, d->control->w);
 
   // Computing the next state (discrete time)
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
@@ -95,10 +87,11 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   const std::size_t nv = differential_->get_state()->get_nv();
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
-  differential_->calcDiff(d->differential, x, u);
+  control_->calc(d->control, 0., u);
+  differential_->calcDiff(d->differential, x, d->control->w);
 
   if (enable_integration_) {
     const MatrixXs& da_dx = d->differential->Fx;
@@ -107,18 +100,23 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
     d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
 
-    d->Fu.topRows(nv).noalias() = da_du * time_step2_;
-    d->Fu.bottomRows(nv).noalias() = da_du * time_step_;
+    control_->multiplyByJacobian(d->control, da_du, d->da_du);
+    d->Fu.topRows(nv).noalias() = time_step2_ * d->da_du;
+    d->Fu.bottomRows(nv).noalias() = time_step_ * d->da_du;
 
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
     differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
-    d->Lu.noalias() = time_step_ * d->differential->Lu;
+    control_->multiplyJacobianTransposeBy(d->control, d->differential->Lu, d->Lu);
+    d->Lu *= time_step_;
     d->Lxx.noalias() = time_step_ * d->differential->Lxx;
-    d->Lxu.noalias() = time_step_ * d->differential->Lxu;
-    d->Luu.noalias() = time_step_ * d->differential->Luu;
+    control_->multiplyByJacobian(d->control, d->differential->Lxu, d->Lxu);
+    d->Lxu *= time_step_;
+    control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
+    control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
+    d->Luu *= time_step_;
   } else {
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
@@ -132,6 +130,10 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
 
 template <typename Scalar>
 boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelEulerTpl<Scalar>::createData() {
+  if (control_->get_nu() > differential_->get_nu())
+    std::cerr
+        << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero"
+        << std::endl;
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
@@ -143,42 +145,6 @@ bool IntegratedActionModelEulerTpl<Scalar>::checkData(const boost::shared_ptr<Ac
   } else {
     return false;
   }
-}
-
-template <typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
-IntegratedActionModelEulerTpl<Scalar>::get_differential() const {
-  return differential_;
-}
-
-template <typename Scalar>
-const Scalar IntegratedActionModelEulerTpl<Scalar>::get_dt() const {
-  return time_step_;
-}
-
-template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::set_dt(const Scalar dt) {
-  if (dt < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "dt has positive value");
-  }
-  time_step_ = dt;
-  time_step2_ = dt * dt;
-}
-
-template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::set_differential(
-    boost::shared_ptr<DifferentialActionModelAbstract> model) {
-  const std::size_t nu = model->get_nu();
-  if (nu_ != nu) {
-    nu_ = nu;
-    unone_ = VectorXs::Zero(nu_);
-  }
-  nr_ = model->get_nr();
-  state_ = model->get_state();
-  differential_ = model;
-  Base::set_u_lb(differential_->get_u_lb());
-  Base::set_u_ub(differential_->get_u_ub());
 }
 
 template <typename Scalar>
@@ -195,9 +161,12 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   }
 
   // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
-  differential_->quasiStatic(d->differential, u, x, maxiter, tol);
+  d->control->w *= 0.;
+  differential_->quasiStatic(d->differential, d->control->w, x, maxiter, tol);
+  control_->params(d->control, 0., d->control->w);
+  u = d->control->u;
 }
 
 template <typename Scalar>

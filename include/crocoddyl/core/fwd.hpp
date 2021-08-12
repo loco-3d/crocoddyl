@@ -43,6 +43,11 @@ struct DifferentialActionDataLQRTpl;
 
 // integrated action
 template <typename Scalar>
+class IntegratedActionModelAbstractTpl;
+template <typename Scalar>
+struct IntegratedActionDataAbstractTpl;
+
+template <typename Scalar>
 class IntegratedActionModelEulerTpl;
 template <typename Scalar>
 struct IntegratedActionDataEulerTpl;
@@ -113,6 +118,25 @@ class StateAbstractTpl;
 
 template <typename Scalar>
 class StateVectorTpl;
+
+// control
+template <typename Scalar>
+class ControlParametrizationModelAbstractTpl;
+template <typename Scalar>
+struct ControlParametrizationDataAbstractTpl;
+
+template <typename Scalar>
+class ControlParametrizationModelPolyZeroTpl;
+
+template <typename Scalar>
+class ControlParametrizationModelPolyOneTpl;
+template <typename Scalar>
+struct ControlParametrizationDataPolyOneTpl;
+
+template <typename Scalar>
+class ControlParametrizationModelPolyTwoRK4Tpl;
+template <typename Scalar>
+struct ControlParametrizationDataPolyTwoRK4Tpl;
 
 // actuation
 template <typename Scalar>
@@ -197,6 +221,11 @@ template <typename Scalar>
 class StateNumDiffTpl;
 
 template <typename Scalar>
+class ControlParametrizationModelNumDiffTpl;
+template <typename Scalar>
+struct ControlParametrizationDataNumDiffTpl;
+
+template <typename Scalar>
 class ActuationModelNumDiffTpl;
 template <typename Scalar>
 struct ActuationDataNumDiffTpl;
@@ -220,6 +249,8 @@ typedef DifferentialActionDataAbstractTpl<double> DifferentialActionDataAbstract
 typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
 typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
 
+typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
+typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;
@@ -255,6 +286,14 @@ typedef ActivationDataAbstractTpl<double> ActivationDataAbstract;
 typedef StateAbstractTpl<double> StateAbstract;
 typedef StateVectorTpl<double> StateVector;
 
+typedef ControlParametrizationModelAbstractTpl<double> ControlParametrizationModelAbstract;
+typedef ControlParametrizationDataAbstractTpl<double> ControlParametrizationDataAbstract;
+typedef ControlParametrizationModelPolyZeroTpl<double> ControlParametrizationModelPolyZero;
+typedef ControlParametrizationModelPolyOneTpl<double> ControlParametrizationModelPolyOne;
+typedef ControlParametrizationDataPolyOneTpl<double> ControlParametrizationDataPolyOne;
+typedef ControlParametrizationModelPolyTwoRK4Tpl<double> ControlParametrizationModelPolyTwoRK4;
+typedef ControlParametrizationDataPolyTwoRK4Tpl<double> ControlParametrizationDataPolyTwoRK4;
+
 typedef ActuationDataAbstractTpl<double> ActuationDataAbstract;
 typedef ActuationModelAbstractTpl<double> ActuationModelAbstract;
 typedef ActuationSquashingDataTpl<double> ActuationSquashingData;
@@ -280,6 +319,8 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
+typedef ControlParametrizationModelNumDiffTpl<double> ControlParametrizationModelNumDiff;
+typedef ControlParametrizationDataNumDiffTpl<double> ControlParametrizationDataNumDiff;
 typedef DifferentialActionModelNumDiffTpl<double> DifferentialActionModelNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;

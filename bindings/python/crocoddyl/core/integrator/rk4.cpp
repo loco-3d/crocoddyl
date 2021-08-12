@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC,
+//                          University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/integ-action-base.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
 namespace crocoddyl {
@@ -16,7 +17,7 @@ namespace python {
 void exposeIntegratedActionRK4() {
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelRK4> >();
 
-  bp::class_<IntegratedActionModelRK4, bp::bases<ActionModelAbstract> >(
+  bp::class_<IntegratedActionModelRK4, bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
       "IntegratedActionModelRK4",
       "RK4 integrator for differential action models.\n\n"
       "This class implements an RK4 integrator\n"
@@ -31,7 +32,15 @@ void exposeIntegratedActionRK4() {
           "Initialize the RK4 integrator.\n\n"
           ":param diffModel: differential action model\n"
           ":param stepTime: step time (default 1e-3)\n"
-          ":param withCostResidual: includes the cost residuals and derivatives."))
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+                    boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
+          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
+          "Initialize the RK4 integrator.\n\n"
+          ":param diffModel: differential action model\n"
+          ":param control: the control parametrization\n"
+          ":param stepTime: step time (default 1e-3)\n"
+          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -58,17 +67,11 @@ void exposeIntegratedActionRK4() {
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
-      .add_property("differential",
-                    bp::make_function(&IntegratedActionModelRK4::get_differential,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    &IntegratedActionModelRK4::set_differential, "differential action model")
-      .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
-                    "step time");
+      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
-  bp::class_<IntegratedActionDataRK4, bp::bases<ActionDataAbstract> >(
+  bp::class_<IntegratedActionDataRK4, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataRK4", "RK4 integrator data.",
       bp::init<IntegratedActionModelRK4*>(bp::args("self", "model"),
                                           "Create RK4 integrator data.\n\n"
@@ -76,20 +79,26 @@ void exposeIntegratedActionRK4() {
       .add_property(
           "differential",
           bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
-          "differential action data")
+          "array of differential action data")
       .add_property(
           "integral",
           bp::make_getter(&IntegratedActionDataRK4::integral, bp::return_value_policy<bp::return_by_value>()),
           "List with the RK4 terms related to the cost")
+      .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
+                    "state rate.")
       .add_property("ki", bp::make_getter(&IntegratedActionDataRK4::ki, bp::return_internal_reference<>()),
                     "List with the RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
                     "List with the states where f is evaluated in the RK4 integration scheme")
-      .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
-                    "state rate.")
+      .add_property("ws", bp::make_getter(&IntegratedActionDataRK4::ws, bp::return_internal_reference<>()),
+                    "Differential control inputs evaluated in the RK4 integration scheme")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the state of the RK4 "
                     "integration method. d(x+dx)/dx")
+      .add_property(
+          "dki_dw", bp::make_getter(&IntegratedActionDataRK4::dki_dw, bp::return_internal_reference<>()),
+          "List with the partial derivatives of dynamics with respect to to the control of the differential model "
+          "integration method. d(x+dx)/dw")
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK4::dki_du, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the control of the RK4 "
                     "integration method. d(x+dx)/du")

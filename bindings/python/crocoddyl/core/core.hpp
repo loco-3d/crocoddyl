@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,9 +16,11 @@ namespace python {
 
 void exposeDataCollector();
 void exposeStateAbstract();
+void exposeControlParametrizationAbstract();
 void exposeActuationAbstract();
 void exposeActionAbstract();
 void exposeDifferentialActionAbstract();
+void exposeIntegratedActionAbstract();
 void exposeResidualAbstract();
 void exposeActivationAbstract();
 void exposeSquashingAbstract();
@@ -38,6 +40,9 @@ void exposeActivationNumDiff();
 void exposeShootingProblem();
 void exposeSolverAbstract();
 void exposeStateEuclidean();
+void exposeControlParametrizationPolyZero();
+void exposeControlParametrizationPolyOne();
+void exposeControlParametrizationPolyTwoRK4();
 void exposeActionUnicycle();
 void exposeActionLQR();
 void exposeDifferentialActionLQR();

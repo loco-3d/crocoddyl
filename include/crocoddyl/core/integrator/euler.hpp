@@ -10,26 +10,30 @@
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
+class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef ActionModelAbstractTpl<Scalar> Base;
+  typedef IntegratedActionModelAbstractTpl<Scalar> Base;
   typedef IntegratedActionDataEulerTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ControlParametrizationModelAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                boost::shared_ptr<ControlParametrizationModelAbstract> control,
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelEulerTpl();
 
@@ -44,12 +48,6 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
                            const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
 
-  const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
-  const Scalar get_dt() const;
-
-  void set_dt(const Scalar dt);
-  void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
-
   /**
    * @brief Print relevant information of the Euler integrator model
    *
@@ -58,26 +56,23 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::nr_;     //!< Dimension of the cost residual
-  using Base::nu_;     //!< Control dimension
-  using Base::state_;  //!< Model of the state
-  using Base::unone_;  //!< Zero control
-
- private:
-  boost::shared_ptr<DifferentialActionModelAbstract> differential_;
-  Scalar time_step_;
-  Scalar time_step2_;
-  bool with_cost_residual_;
-  bool enable_integration_;
+  using Base::control_;             //!< Control parametrization
+  using Base::differential_;        //!< Differential action model
+  using Base::enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
+  using Base::nu_;                  //!< Dimension of the control
+  using Base::state_;               //!< Model of the state
+  using Base::time_step2_;          //!< Square of the time step used for integration
+  using Base::time_step_;           //!< Time step used for integration
+  using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 };
 
 template <typename _Scalar>
-struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
+struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef ActionDataAbstractTpl<Scalar> Base;
+  typedef IntegratedActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -85,12 +80,17 @@ struct IntegratedActionDataEulerTpl : public ActionDataAbstractTpl<_Scalar> {
   explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
     differential = model->get_differential()->createData();
     const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nv = model->get_state()->get_nv();
     dx = VectorXs::Zero(ndx);
+    da_du = MatrixXs::Zero(nv, model->get_nu());
+    Lwu = MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu());
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
+  MatrixXs da_du;
+  MatrixXs Lwu;  // Hessian of the cost function with respect to the control input (w) and control parameters (u)
 
   using Base::cost;
   using Base::Fu;

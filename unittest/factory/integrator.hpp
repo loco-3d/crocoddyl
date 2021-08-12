@@ -11,8 +11,8 @@
 
 #include <iterator>
 
-#include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/numdiff/action.hpp"
+#include "control.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -39,8 +39,12 @@ class IntegratorFactory {
   explicit IntegratorFactory();
   ~IntegratorFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
       IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model) const;
+
+  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
+      IntegratorTypes::Type type, boost::shared_ptr<DifferentialActionModelAbstract> model,
+      boost::shared_ptr<ControlParametrizationModelAbstract> control) const;
 };
 
 }  // namespace unittest

@@ -189,6 +189,24 @@ class GepettoDisplay(DisplayAbstract):
                                         continue
                             fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
+                elif isinstance(data.differential, libcrocoddyl_pywrap.StdVec_DiffActionData):
+                    fc = []
+                    for key, contact in data.differential[0].multibody.contacts.contacts.todict().items():
+                        if model.differential.contacts.contacts[key].active:
+                            joint = model.differential.state.pinocchio.frames[contact.frame].parent
+                            oMf = contact.pinocchio.oMi[joint] * contact.jMf
+                            fiMo = pinocchio.SE3(contact.pinocchio.oMi[joint].rotation.T, contact.jMf.translation)
+                            force = fiMo.actInv(contact.f)
+                            R = np.eye(3)
+                            mu = 0.7
+                            for k, c in model.differential.costs.costs.todict().items():
+                                if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
+                                    if contact.frame == c.cost.reference.id:
+                                        R = c.cost.reference.cone.R
+                                        mu = c.cost.reference.cone.mu
+                                        continue
+                            fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                    fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.todict().items():
@@ -222,10 +240,14 @@ class GepettoDisplay(DisplayAbstract):
                 if hasattr(data, "differential"):
                     # Update the frame placement if there is not contact.
                     # Note that, in non-contact cases, the action model does not compute it for efficiency reason
-                    if len(data.differential.multibody.contacts.contacts.todict().items()) == 0:
+                    if isinstance(data.differential, libcrocoddyl_pywrap.StdVec_DiffActionData):
+                        differential = data.differential[0]
+                    else:
+                        differential = data.differential
+                    if len(differential.multibody.contacts.contacts.todict().items()) == 0:
                         pinocchio.updateFramePlacement(model.differential.state.pinocchio,
                                                        data.differential.multibody.pinocchio, frameId)
-                    pose = data.differential.multibody.pinocchio.oMf[frameId]
+                    pose = differential.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                     pose = data.multibody.pinocchio.oMf[frameId]
