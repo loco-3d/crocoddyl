@@ -2,7 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2019-2022, University of Edinburgh, CTU, INRIA,
-//                          Heriot-Watt University
+//                          Heriot-Watt University, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,11 +43,14 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm:
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
+      os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm:
       os << "DifferentialActionModelFreeInvDynamics_TalosArm";
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
-      os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
+      os << "DifferentialActionModelFreeInvDynamics_TalosArm_Squashed";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       os << "DifferentialActionModelContactFwdDynamics_TalosArm";
@@ -107,6 +110,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
                                       ActuationModelTypes::ActuationModelSquashingFull);
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
+      action = create_freeInvDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                      ActuationModelTypes::ActuationModelSquashingFull);
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
                                          ActuationModelTypes::ActuationModelFull, false);
@@ -143,40 +150,6 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
       break;
   }
-  return action;
-}
-
-boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
-DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type state_type,
-                                                       ActuationModelTypes::Type actuation_type) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> action;
-  boost::shared_ptr<crocoddyl::StateMultibody> state;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  boost::shared_ptr<crocoddyl::CostModelSum> cost;
-  boost::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
-  state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
-  actuation = ActuationModelFactory().create(actuation_type, state_type);
-  cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu() + state->get_nv());
-  cost->addCost("state",
-                CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
-                                          ActivationModelTypes::ActivationModelQuad),
-                1.);
-  cost->addCost("control",
-                CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
-                                          ActivationModelTypes::ActivationModelQuad),
-                1.);
-  cost->addCost("frame",
-                CostModelFactory().create(CostModelTypes::CostModelResidualFramePlacement, state_type,
-                                          ActivationModelTypes::ActivationModelQuad),
-                1.);
-  constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, actuation->get_nu());
-  constraint->addConstraint(
-      "frame", ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality,
-                                               state_type));
-  constraint->addConstraint(
-      "frame-velocity",
-      ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type));
-  action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost, constraint);
   return action;
 }
 
@@ -220,6 +193,41 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
       "frame-velocity",
       ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type));
   action = boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, cost, constraint);
+  return action;
+}
+
+boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
+DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type state_type,
+                                                       ActuationModelTypes::Type actuation_type) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> action;
+  boost::shared_ptr<crocoddyl::StateMultibody> state;
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  boost::shared_ptr<crocoddyl::CostModelSum> cost;
+  boost::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
+  state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
+  actuation = ActuationModelFactory().create(actuation_type, state_type);
+  const std::size_t nu = state->get_nv() + actuation->get_nu();
+  cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
+  cost->addCost("state",
+                CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, nu),
+                1.);
+  cost->addCost("control",
+                CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, nu),
+                1.);
+  cost->addCost("frame",
+                CostModelFactory().create(CostModelTypes::CostModelResidualFramePlacement, state_type,
+                                          ActivationModelTypes::ActivationModelQuad, nu),
+                1.);
+  constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, nu);
+  constraint->addConstraint(
+      "frame", ConstraintModelFactory().create(ConstraintModelTypes::ConstraintModelResidualFramePlacementEquality,
+                                               state_type, nu));
+  constraint->addConstraint("frame-velocity",
+                            ConstraintModelFactory().create(
+                                ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type, nu));
+  action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost, constraint);
   return action;
 }
 
