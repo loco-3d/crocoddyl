@@ -23,22 +23,12 @@ template <typename Scalar>
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeInvDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints)
-    :  
-    // if (constraints_ != nullptr) {
-    //   Base(state, state.get_nv()+actuation->get_nu(), costs->get_nr()), constraints.get_ng(), constraints.get_nh()+state.get_nv()),
-    //   constraints_(constraints),
-    // }
-    //if (constraints_ == nullptr){
-      Base(state, state.get_nv()+actuation->get_nu(), costs->get_nr()), 0, constraints.get_nh()+state.get_nv()),
-      constraints_(ConstraintModelManager(state, state->get_nv() + actuation->get_nu())),
-    //}
-   
-    
+    : Base(state, state->get_nv() + actuation->get_nu(), costs->get_nr(), constraints->get_ng(),
+           constraints->get_nh() + state->get_nv()),
+      constraints_(constraints),
       actuation_(actuation),
       costs_(costs),
-      pinocchio_(*state->get_pinocchio().get())) 
-      
-      {
+      pinocchio_(*state->get_pinocchio().get()) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
@@ -46,13 +36,12 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
   Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
   Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
 
-  if (constraints_ != nullptr) {
-    ng_ = constraints_->get_ng();
-    nh_ = constraints_->get_nh();
-  }
   constraints_->addConstraint(
-      "rnea", ConstraintModelResidual(
-                  state_, DifferentialActionModelFreeInvDynamics::ResidualModelRnea(state_, actuation_->get_nu())))
+      "rnea",
+      boost::make_shared<ConstraintModelResidual>(
+          state_,
+          boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar> >(
+              state_, actuation_->get_nu())));
 }
 
 template <typename Scalar>
@@ -212,14 +201,15 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::ResidualModelRneaTpl<Sca
 template <typename Scalar>
 boost::shared_ptr<ResidualDataAbstractTpl<Scalar>>
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar>::createData() {
-  return boost::allocate_shared<rneaData>(Eigen::aligned_allocator<rneaData>(), this);
+  return boost::allocate_shared<typename Data::ResidualDataRneaTpl<Scalar>>(
+      Eigen::aligned_allocator<typename Data::ResidualDataRneaTpl<Scalar>>(), this);
 }
 
 // template <typename Scalar>
 // bool DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar>::checkData(
 //     const boost::shared_ptr<ResidualDataAbstract>& data) {
-//   boost::shared_ptr<rneaData> d = boost::dynamic_pointer_cast<rneaData>(data);
-//   if (d != NULL) {
+//   boost::shared_ptr<typename Data::ResidualDataRneaTpl<Scalar>> d = boost::dynamic_pointer_cast<typename
+//   Data::ResidualDataRneaTpl<Scalar>>(data); if (d != NULL) {
 //     return true;
 //   } else {
 //     return false;

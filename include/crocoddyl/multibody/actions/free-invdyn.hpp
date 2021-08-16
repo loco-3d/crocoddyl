@@ -63,20 +63,17 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
-  template <typename _Scalar>
   class ResidualModelRneaTpl : public ResidualModelAbstractTpl<_Scalar> {
    public:
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
-    typedef ResidualModelAbstractTpl<Scalar> rneaBase;
-    typedef DifferentialActionDataFreeInvDynamicsTpl<Scalar>::ResidualDataRneaTpl<Scalar> rneaData;
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
     typedef typename MathBase::Vector3s Vector3s;
     typedef typename MathBase::VectorXs VectorXs;
 
-    ResidualModelRneaTpl(boost::shared_ptr<StateMultibodyTpl> state, const std::size_t nu);
+    ResidualModelRneaTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
     virtual ~ResidualModelRneaTpl();
 
     virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -95,15 +92,14 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     using Base::u_dependent_;
     using Base::unone_;
     using Base::v_dependent_;
-  }
+  };
 
   /**
    * @brief Print relevant information of the free forward-dynamics model
    *
    * @param[out] os  Output stream object
    */
-  virtual void
-  print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::ng_;     //!< Number of inequality constraints
@@ -135,10 +131,9 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData()),
         costs(model->get_costs()->createData(&multibody)),
-        Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
-        tmp_xstatic(model->get_state()->get_nx()).tmp_ustatic(model->get_nu()) {
+        tmp_xstatic(model->get_state()->get_nx()),
+        tmp_ustatic(model->get_nu()) {
     costs->shareMemory(this);
     if (model->get_constraints() != nullptr) {
       constraints = model->get_constraints()->createData(&multibody);
@@ -149,7 +144,6 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
     tmp_ustatic.setZero();
   }
 
-  template <typename _Scalar>
   struct ResidualDataRneaTpl : public ResidualDataAbstractTpl<_Scalar> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
