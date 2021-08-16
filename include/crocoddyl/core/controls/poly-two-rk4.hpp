@@ -26,8 +26,9 @@ namespace crocoddyl {
  * because it requires the value of u exactly at 0, 0.5 and 1.
  *
  * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
- * where the former computes control input \f$\mathbf{w}\f from a set of control parameters \f$\mathbf{u}\f,
- * and the latters defines useful operations across the Jacobian of the control-parametrization model.
+ * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
+ * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
+ * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
  * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
  * dual of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.

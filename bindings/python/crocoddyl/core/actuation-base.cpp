@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,11 +17,11 @@ void exposeActuationAbstract() {
 
   bp::class_<ActuationModelAbstract_wrap, boost::noncopyable>(
       "ActuationModelAbstract",
-      "Abstract class for actuation models.\n\n"
-      "In crocoddyl, an actuation model is a block that takes u and outputs a (in continouos\n"
-      "time), where a is the actuation signal of our system, and it also computes the derivatives\n"
-      "of this model. These computations are mainly carry on inside calc() and calcDiff(),\n"
-      "respectively.",
+      "Abstract class for actuation-mapping models.\n\n"
+      "In Crocoddyl, an actuation model is a function that maps control inputs u into generalized\n"
+      " torques a, where a is also named as the actuation signal of our system.\n"
+      "The computation of the actuation signal and its partial derivatives are mainly carry on\n"
+      "inside calc() and calcDiff(), respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args("self", "state", "nu"),
                                                       "Initialize the actuation model.\n\n"
                                                       ":param state: state description,\n"
@@ -33,7 +33,7 @@ void exposeActuationAbstract() {
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
-           "Compute the derivatives of the actuation model.\n\n"
+           "Compute the Jacobians of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time.\n"
            ":param data: actuation data\n"
@@ -64,11 +64,13 @@ void exposeActuationAbstract() {
                                         "The actuation data uses the model in order to first process it.\n"
                                         ":param model: actuation model"))
       .add_property("tau", bp::make_getter(&ActuationDataAbstract::tau, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActuationDataAbstract::tau), "actuation-force signal")
+                    bp::make_setter(&ActuationDataAbstract::tau), "actuation (generalized force) signal")
       .add_property("dtau_dx", bp::make_getter(&ActuationDataAbstract::dtau_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActuationDataAbstract::dtau_dx), "Jacobian of the actuation model")
+                    bp::make_setter(&ActuationDataAbstract::dtau_dx),
+                    "partial derivatives of the actuation model w.r.t. the state point")
       .add_property("dtau_du", bp::make_getter(&ActuationDataAbstract::dtau_du, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActuationDataAbstract::dtau_du), "Jacobian of the actuation model");
+                    bp::make_setter(&ActuationDataAbstract::dtau_du),
+                    "partial derivatives of the actuation model w.r.t. the control input");
 }
 
 }  // namespace python
