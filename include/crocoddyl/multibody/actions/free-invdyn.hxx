@@ -50,7 +50,9 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
     ng_ = constraints_->get_ng();
     nh_ = constraints_->get_nh();
   }
-  constraints_->addConstraint("rnea", ConstraintModelResidual(state_,DifferentialActionModelFreeInvDynamics::ResidualModelRnea(state_,actuation_->get_nu())))
+  constraints_->addConstraint(
+      "rnea", ConstraintModelResidual(
+                  state_, DifferentialActionModelFreeInvDynamics::ResidualModelRnea(state_, actuation_->get_nu())))
 }
 
 template <typename Scalar>
@@ -76,9 +78,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = x.head(state_->get_nv());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = x.tail(state_->get_nv());
 
-
-  d->xout = a 
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a);
+  d->xout = a pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   actuation_->calc(d->multibody.actuation, x, u);
@@ -122,7 +122,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
@@ -159,7 +159,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_xstatic.head(state_->get_nq()) = q;
   d->tmp_xstatic.tail(state_->get_nq()) *= 0;
   d->tmp_ustatic.setZero();
-   
+
   pinocchio::rnea(pinocchio_, d->pinocchio, q, VectorXs::Zero(state_->get_nv()), VectorXs::Zero(state_->get_nv()));
 
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic, VectorXs::Zero(nu_));
@@ -182,19 +182,19 @@ pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+const boost::shared_ptr<ActuationModelAbstractTpl<Scalar>>&
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_costs()
+const boost::shared_ptr<CostModelSumTpl<Scalar>>& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_costs()
     const {
   return costs_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+const boost::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
 }
@@ -203,19 +203,16 @@ template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar>::calc(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
-        d->r = d->pinocchio->tau - d->actuation->tau
-    }
+  d->r = d->pinocchio->tau - d->actuation->tau
+}
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
-        d->Rx.leftCols(nv) = d->pinocchio->dtau_dq
-        d->Rx.rightCols(nv) = d->pinocchio->dtau_dv
-        d->Rx -= d->shared.actuation->dtau_dx
-        d->Ru.leftCols(nv) = d->pinocchio->M
-        d->Ru.rightCols(nv) = d->actuation->dtau_du
-    }
+  d->Rx.leftCols(nv) = d->pinocchio->dtau_dq d->Rx.rightCols(nv) = d->pinocchio->dtau_dv d->Rx -=
+      d->shared.actuation->dtau_dx d->Ru.leftCols(nv) = d->pinocchio->M d->Ru.rightCols(nv) = d->actuation->dtau_du
+}
 
 template <typename Scalar>
 boost::shared_ptr<ResidualDataAbstractTpl<Scalar>>
@@ -233,6 +230,5 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl<Scalar>:
 //     return false;
 //   }
 // }
-
 
 }  // namespace crocoddyl

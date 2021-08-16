@@ -67,19 +67,19 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
 
-  template <typename _Scalar> 
-  class ResidualModelRneaTpl : public ResidualModelAbstractTpl<_Scalar>{
-    public:
-      typedef _Scalar Scalar;
-      typedef MathBaseTpl<Scalar> MathBase;
-      typedef ResidualModelAbstractTpl<Scalar> rneaBase;
-      typedef ResidualDataRneaTpl<Scalar> rneaData;
-      typedef StateMultibodyTpl<Scalar> StateMultibody;
-      typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
-      typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-      typedef typename MathBase::Vector3s Vector3s;
-      typedef typename MathBase::VectorXs VectorXs;
-    
+  template <typename _Scalar>
+  class ResidualModelRneaTpl : public ResidualModelAbstractTpl<_Scalar> {
+   public:
+    typedef _Scalar Scalar;
+    typedef MathBaseTpl<Scalar> MathBase;
+    typedef ResidualModelAbstractTpl<Scalar> rneaBase;
+    typedef ResidualDataRneaTpl<Scalar> rneaData;
+    typedef StateMultibodyTpl<Scalar> StateMultibody;
+    typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
+    typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+    typedef typename MathBase::Vector3s Vector3s;
+    typedef typename MathBase::VectorXs VectorXs;
+
     ResidualModelRneaTpl(boost::shared_ptr<StateMultibodyTpl> state, const std::size_t nu);
     virtual ~ResidualModelRneaTpl();
 
@@ -88,27 +88,26 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
 
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                           const Eigen::Ref<const VectorXs>& u);
-    
+
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
-    
+
     virtual void print(std::ostream& os) const;
-    
-    protected:
-      using Base::nu_;
-      using Base::state_;
-      using Base::u_dependent_;
-      using Base::unone_;
-      using Base::v_dependent_;
+
+   protected:
+    using Base::nu_;
+    using Base::state_;
+    using Base::u_dependent_;
+    using Base::unone_;
+    using Base::v_dependent_;
   }
-
-
 
   /**
    * @brief Print relevant information of the free forward-dynamics model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void
+  print(std::ostream& os) const;
 
  protected:
   using Base::ng_;     //!< Number of inequality constraints
@@ -143,9 +142,7 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
-        tmp_xstatic(model->get_state()->get_nx()).
-        tmp_ustatic(model->get_nu())
-         {
+        tmp_xstatic(model->get_state()->get_nx()).tmp_ustatic(model->get_nu()) {
     costs->shareMemory(this);
     if (model->get_constraints() != nullptr) {
       constraints = model->get_constraints()->createData(&multibody);
@@ -156,8 +153,6 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
     tmp_ustatic.setZero();
   }
 
-
-
   template <typename _Scalar>
   struct ResidualDataRneaTpl : public ResidualDataAbstractTpl<_Scalar> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -167,27 +162,26 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
     typedef ResidualDataAbstractTpl<Scalar> rneaBase;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
     typedef typename MathBase::Matrix3xs Matrix3xs;
-  
+
     template <template <typename Scalar> class Model>
     ResidualDataRneaTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : rneaBase(model, data) {
-    // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
-    if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      // Check that proper shared data has been passed
+      DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+      if (d == NULL) {
+        throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      }
+
+      // Avoids data casting at runtime
+      pinocchio = d->pinocchio;
     }
 
-    // Avoids data casting at runtime
-    pinocchio = d->pinocchio;
-  }
-
-  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
-  using Base::shared;
+    pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
+    using Base::r;
+    using Base::Ru;
+    using Base::Rx;
+    using Base::shared;
   };
 
-  
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;

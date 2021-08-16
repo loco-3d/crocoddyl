@@ -155,7 +155,7 @@ DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type sta
   boost::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
   state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
   actuation = ActuationModelFactory().create(actuation_type, state_type);
-  cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu()+state->get_nv());
+  cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu() + state->get_nv());
   cost->addCost("state",
                 CostModelFactory().create(CostModelTypes::CostModelResidualState, state_type,
                                           ActivationModelTypes::ActivationModelQuad),
@@ -212,9 +212,6 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
   action = boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, cost, constraint);
   return action;
 }
-
-
-
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
 DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type,
