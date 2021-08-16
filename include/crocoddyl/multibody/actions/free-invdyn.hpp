@@ -1,19 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
-#define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
+#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_
+#define CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_
 
 #include <stdexcept>
-
-#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT  // TODO(cmastalli): Removed after merging Pinocchio v.2.4.8
-#include <pinocchio/codegen/cppadcg.hpp>
-#endif
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
@@ -25,6 +21,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
+
 namespace crocoddyl {
 
 template <typename _Scalar>
@@ -65,7 +62,6 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
   const boost::shared_ptr<CostModelSum>& get_costs() const;
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
-  pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
 
   template <typename _Scalar>
   class ResidualModelRneaTpl : public ResidualModelAbstractTpl<_Scalar> {
@@ -73,7 +69,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
     typedef ResidualModelAbstractTpl<Scalar> rneaBase;
-    typedef ResidualDataRneaTpl<Scalar> rneaData;
+    typedef DifferentialActionDataFreeInvDynamicsTpl<Scalar>::ResidualDataRneaTpl<Scalar> rneaData;
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
@@ -208,4 +204,4 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/free-invdyn.hxx>
 
-#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
+#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_

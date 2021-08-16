@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,11 +174,6 @@ template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelFreeFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << "}";
-}
-
-template <typename Scalar>
-pinocchio::ModelTpl<Scalar>& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
 }
 
 template <typename Scalar>
