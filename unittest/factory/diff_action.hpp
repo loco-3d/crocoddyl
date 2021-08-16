@@ -17,6 +17,7 @@
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/free-invdyn.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -60,9 +61,10 @@ class DifferentialActionModelFactory {
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> create_freeInvDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> create_freeFwdDynamics(
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> create_freeInvDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
