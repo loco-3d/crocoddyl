@@ -18,18 +18,19 @@ void exposeActuationFloatingBase() {
   bp::class_<ActuationModelFloatingBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFloatingBase",
       "Floating-base actuation models.\n\n"
-      "It simply considers a floating-base actuation model, where the first 6 elements are unactuated.",
+      "It considers the first joint, defined in the Pinocchio model, as the floating-base joints.\n"
+      "Then, this joint (that might have various DoFs) is unactuated.",
       bp::init<boost::shared_ptr<StateMultibody> >(bp::args("self", "state"),
                                                    "Initialize the floating-base actuation model.\n\n"
                                                    ":param state: state of multibody system"))
       .def("calc", &ActuationModelFloatingBase::calc, bp::args("self", "data", "x", "u"),
-           "Compute the actuation signal from the control input u.\n\n"
+           "Compute the floating-base actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state vector\n"
            ":param u: control input")
       .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
-           "Compute the derivatives of the actuation model.\n\n"
+           "Compute the Jacobians of the floating-base actuation model.\n\n"
            "It computes the partial derivatives of the floating-base actuation. It assumes that calc\n"
            "has been run first. The reason is that the derivatives are constant and\n"
            "defined in createData. The derivatives are constant, so we don't write again these values.\n"

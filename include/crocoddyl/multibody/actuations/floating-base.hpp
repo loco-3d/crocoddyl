@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,19 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
+
+/**
+ * @brief Floating-base actuation model
+ *
+ * It considers the first joint, defined in the Pinocchio model, as the floating-base joints.
+ * Then, this joint (that might have various DoFs) is unactuated.
+ *
+ * The main computations are carrying out in `calc`, and `calcDiff`, where the former computes actuation signal
+ * \f$\mathbf{a}\f$ from a given control input \f$\mathbf{u}\f$ and state point \f$\mathbf{x}\f$, and the latter
+ * computes the Jacobians of the actuation-mapping function. Note that `caldDiff` requires to run `calc` first.
+ *
+ * \sa `ActuationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
@@ -26,10 +39,23 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the floating-base actuation model
+   *
+   * @param[in] state  State of a multibody system
+   * @param[in] nu     Dimension of control vector
+   */
   explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state)
       : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()){};
   virtual ~ActuationModelFloatingBaseTpl(){};
 
+  /**
+   * @brief Compute the floating-base actuation signal from the control input \f\mathbf{u}\in\mathbb{R}^{nu}\f$
+   *
+   * @param[in] data  Actuation data
+   * @param[in] x     State point
+   * @param[in] u     Control input
+   */
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -39,6 +65,13 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     data->tau.tail(nu_) = u;
   };
 
+    /**
+     * @brief Compute the Jacobians of the floating-base actuation function
+     *
+     * @param[in] data  Actuation data
+     * @param[in] x     State point
+     * @param[in] u     Control input
+     */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
@@ -50,6 +83,12 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
     assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
   };
+
+  /**
+   * @brief Create the floating-base actuation data
+   *
+   * @return the actuation data
+   */
   virtual boost::shared_ptr<Data> createData() {
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
