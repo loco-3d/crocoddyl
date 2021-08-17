@@ -32,6 +32,7 @@ void exposeDataCollectorMultibody();
 void exposeDataCollectorContacts();
 void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
+void exposeDifferentialActionFreeInvDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeResidualState();
