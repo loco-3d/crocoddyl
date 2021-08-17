@@ -40,7 +40,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
   constraints_->addConstraint(
       "rnea",
       boost::make_shared<ConstraintModelResidual>(
-          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl>(
+          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRnea>(
                       state, nu)));
 }
 
@@ -73,7 +73,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
   constraints_->addConstraint(
       "rnea",
       boost::make_shared<ConstraintModelResidual>(
-          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRneaTpl>(
+          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRnea>(
                       state, nu)));
 }
 

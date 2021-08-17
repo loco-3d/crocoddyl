@@ -85,7 +85,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   pinocchio::ModelTpl<Scalar>& pinocchio_;
 
  public:
-  class ResidualModelRneaTpl : public ResidualModelAbstractTpl<_Scalar> {
+  class ResidualModelRnea : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -97,21 +97,21 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
     typedef typename MathBase::VectorXs VectorXs;
 
-    ResidualModelRneaTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
+    ResidualModelRnea(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
         : Base(state, state->get_nv(), state->get_nv() + nu, true, true, true), na_(nu) {}
-    virtual ~ResidualModelRneaTpl() {}
+    virtual ~ResidualModelRnea() {}
 
     virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
                       const Eigen::Ref<const VectorXs>&) {
-      const boost::shared_ptr<typename Data::ResidualDataRneaTpl>& d =
-          boost::static_pointer_cast<typename Data::ResidualDataRneaTpl>(data);
+      const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       data->r = d->pinocchio->tau - d->actuation->tau;
     }
 
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
                           const Eigen::Ref<const VectorXs>&) {
-      const boost::shared_ptr<typename Data::ResidualDataRneaTpl>& d =
-          boost::static_pointer_cast<typename Data::ResidualDataRneaTpl>(data);
+      const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       const std::size_t nv = state_->get_nv();
       data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
       data->Rx.rightCols(na_) = d->pinocchio->dtau_dv;
@@ -121,8 +121,8 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     }
 
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
-      return boost::allocate_shared<typename Data::ResidualDataRneaTpl>(
-          Eigen::aligned_allocator<typename Data::ResidualDataRneaTpl>(), this, data);
+      return boost::allocate_shared<typename Data::ResidualDataRnea>(
+          Eigen::aligned_allocator<typename Data::ResidualDataRnea>(), this, data);
     }
 
     virtual void print(std::ostream& os) const {
@@ -178,7 +178,7 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
   using Base::r;
   using Base::xout;
 
-  struct ResidualDataRneaTpl : public ResidualDataAbstractTpl<_Scalar> {
+  struct ResidualDataRnea : public ResidualDataAbstractTpl<_Scalar> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     typedef _Scalar Scalar;
@@ -187,7 +187,7 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
     template <template <typename Scalar> class Model>
-    ResidualDataRneaTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+    ResidualDataRnea(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
       // Check that proper shared data has been passed
       DataCollectorActMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar>*>(shared);
       if (d == NULL) {
