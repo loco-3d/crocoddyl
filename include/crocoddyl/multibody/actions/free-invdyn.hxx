@@ -180,7 +180,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::quasiStatic(
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.tail(nu));
   actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.tail(nu));
 
-  u.noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
+  u.tail(nu).noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
 }
 
