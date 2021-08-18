@@ -30,8 +30,8 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
   const std::size_t nu = actuation_->get_nu();
-  VectorXs lb = VectorXs::Zero(nu_);
-  VectorXs ub = VectorXs::Zero(nu_);
+  VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
+  VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
   lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
   ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
   Base::set_u_lb(lb);
@@ -63,8 +63,8 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
                  << "Constraints doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
   const std::size_t nu = actuation_->get_nu();
-  VectorXs lb = VectorXs::Zero(nu_);
-  VectorXs ub = VectorXs::Zero(nu_);
+  VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
+  VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
   lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
   ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
   Base::set_u_lb(lb);

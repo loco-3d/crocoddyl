@@ -125,6 +125,11 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
           Eigen::aligned_allocator<typename Data::ResidualDataRnea>(), this, data);
     }
 
+    /**
+     * @brief Print relevant information of the RNEA residual model
+     *
+     * @param[out] os  Output stream object
+     */
     virtual void print(std::ostream& os) const {
       os << "ResidualModelRnea {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
          << ", na=" << na_ << "}";
@@ -193,7 +198,8 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
       if (d == NULL) {
         throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibody");
       }
-      Ru.rightCols(model->get_state()->get_nv()) = -d->actuation->dtau_du;
+      const std::size_t na = Ru.cols() - model->get_state()->get_nv();
+      Ru.rightCols(na) = -d->actuation->dtau_du;
 
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
