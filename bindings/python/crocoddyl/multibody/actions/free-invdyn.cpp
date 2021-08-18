@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,17 +9,17 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
-// #include <boost/python/scope.hpp>
+#include <boost/python/scope.hpp>
 
 namespace crocoddyl {
 namespace python {
 
 void exposeDifferentialActionFreeInvDynamics() {
-  //   scope().attr("yes") = 1;
-  //   scope().attr("no") = 0;
-  //   {
+    bp::scope().attr("yes") = 1;
+    bp::scope().attr("no") = 0;
+    {
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics> >();
-  // scope outer =
+   bp::scope outer =
   bp::class_<DifferentialActionModelFreeInvDynamics, bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelFreeInvDynamics",
       "Differential action model for free inverse dynamics in multibody systems.\n\n"
@@ -121,11 +121,11 @@ void exposeDifferentialActionFreeInvDynamics() {
            "returns the allocated data for the RNEA residual.\n"
            ":param data: shared data\n"
            ":return residual data.");
-  //   }
+    }
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeInvDynamics> >();
 
-  //   scope outer2 =
+    bp::scope outer2 =
   bp::class_<DifferentialActionDataFreeInvDynamics, bp::bases<DifferentialActionDataAbstract> >(
       "DifferentialActionDataFreeInvDynamics", "Action data for the free inverse-dynamics system.",
       bp::init<DifferentialActionModelFreeInvDynamics*>(bp::args("self", "model"),
