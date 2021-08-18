@@ -114,7 +114,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
           boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       const std::size_t nv = state_->get_nv();
       data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
-      data->Rx.rightCols(na_) = d->pinocchio->dtau_dv;
+      data->Rx.rightCols(nv) = d->pinocchio->dtau_dv;
       data->Rx -= d->actuation->dtau_dx;
       data->Ru.leftCols(nv) = d->pinocchio->M;
       data->Ru.rightCols(na_) = -d->actuation->dtau_du;
