@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 
@@ -14,12 +16,14 @@ WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 # developed inside crocoddyl; it describes inside DifferentialActionModelFullyActuated class.
 # Finally, we use an Euler sympletic integration scheme.
 
-# First, let's load the Pinocchio model for the Talos arm.
+# First, let's load create the state and actuation models
 talos_arm = example_robot_data.load('talos_arm')
 robot_model = talos_arm.model
+state = crocoddyl.StateMultibody(robot_model)
+actuation = crocoddyl.ActuationModelFull(state)
 
 # Create a cost model per the running and terminal action model.
-state = crocoddyl.StateMultibody(robot_model)
+nu = state.nv
 runningCostModel = crocoddyl.CostModelSum(state)
 terminalCostModel = crocoddyl.CostModelSum(state)
 
@@ -29,29 +33,29 @@ terminalCostModel = crocoddyl.CostModelSum(state)
 # goal-tracking cost, state and control regularization; and one terminal-cost:
 # goal cost. First, let's create the common cost functions.
 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("gripper_left_joint"),
-                                                               pinocchio.SE3(np.eye(3), np.array([.0, .0, .4])))
-uResidual = crocoddyl.ResidualModelControl(state)
-xResidual = crocoddyl.ResidualModelControl(state)
+                                                               pinocchio.SE3(np.eye(3), np.array([.0, .0, .4])), nu)
+uResidual = crocoddyl.ResidualModelControl(state, nu)
+xResidual = crocoddyl.ResidualModelControl(state, nu)
 goalTrackingCost = crocoddyl.CostModelResidual(state, framePlacementResidual)
 xRegCost = crocoddyl.CostModelResidual(state, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 
 # Then let's added the running and terminal cost functions
 runningCostModel.addCost("gripperPose", goalTrackingCost, 1)
-runningCostModel.addCost("xReg", xRegCost, 1e-4)
-runningCostModel.addCost("uReg", uRegCost, 1e-4)
-terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
+runningCostModel.addCost("xReg", xRegCost, 1e-2)
+runningCostModel.addCost("uReg", uRegCost, 1e-1)
+terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 
 # Next, we need to create an action model for running and terminal knots. The
 # forward dynamics (computed using ABA) are implemented
 # inside DifferentialActionModelFullyActuated.
-actuationModel = crocoddyl.ActuationModelFull(state)
+
 dt = 1e-3
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuationModel, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), dt)
 runningModel.differential.armature = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.])
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuationModel, terminalCostModel), 0.)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel), 0.)
 terminalModel.differential.armature = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.])
 
 # For this optimal control problem, we define 250 knots (or running action
@@ -82,6 +86,9 @@ solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving it with the DDP algorithm
 solver.solve()
+
+print('Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
+    "gripper_left_joint")].translation.T)
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:
