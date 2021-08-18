@@ -1,9 +1,12 @@
 SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   double_pendulum
+  double_pendulum_id
   boxfddp_vs_boxddp
   quadrotor
+  quadrotor_id
   quadrotor_ubound
   arm_manipulation
+  arm_manipulation_id
   quadrupedal_gaits
   quadrupedal_walk_ubound
   bipedal_walk
