@@ -117,7 +117,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
       data->Rx.rightCols(na_) = d->pinocchio->dtau_dv;
       data->Rx -= d->actuation->dtau_dx;
       data->Ru.leftCols(nv) = d->pinocchio->M;
-      data->Ru.rightCols(na_) = d->actuation->dtau_du;
+      data->Ru.rightCols(na_) = -d->actuation->dtau_du;
     }
 
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {

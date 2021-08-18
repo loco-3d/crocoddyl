@@ -128,6 +128,8 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
 
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a);
+  d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
+      d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>().transpose();
   actuation_->calcDiff(d->multibody.actuation, x, u);
   costs_->calcDiff(d->costs, x, u);
   constraints_->calcDiff(d->constraints, x, u);
