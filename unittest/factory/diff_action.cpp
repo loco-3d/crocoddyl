@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, CTU, INRIA
+// Copyright (C) 2021, University of Pisa, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm:
       os << "DifferentialActionModelFreeInvDynamics_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
+      os << "DifferentialActionModelFreeInvDynamics_TalosArm_Squashed";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       os << "DifferentialActionModelContactFwdDynamics_TalosArm";
@@ -104,6 +107,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
       action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                      ActuationModelTypes::ActuationModelSquashingFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
+      action = create_freeInvDynamics(StateModelTypes::StateMultibody_TalosArm,
                                       ActuationModelTypes::ActuationModelSquashingFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
