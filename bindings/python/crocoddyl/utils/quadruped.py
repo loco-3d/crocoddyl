@@ -4,7 +4,26 @@ import numpy as np
 
 
 class SimpleQuadrupedalGaitProblem:
-    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control=None):
+    """ Build simple quadrupedal locomotion problems.
+
+    This class aims to build simple locomotion problems used in the examples of Crocoddyl.
+    The scope of this class is purely for academic reasons, and it does not aim to be
+    used in any robotics application.
+    We also do not consider it as part of the API, so changes in this class will not pass
+    through a strict process of deprecation.
+    Thus, we advice any user to DO NOT develop their application based on this class.
+    """
+    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control='zero'):
+        """ Construct quadrupedal-gait problem.
+
+        :param rmodel: robot model
+        :param lfFoot: name of the left-front foot
+        :param rfFoot: name of the right-front foot
+        :param lhFoot: name of the left-hind foot
+        :param rhFoot: name of the right-hind foot
+        :param integrator: type of the integrator (options are: 'euler', and 'rk4')
+        :param control: type of control parametrization (options are: 'zero', 'one', and 'rk4')
+        """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
@@ -15,10 +34,12 @@ class SimpleQuadrupedalGaitProblem:
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
         self.integrator = integrator
-        if control is None:
-            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
+        if control is 'one':
+            self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
+        elif control is 'rk4':
+            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK4(self.actuation.nu)
         else:
-            self.control = control
+            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["standing"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
