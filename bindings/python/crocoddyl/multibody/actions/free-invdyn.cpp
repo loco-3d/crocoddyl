@@ -9,7 +9,6 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
-#include <boost/python/scope.hpp>
 
 namespace crocoddyl {
 namespace python {
@@ -19,7 +18,7 @@ void exposeDifferentialActionFreeInvDynamics() {
   bp::scope().attr("no") = 0;
   {
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics> >();
-    bp::scope outer =
+    bp::scope model_outer =
         bp::class_<DifferentialActionModelFreeInvDynamics, bp::bases<DifferentialActionModelAbstract> >(
             "DifferentialActionModelFreeInvDynamics",
             "Differential action model for free inverse dynamics in multibody systems.\n\n"
@@ -33,6 +32,8 @@ void exposeDifferentialActionFreeInvDynamics() {
                 "It describes the kinematic evolution of the multibody system without any contact,\n"
                 "and imposes an inverse-dynamics (equality) constraint. Additionally, it computes\n"
                 "the cost and extra constraint values associated to this state and control pair.\n"
+                "Note that the name `rnea` in the ConstraintModelManager is reserved to store\n"
+                "the inverse-dynamics constraint\n."
                 ":param state: multibody state\n"
                 ":param actuation: abstract actuation model\n"
                 ":param costs: stack of cost functions\n"
@@ -66,10 +67,6 @@ void exposeDifferentialActionFreeInvDynamics() {
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
             .def("createData", &DifferentialActionModelFreeInvDynamics::createData, bp::args("self"),
                  "Create the free inverse-dynamics differential action data.")
-            .add_property("pinocchio",
-                          bp::make_function(&DifferentialActionModelFreeInvDynamics::get_pinocchio,
-                                            bp::return_internal_reference<>()),
-                          "multibody model (i.e. Pinocchio model)")
             .add_property("actuation",
                           bp::make_function(&DifferentialActionModelFreeInvDynamics::get_actuation,
                                             bp::return_value_policy<bp::return_by_value>()),
@@ -86,7 +83,10 @@ void exposeDifferentialActionFreeInvDynamics() {
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics::ResidualModelRnea> >();
 
     bp::class_<DifferentialActionModelFreeInvDynamics::ResidualModelRnea, bp::bases<ResidualModelAbstract> >(
-        "ResidualModelRnea", "This residual function is defined as r = tau - rnea, where",
+        "ResidualModelRnea",
+        "This residual function is defined as r = tau - RNEA, where\n"
+        "tau is extracted from the control vector and RNEA evaluates the joint torque using\n"
+        "q, q_dot, acc values.",
         bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nu"),
                                                                  "Initialize the RNEA residual model.\n\n"
                                                                  ":param nu: dimension of control vector"))
@@ -126,7 +126,7 @@ void exposeDifferentialActionFreeInvDynamics() {
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeInvDynamics> >();
 
-  bp::scope outer2 =
+  bp::scope data_outer =
       bp::class_<DifferentialActionDataFreeInvDynamics, bp::bases<DifferentialActionDataAbstract> >(
           "DifferentialActionDataFreeInvDynamics", "Action data for the free inverse-dynamics system.",
           bp::init<DifferentialActionModelFreeInvDynamics*>(bp::args("self", "model"),
