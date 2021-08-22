@@ -8,11 +8,20 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/control-base.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeControlParametrizationAbstract() {
+  // Register custom converters between std::vector and Python list
+  typedef boost::shared_ptr<ControlParametrizationModelAbstract> ControlParametrizationModelPtr;
+  typedef boost::shared_ptr<ControlParametrizationDataAbstract> ControlParametrizationDataPtr;
+  StdVectorPythonVisitor<ControlParametrizationModelPtr, std::allocator<ControlParametrizationModelPtr>, true>::expose(
+      "StdVec_ControlParametrizationModel");
+  StdVectorPythonVisitor<ControlParametrizationDataPtr, std::allocator<ControlParametrizationDataPtr>, true>::expose(
+      "StdVec_ControlParametrizationData");
+
   bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationModelAbstract> >();
 
   bp::class_<ControlParametrizationModelAbstract_wrap, boost::noncopyable>(
