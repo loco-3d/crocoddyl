@@ -98,10 +98,10 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
         dli_du(4, VectorXs::Zero(model->get_nu())),
         ddli_ddx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
         ddli_ddw(4, MatrixXs::Zero(model->get_control()->get_nw(), model->get_control()->get_nw())),
-        ddli_dwdu(4, MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu())),
         ddli_ddu(4, MatrixXs::Zero(model->get_nu(), model->get_nu())),
         ddli_dxdw(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_control()->get_nw())),
         ddli_dxdu(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        ddli_dwdu(4, MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu())),
         Luu_partialx(4, MatrixXs::Zero(model->get_nu(), model->get_nu())),
         Lxu_i(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
         Lxx_partialx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
@@ -143,10 +143,10 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
 
   std::vector<MatrixXs> ddli_ddx;
   std::vector<MatrixXs> ddli_ddw;
-  std::vector<MatrixXs> ddli_dwdu;
   std::vector<MatrixXs> ddli_ddu;
   std::vector<MatrixXs> ddli_dxdw;
   std::vector<MatrixXs> ddli_dxdu;
+  std::vector<MatrixXs> ddli_dwdu;
 
   std::vector<MatrixXs> Luu_partialx;
   std::vector<MatrixXs> Lxu_i;
