@@ -9,11 +9,20 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeDifferentialActionAbstract() {
+  // Register custom converters between std::vector and Python list
+  typedef boost::shared_ptr<DifferentialActionModelAbstract> DifferentialActionModelPtr;
+  typedef boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionDataPtr;
+  StdVectorPythonVisitor<DifferentialActionModelPtr, std::allocator<DifferentialActionModelPtr>, true>::expose(
+      "StdVec_DiffActionModel");
+  StdVectorPythonVisitor<DifferentialActionDataPtr, std::allocator<DifferentialActionDataPtr>, true>::expose(
+      "StdVec_DiffActionData");
+
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelAbstract> >();
 
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(

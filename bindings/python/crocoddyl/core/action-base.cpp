@@ -9,11 +9,18 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeActionAbstract() {
+  // Register custom converters between std::vector and Python list
+  typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
+  typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
+  StdVectorPythonVisitor<ActionModelPtr, std::allocator<ActionModelPtr>, true>::expose("StdVec_ActionModel");
+  StdVectorPythonVisitor<ActionDataPtr, std::allocator<ActionDataPtr>, true>::expose("StdVec_ActionData");
+
   bp::register_ptr_to_python<boost::shared_ptr<ActionModelAbstract> >();
 
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
