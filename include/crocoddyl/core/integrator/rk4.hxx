@@ -117,8 +117,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   if (enable_integration_) {
     d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
     d->dki_dx[0] = d->dki_dy[0];
-    d->dki_dw[0].bottomRows(nv) = d->differential[0]->Fu;
-    control_->multiplyByJacobian(d->control, d->dki_dw[0], d->dki_du[0]);  // dki_du = dki_dw * dw_du
+    d->dki_dw[0] = d->differential[0]->Fu;
+    control_->multiplyByJacobian(d->control, d->dki_dw[0], d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
     d->dli_dx[0] = d->differential[0]->Lx;
     control_->multiplyJacobianTransposeBy(d->control, d->differential[0]->Lu,
@@ -147,8 +147,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i],
                                                       second);  // dyi_du = Jintegrate * dyi_du
       d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
-      d->dki_dw[i].bottomRows(nv) = d->differential[i]->Fu;
-      control_->multiplyByJacobian(d->control, d->dki_dw[i], d->dfi_du[i]);  // dfi_du = dki_dw * dw_du
+      d->dki_dw[i] = d->differential[i]->Fu;
+      control_->multiplyByJacobian(d->control, d->dki_dw[i], d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
 
       d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
