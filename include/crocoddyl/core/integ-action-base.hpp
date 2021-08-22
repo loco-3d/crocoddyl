@@ -108,17 +108,12 @@ struct IntegratedActionDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
-  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataAbstractTpl(Model<Scalar>* const model) : Base(model) {
-    control = model->get_control()->createData();
-  }
+  explicit IntegratedActionDataAbstractTpl(Model<Scalar>* const model) : Base(model) {}
   virtual ~IntegratedActionDataAbstractTpl() {}
-
-  boost::shared_ptr<ControlParametrizationDataAbstract> control;  //!< Data of the control parametrization model
 
   using Base::cost;
   using Base::Fu;

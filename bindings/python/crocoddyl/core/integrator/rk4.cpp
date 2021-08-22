@@ -79,7 +79,10 @@ void exposeIntegratedActionRK4() {
       .add_property(
           "differential",
           bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
-          "array of differential action data")
+          "list of differential action data")
+      .add_property("control",
+                    bp::make_getter(&IntegratedActionDataRK4::control, bp::return_value_policy<bp::return_by_value>()),
+                    "list of control parametrization data")
       .add_property(
           "integral",
           bp::make_getter(&IntegratedActionDataRK4::integral, bp::return_value_policy<bp::return_by_value>()),

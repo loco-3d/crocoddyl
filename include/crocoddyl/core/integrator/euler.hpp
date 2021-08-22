@@ -73,12 +73,15 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef IntegratedActionDataAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
   explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model) : Base(model) {
     differential = model->get_differential()->createData();
+    control = model->get_control()->createData();
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nv = model->get_state()->get_nv();
     dx = VectorXs::Zero(ndx);
@@ -87,7 +90,8 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
   }
   virtual ~IntegratedActionDataEulerTpl() {}
 
-  boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
+  boost::shared_ptr<DifferentialActionDataAbstract> differential;  //!< Differential model data
+  boost::shared_ptr<ControlParametrizationDataAbstract> control;   //!< Control parametrization data
   VectorXs dx;
   MatrixXs da_du;
   MatrixXs Lwu;  // Hessian of the cost function with respect to the control input (w) and control parameters (u)

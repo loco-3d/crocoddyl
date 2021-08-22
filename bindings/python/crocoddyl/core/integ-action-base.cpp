@@ -94,11 +94,7 @@ void exposeIntegratedActionAbstract() {
           bp::args("self", "model"),
           "Create common data shared between integrated-action models.\n\n"
           "The integrated-action data uses its model in order to first process it.\n"
-          ":param model: integrated-action model"))
-      .add_property(
-          "control",
-          bp::make_getter(&IntegratedActionDataAbstract::control, bp::return_value_policy<bp::return_by_value>()),
-          "Data of the control parametrization model");
+          ":param model: integrated-action model"));
 }
 
 }  // namespace python

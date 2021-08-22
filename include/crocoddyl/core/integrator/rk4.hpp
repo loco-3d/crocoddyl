@@ -75,6 +75,8 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef IntegratedActionDataAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -110,7 +112,8 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
 
     for (std::size_t i = 0; i < 4; ++i) {
       differential.push_back(
-          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
+          boost::shared_ptr<DifferentialActionDataAbstract>(model->get_differential()->createData()));
+      control.push_back(boost::shared_ptr<ControlParametrizationDataAbstract>(model->get_control()->createData()));
     }
 
     const std::size_t nv = model->get_state()->get_nv();
@@ -121,7 +124,9 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   }
   virtual ~IntegratedActionDataRK4Tpl() {}
 
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
+  std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > differential;  //!< List of differential model data
+  std::vector<boost::shared_ptr<ControlParametrizationDataAbstract> >
+      control;  //!< List of control parametrization data
   std::vector<Scalar> integral;
   VectorXs dx;
   std::vector<VectorXs> ki;
