@@ -54,6 +54,18 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
    */
   virtual void print(std::ostream& os) const;
 
+  /**
+   * @brief Modify the number of threads using with multithreading support
+   *
+   * For values lower than 1, the number of threads is chosen by CROCODDYL_WITH_NTHREADS macro
+   */
+  void set_nthreads(const int nthreads);
+
+  /**
+   * @brief Return the number of threads
+   */
+  std::size_t get_nthreads() const;
+
  protected:
   using Base::control_;             //!< Control parametrization
   using Base::differential_;        //!< Differential action model
@@ -65,6 +77,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 
  private:
+  std::size_t nthreads_;  //!< Number of threach launch by the multi-threading application
   std::vector<Scalar> rk4_c_;
 };
 

@@ -16,11 +16,15 @@ namespace crocoddyl {
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {
+    : Base(model, time_step, with_cost_residual), nthreads_(1) {
   rk4_c_.push_back(Scalar(0.));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(1.));
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>
@@ -28,11 +32,15 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual) {
+    : Base(model, control, time_step, with_cost_residual), nthreads_(1) {
   rk4_c_.push_back(Scalar(0.));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(1.));
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  nthreads_ = CROCODDYL_WITH_NTHREADS;
+#endif
 }
 
 template <typename Scalar>
@@ -107,12 +115,17 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   const std::size_t nv = differential_->get_state()->get_nv();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
-  differential_->calcDiff(d->differential[0], x, d->ws[0]);
-
   if (enable_integration_) {
-    d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(nthreads_)
+#endif
+    for (std::size_t i = 0; i < 4; ++i) {
+      differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
+      d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
+      d->dki_dw[i] = d->differential[i]->Fu;
+    }
+
     d->dki_dx[0] = d->dki_dy[0];
-    d->dki_dw[0] = d->differential[0]->Fu;
     control_->multiplyByJacobian(d->control[0], d->dki_dw[0], d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
     d->dli_dx[0] = d->differential[0]->Lx;
@@ -128,9 +141,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     control_->multiplyByJacobian(d->control[0], d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
     for (std::size_t i = 1; i < 4; ++i) {
-      differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
-      d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
-
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
       differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
@@ -140,7 +150,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i],
                                                       second);  // dyi_du = Jintegrate * dyi_du
       d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
-      d->dki_dw[i] = d->differential[i]->Fu;
       control_->multiplyByJacobian(d->control[i], d->dki_dw[i],
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
@@ -191,6 +200,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
         time_step_ / Scalar(6.) *
         (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   } else {
+    differential_->calcDiff(d->differential[0], x, d->ws[0]);
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
     d->Lx = d->differential[0]->Lx;
@@ -241,6 +251,32 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::print(std::ostream& os) const {
   os << "IntegratedActionModelRK4 {dt=" << time_step_ << ", " << *differential_ << "}";
+}
+
+template <typename Scalar>
+void IntegratedActionModelRK4Tpl<Scalar>::set_nthreads(const int nthreads) {
+#ifndef CROCODDYL_WITH_MULTITHREADING
+  (void)nthreads;
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
+            << std::endl;
+#else
+  if (nthreads < 1) {
+    nthreads_ = CROCODDYL_WITH_NTHREADS;
+  } else {
+    nthreads_ = static_cast<std::size_t>(nthreads);
+  }
+#endif
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelRK4Tpl<Scalar>::get_nthreads() const {
+#ifndef CROCODDYL_WITH_MULTITHREADING
+  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+               "support is not enabled."
+            << std::endl;
+#endif
+  return nthreads_;
 }
 
 }  // namespace crocoddyl
