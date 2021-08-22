@@ -62,13 +62,11 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   const std::size_t nv = differential_->get_state()->get_nv();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
-  // Computing the acceleration and cost
-  control_->calc(d->control[0], rk4_c_[0], u);
-  d->ws[0] = d->control[0]->w;
-  differential_->calc(d->differential[0], x, d->ws[0]);
-
   // Computing the next state (discrete time)
   if (enable_integration_) {
+    control_->calc(d->control[0], rk4_c_[0], u);
+    d->ws[0] = d->control[0]->w;
+    differential_->calc(d->differential[0], x, d->ws[0]);
     d->y[0] = x;
     d->ki[0].head(nv) = d->y[0].tail(nv);
     d->ki[0].tail(nv) = d->differential[0]->xout;
@@ -88,6 +86,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] + Scalar(2.) * d->integral[2] + d->integral[3]) *
               time_step_ / Scalar(6.);
   } else {
+    control_->calc(d->control[0], rk4_c_[0], u);
+    d->ws[0] = d->control[0]->w;
+    differential_->calc(d->differential[0], x, d->ws[0]);
     d->dx.setZero();
     d->xnext = x;
     d->cost = d->differential[0]->cost;
