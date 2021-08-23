@@ -22,8 +22,8 @@ void exposeDifferentialActionFreeInvDynamics() {
         bp::class_<DifferentialActionModelFreeInvDynamics, bp::bases<DifferentialActionModelAbstract> >(
             "DifferentialActionModelFreeInvDynamics",
             "Differential action model for free inverse dynamics in multibody systems.\n\n"
-            "This class implements a the dynamics using Recursive Newton Euler Algorithm (RNEA),\n"
-            "On the other hand, the stack of cost and constraint functions are implemented in\n"
+            "This class implements  the dynamics using Recursive Newton Euler Algorithm (RNEA) as an equality constraint.\n"
+            "The stack of cost and constraint functions are implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
             bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
                      boost::shared_ptr<CostModelSum>, bp::optional<boost::shared_ptr<ConstraintModelManager> > >(
