@@ -229,10 +229,14 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_Jstatic.resize(nv, nu + nc);
   d->tmp_Jstatic << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.topRows(nc).transpose();
 
-  u.segment(nv,nv+nu).noalias() = pseudoInverse(d->tmp_Jstatic.leftCols(nu+nc)) * d->pinocchio.tau;
-  u.tail(nc).noalias() = pseudoInverse(d->tmp_Jstatic.leftCols(nu+nc)) * d->pinocchio.tau;
+  u.segment(nv,nv+nu).noalias() = pseudoInverse(d->tmp_Jstatic.leftCols(nu+nc)) * d->pinocchio.tau.head(nu);
+  u.tail(nc).noalias() = pseudoInverse(d->tmp_Jstatic.leftCols(nu+nc)) * (d->pinocchio.tau-);
   d->pinocchio.tau.setZero();
   
+  }
+  else{
+    u.segment(nv,nv+nu).noalias() =  d->pinocchio.tau.tail(nu);
+    d->pinocchio.tau.setZero();
   }
 
 }
@@ -281,6 +285,33 @@ template <typename Scalar>
 const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContactTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
+
+      const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+        d->r = d->contact->a0;
+    }
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContactTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
+
+      const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+        d->Rx = d->contact->da0_dx;
+        d->Ru.rightCols(state_->get_nv()) = d->contact->Jc;
+    }
+
+template <typename Scalar>
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar>>
+DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContactTpl<Scalar>::createData() {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 
