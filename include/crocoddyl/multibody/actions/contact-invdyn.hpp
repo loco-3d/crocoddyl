@@ -35,6 +35,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -112,8 +113,11 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                       const Eigen::Ref<const VectorXs> &) {
       const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
           boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
-      tau = u [nv:nv + nu] d->r.head(_nv_f) = d->pinocchio.tau.head(_nv_f) data->r.tail(nu) =
-          d->pinocchio->tau.tail(nu) - tau;
+        const std::size_t nv = state_->get_nv();
+        const std::size_t nu = _nv_a;
+        const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nv+nu);
+        d->r.head(_nv_f) = d->pinocchio.tau.head(_nv_f)
+        data->r.tail(nu) = d->pinocchio->tau.tail(nu) - tau;
     }
 
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
@@ -121,6 +125,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
           boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       const std::size_t nv = state_->get_nv();
+      const std::size_t nu = _nv_a;
       data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
       data->Rx.rightCols(nv) = d->pinocchio->dtau_dv;
       data->Rx -= d->actuation->dtau_dx;
@@ -168,7 +173,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     typedef typename MathBase::MatrixXs MatrixXs;
 
     /**
-     * @brief Initialize the contact force residual model
+     * @brief Initialize the contact acceleration residual model
      *
      * @param[in] state  Multibody state
      * @param[in] id     Reference frame id
@@ -180,7 +185,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                             const std::size_t nr, const std::size_t nc, const std::size_t nu);
 
     /**
-     * @brief Initialize the contact residual model
+     * @brief Initialize the contact acceleration residual model
      *
      * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
      *
@@ -222,7 +227,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                           const Eigen::Ref<const VectorXs> &u);
 
     /**
-     * @brief Create the contact force residual data
+     * @brief Create the contact acceleration residual data
      *
      * @param[in] data  shared data (it should be of type
      * DataCollectorContactTpl)
@@ -230,6 +235,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      */
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
 
+    //@cmastalli Do you think it is required? 
     /**
      * @brief Return the reference frame id
      */
@@ -292,7 +298,6 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar>> costs;
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar>> constraints;
-  MatrixXs Kinv;
   MatrixXs df_dx;
   MatrixXs df_du;
   VectorXs tmp_xstatic;
@@ -371,7 +376,6 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
         is_contact = false;
       }
 
-      // Avoids data casting at runtime
       const pinocchio::FrameIndex id = model->get_id();
       const boost::shared_ptr<StateMultibody> &state = boost::static_pointer_cast<StateMultibody>(model->get_state());
       std::string frame_name = state->get_pinocchio()->frames[id].name;
