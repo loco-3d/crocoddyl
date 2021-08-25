@@ -14,6 +14,19 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Sympletic Euler integrator
+ *
+ * It applies a sympletic Euler integration scheme to a differential (i.e., continuous time) action model.
+ *
+ * This sympletic Euler scheme introduces also the possibility to parametrize the control trajectory inside an
+ * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
+ * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
+ * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
+ * control inputs of the integrated action model.
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
@@ -30,20 +43,76 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                                const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  /**
+   * @brief Initialize the sympletic Euler integrator
+   *
+   * @param[in] model      Differential action model
+   * @param[in] control    Control parametrization
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                                 boost::shared_ptr<ControlParametrizationModelAbstract> control,
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+
+  /**
+   * @brief Initialize the sympletic Euler integrator
+   *
+   * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
+   *
+   * @param[in] model      Differential action model
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
+  IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+
   virtual ~IntegratedActionModelEulerTpl();
 
+  /**
+   * @brief Integrate the differential action model using sympletic Euler scheme
+   *
+   * @param[in] data  Sympletic Euler data
+   * @param[in] x     State point
+   * @param[in] u     Control input
+   */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the partial derivatives of the sympletic Euler integrator
+   *
+   * @param[in] data  Sympletic Euler data
+   * @param[in] x     State point
+   * @param[in] u     Control input
+   */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the symplectic Euler data
+   *
+   * @return the sympletic Euler data
+   */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
+   * for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   *
+   * @param[in] data    Action data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
@@ -94,7 +163,7 @@ struct IntegratedActionDataEulerTpl : public IntegratedActionDataAbstractTpl<_Sc
   boost::shared_ptr<ControlParametrizationDataAbstract> control;   //!< Control parametrization data
   VectorXs dx;
   MatrixXs da_du;
-  MatrixXs Lwu;  // Hessian of the cost function with respect to the control input (w) and control parameters (u)
+  MatrixXs Lwu;  //!< Hessian of the cost function with respect to the control input (w) and control parameters (u)
 
   using Base::cost;
   using Base::Fu;

@@ -15,15 +15,15 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {}
-
-template <typename Scalar>
-IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual) {}
+
+template <typename Scalar>
+IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
+    : Base(model, time_step, with_cost_residual) {}
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
@@ -85,8 +85,6 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   }
 
   const std::size_t nv = differential_->get_state()->get_nv();
-
-  // Static casting the data
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
@@ -160,7 +158,6 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  // Static casting the data
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   d->control->w *= 0.;

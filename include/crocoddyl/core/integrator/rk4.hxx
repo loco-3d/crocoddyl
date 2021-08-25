@@ -15,8 +15,10 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual), nthreads_(1) {
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    const bool with_cost_residual)
+    : Base(model, control, time_step, with_cost_residual), nthreads_(1) {
   rk4_c_.push_back(Scalar(0.));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(0.5));
@@ -29,10 +31,8 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
 
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
-    const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual), nthreads_(1) {
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
+    : Base(model, time_step, with_cost_residual), nthreads_(1) {
   rk4_c_.push_back(Scalar(0.));
   rk4_c_.push_back(Scalar(0.5));
   rk4_c_.push_back(Scalar(0.5));

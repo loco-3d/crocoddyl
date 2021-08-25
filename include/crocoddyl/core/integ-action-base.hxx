@@ -19,17 +19,6 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()),
-      differential_(model),
-      control_(new ControlParametrizationModelPolyZero(model->get_nu())),
-      time_step_(time_step),
-      with_cost_residual_(with_cost_residual) {
-  init();
-}
-
-template <typename Scalar>
-IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
@@ -43,6 +32,17 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
                  << "control.nw (" + std::to_string(control->get_nw()) + ") is not equals to model.nu (" +
                         std::to_string(model->get_nu()) + ")");
   }
+  init();
+}
+
+template <typename Scalar>
+IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
+    : Base(model->get_state(), model->get_nu(), model->get_nr()),
+      differential_(model),
+      control_(new ControlParametrizationModelPolyZero(model->get_nu())),
+      time_step_(time_step),
+      with_cost_residual_(with_cost_residual) {
   init();
 }
 

@@ -14,6 +14,19 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Sympletic RK4 integrator
+ *
+ * It applies a sympletic RK4 integration scheme to a differential (i.e., continuous time) action model.
+ *
+ * This sympletic RK4 scheme introduces also the possibility to parametrize the control trajectory inside an
+ * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
+ * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
+ * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
+ * control inputs of the integrated action model.
+ *
+ * \sa `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
@@ -29,20 +42,75 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  /**
+   * @brief Initialize the sympletic RK4 integrator
+   *
+   * @param[in] model      Differential action model
+   * @param[in] control    Control parametrization
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
   IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                               boost::shared_ptr<ControlParametrizationModelAbstract> control,
                               const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+
+  /**
+   * @brief Initialize the sympletic RK4 integrator
+   *
+   * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
+   *
+   * @param[in] model      Differential action model
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
+  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
   virtual ~IntegratedActionModelRK4Tpl();
 
+  /**
+   * @brief Integrate the differential action model using sympletic RK4 scheme
+   *
+   * @param[in] data  Sympletic RK4 data
+   * @param[in] x     State point
+   * @param[in] u     Control input
+   */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the partial derivatives of the sympletic RK4 integrator
+   *
+   * @param[in] data  Sympletic RK4 data
+   * @param[in] x     State point
+   * @param[in] u     Control input
+   */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the sympletic RK4 data
+   *
+   * @return the sympletic RK4 data
+   */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
+   * for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   *
+   * @param[in] data    Action data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
@@ -142,31 +210,44 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
   std::vector<boost::shared_ptr<ControlParametrizationDataAbstract> >
       control;  //!< List of control parametrization data
   std::vector<Scalar> integral;
-  VectorXs dx;
-  std::vector<VectorXs> ki;
-  std::vector<VectorXs> y;
-  std::vector<VectorXs> ws;
+  VectorXs dx;               //!< State rate
+  std::vector<VectorXs> ki;  //!< List of RK4 terms related to system dynamics
+  std::vector<VectorXs> y;   //!< List of states where f is evaluated in the RK4 integration
+  std::vector<VectorXs> ws;  //!< Control inputs evaluated in the RK4 integration
   std::vector<VectorXs> dx_rk4;
 
-  std::vector<MatrixXs> dki_dx;
-  std::vector<MatrixXs> dki_dw;  //!< List with the partial derivatives of RK4 nodes (only nv-bottom block) with
+  std::vector<MatrixXs>
+      dki_dx;  //!< List of partial derivatives of RK4 nodes with respect to the state of the RK4 integration. dki/dx
+  std::vector<MatrixXs> dki_dw;  //!< List of partial derivatives of RK4 nodes (only nv-bottom block) with
                                  //!< respect to the control input of the RK4 integration. dki/dw
-  std::vector<MatrixXs> dki_du;
-  std::vector<MatrixXs> dki_dy;
+  std::vector<MatrixXs> dki_du;  //!< List of partial derivatives of RK4 nodes with respect to the control parameters
+                                 //!< of the RK4 integration. dki/du
+  std::vector<MatrixXs> dki_dy;  //!< List of partial derivatives of RK4 nodes with respect to the dynamics of the RK4
+                                 //!< integration. dki/dy
   std::vector<MatrixXs> dfi_du;
 
-  std::vector<MatrixXs> dyi_dx;
-  std::vector<MatrixXs> dyi_du;
+  std::vector<MatrixXs>
+      dyi_dx;  //!< List of partial derivatives of RK4 dynamics with respect to the state of the RK4 integrator. dyi/dx
+  std::vector<MatrixXs> dyi_du;  //!< List of partial derivatives of RK4 dynamics with respect to the control
+                                 //!< parameters of the RK4 integrator. dyi/du
 
-  std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_du;
+  std::vector<VectorXs>
+      dli_dx;  //!< List of partial derivatives of the cost with respect to the state of the RK4 integration. dli_dx
+  std::vector<VectorXs> dli_du;  //!< List of partial derivatives of the cost with respect to the control input of the
+                                 //!< RK4 integration. dli_du
 
-  std::vector<MatrixXs> ddli_ddx;
-  std::vector<MatrixXs> ddli_ddw;
-  std::vector<MatrixXs> ddli_ddu;
-  std::vector<MatrixXs> ddli_dxdw;
-  std::vector<MatrixXs> ddli_dxdu;
-  std::vector<MatrixXs> ddli_dwdu;
+  std::vector<MatrixXs> ddli_ddx;  //!< List of second partial derivatives of the cost with respect to the state of the
+                                   //!< RK4 integration. ddli_ddx
+  std::vector<MatrixXs> ddli_ddw;  //!< List of second partial derivatives of the cost with respect to the control
+                                   //!< parameters of the RK4 integration. ddli_ddw
+  std::vector<MatrixXs> ddli_ddu;  //!< List of second partial derivatives of the cost with respect to the control
+                                   //!< input of the RK4 integration. ddli_ddu
+  std::vector<MatrixXs> ddli_dxdw;  //!< List of second partial derivatives of the cost with respect to the state and
+                                    //!< control input of the RK4 integration. ddli_dxdw
+  std::vector<MatrixXs> ddli_dxdu;  //!< List of second partial derivatives of the cost with respect to the state and
+                                    //!< control parameters of the RK4 integration. ddli_dxdu
+  std::vector<MatrixXs> ddli_dwdu;  //!< List of second partial derivatives of the cost with respect to the control
+                                    //!< parameters and inputs control of the RK4 integration. ddli_dxdu
 
   std::vector<MatrixXs> Luu_partialx;
   std::vector<MatrixXs> Lxu_i;
