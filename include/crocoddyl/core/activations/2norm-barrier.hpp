@@ -22,14 +22,13 @@ namespace crocoddyl {
  *
  * This activation function describes a quadratic barrier of the 2-norm of a
  * residual vector, i.e. \f[ \begin{equation} \frac{1}{2} (d - \alpha)^2 \end{equation} \f] if \f$d < \alpha\f$ ,
- * else \f$0$\f, where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the
+ * else \f$0\f$, where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the
  * barrier is active, \f$nr\f$ is the dimension of the residual vector.
  *
- * The computation of the function and it derivatives are carried out in `calc()` and `caldDiff()`, respectively.
+ * The computation of the function and it derivatives are carried out in `calc()` and `calcDiff()`, respectively.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
-
 template <typename _Scalar>
 class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
@@ -121,7 +120,6 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
 
   /**
    * @brief Get and set the threshold factor
-   *
    */
   const Scalar& get_alpha() const { return alpha_; };
   void set_alpha(const Scalar& alpha) { alpha_ = alpha; };
