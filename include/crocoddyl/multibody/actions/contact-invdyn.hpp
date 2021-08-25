@@ -19,6 +19,7 @@
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {
 
@@ -68,12 +69,6 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   const boost::shared_ptr<CostModelSum> &get_costs() const;
   const boost::shared_ptr<ConstraintModelManager> &get_constraints() const;
   pinocchio::ModelTpl<Scalar> &get_pinocchio() const;
-
-  /**
-   * @brief Print relevant information of the contact forward-dynamics model
-   *
-   * @param[out] os  Output stream object
-   */
   virtual void print(std::ostream &os) const;
 
  protected:
@@ -102,23 +97,21 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
     typedef typename MathBase::VectorXs VectorXs;
 
+    ResidualModelRnea(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
+        : Base(state, state->get_nv(), 2 * state->get_nv() + nc, true, true, true),
+          nc_(nc),
+          _nv_a(state->get_nv()),
+          _nv_f(0) {}
+
     ResidualModelRnea(boost::shared_ptr<StateMultibody> state, const std::size_t nc, const std::size_t nu)
-        : Base(state, state->get_nv(), state->get_nv() + nu, true, true, true),
+        : Base(state, state->get_nv(), state->get_nv() + nu + nc, true, true, true),
           nc_(nc),
           _nv_a(nu),
           _nv_f(state->get_nv() - nu) {}
     virtual ~ResidualModelRnea() {}
 
     virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
-                      const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
-        const std::size_t nv = state_->get_nv();
-        const std::size_t nu = _nv_a;
-        const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nv+nu);
-        d->r.head(_nv_f) = d->pinocchio.tau.head(_nv_f)
-        data->r.tail(nu) = d->pinocchio->tau.tail(nu) - tau;
-    }
+                      const Eigen::Ref<const VectorXs> &);
 
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
                           const Eigen::Ref<const VectorXs> &) {
@@ -128,9 +121,8 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       const std::size_t nu = _nv_a;
       data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
       data->Rx.rightCols(nv) = d->pinocchio->dtau_dv;
-      data->Rx -= d->actuation->dtau_dx;
       data->Ru.leftCols(nv) = d->pinocchio->M;
-      data->Ru.rightCols(nv + na_) = -d->contacts->Jc.transpose();
+      data->Ru.rightCols(nv + nu) = -d->contact->Jc.transpose();
     }
 
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data) {
@@ -138,14 +130,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
           Eigen::aligned_allocator<typename Data::ResidualDataRnea>(), this, data);
     }
 
-    /**
-     * @brief Print relevant information of the RNEA residual model
-     *
-     * @param[out] os  Output stream object
-     */
     virtual void print(std::ostream &os) const {
       os << "ResidualModelRnea {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
-         << ", na=" << na_ << "}";
+         << "nc=" << nc_;
     }
 
    protected:
@@ -156,97 +143,49 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     using Base::state_;
   };
 
-  template <typename _Scalar>
-  class ResidualModelContactTpl : public ResidualModelAbstractTpl<_Scalar> {
+  class ResidualModelContact : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
     typedef ResidualModelAbstractTpl<Scalar> Base;
-    typedef ResidualDataContactForceTpl<Scalar> Data;
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-    typedef pinocchio::ForceTpl<Scalar> Force;
     typedef typename MathBase::VectorXs VectorXs;
     typedef typename MathBase::MatrixXs MatrixXs;
 
-    /**
-     * @brief Initialize the contact acceleration residual model
-     *
-     * @param[in] state  Multibody state
-     * @param[in] id     Reference frame id
-     * @param[in] nr     Dimenstion of residual vector
-     * @param[in] nc     Dimension of the contact force (nc <= 6)
-     * @param[in] nu     Dimension of control vector
-     */
-    ResidualModelContactTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                            const std::size_t nr, const std::size_t nc, const std::size_t nu);
+    ResidualModelContact(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
+                         const std::size_t nc, const std::size_t nu)
+        : Base(state, nr, state->get_nv() + nu + nc, true, true, true), id_(id) {}
 
-    /**
-     * @brief Initialize the contact acceleration residual model
-     *
-     * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
-     *
-     * @param[in] state  Multibody state
-     * @param[in] id     Reference frame id
-     * @param[in] nr     Dimenstion of residual vector
-     * @param[in] nc     Dimension of the contact force (nc <= 6)
-     */
-    ResidualModelContactTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                            const std::size_t nr, const std::size_t nc);
-    virtual ~ResidualModelContactTpl();
+    ResidualModelContact(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
+                         const std::size_t nc)
+        : Base(state, nr, 2 * state->get_nv() + nc, true, true, true), id_(id) {}
+    virtual ~ResidualModelContact() {}
 
-    /**
-     * @brief Compute the contact force residual
-     *
-     * The residual is computed based on  the acceleration vector is computed by
-     * `DifferentialActionModelContactInvDynamicsTpl` which is stored in
-     * `DataCollectorContactTpl` .
-     *
-     * @param[in] data  Contact force data
-     * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-     * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-     */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
-                      const Eigen::Ref<const VectorXs> &u);
+    template <typename Scalar>
+    void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
+              const Eigen::Ref<const VectorXs> &) {
+      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+      d->r = d->contact->a0;
+    }
 
-    /**
-     * @brief Compute the derivatives of the contact force residual
-     *
-     * The residual is computed based on  the acceleration vector is computed by
-     * `DifferentialActionModelContactInvDynamicsTpl` which is stored in
-     * `DataCollectorContactTpl` .
-     *
-     * @param[in] data  Contact force data
-     * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-     * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-     */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
-                          const Eigen::Ref<const VectorXs> &u);
+    template <typename Scalar>
+    void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
+                  const Eigen::Ref<const VectorXs> &) {
+      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
+          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+      d->Rx = d->contact->da0_dx;
+      d->Ru.rightCols(state_->get_nv()) = d->contact->Jc;
+    }
 
-    /**
-     * @brief Create the contact acceleration residual data
-     *
-     * @param[in] data  shared data (it should be of type
-     * DataCollectorContactTpl)
-     * @return the residual data.
-     */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
-
-    //@cmastalli Do you think it is required? 
-    /**
-     * @brief Return the reference frame id
-     */
-    pinocchio::FrameIndex get_id() const;
-
-    /**
-     * @brief Print relevant information of the contact-force residual
-     *
-     * @param[out] os  Output stream object
-     */
-    virtual void print(std::ostream &os) const;
+    template <typename Scalar>
+    boost::shared_ptr<ResidualDataAbstractTpl<Scalar>> createData() {
+      return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    }
 
    protected:
     using Base::nr_;
@@ -258,7 +197,6 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     pinocchio::FrameIndex id_;  //!< Reference frame id
   };
 };
-
 template <typename _Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -274,10 +212,7 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
-        Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
-             model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
-        df_dx(model->get_contacts()->get_nc_total(), model->get_state()->get_ndx()),
-        df_du(model->get_contacts()->get_nc_total(), model->get_nu()),
+        contacts(model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
         tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
@@ -285,10 +220,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       constraints = model->get_constraints()->createData(&multibody);
       constraints->shareMemory(this);
     }
-    Kinv.setZero();
-    df_dx.setZero();
-    df_du.setZero();
+
     tmp_xstatic.setZero();
+    tmp_Jstatic.setZero();
     tmp_Jstatic.setZero();
     pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
     pinocchio.lambda_c.setZero();
@@ -298,9 +232,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar>> costs;
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar>> constraints;
-  MatrixXs df_dx;
-  MatrixXs df_du;
+  boost::shared_ptr<ContactDataMultipleTpl<Scalar>> contacts;
   VectorXs tmp_xstatic;
+  VectorXs tmp_ustatic;
   MatrixXs tmp_Jstatic;
 
   using Base::cost;
@@ -325,118 +259,114 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     template <template <typename Scalar> class Model>
     ResidualDataRnea(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
       // Check that proper shared data has been passed
-      DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
+      DataCollectorActMultibodyInContactTpl<Scalar> *d =
+          dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
       if (d == NULL) {
         throw_pretty(
             "Invalid argument: the shared data should be derived from "
-            "DataCollectorActMultibody");
+            "DataCollectorActMultibodyInContactTpl");
       }
 
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
       actuation = d->actuation.get();
+      contact = d->contacts.get();
     }
 
     pinocchio::DataTpl<Scalar> *pinocchio;        //!< Pinocchio data
     ActuationDataAbstractTpl<Scalar> *actuation;  //!< Actuation data
+    ContactDataMultipleTpl<Scalar> *contact;      //!< Contact data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
     using Base::shared;
   };
+};
 
-  template <typename _Scalar>
-  struct ResidualDataContactTpl : public ResidualDataAbstractTpl<_Scalar> {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+template <typename _Scalar>
+struct ResidualDataContactTpl : public ResidualDataAbstractTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    typedef _Scalar Scalar;
-    typedef MathBaseTpl<Scalar> MathBase;
-    typedef ResidualDataAbstractTpl<Scalar> Base;
-    typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-    typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
-    typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
-    typedef pinocchio::ForceTpl<Scalar> Force;
-    typedef StateMultibodyTpl<Scalar> StateMultibody;
-    typedef typename MathBase::MatrixXs MatrixXs;
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ResidualDataAbstractTpl<Scalar> Base;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-    template <template <typename Scalar> class Model>
-    ResidualDataContactTpl(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
-      contact_type = ContactUndefined;
-
-      // Check that proper shared data has been passed
-      bool is_contact = true;
-      DataCollectorContactTpl<Scalar> *d1 = dynamic_cast<DataCollectorContactTpl<Scalar> *>(shared);
-      DataCollectorImpulseTpl<Scalar> *d2 = dynamic_cast<DataCollectorImpulseTpl<Scalar> *>(shared);
-      if (d1 == NULL && d2 == NULL) {
-        throw_pretty(
-            "Invalid argument: the shared data should be derived from "
-            "DataCollectorContact or DataCollectorImpulse");
-      }
-      if (d2 != NULL) {
-        is_contact = false;
-      }
-
-      const pinocchio::FrameIndex id = model->get_id();
-      const boost::shared_ptr<StateMultibody> &state = boost::static_pointer_cast<StateMultibody>(model->get_state());
-      std::string frame_name = state->get_pinocchio()->frames[id].name;
-      bool found_contact = false;
-      if (is_contact) {
-        for (typename ContactModelMultiple::ContactDataContainer::iterator it = d1->contacts->contacts.begin();
-             it != d1->contacts->contacts.end(); ++it) {
-          if (it->second->frame == id) {
-            ContactData3DTpl<Scalar> *d3d = dynamic_cast<ContactData3DTpl<Scalar> *>(it->second.get());
-            if (d3d != NULL) {
-              contact_type = Contact3D;
-              found_contact = true;
-              contact = it->second;
-              break;
-            }
-            ContactData6DTpl<Scalar> *d6d = dynamic_cast<ContactData6DTpl<Scalar> *>(it->second.get());
-            if (d6d != NULL) {
-              contact_type = Contact6D;
-              found_contact = true;
-              contact = it->second;
-              break;
-            }
-            throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
-            break;
-          }
-        }
-      } else {
-        for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d2->impulses->impulses.begin();
-             it != d2->impulses->impulses.end(); ++it) {
-          if (it->second->frame == id) {
-            ImpulseData3DTpl<Scalar> *d3d = dynamic_cast<ImpulseData3DTpl<Scalar> *>(it->second.get());
-            if (d3d != NULL) {
-              contact_type = Contact3D;
-              found_contact = true;
-              contact = it->second;
-              break;
-            }
-            ImpulseData6DTpl<Scalar> *d6d = dynamic_cast<ImpulseData6DTpl<Scalar> *>(it->second.get());
-            if (d6d != NULL) {
-              contact_type = Contact6D;
-              found_contact = true;
-              contact = it->second;
-              break;
-            }
-            throw_pretty("Domain error: there isn't defined at least a 3d impulse for " + frame_name);
-            break;
-          }
-        }
-      }
-      if (!found_contact) {
-        throw_pretty("Domain error: there isn't defined contact/impulse data for " + frame_name);
-      }
+  template <template <typename Scalar> class Model>
+  ResidualDataContactTpl(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
+    // Check that proper shared data has been passed
+    bool is_contact = true;
+    DataCollectorContactTpl<Scalar> *d1 = dynamic_cast<DataCollectorContactTpl<Scalar> *>(shared);
+    DataCollectorImpulseTpl<Scalar> *d2 = dynamic_cast<DataCollectorImpulseTpl<Scalar> *>(shared);
+    if (d1 == NULL && d2 == NULL) {
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorContact or DataCollectorImpulse");
+    }
+    if (d2 != NULL) {
+      is_contact = false;
     }
 
-    boost::shared_ptr<ForceDataAbstractTpl<Scalar>> contact;  //!< Contact force data
-    ContactType contact_type;                                 //!< Type of contact (3D / 6D)
-    using Base::r;
-    using Base::Ru;
-    using Base::Rx;
-    using Base::shared;
-  };
+    const pinocchio::FrameIndex id = model->get_id();
+    const boost::shared_ptr<StateMultibody> &state = boost::static_pointer_cast<StateMultibody>(model->get_state());
+    std::string frame_name = state->get_pinocchio()->frames[id].name;
+    bool found_contact = false;
+    if (is_contact) {
+      for (typename ContactModelMultiple::ContactDataContainer::iterator it = d1->contacts->contacts.begin();
+           it != d1->contacts->contacts.end(); ++it) {
+        if (it->second->frame == id) {
+          ContactData3DTpl<Scalar> *d3d = dynamic_cast<ContactData3DTpl<Scalar> *>(it->second.get());
+          if (d3d != NULL) {
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          ContactData6DTpl<Scalar> *d6d = dynamic_cast<ContactData6DTpl<Scalar> *>(it->second.get());
+          if (d6d != NULL) {
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
+          break;
+        }
+      }
+    } else {
+      for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it = d2->impulses->impulses.begin();
+           it != d2->impulses->impulses.end(); ++it) {
+        if (it->second->frame == id) {
+          ImpulseData3DTpl<Scalar> *d3d = dynamic_cast<ImpulseData3DTpl<Scalar> *>(it->second.get());
+          if (d3d != NULL) {
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          ImpulseData6DTpl<Scalar> *d6d = dynamic_cast<ImpulseData6DTpl<Scalar> *>(it->second.get());
+          if (d6d != NULL) {
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+          throw_pretty("Domain error: there isn't defined at least a 3d impulse for " + frame_name);
+          break;
+        }
+      }
+    }
+    if (!found_contact) {
+      throw_pretty("Domain error: there isn't defined contact/impulse data for " + frame_name);
+    }
+  }
+
+  boost::shared_ptr<ForceDataAbstractTpl<Scalar>> contact;  //!< Contact force data
+  using Base::r;
+  using Base::Ru;
+  using Base::Rx;
+  using Base::shared;
+};
 
 }  // namespace crocoddyl
 
