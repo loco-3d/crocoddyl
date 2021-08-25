@@ -198,10 +198,10 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
     }
 
     const std::size_t nv = model->get_state()->get_nv();
-    dyi_dx[0].diagonal().array() = (Scalar)1;
-    dki_dx[2].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
+    dyi_dx[0].diagonal().setOnes();
+    dki_dx[2].topRightCorner(nv, nv).diagonal().setOnes();
     for (std::size_t i = 0; i < 4; ++i) {
-      dki_dy[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
+      dki_dy[i].topRightCorner(nv, nv).diagonal().setOnes();
     }
   }
   virtual ~IntegratedActionDataRK4Tpl() {}

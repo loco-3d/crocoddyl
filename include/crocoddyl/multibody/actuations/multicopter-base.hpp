@@ -64,7 +64,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
     tau_f_ = MatrixXs::Zero(state_->get_nv(), nu_);
     tau_f_.block(0, 0, 6, n_rotors_) = tau_f;
     if (nu_ > n_rotors_) {
-      tau_f_.bottomRightCorner(nu_ - n_rotors_, nu_ - n_rotors_).diagonal().array() = 1.;
+      tau_f_.bottomRightCorner(nu_ - n_rotors_, nu_ - n_rotors_).diagonal().setOnes();
     }
   }
 
@@ -127,7 +127,7 @@ ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(boost
   tau_f_ = MatrixXs::Zero(state_->get_nv(), nu_);
   tau_f_.block(0, 0, 6, n_rotors_) = tau_f;
   if (nu_ > n_rotors_) {
-    tau_f_.bottomRightCorner(nu_ - n_rotors_, nu_ - n_rotors_).diagonal().array() = 1.;
+    tau_f_.bottomRightCorner(nu_ - n_rotors_, nu_ - n_rotors_).diagonal().setOnes();
   }
   std::cerr << "Deprecated ActuationModelMultiCopterBase: Use constructor without n_rotors." << std::endl;
 }
