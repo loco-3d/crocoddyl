@@ -26,8 +26,8 @@ void exposeDifferentialActionContactInvDynamics() {
             "On the other hand, the stack of cost and constraint functions are implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
             bp::init<boost::shared_ptr<StateMultibody>, boost::shared_ptr<ActuationModelAbstract>,
-                    boost::shared_ptr<ContactModelMultiple>,boost::shared_ptr<CostModelSum>, 
-                    bp::optional<boost::shared_ptr<ConstraintModelManager> > >(
+                     boost::shared_ptr<ContactModelMultiple>, boost::shared_ptr<CostModelSum>,
+                     bp::optional<boost::shared_ptr<ConstraintModelManager> > >(
                 bp::args("self", "state", "actuation", "costs", "constraints"),
                 "Initialize the inverse-dynamics action model for system with contact.\n\n"
                 "It describes the kinematic evolution of the multibody system with any contact,\n"
@@ -124,7 +124,7 @@ void exposeDifferentialActionContactInvDynamics() {
              "returns the allocated data for the RNEA residual.\n"
              ":param data: shared data\n"
              ":return residual data.");
-  
+
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelContactInvDynamics::ResidualModelContact> >();
 
     bp::class_<DifferentialActionModelContactInvDynamics::ResidualModelContact, bp::bases<ResidualModelAbstract> >(
@@ -132,10 +132,11 @@ void exposeDifferentialActionContactInvDynamics() {
         "This residual function penalises contact acceleration and is defined as r = acc, where\n"
         "acc is contact acceleration.",
         boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
-                         const std::size_t nc, const std::size_t nu
-        bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "id", "nr", "nc", "nu"),
-                                                                 "Initialize the contact acceleration residual model.\n\n"
-                                                                 ":param nu: dimension of control vector"))
+        const std::size_t nc,
+        const std::size_t nu bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+            bp::args("self", "state", "id", "nr", "nc", "nu"),
+            "Initialize the contact acceleration residual model.\n\n"
+            ":param nu: dimension of control vector"))
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -175,9 +176,10 @@ void exposeDifferentialActionContactInvDynamics() {
   bp::scope data_outer =
       bp::class_<DifferentialActionDataContactInvDynamics, bp::bases<DifferentialActionDataAbstract> >(
           "DifferentialActionDataContactInvDynamics", "Action data for the inverse-dynamics for system with contact.",
-          bp::init<DifferentialActionModelContactInvDynamics*>(bp::args("self", "model"),
-                                                            "Create inverse-dynamics action data for system with contacts.\n\n"
-                                                            ":param model: contact inverse-dynamics action model"))
+          bp::init<DifferentialActionModelContactInvDynamics*>(
+              bp::args("self", "model"),
+              "Create inverse-dynamics action data for system with contacts.\n\n"
+              ":param model: contact inverse-dynamics action model"))
           .add_property(
               "pinocchio",
               bp::make_getter(&DifferentialActionDataContactInvDynamics::pinocchio, bp::return_internal_reference<>()),
