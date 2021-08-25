@@ -34,6 +34,7 @@ void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionFreeInvDynamics();
 void exposeDifferentialActionContactFwdDynamics();
+void exposeDifferentialActionContactInvDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeResidualState();
 void exposeResidualCentroidalMomentum();
