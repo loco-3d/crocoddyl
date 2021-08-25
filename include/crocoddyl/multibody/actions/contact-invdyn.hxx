@@ -74,7 +74,7 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     boost::shared_ptr<ConstraintModelManager> constraints)
-    : Base(state, state->get_nv() + actuation->get_nu() + contacts.get_nc(), costs->get_nr(), constraints->get_ng(),
+    : Base(state, state->get_nv() + actuation->get_nu() + contacts->get_nc(), costs->get_nr(), constraints->get_ng(),
            state->get_nv() + contacts->get_nc() + constraints->get_nh()),
       actuation_(actuation),
       contacts_(contacts),
