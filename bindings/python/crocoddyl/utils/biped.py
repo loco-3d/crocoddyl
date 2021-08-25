@@ -30,9 +30,9 @@ class SimpleBipedGaitProblem:
         self.rfId = self.rmodel.getFrameId(rightFoot)
         self.lfId = self.rmodel.getFrameId(leftFoot)
         self.integrator = integrator
-        if control is 'one':
+        if control == 'one':
             self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
-        elif control is 'rk4':
+        elif control == 'rk4':
             self.control = crocoddyl.ControlParametrizationModelPolyTwoRK4(self.actuation.nu)
         else:
             self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
