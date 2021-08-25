@@ -18,6 +18,7 @@
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
+#include "crocoddyl/core/integrator/rk4.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
@@ -119,20 +120,26 @@ int main(int argc, char* argv[]) {
       boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact_models,
                                                                                terminalCostModel);
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel =
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
+      boost::make_shared<crocoddyl::IntegratedActionModelRK4>(runningDAM, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
 
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, runningModel);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModelsWithEuler(N, runningModelWithEuler);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModelsWithRK4(N, runningModelWithRK4);
 
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, terminalModel);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problemWithEuler =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithEuler, terminalModel);
+  boost::shared_ptr<crocoddyl::ShootingProblem> problemWithRK4 =
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithRK4, terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
 
   /***************************************************************/
 
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModel_data = runningModel->createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithEuler_data = runningModelWithEuler->createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data = runningModelWithRK4->createData();
   boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data = runningDAM->createData();
   crocoddyl::DifferentialActionDataContactFwdDynamics* d =
       static_cast<crocoddyl::DifferentialActionDataContactFwdDynamics*>(runningDAM_data.get());
@@ -150,6 +157,8 @@ int main(int argc, char* argv[]) {
 
   Eigen::ArrayXd duration(T);
 
+  std::vector<Eigen::VectorXd> x0s;
+  std::vector<Eigen::VectorXd> u0s;
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x1s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x2s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) us;   // (T, state->rand());
@@ -160,6 +169,11 @@ int main(int argc, char* argv[]) {
     x2s.push_back(state->rand());
     us.push_back(Eigen::VectorXd(actuation->get_nu()));
   }
+  for (size_t i = 0; i < N; ++i) {
+    x0s.push_back(state->rand());
+    u0s.push_back(Eigen::VectorXd(actuation->get_nu()));
+  }
+  x0s.push_back(state->rand());
 
   /*********************State**********************************/
   std::cout << std::left << std::setw(42) << "Function call"
@@ -415,7 +429,7 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModel->calc(runningModel_data, x1s[_smooth], us[_smooth]);
+    runningModelWithEuler->calc(runningModelWithEuler_data, x1s[_smooth], us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   std::cout << "ContactFwdDynamics+Euler" << std::endl;
@@ -424,7 +438,58 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModel->calcDiff(runningModel_data, x1s[_smooth], us[_smooth]);
+    runningModelWithEuler->calcDiff(runningModelWithEuler_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  printStatistics("calcDiff", duration);
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningModelWithRK4->calc(runningModelWithRK4_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "ContactFwdDynamics+RK4" << std::endl;
+  printStatistics("calc", duration);
+
+  duration.setZero();
+  SMOOTH(T) {
+    timer.reset();
+    runningModelWithRK4->calcDiff(runningModelWithRK4_data, x1s[_smooth], us[_smooth]);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  printStatistics("calcDiff", duration);
+
+  duration = Eigen::ArrayXd(T / N);
+  SMOOTH(T / N) {
+    timer.reset();
+    problemWithEuler->calc(x0s, u0s);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "Problem+Euler" << std::endl;
+  printStatistics("calc", duration);
+
+  duration.setZero();
+  SMOOTH(T / N) {
+    timer.reset();
+    problemWithEuler->calcDiff(x0s, u0s);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  printStatistics("calcDiff", duration);
+
+  duration.setZero();
+  SMOOTH(T / N) {
+    timer.reset();
+    problemWithRK4->calc(x0s, u0s);
+    duration[_smooth] = timer.get_us_duration();
+  }
+  std::cout << "Problem+RK4" << std::endl;
+  printStatistics("calc", duration);
+
+  duration.setZero();
+  SMOOTH(T / N) {
+    timer.reset();
+    problemWithRK4->calcDiff(x0s, u0s);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);
