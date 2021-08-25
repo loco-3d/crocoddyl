@@ -114,6 +114,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   }
 
   const std::size_t nv = differential_->get_state()->get_nv();
+  const std::size_t nw = control_->get_nw();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   if (enable_integration_) {
@@ -143,14 +144,43 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
     for (std::size_t i = 1; i < 4; ++i) {
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
+      d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
       differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
-      d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i];
-
-      d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
       differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i],
                                                       second);  // dyi_du = Jintegrate * dyi_du
-      d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
+      // Sparse matrix-matrix multiplication for computing:
+      //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i]
+      d->dki_dx[i].topRows(nv) = d->dyi_dx[i].bottomRows(nv);
+      if (i == 1) {
+        d->dki_dx[i].bottomLeftCorner(nv, nv) = d->dki_dy[i].bottomLeftCorner(nv, nv);
+        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
+            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
+        d->dki_dx[i].bottomRightCorner(nv, nv) = time_step_ / Scalar(2.) * d->dki_dy[i].bottomLeftCorner(nv, nv);
+      } else {
+        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() =
+            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_dx[i].topLeftCorner(nv, nv);
+        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
+            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
+        d->dki_dx[i].bottomRightCorner(nv, nv).noalias() =
+            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_dx[i].topRightCorner(nv, nv);
+      }
+      d->dki_dx[i].bottomRightCorner(nv, nv).noalias() +=
+          d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomRightCorner(nv, nv);
+      //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i]
+      if (i == 1 || i == 3) {
+        d->dki_du[i].topRows(nv) = d->dyi_du[i].bottomRows(nv);
+        d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
+            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
+        d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
+            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomRightCorner(nv, nw);
+      } else {
+        d->dki_du[i].topRightCorner(nv, nw) = d->dyi_du[i].bottomRightCorner(nv, nw);
+        d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
+            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_du[i].topLeftCorner(nv, nw);
+        d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
+            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
+      }
       control_->multiplyByJacobian(d->control[i], d->dki_dw[i],
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
