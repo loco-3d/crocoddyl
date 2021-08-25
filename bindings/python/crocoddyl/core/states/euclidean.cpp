@@ -70,7 +70,15 @@ void exposeStateEuclidean() {
                        ":param x: current state (dim state.nx()).\n"
                        ":param dx: displacement of the state (dim state.nx()).\n"
                        ":param firstsecond: desired partial derivative\n"
-                       ":return the partial derivative(s) of the integrate(x, dx) function"));
+                       ":return the partial derivative(s) of the integrate(x, dx) function"))
+      .def("JintegrateTransport", &StateVector::JintegrateTransport, bp::args("self", "x", "dx", "Jin", "firstsecond"),
+           "Parallel transport from x + dx to x.\n\n"
+           "This function performs the parallel transportation of an input matrix whose columns\n"
+           "are expressed in the tangent space at x + dx to the tangent space at x point\n"
+           ":param x: state point (dim state.nx).\n"
+           ":param dx: velocity vector (dim state.ndx).\n"
+           ":param Jin: input matrix (number of rows = state.nv).\n"
+           ":param firstsecond: desired partial derivative");
 }
 
 }  // namespace python
