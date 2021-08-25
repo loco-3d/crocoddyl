@@ -142,7 +142,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     using Base::nu_;
     using Base::state_;
   };
-
+  public:
   class ResidualModelContact : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -165,7 +165,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
         : Base(state, nr, 2 * state->get_nv() + nc, true, true, true), id_(id) {}
     virtual ~ResidualModelContact() {}
 
-    template <typename Scalar>
+
     void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
               const Eigen::Ref<const VectorXs> &) {
       const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
@@ -173,7 +173,6 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       d->r = d->contact->a0;
     }
 
-    template <typename Scalar>
     void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
                   const Eigen::Ref<const VectorXs> &) {
       const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
@@ -182,9 +181,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       d->Ru.rightCols(state_->get_nv()) = d->contact->Jc;
     }
 
-    template <typename Scalar>
-    boost::shared_ptr<ResidualDataAbstractTpl<Scalar>> createData() {
-      return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data) {
+      return boost::allocate_shared<typename Data::ResidualDataContact>(
+          Eigen::aligned_allocator<typename Data::ResidualDataContact>(), this, data);
     }
 
    protected:
@@ -281,10 +280,8 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     using Base::Rx;
     using Base::shared;
   };
-};
 
-template <typename _Scalar>
-struct ResidualDataContactTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataContact : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -297,7 +294,7 @@ struct ResidualDataContactTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  ResidualDataContactTpl(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
+  ResidualDataContact(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
     // Check that proper shared data has been passed
     bool is_contact = true;
     DataCollectorContactTpl<Scalar> *d1 = dynamic_cast<DataCollectorContactTpl<Scalar> *>(shared);
@@ -367,7 +364,7 @@ struct ResidualDataContactTpl : public ResidualDataAbstractTpl<_Scalar> {
   using Base::Rx;
   using Base::shared;
 };
-
+};
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
