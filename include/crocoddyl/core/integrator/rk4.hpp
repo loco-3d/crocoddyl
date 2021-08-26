@@ -145,7 +145,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 
  private:
-  std::size_t nthreads_;  //!< Number of threach launched by the multi-threading application
+  std::size_t nthreads_;  //!< Number of threads launched by the multi-threading application
   std::array<Scalar, 4> rk4_c_;
 };
 
