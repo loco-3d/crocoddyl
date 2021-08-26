@@ -17,9 +17,9 @@ namespace crocoddyl {
 /**
  * @brief Semi-implicit RK4 integrator
  *
- * It applies a semi-implicit RK4 integration scheme to a differential (i.e., continuous time) action model.
+ * It applies a standard RK4 integration scheme to a differential (i.e., continuous time) action model.
  *
- * This semi-implicit RK4 scheme introduces also the possibility to parametrize the control trajectory inside an
+ * This standard RK4 scheme introduces also the possibility to parametrize the control trajectory inside an
  * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
  * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
  * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
@@ -43,7 +43,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the semi-implicit RK4 integrator
+   * @brief Initialize the RK4 integrator
    *
    * @param[in] model      Differential action model
    * @param[in] control    Control parametrization
@@ -55,7 +55,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                               const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
 
   /**
-   * @brief Initialize the semi-implicit RK4 integrator
+   * @brief Initialize the RK4 integrator
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
    *
@@ -68,7 +68,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   virtual ~IntegratedActionModelRK4Tpl();
 
   /**
-   * @brief Integrate the differential action model using semi-implicit RK4 scheme
+   * @brief Integrate the differential action model using RK4 scheme
    *
    * @param[in] data  Semi-implicit RK4 data
    * @param[in] x     State point
@@ -78,7 +78,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the partial derivatives of the semi-implicit RK4 integrator
+   * @brief Compute the partial derivatives of the RK4 integrator
    *
    * @param[in] data  Semi-implicit RK4 data
    * @param[in] x     State point
@@ -88,9 +88,9 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create the semi-implicit RK4 data
+   * @brief Create the RK4 data
    *
-   * @return the semi-implicit RK4 data
+   * @return the RK4 data
    */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
@@ -116,7 +116,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                            const Scalar tol = Scalar(1e-9));
 
   /**
-   * @brief Print relevant information of the Runge-Kutta 4 integrator model
+   * @brief Print relevant information of the RK4 integrator model
    *
    * @param[out] os  Output stream object
    */
