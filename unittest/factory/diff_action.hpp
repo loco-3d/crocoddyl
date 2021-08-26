@@ -19,6 +19,7 @@
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/contact-invdyn.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -39,6 +40,9 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
     DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
+    DifferentialActionModelContactInvDynamics_HyQ,
+    DifferentialActionModelContactInvDynamicsWithFriction_TalosArm,
+    DifferentialActionModelContactInvDynamicsWithFriction_HyQ,
     NbDifferentialActionModelTypes
   };
   static std::vector<Type> init_all() {
@@ -70,6 +74,9 @@ class DifferentialActionModelFactory {
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> create_contactInvDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
 };
 
