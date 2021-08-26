@@ -142,6 +142,13 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
     for (std::size_t i = 1; i < 4; ++i) {
       const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data = d->differential[i];
+      d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
+      d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
+      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
+      state_->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
+      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i], second);  // dyi_du = Jintegrate * dyi_du
+
+      // Sparse matrix-matrix multiplication for computing:
       Eigen::Block<MatrixXs> dkvi_dq = d->dki_dx[i].bottomLeftCorner(nv, nv);
       Eigen::Block<MatrixXs> dkvi_dv = d->dki_dx[i].bottomRightCorner(nv, nv);
       Eigen::Block<MatrixXs> dkqi_du = d->dki_du[i].topLeftCorner(nv, nu);
@@ -154,24 +161,15 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       const Eigen::Block<MatrixXs> dvi_dv = d->dyi_dx[i].bottomRightCorner(nv, nv);
       const Eigen::Block<MatrixXs> dqi_du = d->dyi_du[i].topLeftCorner(nv, nu);
       const Eigen::Block<MatrixXs> dvi_du = d->dyi_du[i].bottomLeftCorner(nv, nu);
-
-      d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
-      d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
-      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
-      state_->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
-      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i], second);  // dyi_du = Jintegrate * dyi_du
-      // Sparse matrix-matrix multiplication for computing:
       //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i], where dki_dy is ki_data.Fx
       d->dki_dx[i].topRows(nv) = d->dyi_dx[i].bottomRows(nv);
+      dkvi_dq.noalias() = dki_dqi * dqi_dq;
       if (i == 1) {
-        dkvi_dq = dki_dqi;
-        dkvi_dq.noalias() += dki_dvi * dvi_dq;
         dkvi_dv = time_step_ / Scalar(2.) * dki_dqi;
       } else {
-        dkvi_dq.noalias() = dki_dqi * dqi_dq;
-        dkvi_dq.noalias() += dki_dvi * dvi_dq;
         dkvi_dv.noalias() = dki_dqi * dqi_dv;
       }
+      dkvi_dq.noalias() += dki_dvi * dvi_dq;
       dkvi_dv.noalias() += dki_dvi * dvi_dv;
       //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i], where dki_dy is ki_data.Fx
       dkqi_du = dvi_du;
