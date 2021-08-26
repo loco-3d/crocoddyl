@@ -123,85 +123,89 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
     }
 
-    d->dki_dx[0].bottomRows(nv) = d->differential[0]->Fx;
-    control_->multiplyByJacobian(d->control[0], d->differential[0]->Fu,
+    const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+    d->dki_dx[0].bottomRows(nv) = k0_data->Fx;
+    control_->multiplyByJacobian(d->control[0], k0_data->Fu,
                                  d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
-    d->dli_dx[0] = d->differential[0]->Lx;
-    control_->multiplyJacobianTransposeBy(d->control[0], d->differential[0]->Lu,
+    d->dli_dx[0] = k0_data->Lx;
+    control_->multiplyJacobianTransposeBy(d->control[0], k0_data->Lu,
                                           d->dli_du[0]);  // dli_du = dli_dw * dw_du
 
-    d->ddli_ddx[0] = d->differential[0]->Lxx;
-    d->ddli_ddw[0] = d->differential[0]->Luu;
+    d->ddli_ddx[0] = k0_data->Lxx;
+    d->ddli_ddw[0] = k0_data->Luu;
     control_->multiplyByJacobian(d->control[0], d->ddli_ddw[0], d->ddli_dwdu[0]);  // ddli_dwdu = ddli_ddw * dw_du
     control_->multiplyJacobianTransposeBy(d->control[0], d->ddli_dwdu[0],
                                           d->ddli_ddu[0]);  // ddli_ddu = dw_du.T * ddli_dwdu
-    d->ddli_dxdw[0] = d->differential[0]->Lxu;
+    d->ddli_dxdw[0] = k0_data->Lxu;
     control_->multiplyByJacobian(d->control[0], d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
     for (std::size_t i = 1; i < 4; ++i) {
+      const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data = d->differential[i];
+      Eigen::Block<MatrixXs> dkvi_dq = d->dki_dx[i].bottomLeftCorner(nv, nv);
+      Eigen::Block<MatrixXs> dkvi_dv = d->dki_dx[i].bottomRightCorner(nv, nv);
+      Eigen::Block<MatrixXs> dkvi_dwq = d->dki_du[i].bottomLeftCorner(nv, nw);
+      Eigen::Block<MatrixXs> dkvi_dwv = d->dki_du[i].bottomRightCorner(nv, nw);
+      const Eigen::Block<MatrixXs> dki_dqi = ki_data->Fx.bottomLeftCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dki_dvi = ki_data->Fx.bottomRightCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dqi_dq = d->dyi_dx[i].topLeftCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dqi_dv = d->dyi_dx[i].topRightCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dvi_dq = d->dyi_dx[i].bottomLeftCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dvi_dv = d->dyi_dx[i].bottomRightCorner(nv, nv);
+      const Eigen::Block<MatrixXs> dvi_dwq = d->dyi_du[i].bottomLeftCorner(nv, nw);
+      const Eigen::Block<MatrixXs> dvi_dwv = d->dyi_du[i].bottomRightCorner(nv, nw);
+
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
       d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
-      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
-      differential_->get_state()->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
-      differential_->get_state()->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i],
-                                                      second);  // dyi_du = Jintegrate * dyi_du
+      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_dx[i], second);
+      state_->Jintegrate(x, d->dx_rk4[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
+      state_->JintegrateTransport(x, d->dx_rk4[i], d->dyi_du[i], second);  // dyi_du = Jintegrate * dyi_du
       // Sparse matrix-matrix multiplication for computing:
-      //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i]
+      //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i], where dki_dy is ki_data.Fx
       d->dki_dx[i].topRows(nv) = d->dyi_dx[i].bottomRows(nv);
       if (i == 1) {
-        d->dki_dx[i].bottomLeftCorner(nv, nv) = d->differential[i]->Fx.bottomLeftCorner(nv, nv);
-        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
-            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
-        d->dki_dx[i].bottomRightCorner(nv, nv) =
-            time_step_ / Scalar(2.) * d->differential[i]->Fx.bottomLeftCorner(nv, nv);
+        dkvi_dq = dki_dqi;
+        dkvi_dq.noalias() += dki_dvi * dvi_dq;
+        dkvi_dv = time_step_ / Scalar(2.) * dki_dqi;
       } else {
-        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() =
-            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_dx[i].topLeftCorner(nv, nv);
-        d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
-            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
-        d->dki_dx[i].bottomRightCorner(nv, nv).noalias() =
-            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_dx[i].topRightCorner(nv, nv);
+        dkvi_dq.noalias() = dki_dqi * dqi_dq;
+        dkvi_dq.noalias() += dki_dvi * dvi_dq;
+        dkvi_dv.noalias() = dki_dqi * dqi_dv;
       }
-      d->dki_dx[i].bottomRightCorner(nv, nv).noalias() +=
-          d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomRightCorner(nv, nv);
-      //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i]
+      dkvi_dv.noalias() += dki_dvi * dvi_dv;
+      //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i], where dki_dy is ki_data.Fx
       if (i == 1 || i == 3) {
         d->dki_du[i].topRows(nv) = d->dyi_du[i].bottomRows(nv);
-        d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
-            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
-        d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
-            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomRightCorner(nv, nw);
+        dkvi_dwq.noalias() = dki_dvi * dvi_dwq;
+        dkvi_dwv.noalias() = dki_dvi * dvi_dwv;
       } else {
-        d->dki_du[i].topRightCorner(nv, nw) = d->dyi_du[i].bottomRightCorner(nv, nw);
-        d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
-            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_du[i].topLeftCorner(nv, nw);
-        d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
-            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
+        d->dki_du[i].topRightCorner(nv, nw) = dvi_dwv;
+        dkvi_dwq.noalias() = dki_dqi * d->dyi_du[i].topLeftCorner(nv, nw);
+        dkvi_dwv.noalias() = dki_dvi * dvi_dwq;
       }
-      control_->multiplyByJacobian(d->control[i], d->differential[i]->Fu,
+      control_->multiplyByJacobian(d->control[i], ki_data->Fu,
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
 
-      d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
-      control_->multiplyJacobianTransposeBy(d->control[i], d->differential[i]->Lu,
+      d->dli_dx[i].noalias() = ki_data->Lx.transpose() * d->dyi_dx[i];
+      control_->multiplyJacobianTransposeBy(d->control[i], ki_data->Lu,
                                             d->dli_du[i]);  // dli_du = Lu * dw_du
-      d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
+      d->dli_du[i].noalias() += ki_data->Lx.transpose() * d->dyi_du[i];
 
-      d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
+      d->Lxx_partialx[i].noalias() = ki_data->Lxx * d->dyi_dx[i];
       d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
 
-      control_->multiplyByJacobian(d->control[i], d->differential[i]->Lxu, d->Lxu_i[i]);  // Lxu = Lxw * dw_du
+      control_->multiplyByJacobian(d->control[i], ki_data->Lxu, d->Lxu_i[i]);  // Lxu = Lxw * dw_du
       d->Luu_partialx[i].noalias() = d->Lxu_i[i].transpose() * d->dyi_du[i];
-      d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-      control_->multiplyByJacobian(d->control[i], d->differential[i]->Luu,
+      d->Lxx_partialu[i].noalias() = ki_data->Lxx * d->dyi_du[i];
+      control_->multiplyByJacobian(d->control[i], ki_data->Luu,
                                    d->ddli_dwdu[i]);  // ddli_dwdu = ddli_ddw * dw_du
       control_->multiplyJacobianTransposeBy(d->control[i], d->ddli_dwdu[i],
                                             d->ddli_ddu[i]);  // ddli_ddu = dw_du.T * ddli_dwdu
       d->ddli_ddu[i].noalias() +=
           d->Luu_partialx[i].transpose() + d->Luu_partialx[i] + d->dyi_du[i].transpose() * d->Lxx_partialu[i];
 
-      d->ddli_dxdw[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
+      d->ddli_dxdw[i].noalias() = d->dyi_dx[i].transpose() * ki_data->Lxu;
       control_->multiplyByJacobian(d->control[i], d->ddli_dxdw[i],
                                    d->ddli_dxdu[i]);  // ddli_dxdu = ddli_dxdw * dw_du
       d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
@@ -209,12 +213,12 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
     d->Fx.noalias() = time_step_ / Scalar(6.) *
                       (d->dki_dx[0] + Scalar(2.) * d->dki_dx[1] + Scalar(2.) * d->dki_dx[2] + d->dki_dx[3]);
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+    state_->JintegrateTransport(x, d->dx, d->Fx, second);
+    state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
 
     d->Fu.noalias() = time_step_ / Scalar(6.) *
                       (d->dki_du[0] + Scalar(2.) * d->dki_du[1] + Scalar(2.) * d->dki_du[2] + d->dki_du[3]);
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
+    state_->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ / Scalar(6.) *
                       (d->dli_dx[0] + Scalar(2.) * d->dli_dx[1] + Scalar(2.) * d->dli_dx[2] + d->dli_dx[3]);
@@ -229,14 +233,15 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
         time_step_ / Scalar(6.) *
         (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   } else {
-    differential_->calcDiff(d->differential[0], x, d->ws[0]);
+    const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+    differential_->calcDiff(k0_data, x, d->ws[0]);
     differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
-    d->Lx = d->differential[0]->Lx;
-    d->Lu = d->differential[0]->Lu;
-    d->Lxx = d->differential[0]->Lxx;
-    d->Lxu = d->differential[0]->Lxu;
-    d->Luu = d->differential[0]->Luu;
+    d->Lx = k0_data->Lx;
+    d->Lu = k0_data->Lu;
+    d->Lxx = k0_data->Lxx;
+    d->Lxu = k0_data->Lxu;
+    d->Luu = k0_data->Luu;
   }
 }
 
