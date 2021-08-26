@@ -182,7 +182,7 @@ class StateAbstractTpl {
                           const Jcomponent firstsecond = both, const AssignmentOp op = setto) const = 0;
 
   /**
-   * @brief Parallel transport from x + dx to x.
+   * @brief Parallel transport from integrate(x, dx) to x.
    *
    * This function performs the parallel transportation of an input matrix whose columns are expressed in the
    * tangent space at \f$\mathbf{x}\oplus\delta\mathbf{x}\f$ to the tangent space at \f$\mathbf{x}\f$ point.
