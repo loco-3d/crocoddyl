@@ -84,7 +84,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t nv = differential_->get_state()->get_nv();
+  const std::size_t nv = state_->get_nv();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
   // Computing the derivatives for the time-continuous model (i.e. differential model)
@@ -102,9 +102,9 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     d->Fu.topRows(nv).noalias() = time_step2_ * d->da_du;
     d->Fu.bottomRows(nv).noalias() = time_step_ * d->da_du;
 
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
+    state_->JintegrateTransport(x, d->dx, d->Fx, second);
+    state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+    state_->JintegrateTransport(x, d->dx, d->Fu, second);
 
     d->Lx.noalias() = time_step_ * d->differential->Lx;
     control_->multiplyJacobianTransposeBy(d->control, d->differential->Lu, d->Lu);
@@ -116,7 +116,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
     control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
     d->Luu *= time_step_;
   } else {
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
+    state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
     d->Fu.setZero();
     d->Lx = d->differential->Lx;
     d->Lu = d->differential->Lu;
