@@ -118,11 +118,11 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     for (std::size_t i = 0; i < 4; ++i) {
       differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
       d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
-      d->dki_dw[i] = d->differential[i]->Fu;
     }
 
     d->dki_dx[0] = d->dki_dy[0];
-    control_->multiplyByJacobian(d->control[0], d->dki_dw[0], d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
+    control_->multiplyByJacobian(d->control[0], d->differential[0]->Fu,
+                                 d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
     d->dli_dx[0] = d->differential[0]->Lx;
     control_->multiplyJacobianTransposeBy(d->control[0], d->differential[0]->Lu,
@@ -175,7 +175,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
         d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
             d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
       }
-      control_->multiplyByJacobian(d->control[i], d->dki_dw[i],
+      control_->multiplyByJacobian(d->control[i], d->differential[i]->Fu,
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
 
