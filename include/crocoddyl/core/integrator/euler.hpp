@@ -23,7 +23,8 @@ namespace crocoddyl {
  * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
  * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
  * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
- * control inputs of the integrated action model.
+ * control inputs of the integrated action model. Note that the zero-order (e.g.,
+ * `ControlParametrizationModelPolyZeroTpl`) are the only ones that make sense to use within this integrator.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
