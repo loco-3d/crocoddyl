@@ -108,7 +108,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   }
 
   const std::size_t nv = state_->get_nv();
-  const std::size_t nw = control_->get_nw();
+  const std::size_t nu = control_->get_nu();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
   assert_pretty(d->dyi_dx[0] == MatrixXs::Identity(state_->get_ndx(), state_->get_ndx()),
                 "you have changed dyi_dx[0] values that supposed to be constant.");
@@ -144,16 +144,16 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data = d->differential[i];
       Eigen::Block<MatrixXs> dkvi_dq = d->dki_dx[i].bottomLeftCorner(nv, nv);
       Eigen::Block<MatrixXs> dkvi_dv = d->dki_dx[i].bottomRightCorner(nv, nv);
-      Eigen::Block<MatrixXs> dkvi_dwq = d->dki_du[i].bottomLeftCorner(nv, nw);
-      Eigen::Block<MatrixXs> dkvi_dwv = d->dki_du[i].bottomRightCorner(nv, nw);
+      Eigen::Block<MatrixXs> dkqi_du = d->dki_du[i].topLeftCorner(nv, nu);
+      Eigen::Block<MatrixXs> dkvi_du = d->dki_du[i].bottomLeftCorner(nv, nu);
       const Eigen::Block<MatrixXs> dki_dqi = ki_data->Fx.bottomLeftCorner(nv, nv);
       const Eigen::Block<MatrixXs> dki_dvi = ki_data->Fx.bottomRightCorner(nv, nv);
       const Eigen::Block<MatrixXs> dqi_dq = d->dyi_dx[i].topLeftCorner(nv, nv);
       const Eigen::Block<MatrixXs> dqi_dv = d->dyi_dx[i].topRightCorner(nv, nv);
       const Eigen::Block<MatrixXs> dvi_dq = d->dyi_dx[i].bottomLeftCorner(nv, nv);
       const Eigen::Block<MatrixXs> dvi_dv = d->dyi_dx[i].bottomRightCorner(nv, nv);
-      const Eigen::Block<MatrixXs> dvi_dwq = d->dyi_du[i].bottomLeftCorner(nv, nw);
-      const Eigen::Block<MatrixXs> dvi_dwv = d->dyi_du[i].bottomRightCorner(nv, nw);
+      const Eigen::Block<MatrixXs> dqi_du = d->dyi_du[i].topLeftCorner(nv, nu);
+      const Eigen::Block<MatrixXs> dvi_du = d->dyi_du[i].bottomLeftCorner(nv, nu);
 
       d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk4_c_[i] * time_step_;
       d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk4_c_[i] * time_step_;
@@ -174,15 +174,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       }
       dkvi_dv.noalias() += dki_dvi * dvi_dv;
       //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i], where dki_dy is ki_data.Fx
-      if (i == 1 || i == 3) {
-        d->dki_du[i].topRows(nv) = d->dyi_du[i].bottomRows(nv);
-        dkvi_dwq.noalias() = dki_dvi * dvi_dwq;
-        dkvi_dwv.noalias() = dki_dvi * dvi_dwv;
-      } else {
-        d->dki_du[i].topRightCorner(nv, nw) = dvi_dwv;
-        dkvi_dwq.noalias() = dki_dqi * d->dyi_du[i].topLeftCorner(nv, nw);
-        dkvi_dwv.noalias() = dki_dvi * dvi_dwq;
-      }
+      dkqi_du = dvi_du;
+      dkvi_du.noalias() = dki_dqi * dqi_du;
+      dkvi_du.noalias() += dki_dvi * dvi_du;
+
       control_->multiplyByJacobian(d->control[i], ki_data->Fu,
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
       d->dki_du[i] += d->dfi_du[i];
