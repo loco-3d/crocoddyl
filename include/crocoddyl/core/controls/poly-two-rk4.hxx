@@ -95,7 +95,8 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::convertBounds(const Eigen
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -103,15 +104,33 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyByJacobian(
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
   }
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
-  out.leftCols(nw_) = d->c[0] * A;
-  out.middleCols(nw_, nw_) = d->c[1] * A;
-  out.rightCols(nw_) = d->c[2] * A;
+  switch (op) {
+    case setto:
+      out.leftCols(nw_) = d->c[0] * A;
+      out.middleCols(nw_, nw_) = d->c[1] * A;
+      out.rightCols(nw_) = d->c[2] * A;
+      break;
+    case addto:
+      out.leftCols(nw_) += d->c[0] * A;
+      out.middleCols(nw_, nw_) += d->c[1] * A;
+      out.rightCols(nw_) += d->c[2] * A;
+      break;
+    case rmfrom:
+      out.leftCols(nw_) -= d->c[0] * A;
+      out.middleCols(nw_, nw_) -= d->c[1] * A;
+      out.rightCols(nw_) -= d->c[2] * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTransposeBy(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
@@ -119,9 +138,26 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::multiplyJacobianTranspose
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
-  out.topRows(nw_) = d->c[0] * A;
-  out.middleRows(nw_, nw_) = d->c[1] * A;
-  out.bottomRows(nw_) = d->c[2] * A;
+  switch (op) {
+    case setto:
+      out.topRows(nw_) = d->c[0] * A;
+      out.middleRows(nw_, nw_) = d->c[1] * A;
+      out.bottomRows(nw_) = d->c[2] * A;
+      break;
+    case addto:
+      out.topRows(nw_) += d->c[0] * A;
+      out.middleRows(nw_, nw_) += d->c[1] * A;
+      out.bottomRows(nw_) += d->c[2] * A;
+      break;
+    case rmfrom:
+      out.topRows(nw_) -= d->c[0] * A;
+      out.middleRows(nw_, nw_) -= d->c[1] * A;
+      out.bottomRows(nw_) -= d->c[2] * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 }  // namespace crocoddyl

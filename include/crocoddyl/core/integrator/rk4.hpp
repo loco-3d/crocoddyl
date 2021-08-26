@@ -172,7 +172,6 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
         dx_rk4(4, VectorXs::Zero(model->get_state()->get_ndx())),
         dki_dx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
         dki_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
-        dfi_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
         dyi_dx(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
         dyi_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
         dli_dx(4, VectorXs::Zero(model->get_state()->get_ndx())),
@@ -215,7 +214,6 @@ struct IntegratedActionDataRK4Tpl : public IntegratedActionDataAbstractTpl<_Scal
       dki_dx;  //!< List of partial derivatives of RK4 nodes with respect to the state of the RK4 integration. dki/dx
   std::vector<MatrixXs> dki_du;  //!< List of partial derivatives of RK4 nodes with respect to the control parameters
                                  //!< of the RK4 integration. dki/du
-  std::vector<MatrixXs> dfi_du;
 
   std::vector<MatrixXs>
       dyi_dx;  //!< List of partial derivatives of RK4 dynamics with respect to the state of the RK4 integrator. dyi/dx

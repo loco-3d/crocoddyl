@@ -88,27 +88,55 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(const Eigen::
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(
     const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  out = A;
+  switch (op) {
+    case setto:
+      out = A;
+      break;
+    case addto:
+      out += A;
+      break;
+    case rmfrom:
+      out -= A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyJacobianTransposeBy(
     const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  out = A;
+  switch (op) {
+    case setto:
+      out = A;
+      break;
+    case addto:
+      out += A;
+      break;
+    case rmfrom:
+      out -= A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 }  // namespace crocoddyl

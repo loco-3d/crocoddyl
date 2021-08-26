@@ -176,9 +176,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       dkvi_du.noalias() = dki_dqi * dqi_du;
       dkvi_du.noalias() += dki_dvi * dvi_du;
 
-      control_->multiplyByJacobian(d->control[i], ki_data->Fu,
-                                   d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du
-      d->dki_du[i] += d->dfi_du[i];
+      control_->multiplyByJacobian(d->control[i], ki_data->Fu, d->dki_du[i].bottomRows(nv),
+                                   addto);  // dfi_du = dki_dw * dw_du
 
       d->dli_dx[i].noalias() = ki_data->Lx.transpose() * d->dyi_dx[i];
       control_->multiplyJacobianTransposeBy(d->control[i], ki_data->Lu,

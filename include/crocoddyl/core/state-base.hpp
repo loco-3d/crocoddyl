@@ -20,13 +20,10 @@
 namespace crocoddyl {
 
 enum Jcomponent { both = 0, first = 1, second = 2 };
-enum AssignmentOp { setto, addto, rmfrom };
 
 inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
 }
-
-inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == addto || op == rmfrom); }
 
 /**
  * @brief Abstract class for the state representation

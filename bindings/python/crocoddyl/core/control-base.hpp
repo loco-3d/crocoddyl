@@ -76,8 +76,26 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
   }
 
   void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                          const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyByJacobian_wrap(data, A);
+                          const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out,
+                          const AssignmentOp op) const {
+    switch (op) {
+      case setto: {
+        out = multiplyByJacobian_wrap(data, A);
+        break;
+      }
+      case addto: {
+        out += multiplyByJacobian_wrap(data, A);
+        break;
+      }
+      case rmfrom: {
+        out -= multiplyByJacobian_wrap(data, A);
+        break;
+      }
+      default: {
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
+      }
+    }
   }
 
   Eigen::MatrixXd multiplyByJacobian_wrap(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
@@ -86,8 +104,26 @@ class ControlParametrizationModelAbstract_wrap : public ControlParametrizationMo
   }
 
   void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                   const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out) const {
-    out = multiplyJacobianTransposeBy_wrap(data, A);
+                                   const Eigen::Ref<const Eigen::MatrixXd>& A, Eigen::Ref<Eigen::MatrixXd> out,
+                                   const AssignmentOp op) const {
+    switch (op) {
+      case setto: {
+        out = multiplyJacobianTransposeBy_wrap(data, A);
+        break;
+      }
+      case addto: {
+        out += multiplyJacobianTransposeBy_wrap(data, A);
+        break;
+      }
+      case rmfrom: {
+        out -= multiplyJacobianTransposeBy_wrap(data, A);
+        break;
+      }
+      default: {
+        throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+        break;
+      }
+    }
   }
 
   Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,

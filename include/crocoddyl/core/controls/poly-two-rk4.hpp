@@ -109,9 +109,11 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
   virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                  const AssignmentOp = setto) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
@@ -123,9 +125,11 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
   virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                           const AssignmentOp = setto) const;
 
  protected:
   using Base::nu_;

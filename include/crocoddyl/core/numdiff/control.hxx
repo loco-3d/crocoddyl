@@ -67,17 +67,45 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::R
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   MatrixXs J(nw_, nu_);
-  out.noalias() = A * data->dw_du;
+  switch (op) {
+    case setto:
+      out.noalias() = A * data->dw_du;
+      break;
+    case addto:
+      out.noalias() += A * data->dw_du;
+      break;
+    case rmfrom:
+      out.noalias() -= A * data->dw_du;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out) const {
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   MatrixXs J(nw_, nu_);
-  out.noalias() = data->dw_du.transpose() * A;
+  switch (op) {
+    case setto:
+      out.noalias() = data->dw_du.transpose() * A;
+      break;
+    case addto:
+      out.noalias() += data->dw_du.transpose() * A;
+      break;
+    case rmfrom:
+      out.noalias() -= data->dw_du.transpose() * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 template <typename Scalar>
