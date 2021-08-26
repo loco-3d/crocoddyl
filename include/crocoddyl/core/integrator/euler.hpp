@@ -15,11 +15,11 @@
 namespace crocoddyl {
 
 /**
- * @brief Sympletic Euler integrator
+ * @brief Symplectic Euler integrator
  *
- * It applies a sympletic Euler integration scheme to a differential (i.e., continuous time) action model.
+ * It applies a symplectic Euler integration scheme to a differential (i.e., continuous time) action model.
  *
- * This sympletic Euler scheme introduces also the possibility to parametrize the control trajectory inside an
+ * This symplectic Euler scheme introduces also the possibility to parametrize the control trajectory inside an
  * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
  * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
  * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
@@ -44,7 +44,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the sympletic Euler integrator
+   * @brief Initialize the symplectic Euler integrator
    *
    * @param[in] model      Differential action model
    * @param[in] control    Control parametrization
@@ -56,7 +56,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
                                 const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
 
   /**
-   * @brief Initialize the sympletic Euler integrator
+   * @brief Initialize the symplectic Euler integrator
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
    *
@@ -70,9 +70,9 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   virtual ~IntegratedActionModelEulerTpl();
 
   /**
-   * @brief Integrate the differential action model using sympletic Euler scheme
+   * @brief Integrate the differential action model using symplectic Euler scheme
    *
-   * @param[in] data  Sympletic Euler data
+   * @param[in] data  Symplectic Euler data
    * @param[in] x     State point
    * @param[in] u     Control input
    */
@@ -80,9 +80,9 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the partial derivatives of the sympletic Euler integrator
+   * @brief Compute the partial derivatives of the symplectic Euler integrator
    *
-   * @param[in] data  Sympletic Euler data
+   * @param[in] data  Symplectic Euler data
    * @param[in] x     State point
    * @param[in] u     Control input
    */
@@ -92,7 +92,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   /**
    * @brief Create the symplectic Euler data
    *
-   * @return the sympletic Euler data
+   * @return the symplectic Euler data
    */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
