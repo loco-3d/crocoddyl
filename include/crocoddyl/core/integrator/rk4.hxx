@@ -107,9 +107,13 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t nv = differential_->get_state()->get_nv();
+  const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  assert_pretty(d->dyi_dx[0] == MatrixXs::Identity(state_->get_ndx(), state_->get_ndx()),
+                "you have changed dyi_dx[0] values that supposed to be constant.");
+  assert_pretty(d->dki_dx[0].topRightCorner(nv, nv) == MatrixXs::Identity(nv, nv),
+                "you have changed dki_dx[0] values that supposed to be constant.");
 
   if (enable_integration_) {
 #ifdef CROCODDYL_WITH_MULTITHREADING
@@ -117,10 +121,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 #endif
     for (std::size_t i = 0; i < 4; ++i) {
       differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
-      d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
     }
 
-    d->dki_dx[0] = d->dki_dy[0];
+    d->dki_dx[0].bottomRows(nv) = d->differential[0]->Fx;
     control_->multiplyByJacobian(d->control[0], d->differential[0]->Fu,
                                  d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
@@ -147,33 +150,34 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
       //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i]
       d->dki_dx[i].topRows(nv) = d->dyi_dx[i].bottomRows(nv);
       if (i == 1) {
-        d->dki_dx[i].bottomLeftCorner(nv, nv) = d->dki_dy[i].bottomLeftCorner(nv, nv);
+        d->dki_dx[i].bottomLeftCorner(nv, nv) = d->differential[i]->Fx.bottomLeftCorner(nv, nv);
         d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
-            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
-        d->dki_dx[i].bottomRightCorner(nv, nv) = time_step_ / Scalar(2.) * d->dki_dy[i].bottomLeftCorner(nv, nv);
+            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
+        d->dki_dx[i].bottomRightCorner(nv, nv) =
+            time_step_ / Scalar(2.) * d->differential[i]->Fx.bottomLeftCorner(nv, nv);
       } else {
         d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() =
-            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_dx[i].topLeftCorner(nv, nv);
+            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_dx[i].topLeftCorner(nv, nv);
         d->dki_dx[i].bottomLeftCorner(nv, nv).noalias() +=
-            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
+            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomLeftCorner(nv, nv);
         d->dki_dx[i].bottomRightCorner(nv, nv).noalias() =
-            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_dx[i].topRightCorner(nv, nv);
+            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_dx[i].topRightCorner(nv, nv);
       }
       d->dki_dx[i].bottomRightCorner(nv, nv).noalias() +=
-          d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomRightCorner(nv, nv);
+          d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_dx[i].bottomRightCorner(nv, nv);
       //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i]
       if (i == 1 || i == 3) {
         d->dki_du[i].topRows(nv) = d->dyi_du[i].bottomRows(nv);
         d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
-            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
+            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
         d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
-            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomRightCorner(nv, nw);
+            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomRightCorner(nv, nw);
       } else {
         d->dki_du[i].topRightCorner(nv, nw) = d->dyi_du[i].bottomRightCorner(nv, nw);
         d->dki_du[i].bottomLeftCorner(nv, nw).noalias() =
-            d->dki_dy[i].bottomLeftCorner(nv, nv) * d->dyi_du[i].topLeftCorner(nv, nw);
+            d->differential[i]->Fx.bottomLeftCorner(nv, nv) * d->dyi_du[i].topLeftCorner(nv, nw);
         d->dki_du[i].bottomRightCorner(nv, nw).noalias() =
-            d->dki_dy[i].bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
+            d->differential[i]->Fx.bottomRightCorner(nv, nv) * d->dyi_du[i].bottomLeftCorner(nv, nw);
       }
       control_->multiplyByJacobian(d->control[i], d->differential[i]->Fu,
                                    d->dfi_du[i].bottomRows(nv));  // dfi_du = dki_dw * dw_du

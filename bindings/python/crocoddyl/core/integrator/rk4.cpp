@@ -106,9 +106,6 @@ void exposeIntegratedActionRK4() {
                     "list of partial derivatives of RK4 nodes with respect to the control parameters of the RK4 "
                     "integration. dki/du")
       .add_property(
-          "dki_dy", bp::make_getter(&IntegratedActionDataRK4::dki_dy, bp::return_internal_reference<>()),
-          "list of partial derivatives of RK4 nodes with respect to the dynamics of the RK4 integration. dki/dy")
-      .add_property(
           "dyi_dx", bp::make_getter(&IntegratedActionDataRK4::dyi_dx, bp::return_internal_reference<>()),
           "list of partial derivatives of RK4 dynamics with respect to the state of the RK4 integrator. dyi/dx")
       .add_property("dyi_du", bp::make_getter(&IntegratedActionDataRK4::dyi_du, bp::return_internal_reference<>()),
