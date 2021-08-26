@@ -19,10 +19,7 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual), nthreads_(1) {
-  rk4_c_.push_back(Scalar(0.));
-  rk4_c_.push_back(Scalar(0.5));
-  rk4_c_.push_back(Scalar(0.5));
-  rk4_c_.push_back(Scalar(1.));
+  rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
   nthreads_ = CROCODDYL_WITH_NTHREADS;
@@ -33,10 +30,7 @@ template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual), nthreads_(1) {
-  rk4_c_.push_back(Scalar(0.));
-  rk4_c_.push_back(Scalar(0.5));
-  rk4_c_.push_back(Scalar(0.5));
-  rk4_c_.push_back(Scalar(1.));
+  rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
   nthreads_ = CROCODDYL_WITH_NTHREADS;

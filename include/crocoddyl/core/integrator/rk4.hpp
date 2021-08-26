@@ -146,7 +146,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
 
  private:
   std::size_t nthreads_;  //!< Number of threach launched by the multi-threading application
-  std::vector<Scalar> rk4_c_;
+  std::array<Scalar, 4> rk4_c_;
 };
 
 template <typename _Scalar>
