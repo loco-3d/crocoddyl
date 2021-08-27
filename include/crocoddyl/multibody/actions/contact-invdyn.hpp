@@ -98,14 +98,12 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     typedef typename MathBase::VectorXs VectorXs;
 
     ResidualModelRnea(boost::shared_ptr<StateMultibody> state, const std::size_t nc, const std::size_t nu)
-        : Base(state, state->get_nv(), state->get_nv() + nu + nc, true, true, true),
-          nc_(nc),
-          na_(nu) {}
+        : Base(state, state->get_nv(), state->get_nv() + nu + nc, true, true, true), nc_(nc), na_(nu) {}
     virtual ~ResidualModelRnea() {}
 
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
-                      const Eigen::Ref<const VectorXs>&) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
+                      const Eigen::Ref<const VectorXs> &) {
+      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
           boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       data->r = d->pinocchio->tau - d->actuation->tau;
     }
@@ -142,7 +140,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     std::size_t na_;
   };
 
-  public:
+ public:
   class ResidualModelContact : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -164,7 +162,6 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                          const std::size_t nc)
         : Base(state, nr, 2 * state->get_nv() + nc, true, true, true), id_(id) {}
     virtual ~ResidualModelContact() {}
-
 
     void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
               const Eigen::Ref<const VectorXs> &) {
@@ -281,38 +278,38 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     using Base::shared;
   };
 
-struct ResidualDataContact : public ResidualDataAbstractTpl<_Scalar> {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  struct ResidualDataContact : public ResidualDataAbstractTpl<_Scalar> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef ResidualDataAbstractTpl<Scalar> Base;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef DataCollectorMultibodyInContactTpl<Scalar> DataCollectorMultibodyInContact;
-  typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+    typedef _Scalar Scalar;
+    typedef MathBaseTpl<Scalar> MathBase;
+    typedef ResidualDataAbstractTpl<Scalar> Base;
+    typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+    typedef DataCollectorMultibodyInContactTpl<Scalar> DataCollectorMultibodyInContact;
+    typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
 
-  template <template <typename Scalar> class Model>
-  ResidualDataContact(Model<Scalar> *const model, DataCollectorAbstract *const data, const std::size_t id) : Base(model, data) {
-    DataCollectorMultibodyInContact *d = dynamic_cast<DataCollectorMultibodyInContact*>(shared);
-    if (d == NULL) {
-      throw_pretty(
-          "Invalid argument: the shared data should be derived from DataCollectorMultibodyInContact");
-    }
-    typename ContactModelMultiple::ContactDataContainer::iterator it, end;
-    for (it = d->contacts->contacts.begin(), end = d->contacts->contacts.end(); it != end; ++it) {
-      if (id == it->second->frame) { //TODO(cmastalli): use model->get_id() and avoid to pass id in constructor
-        contact = it->second;
-        break;
+    template <template <typename Scalar> class Model>
+    ResidualDataContact(Model<Scalar> *const model, DataCollectorAbstract *const data, const std::size_t id)
+        : Base(model, data) {
+      DataCollectorMultibodyInContact *d = dynamic_cast<DataCollectorMultibodyInContact *>(shared);
+      if (d == NULL) {
+        throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInContact");
+      }
+      typename ContactModelMultiple::ContactDataContainer::iterator it, end;
+      for (it = d->contacts->contacts.begin(), end = d->contacts->contacts.end(); it != end; ++it) {
+        if (id == it->second->frame) {  // TODO(cmastalli): use model->get_id() and avoid to pass id in constructor
+          contact = it->second;
+          break;
+        }
       }
     }
-  }
 
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar>> contact;  //!< Contact force data
-  using Base::r;
-  using Base::Ru;
-  using Base::Rx;
-  using Base::shared;
-};
+    boost::shared_ptr<ForceDataAbstractTpl<Scalar>> contact;  //!< Contact force data
+    using Base::r;
+    using Base::Ru;
+    using Base::Rx;
+    using Base::shared;
+  };
 };
 }  // namespace crocoddyl
 

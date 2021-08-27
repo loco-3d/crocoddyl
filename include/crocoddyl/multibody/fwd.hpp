@@ -383,8 +383,6 @@ typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDa
 typedef DifferentialActionModelContactInvDynamicsTpl<double> DifferentialActionModelContactInvDynamics;
 typedef DifferentialActionDataContactInvDynamicsTpl<double> DifferentialActionDataContactInvDynamics;
 
-
-
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
 typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;

@@ -89,10 +89,11 @@ void exposeDifferentialActionContactInvDynamics() {
         "This residual function is defined as r = tau - RNEA, where\n"
         "tau is extracted from the control vector and RNEA evaluates the joint torque using\n"
         "q, q_dot, acc, f_ext values.",
-        bp::init<boost::shared_ptr<StateMultibody>, std::size_t, std::size_t>(bp::args("self", "state", "nc", "nu"),
-                                                                 "Initialize the RNEA residual model.\n\n"
-                                                                 ":param nc: number of the contacts\n"
-                                                                 ":param nu: dimension of control vector"))
+        bp::init<boost::shared_ptr<StateMultibody>, std::size_t, std::size_t>(
+            bp::args("self", "state", "nc", "nu"),
+            "Initialize the RNEA residual model.\n\n"
+            ":param nc: number of the contacts\n"
+            ":param nu: dimension of control vector"))
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelRnea::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -132,10 +133,10 @@ void exposeDifferentialActionContactInvDynamics() {
         "ResidualModelContact",
         "This residual function penalizes contact acceleration and is defined as r = a0, where\n"
         "acc is contact acceleration.",
-        bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, std::size_t, std::size_t, const std::size_t>(
-            bp::args("self", "state", "id", "nr", "nc", "nu"),
-            "Initialize the contact acceleration residual model.\n\n"
-            ":param nu: dimension of control vector"))
+        bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, std::size_t, std::size_t,
+                 const std::size_t>(bp::args("self", "state", "id", "nr", "nc", "nu"),
+                                    "Initialize the contact acceleration residual model.\n\n"
+                                    ":param nu: dimension of control vector"))
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
