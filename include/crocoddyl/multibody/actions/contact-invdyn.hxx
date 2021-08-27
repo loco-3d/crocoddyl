@@ -41,7 +41,6 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
   const std::size_t nu = actuation_->get_nu();
-  const std::size_t nh = state_->get_nv() + contacts_->get_nc();
   const std::size_t nc = contacts_->get_nc();
   VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
   VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
@@ -90,7 +89,6 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
   const std::size_t nu = actuation_->get_nu();
-  const std::size_t nh = state_->get_nv() + contacts_->get_nc();
   const std::size_t nc = contacts_->get_nc();
   VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
   VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
@@ -295,19 +293,6 @@ template <typename Scalar>
 const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
-}
-
-template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelRnea::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-    const Eigen::Ref<const VectorXs>& u) {
-  const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
-      boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
-  const std::size_t nv = state_->get_nv();
-  const std::size_t nu = _nv_a;
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nu);
-  d->r.head(_nv_f) = d->pinocchio->tau.head(_nv_f);
-  data->r.tail(nu) = d->pinocchio->tau.tail(nu) - tau;
 }
 
 }  // namespace crocoddyl
