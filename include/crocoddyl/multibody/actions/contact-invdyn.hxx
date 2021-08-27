@@ -9,14 +9,14 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/actions/contact-invdyn.hpp"
+#include "crocoddyl/core/constraints/residual.hpp"
 
 #include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/contact-dynamics.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 namespace crocoddyl {
 
@@ -32,41 +32,7 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
       constraints_(boost::make_shared<ConstraintModelManager>(
           state, state->get_nv() + actuation->get_nu() + contacts->get_nc())),
       pinocchio_(*state->get_pinocchio().get()) {
-  if (contacts_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  if (costs_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  const std::size_t nu = actuation_->get_nu();
-  const std::size_t nh = state_->get_nv() + contacts_->get_nc();
-  const std::size_t nc = contacts_->get_nc();
-  VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
-  VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
-  lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
-  ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
-  Base::set_u_lb(lb);
-  Base::set_u_ub(ub);
-
-  constraints_->addConstraint(
-      "rnea",
-      boost::make_shared<ConstraintModelResidual>(
-          state_, boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelRnea>(
-                      state, nc, nu)));
-
-  typename ContactModelMultiple::ContactModelContainer contact_list;
-  contact_list = contacts_->get_contacts();
-  typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
-  for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m; ++it_m) {
-    constraints_->addConstraint(
-        it_m->second->name,
-        boost::make_shared<ConstraintModelResidual>(
-            state_,
-            boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContact>(
-                state, it_m->second->contact->get_id(), it_m->second->contact->get_nc(), nc, nu)));
-  }
+  init(state);
 }
 
 template <typename Scalar>
@@ -81,6 +47,14 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
       costs_(costs),
       constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()) {
+  init(state);
+}
+
+template <typename Scalar>
+DifferentialActionModelContactInvDynamicsTpl<Scalar>::~DifferentialActionModelContactInvDynamicsTpl() {}
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(const boost::shared_ptr<StateMultibody>& state) {
   if (contacts_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
@@ -89,13 +63,13 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
+  const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
-  const std::size_t nh = state_->get_nv() + contacts_->get_nc();
   const std::size_t nc = contacts_->get_nc();
   VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
   VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
-  lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
-  ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
+  lb.segment(nv, nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
+  ub.segment(nv, nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
 
@@ -104,21 +78,21 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
       boost::make_shared<ConstraintModelResidual>(
           state_, boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelRnea>(
                       state, nc, nu)));
-  typename ContactModelMultiple::ContactModelContainer contact_list;
-  contact_list = contacts_->get_contacts();
-  typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
-  for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m; ++it_m) {
-    constraints_->addConstraint(
-        it_m->second->name,
-        boost::make_shared<ConstraintModelResidual>(
-            state_,
-            boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContact>(
-                state, it_m->second->contact->get_id(), it_m->second->contact->get_nc(), nc, nu)));
+  if (contacts_->get_nc() != 0) {
+    typename ContactModelMultiple::ContactModelContainer contact_list;
+    contact_list = contacts_->get_contacts();
+    typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
+    for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m; ++it_m) {
+      const boost::shared_ptr<ContactItem>& contact = it_m->second;
+      constraints_->addConstraint(
+          contact->name,
+          boost::make_shared<ConstraintModelResidual>(
+              state_,
+              boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContact>(
+                  state, contact->contact->get_id(), contact->contact->get_nc(), nc, nu)));
+    }
   }
 }
-
-template <typename Scalar>
-DifferentialActionModelContactInvDynamicsTpl<Scalar>::~DifferentialActionModelContactInvDynamicsTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
@@ -132,12 +106,10 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
+  Data* d = static_cast<Data*>(data.get());
   const std::size_t nc = contacts_->get_nc();
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
-
-  Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
@@ -146,7 +118,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
 
   d->xout = a;
   contacts_->updateForce(d->multibody.contacts, f_ext);
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a, d->contacts->fext);
+  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   pinocchio::centerOfMass(pinocchio_, d->pinocchio, q, v, a);
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
@@ -154,8 +126,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
 
   actuation_->calc(d->multibody.actuation, x, tau);
   contacts_->calc(d->multibody.contacts, x);
-
-  // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   constraints_->calc(d->constraints, x, u);
@@ -173,21 +143,20 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
+  Data* d = static_cast<Data*>(data.get());
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
-
-  Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nu);
 
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a, d->contacts->fext);
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
+  d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
+      d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>().transpose();
 
   actuation_->calcDiff(d->multibody.actuation, x, tau);
   contacts_->calcDiff(d->multibody.contacts, x);
-
   costs_->calcDiff(d->costs, x, u);
   constraints_->calcDiff(d->constraints, x, u);
 }
@@ -210,45 +179,34 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  // Static casting the data
   Data* d = static_cast<Data*>(data.get());
   const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
   const std::size_t nc = contacts_->get_nc();
-
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
+  d->tmp_xstatic.head(nq) = q;
+  d->tmp_xstatic.tail(nv).setZero();
+  u.setZero();
 
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv));
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u.segment(nv, nu));
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u.segment(nv, nu));
+  contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
 
+  d->tmp_Jstatic.resize(nv, nu + nc);
+  d->tmp_Jstatic.leftCols(nu) = d->multibody.actuation->dtau_du;
+  d->tmp_Jstatic.rightCols(nc) = d->multibody.contacts->Jc.topRows(nc).transpose();
+  u.segment(nv, nu) = (pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau).head(nu);
   if (nc != 0) {
-    d->tmp_xstatic.head(nq) = q;
-    d->tmp_xstatic.tail(nv) *= 0;
-    d->tmp_ustatic.setZero();
-    // Check the velocity input is zero
-    assert_pretty(x.tail(nv).isZero(), "The velocity input should be zero for quasi-static to work.");
-
-    actuation_->calc(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.head(nu));
-    actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.head(nu));
-    contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
-
-    //     // Allocates memory
-    d->tmp_Jstatic.resize(nv, nu + nc);
-    d->tmp_Jstatic << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.topRows(nc).transpose();
-    u.segment(nv, nu).noalias() = (pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau).head(nu);
-    VectorXs temp;
-    temp << VectorXs::Zero(nv - nu), d->tmp_xstatic.segment(nv, nu);
-    u.tail(nc).noalias() = pseudoInverse(d->tmp_Jstatic) * (d->pinocchio.tau - temp);
-    d->pinocchio.tau.setZero();
-
+    d->tmp_Jcstatic.resize(nv, nc);
+    d->tmp_Jcstatic = d->tmp_Jstatic.rightCols(nc);
+    d->pinocchio.tau -= d->multibody.actuation->tau;
+    u.tail(nc).noalias() = pseudoInverse(d->tmp_Jcstatic) * d->pinocchio.tau;
   }
-
-  else {
-    u.segment(nv, nv + nu).noalias() = d->pinocchio.tau.tail(nu);
-    d->pinocchio.tau.setZero();
-  }
+  d->pinocchio.tau.setZero();
 }
 
 template <typename Scalar>
@@ -295,19 +253,6 @@ template <typename Scalar>
 const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
-}
-
-template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelRnea::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-    const Eigen::Ref<const VectorXs>& u) {
-  const boost::shared_ptr<typename Data::ResidualDataRnea>& d =
-      boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
-  const std::size_t nv = state_->get_nv();
-  const std::size_t nu = _nv_a;
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nu);
-  d->r.head(_nv_f) = d->pinocchio->tau.head(_nv_f);
-  data->r.tail(nu) = d->pinocchio->tau.tail(nu) - tau;
 }
 
 }  // namespace crocoddyl

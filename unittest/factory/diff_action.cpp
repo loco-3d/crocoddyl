@@ -76,14 +76,23 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_Talos";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm:
+      os << "DifferentialActionModelContactInvDynamics_TalosArm";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ:
       os << "DifferentialActionModelContactInvDynamics_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos:
+      os << "DifferentialActionModelContactInvDynamics_Talos";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
       os << "DifferentialActionModelContactInvDynamicsWithFriction_TalosArm";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
       os << "DifferentialActionModelContactInvDynamicsWithFriction_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
+      os << "DifferentialActionModelContactInvDynamicsWithFriction_Talos";
       break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
@@ -155,16 +164,28 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase);
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm:
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ:
-      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
+                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos:
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
       action =
-          create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+          create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
-      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
+                                         ActuationModelTypes::ActuationModelFloatingBase);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase);
       break;
     default:
@@ -456,9 +477,7 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
   state = boost::static_pointer_cast<crocoddyl::StateMultibody>(StateModelFactory().create(state_type));
   actuation = ActuationModelFactory().create(actuation_type, state_type);
-  const std::size_t nu = state->get_nv() + actuation->get_nu() + contact->get_nc();
-  contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
-  cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
+  std::size_t nu = state->get_nv() + actuation->get_nu();
 
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   crocoddyl::FrictionCone cone(R, 0.8, 4, false);
@@ -467,6 +486,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(bounds);
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
+      nu += 3;
+      contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
+      cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
       contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
                                     state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
                                     Eigen::Vector3d::Zero(), nu));
@@ -480,6 +502,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
+      nu += 12;  // it includes nc
+      contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
+      cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
                                                              PinocchioModelTypes::HyQ, "lf_foot", nu));
       contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
@@ -516,6 +541,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_Talos:
+      nu += 12;  // it includes nc
+      contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
+      cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
                                                              PinocchioModelTypes::Talos, "left_sole_link", nu));
       contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
