@@ -18,23 +18,15 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual), nthreads_(1) {
+    : Base(model, control, time_step, with_cost_residual) {
   rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
-
-#ifdef CROCODDYL_WITH_MULTITHREADING
-  nthreads_ = CROCODDYL_WITH_NTHREADS;
-#endif
 }
 
 template <typename Scalar>
 IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual), nthreads_(1) {
+    : Base(model, time_step, with_cost_residual) {
   rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
-
-#ifdef CROCODDYL_WITH_MULTITHREADING
-  nthreads_ = CROCODDYL_WITH_NTHREADS;
-#endif
 }
 
 template <typename Scalar>
@@ -116,9 +108,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                 "you have changed dki_dx[0] values that supposed to be constant.");
 
   if (enable_integration_) {
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(nthreads_)
-#endif
     for (std::size_t i = 0; i < 4; ++i) {
       differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
     }
@@ -277,32 +266,6 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::print(std::ostream& os) const {
   os << "IntegratedActionModelRK4 {dt=" << time_step_ << ", " << *differential_ << "}";
-}
-
-template <typename Scalar>
-void IntegratedActionModelRK4Tpl<Scalar>::set_nthreads(const int nthreads) {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  (void)nthreads;
-  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
-               "support is not enabled."
-            << std::endl;
-#else
-  if (nthreads < 1) {
-    nthreads_ = CROCODDYL_WITH_NTHREADS;
-  } else {
-    nthreads_ = static_cast<std::size_t>(nthreads);
-  }
-#endif
-}
-
-template <typename Scalar>
-std::size_t IntegratedActionModelRK4Tpl<Scalar>::get_nthreads() const {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
-               "support is not enabled."
-            << std::endl;
-#endif
-  return nthreads_;
 }
 
 }  // namespace crocoddyl

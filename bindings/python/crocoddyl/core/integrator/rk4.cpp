@@ -67,11 +67,7 @@ void exposeIntegratedActionRK4() {
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
-      .add_property("nthreads", bp::make_function(&IntegratedActionModelRK4::get_nthreads),
-                    bp::make_function(&IntegratedActionModelRK4::set_nthreads),
-                    "number of threads launch by the multi-threading support (if you set nthreads <= 1, then "
-                    "nthreads=CROCODDYL_WITH_NTHREADS)");
+      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
