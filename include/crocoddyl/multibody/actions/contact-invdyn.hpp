@@ -9,17 +9,14 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_INVDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_INVDYN_HPP_
 
-#include <stdexcept>
-
-#include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/constraints/constraint-manager.hpp"
-#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {
 
@@ -31,14 +28,15 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataContactInvDynamicsTpl<Scalar> Data;
-  typedef MathBaseTpl<Scalar> MathBase;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef ContactItemTpl<Scalar> ContactItem;
+  typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -78,6 +76,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   using Base::state_;  //!< Model of the state
 
  private:
+  void init(const boost::shared_ptr<StateMultibody>& state);
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<ContactModelMultiple> contacts_;
   boost::shared_ptr<CostModelSum> costs_;
@@ -132,12 +131,12 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     }
 
    protected:
-    std::size_t nc_;
     using Base::nu_;
     using Base::state_;
 
    private:
-    std::size_t na_;
+    std::size_t nc_;  //!< Number of the contacts
+    std::size_t na_;  //!< Number of actuated joints
   };
 
  public:
@@ -175,7 +174,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
           boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
       d->Rx = d->contact->da0_dx;
-      d->Ru.rightCols(state_->get_nv()) = d->contact->Jc;
+      d->Ru.leftCols(state_->get_nv()) = d->contact->Jc;
     }
 
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data) {
@@ -208,30 +207,27 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
+        constraints(model->get_constraints()->createData(&multibody)),
         contacts(model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
-        tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
+        tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()),
+        tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
-    if (model->get_constraints() != nullptr) {
-      constraints = model->get_constraints()->createData(&multibody);
-      constraints->shareMemory(this);
-    }
+    constraints->shareMemory(this);
 
     tmp_xstatic.setZero();
     tmp_Jstatic.setZero();
-    tmp_Jstatic.setZero();
-    pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
-    pinocchio.lambda_c.setZero();
+    tmp_Jcstatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar>> costs;
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar>> constraints;
-  boost::shared_ptr<ContactDataMultipleTpl<Scalar>> contacts;
+  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts;
   VectorXs tmp_xstatic;
-  VectorXs tmp_ustatic;
   MatrixXs tmp_Jstatic;
+  MatrixXs tmp_Jcstatic;
 
   using Base::cost;
   using Base::Fu;
@@ -251,18 +247,15 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     typedef MathBaseTpl<Scalar> MathBase;
     typedef ResidualDataAbstractTpl<Scalar> Base;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+    typedef DataCollectorActMultibodyInContactTpl<Scalar> DataCollectorActMultibodyInContact;
 
     template <template <typename Scalar> class Model>
     ResidualDataRnea(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
       // Check that proper shared data has been passed
-      DataCollectorActMultibodyInContactTpl<Scalar> *d =
-          dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
+      DataCollectorActMultibodyInContact *d = dynamic_cast<DataCollectorActMultibodyInContact *>(shared);
       if (d == NULL) {
-        throw_pretty(
-            "Invalid argument: the shared data should be derived from "
-            "DataCollectorActMultibodyInContactTpl");
+        throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibodyInContact");
       }
-
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
       actuation = d->actuation.get();
@@ -298,13 +291,13 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       typename ContactModelMultiple::ContactDataContainer::iterator it, end;
       for (it = d->contacts->contacts.begin(), end = d->contacts->contacts.end(); it != end; ++it) {
         if (id == it->second->frame) {  // TODO(cmastalli): use model->get_id() and avoid to pass id in constructor
-          contact = it->second;
+          contact = it->second.get();
           break;
         }
       }
     }
 
-    boost::shared_ptr<ForceDataAbstractTpl<Scalar>> contact;  //!< Contact force data
+    ForceDataAbstractTpl<Scalar>* contact;  //!< Contact force data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
