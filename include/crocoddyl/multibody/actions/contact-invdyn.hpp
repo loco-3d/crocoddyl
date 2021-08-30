@@ -76,7 +76,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   using Base::state_;  //!< Model of the state
 
  private:
-  void init(const boost::shared_ptr<StateMultibody>& state);
+  void init(const boost::shared_ptr<StateMultibody> &state);
   boost::shared_ptr<ActuationModelAbstract> actuation_;
   boost::shared_ptr<ContactModelMultiple> contacts_;
   boost::shared_ptr<CostModelSum> costs_;
@@ -297,7 +297,7 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       }
     }
 
-    ForceDataAbstractTpl<Scalar>* contact;  //!< Contact force data
+    ForceDataAbstractTpl<Scalar> *contact;  //!< Contact force data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
