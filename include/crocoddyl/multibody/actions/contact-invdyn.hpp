@@ -156,10 +156,6 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     ResidualModelContact(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
                          const std::size_t nc, const std::size_t nu)
         : Base(state, nr, state->get_nv() + nu + nc, true, true, true), id_(id) {}
-
-    ResidualModelContact(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
-                         const std::size_t nc)
-        : Base(state, nr, 2 * state->get_nv() + nc, true, true, true), id_(id) {}
     virtual ~ResidualModelContact() {}
 
     void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
