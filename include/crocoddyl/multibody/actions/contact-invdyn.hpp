@@ -160,15 +160,15 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
 
     void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
               const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+      const boost::shared_ptr<typename Data::ResidualDataContact> &d =
+          boost::static_pointer_cast<typename Data::ResidualDataContact>(data);
       d->r = d->contact->a0;
     }
 
     void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
                   const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+      const boost::shared_ptr<typename Data::ResidualDataContact> &d =
+          boost::static_pointer_cast<typename Data::ResidualDataContact>(data);
       d->Rx = d->contact->da0_dx;
       d->Ru.leftCols(state_->get_nv()) = d->contact->Jc;
     }
@@ -204,13 +204,14 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         constraints(model->get_constraints()->createData(&multibody)),
-        contacts(model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
         tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()),
         tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
     costs->shareMemory(this);
     constraints->shareMemory(this);
 
+    const std::size_t nv = model->get_state()->get_nv();
+    Fu.leftCols(nv).diagonal().setOnes();
     tmp_xstatic.setZero();
     tmp_Jstatic.setZero();
     tmp_Jcstatic.setZero();
@@ -220,7 +221,6 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
-  boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts;
   VectorXs tmp_xstatic;
   MatrixXs tmp_Jstatic;
   MatrixXs tmp_Jcstatic;
@@ -293,7 +293,7 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       }
     }
 
-    ForceDataAbstractTpl<Scalar> *contact;  //!< Contact force data
+    ContactDataAbstractTpl<Scalar> *contact;  //!< Contact force data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
