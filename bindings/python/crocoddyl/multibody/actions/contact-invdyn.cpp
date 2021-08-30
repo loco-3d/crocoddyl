@@ -44,10 +44,10 @@ void exposeDifferentialActionContactInvDynamics() {
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &DifferentialActionModelContactInvDynamics::calc,
                                                            bp::args("self", "data", "x", "u"),
-                                                           "Compute the next state and cost value.\n\n"
+                                                           "Compute the next state, cost value and constraints.\n\n"
                                                            ":param data: inverse-dynamics action data\n"
-                                                           ":param x: time-continuous state vector\n"
-                                                           ":param u: time-continuous control input")
+                                                           ":param x: state vector\n"
+                                                           ":param u: control input")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -55,15 +55,14 @@ void exposeDifferentialActionContactInvDynamics() {
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelContactInvDynamics::calcDiff, bp::args("self", "data", "x", "u"),
-                "Compute the derivatives of the differential multibody system and\n"
-                "its cost functions.\n\n"
-                "It computes the partial derivatives of the differential multibody system and the\n"
-                "cost function. It assumes that calc has been run first.\n"
-                "This function builds a quadratic approximation of the\n"
-                "action model (i.e. dynamical system and cost function).\n"
+                "Compute the derivatives of the differential multibody system, and its cost and constraint "
+                "functions.\n\n"
+                "It computes the partial derivatives of the differential multibody system, the cost and constraint\n"
+                "functions. It assumes that calc has been run first. This function builds a quadratic approximation\n"
+                "of the action model (i.e., dynamical system, cost and constraint functions).\n"
                 ":param data: inverse-dynamics action data\n"
-                ":param x: time-continuous state vector\n"
-                ":param u: time-continuous control input")
+                ":param x: state vector\n"
+                ":param u: control input")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -86,9 +85,8 @@ void exposeDifferentialActionContactInvDynamics() {
 
     bp::class_<DifferentialActionModelContactInvDynamics::ResidualModelRnea, bp::bases<ResidualModelAbstract> >(
         "ResidualModelRnea",
-        "This residual function is defined as r = tau - RNEA, where\n"
-        "tau is extracted from the control vector and RNEA evaluates the joint torque using\n"
-        "q, q_dot, acc, f_ext values.",
+        "This residual function is defined as r = tau - RNEA, where tau is extracted from the control vector\n"
+        "and RNEA consider the contact forces.",
         bp::init<boost::shared_ptr<StateMultibody>, std::size_t, std::size_t>(
             bp::args("self", "state", "nc", "nu"),
             "Initialize the RNEA residual model.\n\n"
@@ -131,12 +129,12 @@ void exposeDifferentialActionContactInvDynamics() {
 
     bp::class_<DifferentialActionModelContactInvDynamics::ResidualModelContact, bp::bases<ResidualModelAbstract> >(
         "ResidualModelContact",
-        "This residual function penalizes contact acceleration and is defined as r = a0, where\n"
-        "acc is contact acceleration.",
-        bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, std::size_t, std::size_t,
-                 const std::size_t>(bp::args("self", "state", "id", "nr", "nc", "nu"),
-                                    "Initialize the contact acceleration residual model.\n\n"
-                                    ":param nu: dimension of control vector"))
+        "This residual function for the contact acceleration, i.e., r = a0, where a0 is the desired\n"
+        "contact acceleration which also considers the Baumgarte stabilization.",
+        bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, std::size_t, std::size_t, std::size_t>(
+            bp::args("self", "state", "id", "nr", "nc", "nu"),
+            "Initialize the contact-acceleration residual model.\n\n"
+            ":param nu: dimension of control vector"))
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -154,7 +152,7 @@ void exposeDifferentialActionContactInvDynamics() {
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &DifferentialActionModelContactInvDynamics::ResidualModelContact::calcDiff,
             bp::args("self", "data", "x", "u"),
-            "Compute the Jacobians of the contact-acceleration constraint residual.\n\n"
+            "Compute the Jacobians of the contact-acceleration residual.\n\n"
             "It assumes that calc has been run first.\n"
             ":param data: action data\n"
             ":param x: state vector\n"
@@ -166,7 +164,7 @@ void exposeDifferentialActionContactInvDynamics() {
              bp::with_custodian_and_ward_postcall<0, 2>(), bp::args("self", "data"),
              "Create the contact-acceleration residual data.\n\n"
              "Each residual model has its own data that needs to be allocated. This function\n"
-             "returns the allocated data for the contact acceleration residual.\n"
+             "returns the allocated data for the contact-acceleration residual.\n"
              ":param data: shared data\n"
              ":return residual data.");
   }
@@ -175,7 +173,8 @@ void exposeDifferentialActionContactInvDynamics() {
 
   bp::scope data_outer =
       bp::class_<DifferentialActionDataContactInvDynamics, bp::bases<DifferentialActionDataAbstract> >(
-          "DifferentialActionDataContactInvDynamics", "Action data for the inverse-dynamics for system with contact.",
+          "DifferentialActionDataContactInvDynamics",
+          "Differential action data for the inverse-dynamics for system with contact.",
           bp::init<DifferentialActionModelContactInvDynamics*>(
               bp::args("self", "model"),
               "Create inverse-dynamics action data for system with contacts.\n\n"
@@ -213,10 +212,14 @@ void exposeDifferentialActionContactInvDynamics() {
       "ResidualDataContact", "Data for contact acceleration residual.\n\n",
       bp::init<DifferentialActionModelContactInvDynamics::ResidualModelContact*, DataCollectorAbstract*, std::size_t>(
           bp::args("self", "model", "data", "id"),
-          "Create contact acceleration residual data.\n\n"
-          ":param model: contact residual model\n"
+          "Create contact-acceleration residual data.\n\n"
+          ":param model: contact-acceleration residual model\n"
           ":param data: shared data\n"
-          ":param id: contact id")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+          ":param id: contact id")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("contact",
+                    bp::make_getter(&DifferentialActionDataContactInvDynamics::ResidualDataContact::contact,
+                                    bp::return_value_policy<bp::return_by_value>()),
+                    "contact data associated with the current residual");
 }
 
 }  // namespace python
