@@ -359,13 +359,11 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
         multibody(&pinocchio, model->get_actuation()->createData()),
         costs(model->get_costs()->createData(&multibody)),
         constraints(model->get_constraints()->createData(&multibody)),
-        tmp_xstatic(model->get_state()->get_nx()),
-        tmp_ustatic(model->get_nu()) {
+        tmp_xstatic(model->get_state()->get_nx()) {
     costs->shareMemory(this);
     constraints->shareMemory(this);
     Fu.leftCols(model->get_state()->get_nv()).diagonal().array() = 1;
     tmp_xstatic.setZero();
-    tmp_ustatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;                              //!< Pinocchio data
@@ -373,7 +371,6 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;  //!< Constraints data
   VectorXs tmp_xstatic;  //!< quasistatic state point (velocity has to be zero)
-  VectorXs tmp_ustatic;  //!< quasistatic control vector
   using Base::cost;
   using Base::Fu;
   using Base::Fx;

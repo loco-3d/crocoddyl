@@ -175,11 +175,11 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::quasiStatic(
 
   d->tmp_xstatic.head(nq) = q;
   d->tmp_xstatic.tail(nv) *= 0;
-  d->tmp_ustatic.setZero();
+  u.setZero();
 
   pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.tail(nu));
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, d->tmp_ustatic.tail(nu));
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u.tail(nu));
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u.tail(nu));
 
   u.tail(nu).noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
