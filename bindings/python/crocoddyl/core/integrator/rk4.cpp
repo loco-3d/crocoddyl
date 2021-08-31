@@ -79,46 +79,61 @@ void exposeIntegratedActionRK4() {
       .add_property(
           "differential",
           bp::make_getter(&IntegratedActionDataRK4::differential, bp::return_value_policy<bp::return_by_value>()),
-          "array of differential action data")
+          "list of differential action data")
+      .add_property("control",
+                    bp::make_getter(&IntegratedActionDataRK4::control, bp::return_value_policy<bp::return_by_value>()),
+                    "list of control parametrization data")
       .add_property(
           "integral",
           bp::make_getter(&IntegratedActionDataRK4::integral, bp::return_value_policy<bp::return_by_value>()),
-          "List with the RK4 terms related to the cost")
+          "list of RK4 terms related to the cost")
       .add_property("dx", bp::make_getter(&IntegratedActionDataRK4::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("ki", bp::make_getter(&IntegratedActionDataRK4::ki, bp::return_internal_reference<>()),
-                    "List with the RK4 terms related to system dynamics")
+                    "list of RK4 terms related to system dynamics")
       .add_property("y", bp::make_getter(&IntegratedActionDataRK4::y, bp::return_internal_reference<>()),
-                    "List with the states where f is evaluated in the RK4 integration scheme")
+                    "list of states where f is evaluated in the RK4 integration")
       .add_property("ws", bp::make_getter(&IntegratedActionDataRK4::ws, bp::return_internal_reference<>()),
-                    "Differential control inputs evaluated in the RK4 integration scheme")
+                    "control inputs evaluated in the RK4 integration")
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK4::dki_dx, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of dynamics with respect to to the state of the RK4 "
-                    "integration method. d(x+dx)/dx")
-      .add_property(
-          "dki_dw", bp::make_getter(&IntegratedActionDataRK4::dki_dw, bp::return_internal_reference<>()),
-          "List with the partial derivatives of dynamics with respect to to the control of the differential model "
-          "integration method. d(x+dx)/dw")
+                    "list of partial derivatives of RK4 nodes with respect to the state of the RK4 "
+                    "integration. dki/dx")
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK4::dki_du, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of dynamics with respect to to the control of the RK4 "
-                    "integration method. d(x+dx)/du")
+                    "list of partial derivatives of RK4 nodes with respect to the control parameters of the RK4 "
+                    "integration. dki/du")
+      .add_property(
+          "dyi_dx", bp::make_getter(&IntegratedActionDataRK4::dyi_dx, bp::return_internal_reference<>()),
+          "list of partial derivatives of RK4 dynamics with respect to the state of the RK4 integrator. dyi/dx")
+      .add_property("dyi_du", bp::make_getter(&IntegratedActionDataRK4::dyi_du, bp::return_internal_reference<>()),
+                    "list of partial derivatives of RK4 dynamics with respect to the control parameters of the "
+                    "RK4 integrator. dyi/du")
       .add_property("dli_dx", bp::make_getter(&IntegratedActionDataRK4::dli_dx, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of the cost with respect to to the state of the RK4 "
-                    "integration method.")
+                    "list of partial derivatives of the cost with respect to the state of the RK4 "
+                    "integration. dli_dx")
       .add_property("dli_du", bp::make_getter(&IntegratedActionDataRK4::dli_du, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of the cost with respect to to the control of the RK4 "
-                    "integration method.")
+                    "list of partial derivatives of the cost with respect to the control input of the RK4 "
+                    "integration. dli_du")
       .add_property("ddli_ddx", bp::make_getter(&IntegratedActionDataRK4::ddli_ddx, bp::return_internal_reference<>()),
-                    "List with the second partial derivatives of the cost with respect to to the state of the RK4 "
-                    "integration method.")
+                    "list of second partial derivatives of the cost with respect to the state of the RK4 "
+                    "integration. ddli_ddx")
+      .add_property("ddli_ddw", bp::make_getter(&IntegratedActionDataRK4::ddli_ddw, bp::return_internal_reference<>()),
+                    "list of second partial derivatives of the cost with respect to the control parameters of "
+                    "the RK4 integration. ddli_ddw")
       .add_property("ddli_ddu", bp::make_getter(&IntegratedActionDataRK4::ddli_ddu, bp::return_internal_reference<>()),
-                    "List with the second partial derivatives of the cost with respect to to the control of the RK4 "
-                    "integration method.")
+                    "list of second partial derivatives of the cost with respect to the control input of the RK4 "
+                    "integration. ddli_ddu")
+      .add_property(
+          "ddli_dxdw", bp::make_getter(&IntegratedActionDataRK4::ddli_dxdw, bp::return_internal_reference<>()),
+          "list of second partial derivatives of the cost with respect to the state and control parameters of "
+          "the RK4 integration. ddli_dxdw")
       .add_property("ddli_dxdu",
                     bp::make_getter(&IntegratedActionDataRK4::ddli_dxdu, bp::return_internal_reference<>()),
-                    "List with the second partial derivatives of the cost with respect to to the state and the "
-                    "control of the RK4 "
-                    "integration method.");
+                    "list of second partial derivatives of the cost with respect to the state and control input "
+                    "of the RK4 integration. ddli_dxdu")
+      .add_property("ddli_dwdu",
+                    bp::make_getter(&IntegratedActionDataRK4::ddli_dwdu, bp::return_internal_reference<>()),
+                    "list of second partial derivatives of the cost with respect to the control parameters and "
+                    "inputs control of the RK4 integration. ddli_dxdu");
 }
 
 }  // namespace python

@@ -4,7 +4,24 @@ import numpy as np
 
 
 class SimpleBipedGaitProblem:
-    def __init__(self, rmodel, rightFoot, leftFoot, integrator='euler', control=None):
+    """ Build simple bipedal locomotion problems.
+
+    This class aims to build simple locomotion problems used in the examples of Crocoddyl.
+    The scope of this class is purely for academic reasons, and it does not aim to be
+    used in any robotics application.
+    We also do not consider it as part of the API, so changes in this class will not pass
+    through a strict process of deprecation.
+    Thus, we advice any user to DO NOT develop their application based on this class.
+    """
+    def __init__(self, rmodel, rightFoot, leftFoot, integrator='euler', control='zero'):
+        """ Construct biped-gait problem.
+
+        :param rmodel: robot model
+        :param rightFoot: name of the right foot
+        :param leftFoot: name of the left foot
+        :param integrator: type of the integrator (options are: 'euler', and 'rk4')
+        :param control: type of control parametrization (options are: 'zero', 'one', and 'rk4')
+        """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
@@ -13,10 +30,12 @@ class SimpleBipedGaitProblem:
         self.rfId = self.rmodel.getFrameId(rightFoot)
         self.lfId = self.rmodel.getFrameId(leftFoot)
         self.integrator = integrator
-        if control is None:
-            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
+        if control == 'one':
+            self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
+        elif control == 'rk4':
+            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK4(self.actuation.nu)
         else:
-            self.control = control
+            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])

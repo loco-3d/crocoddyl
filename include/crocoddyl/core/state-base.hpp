@@ -20,13 +20,10 @@
 namespace crocoddyl {
 
 enum Jcomponent { both = 0, first = 1, second = 2 };
-enum AssignmentOp { setto, addto, rmfrom };
 
 inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
 }
-
-inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == addto || op == rmfrom); }
 
 /**
  * @brief Abstract class for the state representation
@@ -182,7 +179,7 @@ class StateAbstractTpl {
                           const Jcomponent firstsecond = both, const AssignmentOp op = setto) const = 0;
 
   /**
-   * @brief Parallel transport from x + dx to x.
+   * @brief Parallel transport from integrate(x, dx) to x.
    *
    * This function performs the parallel transportation of an input matrix whose columns are expressed in the
    * tangent space at \f$\mathbf{x}\oplus\delta\mathbf{x}\f$ to the tangent space at \f$\mathbf{x}\f$ point.

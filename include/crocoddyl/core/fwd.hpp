@@ -13,6 +13,10 @@
 
 namespace crocoddyl {
 
+enum AssignmentOp { setto, addto, rmfrom };
+
+inline bool is_a_AssignmentOp(AssignmentOp op) { return (op == setto || op == addto || op == rmfrom); }
+
 // action
 template <typename Scalar>
 class ActionModelAbstractTpl;

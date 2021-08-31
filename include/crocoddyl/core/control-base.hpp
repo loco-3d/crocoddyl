@@ -115,12 +115,14 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  data   Control-parametrization data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
   virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
+                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                  const AssignmentOp = setto) const = 0;
 
   virtual MatrixXs multiplyByJacobian_J(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                        const Eigen::Ref<const MatrixXs>& A) const;
+                                        const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
 
   /**
    * @brief Compute the product between the transpose of the derivative of the control input with respect to the
@@ -132,12 +134,15 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
   virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const = 0;
+                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                           const AssignmentOp = setto) const = 0;
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-                                                 const Eigen::Ref<const MatrixXs>& A) const;
+                                                 const Eigen::Ref<const MatrixXs>& A,
+                                                 const AssignmentOp = setto) const;
 
   /**
    * @brief Checks that a specific data belongs to this model

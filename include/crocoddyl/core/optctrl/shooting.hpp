@@ -252,7 +252,7 @@ class ShootingProblemTpl {
   std::size_t nx_;                                                       //!< State dimension
   std::size_t ndx_;                                                      //!< State rate dimension
   std::size_t nu_max_;                                                   //!< Maximum control dimension
-  std::size_t nthreads_;  //!< Number of threach launch by the multi-threading application
+  std::size_t nthreads_;  //!< Number of threads launch by the multi-threading application
 
  private:
   void allocateData();

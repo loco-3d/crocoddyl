@@ -86,7 +86,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<Data> createData() {
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    data->dtau_du.diagonal().fill((Scalar)1);
+    data->dtau_du.diagonal().setOnes();
     return data;
   };
 

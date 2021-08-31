@@ -24,7 +24,7 @@ namespace crocoddyl {
  *
  * The main computations are carrying out in `calc`, and `calcDiff`, where the former computes actuation signal
  * \f$\mathbf{a}\f$ from a given control input \f$\mathbf{u}\f$ and state point \f$\mathbf{x}\f$, and the latter
- * computes the Jacobians of the actuation-mapping function. Note that `caldDiff` requires to run `calc` first.
+ * computes the Jacobians of the actuation-mapping function. Note that `calcDiff` requires to run `calc` first.
  *
  * \sa `ActuationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -50,7 +50,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
   virtual ~ActuationModelFloatingBaseTpl(){};
 
   /**
-   * @brief Compute the floating-base actuation signal from the control input \f\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @brief Compute the floating-base actuation signal from the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point
@@ -93,7 +93,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).fill((Scalar)1.);
+    data->dtau_du.diagonal(-state->get_pinocchio()->joints[1].nv()).setOnes();
 #ifndef NDEBUG
     dtau_du_ = data->dtau_du;
 #endif
