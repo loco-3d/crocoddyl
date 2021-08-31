@@ -16,7 +16,7 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
                                                                    const std::size_t nc, const std::size_t nu)
     : Base(state, nc, nu, true, true, true), id_(id), fref_(fref) {
   if (nc > 6) {
-    throw_pretty("Invalid argument in ResidualModelContactForce: nc is less than 6");
+    throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
 }
 
@@ -26,7 +26,7 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
                                                                    const std::size_t nc)
     : Base(state, nc), id_(id), fref_(fref) {
   if (nc > 6) {
-    throw_pretty("Invalid argument in ResidualModelContactForce: nc is less than 6");
+    throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
 }
 
