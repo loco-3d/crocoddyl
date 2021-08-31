@@ -43,8 +43,9 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelContactInvDynamics_TalosArm,
     DifferentialActionModelContactInvDynamics_HyQ,
     DifferentialActionModelContactInvDynamics_Talos,
-    // DifferentialActionModelContactInvDynamicsWithFriction_TalosArm,
-    // DifferentialActionModelContactInvDynamicsWithFriction_HyQ,
+    DifferentialActionModelContactInvDynamicsWithFriction_TalosArm,
+    DifferentialActionModelContactInvDynamicsWithFriction_HyQ,
+    DifferentialActionModelContactInvDynamicsWithFriction_Talos,
     NbDifferentialActionModelTypes
   };
   static std::vector<Type> init_all() {

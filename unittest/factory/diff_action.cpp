@@ -84,12 +84,15 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos:
       os << "DifferentialActionModelContactInvDynamics_Talos";
       break;
-    // case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
-    //   os << "DifferentialActionModelContactInvDynamicsWithFriction_TalosArm";
-    //   break;
-    // case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
-    //   os << "DifferentialActionModelContactInvDynamicsWithFriction_HyQ";
-    //   break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
+      os << "DifferentialActionModelContactInvDynamicsWithFriction_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
+      os << "DifferentialActionModelContactInvDynamicsWithFriction_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
+      os << "DifferentialActionModelContactInvDynamicsWithFriction_Talos";
+      break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
       break;
@@ -172,15 +175,18 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
       break;
-    // case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
-    //   action =
-    //       create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm,
-    //       ActuationModelTypes::ActuationModelFull);
-    //   break;
-    // case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
-    //   action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
-    //                                      ActuationModelTypes::ActuationModelFloatingBase);
-    //   break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
+      action =
+          create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
+                                         ActuationModelTypes::ActuationModelFloatingBase);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
+                                         ActuationModelTypes::ActuationModelFloatingBase);
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
       break;
