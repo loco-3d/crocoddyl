@@ -28,8 +28,9 @@ namespace crocoddyl {
  *
  * This class implements forward kinematic with an inverse-dynamics equality constraint computed using the Recursive
  * Newton Euler Algorithm (RNEA). The stack of cost and constraint functions are implemented in
- * `ConstraintModelManagerTpl` and `CostModelSumTpl`, respectively. The acceleration and the torques are decision
- * variables, and the RNEA constraint is under the name `rnea`, thus the user is not allow to use it.
+ * `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively. The acceleration and the torques are decision
+ * variables defined as the control inputs, and the RNEA constraint is under the name `rnea`, thus the user is not
+ * allow to use it.
  *
  * In Crocoddyl, a differential action model combines dynamics, cost and constraints models. We can use it in each node
  * of our optimal control problem thanks to dedicated integration rules (e.g. `IntegratedActionModelEulerTpl` or
@@ -62,9 +63,7 @@ namespace crocoddyl {
  * lies also in the tangent space of the configuration manifold.
 
  * The computation of these equations are carrying out inside `calc()` function. In short, this function computes
- * the cost and constraints values (also called constraints violations). It also sets the acceleration equal to
- * that of the decision variable values rather than using ABA used in traditional DDP algorithms. This procedure is
- * equivalent to running a forward pass of the action model.
+ * the cost and constraints values (also called constraints violations).
  *
  * However, during numerical optimization, we also need to run backward passes of the differential action model. These
  * calculations are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the
@@ -124,14 +123,14 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
-   * @brief Initialize the differential action model
+   * @brief Initialize the free inverse-dynamics action model
    *
    * It describes the kinematic evolution of the multibody system without any contact,
    * and imposes an inverse-dynamics (equality) constraint. Additionally, it computes
    * the cost and extra constraint values associated to this state and control pair.
-   * Note that the name `rnea` in the ConstraintModelManager is reserved to store
-   * the inverse-dynamics constraint\n.
-
+   * Note that the name `rnea` in the `ConstraintModelManagerTpl` is reserved to store
+   * the inverse-dynamics constraint.
+   *
    * @param[in] state      State of the multibody system
    * @param[in] actuation  Actuation model
    * @param[in] costs      Cost model
@@ -141,7 +140,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
                                             boost::shared_ptr<CostModelSum> costs);
 
   /**
-   * @brief Initialize the differential action model
+   * @brief Initialize the free inverse-dynamics action model
    *
    * @param[in] state        State of the multibody system
    * @param[in] actuation    Actuation model
@@ -155,7 +154,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   virtual ~DifferentialActionModelFreeInvDynamicsTpl();
 
   /**
-   * @brief Compute the system acceleration and cost value
+   * @brief Compute the system acceleration, cost value and constraint residuals
    *
    * It extracts the acceleration value from control vector and also computes the cost and constraints.
    *
@@ -167,11 +166,11 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the derivatives of the dynamics and cost functions
+   * @brief Compute the derivatives of the dynamics, cost and constraint functions
    *
-   * It computes the partial derivatives of the dynamical system and the cost function. It assumes that `calc()` has
-   * been run first. This function builds a quadratic approximation of the time-continuous action model (i.e. dynamical
-   * system and cost function).
+   * It computes the partial derivatives of the dynamical system and the cost and contraint functions.
+   * It assumes that `calc()` has been run first. This function builds a quadratic approximation of the
+   * time-continuous action model (i.e., dynamical system, cost and constraint functions).
    *
    * @param[in] data  Free inverse-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -183,7 +182,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   /**
    * @brief Create the free inverse-dynamics data
    *
-   * @return differential action data
+   * @return free inverse-dynamics data
    */
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
@@ -247,6 +246,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
   pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
 
+ public:
   /**
    * @brief RNEA residual
    *
@@ -261,7 +261,6 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
    *
    * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
    */
- public:
   class ResidualModelRnea : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -367,7 +366,7 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;                              //!< Pinocchio data
-  DataCollectorActMultibodyTpl<Scalar> multibody;                    //!< multibody data
+  DataCollectorActMultibodyTpl<Scalar> multibody;                    //!< Multibody data
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;  //!< Constraints data
   VectorXs tmp_xstatic;  //!< quasistatic state point (velocity has to be zero)
