@@ -117,9 +117,9 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
   d->Luu *= time_step_;
   d->Gx = d->differential->Gx;
-  d->Gu = d->differential->Gu;
   d->Hx = d->differential->Hx;
-  d->Hu = d->differential->Hu;
+  control_->multiplyByJacobian(d->control, d->differential->Gu, d->Gu);
+  control_->multiplyByJacobian(d->control, d->differential->Hu, d->Hu);
 }
 
 template <typename Scalar>
