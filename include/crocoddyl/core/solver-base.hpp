@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,12 +66,12 @@ class SolverAbstract {
    * until `stoppingCriteria()` is below threshold. It also describes the globalization strategy used during the
    * numerical optimization.
    *
-   * @param[in]  init_xs     initial guess for state trajectory with \f$T+1\f$ elements (default [])
-   * @param[in]  init_us     initial guess for control trajectory with \f$T\f$ elements (default [])
-   * @param[in]  maxiter     maximum allowed number of iterations (default 100)
-   * @param[in]  isFeasible  true if the \p init_xs are obtained from integrating the \p init_us (rollout) (default
+   * @param[in] init_xs     initial guess for state trajectory with \f$T+1\f$ elements (default [])
+   * @param[in] init_us     initial guess for control trajectory with \f$T\f$ elements (default [])
+   * @param[in] maxiter     maximum allowed number of iterations (default 100)
+   * @param[in] isFeasible  true if the \p init_xs are obtained from integrating the \p init_us (rollout) (default
    * false)
-   * @param[in]  regInit     initial guess for the regularization value. Very low values are typical used with very
+   * @param[in] regInit     initial guess for the regularization value. Very low values are typical used with very
    * good guess points (init_xs, init_us)
    * @return A boolean that describes if convergence was reached.
    */
@@ -129,9 +129,9 @@ class SolverAbstract {
    * \f$T+1\f$ and \f$T\f$ elements, respectively. Additionally, we need to define is \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
    * pair is feasible, this means that the dynamics rollout give us produces \f$\mathbf{x}_s\f$.
    *
-   * @param[in]  xs          state trajectory of \f$T+1\f$ elements (default [])
-   * @param[in]  us          control trajectory of \f$T\f$ elements (default [])
-   * @param[in]  isFeasible  true if the \p xs are obtained from integrating the \p us (rollout)
+   * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
+   * @param[in] us          control trajectory of \f$T\f$ elements (default [])
+   * @param[in] isFeasible  true if the \p xs are obtained from integrating the \p us (rollout)
    */
   void setCandidate(const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
                     const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR, const bool is_feasible = false);

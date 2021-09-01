@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ void exposeSolverAbstract() {
                                   ":param us: control trajectory of T elements (default []).\n"
                                   ":param isFeasible: true if the xs are obtained from integrating the\n"
                                   "us (rollout)."))
-      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self"),
+      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self", "callbacks"),
            "Set a list of callback functions using for diagnostic.\n\n"
            "Each iteration, the solver calls these set of functions in order to\n"
            "allowed user the diagnostic of the its performance.\n"

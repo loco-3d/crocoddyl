@@ -69,12 +69,12 @@ class SolverDDP : public SolverAbstract {
   virtual const Eigen::Vector2d& expectedImprovement();
 
   /**
-   * @brief Update the Jacobian and Hessian of the optimal control problem
+   * @brief Update the Jacobian, Hessian and feasibility of the optimal control problem
    *
    * These derivatives are computed around the guess state and control trajectory. These trajectory can be set by using
    * `setCandidate()`.
    *
-   * @return  The total cost around the guess trajectory
+   * @return the total cost around the guess trajectory
    */
   virtual double calcDiff();
 
