@@ -123,6 +123,14 @@ class SolverAbstract {
   virtual const Eigen::Vector2d& expectedImprovement() = 0;
 
   /**
+   * @brief Compute the dynamic feasibility for the current guess
+   *
+   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
+   * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
+   */
+  double computeDynamicFeasibility();
+
+  /**
    * @brief Set the solver candidate warm-point values \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
    *
    * The solver candidates are defined as a state and control trajectories \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of
@@ -165,6 +173,11 @@ class SolverAbstract {
    * @brief Return the control trajectory \f$\mathbf{u}_s\f$
    */
   const std::vector<Eigen::VectorXd>& get_us() const;
+
+  /**
+   * @brief Return the gaps \f$\mathbf{\bar{f}}_{s}\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_fs() const;
 
   /**
    * @brief Return the feasibility status of the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ trajectory
@@ -227,6 +240,21 @@ class SolverAbstract {
   std::size_t get_iter() const;
 
   /**
+   * @brief Return the threshold for accepting a gap as non-zero
+   */
+  double get_th_gaptol() const;
+
+  /**
+   * @brief Return the feasibility of the dynamic constraints of the current guess
+   */
+  double get_ffeas() const;
+
+  /**
+   * @brief Return the norm used for the computing the feasibility (true for l-inf, false for l-1)
+   */
+  bool get_inffeas() const;
+
+  /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
    */
   void set_xs(const std::vector<Eigen::VectorXd>& xs);
@@ -256,23 +284,39 @@ class SolverAbstract {
    */
   void set_th_stop(const double th_stop);
 
+  /**
+   * @brief Modify the threshold for accepting a gap as non-zero
+   */
+  void set_th_gaptol(const double th_gaptol);
+
+  /**
+   * @brief Modify the current norm used for computed the feasibility
+   */
+  void set_inffeas(const bool inffeas);
+
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
   std::vector<Eigen::VectorXd> xs_;                              //!< State trajectory
   std::vector<Eigen::VectorXd> us_;                              //!< Control trajectory
+  std::vector<Eigen::VectorXd> fs_;                              //!< Gaps/defects between shooting nodes
   std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;  //!< Callback functions
   bool is_feasible_;                                             //!< Label that indicates is the iteration is feasible
-  double cost_;                                                  //!< Total cost
-  double stop_;                                                  //!< Value computed by `stoppingCriteria()`
-  Eigen::Vector2d d_;                                            //!< LQ approximation of the expected improvement
-  double xreg_;                                                  //!< Current state regularization value
-  double ureg_;                                                  //!< Current control regularization values
-  double steplength_;                                            //!< Current applied step-length
-  double dV_;                                                    //!< Cost reduction obtained by `tryStep()`
-  double dVexp_;                                                 //!< Expected cost reduction
-  double th_acceptstep_;                                         //!< Threshold used for accepting step
-  double th_stop_;                                               //!< Tolerance for stopping the algorithm
-  std::size_t iter_;                                             //!< Number of iteration performed by the solver
+  bool was_feasible_;     //!< Label that indicates in the previous iterate was feasible
+  double cost_;           //!< Total cost
+  double stop_;           //!< Value computed by `stoppingCriteria()`
+  Eigen::Vector2d d_;     //!< LQ approximation of the expected improvement
+  double xreg_;           //!< Current state regularization value
+  double ureg_;           //!< Current control regularization values
+  double steplength_;     //!< Current applied step-length
+  double dV_;             //!< Cost reduction obtained by `tryStep()`
+  double dVexp_;          //!< Expected cost reduction
+  double th_acceptstep_;  //!< Threshold used for accepting step
+  double th_stop_;        //!< Tolerance for stopping the algorithm
+  std::size_t iter_;      //!< Number of iteration performed by the solver
+  double th_gaptol_;      //!< Threshold limit to check non-zero gaps
+  double ffeas_;          //!< Feasibility of the dynamic constraints
+  bool inffeas_;  //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
+                  //!< the l-1 norm
 };
 
 /**

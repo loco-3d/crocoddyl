@@ -97,7 +97,6 @@ void exposeSolverDDP() {
       .add_property("Qu", make_function(&SolverDDP::get_Qu, bp::return_value_policy<bp::copy_const_reference>()), "Qu")
       .add_property("K", make_function(&SolverDDP::get_K, bp::return_value_policy<bp::copy_const_reference>()), "K")
       .add_property("k", make_function(&SolverDDP::get_k, bp::return_value_policy<bp::copy_const_reference>()), "k")
-      .add_property("fs", make_function(&SolverDDP::get_fs, bp::return_value_policy<bp::copy_const_reference>()), "fs")
       .add_property("reg_incFactor", bp::make_function(&SolverDDP::get_reg_incfactor),
                     bp::make_function(&SolverDDP::set_reg_incfactor),
                     "regularization factor used for increasing the damping value.")
@@ -130,8 +129,6 @@ void exposeSolverDDP() {
                     "regularization)")
       .add_property("th_grad", bp::make_function(&SolverDDP::get_th_grad), bp::make_function(&SolverDDP::set_th_grad),
                     "threshold for accepting step which gradients is lower than this value")
-      .add_property("th_gapTol", bp::make_function(&SolverDDP::get_th_gaptol),
-                    bp::make_function(&SolverDDP::set_th_gaptol), "threshold for accepting a gap as non-zero")
       .add_property("th_gaptol",
                     bp::make_function(&SolverDDP::get_th_gaptol, deprecated<>("Deprecated. Use th_gapTol")),
                     bp::make_function(&SolverDDP::set_th_gaptol, deprecated<>("Deprecated. Use th_gapTol")),

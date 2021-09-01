@@ -201,11 +201,6 @@ class SolverDDP : public SolverAbstract {
   double get_th_grad() const;
 
   /**
-   * @brief Return the threshold for accepting a gap as non-zero
-   */
-  double get_th_gaptol() const;
-
-  /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
    */
   const std::vector<Eigen::MatrixXd>& get_Vxx() const;
@@ -249,11 +244,6 @@ class SolverDDP : public SolverAbstract {
    * @brief Return the feedforward gains \f$\mathbf{k}_{s}\f$
    */
   const std::vector<Eigen::VectorXd>& get_k() const;
-
-  /**
-   * @brief Return the gaps \f$\mathbf{\bar{f}}_{s}\f$
-   */
-  const std::vector<Eigen::VectorXd>& get_fs() const;
 
   /**
    * @brief Modify the regularization factor used to increase the damping value
@@ -302,11 +292,6 @@ class SolverDDP : public SolverAbstract {
    */
   void set_th_grad(const double th_grad);
 
-  /**
-   * @brief Modify the threshold for accepting a gap as non-zero
-   */
-  void set_th_gaptol(const double th_gaptol);
-
  protected:
   double reg_incfactor_;  //!< Regularization factor used to increase the damping value
   double reg_decfactor_;  //!< Regularization factor used to decrease the damping value
@@ -329,7 +314,6 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
   std::vector<MatrixXdRowMajor> K_;   //!< Feedback gains
   std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
-  std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
 
   Eigen::VectorXd xnext_;                              //!< Next state
   MatrixXdRowMajor FxTVxx_p_;                          //!< fxTVxx_p_
@@ -339,10 +323,8 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> Quuk_;                  //!< Quuk term
   std::vector<double> alphas_;                         //!< Set of step lengths using by the line-search procedure
   double th_grad_;     //!< Tolerance of the expected gradient used for testing the step
-  double th_gaptol_;   //!< Threshold limit to check non-zero gaps
   double th_stepdec_;  //!< Step-length threshold used to decrease regularization
   double th_stepinc_;  //!< Step-length threshold used to increase regularization
-  bool was_feasible_;  //!< Label that indicates in the previous iterate was feasible
 };
 
 }  // namespace crocoddyl
