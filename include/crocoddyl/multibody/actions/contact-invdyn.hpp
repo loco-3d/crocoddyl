@@ -50,7 +50,8 @@ namespace crocoddyl {
  *  - the configuration \f$\mathbf{q}\in\mathcal{Q}\f$ lies in the configuration manifold described with a `nq`-tuple,
  *  - the velocity \f$\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ its a tangent vector to this manifold with `nv`
  * dimension,
- *  - the control input \f$\mathbf{u}= (\mathbf{a},\mathbf{\tau}, \boldsymbold{\lambda}) \in\mathbb{R}^{nu+nv}\f$ is an Euclidean vector,
+ *  - the control input \f$\mathbf{u}= (\mathbf{a},\mathbf{\tau}, \boldsymbold{\lambda}) \in\mathbb{R}^{nu+nv}\f$ is an
+ Euclidean vector,
  *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
  * `ActivationModelAbstractTpl`),
  *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
@@ -215,27 +216,27 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const boost::shared_ptr<ActuationModelAbstract> &get_actuation() const;
 
   /**
    * @brief Return the contact model
    */
-  const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
+  const boost::shared_ptr<ContactModelMultiple> &get_contacts() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const boost::shared_ptr<CostModelSum> &get_costs() const;
 
   /**
    * @brief Return the constraint model
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const boost::shared_ptr<ConstraintModelManager> &get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
    */
-  pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
+  pinocchio::ModelTpl<Scalar> &get_pinocchio() const;
 
   /**
    * @brief Print relevant information of the contact inverse-dynamics model
@@ -256,7 +257,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
   boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar> &pinocchio_;                 //!< Pinocchio model
 
  public:
   /**
@@ -391,7 +392,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @brief Initialize the contact-acceleration residual model
      *
      * @param[in] state  State of the multibody system
-     * @param[in] id     Contact frame id 
+     * @param[in] id     Contact frame id
      * @param[in] nr     Dimension of the contact-acceleration residual
      * @param[in] nc     Dimension of all contacts
      * @param[in] nu     Dimension of the control vector
@@ -498,8 +499,8 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   DataCollectorActMultibodyInContactTpl<Scalar> multibody;           //!< Multibody data
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;  //!< quasistatic state point (velocity has to be zero)
-  MatrixXs tmp_Jstatic;  //!< quasistatic Jacobian
+  VectorXs tmp_xstatic;   //!< quasistatic state point (velocity has to be zero)
+  MatrixXs tmp_Jstatic;   //!< quasistatic Jacobian
   MatrixXs tmp_Jcstatic;  //!< quasistatic partial Jacobian
 
   using Base::cost;
