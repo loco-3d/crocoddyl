@@ -16,54 +16,32 @@ CallbackVerbose::~CallbackVerbose() {}
 
 void CallbackVerbose::operator()(SolverAbstract& solver) {
   if (solver.get_iter() % 10 == 0) {
+    std::cout << "iter     cost         stop         grad         xreg         ureg       step    ||ffeas||";
     switch (level) {
-      case _1: {
-        std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t  ||ffeas||\n";
-        break;
-      }
       case _2: {
-        std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t  ||ffeas|| \tdV-exp \t      dV\n";
+        std::cout << "     dV-exp         dV";
         break;
       }
-      default: {
-        std::cout << "iter \t cost \t      stop \t    grad \t  xreg";
-        std::cout << " \t      ureg \t step \t  ||ffeas||\n";
-      }
+      default: {}
     }
+    std::cout << std::endl;
   }
 
+  std::cout << std::setw(4) << solver.get_iter() << "  ";
+  std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
+  std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
+  std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "  ";
+  std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
+  std::cout << std::scientific << std::setprecision(5) << solver.get_ffeas();
   switch (level) {
-    case _1: {
-      std::cout << std::setw(4) << solver.get_iter() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
-      std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
-      std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_ffeas() << '\n';
-      break;
-    }
     case _2: {
-      std::cout << std::setw(4) << solver.get_iter() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
-      std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
-      std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_ffeas() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_dVexp() << "  ";
-      std::cout << solver.get_dV() << '\n';
+      std::cout << "  " << std::scientific << std::setprecision(5) << solver.get_dVexp() << "  ";
+      std::cout << solver.get_dV();
       break;
     }
-    default: {
-      std::cout << std::setw(4) << solver.get_iter() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_cost() << "  ";
-      std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
-      std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "   ";
-      std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
-      std::cout << std::scientific << std::setprecision(5) << solver.get_ffeas() << '\n';
-    }
+    default: {}
   }
+  std::cout << std::endl;
   std::cout << std::flush;
 }
 
