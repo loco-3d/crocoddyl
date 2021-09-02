@@ -98,12 +98,8 @@ void exposeSolverAbstract() {
           "problem",
           bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::copy_const_reference>()),
           "shooting problem")
-      .add_property(
-          "xs", bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")
-      .add_property(
-          "us", bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
+      .def_readwrite("xs", &SolverAbstract_wrap::xs_, "state trajectory")
+      .def_readwrite("us", &SolverAbstract_wrap::us_, "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_, "stopping criteria value")
