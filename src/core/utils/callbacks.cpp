@@ -50,7 +50,8 @@ void CallbackVerbose::update_header() {
   header_ += center_string("xreg", columnwidth) + separator;
   header_ += center_string("ureg", columnwidth) + separator;
   header_ += center_string("step", 2 + 4) + separator;
-  header_ += center_string("||ffeas||", columnwidth);
+  header_ += center_string("||ffeas||", columnwidth) + separator;
+  header_ += center_string("||hfeas||", columnwidth);
   switch (level_) {
     case _2: {
       header_ += separator + center_string("dV-exp", columnwidth) + separator;
@@ -71,7 +72,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
   std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
   std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "  ";
   std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
-  std::cout << std::scientific << std::setprecision(precision_) << solver.get_ffeas();
+  std::cout << std::scientific << std::setprecision(precision_) << solver.get_ffeas() << "  ";
+  std::cout << std::scientific << std::setprecision(precision_) << solver.get_hfeas();
   switch (level_) {
     case _2: {
       std::cout << "  " << std::scientific << std::setprecision(precision_) << solver.get_dVexp() << "  ";

@@ -31,6 +31,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       iter_(0),
       th_gaptol_(1e-16),
       ffeas_(NAN),
+      hfeas_(NAN),
       inffeas_(true),
       tmp_feas_(0.) {
   // Allocate common data
@@ -98,6 +99,27 @@ double SolverAbstract::computeDynamicFeasibility() {
     }
   }
   return tmp_feas_;
+}
+
+double SolverAbstract::computeEqualityFeasibility() {
+  hfeas_ = 0.;
+  const std::size_t T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  if (inffeas_) {
+    for (std::size_t t = 0; t < T; ++t) {
+      if (models[t]->get_nh() > 0) {
+        ffeas_ = std::max(ffeas_, datas[t]->h.lpNorm<Eigen::Infinity>());
+      }
+    }
+  } else {
+    for (std::size_t t = 0; t < T; ++t) {
+      if (models[t]->get_nh() > 0) {
+        ffeas_ += datas[t]->h.lpNorm<1>();
+      }
+    }
+  }
+  return hfeas_;
 }
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
@@ -198,6 +220,8 @@ std::size_t SolverAbstract::get_iter() const { return iter_; }
 double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
 
 double SolverAbstract::get_ffeas() const { return ffeas_; }
+
+double SolverAbstract::get_hfeas() const { return hfeas_; }
 
 bool SolverAbstract::get_inffeas() const { return inffeas_; }
 
