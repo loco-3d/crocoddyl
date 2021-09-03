@@ -172,7 +172,7 @@ double SolverDDP::calcDiff() {
   }
   cost_ = problem_->calcDiff(xs_, us_);
 
-  computeDynamicFeasibility();
+  ffeas_ = computeDynamicFeasibility();
   STOP_PROFILER("SolverDDP::calcDiff");
   return cost_;
 }

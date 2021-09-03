@@ -31,7 +31,8 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       iter_(0),
       th_gaptol_(1e-16),
       ffeas_(NAN),
-      inffeas_(true) {
+      inffeas_(true),
+      tmp_feas_(0.) {
   // Allocate common data
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
@@ -52,7 +53,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
 SolverAbstract::~SolverAbstract() {}
 
 double SolverAbstract::computeDynamicFeasibility() {
-  ffeas_ = 0.;
+  tmp_feas_ = 0.;
   if (!is_feasible_) {
     const std::size_t T = problem_->get_T();
     const Eigen::VectorXd& x0 = problem_->get_x0();
@@ -70,17 +71,17 @@ double SolverAbstract::computeDynamicFeasibility() {
     }
 
     if (inffeas_) {
-      ffeas_ = std::max(ffeas_, fs_[0].lpNorm<Eigen::Infinity>());
+      tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
       for (std::size_t t = 0; t < T; ++t) {
-        ffeas_ = std::max(ffeas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
+        tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
       }
     } else {
-      ffeas_ = fs_[0].lpNorm<1>();
+      tmp_feas_ = fs_[0].lpNorm<1>();
       for (std::size_t t = 0; t < T; ++t) {
-        ffeas_ += fs_[t + 1].lpNorm<1>();
+        tmp_feas_ += fs_[t + 1].lpNorm<1>();
       }
     }
-    if (ffeas_ <= th_gaptol_) {
+    if (tmp_feas_ <= th_gaptol_) {
       is_feasible_ = true;
     } else {
       is_feasible_ = false;
@@ -90,7 +91,7 @@ double SolverAbstract::computeDynamicFeasibility() {
       it->setZero();
     }
   }
-  return ffeas_;
+  return tmp_feas_;
 }
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,

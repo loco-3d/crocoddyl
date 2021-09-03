@@ -317,6 +317,9 @@ class SolverAbstract {
   double ffeas_;          //!< Feasibility of the dynamic constraints
   bool inffeas_;  //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
                   //!< the l-1 norm
+
+ private:
+  double tmp_feas_;  //!< Temporal variables used for computed the feasibility
 };
 
 /**
