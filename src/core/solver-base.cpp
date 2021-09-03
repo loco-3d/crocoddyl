@@ -109,7 +109,7 @@ double SolverAbstract::computeEqualityFeasibility() {
   if (inffeas_) {
     for (std::size_t t = 0; t < T; ++t) {
       if (models[t]->get_nh() > 0) {
-        tmp_feas_ = std::max(ffeas_, datas[t]->h.lpNorm<Eigen::Infinity>());
+        tmp_feas_ = std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
       }
     }
   } else {
