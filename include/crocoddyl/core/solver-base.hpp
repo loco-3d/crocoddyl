@@ -143,6 +143,14 @@ class SolverAbstract {
   double computeDynamicFeasibility();
 
   /**
+   * @brief Compute the feasibility of the equality constraints for the current guess
+   *
+   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
+   * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
+   */
+  double computeEqualityFeasibility();
+
+  /**
    * @brief Set the solver candidate trajectories \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
    *
    * The solver candidates are defined as a state and control trajectories \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of
@@ -188,7 +196,7 @@ class SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_us() const;
 
   /**
-   * @brief Return the gaps \f$\mathbf{f}_{s}\f$
+   * @brief Return the dynamic infeasibility \f$\mathbf{f}_{s}\f$
    */
   const std::vector<Eigen::VectorXd>& get_fs() const;
 
@@ -266,6 +274,11 @@ class SolverAbstract {
   /**
    * @brief Return the norm used for the computing the feasibility (true for \f$\ell_\infty\f$, false for \f$\ell_1\f$)
    */
+  double get_hfeas() const;
+
+  /**
+   * @brief Return the norm used for the computing the feasibility (true for l-inf, false for l-1)
+   */
   bool get_inffeas() const;
 
   /**
@@ -329,6 +342,7 @@ class SolverAbstract {
   std::size_t iter_;      //!< Number of iteration performed by the solver
   double th_gaptol_;      //!< Threshold limit to check non-zero gaps
   double ffeas_;          //!< Feasibility of the dynamic constraints
+  double hfeas_;          //!< Feasibility of the equality constraints
   bool inffeas_;     //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
                      //!< the l-1 norm
   double tmp_feas_;  //!< Temporal variables used for computed the feasibility

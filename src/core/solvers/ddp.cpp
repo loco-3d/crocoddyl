@@ -194,6 +194,7 @@ double SolverDDP::calcDiff() {
   cost_ = problem_->calcDiff(xs_, us_);
 
   ffeas_ = computeDynamicFeasibility();
+  hfeas_ = computeEqualityFeasibility();
   STOP_PROFILER("SolverDDP::calcDiff");
   return cost_;
 }
