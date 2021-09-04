@@ -7,9 +7,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#include <omp.h>
-#endif  // CROCODDYL_WITH_MULTITHREADING
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
@@ -25,10 +22,8 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       reg_max_(1e9),
       cost_try_(0.),
       th_grad_(1e-12),
-      th_gaptol_(1e-16),
       th_stepdec_(0.5),
-      th_stepinc_(0.01),
-      was_feasible_(false) {
+      th_stepinc_(0.01) {
   allocateData();
 
   const std::size_t n_alphas = 10;
@@ -172,43 +167,12 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 
 double SolverDDP::calcDiff() {
   START_PROFILER("SolverDDP::calcDiff");
-  if (iter_ == 0) problem_->calc(xs_, us_);
+  if (iter_ == 0) {
+    problem_->calc(xs_, us_);
+  }
   cost_ = problem_->calcDiff(xs_, us_);
 
-  if (!is_feasible_) {
-    const Eigen::VectorXd& x0 = problem_->get_x0();
-    problem_->get_runningModels()[0]->get_state()->diff(xs_[0], x0, fs_[0]);
-    bool could_be_feasible = true;
-    if (fs_[0].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
-      could_be_feasible = false;
-    }
-    const std::size_t T = problem_->get_T();
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(problem_->get_nthreads())
-#endif
-    for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      model->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
-    }
-
-    if (could_be_feasible) {
-      for (std::size_t t = 0; t < T; ++t) {
-        if (fs_[t + 1].lpNorm<Eigen::Infinity>() >= th_gaptol_) {
-          could_be_feasible = false;
-          break;
-        }
-      }
-    }
-    is_feasible_ = could_be_feasible;
-
-  } else if (!was_feasible_) {  // closing the gaps
-    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
-      it->setZero();
-    }
-  }
+  computeDynamicFeasibility();
   STOP_PROFILER("SolverDDP::calcDiff");
   return cost_;
 }
@@ -392,7 +356,6 @@ void SolverDDP::allocateData() {
   Qu_.resize(T);
   K_.resize(T);
   k_.resize(T);
-  fs_.resize(T + 1);
 
   xs_try_.resize(T + 1);
   us_try_.resize(T);
@@ -416,7 +379,6 @@ void SolverDDP::allocateData() {
     Qu_[t] = Eigen::VectorXd::Zero(nu);
     K_[t] = MatrixXdRowMajor::Zero(nu, ndx);
     k_[t] = Eigen::VectorXd::Zero(nu);
-    fs_[t] = Eigen::VectorXd::Zero(ndx);
 
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
@@ -434,7 +396,6 @@ void SolverDDP::allocateData() {
   Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
-  fs_.back() = Eigen::VectorXd::Zero(ndx);
 
   FxTVxx_p_ = MatrixXdRowMajor::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
@@ -462,8 +423,6 @@ double SolverDDP::get_th_stepinc() const { return th_stepinc_; }
 
 double SolverDDP::get_th_grad() const { return th_grad_; }
 
-double SolverDDP::get_th_gaptol() const { return th_gaptol_; }
-
 const std::vector<Eigen::MatrixXd>& SolverDDP::get_Vxx() const { return Vxx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Vx() const { return Vx_; }
@@ -481,8 +440,6 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
 const std::vector<typename MathBaseTpl<double>::MatrixXsRowMajor>& SolverDDP::get_K() const { return K_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
-
-const std::vector<Eigen::VectorXd>& SolverDDP::get_fs() const { return fs_; }
 
 void SolverDDP::set_reg_incfactor(const double regfactor) {
   if (regfactor <= 1.) {
@@ -583,14 +540,6 @@ void SolverDDP::set_th_grad(const double th_grad) {
                  << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
-}
-
-void SolverDDP::set_th_gaptol(const double th_gaptol) {
-  if (0. > th_gaptol) {
-    throw_pretty("Invalid argument: "
-                 << "th_gaptol value has to be positive.");
-  }
-  th_gaptol_ = th_gaptol;
 }
 
 }  // namespace crocoddyl

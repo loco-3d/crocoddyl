@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,11 @@ void exposeSolverAbstract() {
                                   ":param us: control trajectory of T elements (default []).\n"
                                   ":param isFeasible: true if the xs are obtained from integrating the\n"
                                   "us (rollout)."))
-      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self"),
+      .def("computeDynamicFeasibility", &SolverAbstract_wrap::computeDynamicFeasibility, bp::args("self"),
+           "Compute the dynamic feasibility for the current guess.\n\n"
+           "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
+           "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
+      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self", "callbacks"),
            "Set a list of callback functions using for diagnostic.\n\n"
            "Each iteration, the solver calls these set of functions in order to\n"
            "allowed user the diagnostic of the its performance.\n"
@@ -98,12 +102,9 @@ void exposeSolverAbstract() {
           "problem",
           bp::make_function(&SolverAbstract_wrap::get_problem, bp::return_value_policy<bp::copy_const_reference>()),
           "shooting problem")
-      .add_property(
-          "xs", bp::make_function(&SolverAbstract_wrap::get_xs, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_xs), "state trajectory")
-      .add_property(
-          "us", bp::make_function(&SolverAbstract_wrap::get_us, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
+      .def_readwrite("xs", &SolverAbstract_wrap::xs_, "state trajectory")
+      .def_readwrite("us", &SolverAbstract_wrap::us_, "control sequence")
+      .def_readwrite("fs", &SolverAbstract_wrap::fs_, "dynamics gaps")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_, "stopping criteria value")
@@ -117,7 +118,16 @@ void exposeSolverAbstract() {
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
       .add_property("th_stop", bp::make_function(&SolverAbstract_wrap::get_th_stop),
                     bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
-      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()")
+      .add_property("th_gapTol", bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
+                    bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
+                    "threshold for accepting a gap as non-zero")
+      .add_property("ffeas", bp::make_function(&SolverAbstract_wrap::get_ffeas),
+                    "feasibility of the dynamic constraint of current guess")
+      .add_property("inffeas", bp::make_function(&SolverAbstract_wrap::get_inffeas),
+                    bp::make_function(&SolverAbstract_wrap::set_inffeas),
+                    "true indicates if we use l-inf norm for computing the feasibility, otherwise false represents "
+                    "the l-1 norm");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",

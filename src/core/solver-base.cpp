@@ -1,10 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#include <omp.h>
+#endif  // CROCODDYL_WITH_MULTITHREADING
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solver-base.hpp"
@@ -14,6 +18,7 @@ namespace crocoddyl {
 SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
       is_feasible_(false),
+      was_feasible_(false),
       cost_(0.),
       stop_(0.),
       xreg_(NAN),
@@ -23,21 +28,70 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       dVexp_(0.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
-      iter_(0) {
+      iter_(0),
+      th_gaptol_(1e-16),
+      ffeas_(NAN),
+      inffeas_(true) {
   // Allocate common data
+  const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
   us_.resize(T);
+  fs_.resize(T + 1);
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_runningModels()[t];
 
     xs_[t] = model->get_state()->zero();
     us_[t] = Eigen::VectorXd::Zero(problem_->get_nu_max());
+    fs_[t] = Eigen::VectorXd::Zero(ndx);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
+  fs_.back() = Eigen::VectorXd::Zero(ndx);
 }
 
 SolverAbstract::~SolverAbstract() {}
+
+double SolverAbstract::computeDynamicFeasibility() {
+  ffeas_ = 0.;
+  if (!is_feasible_) {
+    const std::size_t T = problem_->get_T();
+    const Eigen::VectorXd& x0 = problem_->get_x0();
+    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+
+    models[0]->get_state()->diff(xs_[0], x0, fs_[0]);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(problem_->get_nthreads())
+#endif
+    for (std::size_t t = 0; t < T; ++t) {
+      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      m->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
+    }
+
+    if (inffeas_) {
+      ffeas_ = std::max(ffeas_, fs_[0].lpNorm<Eigen::Infinity>());
+      for (std::size_t t = 0; t < T; ++t) {
+        ffeas_ = std::max(ffeas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
+      }
+    } else {
+      ffeas_ = fs_[0].lpNorm<1>();
+      for (std::size_t t = 0; t < T; ++t) {
+        ffeas_ += fs_[t + 1].lpNorm<1>();
+      }
+    }
+    if (ffeas_ <= th_gaptol_) {
+      is_feasible_ = true;
+    } else {
+      is_feasible_ = false;
+    }
+  } else if (!was_feasible_) {  // closing the gaps
+    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
+      it->setZero();
+    }
+  }
+  return ffeas_;
+}
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   const std::vector<Eigen::VectorXd>& us_warm, bool is_feasible) {
@@ -102,6 +156,8 @@ const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const { return xs_;
 
 const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const { return us_; }
 
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_fs() const { return fs_; }
+
 bool SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
 double SolverAbstract::get_cost() const { return cost_; }
@@ -125,6 +181,12 @@ double SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
 double SolverAbstract::get_th_stop() const { return th_stop_; }
 
 std::size_t SolverAbstract::get_iter() const { return iter_; }
+
+double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
+
+double SolverAbstract::get_ffeas() const { return ffeas_; }
+
+bool SolverAbstract::get_inffeas() const { return inffeas_; }
 
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
@@ -195,6 +257,16 @@ void SolverAbstract::set_th_stop(const double th_stop) {
   }
   th_stop_ = th_stop;
 }
+
+void SolverAbstract::set_th_gaptol(const double th_gaptol) {
+  if (0. > th_gaptol) {
+    throw_pretty("Invalid argument: "
+                 << "th_gaptol value has to be positive.");
+  }
+  th_gaptol_ = th_gaptol;
+}
+
+void SolverAbstract::set_inffeas(const bool inffeas) { inffeas_ = inffeas; }
 
 bool raiseIfNaN(const double value) {
   if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
