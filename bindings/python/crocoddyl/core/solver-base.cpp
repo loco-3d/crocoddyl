@@ -114,6 +114,8 @@ void exposeSolverAbstract() {
       .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
                     bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
       .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
+      .def_readwrite("dV", &SolverAbstract_wrap::dV_, "reduction in the cost function")
+      .def_readwrite("dVexp", &SolverAbstract_wrap::dVexp_, "expected reduction in the cost function")
       .add_property("th_acceptStep", bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
       .add_property("th_stop", bp::make_function(&SolverAbstract_wrap::get_th_stop),
@@ -122,8 +124,7 @@ void exposeSolverAbstract() {
       .add_property("th_gapTol", bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
                     bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
                     "threshold for accepting a gap as non-zero")
-      .add_property("ffeas", bp::make_function(&SolverAbstract_wrap::get_ffeas),
-                    "feasibility of the dynamic constraint of current guess")
+      .def_readwrite("ffeas", &SolverAbstract_wrap::ffeas_, "feasibility of the dynamic constraint of current guess")
       .add_property("inffeas", bp::make_function(&SolverAbstract_wrap::get_inffeas),
                     bp::make_function(&SolverAbstract_wrap::set_inffeas),
                     "true indicates if we use l-inf norm for computing the feasibility, otherwise false represents "
