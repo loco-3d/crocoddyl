@@ -99,10 +99,10 @@ class SolverAbstract {
    * need to run first `computeDirection()`. Additionally it returns the cost improvement along the predefined step
    * length.
    *
-   * @param[in]  stepLength  step length
-   * @return  The cost improvement
+   * @param[in] steplength  Step length
+   * @return  the cost improvement
    */
-  virtual double tryStep(const double step_length = 1) = 0;
+  virtual double tryStep(const double steplength = 1) = 0;
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -317,8 +317,6 @@ class SolverAbstract {
   double ffeas_;          //!< Feasibility of the dynamic constraints
   bool inffeas_;  //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
                   //!< the l-1 norm
-
- private:
   double tmp_feas_;  //!< Temporal variables used for computed the feasibility
 };
 
