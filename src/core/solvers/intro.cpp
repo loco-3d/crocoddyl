@@ -27,6 +27,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
 
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t nu = problem_->get_nu_max();
+  QuuK_tmp_ = Eigen::MatrixXd::Zero(nu, ndx);
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -85,7 +86,6 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
     // We need to recalculate the derivatives when the step length passes
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
       steplength_ = *it;
-
       try {
         dV_ = tryStep(steplength_);
         dPhi_ = dV_ + upsilon_ * (hfeas_ - hfeas_try_);
@@ -94,7 +94,6 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       }
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
       dPhiexp_ = dVexp_ + steplength_ * upsilon_ * hfeas_;
-
       if (abs(d_[0]) < th_grad_ || !is_feasible_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
         was_feasible_ = is_feasible_;
         setCandidate(xs_try_, us_try_, true);
@@ -137,6 +136,90 @@ double SolverIntro::tryStep(const double steplength) {
   return cost_ - cost_try_;
 }
 
+void SolverIntro::backwardPass() {
+  START_PROFILER("SolverIntro::backwardPass");
+  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
+  Vxx_.back() = d_T->Lxx;
+  Vx_.back() = d_T->Lx;
+
+  if (!std::isnan(xreg_)) {
+    Vxx_.back().diagonal().array() += xreg_;
+  }
+
+  if (!is_feasible_) {
+    Vx_.back().noalias() += Vxx_.back() * fs_.back();
+  }
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
+    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
+    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+    const std::size_t nu = m->get_nu();
+
+    Qxx_[t] = d->Lxx;
+    Qx_[t] = d->Lx;
+    START_PROFILER("SolverIntro::Qxx");
+    FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
+    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    STOP_PROFILER("SolverIntro::Qxx");
+    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    if (nu != 0) {
+      Qxu_[t].leftCols(nu) = d->Lxu;
+      Quu_[t].topLeftCorner(nu, nu) = d->Luu;
+      Qu_[t].head(nu) = d->Lu;
+      START_PROFILER("SolverIntro::Qxu");
+      Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
+      STOP_PROFILER("SolverIntro::Qxu");
+      START_PROFILER("SolverIntro::Quu");
+      FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
+      Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      STOP_PROFILER("SolverIntro::Quu");
+      Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
+
+      if (!std::isnan(ureg_)) {
+        Quu_[t].diagonal().head(nu).array() += ureg_;
+      }
+    }
+
+    computeGains(t);
+
+    Vx_[t] = Qx_[t];
+    Vxx_[t] = Qxx_[t];
+    if (nu != 0) {
+      Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
+      Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
+      Vx_[t].noalias() -= Qxu_[t].leftCols(nu) * k_[t].head(nu);
+      Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
+      START_PROFILER("SolverIntro::Vxx");
+      QuuK_tmp_.noalias() = Quu_[t].topLeftCorner(nu, nu) * K_[t].topRows(nu);
+      Vxx_[t].noalias() -= 2 * Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
+      Vxx_[t].noalias() += K_[t].topRows(nu).transpose() * QuuK_tmp_;
+      STOP_PROFILER("SolverIntro::Vxx");
+    }
+    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+    Vxx_[t] = Vxx_tmp_;
+
+    if (!std::isnan(xreg_)) {
+      Vxx_[t].diagonal().array() += xreg_;
+    }
+
+    // Compute and store the Vx gradient at end of the interval (rollout state)
+    if (!is_feasible_) {
+      Vx_[t].noalias() += Vxx_[t] * fs_[t];
+    }
+
+    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
+      throw_pretty("backward_error");
+    }
+    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
+      throw_pretty("backward_error");
+    }
+  }
+  STOP_PROFILER("SolverIntro::backwardPass");
+}
+
 double SolverIntro::stoppingCriteria() {
   stop_ = std::max(hfeas_, abs(d_[0] + 0.5 * d_[1]));
   return stop_;
@@ -149,23 +232,24 @@ void SolverIntro::computeGains(const std::size_t t) {
 
   const std::size_t nu = model->get_nu();
   if (nu > 0 && model->get_nh() > 0) {
-    QuuinvHuT_[t] = data->Hu.transpose();
-    Quu_llt_[t].solveInPlace(QuuinvHuT_[t]);
-    Quu_hat_[t].noalias() = data->Hu * QuuinvHuT_[t];
+    QuuinvHuT_[t].topRows(nu) = data->Hu.transpose();
+
+    Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> QuuinvHuT = QuuinvHuT_[t].topRows(nu);
+    Quu_llt_[t].solveInPlace(QuuinvHuT);
+    Quu_hat_[t].noalias() = data->Hu * QuuinvHuT;
     Quu_hat_llt_[t].compute(Quu_hat_[t]);
     const Eigen::ComputationInfo& info = Quu_hat_llt_[t].info();
     if (info != Eigen::Success) {
       throw_pretty("backward error");
     }
-    Eigen::Transpose<Eigen::MatrixXd> HuQuuinv = QuuinvHuT_[t].transpose();
+    Eigen::Transpose<Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> > HuQuuinv = QuuinvHuT_[t].topRows(nu).transpose();
     Quu_hat_llt_[t].solveInPlace(HuQuuinv);
-
     k_hat_[t] = data->h;
-    k_hat_[t].noalias() -= data->Hu * k_[t];
+    k_hat_[t].noalias() -= data->Hu * k_[t].head(nu);
     K_hat_[t] = data->Hx;
-    K_hat_[t].noalias() -= data->Hu * K_[t];
-    k_[t].noalias() += (k_hat_[t].transpose() * HuQuuinv).transpose();
-    K_[t].noalias() += (K_hat_[t].transpose() * HuQuuinv).transpose();
+    K_hat_[t].noalias() -= data->Hu * K_[t].topRows(nu);
+    k_[t].head(nu).noalias() += QuuinvHuT_[t].topRows(nu) * k_hat_[t];
+    K_[t].topRows(nu) += QuuinvHuT_[t].topRows(nu) * K_hat_[t];
   }
 }
 

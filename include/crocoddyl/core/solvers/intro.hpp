@@ -32,6 +32,35 @@ class SolverIntro : public SolverDDP {
   virtual double stoppingCriteria();
 
   /**
+   * @brief Run the backward pass (Riccati sweep)
+   *
+   * It assumes that the Jacobian and Hessians of the optimal control problem have been compute (i.e. `calcDiff()`).
+   * The backward pass handles infeasible guess through a modified Riccati sweep:
+   * \f{eqnarray*}
+   *   \mathbf{Q}_{\mathbf{x}_k} &=& \mathbf{l}_{\mathbf{x}_k} + \mathbf{f}^\top_{\mathbf{x}_k} (V_{\mathbf{x}_{k+1}}
+   * +
+   * V_{\mathbf{xx}_{k+1}}\mathbf{\bar{f}}_{k+1}),\\
+   *   \mathbf{Q}_{\mathbf{u}_k} &=& \mathbf{l}_{\mathbf{u}_k} + \mathbf{f}^\top_{\mathbf{u}_k} (V_{\mathbf{x}_{k+1}}
+   * +
+   * V_{\mathbf{xx}_{k+1}}\mathbf{\bar{f}}_{k+1}),\\
+   *   \mathbf{Q}_{\mathbf{xx}_k} &=& \mathbf{l}_{\mathbf{xx}_k} + \mathbf{f}^\top_{\mathbf{x}_k}
+   * V_{\mathbf{xx}_{k+1}}
+   * \mathbf{f}_{\mathbf{x}_k},\\
+   *   \mathbf{Q}_{\mathbf{xu}_k} &=& \mathbf{l}_{\mathbf{xu}_k} + \mathbf{f}^\top_{\mathbf{x}_k}
+   * V_{\mathbf{xx}_{k+1}}
+   * \mathbf{f}_{\mathbf{u}_k},\\
+   *   \mathbf{Q}_{\mathbf{uu}_k} &=& \mathbf{l}_{\mathbf{uu}_k} + \mathbf{f}^\top_{\mathbf{u}_k}
+   * V_{\mathbf{xx}_{k+1}} \mathbf{f}_{\mathbf{u}_k}, \f} where
+   * \f$\mathbf{l}_{\mathbf{x}_k}\f$,\f$\mathbf{l}_{\mathbf{u}_k}\f$,\f$\mathbf{f}_{\mathbf{x}_k}\f$ and
+   * \f$\mathbf{f}_{\mathbf{u}_k}\f$ are the Jacobians of the cost function and dynamics,
+   * \f$\mathbf{l}_{\mathbf{xx}_k}\f$,\f$\mathbf{l}_{\mathbf{xu}_k}\f$ and \f$\mathbf{l}_{\mathbf{uu}_k}\f$ are the
+   * Hessians of the cost function, \f$V_{\mathbf{x}_{k+1}}\f$ and \f$V_{\mathbf{xx}_{k+1}}\f$ defines the
+   * linear-quadratic approximation of the Value function, and \f$\mathbf{\bar{f}}_{k+1}\f$ describes the gaps of the
+   * dynamics.
+   */
+  virtual void backwardPass();
+
+  /**
    * @brief Compute the feedforward and feedback terms using a Cholesky decomposition
    *
    * To compute the feedforward \f$\mathbf{k}_k\f$ and feedback \f$\mathbf{K}_k\f$ terms, we use a Cholesky
@@ -80,6 +109,7 @@ class SolverIntro : public SolverDDP {
   double upsilon_;    //!< Estimated penalty paramter that balances relative contribution of the cost function and
                       //!< equality constraints
 
+  Eigen::MatrixXd QuuK_tmp_;
   std::vector<Eigen::VectorXd> k_hat_;
   std::vector<Eigen::MatrixXd> K_hat_;
   std::vector<Eigen::MatrixXd> Quu_hat_;
