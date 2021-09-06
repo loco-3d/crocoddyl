@@ -81,11 +81,6 @@ double SolverAbstract::computeDynamicFeasibility() {
         tmp_feas_ += fs_[t + 1].lpNorm<1>();
       }
     }
-    if (tmp_feas_ <= th_gaptol_) {
-      is_feasible_ = true;
-    } else {
-      is_feasible_ = false;
-    }
   } else if (!was_feasible_) {  // closing the gaps
     for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
