@@ -32,7 +32,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nh = model->get_nh();
 
-    k_hat_[t] = Eigen::VectorXd::Zero(nu);
+    k_hat_[t] = Eigen::VectorXd::Zero(nh);
     K_hat_[t] = Eigen::MatrixXd::Zero(nh, ndx);
     Quu_hat_[t] = Eigen::MatrixXd::Zero(nh, nh);
     QuuinvHuT_[t] = Eigen::MatrixXd::Zero(nu, nh);
@@ -45,7 +45,7 @@ SolverIntro::~SolverIntro() {}
 bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
                         const std::size_t maxiter, const bool is_feasible, const double reginit) {
   START_PROFILER("SolverIntro::solve");
-  // xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
+  xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(reginit)) {
@@ -95,7 +95,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
       dPhiexp_ = dVexp_ + steplength_ * upsilon_ * hfeas_;
 
-      if (abs(d_[0]) < th_grad_ || !is_feasible || dPhi_ > th_acceptstep_ * dPhiexp_) {
+      if (abs(d_[0]) < th_grad_ || !is_feasible_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
         was_feasible_ = is_feasible_;
         setCandidate(xs_try_, us_try_, true);
         cost_ = cost_try_;
@@ -115,14 +115,14 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       decreaseRegularization();
     }
     if (steplength_ <= th_stepinc_) {
-      increaseRegularization();
       if (xreg_ == reg_max_) {
         STOP_PROFILER("SolverIntro::solve");
         return false;
       }
+      increaseRegularization();
     }
 
-    if (was_feasible_ && stop_ < th_stop_) {
+    if (is_feasible_ && stop_ < th_stop_) {
       STOP_PROFILER("SolverIntro::solve");
       return true;
     }
