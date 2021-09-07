@@ -13,8 +13,7 @@ class SimpleQuadrupedalGaitProblem:
     through a strict process of deprecation.
     Thus, we advice any user to DO NOT develop their application based on this class.
     """
-
-    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control='zero'):
+    def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control='zero', fwddyn=True):
         """ Construct quadrupedal-gait problem.
 
         :param rmodel: robot model
@@ -24,6 +23,7 @@ class SimpleQuadrupedalGaitProblem:
         :param rhFoot: name of the right-hind foot
         :param integrator: type of the integrator (options are: 'euler', and 'rk4')
         :param control: type of control parametrization (options are: 'zero', 'one', and 'rk4')
+        :param fwddyn: True for forward-dynamics and False for inverse-dynamics formulations
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -34,15 +34,10 @@ class SimpleQuadrupedalGaitProblem:
         self.rfFootId = self.rmodel.getFrameId(rfFoot)
         self.lhFootId = self.rmodel.getFrameId(lhFoot)
         self.rhFootId = self.rmodel.getFrameId(rhFoot)
-        self.integrator = integrator
-        if control == 'one':
-            self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
-        elif control == 'rk4':
-            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK(self.actuation.nu, crocoddyl.RKType.four)
-        elif control == 'rk3':
-            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK(self.actuation.nu, crocoddyl.RKType.three)
-        else:
-            self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
+        self._integrator = integrator
+        self._control = control
+        self._fwddyn = fwddyn
+
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["standing"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
@@ -438,7 +433,10 @@ class SimpleQuadrupedalGaitProblem:
         """
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
-        nu = self.actuation.nu
+        if self._fwddyn:
+            nu = self.actuation.nu
+        else:
+            nu = self.actuation.nu + self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
             supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), nu,
@@ -453,7 +451,7 @@ class SimpleQuadrupedalGaitProblem:
             costModel.addCost("comTrack", comTrack, 1e6)
         for i in supportFootIds:
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
-            coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, nu)
+            coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, nu, self._fwddyn)
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
             frictionCone = crocoddyl.CostModelResidual(self.state, coneActivation, coneResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
@@ -468,9 +466,14 @@ class SimpleQuadrupedalGaitProblem:
                                 (self.rmodel.nv - 6))
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
-        ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
+        if self._fwddyn:
+            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        else:
+            ctrlWeights = np.array([1e0] * self.state.nv + [0.] * self.actuation.nu + [1e-1] * contactModel.nc)
+            ctrlActivation = crocoddyl.ActivationModelWeightedQuad(ctrlWeights**2)
+            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlActivation, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
@@ -483,18 +486,24 @@ class SimpleQuadrupedalGaitProblem:
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel, 0., True)
-        if self.integrator == 'euler':
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
-        elif self.integrator == 'rk4':
-            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.four, timeStep)
-        elif self.integrator == 'rk3':
-            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.three, timeStep)
-        elif self.integrator == 'rk2':
-            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.two, timeStep)
+        if self._fwddyn:
+            dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel, 0., True)
         else:
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
+            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel)
+        if self._control == 'one':
+            control = crocoddyl.ControlParametrizationModelPolyOne(nu)
+        elif self._control == 'rk4':
+            control = crocoddyl.ControlParametrizationModelPolyTwoRK(nu, crocoddyl.RKType.four)
+        elif self._control == 'rk3':
+            control = crocoddyl.ControlParametrizationModelPolyTwoRK(nu, crocoddyl.RKType.three)
+        else:
+            control = crocoddyl.ControlParametrizationModelPolyZero(nu)
+        if self._integrator == 'euler':
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
+        elif self._integrator == 'rk4':
+            model = crocoddyl.IntegratedActionModelRK4(dmodel, control, timeStep)
         return model
 
     def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=False):
@@ -520,7 +529,10 @@ class SimpleQuadrupedalGaitProblem:
         """
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
-        nu = self.actuation.nu
+        if self._fwddyn:
+            nu = self.actuation.nu
+        else:
+            nu = self.actuation.nu + self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
             supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), nu,
@@ -531,7 +543,7 @@ class SimpleQuadrupedalGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, nu)
         for i in supportFootIds:
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
-            coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, nu)
+            coneResidual = crocoddyl.ResidualModelContactFrictionCone(self.state, i, cone, nu, self._fwddyn)
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub))
             frictionCone = crocoddyl.CostModelResidual(self.state, coneActivation, coneResidual)
             costModel.addCost(self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1)
@@ -549,17 +561,26 @@ class SimpleQuadrupedalGaitProblem:
         stateWeights = np.array([0.] * 3 + [500.] * 3 + [0.01] * (self.rmodel.nv - 6) + [10.] * self.rmodel.nv)
         stateResidual = crocoddyl.ResidualModelState(self.state, self.rmodel.defaultState, nu)
         stateActivation = crocoddyl.ActivationModelWeightedQuad(stateWeights**2)
-        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
-        ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
+        if self._fwddyn:
+            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        else:
+            ctrlWeights = np.array([1e0] * self.state.nv + [0.] * self.actuation.nu + [1e1] * contactModel.nc)
+            ctrlActivation = crocoddyl.ActivationModelWeightedQuad(ctrlWeights**2)
+            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlActivation, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
-        dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel, 0., True)
-        if self.integrator == 'euler':
+        if self._fwddyn:
+            dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel, 0., True)
+        else:
+            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel)
+        if self._integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         elif self.integrator == 'rk4':
             model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.four, 0.)
@@ -616,6 +637,9 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         xs_lb, xs_ub = [], []
     if isinstance(solver, list):
         rmodel = solver[0].problem.runningModels[0].state.pinocchio
+        nq, nv, nu = rmodel.nq, rmodel.nv, solver[0].problem.runningModels[0].differential.actuation.nu
+        fwddyn = isinstance(solver[0].problem.runningModels[0].differential,
+                            crocoddyl.DifferentialActionModelContactFwdDynamics)
         for s in solver:
             xs.extend(s.xs[:-1])
             us.extend(s.us)
@@ -628,6 +652,9 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
                     xs_ub += [m.state.ub]
     else:
         rmodel = solver.problem.runningModels[0].state.pinocchio
+        nq, nv, nu = rmodel.nq, rmodel.nv, solver.problem.runningModels[0].differential.actuation.nu
+        fwddyn = isinstance(solver.problem.runningModels[0].differential,
+                            crocoddyl.DifferentialActionModelContactFwdDynamics)
         xs, us = solver.xs, solver.us
         if bounds:
             models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
@@ -638,7 +665,11 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
                 xs_ub += [m.state.ub]
 
     # Getting the state and control trajectories
-    nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
+    nx = nq + nv
+    if fwddyn:
+        offset = 0
+    else:
+        offset = nv
     X = [0.] * nx
     U = [0.] * nu
     if bounds:
@@ -652,10 +683,10 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
             X_LB[i] = [np.asscalar(x[i]) for x in xs_lb]
             X_UB[i] = [np.asscalar(x[i]) for x in xs_ub]
     for i in range(nu):
-        U[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else 0 for u in us]
+        U[i] = [np.asscalar(u[offset + i]) if u.shape[0] != 0 else 0 for u in us]
         if bounds:
-            U_LB[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else np.nan for u in us_lb]
-            U_UB[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else np.nan for u in us_ub]
+            U_LB[i] = [np.asscalar(u[offset + i]) if u.shape[0] != 0 else np.nan for u in us_lb]
+            U_UB[i] = [np.asscalar(u[offset + i]) if u.shape[0] != 0 else np.nan for u in us_ub]
 
     # Plotting the joint positions, velocities and torques
     plt.figure(figIndex)

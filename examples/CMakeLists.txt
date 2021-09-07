@@ -8,8 +8,10 @@ SET(${PROJECT_NAME}_EXAMPLES_PYTHON
   arm_manipulation
   arm_manipulation_id
   quadrupedal_gaits
+  quadrupedal_gaits_id
   quadrupedal_walk_ubound
   bipedal_walk
+  bipedal_walk_id
   bipedal_walk_ubound
   humanoid_manipulation
   humanoid_manipulation_ubound
