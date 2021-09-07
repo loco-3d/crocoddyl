@@ -158,26 +158,19 @@ void SolverIntro::backwardPass() {
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
     const std::size_t nu = m->get_nu();
 
-    Qxx_[t] = d->Lxx;
-    Qx_[t] = d->Lx;
-    START_PROFILER("SolverIntro::Qxx");
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
-    STOP_PROFILER("SolverIntro::Qxx");
+    Qx_[t] = d->Lx;
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    Qxx_[t] = d->Lxx;
+    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
     if (nu != 0) {
-      Qxu_[t].leftCols(nu) = d->Lxu;
-      Quu_[t].topLeftCorner(nu, nu) = d->Luu;
-      Qu_[t].head(nu) = d->Lu;
-      START_PROFILER("SolverIntro::Qxu");
-      Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
-      STOP_PROFILER("SolverIntro::Qxu");
-      START_PROFILER("SolverIntro::Quu");
       FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
-      Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
-      STOP_PROFILER("SolverIntro::Quu");
+      Qu_[t].head(nu) = d->Lu;
       Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
-
+      Quu_[t].topLeftCorner(nu, nu) = d->Luu;
+      Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      Qxu_[t].leftCols(nu) = d->Lxu;
+      Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
       if (!std::isnan(ureg_)) {
         Quu_[t].diagonal().head(nu).array() += ureg_;
       }
@@ -192,11 +185,9 @@ void SolverIntro::backwardPass() {
       Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
       Vx_[t].noalias() -= Qxu_[t].leftCols(nu) * k_[t].head(nu);
       Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
-      START_PROFILER("SolverIntro::Vxx");
-      QuuK_tmp_.noalias() = Quu_[t].topLeftCorner(nu, nu) * K_[t].topRows(nu);
+      QuuK_tmp_.topRows(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * K_[t].topRows(nu);
       Vxx_[t].noalias() -= 2 * Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
-      Vxx_[t].noalias() += K_[t].topRows(nu).transpose() * QuuK_tmp_;
-      STOP_PROFILER("SolverIntro::Vxx");
+      Vxx_[t].noalias() += K_[t].topRows(nu).transpose() * QuuK_tmp_.topRows(nu);
     }
     Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
     Vxx_[t] = Vxx_tmp_;
