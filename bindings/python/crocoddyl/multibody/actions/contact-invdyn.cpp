@@ -72,6 +72,10 @@ void exposeDifferentialActionContactInvDynamics() {
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_actuation,
                                             bp::return_value_policy<bp::return_by_value>()),
                           "actuation model")
+            .add_property("contacts",
+                          bp::make_function(&DifferentialActionModelContactInvDynamics::get_contacts,
+                                            bp::return_value_policy<bp::return_by_value>()),
+                          "multiple contact model")
             .add_property("costs",
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_costs,
                                             bp::return_value_policy<bp::return_by_value>()),
