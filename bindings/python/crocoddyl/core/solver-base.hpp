@@ -25,7 +25,6 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   using SolverAbstract::dVexp_;
   using SolverAbstract::ffeas_;
   using SolverAbstract::fs_;
-  using SolverAbstract::hfeas_;
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::steplength_;
