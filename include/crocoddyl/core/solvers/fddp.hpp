@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ namespace crocoddyl {
  * For more details about the feasibility-driven differential dynamic programming algorithm see:
  * \include mastalli-icra20.bib
  *
- * \sa `backwardPass()`, `forwardPass()`, `expectedImprovement()` and `updateExpectedImprovement()`
+ * \sa `SolverDDP()`, `backwardPass()`, `forwardPass()`, `expectedImprovement()` and `updateExpectedImprovement()`
  */
 class SolverFDDP : public SolverDDP {
  public:
@@ -53,6 +53,8 @@ class SolverFDDP : public SolverDDP {
 
   /**
    * @brief Initialize the FDDP solver
+   *
+   * @param[in] problem  shooting problem
    */
   explicit SolverFDDP(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverFDDP();

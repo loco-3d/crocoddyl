@@ -22,7 +22,7 @@ namespace crocoddyl {
  *
  * The DDP solver computes an optimal trajectory and control commands by iterates running `backwardPass()` and
  * `forwardPass()`. The backward-pass updates locally the quadratic approximation of the problem and computes descent
- * direction. If the warm-start is feasible, then it computes the gaps \f$\mathbf{\bar{f}}_s\f$ and run a modified
+ * direction. If the warm-start is feasible, then it computes the gaps \f$\mathbf{f}_s\f$ and run a modified
  * Riccati sweep:
  * \f{eqnarray*}
  *   \mathbf{Q}_{\mathbf{x}_k} &=& \mathbf{l}_{\mathbf{x}_k} + \mathbf{f}^\top_{\mathbf{x}_k} (V_{\mathbf{x}_{k+1}} +
@@ -44,7 +44,7 @@ namespace crocoddyl {
  *   \mathbf{\hat{x}}_{k+1} &=& \mathbf{f}_k(\mathbf{\hat{x}}_k,\mathbf{\hat{u}}_k).
  * \f}
  *
- * \sa `backwardPass()` and `forwardPass()`
+ * \sa SolverAbstract(), `backwardPass()` and `forwardPass()`
  */
 class SolverDDP : public SolverAbstract {
  public:
@@ -55,7 +55,7 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Initialize the DDP solver
    *
-   * @param[in] problem  Shooting problem
+   * @param[in] problem  shooting problem
    */
   explicit SolverDDP(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverDDP();
@@ -81,7 +81,7 @@ class SolverDDP : public SolverAbstract {
   /**
    * @brief Run the backward pass (Riccati sweep)
    *
-   * It assumes that the Jacobian and Hessians of the optimal control problem have been compute (i.e. `calcDiff()`).
+   * It assumes that the Jacobian and Hessians of the optimal control problem have been compute (i.e., `calcDiff()`).
    * The backward pass handles infeasible guess through a modified Riccati sweep:
    * \f{eqnarray*}
    *   \mathbf{Q}_{\mathbf{x}_k} &=& \mathbf{l}_{\mathbf{x}_k} + \mathbf{f}^\top_{\mathbf{x}_k} (V_{\mathbf{x}_{k+1}}
@@ -119,7 +119,7 @@ class SolverDDP : public SolverAbstract {
    * \f}
    * We can define different step lengths \f$\alpha\f$.
    *
-   * @param  stepLength  applied step length (\f$0\leq\alpha\leq1\f$)
+   * @param stepLength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
   virtual void forwardPass(const double stepLength);
 
@@ -304,27 +304,28 @@ class SolverDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd> dx_;
 
   // allocate data
-  std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
+  std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function \f$\mathbf{V_{xx}}\f$
   Eigen::MatrixXd Vxx_tmp_;           //!< Temporary variable for ensuring symmetry of Vxx
-  std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
-  std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
-  std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
-  std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
-  std::vector<MatrixXdRowMajor> K_;   //!< Feedback gains
-  std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
+  std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function \f$\mathbf{V_x}\f$
+  std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xx}}\f$
+  std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xu}}\f$
+  std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{uu}}\f$
+  std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian \f$\mathbf{Q_x}\f$
+  std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian \f$\mathbf{Q_u}\f$
+  std::vector<MatrixXdRowMajor> K_;   //!< Feedback gains \f$\mathbf{K}\f$
+  std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms \f$\mathbf{l}\f$
 
-  Eigen::VectorXd xnext_;                              //!< Next state
-  MatrixXdRowMajor FxTVxx_p_;                          //!< fxTVxx_p_
-  std::vector<MatrixXdRowMajor> FuTVxx_p_;             //!< fuTVxx_p_
-  Eigen::VectorXd fTVxx_p_;                            //!< fTVxx_p term
+  Eigen::VectorXd xnext_;      //!< Next state \f$\mathbf{x}^{'}\f$
+  MatrixXdRowMajor FxTVxx_p_;  //!< Store the value of \f$\mathbf{f_x}^T\mathbf{V_{xx}}^{'}\f$
+  std::vector<MatrixXdRowMajor>
+      FuTVxx_p_;             //!< Store the values of \f$\mathbf{f_u}^T\mathbf{V_{xx}}^{'}\f$ per each running node
+  Eigen::VectorXd fTVxx_p_;  //!< Store the value of \f$\mathbf{\bar{f}}^T\mathbf{V_{xx}}^{'}\f$
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;  //!< Cholesky LLT solver
-  std::vector<Eigen::VectorXd> Quuk_;                  //!< Quuk term
-  std::vector<double> alphas_;                         //!< Set of step lengths using by the line-search procedure
-  double th_grad_;     //!< Tolerance of the expected gradient used for testing the step
-  double th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  double th_stepinc_;  //!< Step-length threshold used to increase regularization
+  std::vector<Eigen::VectorXd> Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each running node
+  std::vector<double> alphas_;         //!< Set of step lengths using by the line-search procedure
+  double th_grad_;                     //!< Tolerance of the expected gradient used for testing the step
+  double th_stepdec_;                  //!< Step-length threshold used to decrease regularization
+  double th_stepinc_;                  //!< Step-length threshold used to increase regularization
 };
 
 }  // namespace crocoddyl
