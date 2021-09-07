@@ -7,7 +7,6 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-import inv_dyn
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -66,7 +65,7 @@ x0 = np.concatenate([q0, pinocchio.utils.zero(robot_model.nv)])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the solver for this OC problem, defining a logger
-solver = inv_dyn.DDP_KKT(problem)
+solver = crocoddyl.SolverIntro(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(talos_arm, 4, 4, cameraTF)

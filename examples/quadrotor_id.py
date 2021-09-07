@@ -5,7 +5,6 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-import inv_dyn
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -51,7 +50,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 # Creating the shooting problem and the solver
 T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
-solver = inv_dyn.DDP_KKT(problem)
+solver = crocoddyl.SolverIntro(problem)
 
 solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 

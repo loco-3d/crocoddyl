@@ -5,7 +5,6 @@ import crocoddyl
 import numpy as np
 import example_robot_data
 from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoublePendulum
-import inv_dyn
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -45,7 +44,7 @@ T = 100
 x0 = np.array([3.14, 0., 0., 0.])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 problem.nthreads = 1  # TODO(cmastalli): Remove after Crocoddyl supports multithreading with Python-derived models
-solver = inv_dyn.DDP_KKT(problem)
+solver = crocoddyl.SolverIntro(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
