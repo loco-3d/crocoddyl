@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,14 +29,14 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
   Data* d = static_cast<Data*>(data.get());
+
   const Scalar c = cos(x[2]);
   const Scalar s = sin(x[2]);
   d->xnext << x[0] + c * u[0] * dt_, x[1] + s * u[0] * dt_, x[2] + u[1] * dt_;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>() = cost_weights_[1] * u;
-  d->cost = Scalar(0.5) * d->r.transpose() * d->r;
+  d->cost = Scalar(0.5) * d->r.dot(d->r);
 }
 
 template <typename Scalar>
@@ -51,20 +51,16 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
   Data* d = static_cast<Data*>(data.get());
 
-  // Cost derivatives
+  const Scalar c = cos(x[2]);
+  const Scalar s = sin(x[2]);
   const Scalar w_x = cost_weights_[0] * cost_weights_[0];
   const Scalar w_u = cost_weights_[1] * cost_weights_[1];
   d->Lx = x * w_x;
   d->Lu = u * w_u;
   d->Lxx.diagonal().setConstant(w_x);
   d->Luu.diagonal().setConstant(w_u);
-
-  // Dynamic derivatives
-  const Scalar c = cos(x[2]);
-  const Scalar s = sin(x[2]);
   d->Fx(0, 2) = -s * u[0] * dt_;
   d->Fx(1, 2) = c * u[0] * dt_;
   d->Fu(0, 0) = c * dt_;
