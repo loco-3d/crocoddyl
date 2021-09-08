@@ -47,9 +47,9 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   /**
    * @brief Initialize the symplectic Euler integrator
    *
-   * @param[in] model      Differential action model
-   * @param[in] control    Control parametrization
-   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] model               Differential action model
+   * @param[in] control             Control parametrization
+   * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
@@ -61,8 +61,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
    *
-   * @param[in] model      Differential action model
-   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] model               Differential action model
+   * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
