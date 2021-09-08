@@ -41,7 +41,7 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            solver[i] = crocoddyl.SolverDDP(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
             solver[i].th_stop = 1e-7

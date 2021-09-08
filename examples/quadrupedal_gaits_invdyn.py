@@ -7,7 +7,6 @@ import crocoddyl
 import example_robot_data
 import pinocchio
 from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
-import inv_dyn
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
@@ -73,27 +72,27 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            solver[i] = inv_dyn.DDP_KKT(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
         elif key == 'trotting':
             # Creating a trotting problem
-            solver[i] = inv_dyn.DDP_KKT(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createTrottingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'pacing':
             # Creating a pacing problem
-            solver[i] = inv_dyn.DDP_KKT(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createPacingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                          value['stepKnots'], value['supportKnots']))
         elif key == 'bounding':
             # Creating a bounding problem
-            solver[i] = inv_dyn.DDP_KKT(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createBoundingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                            value['stepKnots'], value['supportKnots']))
         elif key == 'jumping':
             # Creating a jumping problem
-            solver[i] = inv_dyn.DDP_KKT(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createJumpingProblem(x0, value['jumpHeight'], value['jumpLength'], value['timeStep'],
                                           value['groundKnots'], value['flyingKnots']))
 
