@@ -84,6 +84,18 @@ class DifferentialActionModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost and defines the system acceleration as zero. This function is commonly used in the
+   * terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Differential action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the dynamics and cost functions
    *
    * It computes the partial derivatives of the dynamical system and the cost function. It assumes that `calc()` has
@@ -98,6 +110,18 @@ class DifferentialActionModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the derivatives of the cost functions with respect to the state only
+   *
+   * It updates the derivatives of the cost function with respect to the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Differential action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the differential action data
    *
    * @return the differential action data
@@ -108,22 +132,6 @@ class DifferentialActionModelAbstractTpl {
    * @brief Checks that a specific data belongs to this model
    */
   virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Differential action data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Differential action data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Computes the quasic static commands
