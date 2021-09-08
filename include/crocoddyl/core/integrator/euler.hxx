@@ -40,32 +40,35 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
   const std::size_t nv = differential_->get_state()->get_nv();
+  Data* d = static_cast<Data*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
 
-  // Static casting the data
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
-
-  // Computing the acceleration and cost
   control_->calc(d->control, 0., u);
   differential_->calc(d->differential, x, d->control->w);
-
-  // Computing the next state (discrete time)
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
-      x.tail(differential_->get_state()->get_nv());
   const VectorXs& a = d->differential->xout;
-  if (enable_integration_) {
-    d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
-    d->dx.tail(nv).noalias() = a * time_step_;
-    differential_->get_state()->integrate(x, d->dx, d->xnext);
-    d->cost = time_step_ * d->differential->cost;
-  } else {
-    d->dx.setZero();
-    d->xnext = x;
-    d->cost = d->differential->cost;
+  d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
+  d->dx.tail(nv).noalias() = a * time_step_;
+  differential_->get_state()->integrate(x, d->dx, d->xnext);
+  d->cost = time_step_ * d->differential->cost;
+  if (with_cost_residual_) {
+    d->r = d->differential->r;
   }
+}
 
-  // Updating the cost value
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                 const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  differential_->calc(d->differential, x);
+  d->dx.setZero();
+  d->xnext = x;
+  d->cost = d->differential->cost;
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
@@ -85,45 +88,46 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   }
 
   const std::size_t nv = state_->get_nv();
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
 
-  // Computing the derivatives for the time-continuous model (i.e. differential model)
   control_->calc(d->control, 0., u);
   differential_->calcDiff(d->differential, x, d->control->w);
+  const MatrixXs& da_dx = d->differential->Fx;
+  const MatrixXs& da_du = d->differential->Fu;
+  control_->multiplyByJacobian(d->control, da_du, d->da_du);
+  d->Fx.topRows(nv).noalias() = da_dx * time_step2_;
+  d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
+  d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
+  d->Fu.topRows(nv).noalias() = time_step2_ * d->da_du;
+  d->Fu.bottomRows(nv).noalias() = time_step_ * d->da_du;
+  state_->JintegrateTransport(x, d->dx, d->Fx, second);
+  state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+  state_->JintegrateTransport(x, d->dx, d->Fu, second);
 
-  if (enable_integration_) {
-    const MatrixXs& da_dx = d->differential->Fx;
-    const MatrixXs& da_du = d->differential->Fu;
-    d->Fx.topRows(nv).noalias() = da_dx * time_step2_;
-    d->Fx.bottomRows(nv).noalias() = da_dx * time_step_;
-    d->Fx.topRightCorner(nv, nv).diagonal().array() += Scalar(time_step_);
+  d->Lx.noalias() = time_step_ * d->differential->Lx;
+  control_->multiplyJacobianTransposeBy(d->control, d->differential->Lu, d->Lu);
+  d->Lu *= time_step_;
+  d->Lxx.noalias() = time_step_ * d->differential->Lxx;
+  control_->multiplyByJacobian(d->control, d->differential->Lxu, d->Lxu);
+  d->Lxu *= time_step_;
+  control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
+  control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
+  d->Luu *= time_step_;
+}
 
-    control_->multiplyByJacobian(d->control, da_du, d->da_du);
-    d->Fu.topRows(nv).noalias() = time_step2_ * d->da_du;
-    d->Fu.bottomRows(nv).noalias() = time_step_ * d->da_du;
-
-    state_->JintegrateTransport(x, d->dx, d->Fx, second);
-    state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
-    state_->JintegrateTransport(x, d->dx, d->Fu, second);
-
-    d->Lx.noalias() = time_step_ * d->differential->Lx;
-    control_->multiplyJacobianTransposeBy(d->control, d->differential->Lu, d->Lu);
-    d->Lu *= time_step_;
-    d->Lxx.noalias() = time_step_ * d->differential->Lxx;
-    control_->multiplyByJacobian(d->control, d->differential->Lxu, d->Lxu);
-    d->Lxu *= time_step_;
-    control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
-    control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
-    d->Luu *= time_step_;
-  } else {
-    state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
-    d->Fu.setZero();
-    d->Lx = d->differential->Lx;
-    d->Lu = d->differential->Lu;
-    d->Lxx = d->differential->Lxx;
-    d->Lxu = d->differential->Lxu;
-    d->Luu = d->differential->Luu;
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                     const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  Data* d = static_cast<Data*>(data.get());
+
+  differential_->calcDiff(d->differential, x);
+  state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
+  d->Lx = d->differential->Lx;
+  d->Lxx = d->differential->Lxx;
 }
 
 template <typename Scalar>

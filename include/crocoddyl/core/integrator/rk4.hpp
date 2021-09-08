@@ -78,6 +78,17 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Integrate the total cost value for nodes that depends only on the state using RK4 scheme
+   *
+   * It integrates the total cost and defines the next state as the current one. This function is commonly used in the
+   * terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the partial derivatives of the RK4 integrator
    *
    * @param[in] data  Semi-implicit RK4 data
@@ -86,6 +97,17 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the partial derivatives of the RK4 cost integrator
+   *
+   * It updates the derivatives of the cost function with respect to the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the RK4 data
@@ -125,7 +147,6 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
  protected:
   using Base::control_;             //!< Control parametrization
   using Base::differential_;        //!< Differential action model
-  using Base::enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
   using Base::time_step2_;          //!< Square of the time step used for integration
