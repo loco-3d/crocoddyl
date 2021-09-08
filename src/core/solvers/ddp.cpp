@@ -203,7 +203,7 @@ void SolverDDP::backwardPass() {
     START_PROFILER("SolverDDP::Qx");
     Qx_[t] = d->Lx;
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
-    STOP_PROFILER("SolverDDP::Qxx");
+    STOP_PROFILER("SolverDDP::Qx");
     START_PROFILER("SolverDDP::Qxx");
     Qxx_[t] = d->Lxx;
     Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
