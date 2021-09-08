@@ -40,6 +40,21 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
 }
 
 template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+                                          const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  d->xnext = x;
+  d->r.template head<3>() = cost_weights_[0] * x;
+  d->r.template tail<2>().setZero();
+  d->cost = Scalar(0.5) * d->r.template head<3>().dot(d->r.template head<3>());
+}
+
+template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
                                               const Eigen::Ref<const VectorXs>& x,
                                               const Eigen::Ref<const VectorXs>& u) {
@@ -66,6 +81,20 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionData
   d->Fu(0, 0) = c * dt_;
   d->Fu(1, 0) = s * dt_;
   d->Fu(2, 1) = dt_;
+}
+
+template <typename Scalar>
+void ActionModelUnicycleTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+                                              const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  const Scalar w_x = cost_weights_[0] * cost_weights_[0];
+  d->Lx = x * w_x;
+  d->Lxx.diagonal().setConstant(w_x);
 }
 
 template <typename Scalar>
