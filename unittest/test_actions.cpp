@@ -105,6 +105,21 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
+
+  // Computing the action derivatives
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against NumDiff
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  if (model_num_diff.get_with_gauss_approx()) {
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+  } else {
+    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
+  }
 }
 
 void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_type) {
