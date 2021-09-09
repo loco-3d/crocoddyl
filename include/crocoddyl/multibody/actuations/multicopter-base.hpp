@@ -91,7 +91,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
                         const Eigen::Ref<const VectorXs>&) {
 #endif
     // The derivatives has constant values which were set in createData.
-    assert_pretty(data->dtau_du == tau_f_, "dtau_du has wrong value");
+    assert_pretty(MatrixXs(data->dtau_du).isApprox(tau_f_), "dtau_du has wrong value");
   }
 
   boost::shared_ptr<Data> createData() {

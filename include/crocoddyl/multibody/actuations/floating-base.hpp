@@ -80,8 +80,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
                         const Eigen::Ref<const VectorXs>& /*u*/) {
 #endif
     // The derivatives has constant values which were set in createData.
-    assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
-    assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
+    assert_pretty(data->dtau_dx.isZero(), "dtau_dx has wrong value");
+    assert_pretty(MatrixXs(data->dtau_du).isApprox(dtau_du_), "dtau_du has wrong value");
   };
 
   /**

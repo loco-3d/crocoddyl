@@ -51,10 +51,15 @@ void ResidualModelControlTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataA
 }
 
 template <typename Scalar>
+#ifndef NDEBUG
+void ResidualModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                               const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+#else
 void ResidualModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>&,
                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+#endif
   // The Jacobian has constant values which were set in createData.
-  assert_pretty(MatrixXs(data->Ru).isApprox(MatrixXs::Identity(nu_)), "Ru has wrong value");
+  assert_pretty(MatrixXs(data->Ru).isApprox(MatrixXs::Identity(nu_, nu_)), "Ru has wrong value");
 }
 
 template <typename Scalar>

@@ -39,6 +39,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the control residual model

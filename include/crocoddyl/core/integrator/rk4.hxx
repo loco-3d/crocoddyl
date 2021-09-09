@@ -102,9 +102,9 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
-  assert_pretty(d->dyi_dx[0] == MatrixXs::Identity(state_->get_ndx(), state_->get_ndx()),
+  assert_pretty(MatrixXs(d->dyi_dx[0]).isApprox(MatrixXs::Identity(state_->get_ndx(), state_->get_ndx())),
                 "you have changed dyi_dx[0] values that supposed to be constant.");
-  assert_pretty(d->dki_dx[0].topRightCorner(nv, nv) == MatrixXs::Identity(nv, nv),
+  assert_pretty(MatrixXs(d->dki_dx[0]).topRightCorner(nv, nv).isApprox(MatrixXs::Identity(nv, nv)),
                 "you have changed dki_dx[0] values that supposed to be constant.");
 
   if (enable_integration_) {
