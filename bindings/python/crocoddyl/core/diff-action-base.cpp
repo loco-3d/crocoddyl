@@ -52,7 +52,7 @@ void exposeDifferentialActionAbstract() {
           "It updates the total cost when system acceleration as zero.\n"
           "This function is commonly used in the terminal nodes of an optimal control problem.\n"
           ":param data: differential action data\n"
-          ":param x: state tuple")
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
@@ -70,7 +70,7 @@ void exposeDifferentialActionAbstract() {
           "It updates the derivatives of the cost function with respect to the state only.\n"
           "This function is commonly used in the terminal nodes of an optimal control problem.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector")
+          ":param x: state point (dim. state.nx)")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData,
            &DifferentialActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the differential action data.\n\n"

@@ -86,7 +86,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * terminal nodes of an optimal control problem.
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -107,7 +107,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
