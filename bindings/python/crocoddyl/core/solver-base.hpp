@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,9 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
  public:
   using SolverAbstract::cost_;
   using SolverAbstract::d_;
+  using SolverAbstract::dV_;
+  using SolverAbstract::dVexp_;
+  using SolverAbstract::ffeas_;
   using SolverAbstract::fs_;
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
