@@ -47,13 +47,13 @@ void exposeActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &ActionModelAbstract::calc,
-                                                                                    bp::args("self", "data", "x"),
-           "Compute the total cost value for nodes that depends only on the state.\n\n"
-           "It updates the total cost when the next state remains the same to current one.\n"
-           "This function is commonly used in the terminal nodes of an optimal control problem.\n"
-           ":param data: action data\n"
-           ":param x: time-discrete state vector")
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "It updates the total cost when the next state remains the same to current one.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector")
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
