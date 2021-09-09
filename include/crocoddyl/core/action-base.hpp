@@ -81,8 +81,8 @@ class ActionModelAbstractTpl {
    * @brief Compute the next state and cost value
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
@@ -95,8 +95,8 @@ class ActionModelAbstractTpl {
    * and cost function).
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
@@ -117,7 +117,7 @@ class ActionModelAbstractTpl {
    * @copybrief calc()
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -125,7 +125,7 @@ class ActionModelAbstractTpl {
    * @copybrief calcDiff()
    *
    * @param[in] data  Action data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 

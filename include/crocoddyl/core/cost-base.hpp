@@ -163,7 +163,7 @@ class CostModelAbstractTpl {
    * @copybrief calc()
    *
    * @param[in] data  Cost data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -171,7 +171,7 @@ class CostModelAbstractTpl {
    * @copybrief calcDiff()
    *
    * @param[in] data  Cost data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 

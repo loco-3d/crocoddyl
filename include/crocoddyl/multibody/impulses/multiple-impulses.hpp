@@ -111,7 +111,7 @@ class ImpulseModelMultipleTpl {
    * @brief Compute the total contact Jacobian and contact acceleration
    *
    * @param[in] data  Multi-impulse data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @@param[in] x    State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -119,7 +119,7 @@ class ImpulseModelMultipleTpl {
    * @brief Compute the derivatives of the contact holonomic constraint
    *
    * @param[in] data  Multi-impulse data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @@param[in] x    State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 

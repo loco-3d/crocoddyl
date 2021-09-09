@@ -74,8 +74,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * @brief Integrate the differential action model using symplectic Euler scheme
    *
    * @param[in] data  Symplectic Euler data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -84,8 +84,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * @brief Compute the partial derivatives of the symplectic Euler integrator
    *
    * @param[in] data  Symplectic Euler data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);

@@ -114,7 +114,7 @@ class ResidualModelAbstractTpl {
    * @copybrief calc()
    *
    * @param[in] data  Residual data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -122,7 +122,7 @@ class ResidualModelAbstractTpl {
    * @copybrief calcDiff()
    *
    * @param[in] data  Residual data
-   * @param[in] x     State point
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
