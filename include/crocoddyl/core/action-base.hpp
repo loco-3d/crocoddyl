@@ -90,8 +90,8 @@ class ActionModelAbstractTpl {
   /**
    * @brief Compute the total cost value for nodes that depends only on the state
    *
-   * It updates the total cost and defines the next state as the current one. This function is commonly used in the
-   * terminal nodes of an optimal control problem.
+   * It updates the total cost when the next state remains the same to current one. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

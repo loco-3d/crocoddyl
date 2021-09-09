@@ -47,7 +47,12 @@ void exposeDifferentialActionAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
+          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "It updates the total cost when system acceleration as zero.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: differential action data\n"
+          ":param x: state tuple")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
@@ -60,7 +65,12 @@ void exposeDifferentialActionAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the derivatives of the cost functions with respect to the state only.\n\n"
+          "It updates the derivatives of the cost function with respect to the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: action data\n"
+          ":param x: time-discrete state vector")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData,
            &DifferentialActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the differential action data.\n\n"

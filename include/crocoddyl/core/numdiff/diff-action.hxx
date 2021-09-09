@@ -114,7 +114,6 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   }
 }
 
-
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const VectorXs>& x) {
@@ -147,7 +146,6 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     data->Lxx = d->Rx.transpose() * d->Rx;
   }
 }
-
 
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > DifferentialActionModelNumDiffTpl<Scalar>::createData() {
