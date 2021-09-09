@@ -50,8 +50,8 @@ void ResidualModelControlTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataA
   data->r = u - uref_;
 }
 
-template <typename Scalar>
 #ifndef NDEBUG
+template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
 #else
