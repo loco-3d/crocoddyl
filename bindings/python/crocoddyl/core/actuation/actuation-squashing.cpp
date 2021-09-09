@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,15 +28,15 @@ void exposeActuationSquashing() {
            "Compute the actuation signal from the squashing input u.\n\n"
            "It describes the time-continuos evolution of the actuation model.\n"
            ":param data: actuation data\n"
-           ":param x: state vector\n"
+           ":param x: state point (dim. state.nx)\n"
            ":param u: squashing function input")
       .def("calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time. It assumes that calc has been run first.\n"
            ":param data: actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input.")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu).")
       .def("createData", &ActuationSquashingModel::createData, bp::args("self"),
            "Create the actuation squashing data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

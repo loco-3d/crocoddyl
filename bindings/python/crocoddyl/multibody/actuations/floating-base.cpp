@@ -27,16 +27,16 @@ void exposeActuationFloatingBase() {
            "Compute the floating-base actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the floating-base actuation model.\n\n"
            "It computes the partial derivatives of the floating-base actuation. It assumes that calc\n"
            "has been run first. The reason is that the derivatives are constant and\n"
            "defined in createData. The derivatives are constant, so we don't write again these values.\n"
            ":param data: floating-base actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("createData", &ActuationModelFloatingBase::createData, bp::args("self"),
            "Create the floating-base actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

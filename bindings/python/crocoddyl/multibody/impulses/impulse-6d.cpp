@@ -30,14 +30,14 @@ void exposeImpulse6D() {
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
-           ":param x: state vector")
+           ":param x: state point (dim. state.nx)")
       .def("calcDiff", &ImpulseModel6D::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the 6D impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
-           ":param x: state vector\n")
+           ":param x: state point (dim. state.nx)")
       .def("updateForce", &ImpulseModel6D::updateForce, bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: cost data\n"

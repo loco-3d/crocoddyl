@@ -36,8 +36,8 @@ void exposeResidualContactCoPPosition() {
           "calc", &ResidualModelContactCoPPosition::calc, bp::args("self", "data", "x", "u"),
           "Compute the contact CoP position residual.\n\n"
           ":param data: residual data\n"
-          ":param x: state point\n"
-          ":param u: control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactCoPPosition::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -45,8 +45,8 @@ void exposeResidualContactCoPPosition() {
           "Compute the derivatives of the contact CoP position residual.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: state point\n"
-          ":param u: control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)\n")
       .def("createData", &ResidualModelContactCoPPosition::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact CoP position residual data.\n\n"

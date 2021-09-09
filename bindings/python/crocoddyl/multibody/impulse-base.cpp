@@ -30,12 +30,12 @@ void exposeImpulseAbstract() {
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
-           ":param x: state vector")
+           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ImpulseModelAbstract_wrap::calcDiff), bp::args("self", "data", "x"),
            "Compute the derivatives of impulse Jacobian\n"
            "It assumes that calc has been run first.\n"
            ":param data: impulse data\n"
-           ":param x: state vector\n")
+           ":param x: state point (dim. state.nx)")
       .def("updateForce", pure_virtual(&ImpulseModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: impulse data\n"

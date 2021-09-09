@@ -81,7 +81,7 @@ void exposeStateMultibody() {
            "Parallel transport from integrate(x, dx) to x.\n\n"
            "This function performs the parallel transportation of an input matrix whose columns\n"
            "are expressed in the tangent space at integrate(x, dx) to the tangent space at x point\n"
-           ":param x: state point (dim state.nx).\n"
+           ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")

@@ -30,15 +30,15 @@ void exposeActuationAbstract() {
            "Compute the actuation signal from the control input u.\n\n"
            "It describes the time-continuos evolution of the actuation model.\n"
            ":param data: actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
            "describes in continouos time.\n"
            ":param data: actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("createData", &ActuationModelAbstract_wrap::createData, &ActuationModelAbstract_wrap::default_createData,
            bp::args("self"),
            "Create the actuation data.\n\n"

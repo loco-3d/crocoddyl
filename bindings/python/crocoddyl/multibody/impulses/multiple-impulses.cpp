@@ -74,14 +74,14 @@ void exposeImpulseMultiple() {
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            ":param data: impulse data\n"
-           ":param x: state vector")
+           ":param x: state point (dim. state.nx)")
       .def("calcDiff", &ImpulseModelMultiple::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the impulse holonomic constraint.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
            "of the impulse frame placement.\n"
            "It assumes that calc has been run first.\n"
            ":param data: impulse data\n"
-           ":param x: state vector\n")
+           ":param x: state point (dim. state.nx)")
       .def("updateVelocity", &ImpulseModelMultiple::updateVelocity, bp::args("self", "data", "vnext"),
            "Update the system velocity after impulse.\n\n"
            ":param data: impulse data\n"

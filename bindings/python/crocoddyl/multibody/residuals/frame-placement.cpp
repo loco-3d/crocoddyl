@@ -40,8 +40,8 @@ void exposeResidualFramePlacement() {
           "calc", &ResidualModelFramePlacement::calc, bp::args("self", "data", "x", "u"),
           "Compute the frame placement residual.\n\n"
           ":param data: residual data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ResidualModelFramePlacement::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -52,8 +52,8 @@ void exposeResidualFramePlacement() {
           "Compute the Jacobians of the frame placement residual.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ResidualModelFramePlacement::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                                  const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))

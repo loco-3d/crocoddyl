@@ -23,16 +23,16 @@ void exposeActuationFull() {
       .def("calc", &ActuationModelFull::calc, bp::args("self", "data", "x", "u"),
            "Compute the actuation signal from the control input u.\n\n"
            ":param data: full actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("calcDiff", &ActuationModelFull::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the full actuation. It assumes that calc\n"
            "has been run first. The reason is that the derivatives are constant and\n"
            "defined in createData. The Hessian is constant, so we don't write again this value.\n"
            ":param data: full actuation data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def("createData", &ActuationModelFull::createData, bp::args("self"),
            "Create the full actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

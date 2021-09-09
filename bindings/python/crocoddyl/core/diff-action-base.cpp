@@ -43,8 +43,8 @@ void exposeDifferentialActionAbstract() {
       .def("calc", pure_virtual(&DifferentialActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the system acceleration and cost value.\n\n"
            ":param data: differential action data\n"
-           ":param x: state tuple\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -56,8 +56,8 @@ void exposeDifferentialActionAbstract() {
            "This function builds a quadratic approximation of the\n"
            "time-continuous action model (i.e. dynamical system and cost function).\n"
            ":param data: differential action data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))

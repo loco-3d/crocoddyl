@@ -44,8 +44,8 @@ void exposeIntegratedActionAbstract() {
            "in which we obtain the next state. Additionally it computes the\n"
            "cost value associated to this discrete state and control pair.\n"
            ":param data: integrated-action data\n"
-           ":param x: time-discrete state vector\n"
-           ":param u: time-discrete control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &IntegratedActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -56,8 +56,8 @@ void exposeIntegratedActionAbstract() {
            "This function builds a quadratic approximation of the\n"
            "action model (i.e. linear dynamics and quadratic cost).\n"
            ":param data: integrated-action data\n"
-           ":param x: time-discrete state vector\n"
-           ":param u: time-discrete control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelAbstract::calcDiff, bp::args("self", "data", "x"))

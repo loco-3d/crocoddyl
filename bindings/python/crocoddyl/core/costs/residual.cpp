@@ -35,8 +35,8 @@ void exposeCostResidual() {
           "calc", &CostModelResidual::calc, bp::args("self", "data", "x", "u"),
           "Compute the residual cost.\n\n"
           ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
                                                                                   bp::args("self", "data", "x"))
@@ -47,8 +47,8 @@ void exposeCostResidual() {
           "Compute the derivatives of the residual cost.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
