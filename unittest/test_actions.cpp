@@ -80,7 +80,7 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
@@ -94,12 +94,12 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(NUMDIFF_MODIFIER * tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(NUMDIFF_MODIFIER * tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(NUMDIFF_MODIFIER * tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(NUMDIFF_MODIFIER * tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(NUMDIFF_MODIFIER * tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(NUMDIFF_MODIFIER * tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
@@ -107,6 +107,7 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   }
 
   // Computing the action derivatives
+  x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
 
@@ -114,9 +115,9 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against NumDiff
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(NUMDIFF_MODIFIER * tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(NUMDIFF_MODIFIER * tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
