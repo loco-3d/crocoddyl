@@ -23,51 +23,84 @@ ResidualModelNumDiffTpl<Scalar>::~ResidualModelNumDiffTpl() {}
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
-  model_->calc(data_nd->data_0, x, u);
-  data_nd->r = data_nd->data_0->r;
+  Data* d = static_cast<Data*>(data.get());
+  model_->calc(d->data_0, x, u);
+  d->r = d->data_0->r;
+}
+
+template <typename Scalar>
+void ResidualModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                           const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
+  model_->calc(d->data_0, x);
+  d->r = d->data_0->r;
 }
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>& x,
                                                const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
 
-  const VectorXs& r0 = data_nd->r;
+  const VectorXs& r0 = d->r;
   assertStableStateFD(x);
 
   // Computing the d residual(x,u) / dx
-  data_nd->dx.setZero();
+  d->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    data_nd->dx(ix) = disturbance_;
-    model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp, u);
+      reevals_[i](d->xp, u);
     }
     // residual(x+dx, u)
-    model_->calc(data_nd->data_x[ix], data_nd->xp, u);
+    model_->calc(d->data_x[ix], d->xp, u);
     // Rx
-    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - r0) / disturbance_;
-    data_nd->dx(ix) = 0.0;
+    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 
   // Computing the d residual(x,u) / du
-  data_nd->du.setZero();
+  d->du.setZero();
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
-    data_nd->du(iu) = disturbance_;
-    data_nd->up = u + data_nd->du;
+    d->du(iu) = disturbance_;
+    d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](x, data_nd->up);
+      reevals_[i](x, d->up);
     }
     // residual(x, u+du)
-    model_->calc(data_nd->data_u[iu], x, data_nd->up);
+    model_->calc(d->data_u[iu], x, d->up);
     // Ru
-    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - r0) / disturbance_;
-    data_nd->du(iu) = 0.0;
+    d->Ru.col(iu) = (d->data_u[iu]->r - r0) / disturbance_;
+    d->du(iu) = 0.0;
+  }
+}
+
+template <typename Scalar>
+void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                               const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
+
+  const VectorXs& r0 = d->r;
+  assertStableStateFD(x);
+
+  // Computing the d residual(x,u) / dx
+  d->dx.setZero();
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    // call the update function
+    for (size_t i = 0; i < reevals_.size(); ++i) {
+      reevals_[i](d->xp, unone_);
+    }
+    // residual(x+dx, u)
+    model_->calc(d->data_x[ix], d->xp);
+    // Rx
+    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 }
 

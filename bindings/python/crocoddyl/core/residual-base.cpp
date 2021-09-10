@@ -19,10 +19,10 @@ void exposeResidualAbstract() {
   bp::class_<ResidualModelAbstract_wrap, boost::noncopyable>(
       "ResidualModelAbstract",
       "Abstract class for residual models.\n\n"
-      "In crocoddyl, a residual model defines a vector function r(x,u) in R^nr.\n"
-      "where nr describes its dimension in the Euclidean space.\n"
-      "For each residual model, we need to provide ways of computing the residual vector and its Jacobians.\n"
-      "These computations are mainly carry on inside calc() and calcDiff(), respectively.",
+      "A residual model defines a vector function r(x,u) in R^nr, where nr describes its dimension in the\n"
+      "the Euclidean space. For each residual model, we need to provide ways of computing the residual\n"
+      "vector and its Jacobians. These computations are mainly carry on inside calc() and calcDiff(),\n"
+      "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, bp::optional<bool, bool, bool> >(
           bp::args("self", "state", "nr", "nu", "q_dependent", "v_dependent", "u_dependent"),
           "Initialize the residual model.\n\n"
@@ -47,7 +47,12 @@ void exposeResidualAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
+          "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the residual vector for nodes that depends only on the state.\n\n"
+          "It updates the residual vector based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: residual data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ResidualModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the residual function.\n\n"
            ":param data: residual data\n"
@@ -55,7 +60,12 @@ void exposeResidualAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the Jacobian of the residual functions with respect to the state only.\n\n"
+          "It updates the Jacobian of the residual function based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: residual data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ResidualModelAbstract_wrap::createData, &ResidualModelAbstract_wrap::default_createData,
            bp::args("self"),
            "Create the residual data.\n\n"

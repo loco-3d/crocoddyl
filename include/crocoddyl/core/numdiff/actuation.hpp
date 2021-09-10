@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,6 +17,16 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of an actuation model.
+ *
+ * It computes Jacobian of the residual model via numerical differentiation, i.e.,
+ * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{x}}\f$ and
+ * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{u}}\f$ which denote the Jacobians of the actuation function
+ * \f$\boldsymbol{\tau}(\mathbf{x},\mathbf{u})\f$.
+ *
+ * \sa `ActuationModelAbstractTpl()`, `calcDiff()`
+ */
 template <typename _Scalar>
 class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
@@ -29,14 +39,14 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Construct a new ActuationModelNumDiff object
+   * @brief Initialize the numdiff residual model
    *
-   * @param model
+   * @param model  Actuation model that we want to apply the numerical differentiation
    */
   explicit ActuationModelNumDiffTpl(boost::shared_ptr<Base> model);
 
   /**
-   * @brief Destroy the ActuationModelNumDiff object
+   * @brief Destroy the numdiff actuation model
    */
   virtual ~ActuationModelNumDiffTpl();
 
@@ -47,50 +57,46 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&
+   * x)
+   */
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a Data object from the given model.
-   *
-   * @return boost::shared_ptr<ActuationDataAbstract>
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::createData()
    */
   virtual boost::shared_ptr<ActuationDataAbstract> createData();
 
   /**
-   * @brief Get the model_ object
-   *
-   * @return Base&
+   * @brief Return the original actuation model
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return Scalar
+   * @brief Return the disturbance value used by the numdiff routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance value used by the numdiff routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  /**
-   * @brief This is the model to compute the finite differentiation from
-   */
-  boost::shared_ptr<Base> model_;
-
-  /**
-   * @brief This is the numerical disturbance value used during the numerical
-   * differentiation
-   */
-  Scalar disturbance_;
+  boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the numerical differentiation
+  Scalar disturbance_;             //!< Disturbance used in the numerical differentiation routine
 
  protected:
   using Base::nu_;
@@ -106,7 +112,7 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
   typedef ActuationDataAbstractTpl<Scalar> Base;
 
   /**
-   * @brief Construct a new ActuationDataNumDiff object
+   * @brief Initialize the numdiff actuation data
    *
    * @tparam Model is the type of the ActuationModel.
    * @param model is the object to compute the numerical differentiation from.

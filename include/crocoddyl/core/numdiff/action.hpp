@@ -131,19 +131,9 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
 
-  /**
-   * @brief This is the model to compute the finite differentiation from
-   */
-
-  boost::shared_ptr<Base> model_;
-
-  /**
-   * @brief This is the numerical disturbance value used during the numerical
-   * differenciations
-   */
-  Scalar disturbance_;
-
-  bool with_gauss_approx_;
+  boost::shared_ptr<Base> model_;  //!< Action model hat we want to apply the numerical differentiation
+  Scalar disturbance_;             //!< Disturbance used in the numerical differentiation routine
+  bool with_gauss_approx_;         //!< True if we want to use the Gauss approximation for computing the Hessians
 };
 
 template <typename _Scalar>
@@ -157,7 +147,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
 
   /**
-   * @brief Construct a new ActionDataNumDiff object
+   * @brief Initialize the numdiff action data
    *
    * @tparam Model is the type of the ActionModel.
    * @param model is the object to compute the numerical differentiation from.

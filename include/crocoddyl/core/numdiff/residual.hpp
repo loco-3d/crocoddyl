@@ -15,6 +15,15 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of a residual model.
+ *
+ * It computes Jacobian of the residual model via numerical differentiation, i.e., \f$\mathbf{R_x}\f$
+ * and \f$\mathbf{R_u}\f$ which denote the Jacobians of the residual function
+ * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$.
+ *
+ * \sa `ResidualModelAbstractTpl()`, `calcDiff()`
+ */
 template <typename _Scalar>
 class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
@@ -33,7 +42,7 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff residual model
    *
-   * @param model
+   * @param model  Residual model that we want to apply the numerical differentiation
    */
   explicit ResidualModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
@@ -43,22 +52,31 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   virtual ~ResidualModelNumDiffTpl();
 
   /**
-   * @brief @copydoc ResidualModelAbstract::calc()
+   * @brief @copydoc Base::calc()
    */
   virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ResidualModelAbstract::calcDiff()
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&
+   * x)
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a data object
-   *
-   * @param data  Data collector used by the original model
-   * @return the residual data
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::createData()
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
@@ -90,15 +108,6 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
-  /** @brief Model of the residual. */
-  boost::shared_ptr<Base> model_;
-
-  /** @brief Numerical disturbance used in the numerical differentiation. */
-  Scalar disturbance_;
-
-  /** @brief Functions that needs execution before calc or calcDiff. */
-  std::vector<ReevaluationFunction> reevals_;
-
  private:
   /**
    * @brief Make sure that when we finite difference the residual model, the user
@@ -112,6 +121,10 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
+
+  boost::shared_ptr<Base> model_;              //!< Residual model hat we want to apply the numerical differentiation
+  Scalar disturbance_;                         //!< Disturbance used in the numerical differentiation routine
+  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>
@@ -125,6 +138,12 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
+  /**
+   * @brief Initialize the numdiff residual data
+   *
+   * @tparam Model is the type of the ActionModel.
+   * @param model is the object to compute the numerical differentiation from.
+   */
   template <template <typename Scalar> class Model>
   explicit ResidualDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
       : Base(model, shared_data),

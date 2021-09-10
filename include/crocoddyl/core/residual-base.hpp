@@ -21,8 +21,8 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for residual models
  *
- * In Crocoddyl, a residual model defines a vector function \f$\mathbf{r}(\mathbf{x}, \mathbf{u})\mathbb{R}^{nr}\f$
- * where `nr` describes its dimension in the Euclidean space. This function depends on the state point
+ * A residual model defines a vector function \f$\mathbf{r}(\mathbf{x}, \mathbf{u})\mathbb{R}^{nr}\f$ where `nr`
+ * describes its dimension in the Euclidean space. This function depends on the state point
  * \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold described with a `nq`-tuple, its velocity
  * \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to the tangent space with `nv` dimension, and the
  * control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$. The residual function can used across cost and constraint models.
@@ -87,6 +87,17 @@ class ResidualModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the residual vector for nodes that depends only on the state
+   *
+   * It updates the residual vector based on the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the Jacobian of the residual vector
    *
    * It computes the Jacobian the residual function. It assumes that `calc()` has been run first.
@@ -99,6 +110,17 @@ class ResidualModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the Jacobian of the residual functions with respect to the state only
+   *
+   * It updates the Jacobian of the residual function based on the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the residual data
    *
    * The default data contains objects to store the values of the residual vector and their Jacobians.
@@ -109,22 +131,6 @@ class ResidualModelAbstractTpl {
    * @return the residual data
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Residual data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Residual data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state

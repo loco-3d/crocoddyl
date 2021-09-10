@@ -72,6 +72,16 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
   BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
+
+  // Computing the actuation derivatives
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against numdiff
+  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//
