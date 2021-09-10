@@ -96,8 +96,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     // constraint
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    data->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    data->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
     d->dx(ix) = 0.0;
   }
 
@@ -114,8 +114,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     data->Lu(iu) = (c - c0) / disturbance_;
     d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / disturbance_;
     // constraint
-    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
-    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
+    data->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
+    data->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
     d->du(iu) = 0.0;
   }
 
@@ -157,11 +157,10 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
-    d->dx(ix) = 0.0;
     // constraint
-    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
-    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
-    d->du(iu) = 0.0;
+    data->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    data->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 
   if (with_gauss_approx_) {

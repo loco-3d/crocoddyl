@@ -180,6 +180,12 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
+  using Base::g;
+  using Base::Gu;
+  using Base::Gx;
+  using Base::h;
+  using Base::Hu;
+  using Base::Hx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
