@@ -83,6 +83,8 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
     data->tau.noalias() = tau_f_ * u;
   }
 
+  virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&) { data->tau.setZero(); }
+
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>&) {

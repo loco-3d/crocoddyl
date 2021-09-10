@@ -38,20 +38,32 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) {
-    boost::shared_ptr<Data> data_squashing = boost::static_pointer_cast<Data>(data);
+    Data* d = static_cast<Data*>(data.get());
 
-    squashing_->calc(data_squashing->squashing, u);
-    actuation_->calc(data_squashing->actuation, x, data_squashing->squashing->u);
-    data->tau = data_squashing->actuation->tau;
+    squashing_->calc(d->squashing, u);
+    actuation_->calc(d->actuation, x, d->squashing->u);
+    data->tau = d->actuation->tau;
+  };
+
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+    data->tau.setZero();
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) {
-    boost::shared_ptr<Data> data_squashing = boost::static_pointer_cast<Data>(data);
+    Data* d = static_cast<Data*>(data.get());
 
-    squashing_->calcDiff(data_squashing->squashing, u);
-    actuation_->calcDiff(data_squashing->actuation, x, data_squashing->squashing->u);
-    data->dtau_du.noalias() = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
+    squashing_->calcDiff(d->squashing, u);
+    actuation_->calcDiff(d->actuation, x, d->squashing->u);
+    data->dtau_du.noalias() = d->actuation->dtau_du * d->squashing->du_ds;
+  };
+
+#ifndef NDEBUG
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+#else
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>&, const Eigen::Ref<const VectorXs>&) {
+#endif
+    assert_pretty(MatrixXs(data->dtau_du).isZero(), "dtau_du has wrong value");
   };
 
   boost::shared_ptr<ActuationDataAbstract> createData() {

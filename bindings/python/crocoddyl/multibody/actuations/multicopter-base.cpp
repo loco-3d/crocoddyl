@@ -29,11 +29,17 @@ void exposeActuationModelMultiCopterBase() {
           ":param state: state of multibody system, \n"
           ":param nrotors: number of rotors of the flying base, \n"
           ":param tau_f: matrix that maps rotors thrust to generalized torque of the flying base."))
-      .def("calc", &ActuationModelMultiCopterBase::calc, bp::args("self", "data", "x", "u"),
-           "Compute the actuation signal from the control input u.\n\n"
-           ":param data: multicopter-base actuation data\n"
-           ":param x: state point (dim. state.nx)\n"
-           ":param u: control input (dim. nu)")
+      .def<void (ActuationModelMultiCopterBase::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                                   const Eigen::Ref<const Eigen::VectorXd>&,
+                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActuationModelMultiCopterBase::calc, bp::args("self", "data", "x", "u"),
+          "Compute the actuation signal from the control input u.\n\n"
+          ":param data: multicopter-base actuation data\n"
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
+      .def<void (ActuationModelMultiCopterBase::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActuationModelMultiCopterBase::calc, bp::args("self", "data", "x"))
       .def("calcDiff", &ActuationModelMultiCopterBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
            "It computes the partial derivatives of the full actuation. It assumes that calc\n"
