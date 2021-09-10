@@ -343,8 +343,9 @@ class SolverAbstract {
   double th_gaptol_;      //!< Threshold limit to check non-zero gaps
   double ffeas_;          //!< Feasibility of the dynamic constraints
   double hfeas_;          //!< Feasibility of the equality contraints
-  bool inffeas_;  //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
-                  //!< the l-1 norm
+  bool inffeas_;     //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
+                     //!< the l-1 norm
+  double tmp_feas_;  //!< Temporal variables used for computed the feasibility
 };
 
 /**
