@@ -23,77 +23,129 @@ CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
-  data_nd->data_0->cost = 0.0;
-  model_->calc(data_nd->data_0, x, u);
-  data_nd->cost = data_nd->data_0->cost;
-  data_nd->residual->r = data_nd->data_0->residual->r;
+  Data* d = static_cast<Data*>(data.get());
+  d->data_0->cost = 0.0;
+  model_->calc(d->data_0, x, u);
+  d->cost = d->data_0->cost;
+  d->residual->r = d->data_0->residual->r;
+}
+
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
+                                       const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
+  d->data_0->cost = 0.0;
+  model_->calc(d->data_0, x);
+  d->cost = d->data_0->cost;
+  d->residual->r = d->data_0->residual->r;
 }
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                            const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
 
-  const Scalar c0 = data_nd->cost;
-  const VectorXs& r0 = data_nd->residual->r;
+  const Scalar c0 = d->cost;
+  const VectorXs& r0 = d->residual->r;
   if (get_with_gauss_approx()) {
-    model_->get_activation()->calc(data_nd->data_0->activation, r0);
-    model_->get_activation()->calcDiff(data_nd->data_0->activation, r0);
+    model_->get_activation()->calc(d->data_0->activation, r0);
+    model_->get_activation()->calcDiff(d->data_0->activation, r0);
   }
   assertStableStateFD(x);
 
   // Computing the d cost(x,u) / dx
-  data_nd->dx.setZero();
+  d->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     // x + dx
-    data_nd->dx(ix) = disturbance_;
-    model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp, u);
+      reevals_[i](d->xp, u);
     }
     // cost(x+dx, u)
-    model_->calc(data_nd->data_x[ix], data_nd->xp, u);
+    model_->calc(d->data_x[ix], d->xp, u);
     // Lx
-    data_nd->Lx(ix) = (data_nd->data_x[ix]->cost - c0) / disturbance_;
+    d->Lx(ix) = (d->data_x[ix]->cost - c0) / disturbance_;
     // Check if we need to/can compute the Gauss approximation of the Hessian.
     if (get_with_gauss_approx()) {
-      data_nd->residual->Rx.col(ix) = (data_nd->data_x[ix]->residual->r - r0) / disturbance_;
+      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / disturbance_;
     }
-    data_nd->dx(ix) = 0.0;
+    d->dx(ix) = 0.0;
   }
 
   // Computing the d cost(x,u) / du
-  data_nd->du.setZero();
+  d->du.setZero();
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
-    data_nd->du(iu) = disturbance_;
-    data_nd->up = u + data_nd->du;
+    d->du(iu) = disturbance_;
+    d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](x, data_nd->up);
+      reevals_[i](x, d->up);
     }
     // cost(x, u+du)
-    model_->calc(data_nd->data_u[iu], x, data_nd->up);
+    model_->calc(d->data_u[iu], x, d->up);
     // Lu
-    data_nd->Lu(iu) = (data_nd->data_u[iu]->cost - c0) / disturbance_;
+    d->Lu(iu) = (d->data_u[iu]->cost - c0) / disturbance_;
     // Check if we need to/can compute the Gauss approximation of the Hessian.
     if (get_with_gauss_approx()) {
-      data_nd->residual->Ru.col(iu) = (data_nd->data_u[iu]->residual->r - r0) / disturbance_;
+      d->residual->Ru.col(iu) = (d->data_u[iu]->residual->r - r0) / disturbance_;
     }
-    data_nd->du(iu) = 0.0;
+    d->du(iu) = 0.0;
   }
 
   if (get_with_gauss_approx()) {
-    const MatrixXs& Arr = data_nd->data_0->activation->Arr;
-    data_nd->Lxx = data_nd->residual->Rx.transpose() * Arr * data_nd->residual->Rx;
-    data_nd->Lxu = data_nd->residual->Rx.transpose() * Arr * data_nd->residual->Ru;
-    data_nd->Luu = data_nd->residual->Ru.transpose() * Arr * data_nd->residual->Ru;
+    const MatrixXs& Arr = d->data_0->activation->Arr;
+    d->Lxx = d->residual->Rx.transpose() * Arr * d->residual->Rx;
+    d->Lxu = d->residual->Rx.transpose() * Arr * d->residual->Ru;
+    d->Luu = d->residual->Ru.transpose() * Arr * d->residual->Ru;
   } else {
-    data_nd->Lxx.fill(0.0);
-    data_nd->Lxu.fill(0.0);
-    data_nd->Luu.fill(0.0);
+    d->Lxx.fill(0.0);
+    d->Lxu.fill(0.0);
+    d->Luu.fill(0.0);
+  }
+}
+
+template <typename Scalar>
+void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                                           const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
+
+  const Scalar c0 = d->cost;
+  const VectorXs& r0 = d->residual->r;
+  if (get_with_gauss_approx()) {
+    model_->get_activation()->calc(d->data_0->activation, r0);
+    model_->get_activation()->calcDiff(d->data_0->activation, r0);
+  }
+  assertStableStateFD(x);
+
+  // Computing the d cost(x,u) / dx
+  d->dx.setZero();
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+    // x + dx
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    // call the update function on the pinocchio data
+    for (size_t i = 0; i < reevals_.size(); ++i) {
+      reevals_[i](d->xp, unone_);
+    }
+    // cost(x+dx, u)
+    model_->calc(d->data_x[ix], d->xp);
+    // Lx
+    d->Lx(ix) = (d->data_x[ix]->cost - c0) / disturbance_;
+    // Check if we need to/can compute the Gauss approximation of the Hessian.
+    if (get_with_gauss_approx()) {
+      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / disturbance_;
+    }
+    d->dx(ix) = 0.0;
+  }
+
+  if (get_with_gauss_approx()) {
+    const MatrixXs& Arr = d->data_0->activation->Arr;
+    d->Lxx = d->residual->Rx.transpose() * Arr * d->residual->Rx;
+  } else {
+    d->Lxx.fill(0.0);
   }
 }
 

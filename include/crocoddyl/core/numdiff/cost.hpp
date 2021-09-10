@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, New York University,
 //                          Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,6 +16,15 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of a cost model.
+ *
+ * It computes Jacobian and Hessian of the cost model via numerical differentiation, i.e., \f$\mathbf{\ell_x}\f$,
+ * \f$\mathbf{\ell_u}\f$, \f$\mathbf{\ell_{xx}}\f$, \f$\mathbf{\ell_{uu}}\f$, and \f$\mathbf{\ell_{xu}}\f$ which denote
+ * the Jacobians and Hessians of the cost function, respectively.
+ *
+ * \sa `CostModelAbstractTpl()`, `calcDiff()`
+ */
 template <typename _Scalar>
 class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
  public:
@@ -34,7 +43,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff cost model
    *
-   * @param model
+   * @param model  Cost model that we want to apply the numerical differentiation
    */
   explicit CostModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
@@ -44,22 +53,33 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   virtual ~CostModelNumDiffTpl();
 
   /**
-   * @brief @copydoc CostModelAbstract::calc()
+   * @brief @copydoc Base::calc()
    */
   virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc CostModelAbstract::calcDiff()
+   * @brief @copydoc Base::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a Data object
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>&
+   * x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Create a numdiff cost data
    *
    * @param data  Data collector used by the original model
-   * @return the cost data
+   * @return the numdiff cost data
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
 
@@ -100,15 +120,6 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
-  /** @brief Model of the cost. */
-  boost::shared_ptr<Base> model_;
-
-  /** @brief Numerical disturbance used in the numerical differentiation. */
-  Scalar disturbance_;
-
-  /** @brief Functions that needs execution before calc or calcDiff. */
-  std::vector<ReevaluationFunction> reevals_;
-
  private:
   /**
    * @brief Make sure that when we finite difference the Cost Model, the user
@@ -122,6 +133,10 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
+
+  boost::shared_ptr<Base> model_;              //!< Cost model hat we want to apply the numerical differentiation
+  Scalar disturbance_;                         //!< Disturbance used in the numerical differentiation routine
+  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>
@@ -135,6 +150,12 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
+  /**
+   * @brief Initialize the numdiff cost data
+   *
+   * @tparam Model is the type of the `CostModelAbstractTpl`.
+   * @param model is the object to compute the numerical differentiation from.
+   */
   template <template <typename Scalar> class Model>
   explicit CostDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
       : Base(model, shared_data),
