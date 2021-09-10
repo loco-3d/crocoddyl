@@ -73,14 +73,14 @@ void exposeContactMultiple() {
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
-           ":param x: state vector")
+           ":param x: state point (dim. state.nx)")
       .def("calcDiff", &ContactModelMultiple::calcDiff, bp::args("self", "data", "x"),
            "Compute the derivatives of the contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
            "It assumes that calc has been run first.\n"
            ":param data: contact data\n"
-           ":param x: state vector\n")
+           ":param x: state point (dim. state.nx)")
       .def("updateAcceleration", &ContactModelMultiple::updateAcceleration, bp::args("self", "data", "dv"),
            "Update the constrained system acceleration.\n\n"
            ":param data: contact data\n"

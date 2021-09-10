@@ -48,8 +48,8 @@ void exposeResidualState() {
           "calc", &ResidualModelState::calc, bp::args("self", "data", "x", "u"),
           "Compute the state cost.\n\n"
           ":param data: cost data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ResidualModelState::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -60,8 +60,8 @@ void exposeResidualState() {
           "Compute the derivatives of the state cost.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ResidualModelState::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))

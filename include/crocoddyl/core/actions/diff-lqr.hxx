@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,18 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<Differe
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
   if (drift_free_) {
-    data->xout = Fq_ * q + Fv_ * v + Fu_ * u;
+    data->xout.noalias() = Fq_ * q;
+    data->xout.noalias() += Fv_ * v;
+    data->xout.noalias() += Fu_ * u;
   } else {
-    data->xout = Fq_ * q + Fv_ * v + Fu_ * u + f0_;
+    data->xout.noalias() = Fq_ * q;
+    data->xout.noalias() += Fv_ * v;
+    data->xout.noalias() += Fu_ * u;
+    data->xout += f0_;
   }
   data->cost =
       Scalar(0.5) * x.dot(Lxx_ * x) + Scalar(0.5) * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
@@ -68,8 +72,12 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<Dif
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  data->Lx = lx_ + Lxx_ * x + Lxu_ * u;
-  data->Lu = lu_ + Lxu_.transpose() * x + Luu_ * u;
+  data->Lx = lx_;
+  data->Lx.noalias() += Lxx_ * x;
+  data->Lx.noalias() += Lxu_ * u;
+  data->Lu = lu_;
+  data->Lu.noalias() += Lxu_.transpose() * x;
+  data->Lu.noalias() += Luu_ * u;
   data->Fx.leftCols(state_->get_nq()) = Fq_;
   data->Fx.rightCols(state_->get_nv()) = Fv_;
   data->Fu = Fu_;

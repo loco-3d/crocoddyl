@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,9 +40,12 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
   }
 
   if (drift_free_) {
-    data->xnext.noalias() = Fx_ * x + Fu_ * u;
+    data->xnext.noalias() = Fx_ * x;
+    data->xnext.noalias() += Fu_ * u;
   } else {
-    data->xnext.noalias() = Fx_ * x + Fu_ * u + f0_;
+    data->xnext.noalias() = Fx_ * x;
+    data->xnext.noalias() += Fu_ * u;
+    data->xnext += f0_;
   }
   data->cost =
       Scalar(0.5) * x.dot(Lxx_ * x) + Scalar(0.5) * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
@@ -60,8 +63,12 @@ void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstr
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  data->Lx.noalias() = lx_ + Lxx_ * x + Lxu_ * u;
-  data->Lu.noalias() = lu_ + Lxu_.transpose() * x + Luu_ * u;
+  data->Lx = lx_;
+  data->Lx.noalias() += Lxx_ * x;
+  data->Lx.noalias() += Lxu_ * u;
+  data->Lu = lu_;
+  data->Lu.noalias() += Lxu_.transpose() * x;
+  data->Lu.noalias() += Luu_ * u;
   data->Fx = Fx_;
   data->Fu = Fu_;
   data->Lxx = Lxx_;

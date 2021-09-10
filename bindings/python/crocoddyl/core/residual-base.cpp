@@ -43,16 +43,16 @@ void exposeResidualAbstract() {
       .def("calc", pure_virtual(&ResidualModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the residual vector.\n\n"
            ":param data: residual data\n"
-           ":param x: time-discrete state vector\n"
-           ":param u: time-discrete control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&ResidualModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the residual function.\n\n"
            ":param data: residual data\n"
-           ":param x: time-discrete state vector\n"
-           ":param u: time-discrete control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(const boost::shared_ptr<ResidualDataAbstract>&,
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))

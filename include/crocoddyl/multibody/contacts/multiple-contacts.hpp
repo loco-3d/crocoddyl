@@ -119,7 +119,7 @@ class ContactModelMultipleTpl {
    * @brief Compute the contact Jacobian and contact acceleration
    *
    * @param[in] data  Multi-contact data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calc(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 
@@ -127,7 +127,7 @@ class ContactModelMultipleTpl {
    * @brief Compute the derivatives of the contact holonomic constraint
    *
    * @param[in] data  Multi-contact data
-   * @param[in] x     State vector \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 

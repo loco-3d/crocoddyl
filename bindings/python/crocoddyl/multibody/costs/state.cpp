@@ -85,8 +85,8 @@ void exposeCostState() {  // TODO: Remove once the deprecated update call has be
           "Compute the derivatives of the state cost.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .add_property("reference", &CostModelState::get_reference<Eigen::VectorXd>,
                     &CostModelState::set_reference<Eigen::VectorXd>, "reference state")
       .add_property("xref",

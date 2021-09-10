@@ -47,9 +47,9 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   /**
    * @brief Initialize the symplectic Euler integrator
    *
-   * @param[in] model      Differential action model
-   * @param[in] control    Control parametrization
-   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] model               Differential action model
+   * @param[in] control             Control parametrization
+   * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
@@ -61,8 +61,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
    *
-   * @param[in] model      Differential action model
-   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] model               Differential action model
+   * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelEulerTpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
@@ -74,8 +74,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * @brief Integrate the differential action model using symplectic Euler scheme
    *
    * @param[in] data  Symplectic Euler data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
@@ -84,8 +84,8 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * @brief Compute the partial derivatives of the symplectic Euler integrator
    *
    * @param[in] data  Symplectic Euler data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);

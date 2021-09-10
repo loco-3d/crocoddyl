@@ -37,8 +37,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&) const {
 #endif
   // The Hessian has constant values which were set in createData.
-  assert_pretty(MatrixXs(data->dw_du.diagonal().asDiagonal()).isApprox(MatrixXs::Identity(nu_, nu_)),
-                "dw_du has wrong value");
+  assert_pretty(MatrixXs(data->dw_du).isApprox(MatrixXs::Identity(nu_, nu_)), "dw_du has wrong value");
 }
 
 template <typename Scalar>

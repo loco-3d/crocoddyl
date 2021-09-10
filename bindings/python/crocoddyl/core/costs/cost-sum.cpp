@@ -85,8 +85,8 @@ void exposeCostSum() {
                                                                              bp::args("self", "data", "x", "u"),
                                                                              "Compute the total cost.\n\n"
                                                                              ":param data: cost-sum data\n"
-                                                                             ":param x: time-discrete state vector\n"
-                                                                             ":param u: time-discrete control input")
+                                                                             ":param x: state point (dim. state.nx)\n"
+                                                                             ":param u: control input (dim. nu)")
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelSum::calc, bp::args("self", "data", "x"))
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&,
@@ -95,8 +95,8 @@ void exposeCostSum() {
           "Compute the derivatives of the total cost.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

@@ -57,7 +57,7 @@ void exposeStateAbstract() {
            "Compute the state manifold integration.\n\n"
            "It returns the value of x [+] dx operation. x and dx are points in the state.diff(x0,x1) (in M)\n"
            "and its tangent, respectively. Note that the operator result lies on M too.\n"
-           ":param x: state point (dim state.nx).\n"
+           ":param x: state point (dim. state.nx) (dim state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":return x [+] dx value (dim state.nx).")
       .def("Jdiff", pure_virtual(&StateAbstract_wrap::Jdiff_wrap), bp::args("self", "x0", "x1", "firstsecond"),
@@ -80,7 +80,7 @@ void exposeStateAbstract() {
            "\\partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of\n"
            "the first and second argument (i.e. firstsecond='both').\n"
            "partial derivative by setting firstsecond='first' or firstsecond='second'.\n"
-           ":param x: state point (dim state.nx).\n"
+           ":param x: state point (dim. state.nx) (dim state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param firstsecond: derivative w.r.t x or dx or both\n"
            ":return the partial derivative(s) of the integrate(x, dx) function")
@@ -89,7 +89,7 @@ void exposeStateAbstract() {
            "Parallel transport from integrate(x, dx) to x.\n\n"
            "This function performs the parallel transportation of an input matrix whose columns\n"
            "are expressed in the tangent space at integrate(x, dx) to the tangent space at x point\n"
-           ":param x: state point (dim state.nx).\n"
+           ":param x: state point (dim. state.nx) (dim state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")

@@ -30,8 +30,8 @@ void exposeActionNumDiff() {
           "Compute the next state and cost value.\n\n"
           "The system evolution is described in model.\n"
           ":param data: NumDiff action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &ActionModelAbstract::calc,
                                                                                    bp::args("self", "data", "x"))
@@ -43,8 +43,8 @@ void exposeActionNumDiff() {
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
           "It assumes that calc has been run first.\n"
           ":param data: NumDiff action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ActionModelNumDiff::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))

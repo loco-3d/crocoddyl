@@ -68,14 +68,15 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
      */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>& /*u*/) {
+                        const Eigen::Ref<const VectorXs>&) {
 #else
   virtual void calcDiff(const boost::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>& /*u*/) {
+                        const Eigen::Ref<const VectorXs>&) {
 #endif
     // The derivatives has constant values which were set in createData.
-    assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
-    assert_pretty(data->dtau_du == MatrixXs::Identity(state_->get_nv(), nu_), "dtau_du has wrong value");
+    assert_pretty(data->dtau_dx.isZero(), "dtau_dx has wrong value");
+    assert_pretty(MatrixXs(data->dtau_du).isApprox(MatrixXs::Identity(state_->get_nv(), nu_)),
+                  "dtau_du has wrong value");
   };
 
   /**

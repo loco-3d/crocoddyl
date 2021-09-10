@@ -53,8 +53,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
    * @brief Compute the floating-base actuation signal from the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    *
    * @param[in] data  Actuation data
-   * @param[in] x     State point
-   * @param[in] u     Control input
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
@@ -69,8 +69,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
      * @brief Compute the Jacobians of the floating-base actuation function
      *
      * @param[in] data  Actuation data
-     * @param[in] x     State point
-     * @param[in] u     Control input
+     * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+     * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
@@ -80,8 +80,8 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
                         const Eigen::Ref<const VectorXs>& /*u*/) {
 #endif
     // The derivatives has constant values which were set in createData.
-    assert_pretty(data->dtau_dx == MatrixXs::Zero(state_->get_nv(), state_->get_ndx()), "dtau_dx has wrong value");
-    assert_pretty(data->dtau_du == dtau_du_, "dtau_du has wrong value");
+    assert_pretty(data->dtau_dx.isZero(), "dtau_dx has wrong value");
+    assert_pretty(MatrixXs(data->dtau_du).isApprox(dtau_du_), "dtau_du has wrong value");
   };
 
   /**

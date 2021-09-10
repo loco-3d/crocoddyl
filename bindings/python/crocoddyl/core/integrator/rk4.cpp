@@ -48,8 +48,8 @@ void exposeIntegratedActionRK4() {
           "Compute the time-discrete evolution of a differential action model.\n\n"
           "It describes the time-discrete evolution of action model.\n"
           ":param data: action data\n"
-          ":param x: state vector\n"
-          ":param u: control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -62,8 +62,8 @@ void exposeIntegratedActionRK4() {
           "action model (i.e. dynamical system and cost function).\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: state vector\n"
-          ":param u: control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))

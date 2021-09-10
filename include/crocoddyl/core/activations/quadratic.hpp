@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
 
     data->Ar = r;
     // The Hessian has constant values which were set in createData.
-    assert_pretty(MatrixXs(data->Arr.diagonal().asDiagonal()).isApprox(MatrixXs::Identity(nr_, nr_)),
-                  "Arr has wrong value");
+    assert_pretty(MatrixXs(data->Arr).isApprox(MatrixXs::Identity(nr_, nr_)), "Arr has wrong value");
   };
 
   virtual boost::shared_ptr<ActivationDataAbstract> createData() {

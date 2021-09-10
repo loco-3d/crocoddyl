@@ -71,8 +71,8 @@ void exposeCostAbstract() {
       .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
            ":param data: cost data\n"
-           ":param x: state vector\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
                                                                                   bp::args("self", "data", "x"))
@@ -81,8 +81,8 @@ void exposeCostAbstract() {
            "It computes the partial derivatives of the cost function.\n"
            "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
