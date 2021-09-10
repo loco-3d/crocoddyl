@@ -141,7 +141,7 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff residual data
    *
-   * @tparam Model is the type of the ActionModel.
+   * @tparam Model is the type of the `ResidualModelAbstractTpl`.
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>

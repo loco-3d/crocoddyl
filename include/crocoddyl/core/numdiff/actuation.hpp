@@ -114,7 +114,7 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff actuation data
    *
-   * @tparam Model is the type of the ActuationModel.
+   * @tparam Model is the type of the `ActuationModelAbstractTpl`.
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>

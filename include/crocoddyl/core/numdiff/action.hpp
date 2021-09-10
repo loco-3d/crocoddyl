@@ -149,7 +149,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff action data
    *
-   * @tparam Model is the type of the ActionModel.
+   * @tparam Model is the type of the `ActionModelAbstractTpl`.
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
