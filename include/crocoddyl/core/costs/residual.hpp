@@ -81,6 +81,17 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the residual cost based on state only
+   *
+   * It updates the total cost based on the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the residual cost
    *
    * @param[in] data  Residual cost data
@@ -89,6 +100,17 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the residual cost with respect to the state only
+   *
+   * It updates the Jacobian and Hessian of the cost function based on the state only. This function is commonly used
+   * in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the residual cost data
