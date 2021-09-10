@@ -26,8 +26,8 @@ namespace crocoddyl {
  * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ is the current position joints input. Note that the dimension of the residual
  * vector is obtained from `state->get_nv()`.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc()` and
+ * `calcDiff()`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -84,6 +84,12 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    */
   virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
                         const Eigen::Ref<const VectorXs> &u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
 
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
 

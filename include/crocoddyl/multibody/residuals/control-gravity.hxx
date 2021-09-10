@@ -54,6 +54,18 @@ void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<Resid
 }
 
 template <typename Scalar>
+void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+                                                   const Eigen::Ref<const VectorXs> &x) {
+  Data *d = static_cast<Data *>(data.get());
+
+  // Compute the derivatives of the residual residual
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->Rx.leftCols(state_->get_nv());
+  pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, Rq);
+  Rq *= -1;
+}
+
+template <typename Scalar>
 boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelControlGravTpl<Scalar>::createData(
     DataCollectorAbstract *const data) {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
