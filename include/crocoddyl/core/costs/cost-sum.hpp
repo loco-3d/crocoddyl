@@ -52,14 +52,14 @@ struct CostItemTpl {
  * approach we avoid dynamic allocation of memory. Each cost model is added through `addCost`, where the weight and its
  * status can be defined.
  *
- * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the costs (and its
- * residuals) and `calcDiff` computes the derivatives of the cost functions (and its residuals). Concretely speaking,
- * `calcDiff` builds a linear-quadratic approximation of the total cost function with the form:
- * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
- * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively.
+ * The main computations are carring out in `calc()` and `calcDiff()` routines. `calc()` computes the costs (and its
+ * residuals) and `calcDiff()` computes the derivatives of the cost functions (and its residuals). Concretely speaking,
+ * `calcDiff()` builds a linear-quadratic approximation of the total cost function with the form:
+ * \f$\mathbf{\ell_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$,
+ * \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
+ * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively.
  *
- * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelSumTpl {
@@ -83,7 +83,7 @@ class CostModelSumTpl {
   /**
    * @brief Initialize the cost-sum model
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    */
   CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
@@ -93,7 +93,7 @@ class CostModelSumTpl {
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
+   * @param[in] state  State description
    */
   explicit CostModelSumTpl(boost::shared_ptr<StateAbstract> state);
   ~CostModelSumTpl();
@@ -135,6 +135,17 @@ class CostModelSumTpl {
             const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost based on the state only. This function is commonly used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the Jacobian and Hessian of the total cost
    *
    * @param[in] data  Cost data
@@ -143,6 +154,18 @@ class CostModelSumTpl {
    */
   void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the Jacobian and Hessian of the total cost for nodes that depends on the state only
+   *
+   * It updates the Jacobian and Hessian of the total cost based on the state only. This function is commonly used
+   * in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
+  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the cost data
@@ -155,22 +178,6 @@ class CostModelSumTpl {
    * @return the cost data
    */
   boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state
@@ -228,7 +235,6 @@ class CostModelSumTpl {
   std::size_t nr_total_;                    //!< Dimension of the total residual vector
   std::vector<std::string> active_;         //!< Names of the active cost items
   std::vector<std::string> inactive_;       //!< Names of the inactive cost items
-  VectorXs unone_;                          //!< No control vector
 };
 
 template <typename _Scalar>

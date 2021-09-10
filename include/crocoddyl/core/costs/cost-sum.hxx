@@ -119,6 +119,34 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSum>& data, c
 }
 
 template <typename Scalar>
+void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (data->costs.size() != costs_.size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of cost datas and models");
+  }
+  data->cost = 0.;
+
+  typename CostModelContainer::iterator it_m, end_m;
+  typename CostDataContainer::iterator it_d, end_d;
+  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<CostItem>& m_i = it_m->second;
+    if (m_i->active) {
+      const boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
+
+      m_i->cost->calc(d_i, x);
+      data->cost += m_i->weight * d_i->cost;
+    }
+  }
+}
+
+template <typename Scalar>
 void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSum>& data, const Eigen::Ref<const VectorXs>& x,
                                        const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -160,20 +188,39 @@ void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSum>& dat
 }
 
 template <typename Scalar>
+void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSum>& data,
+                                       const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (data->costs.size() != costs_.size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of cost datas and models");
+  }
+  data->Lx.setZero();
+  data->Lxx.setZero();
+
+  typename CostModelContainer::iterator it_m, end_m;
+  typename CostDataContainer::iterator it_d, end_d;
+  for (it_m = costs_.begin(), end_m = costs_.end(), it_d = data->costs.begin(), end_d = data->costs.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<CostItem>& m_i = it_m->second;
+    if (m_i->active) {
+      const boost::shared_ptr<CostDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the cost name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
+
+      m_i->cost->calcDiff(d_i, x);
+      data->Lx += m_i->weight * d_i->Lx;
+      data->Lxx += m_i->weight * d_i->Lxx;
+    }
+  }
+}
+
+template <typename Scalar>
 boost::shared_ptr<CostDataSumTpl<Scalar> > CostModelSumTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return boost::allocate_shared<CostDataSum>(Eigen::aligned_allocator<CostDataSum>(), this, data);
-}
-
-template <typename Scalar>
-void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                                   const Eigen::Ref<const VectorXs>& x) {
-  calc(data, x, unone_);
-}
-
-template <typename Scalar>
-void CostModelSumTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataSumTpl<Scalar> >& data,
-                                       const Eigen::Ref<const VectorXs>& x) {
-  calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>

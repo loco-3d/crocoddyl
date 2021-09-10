@@ -211,7 +211,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   const boost::shared_ptr<crocoddyl::CostDataSum>& data = model.createData(&shared_data);
 
   // compute the cost sum data for the case when all costs are defined as active
-  const Eigen::VectorXd& x1 = state->rand();
+  Eigen::VectorXd x1 = state->rand();
   const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
   model.calc(data, x1, u1);
@@ -244,12 +244,30 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->Lxu == Lxu);
   BOOST_CHECK(data->Luu == Luu);
 
+  x1 = state->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  model.calc(data, x1);
+  model.calcDiff(data, x1);
+  cost = 0.;
+  Lx.setZero();
+  Lxx.setZero();
+  for (std::size_t i = 0; i < 5; ++i) {
+    models[i]->calc(datas[i], x1);
+    models[i]->calcDiff(datas[i], x1);
+    cost += datas[i]->cost;
+    Lx += datas[i]->Lx;
+    Lxx += datas[i]->Lxx;
+  }
+  BOOST_CHECK(data->cost == cost);
+  BOOST_CHECK(data->Lx == Lx);
+  BOOST_CHECK(data->Lxx == Lxx);
+
   // compute the cost sum data for the case when the first three costs are defined as active
   model.changeCostStatus("random_cost_3", false);
   model.changeCostStatus("random_cost_4", false);
-  const Eigen::VectorXd& x2 = state->rand();
+  Eigen::VectorXd x2 = state->rand();
   const Eigen::VectorXd& u2 = Eigen::VectorXd::Random(model.get_nu());
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2, u2);
   model.calcDiff(data, x2, u2);
   cost = 0;
@@ -274,6 +292,24 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->Lxx == Lxx);
   BOOST_CHECK(data->Lxu == Lxu);
   BOOST_CHECK(data->Luu == Luu);
+
+  x2 = state->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
+  model.calc(data, x2);
+  model.calcDiff(data, x2);
+  cost = 0.;
+  Lx.setZero();
+  Lxx.setZero();
+  for (std::size_t i = 0; i < 3; ++i) {
+    models[i]->calc(datas[i], x2);
+    models[i]->calcDiff(datas[i], x2);
+    cost += datas[i]->cost;
+    Lx += datas[i]->Lx;
+    Lxx += datas[i]->Lxx;
+  }
+  BOOST_CHECK(data->cost == cost);
+  BOOST_CHECK(data->Lx == Lx);
+  BOOST_CHECK(data->Lxx == Lxx);
 }
 
 void test_get_costs(StateModelTypes::Type state_type) {
