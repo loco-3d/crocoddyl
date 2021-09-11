@@ -51,11 +51,11 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   d->dx.tail(nv).noalias() = a * time_step_;
   differential_->get_state()->integrate(x, d->dx, d->xnext);
   d->cost = time_step_ * d->differential->cost;
+  d->g = d->differential->g;
+  d->h = d->differential->h;
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
-  d->g = d->differential->g;
-  d->h = d->differential->h;
 }
 
 template <typename Scalar>
@@ -70,11 +70,11 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   differential_->calc(d->differential, x);
   d->dx.setZero();
   d->cost = d->differential->cost;
+  d->g = d->differential->g;
+  d->h = d->differential->h;
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
-  d->g = d->differential->g;
-  d->h = d->differential->h;
 }
 
 template <typename Scalar>

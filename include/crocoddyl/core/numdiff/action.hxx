@@ -39,8 +39,8 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
-  data->cost = d->data_0->cost;
   data->xnext = d->data_0->xnext;
+  data->cost = d->data_0->cost;
   d->g = d->data_0->g;
   d->h = d->data_0->h;
 }
@@ -54,8 +54,8 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
-  data->cost = d->data_0->cost;
   data->xnext = d->data_0->xnext;
+  data->cost = d->data_0->cost;
   d->g = d->data_0->g;
   d->h = d->data_0->h;
 }
