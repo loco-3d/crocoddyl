@@ -112,7 +112,7 @@ for i, phase in enumerate(GAITPHASES):
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
-    # Solving the problem with the DDP solver
+    # Solving the problem with the solver
     xs = [x0] * (solver[i].problem.T + 1)
     us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
     solver[i].solve(xs, us, 100, False)

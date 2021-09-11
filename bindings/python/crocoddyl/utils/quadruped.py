@@ -471,7 +471,7 @@ class SimpleQuadrupedalGaitProblem:
         if self._fwddyn:
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         else:
-            ctrlWeights = np.array([1e0] * self.state.nv + [0.] * self.actuation.nu + [1e-1] * contactModel.nc)
+            ctrlWeights = np.array([0.] * self.state.nv + [1.] * self.actuation.nu + [0.] * contactModel.nc)
             ctrlActivation = crocoddyl.ActivationModelWeightedQuad(ctrlWeights**2)
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlActivation, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
@@ -566,7 +566,7 @@ class SimpleQuadrupedalGaitProblem:
         if self._fwddyn:
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         else:
-            ctrlWeights = np.array([1e0] * self.state.nv + [0.] * self.actuation.nu + [1e1] * contactModel.nc)
+            ctrlWeights = np.array([0.] * self.state.nv + [1.] * self.actuation.nu + [0.] * contactModel.nc)
             ctrlActivation = crocoddyl.ActivationModelWeightedQuad(ctrlWeights**2)
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlActivation, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
