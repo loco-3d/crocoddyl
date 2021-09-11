@@ -246,7 +246,7 @@ class GepettoDisplay(DisplayAbstract):
                         differential = data.differential
                     if len(differential.multibody.contacts.contacts.todict().items()) == 0:
                         pinocchio.updateFramePlacement(model.differential.state.pinocchio,
-                                                       data.differential.multibody.pinocchio, frameId)
+                                                       differential.multibody.pinocchio, frameId)
                     pose = differential.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
                 elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
