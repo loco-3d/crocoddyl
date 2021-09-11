@@ -18,7 +18,7 @@ ActuationModelAbstractTpl<Scalar>::ActuationModelAbstractTpl(boost::shared_ptr<S
     throw_pretty("Invalid argument: "
                  << "nu cannot be zero");
   }
-};
+}
 
 template <typename Scalar>
 ActuationModelAbstractTpl<Scalar>::~ActuationModelAbstractTpl() {}
