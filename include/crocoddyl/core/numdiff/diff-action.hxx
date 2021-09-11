@@ -38,8 +38,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
-  data->cost = d->data_0->cost;
   data->xout = d->data_0->xout;
+  data->cost = d->data_0->cost;
   d->g = d->data_0->g;
   d->h = d->data_0->h;
 }
@@ -53,8 +53,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
-  data->cost = d->data_0->cost;
   data->xout = d->data_0->xout;
+  data->cost = d->data_0->cost;
   d->g = d->data_0->g;
   d->h = d->data_0->h;
 }
@@ -95,7 +95,6 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
-    d->dx(ix) = 0.0;
     // constraint
     d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
     d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
@@ -155,7 +154,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
     const Scalar c = d->data_x[ix]->cost;
-    // dynamics
+    // cost
     data->Lx(ix) = (c - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
     d->dx(ix) = 0.0;
