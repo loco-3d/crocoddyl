@@ -111,6 +111,10 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     data->Lxx = d->Rx.transpose() * d->Rx;
     data->Lxu = d->Rx.transpose() * d->Ru;
     data->Luu = d->Ru.transpose() * d->Ru;
+  } else {
+    data->Lxx.setZero();
+    data->Lxu.setZero();
+    data->Luu.setZero();
   }
 }
 
@@ -144,6 +148,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
 
   if (with_gauss_approx_) {
     data->Lxx = d->Rx.transpose() * d->Rx;
+  } else {
+    data->Lxx.setZero();
   }
 }
 
