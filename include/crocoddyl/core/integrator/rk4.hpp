@@ -99,7 +99,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the partial derivatives of the RK4 cost integrator
+   * @brief Compute the partial derivatives of the cost
    *
    * It updates the derivatives of the cost function with respect to the state only. This function is commonly used in
    * the terminal nodes of an optimal control problem.
