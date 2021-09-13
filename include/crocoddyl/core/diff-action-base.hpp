@@ -86,8 +86,8 @@ class DifferentialActionModelAbstractTpl {
   /**
    * @brief Compute the total cost value for nodes that depends only on the state
    *
-   * It updates the total cost when system acceleration as zero. This function is commonly used in the
-   * terminal nodes of an optimal control problem.
+   * It updates the total cost and the system acceleration is not updated as it is expected to be zero. This function
+   * is commonly used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Differential action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

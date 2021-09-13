@@ -80,7 +80,7 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
   /**
    * @brief Integrate the total cost value for nodes that depends only on the state using RK4 scheme
    *
-   * It integrates the total cost and defines the next state as the current one. This function is commonly used in the
+   * It computes the total cost and defines the next state as the current one. This function is commonly used in the
    * terminal nodes of an optimal control problem.
    *
    * @param[in] data  Action data

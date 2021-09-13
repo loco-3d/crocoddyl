@@ -70,7 +70,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   /**
    * @brief Compute the system acceleration, and cost value
    *
-   * It computes the system acceleration using the free dynamics.
+   * It computes the system acceleration using the free forward-dynamics.
    *
    * @param[in] data  Free forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

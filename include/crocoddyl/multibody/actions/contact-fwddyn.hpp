@@ -108,10 +108,11 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   /**
    * @brief Compute the total cost value for nodes that depends only on the state
    *
-   * It updates the total cost when the next state remains the same to current one. Additionally, it does not
-   * update the contact forces. This function is commonly used in the terminal nodes of an optimal control problem.
+   * It updates the total cost and the system acceleration is not updated as it is expected to be zero. Additionally,
+   * it does not update the contact forces. This function is commonly used in the terminal nodes of an optimal control
+   * problem.
    *
-   * @param[in] data  Action data
+   * @param[in] data  Contact forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,

@@ -82,7 +82,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   /**
    * @brief Integrate the total cost value for nodes that depends only on the state using symplectic Euler scheme
    *
-   * It integrates the total cost and defines the next state as the current one. This function is commonly used in the
+   * It computes the total cost and defines the next state as the current one. This function is commonly used in the
    * terminal nodes of an optimal control problem.
    *
    * @param[in] data  Action data
