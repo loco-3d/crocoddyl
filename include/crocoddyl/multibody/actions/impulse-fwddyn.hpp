@@ -95,6 +95,21 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                                    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
                                    const Scalar JMinvJt_damping = Scalar(0.), const bool enable_force = false);
 
+  /**
+   * @brief Initialize the impulse forward-dynamics action model
+   *
+   * It describes the impulse dynamics of a multibody system under rigid-contact constraints defined by
+   * `ImpulseModelMultipleTpl`. It computes the cost described in `CostModelSumTpl`.
+   *
+   * @param[in] state            State of the multibody system
+   * @param[in] actuation        Actuation model
+   * @param[in] impulses         Stack of rigid impulses
+   * @param[in] costs            Stack of cost functions
+   * @param[in] constraints      Stack of constraints
+   * @param[in] r_coeff          Restitution coefficient (default 0.)
+   * @param[in] JMinvJt_damping  Damping term used in operational space inertia matrix (default 0.)
+   * @param[in] enable_force     Enable the computation of the contact force derivatives (default false)
+   */
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
                                    boost::shared_ptr<CostModelSum> costs,
