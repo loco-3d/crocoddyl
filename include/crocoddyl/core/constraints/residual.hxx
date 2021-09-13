@@ -293,4 +293,9 @@ void ConstraintModelResidualTpl<Scalar>::updateConstraintType() {
   }
 }
 
+template <typename Scalar>
+void ConstraintModelResidualTpl<Scalar>::print(std::ostream& os) const {
+  os << "ConstraintModelResidual {" << *residual_ << "}";
+}
+
 }  // namespace crocoddyl

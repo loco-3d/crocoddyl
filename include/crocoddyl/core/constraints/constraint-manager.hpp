@@ -30,6 +30,14 @@ struct ConstraintItemTpl {
   ConstraintItemTpl(const std::string& name, boost::shared_ptr<ConstraintModelAbstract> constraint, bool active = true)
       : name(name), constraint(constraint), active(active) {}
 
+  /**
+   * @brief Print information on the constraint item
+   */
+  friend std::ostream& operator<<(std::ostream& os, const ConstraintItemTpl<Scalar>& model) {
+    os << "{" << *model.constraint << "}";
+    return os;
+  }
+
   std::string name;
   boost::shared_ptr<ConstraintModelAbstract> constraint;
   bool active;
@@ -212,6 +220,12 @@ class ConstraintModelManagerTpl {
    * @param[in] name  Constraint name
    */
   bool getConstraintStatus(const std::string& name) const;
+
+  /**
+   * @brief Print information on the stack of constraints
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model);
 
  private:
   boost::shared_ptr<StateAbstract> state_;  //!< State description

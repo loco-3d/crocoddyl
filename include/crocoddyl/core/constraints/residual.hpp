@@ -133,6 +133,13 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    */
   void update_bounds(const VectorXs& lower, const VectorXs& upper);
 
+  /**
+   * @brief Print relevant information of the cost-residual model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  private:
   void updateConstraintType();
 

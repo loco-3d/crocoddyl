@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <boost/core/demangle.hpp>
+
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -74,6 +76,11 @@ boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> > ConstraintModelAbstractTpl
 }
 
 template <typename Scalar>
+void ConstraintModelAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& ConstraintModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -96,6 +103,12 @@ std::size_t ConstraintModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
+}
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os, const ConstraintModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl
