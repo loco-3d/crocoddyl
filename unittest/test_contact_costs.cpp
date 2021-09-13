@@ -93,9 +93,11 @@ bool init_function() {
   // as it needs to test the contact wrench cone
   for (size_t cost_type = 0; cost_type < ContactCostModelTypes::all.size(); ++cost_type) {
     for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
-      register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
-                                             ActivationModelTypes::all[activation_type],
-                                             ActuationModelTypes::ActuationModelFloatingBase);
+      if (ActivationModelTypes::all[activation_type] != ActivationModelTypes::ActivationModel2NormBarrier) {
+        register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
+                                               ActivationModelTypes::all[activation_type],
+                                               ActuationModelTypes::ActuationModelFloatingBase);
+      }
     }
   }
 
