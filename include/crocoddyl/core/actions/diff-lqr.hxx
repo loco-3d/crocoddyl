@@ -67,11 +67,6 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<Differe
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  if (drift_free_) {
-    data->xout.setZero();
-  } else {
-    data->xout = f0_;
-  }
   data->cost = Scalar(0.5) * x.dot(Lxx_ * x) + lx_.dot(x);
 }
 

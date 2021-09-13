@@ -67,7 +67,6 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
 
   differential_->calc(d->differential, x);
   d->dx.setZero();
-  d->xnext = x;
   d->cost = d->differential->cost;
   if (with_cost_residual_) {
     d->r = d->differential->r;

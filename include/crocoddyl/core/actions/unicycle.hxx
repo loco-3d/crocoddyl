@@ -48,7 +48,6 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   }
   Data* d = static_cast<Data*>(data.get());
 
-  d->xnext = x;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>().setZero();
   d->cost = Scalar(0.5) * d->r.template head<3>().dot(d->r.template head<3>());
