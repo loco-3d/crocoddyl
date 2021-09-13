@@ -104,6 +104,28 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  Data* d = static_cast<Data*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
+
+  actuation_->calc(d->multibody.actuation, x);
+
+  // Computing the cost value and residuals
+  costs_->calc(d->costs, x);
+  d->cost = d->costs->cost;
+}
+
+template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
@@ -157,6 +179,19 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
     contacts_->updateForceDiff(d->multibody.contacts, d->df_dx.topRows(nc), d->df_du.topRows(nc));
   }
   costs_->calcDiff(d->costs, x, u);
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  actuation_->calcDiff(d->multibody.actuation, x);
+  costs_->calcDiff(d->costs, x);
 }
 
 template <typename Scalar>

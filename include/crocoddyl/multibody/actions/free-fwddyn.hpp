@@ -80,6 +80,13 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
    *
    * @param[in] data  Free forward-dynamics data
@@ -88,6 +95,13 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the free forward-dynamics data

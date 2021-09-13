@@ -35,6 +35,12 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<Re
 }
 
 template <typename Scalar>
+void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                      const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
+
+template <typename Scalar>
 void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                           const Eigen::Ref<const VectorXs>&,
                                                           const Eigen::Ref<const VectorXs>&) {
@@ -49,6 +55,12 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_pt
   // Compute the derivatives of the residual residual
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
+}
+
+template <typename Scalar>
+void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                          const Eigen::Ref<const VectorXs>&) {
+  data->Rx.setZero();
 }
 
 template <typename Scalar>

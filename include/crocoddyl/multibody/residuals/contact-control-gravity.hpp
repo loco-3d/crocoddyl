@@ -72,8 +72,19 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the residual vector for nodes that depends only on the state
+   *
+   * It updates the residual vector based on the state only (i.e., it ignores the contact forces). This function
+   * is commonly used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the Jacobians of the contact control gravity contact residual
@@ -82,23 +93,31 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
-   * VectorXs>& x)
+   * @brief Compute the Jacobian of the residual functions with respect to the state only
+   *
+   * It updates the Jacobian of the residual function based on the state only (i.e., it ignores the contact forces).
+   * This function is commonly used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
+  /**
+   * @brief Create the contact-control-gravity residual data
+   */
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
    * @brief Print relevant information of the contact-control-grav residual
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream &os) const;
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::nu_;
@@ -122,14 +141,14 @@ struct ResidualDataContactControlGravTpl : public ResidualDataAbstractTpl<_Scala
   typedef pinocchio::DataTpl<Scalar> PinocchioData;
 
   template <template <typename Scalar> class Model>
-  ResidualDataContactControlGravTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
+  ResidualDataContactControlGravTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
       : Base(model, data) {
-    StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
+    StateMultibody* sm = static_cast<StateMultibody*>(model->get_state().get());
     pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
 
     // Check that proper shared data has been passed
-    DataCollectorActMultibodyInContactTpl<Scalar> *d =
-        dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar> *>(shared);
+    DataCollectorActMultibodyInContactTpl<Scalar>* d =
+        dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar>*>(shared);
     if (d == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "

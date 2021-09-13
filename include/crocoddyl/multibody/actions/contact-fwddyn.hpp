@@ -106,6 +106,18 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost when the next state remains the same to current one. Additionally, it does not
+   * update the contact forces. This function is commonly used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
    *
    * @param[in] data  Contact forward-dynamics data
@@ -114,6 +126,19 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the cost functions with respect to the state only
+   *
+   * It updates the derivatives of the cost function with respect to the state only. Additionally, it does not
+   * update the contact forces derivatives. This function is commonly used in the terminal nodes of an optimal control
+   * problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the contact forward-dynamics data

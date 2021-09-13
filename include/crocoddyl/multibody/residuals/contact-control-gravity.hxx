@@ -41,6 +41,15 @@ void ResidualModelContactControlGravTpl<Scalar>::calc(const boost::shared_ptr<Re
 }
 
 template <typename Scalar>
+void ResidualModelContactControlGravTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+                                                      const Eigen::Ref<const VectorXs> &x) {
+  Data *d = static_cast<Data *>(data.get());
+
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  data->r = d->actuation->tau - pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
+}
+
+template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
                                                           const Eigen::Ref<const VectorXs> &x,
                                                           const Eigen::Ref<const VectorXs> &) {
@@ -60,7 +69,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(const boost::shared_pt
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->Rx.leftCols(state_->get_nv());
-  pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q, d->fext, Rq);
+  pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, Rq);
   Rq *= -1;
 }
 
