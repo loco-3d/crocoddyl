@@ -685,3 +685,8 @@ MATHJAX_FORMAT         = SVG
 #---------------------------------------------------------------------------
 
 ALIASES += "cheatsheet=\xrefitem cheatsheet \"Remarkable identity\" \"Cheat sheet\""
+
+
+CITE_BIB_FILES         = @PROJECT_SOURCE_DIR@/doc/bib/mastalli-icra20.bib \
+                         @PROJECT_SOURCE_DIR@/doc/bib/budhiraja-ichr18 \
+                         @PROJECT_SOURCE_DIR@/doc/bib/carpentier-rss18.bib \
