@@ -161,6 +161,19 @@ class ConstraintModelAbstractTpl {
    */
   std::size_t get_nh() const;
 
+  /**
+   * @brief Print information on the constraint model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the constraint model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   boost::shared_ptr<StateAbstract> state_;             //!< State description
   boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model

@@ -15,6 +15,7 @@
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 
 namespace crocoddyl {
@@ -47,8 +48,8 @@ void exposeConstraintManager() {
       .add_property("constraint",
                     bp::make_getter(&ConstraintItem::constraint, bp::return_value_policy<bp::return_by_value>()),
                     "constraint model")
-      .def_readwrite("active", &ConstraintItem::active, "constraint status");
-  ;
+      .def_readwrite("active", &ConstraintItem::active, "constraint status")
+      .def(PrintableVisitor<ConstraintItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelManager> >();
 
@@ -136,7 +137,8 @@ void exposeConstraintManager() {
           "name of inactive constraint items")
       .def("getConstraintStatus", &ConstraintModelManager::getConstraintStatus, bp::args("self", "name"),
            "Return the constraint status of a given constraint name.\n\n"
-           ":param name: constraint name");
+           ":param name: constraint name")
+      .def(PrintableVisitor<ConstraintModelManager>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataManager> >();
 

@@ -15,8 +15,8 @@
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 
 namespace crocoddyl {
 namespace python {

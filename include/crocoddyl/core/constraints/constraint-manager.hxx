@@ -269,4 +269,32 @@ bool ConstraintModelManagerTpl<Scalar>::getConstraintStatus(const std::string& n
   }
 }
 
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model) {
+  const std::vector<std::string>& active = model.get_active();
+  const std::vector<std::string>& inactive = model.get_inactive();
+  os << "ConstraintModelManagerTpl:" << std::endl;
+  os << "  Active:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+    const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
+        model.get_constraints().find(*it)->second;
+    if (it != --active.end()) {
+      os << "    " << *it << ": " << *constraint_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *constraint_item << std::endl;
+    }
+  }
+  os << "  Inactive:" << std::endl;
+  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+    const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
+        model.get_constraints().find(*it)->second;
+    if (it != --inactive.end()) {
+      os << "    " << *it << ": " << *constraint_item << std::endl;
+    } else {
+      os << "    " << *it << ": " << *constraint_item;
+    }
+  }
+  return os;
+}
+
 }  // namespace crocoddyl
