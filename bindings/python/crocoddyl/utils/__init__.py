@@ -1095,7 +1095,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return np.array([d1, d2])
 
     def calcDiff(self):
-        self.cost = self.problem.calc(self.xs, self.us)
+        if self.iter == 0:
+            self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         if not self.isFeasible:
             self.fs[0] = self.problem.runningModels[0].state.diff(self.xs[0], self.problem.x0)
