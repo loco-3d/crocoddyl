@@ -89,8 +89,8 @@ void exposeConstraintManager() {
           "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x", "u"),
           "Compute the total constraint.\n\n"
           ":param data: constraint-sum data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ConstraintModelManager::*)(const boost::shared_ptr<ConstraintDataManager>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x"))
@@ -101,8 +101,8 @@ void exposeConstraintManager() {
           "Compute the derivatives of the total constraint.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelManager::*)(const boost::shared_ptr<ConstraintDataManager>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelManager::calcDiff, bp::args("self", "data", "x"))
