@@ -79,6 +79,7 @@ void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(const boost::sh
   const Matrix46& A = cref_.get_A();
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
+  update_jacobians_ = false;
 }
 
 template <typename Scalar>

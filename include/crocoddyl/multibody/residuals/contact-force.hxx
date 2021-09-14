@@ -122,6 +122,7 @@ void ResidualModelContactForceTpl<Scalar>::updateJacobians(const boost::shared_p
     default:
       break;
   }
+  update_jacobians_ = false;
 }
 
 template <typename Scalar>

@@ -82,6 +82,7 @@ void ResidualModelContactWrenchConeTpl<Scalar>::updateJacobians(const boost::sha
   const MatrixX6s& A = fref_.get_A();
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
+  update_jacobians_ = false;
 }
 
 template <typename Scalar>

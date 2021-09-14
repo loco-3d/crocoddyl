@@ -97,6 +97,7 @@ void ResidualModelContactFrictionConeTpl<Scalar>::updateJacobians(
     default:
       break;
   }
+  update_jacobians_ = false;
 }
 
 template <typename Scalar>
