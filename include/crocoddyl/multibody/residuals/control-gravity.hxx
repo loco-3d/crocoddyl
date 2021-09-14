@@ -40,6 +40,15 @@ void ResidualModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<ResidualD
 }
 
 template <typename Scalar>
+void ResidualModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+                                               const Eigen::Ref<const VectorXs> &x) {
+  Data *d = static_cast<Data *>(data.get());
+
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  data->r = -pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
+}
+
+template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
                                                    const Eigen::Ref<const VectorXs> &x,
                                                    const Eigen::Ref<const VectorXs> &) {

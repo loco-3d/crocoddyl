@@ -92,7 +92,6 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
 
-  actuation_->calc(d->multibody.actuation, x);
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
 
   costs_->calc(d->costs, x);
@@ -147,7 +146,6 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
   }
   Data* d = static_cast<Data*>(data.get());
 
-  actuation_->calcDiff(d->multibody.actuation, x);
   costs_->calcDiff(d->costs, x);
 }
 

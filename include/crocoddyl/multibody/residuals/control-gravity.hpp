@@ -73,6 +73,12 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
+
+  /**
    * @brief Compute the Jacobians of the control gravity residual
    *
    * @param[in] data  Control residual data

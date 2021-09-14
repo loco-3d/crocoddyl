@@ -35,9 +35,9 @@ void exposeActuationAbstract() {
       .def<void (ActuationModelAbstract::*)(const boost::shared_ptr<ActuationDataAbstract>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActuationModelAbstract::calc, bp::args("self", "data", "x"),
-          "Compute the residual vector for nodes that depends only on the state.\n\n"
-          "It updates the residual vector based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "Ignore the computation of the actuation signal.\n\n"
+          "It does not update the actuation signal as this function is used in the\n"
+          "terminal nodes of an optimal control problem.\n"
           ":param data: actuation data\n"
           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
@@ -50,9 +50,9 @@ void exposeActuationAbstract() {
       .def<void (ActuationModelAbstract::*)(const boost::shared_ptr<ActuationDataAbstract>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActuationModelAbstract::calcDiff, bp::args("self", "data", "x"),
-          "Compute the Jacobian of the residual functions with respect to the state only.\n\n"
-          "It updates the Jacobian of the residual function based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "Ignore the computation of the Jacobians of the actuation function.\n\n"
+          "It does not update the Jacobians of the actuation function as this function\n"
+          "is used in the terminal nodes of an optimal control problem.\n"
           ":param data: actuation data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &ActuationModelAbstract_wrap::createData, &ActuationModelAbstract_wrap::default_createData,

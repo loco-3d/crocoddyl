@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,10 +45,6 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->tau = d->actuation->tau;
   };
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
-    data->tau.setZero();
-  };
-
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
@@ -56,14 +52,6 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     squashing_->calcDiff(d->squashing, u);
     actuation_->calcDiff(d->actuation, x, d->squashing->u);
     data->dtau_du.noalias() = d->actuation->dtau_du * d->squashing->du_ds;
-  };
-
-#ifndef NDEBUG
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
-#else
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>&, const Eigen::Ref<const VectorXs>&) {
-#endif
-    assert_pretty(MatrixXs(data->dtau_du).isZero(), "dtau_du has wrong value");
   };
 
   boost::shared_ptr<ActuationDataAbstract> createData() {

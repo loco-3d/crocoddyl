@@ -34,9 +34,6 @@ void exposeActuationSquashing() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: squashing function input")
       .def<void (ActuationSquashingModel::*)(const boost::shared_ptr<ActuationDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ActuationSquashingModel::calc, bp::args("self", "data", "x"))
-      .def<void (ActuationSquashingModel::*)(const boost::shared_ptr<ActuationDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x", "u"),
@@ -46,9 +43,6 @@ void exposeActuationSquashing() {
           ":param data: actuation data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu).")
-      .def<void (ActuationSquashingModel::*)(const boost::shared_ptr<ActuationDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &ActuationSquashingModel::createData, bp::args("self"),
            "Create the actuation squashing data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

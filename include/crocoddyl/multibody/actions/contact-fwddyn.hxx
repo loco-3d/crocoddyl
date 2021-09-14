@@ -118,8 +118,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
 
-  actuation_->calc(d->multibody.actuation, x);
-
   // Computing the cost value and residuals
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
@@ -189,8 +187,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
-
-  actuation_->calcDiff(d->multibody.actuation, x);
   costs_->calcDiff(d->costs, x);
 }
 

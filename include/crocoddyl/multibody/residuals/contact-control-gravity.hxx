@@ -46,7 +46,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calc(const boost::shared_ptr<Re
   Data *d = static_cast<Data *>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  data->r = d->actuation->tau - pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
+  data->r = -pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
 }
 
 template <typename Scalar>

@@ -13,7 +13,7 @@ namespace crocoddyl {
 template <typename Scalar>
 ActuationModelAbstractTpl<Scalar>::ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                              const std::size_t nu)
-    : nu_(nu), state_(state), unone_(VectorXs::Zero(nu_)) {
+    : nu_(nu), state_(state) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
                  << "nu cannot be zero");
@@ -29,16 +29,12 @@ boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > ActuationModelAbstractTpl<S
 }
 
 template <typename Scalar>
-void ActuationModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActuationDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x) {
-  calc(data, x, unone_);
-}
+void ActuationModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActuationDataAbstract>&,
+                                             const Eigen::Ref<const VectorXs>&) {}
 
 template <typename Scalar>
-void ActuationModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>& x) {
-  calcDiff(data, x, unone_);
-}
+void ActuationModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActuationDataAbstract>&,
+                                                 const Eigen::Ref<const VectorXs>&) {}
 
 template <typename Scalar>
 std::size_t ActuationModelAbstractTpl<Scalar>::get_nu() const {

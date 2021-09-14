@@ -69,15 +69,15 @@ class ActuationModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the actuation signal from the state point only
+   * @brief Ignore the computation of the actuation signal
    *
-   * It updates the actuation signal based on the state only. This function is commonly used in
-   * the terminal nodes of an optimal control problem.
+   * It does not update the actuation signal as this function is used in the terminal nodes of an optimal
+   * control problem.
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the Jacobians of the actuation function
@@ -90,12 +90,15 @@ class ActuationModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the Jacobians of the actuation function with respect to the state only
+   * @brief Ignore the computation of the Jacobians of the actuation function
+   *
+   * It does not update the Jacobians of the actuation function as this function is used in the terminal
+   * nodes of an optimal control problem.
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the actuation data
@@ -130,7 +133,6 @@ class ActuationModelAbstractTpl {
  protected:
   std::size_t nu_;                          //!< Control dimension
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  VectorXs unone_;                          //!< No control vector
 };
 
 template <typename _Scalar>
