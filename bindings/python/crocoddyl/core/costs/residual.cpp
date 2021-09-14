@@ -42,7 +42,7 @@ void exposeCostResidual() {
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual cost based on state only.\n\n"
           "It updates the total cost based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
@@ -59,7 +59,7 @@ void exposeCostResidual() {
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"),
           "Compute the derivatives of the residual cost with respect to the state only.\n\n"
           "It updates the Jacobian and Hessian of the cost function based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost residual data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &CostModelResidual::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

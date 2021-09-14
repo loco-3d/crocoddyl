@@ -109,7 +109,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
    * @brief Compute the total cost value for nodes that depends only on the state
    *
    * It updates the total cost and the system acceleration is not updated as it is expected to be zero. Additionally,
-   * it does not update the contact forces. This function is commonly used in the terminal nodes of an optimal control
+   * it does not update the contact forces. This function is used in the terminal nodes of an optimal control
    * problem.
    *
    * @param[in] data  Contact forward-dynamics data
@@ -132,7 +132,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
    * @brief Compute the derivatives of the cost functions with respect to the state only
    *
    * It updates the derivatives of the cost function with respect to the state only. Additionally, it does not
-   * update the contact forces derivatives. This function is commonly used in the terminal nodes of an optimal control
+   * update the contact forces derivatives. This function is used in the terminal nodes of an optimal control
    * problem.
    *
    * @param[in] data  Action data

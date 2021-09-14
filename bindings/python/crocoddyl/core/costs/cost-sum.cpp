@@ -91,7 +91,7 @@ void exposeCostSum() {
           "calc", &CostModelSum::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
           "It updates the total cost based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost-sum data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&, const Eigen::Ref<const Eigen::VectorXd>&,
@@ -106,7 +106,7 @@ void exposeCostSum() {
           "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x"),
           "Compute the Jacobian and Hessian of the total cost for nodes that depends on the state only.\n\n"
           "It updates the Jacobian and Hessian of the total cost based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost-sum data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &CostModelSum::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

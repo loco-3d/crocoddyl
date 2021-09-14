@@ -51,7 +51,7 @@ void exposeActionAbstract() {
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
           "It updates the total cost and the next state is not computed as it is not expected to change.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
@@ -68,7 +68,7 @@ void exposeActionAbstract() {
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"),
           "Compute the derivatives of the cost functions with respect to the state only.\n\n"
           "It updates the derivatives of the cost function with respect to the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &ActionModelAbstract_wrap::createData, &ActionModelAbstract_wrap::default_createData,

@@ -106,7 +106,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @brief Compute the residual vector for nodes that depends only on the state
    *
    * It updates the residual vector based on the state only (i.e., it ignores the contact forces). This function
-   * is commonly used in the terminal nodes of an optimal control problem.
+   * is used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -131,7 +131,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @brief Compute the Jacobian of the residual functions with respect to the state only
    *
    * It updates the Jacobian of the residual function based on the state only (i.e., it ignores the contact forces).
-   * This function is commonly used in the terminal nodes of an optimal control problem.
+   * This function is used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

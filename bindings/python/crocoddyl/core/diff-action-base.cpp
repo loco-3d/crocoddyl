@@ -50,7 +50,7 @@ void exposeDifferentialActionAbstract() {
           "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
           "It updates the total cost and the system acceleration is not updated as the control\n"
-          "input is undefined. This function is commonly used in the terminal nodes of an optimal\n"
+          "input is undefined. This function is used in the terminal nodes of an optimal\n"
           "control problem.\n"
           ":param data: differential action data\n"
           ":param x: state point (dim. state.nx)")
@@ -69,7 +69,7 @@ void exposeDifferentialActionAbstract() {
           "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"),
           "Compute the derivatives of the cost functions with respect to the state only.\n\n"
           "It updates the derivatives of the cost function with respect to the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData,

@@ -138,7 +138,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Compute the total cost value for nodes that depends only on the state
    *
-   * It updates the total cost based on the state only. This function is commonly used in
+   * It updates the total cost based on the state only. This function is used in
    * the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Cost data
@@ -161,7 +161,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Compute the Jacobian and Hessian of the cost functions with respect to the state only
    *
-   * It updates the Jacobian and Hessian of the cost function based on the state only. This function is commonly used
+   * It updates the Jacobian and Hessian of the cost function based on the state only. This function is used
    * in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Cost data

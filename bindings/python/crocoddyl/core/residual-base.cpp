@@ -50,7 +50,7 @@ void exposeResidualAbstract() {
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual vector for nodes that depends only on the state.\n\n"
           "It updates the residual vector based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: residual data\n"
           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ResidualModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
@@ -63,7 +63,7 @@ void exposeResidualAbstract() {
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"),
           "Compute the Jacobian of the residual functions with respect to the state only.\n\n"
           "It updates the Jacobian of the residual function based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: residual data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &ResidualModelAbstract_wrap::createData, &ResidualModelAbstract_wrap::default_createData,

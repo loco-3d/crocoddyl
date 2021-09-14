@@ -78,7 +78,7 @@ void exposeCostAbstract() {
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
           "It updates the total cost based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
@@ -93,7 +93,7 @@ void exposeCostAbstract() {
           "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"),
           "Compute the Jacobian and Hessian of the cost functions with respect to the state only.\n\n"
           "It updates the Jacobian and Hessian of the cost function based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),

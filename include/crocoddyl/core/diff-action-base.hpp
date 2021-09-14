@@ -87,7 +87,7 @@ class DifferentialActionModelAbstractTpl {
    * @brief Compute the total cost value for nodes that depends only on the state
    *
    * It updates the total cost and the system acceleration is not updated as the control input is undefined. This
-   * function is commonly used in the terminal nodes of an optimal control problem.
+   * function is used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Differential action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -112,7 +112,7 @@ class DifferentialActionModelAbstractTpl {
   /**
    * @brief Compute the derivatives of the cost functions with respect to the state only
    *
-   * It updates the derivatives of the cost function with respect to the state only. This function is commonly used in
+   * It updates the derivatives of the cost function with respect to the state only. This function is used in
    * the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Differential action data
