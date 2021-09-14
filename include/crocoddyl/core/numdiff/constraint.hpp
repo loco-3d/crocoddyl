@@ -14,6 +14,15 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of a constraint model.
+ *
+ * It computes Jacobian of the constraint model via numerical differentiation, i.e., \f$\mathbf{g_x}\f$,
+ * \f$\mathbf{g_u}\f$ and \f$\mathbf{h_x}\f$, \f$\mathbf{h_u}\f$, which denote the Jacobians of the
+ * inequality and equality constraints, respectively.
+ *
+ * \sa `ConstraintModelAbstractTpl()`, `calcDiff()`
+ */
 template <typename _Scalar>
 class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
  public:
@@ -47,21 +56,30 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc ConstraintModelAbstract::calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff()
    */
   virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a Data object
-   *
-   * @param data  Data collector used for the original model
-   * @return the constraint data
+   * @brief @copydoc ConstraintModelAbstract::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::createData()
    */
   virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the original model
+   * @brief Return the original constraint model
    */
   const boost::shared_ptr<Base>& get_model() const;
 
@@ -88,15 +106,6 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   using Base::state_;
   using Base::unone_;
 
-  /** @brief Model of the cost. */
-  boost::shared_ptr<Base> model_;
-
-  /** @brief Numerical disturbance used in the numerical differentiation. */
-  Scalar disturbance_;
-
-  /** @brief Functions that needs execution before calc or calcDiff. */
-  std::vector<ReevaluationFunction> reevals_;
-
  private:
   /**
    * @brief Make sure that when we finite difference the constraint model, the user
@@ -107,6 +116,10 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
+
+  boost::shared_ptr<Base> model_;              //!< Constraint model hat we want to apply the numerical differentiation
+  Scalar disturbance_;                         //!< Disturbance used in the numerical differentiation routine
+  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>

@@ -75,7 +75,6 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, State
 
   // Computing the cost derivatives
   model->calc(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
@@ -102,7 +101,7 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
@@ -121,12 +120,26 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
 
-  // Checking the partial derivatives against NumDiff
+  // Checking the partial derivatives against numdiff
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
   BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
+
+  // Computing the cost derivatives
+  x = model->get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  // Computing the cost derivatives via numerical differentiation
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against numdiff
+  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
 }
 
 void test_dimensions_in_constraint_manager(ConstraintModelTypes::Type constraint_type,
@@ -224,6 +237,7 @@ bool init_function() {
                                            StateModelTypes::all[state_type]);
     }
   }
+
   return true;
 }
 

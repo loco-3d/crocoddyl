@@ -81,11 +81,38 @@ void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<Constraint
 }
 
 template <typename Scalar>
+void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                                              const Eigen::Ref<const VectorXs>& x) {
+  // Compute the constraint residual
+  residual_->calc(data->residual, x);
+
+  // Fill the residual values for its corresponding type of constraint
+  std::size_t nh_i = 0;
+  std::size_t ng_i = 0;
+  const std::size_t nr = residual_->get_nr();
+  for (std::size_t i = 0; i < nr; ++i) {
+    if (constraint_type_(i) == 0) {  // equality constraint
+      data->h(nh_i) = data->residual->r(i) - ub_(i);
+      ++nh_i;
+    } else if (constraint_type_(i) == 1) {  // inequality constraint
+      data->g(ng_i) = data->residual->r(i) - ub_(i);
+      data->g(ng_i + 1) = lb_(i) - data->residual->r(i);
+      ng_i += 2;
+    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
+      data->g(ng_i) = lb_(i) - data->residual->r(i);
+      ++ng_i;
+    } else if (constraint_type_(i) == 3) {
+      data->g(ng_i) = data->residual->r(i) - ub_(i);
+      ++ng_i;
+    }
+  }
+}
+
+template <typename Scalar>
 void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
                                                   const Eigen::Ref<const VectorXs>& x,
                                                   const Eigen::Ref<const VectorXs>& u) {
   // Compute the derivatives of the residual function
-  // Data* d = static_cast<Data*>(data.get());
   residual_->calcDiff(data->residual, x, u);
 
   // Fill the residual values for its corresponding type of constraint
@@ -147,6 +174,63 @@ void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<Constr
       }
       if (is_ru) {
         data->Gu.row(ng_i) = data->residual->Ru.row(i);
+      }
+      ++ng_i;
+    }
+  }
+}
+
+template <typename Scalar>
+void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                                                  const Eigen::Ref<const VectorXs>& x) {
+  // Compute the derivatives of the residual function
+  residual_->calcDiff(data->residual, x);
+
+  // Fill the residual values for its corresponding type of constraint
+  std::size_t nh_i = 0;
+  std::size_t ng_i = 0;
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nr = residual_->get_nr();
+  const bool is_rq = residual_->get_q_dependent();
+  const bool is_rv = residual_->get_v_dependent();
+  for (std::size_t i = 0; i < nr; ++i) {
+    if (constraint_type_(i) == 0) {  // equality constraint
+      if (is_rq && is_rv) {
+        data->Hx.row(nh_i) = data->residual->Rx.row(i);
+      } else if (is_rq) {
+        data->Hx.row(nh_i).head(nv) = data->residual->Rx.row(i).head(nv);
+      } else if (is_rv) {
+        data->Hx.row(nh_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
+      }
+      ++nh_i;
+    } else if (constraint_type_(i) == 1) {  // inequality constraint
+      if (is_rq && is_rv) {
+        data->Gx.row(ng_i) = data->residual->Rx.row(i);
+        data->Gx.row(ng_i + 1) = -data->residual->Rx.row(i);
+      } else if (is_rq) {
+        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
+        data->Gx.row(ng_i + 1).head(nv) = -data->residual->Rx.row(i).head(nv);
+      } else if (is_rv) {
+        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
+        data->Gx.row(ng_i + 1).tail(nv) = -data->residual->Rx.row(i).tail(nv);
+      }
+      ng_i += 2;
+    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
+      if (is_rq && is_rv) {
+        data->Gx.row(ng_i) = -data->residual->Rx.row(i);
+      } else if (is_rq) {
+        data->Gx.row(ng_i).head(nv) = -data->residual->Rx.row(i).head(nv);
+      } else if (is_rv) {
+        data->Gx.row(ng_i).tail(nv) = -data->residual->Rx.row(i).tail(nv);
+      }
+      ++ng_i;
+    } else if (constraint_type_(i) == 3) {
+      if (is_rq && is_rv) {
+        data->Gx.row(ng_i) = data->residual->Rx.row(i);
+      } else if (is_rq) {
+        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
+      } else if (is_rv) {
+        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
       }
       ++ng_i;
     }

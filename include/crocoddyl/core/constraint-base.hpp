@@ -96,6 +96,17 @@ class ConstraintModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the constraint value for nodes that depends only on the state
+   *
+   * It updates the constraint based on the state only. This function is commonly used in the terminal nodes of an
+   * optimal control problem.
+   *
+   * @param[in] data  Constraint data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the Jacobian of the constraint
    *
    * It computes the Jacobian of the constraint function. It assumes that `calc()` has
@@ -109,6 +120,17 @@ class ConstraintModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the Jacobian of the constraint with respect to the state only
+   *
+   * It computes the Jacobian of the constraint function based on the state only. This function is commonly used
+   * in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Constraint data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the constraint data
    *
    * The default data contains objects to store the values of the constraint, residual vector and their first
@@ -119,22 +141,6 @@ class ConstraintModelAbstractTpl {
    * @return the constraint data
    */
   virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Constraint data
-   * @param[in] x     State point
-   */
-  void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Constraint data
-   * @param[in] x     State point
-   */
-  void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state
