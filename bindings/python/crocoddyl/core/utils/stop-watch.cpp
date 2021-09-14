@@ -15,6 +15,10 @@ using namespace boost::python;
 namespace crocoddyl {
 namespace python {
 
+void enable_report() { getProfiler().enable_profiler(); }
+
+void disable_report() { getProfiler().disable_profiler(); }
+
 void stop_watch_report(int precision) { getProfiler().report_all(precision); }
 
 long double stop_watch_get_average_time(const std::string& perf_name) {
@@ -32,6 +36,10 @@ long double stop_watch_get_total_time(const std::string& perf_name) { return get
 void stop_watch_reset_all() { getProfiler().reset_all(); }
 
 void exposeStopWatch() {
+  bp::def("enable_profiler", enable_report, "Enable the profiler report.");
+
+  bp::def("disable_profiler", enable_report, "Disable the profiler report.");
+
   bp::def("stop_watch_report", stop_watch_report, "Report all the times measured by the shared stop-watch.");
 
   bp::def("stop_watch_get_average_time", stop_watch_get_average_time,

@@ -34,16 +34,8 @@
 #pragma GCC visibility push(default)
 #endif
 
-// Uncomment the following line to activate the profiler
-//#define PROFILER_ACTIVE
-
-#ifdef PROFILER_ACTIVE
-#define START_PROFILER(name) getProfiler().start(name)
-#define STOP_PROFILER(name) getProfiler().stop(name)
-#else
-#define START_PROFILER(name)
-#define STOP_PROFILER(name)
-#endif
+#define START_PROFILER(name) getProfiler().profiler_status() ? getProfiler().start(name) : void()
+#define STOP_PROFILER(name) getProfiler().profiler_status() ? getProfiler().stop(name) : void()
 
 #define STOP_WATCH_MAX_NAME_LENGTH 60
 #define STOP_WATCH_TIME_WIDTH 10
@@ -163,6 +155,15 @@ class Stopwatch {
   /** @brief Destructor */
   ~Stopwatch();
 
+  /** @brief Enable the profiler **/
+  void enable_profiler();
+
+  /** @brief Disable the profiler **/
+  void disable_profiler();
+
+  /** @brief Return if the profiler is enable or disable **/
+  bool profiler_status();
+
   /** @brief Tells if a performance with a certain ID exists */
   bool performance_exists(std::string perf_name);
 
@@ -238,6 +239,7 @@ class Stopwatch {
   bool active;                                         //!< Flag to hold the clock's status
   StopwatchMode mode;                                  //!< Time taking mode
   std::map<std::string, PerformanceData> *records_of;  //!< Dynamic collection of performance data
+  bool profiler_active;                                //!< Indicates if the profiler is enabled
 };
 
 Stopwatch &getProfiler();

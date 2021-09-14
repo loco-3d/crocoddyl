@@ -42,11 +42,17 @@ Stopwatch& getProfiler() {
   return s;
 }
 
-Stopwatch::Stopwatch(StopwatchMode _mode) : active(true), mode(_mode) {
+Stopwatch::Stopwatch(StopwatchMode _mode) : active(true), mode(_mode), profiler_active(false) {
   records_of = new map<string, PerformanceData>();
 }
 
 Stopwatch::~Stopwatch() { delete records_of; }
+
+void Stopwatch::enable_profiler() { profiler_active = true; }
+
+void Stopwatch::disable_profiler() { profiler_active = false; }
+
+bool Stopwatch::profiler_status() { return profiler_active; }
 
 void Stopwatch::set_mode(StopwatchMode new_mode) { mode = new_mode; }
 
