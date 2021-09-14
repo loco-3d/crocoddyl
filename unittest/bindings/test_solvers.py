@@ -48,6 +48,7 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_compute_search_direction(self):
         # Compute the direction
+        self.solver.setCandidate([], [], False)
         self.solver.computeDirection()
         self.solver_der.computeDirection()
         # Check the LQ model of the Hamiltonian
@@ -68,15 +69,16 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_try_step(self):
         # Try a full step and check the improvement in the cost
+        self.solver.setCandidate([], [], False)
         self.solver.computeDirection()
         self.solver_der.computeDirection()
         cost = self.solver.tryStep()
         costDer = self.solver_der.tryStep()
-        self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value for full step")
+        self.assertAlmostEqual(cost, costDer, 9, "Wrong cost value for full step")
         # Try a half step and check the improvement in the cost
         cost = self.solver.tryStep(0.5)
         costDer = self.solver_der.tryStep(0.5)
-        self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value for half step")
+        self.assertAlmostEqual(cost, costDer, 9, "Wrong cost value for half step")
 
     def test_stopping_criteria(self):
         # Run 2 iteration in order to boost test analysis
@@ -85,7 +87,7 @@ class SolverAbstractTestCase(unittest.TestCase):
         # Compute and check the stopping criteria
         stop = self.solver.stoppingCriteria()
         stopDer = self.solver_der.stoppingCriteria()
-        self.assertAlmostEqual(stop, stopDer, 10, "Wrong stopping value")
+        self.assertAlmostEqual(stop, stopDer, 9, "Wrong stopping value")
 
     def test_expected_improvement(self):
         # Run 2 iteration in order to boost test analysis
