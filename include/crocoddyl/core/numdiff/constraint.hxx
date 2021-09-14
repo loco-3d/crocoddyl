@@ -23,58 +23,123 @@ template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
                                              const Eigen::Ref<const VectorXs>& x,
                                              const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
-  data_nd->data_0->g.setZero();
-  data_nd->data_0->h.setZero();
-  model_->calc(data_nd->data_0, x, u);
-  data_nd->g = data_nd->data_0->g;
-  data_nd->h = data_nd->data_0->h;
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+
+  Data* d = static_cast<Data*>(data.get());
+  d->data_0->g.setZero();
+  d->data_0->h.setZero();
+  model_->calc(d->data_0, x, u);
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
+}
+
+template <typename Scalar>
+void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                                             const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  d->data_0->g.setZero();
+  d->data_0->h.setZero();
+  model_->calc(d->data_0, x);
+  d->g = d->data_0->g;
+  d->h = d->data_0->h;
 }
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
                                                  const Eigen::Ref<const VectorXs>& x,
                                                  const Eigen::Ref<const VectorXs>& u) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
 
-  const VectorXs& g0 = data_nd->g;
-  const VectorXs& h0 = data_nd->h;
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
   assertStableStateFD(x);
 
   // Computing the d constraint(x,u) / dx
-  data_nd->dx.setZero();
+  d->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     // x + dx
-    data_nd->dx(ix) = disturbance_;
-    model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp, u);
+      reevals_[i](d->xp, u);
     }
     // constraints(x+dx, u)
-    model_->calc(data_nd->data_x[ix], data_nd->xp, u);
+    model_->calc(d->data_x[ix], d->xp, u);
     // Gx, Hx
-    data_nd->Gx.col(ix) = (data_nd->data_x[ix]->g - g0) / disturbance_;
-    data_nd->Hx.col(ix) = (data_nd->data_x[ix]->h - h0) / disturbance_;
-    data_nd->dx(ix) = 0.0;
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 
   // Computing the d constraint(x,u) / du
-  data_nd->du.setZero();
+  d->du.setZero();
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     // up = u + du
-    data_nd->du(iu) = disturbance_;
-    data_nd->up = u + data_nd->du;
+    d->du(iu) = disturbance_;
+    d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](x, data_nd->up);
+      reevals_[i](x, d->up);
     }
     // constraint(x, u+du)
-    model_->calc(data_nd->data_u[iu], x, data_nd->up);
+    model_->calc(d->data_u[iu], x, d->up);
     // Gu, Hu
-    data_nd->Gu.col(iu) = (data_nd->data_u[iu]->g - g0) / disturbance_;
-    data_nd->Hu.col(iu) = (data_nd->data_u[iu]->h - h0) / disturbance_;
-    data_nd->du(iu) = 0.0;
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
+    d->du(iu) = 0.0;
+  }
+}
+
+template <typename Scalar>
+void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                                                 const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  const VectorXs& g0 = d->g;
+  const VectorXs& h0 = d->h;
+  assertStableStateFD(x);
+
+  // Computing the d constraint(x) / dx
+  d->dx.setZero();
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+    // x + dx
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    // call the update function
+    for (size_t i = 0; i < reevals_.size(); ++i) {
+      reevals_[i](d->xp, unone_);
+    }
+    // constraints(x+dx)
+    model_->calc(d->data_x[ix], d->xp);
+    // Gx, Hx
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 }
 

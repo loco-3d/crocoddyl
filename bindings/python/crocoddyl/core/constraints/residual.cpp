@@ -40,7 +40,12 @@ void exposeConstraintResidual() {
           ":param u: time-discrete control input")
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"))
+          "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the residual constraint based on state only.\n\n"
+          "It updates the constraint based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint data\n"
+          ":param x: state point (dim. state.nx)")
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
@@ -52,7 +57,12 @@ void exposeConstraintResidual() {
           ":param u: time-discrete control input\n")
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the derivatives of the residual constraint with respect to the state only.\n\n"
+          "It updates the Jacobian of the constraint function based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ConstraintModelResidual::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the residual constraint data.\n\n"

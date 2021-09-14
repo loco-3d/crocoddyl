@@ -49,7 +49,12 @@ void exposeConstraintAbstract() {
            ":param u: control input")
       .def<void (ConstraintModelAbstract::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"))
+          "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the constraint value for nodes that depends only on the state.\n\n"
+          "It updates the constraint based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ConstraintModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the constraint function.\n\n"
            "It computes the Jacobians of the constraint function.\n"
@@ -59,7 +64,12 @@ void exposeConstraintAbstract() {
            ":param u: control input\n")
       .def<void (ConstraintModelAbstract::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the Jacobian of the constraint with respect to the state only.\n\n"
+          "It computes the Jacobian of the constraint function based on the state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ConstraintModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the constraint data.\n\n"
