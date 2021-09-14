@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2021, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,36 +18,26 @@
 namespace crocoddyl {
 
 /**
- * @brief This class computes the numerical differentiation of an ActionModel.
+ * @brief This class computes the numerical differentiation of an action model.
  *
- * It computes the same quantity as a normal model would do but using numerical
- * differentiation.
- * The subtility is in the computation of the Hessian of the cost. Let us
- * consider that the ActionModel owns a cost residual. This means that the cost
- * is the square of a residual \f$ l(x,u) = .5 r(x,u)**2 \f$, with
- * \f$ r(x,u) \f$ being the residual vector. Therefore the derivatives of the
- * cost \f$ l \f$ can be expressed in function of the derivatives of the
- * residuals (Jacobians), denoted by \f$ R_x \f$ and \f$ R_u \f$. Which would be:
+ * It computes Jacobian of the cost, its residual and dynamics via numerical differentiation.
+ * It considers that the action model owns a cost residual and the cost is the square of this residual, i.e.,
+ * \f$\ell(\mathbf{x},\mathbf{u})=\frac{1}{2}\|\mathbf{r}(\mathbf{x},\mathbf{u})\|^2\f$, where
+ * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$ is the residual vector.  The Hessian is computed only through the
+ * Gauss-Newton approximation, i.e.,
  * \f{eqnarray*}{
- *     L_x    &=& R_x^T r \\
- *     L_u    &=& R_u^T r \\
- *     L_{xx} &=& R_x^T R_x + R_{xx} r
+ *     \mathbf{\ell}_\mathbf{xx} &=& \mathbf{R_x}^T\mathbf{R_x} \\
+ *     \mathbf{\ell}_\mathbf{uu} &=& \mathbf{R_u}^T\mathbf{R_u} \\
+ *     \mathbf{\ell}_\mathbf{xu} &=& \mathbf{R_x}^T\mathbf{R_u}
  * \f}
- * with \f$ R_{xx} \f$ the derivatives of the Jacobian (i.e. not a matrix, but a
- * dim-3 tensor). The Gauss approximation consists in neglecting these.
- * So \f$ L_{xx} \sim R_x^T R_x \f$. Similarly for \f$ L_{xu} \sim R_x^T R_u \f$
- * and \f$ L_{uu} \sim R_u^T R_u \f$. The above set of equations becomes:
- * \f{eqnarray*}{
- *     L_x    &=& R_x^T r \\
- *     L_u    &=& R_u^T r \\
- *     L_{xx} &\sim& R_x^T R_x \\
- *     L_{xu} &\sim& R_x^T R_u \\
- *     L_{uu} &\sim& R_u^T R_u
- * \f}
- * In the case that the cost does not have a residual we set the Hessian to
- * \f$ 0 \f$, i.e. \f$ L_{xx} = L_{xu} = L_{uu} = 0 \f$.
+ * where the Jacobians of the cost residuals are denoted by \f$\mathbf{R_x}\f$ and \f$\mathbf{R_u}\f$.
+ * Note that this approximation ignores the tensor products (e.g., \f$\mathbf{R_{xx}}\mathbf{r}\f$).
+ *
+ * Finally, in the case that the cost does not have a residual, we set the Hessian to zero, i.e.,
+ * \f$\mathbf{L_{xx}} = \mathbf{L_{xu}} = \mathbf{L_{uu}} = \mathbf{0}\f$.
+ *
+ * \sa `ActionModelAbstractTpl()`, `calcDiff()`
  */
-
 template <typename _Scalar>
 class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
@@ -62,15 +52,12 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
 
   /**
-   * @brief Construct a new ActionModelNumDiff object
+   * @brief Initialize the numdiff action model
    *
-   * @param model
+   * @param[in] model              Action model that we want to apply the numerical differentiation
+   * @param[in] with_gauss_approx  True if we want to use the Gauss approximation for computing the Hessians
    */
   explicit ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx = false);
-
-  /**
-   * @brief Destroy the ActionModelNumDiff object
-   */
   virtual ~ActionModelNumDiffTpl();
 
   /**
@@ -80,44 +67,44 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create a Data object from the given model.
-   *
-   * @return boost::shared_ptr<ActionDataAbstract>
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::createData()
    */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
-   * @brief Get the model_ object
-   *
-   * @return Base&
+   * @brief Return the acton model that we use to numerical differentiate
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return Scalar
+   * @brief Return the disturbance used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Identify if the Gauss approximation is going to be used or not.
-   *
-   * @return true
-   * @return false
    */
   bool get_with_gauss_approx();
 
@@ -144,19 +131,9 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
 
-  /**
-   * @brief This is the model to compute the finite differentiation from
-   */
-
-  boost::shared_ptr<Base> model_;
-
-  /**
-   * @brief This is the numerical disturbance value used during the numerical
-   * differenciations
-   */
-  Scalar disturbance_;
-
-  bool with_gauss_approx_;
+  boost::shared_ptr<Base> model_;  //!< Action model hat we want to apply the numerical differentiation
+  Scalar disturbance_;             //!< Disturbance used in the numerical differentiation routine
+  bool with_gauss_approx_;         //!< True if we want to use the Gauss approximation for computing the Hessians
 };
 
 template <typename _Scalar>
@@ -170,9 +147,9 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
 
   /**
-   * @brief Construct a new ActionDataNumDiff object
+   * @brief Initialize the numdiff action data
    *
-   * @tparam Model is the type of the ActionModel.
+   * @tparam Model is the type of the `ActionModelAbstractTpl`.
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>

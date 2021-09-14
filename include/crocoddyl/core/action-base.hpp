@@ -23,9 +23,9 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for action model
  *
- * In Crocoddyl, an action model combines dynamics and cost models. Each node, in our optimal control problem, is
- * described through an action model. Every time that we want describe a problem, we need to provide ways of computing
- * the dynamics, cost functions and their derivatives. All these is described inside the action model.
+ * An action model combines dynamics and cost models. Each node, in our optimal control problem, is described through
+ * an action model. Every time that we want describe a problem, we need to provide ways of computing the dynamics, cost
+ * functions and their derivatives. All these is described inside the action model.
  *
  * Concretely speaking, the action model describes a time-discrete action model with a first-order ODE along a cost
  * function, i.e.
@@ -88,6 +88,17 @@ class ActionModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost and the next state is not computed as it is not expected to change. This function is
+   * used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the dynamics and cost functions
    *
    * It computes the partial derivatives of the dynamical system and the cost function. It assumes that `calc()` has
@@ -102,6 +113,17 @@ class ActionModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the derivatives of the cost functions with respect to the state only
+   *
+   * It updates the derivatives of the cost function with respect to the state only. This function is used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the action data
    *
    * @return the action data
@@ -112,22 +134,6 @@ class ActionModelAbstractTpl {
    * @brief Checks that a specific data belongs to this model
    */
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Action data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Action data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Computes the quasic static commands

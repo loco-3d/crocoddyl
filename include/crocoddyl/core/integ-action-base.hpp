@@ -120,7 +120,6 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   Scalar time_step_;         //!< Time step used for integration
   Scalar time_step2_;        //!< Square of the time step used for integration
   bool with_cost_residual_;  //!< Flag indicating whether a cost residual is used
-  bool enable_integration_;  //!< False for the terminal horizon node, where integration is not needed
 };
 
 template <typename _Scalar>

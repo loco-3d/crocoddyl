@@ -74,8 +74,13 @@ void exposeCostAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                       const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
-                                                                                  bp::args("self", "data", "x"))
+                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "It updates the total cost based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: cost data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            "It computes the partial derivatives of the cost function.\n"
@@ -85,7 +90,12 @@ void exposeCostAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the Jacobian and Hessian of the cost functions with respect to the state only.\n\n"
+          "It updates the Jacobian and Hessian of the cost function based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: cost data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the cost data.\n\n"

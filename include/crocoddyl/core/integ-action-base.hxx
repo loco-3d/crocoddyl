@@ -49,7 +49,6 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::init() {
   time_step2_ = time_step_ * time_step_;
-  enable_integration_ = true;
   VectorXs u_lb(nu_), u_ub(nu_);
   control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(), u_lb, u_ub);
   Base::set_u_lb(u_lb);
@@ -58,9 +57,6 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
     time_step_ = Scalar(1e-3);
     time_step2_ = time_step_ * time_step_;
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
-  if (time_step_ == Scalar(0.)) {
-    enable_integration_ = false;
   }
 }
 

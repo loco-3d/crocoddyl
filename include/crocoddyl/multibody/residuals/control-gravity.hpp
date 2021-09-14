@@ -24,8 +24,8 @@ namespace crocoddyl {
  * gravity torque corresponding to the current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position
  * joints input. Note that the dimension of the residual vector is obtained from `StateAbstractTpl::get_nv()`.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc()` and
+ * `calcDiff()`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -73,6 +73,12 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
+
+  /**
    * @brief Compute the Jacobians of the control gravity residual
    *
    * @param[in] data  Control residual data
@@ -81,6 +87,12 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
                         const Eigen::Ref<const VectorXs> &u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
 
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
 

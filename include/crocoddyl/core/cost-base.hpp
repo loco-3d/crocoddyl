@@ -25,25 +25,25 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for cost models
  *
- * In Crocoddyl, a cost model is defined by the scalar activation function \f$a(\cdot)\f$ and by the residual function
- * \f$\mathbf{r}(\cdot)\f$ as follows: \f[ cost = a(\mathbf{r}(\mathbf{x}, \mathbf{u})), \f] where
- * the residual function depends on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold
- * described with a `nq`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to
- * the tangent space with `nv` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$. The residual vector
- * is defined by \f$\mathbf{r}\in\mathbb{R}^{nr}\f$ where `nr` describes its dimension in the Euclidean space. On the
- * other hand, the activation function builds a cost value based on the definition of the residual vector. The residual
- * vector has to be specialized in a derived classes.
+ * A cost model is defined by the scalar activation function \f$a(\cdot)\f$ and by the residual function
+ * \f$\mathbf{r}(\cdot)\f$ as follows: \f[ \ell(\mathbf{x},\mathbf{u}) = a(\mathbf{r}(\mathbf{x}, \mathbf{u})), \f]
+ * where the residual function depends on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state
+ * manifold described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs
+ * to the tangent space with `ndx` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$. The residual
+ * vector is defined by \f$\mathbf{r}\in\mathbb{R}^{nr}\f$ where `nr` describes its dimension in the Euclidean space.
+ * On the other hand, the activation function builds a cost value based on the definition of the residual vector. The
+ * residual vector has to be specialized in a derived classes.
  *
- * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the cost (and its residual)
- * and `calcDiff` computes the derivatives of the cost function (and its residual). Concretely speaking, `calcDiff`
- * builds a linear-quadratic approximation of the cost function with the form: \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$,
- * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$, \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
- * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$, \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
- * Jacobians and Hessians, respectively.
- * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * The main computations are carring out in `calc()` and `calcDiff()` routines. `calc()` computes the cost (and its
+ * residual) and `calcDiff()` computes the derivatives of the cost function (and its residual). Concretely speaking,
+ * `calcDiff()` builds a linear-quadratic approximation of the cost function with the form:
+ * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
+ * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
+ * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively. Additionally, it is
+ * important remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
+ * need to run first `calc()`.
  *
- * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `ActivationModelAbstractTpl`, `ResidualModelAbstractTpl` `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class CostModelAbstractTpl {
@@ -94,7 +94,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e., \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
    * @param[in] state     State of the dynamical system
    * @param[in] residual  Residual model
@@ -104,7 +104,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e., \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$)
    *
    * @param[in] state  State of the system
    * @param[in] nr     Dimension of residual vector
@@ -115,7 +115,7 @@ class CostModelAbstractTpl {
   /**
    * @copybrief CostModelAbstractTpl()
    *
-   * We use `ActivationModelQuadTpl` as a default activation model (i.e. \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
+   * We use `ActivationModelQuadTpl` as a default activation model (i.e., \f$a=\frac{1}{2}\|\mathbf{r}\|^2\f$).
    * Furthermore, the default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state  State of the dynamical system
@@ -136,6 +136,17 @@ class CostModelAbstractTpl {
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost based on the state only. This function is used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the Jacobian and Hessian of cost and its residual vector
    *
    * It computes the Jacobian and Hessian of the cost function. It assumes that `calc()` has been run first.
@@ -148,6 +159,17 @@ class CostModelAbstractTpl {
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
+   * @brief Compute the Jacobian and Hessian of the cost functions with respect to the state only
+   *
+   * It updates the Jacobian and Hessian of the cost function based on the state only. This function is used
+   * in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Cost data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the cost data
    *
    * The default data contains objects to store the values of the cost, residual vector and their derivatives (first
@@ -158,22 +180,6 @@ class CostModelAbstractTpl {
    * @return the cost data
    */
   virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Cost data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   */
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state

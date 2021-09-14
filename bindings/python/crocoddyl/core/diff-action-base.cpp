@@ -28,11 +28,11 @@ void exposeDifferentialActionAbstract() {
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
       "DifferentialActionModelAbstract",
       "Abstract class for the differential action model.\n\n"
-      "In crocoddyl, a differential action model combines dynamics and cost data described in\n"
-      "continuous time. Each node, in our optimal control problem, is described through an\n"
-      "action model. Every time that we want describe a problem, we need to provide ways of\n"
-      "computing the dynamics, cost functions and their derivatives. These computations are\n"
-      "mainly carry on inside calc() and calcDiff(), respectively.",
+      "A differential action model is the time-continuous version of an action model. Each\n"
+      "node, in our optimal control problem, is described through an action model. Every\n"
+      "time that we want describe a problem, we need to provide ways of computing the\n"
+      "dynamics, cost functions and their derivatives. These computations are mainly carrying\n"
+      "on inside calc() and calcDiff(), respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
           bp::args("self", "state", "nu", "nr"),
           "Initialize the differential action model.\n\n"
@@ -47,7 +47,13 @@ void exposeDifferentialActionAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
+          "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "It updates the total cost and the system acceleration is not updated as the control\n"
+          "input is undefined. This function is used in the terminal nodes of an optimal\n"
+          "control problem.\n"
+          ":param data: differential action data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
            bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
@@ -60,7 +66,12 @@ void exposeDifferentialActionAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(const boost::shared_ptr<DifferentialActionDataAbstract>&,
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the derivatives of the cost functions with respect to the state only.\n\n"
+          "It updates the derivatives of the cost function with respect to the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: action data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &DifferentialActionModelAbstract_wrap::createData,
            &DifferentialActionModelAbstract_wrap::default_createData, bp::args("self"),
            "Create the differential action data.\n\n"

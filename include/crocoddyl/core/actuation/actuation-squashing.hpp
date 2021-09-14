@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,20 +38,20 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) {
-    boost::shared_ptr<Data> data_squashing = boost::static_pointer_cast<Data>(data);
+    Data* d = static_cast<Data*>(data.get());
 
-    squashing_->calc(data_squashing->squashing, u);
-    actuation_->calc(data_squashing->actuation, x, data_squashing->squashing->u);
-    data->tau = data_squashing->actuation->tau;
+    squashing_->calc(d->squashing, u);
+    actuation_->calc(d->actuation, x, d->squashing->u);
+    data->tau = d->actuation->tau;
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) {
-    boost::shared_ptr<Data> data_squashing = boost::static_pointer_cast<Data>(data);
+    Data* d = static_cast<Data*>(data.get());
 
-    squashing_->calcDiff(data_squashing->squashing, u);
-    actuation_->calcDiff(data_squashing->actuation, x, data_squashing->squashing->u);
-    data->dtau_du.noalias() = data_squashing->actuation->dtau_du * data_squashing->squashing->du_ds;
+    squashing_->calcDiff(d->squashing, u);
+    actuation_->calcDiff(d->actuation, x, d->squashing->u);
+    data->dtau_du.noalias() = d->actuation->dtau_du * d->squashing->du_ds;
   };
 
   boost::shared_ptr<ActuationDataAbstract> createData() {

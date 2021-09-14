@@ -81,6 +81,24 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
+void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  Data* d = static_cast<Data*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+
+  costs_->calc(d->costs, x);
+  d->cost = d->costs->cost;
+}
+
+template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
@@ -117,6 +135,18 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
 
   // Computing the cost derivatives
   costs_->calcDiff(d->costs, x, u);
+}
+
+template <typename Scalar>
+void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  costs_->calcDiff(d->costs, x);
 }
 
 template <typename Scalar>

@@ -52,6 +52,17 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
 }
 
 template <typename Scalar>
+void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                     const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  data->cost = Scalar(0.5) * x.dot(Lxx_ * x) + lx_.dot(x);
+}
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                          const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -74,6 +85,19 @@ void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstr
   data->Lxx = Lxx_;
   data->Lxu = Lxu_;
   data->Luu = Luu_;
+}
+
+template <typename Scalar>
+void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                         const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  data->Lx = lx_;
+  data->Lx.noalias() += Lxx_ * x;
+  data->Lxx = Lxx_;
 }
 
 template <typename Scalar>

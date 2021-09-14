@@ -132,7 +132,7 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
   const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the residual derivatives
@@ -150,10 +150,25 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
 
-  // Checking the partial derivatives against NumDiff
+  // Checking the partial derivatives against numdiff
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(NUMDIFF_MODIFIER * tol));
   BOOST_CHECK((data->Ru - data_num_diff->Ru).isZero(tol));
+
+  // Computing the residual derivatives
+  x = model->get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  actuation_model->calc(actuation_data, x);
+  actuation_model->calcDiff(actuation_data, x);
+
+  // Computing the residual derivatives via numerical differentiation
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against numdiff
+  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(NUMDIFF_MODIFIER * tol));
 }
 
 //----------------------------------------------------------------------------//

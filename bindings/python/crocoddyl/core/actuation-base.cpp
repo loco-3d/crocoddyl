@@ -18,8 +18,8 @@ void exposeActuationAbstract() {
   bp::class_<ActuationModelAbstract_wrap, boost::noncopyable>(
       "ActuationModelAbstract",
       "Abstract class for actuation-mapping models.\n\n"
-      "In Crocoddyl, an actuation model is a function that maps control inputs u into generalized\n"
-      " torques a, where a is also named as the actuation signal of our system.\n"
+      "An actuation model is a function that maps state x and control inputs u into generalized\n"
+      "torques tau, where tau is also named as the actuation signal of our system.\n"
       "The computation of the actuation signal and its partial derivatives are mainly carry on\n"
       "inside calc() and calcDiff(), respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args("self", "state", "nu"),
@@ -32,6 +32,14 @@ void exposeActuationAbstract() {
            ":param data: actuation data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
+      .def<void (ActuationModelAbstract::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActuationModelAbstract::calc, bp::args("self", "data", "x"),
+          "Ignore the computation of the actuation signal.\n\n"
+          "It does not update the actuation signal as this function is used in the\n"
+          "terminal nodes of an optimal control problem.\n"
+          ":param data: actuation data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ActuationModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the actuation model.\n\n"
            "It computes the partial derivatives of the actuation model which is\n"
@@ -39,6 +47,14 @@ void exposeActuationAbstract() {
            ":param data: actuation data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
+      .def<void (ActuationModelAbstract::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ActuationModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Ignore the computation of the Jacobians of the actuation function.\n\n"
+          "It does not update the Jacobians of the actuation function as this function\n"
+          "is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: actuation data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ActuationModelAbstract_wrap::createData, &ActuationModelAbstract_wrap::default_createData,
            bp::args("self"),
            "Create the actuation data.\n\n"
@@ -56,9 +72,8 @@ void exposeActuationAbstract() {
   bp::class_<ActuationDataAbstract, boost::noncopyable>(
       "ActuationDataAbstract",
       "Abstract class for actuation datas.\n\n"
-      "In crocoddyl, an actuation data contains all the required information for processing an\n"
-      "user-defined actuation model. The actuation data typically is allocated onces by running\n"
-      "model.createData().",
+      "An actuation data contains all the required information for processing an user-defined \n"
+      "actuation model. The actuation data typically is allocated onces by running model.createData().",
       bp::init<ActuationModelAbstract*>(bp::args("self", "model"),
                                         "Create common data shared between actuation models.\n\n"
                                         "The actuation data uses the model in order to first process it.\n"

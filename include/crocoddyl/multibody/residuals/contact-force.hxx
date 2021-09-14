@@ -52,6 +52,12 @@ void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<Residual
 }
 
 template <typename Scalar>
+void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
+
+template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                     const Eigen::Ref<const VectorXs>&,
                                                     const Eigen::Ref<const VectorXs>&) {
@@ -71,6 +77,12 @@ void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<Resi
     default:
       break;
   }
+}
+
+template <typename Scalar>
+void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                    const Eigen::Ref<const VectorXs>&) {
+  data->Rx.setZero();
 }
 
 template <typename Scalar>

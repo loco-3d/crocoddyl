@@ -24,19 +24,25 @@ void exposeActuationSquashing() {
           ":param actuation: actuation model to be squashed,\n"
           ":param squashing: squashing function,\n"
           ":param nu: number of controls"))
-      .def("calc", &ActuationSquashingModel::calc, bp::args("self", "data", "x", "u"),
-           "Compute the actuation signal from the squashing input u.\n\n"
-           "It describes the time-continuos evolution of the actuation model.\n"
-           ":param data: actuation data\n"
-           ":param x: state point (dim. state.nx)\n"
-           ":param u: squashing function input")
-      .def("calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x", "u"),
-           "Compute the derivatives of the actuation model.\n\n"
-           "It computes the partial derivatives of the actuation model which is\n"
-           "describes in continouos time. It assumes that calc has been run first.\n"
-           ":param data: actuation data\n"
-           ":param x: state point (dim. state.nx)\n"
-           ":param u: control input (dim. nu).")
+      .def<void (ActuationSquashingModel::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                             const Eigen::Ref<const Eigen::VectorXd>&,
+                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActuationSquashingModel::calc, bp::args("self", "data", "x", "u"),
+          "Compute the actuation signal from the squashing input u.\n\n"
+          "It describes the time-continuos evolution of the actuation model.\n"
+          ":param data: actuation data\n"
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: squashing function input")
+      .def<void (ActuationSquashingModel::*)(const boost::shared_ptr<ActuationDataAbstract>&,
+                                             const Eigen::Ref<const Eigen::VectorXd>&,
+                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ActuationSquashingModel::calcDiff, bp::args("self", "data", "x", "u"),
+          "Compute the derivatives of the actuation model.\n\n"
+          "It computes the partial derivatives of the actuation model which is\n"
+          "describes in continouos time. It assumes that calc has been run first.\n"
+          ":param data: actuation data\n"
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu).")
       .def("createData", &ActuationSquashingModel::createData, bp::args("self"),
            "Create the actuation squashing data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"

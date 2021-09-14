@@ -40,6 +40,15 @@ void ResidualModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<ResidualD
 }
 
 template <typename Scalar>
+void ResidualModelControlGravTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+                                               const Eigen::Ref<const VectorXs> &x) {
+  Data *d = static_cast<Data *>(data.get());
+
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  data->r = -pinocchio::computeGeneralizedGravity(pin_model_, d->pinocchio, q);
+}
+
+template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
                                                    const Eigen::Ref<const VectorXs> &x,
                                                    const Eigen::Ref<const VectorXs> &) {
@@ -51,6 +60,18 @@ void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<Resid
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, Rq);
   Rq *= -1;
   data->Ru = d->actuation->dtau_du;
+}
+
+template <typename Scalar>
+void ResidualModelControlGravTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+                                                   const Eigen::Ref<const VectorXs> &x) {
+  Data *d = static_cast<Data *>(data.get());
+
+  // Compute the derivatives of the residual residual
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic, true> Rq = data->Rx.leftCols(state_->get_nv());
+  pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q, Rq);
+  Rq *= -1;
 }
 
 template <typename Scalar>

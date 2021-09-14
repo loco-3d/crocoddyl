@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, New York University,
 // Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -36,10 +36,23 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<Dif
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  Data* data_nd = static_cast<Data*>(data.get());
-  model_->calc(data_nd->data_0, x, u);
-  data->cost = data_nd->data_0->cost;
-  data->xout = data_nd->data_0->xout;
+  Data* d = static_cast<Data*>(data.get());
+  model_->calc(d->data_0, x, u);
+  data->cost = d->data_0->cost;
+  data->xout = d->data_0->xout;
+}
+
+template <typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                                     const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+  model_->calc(d->data_0, x);
+  data->cost = d->data_0->cost;
+  data->xout = d->data_0->xout;
 }
 
 template <typename Scalar>
@@ -54,50 +67,89 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
 
-  const VectorXs& xn0 = data_nd->data_0->xout;
-  const Scalar c0 = data_nd->data_0->cost;
-  data->xout = data_nd->data_0->xout;
-  data->cost = data_nd->data_0->cost;
+  const VectorXs& xn0 = d->data_0->xout;
+  const Scalar c0 = d->data_0->cost;
+  data->xout = d->data_0->xout;
+  data->cost = d->data_0->cost;
 
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  data_nd->dx.setZero();
+  d->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    data_nd->dx(ix) = disturbance_;
-    model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
-    model_->calc(data_nd->data_x[ix], data_nd->xp, u);
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp, u);
 
-    const VectorXs& xn = data_nd->data_x[ix]->xout;
-    const Scalar c = data_nd->data_x[ix]->cost;
+    const VectorXs& xn = d->data_x[ix]->xout;
+    const Scalar c = d->data_x[ix]->cost;
     data->Fx.col(ix) = (xn - xn0) / disturbance_;
 
     data->Lx(ix) = (c - c0) / disturbance_;
-    data_nd->Rx.col(ix) = (data_nd->data_x[ix]->r - data_nd->data_0->r) / disturbance_;
-    data_nd->dx(ix) = 0.0;
+    d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
+    d->dx(ix) = 0.0;
   }
 
   // Computing the d action(x,u) / du
-  data_nd->du.setZero();
+  d->du.setZero();
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
-    data_nd->du(iu) = disturbance_;
-    model_->calc(data_nd->data_u[iu], x, u + data_nd->du);
+    d->du(iu) = disturbance_;
+    model_->calc(d->data_u[iu], x, u + d->du);
 
-    const VectorXs& xn = data_nd->data_u[iu]->xout;
-    const Scalar c = data_nd->data_u[iu]->cost;
+    const VectorXs& xn = d->data_u[iu]->xout;
+    const Scalar c = d->data_u[iu]->cost;
     data->Fu.col(iu) = (xn - xn0) / disturbance_;
 
     data->Lu(iu) = (c - c0) / disturbance_;
-    data_nd->Ru.col(iu) = (data_nd->data_u[iu]->r - data_nd->data_0->r) / disturbance_;
-    data_nd->du(iu) = 0.0;
+    d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / disturbance_;
+    d->du(iu) = 0.0;
   }
 
   if (with_gauss_approx_) {
-    data->Lxx = data_nd->Rx.transpose() * data_nd->Rx;
-    data->Lxu = data_nd->Rx.transpose() * data_nd->Ru;
-    data->Luu = data_nd->Ru.transpose() * data_nd->Ru;
+    data->Lxx = d->Rx.transpose() * d->Rx;
+    data->Lxu = d->Rx.transpose() * d->Ru;
+    data->Luu = d->Ru.transpose() * d->Ru;
+  } else {
+    data->Lxx.setZero();
+    data->Lxu.setZero();
+    data->Luu.setZero();
+  }
+}
+
+template <typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                                         const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  const Scalar c0 = d->data_0->cost;
+  data->xout = d->data_0->xout;
+  data->cost = d->data_0->cost;
+
+  assertStableStateFD(x);
+
+  // Computing the d action(x,u) / dx
+  d->dx.setZero();
+  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+    d->dx(ix) = disturbance_;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp);
+    const Scalar c = d->data_x[ix]->cost;
+
+    data->Lx(ix) = (c - c0) / disturbance_;
+    d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
+    d->dx(ix) = 0.0;
+  }
+
+  if (with_gauss_approx_) {
+    data->Lxx = d->Rx.transpose() * d->Rx;
+  } else {
+    data->Lxx.setZero();
   }
 }
 

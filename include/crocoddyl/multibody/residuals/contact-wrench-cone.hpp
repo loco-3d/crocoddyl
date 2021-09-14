@@ -102,6 +102,17 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the residual vector for nodes that depends only on the state
+   *
+   * It updates the residual vector based on the state only (i.e., it ignores the contact forces). This function
+   * is used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the contact wrench cone residual
    *
    * The CoP residual is computed based on the \f$\mathbf{A}\f$ matrix, the force vector is computed by
@@ -114,6 +125,17 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
    */
   virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the Jacobian of the residual functions with respect to the state only
+   *
+   * It updates the Jacobian of the residual function based on the state only (i.e., it ignores the contact forces).
+   * This function is used in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Residual data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the contact wrench cone residual data

@@ -90,7 +90,6 @@ void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type, ActivationMod
 
   // Computing the cost derivatives
   model->calc(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
@@ -120,7 +119,7 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
@@ -155,6 +154,27 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data_num_diff->Luu).isZero(tol));
+  }
+
+  // Computing the cost derivatives
+  x = model->get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  actuation_model->calc(actuation_data, x);
+  actuation_model->calcDiff(actuation_data, x);
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  // Computing the cost derivatives via numerical differentiation
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against numdiff
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  if (model_num_diff.get_with_gauss_approx()) {
+    // The num diff is not precise enough to be tested here.
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+  } else {
+    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
 }
 

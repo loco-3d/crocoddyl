@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,6 +17,27 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief This class computes the numerical differentiation of a differential action model.
+ *
+ * It computes Jacobian of the cost, its residual and dynamics via numerical differentiation.
+ * It considers that the action model owns a cost residual and the cost is the square of this residual, i.e.,
+ * \f$\ell(\mathbf{x},\mathbf{u})=\frac{1}{2}\|\mathbf{r}(\mathbf{x},\mathbf{u})\|^2\f$, where
+ * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$ is the residual vector.  The Hessian is computed only through the
+ * Gauss-Newton approximation, i.e.,
+ * \f{eqnarray*}{
+ *     \mathbf{\ell}_\mathbf{xx} &=& \mathbf{R_x}^T\mathbf{R_x} \\
+ *     \mathbf{\ell}_\mathbf{uu} &=& \mathbf{R_u}^T\mathbf{R_u} \\
+ *     \mathbf{\ell}_\mathbf{xu} &=& \mathbf{R_x}^T\mathbf{R_u}
+ * \f}
+ * where the Jacobians of the cost residuals are denoted by \f$\mathbf{R_x}\f$ and \f$\mathbf{R_u}\f$.
+ * Note that this approximation ignores the tensor products (e.g., \f$\mathbf{R_{xx}}\mathbf{r}\f$).
+ *
+ * Finally, in the case that the cost does not have a residual, we set the Hessian to zero, i.e.,
+ * \f$\mathbf{L_{xx}} = \mathbf{L_{xu}} = \mathbf{L_{uu}} = \mathbf{0}\f$.
+ *
+ * \sa `DifferentialActionModelAbstractTpl()`, `calcDiff()`
+ */
 template <typename _Scalar>
 class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
@@ -30,18 +51,64 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the numdiff differential action model
+   *
+   * @param[in] model              Differential action model that we want to apply the numerical differentiation
+   * @param[in] with_gauss_approx  True if we want to use the Gauss approximation for computing the Hessians
+   */
   explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, const bool with_gauss_approx = false);
   virtual ~DifferentialActionModelNumDiffTpl();
 
+  /**
+   * @brief @copydoc Base::calc()
+   */
   virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::calcDiff()
+   */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief @copydoc Base::createData()
+   */
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
+  /**
+   * @brief Return the differential acton model that we use to numerical differentiate
+   */
   const boost::shared_ptr<Base>& get_model() const;
+
+  /**
+   * @brief Return the disturbance used in the numerical differentiation routine
+   */
   const Scalar get_disturbance() const;
+
+  /**
+   * @brief Modify the disturbance used in the numerical differentiation routine
+   */
   void set_disturbance(const Scalar disturbance);
+
+  /**
+   * @brief Identify if the Gauss approximation is going to be used or not.
+   */
   bool get_with_gauss_approx();
 
  protected:

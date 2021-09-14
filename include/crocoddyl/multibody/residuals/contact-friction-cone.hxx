@@ -36,6 +36,12 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<R
 }
 
 template <typename Scalar>
+void ResidualModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                       const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
+
+template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                            const Eigen::Ref<const VectorXs>&,
                                                            const Eigen::Ref<const VectorXs>&) {
@@ -51,6 +57,12 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_p
     data->Rx.noalias() = A * df_dx;
     data->Ru.noalias() = A * df_du;
   }
+}
+
+template <typename Scalar>
+void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                           const Eigen::Ref<const VectorXs>&) {
+  data->Rx.setZero();
 }
 
 template <typename Scalar>

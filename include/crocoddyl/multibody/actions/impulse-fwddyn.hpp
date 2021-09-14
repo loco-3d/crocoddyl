@@ -30,6 +30,34 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Action model for impulse forward dynamics in multibody systems.
+ *
+ * This class implements impulse forward dynamics given a stack of rigid-impulses described in
+ * `ImpulseModelMultipleTpl`, i.e.,
+ * \f[
+ * \left[\begin{matrix}\mathbf{v}^+ \\ -\boldsymbol{\Lambda}\end{matrix}\right] =
+ * \left[\begin{matrix}\mathbf{M} & \mathbf{J}^{\top}_c \\ {\mathbf{J}_{c}} & \mathbf{0} \end{matrix}\right]^{-1}
+ * \left[\begin{matrix}\mathbf{M}\mathbf{v}^- \\ -e\mathbf{J}_c\mathbf{v}^- \\\end{matrix}\right],
+ * \f]
+ * where \f$\mathbf{q}\in Q\f$, \f$\mathbf{v}\in\mathbb{R}^{nv}\f$ are the configuration point and generalized velocity
+ * (its tangent vector), respectively; \f$\mathbf{v}^+\f$, \f$\mathbf{v}^-\f$ are the discontinuous changes in the
+ * generalized velocity (i.e., velocity before and after impact, respectively);
+ * \f$\mathbf{J}_c\in\mathbb{R}^{nc\times nv}\f$ is the contact Jacobian expressed in the local frame; and
+ * \f$\boldsymbol{\Lambda}\in\mathbb{R}^{nc}\f$ is the impulse vector.
+ *
+ * The derivatives of the next state and contact impulses are computed efficiently
+ * based on the analytical derivatives of Recursive Newton Euler Algorithm (RNEA) as described in
+ * \cite mastalli-icra20. Note that the algorithm for computing the RNEA derivatives is described in
+ * \cite carpentier-rss18.
+ *
+ * The stack of cost functions is implemented in `CostModelSumTpl`. The computation of the impulse dynamics and its
+ * derivatives are carrying out inside `calc()` and `calcDiff()` functions, respectively. It is also important to
+ * remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we need to run
+ * `calc()` first.
+ *
+ * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
@@ -46,32 +74,107 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the impulse forward-dynamics action model
+   *
+   * It describes the impulse dynamics of a multibody system under rigid-contact constraints defined by
+   * `ImpulseModelMultipleTpl`. It computes the cost described in `CostModelSumTpl`.
+   *
+   * @param[in] state            State of the multibody system
+   * @param[in] actuation        Actuation model
+   * @param[in] impulses         Stack of rigid impulses
+   * @param[in] costs            Stack of cost functions
+   * @param[in] r_coeff          Restitution coefficient (default 0.)
+   * @param[in] JMinvJt_damping  Damping term used in operational space inertia matrix (default 0.)
+   * @param[in] enable_force     Enable the computation of the contact force derivatives (default false)
+   */
   ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
                                    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
                                    const Scalar JMinvJt_damping = Scalar(0.), const bool enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
+  /**
+   * @brief Compute the system acceleration, and cost value
+   *
+   * It computes the system acceleration using the impulse dynamics.
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the impulse dynamics, and cost function
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Create the impulse forward-dynamics data
+   *
+   * @return impulse forward-dynamics data
+   */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Check that the given data belongs to the impulse forward-dynamics data
+   */
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  /**
+   * @brief Return the impulse model
+   */
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
+
+  /**
+   * @brief Return the cost model
+   */
   const boost::shared_ptr<CostModelSum>& get_costs() const;
+
+  /**
+   * @brief Return the Pinocchio model
+   */
   pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
+
+  /**
+   * @brief Return the armature vector
+   */
   const VectorXs& get_armature() const;
+
+  /**
+   * @brief Return the restituion coefficient
+   */
   const Scalar get_restitution_coefficient() const;
+
+  /**
+   * @brief Return the damping factor used in the operational space inertia matrix
+   */
   const Scalar get_damping_factor() const;
 
+  /**
+   * @brief Modify the armature vector
+   */
   void set_armature(const VectorXs& armature);
+
+  /**
+   * @brief Modify the restituion coefficient
+   */
   void set_restitution_coefficient(const Scalar r_coeff);
+
+  /**
+   * @brief Modify the damping factor used in the operational space inertia matrix
+   */
   void set_damping_factor(const Scalar damping);
 
   /**
-   * @brief Print relevant information of the impulase forward-dynamics model
+   * @brief Print relevant information of the impulse forward-dynamics model
    *
    * @param[out] os  Output stream object
    */
@@ -81,15 +184,15 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ImpulseModelMultiple> impulses_;
-  boost::shared_ptr<CostModelSum> costs_;
-  pinocchio::ModelTpl<Scalar>& pinocchio_;
-  bool with_armature_;
-  VectorXs armature_;
-  Scalar r_coeff_;
-  Scalar JMinvJt_damping_;
-  bool enable_force_;
-  pinocchio::MotionTpl<Scalar> gravity_;
+  boost::shared_ptr<ImpulseModelMultiple> impulses_;  //!< Impulse model
+  boost::shared_ptr<CostModelSum> costs_;             //!< Cost model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;            //!< Pinocchio model
+  bool with_armature_;                                //!< Indicate if we have defined an armature
+  VectorXs armature_;                                 //!< Armature vector
+  Scalar r_coeff_;                                    //!< Restitution coefficient
+  Scalar JMinvJt_damping_;                            //!< Damping factor used in operational space inertia matrix
+  bool enable_force_;  //!< Indicate if we have enabled the computation of the contact-forces derivatives
+  pinocchio::MotionTpl<Scalar> gravity_;  //! Gravity acceleration
 };
 
 template <typename _Scalar>

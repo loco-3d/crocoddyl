@@ -21,13 +21,19 @@ namespace crocoddyl {
  * @brief 2-norm barrier activation
  *
  * This activation function describes a quadratic barrier of the 2-norm of a
- * residual vector, i.e. \f[ \begin{equation} \frac{1}{2} (d - \alpha)^2 \end{equation} \f] if \f$d < \alpha\f$ ,
- * else \f$0\f$, where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the
+ * residual vector, i.e.,
+ * \f[
+ * \Bigg\{\begin{aligned}
+ * &\frac{1}{2} (d - \alpha)^2, &\textrm{if} \,\,\, d < \alpha \\
+ * &0, &\textrm{otherwise},
+ * \end{aligned}
+ * \f]
+ * where \f$d = \|r\|\f$ is the norm of the residual, \f$\alpha\f$ the threshold distance from which the
  * barrier is active, \f$nr\f$ is the dimension of the residual vector.
  *
  * The computation of the function and it derivatives are carried out in `calc()` and `calcDiff()`, respectively.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`
+ * \sa `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
@@ -47,7 +53,7 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
    * The default `alpha` value is defined as 0.1.
    *
    * @param[in] nr            Dimension of the residual vector
-   * @param[in] alpha         Threshold factor (default: 0.1)
+   * @param[in] alpha         Threshold factor (default 0.1)
    * @param[in] true_hessian  Boolean indicating whether to use the Gauss-Newton approximation or true Hessian in
    * computing the derivatives (default: false)
    */

@@ -38,6 +38,12 @@ void ResidualModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<Res
 }
 
 template <typename Scalar>
+void ResidualModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                     const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
+
+template <typename Scalar>
 void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                          const Eigen::Ref<const VectorXs>&,
                                                          const Eigen::Ref<const VectorXs>&) {
@@ -48,6 +54,12 @@ void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr
   const MatrixX6s& A = fref_.get_A();
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
+}
+
+template <typename Scalar>
+void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                         const Eigen::Ref<const VectorXs>&) {
+  data->Rx.setZero();
 }
 
 template <typename Scalar>

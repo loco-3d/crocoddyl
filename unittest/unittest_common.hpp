@@ -14,7 +14,7 @@
 #ifndef CROCODDYL_UNITTEST_COMMON_HPP_
 #define CROCODDYL_UNITTEST_COMMON_HPP_
 
-#define NUMDIFF_MODIFIER 10.
+#define NUMDIFF_MODIFIER 20.
 
 #include <iterator>
 #include <boost/test/included/unit_test.hpp>

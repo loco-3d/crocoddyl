@@ -34,24 +34,34 @@ void exposeCostResidual() {
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelResidual::calc, bp::args("self", "data", "x", "u"),
           "Compute the residual cost.\n\n"
-          ":param data: cost data\n"
+          ":param data: cost residual data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                       const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &CostModelAbstract::calc,
-                                                                                  bp::args("self", "data", "x"))
+                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the residual cost based on state only.\n\n"
+          "It updates the total cost based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: cost data\n"
+          ":param x: state point (dim. state.nx)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelResidual::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the residual cost.\n\n"
           "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
+          ":param data: cost residual data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(const boost::shared_ptr<CostDataAbstract>&,
                                        const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the derivatives of the residual cost with respect to the state only.\n\n"
+          "It updates the Jacobian and Hessian of the cost function based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: cost residual data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &CostModelResidual::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the residual cost data.\n\n"

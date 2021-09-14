@@ -58,7 +58,7 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  Eigen::VectorXd x = model->get_state()->rand();
   const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the actuation derivatives
@@ -72,6 +72,17 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
   BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
+
+  // Computing the actuation derivatives
+  x = model->get_state()->rand();
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+
+  // Checking the partial derivatives against numdiff
+  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//

@@ -26,10 +26,10 @@ void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",
       "Abstract class for action models.\n\n"
-      "In crocoddyl, an action model combines dynamics and cost data. Each node, in our optimal\n"
-      "control problem, is described through an action model. Every time that we want to describe\n"
+      "An action model combines dynamics and cost data. Each node, in our optimal control\n"
+      "problem, is described through an action model. Every time that we want to describe\n"
       "a problem, we need to provide ways of computing the dynamics, cost functions and their\n"
-      "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
+      "derivatives. These computations are mainly carrying on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
           bp::args("self", "state", "nu", "nr"),
@@ -47,8 +47,13 @@ void exposeActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                         const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &ActionModelAbstract::calc,
-                                                                                    bp::args("self", "data", "x"))
+                                         const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"),
+          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "It updates the total cost and the next state is not computed as it is not expected to change.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: action data\n"
+          ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&ActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
            "It computes the partial derivatives of the dynamical system and the\n"
@@ -60,7 +65,12 @@ void exposeActionAbstract() {
            ":param u: control input (dim. nu)")
       .def<void (ActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"),
+          "Compute the derivatives of the cost functions with respect to the state only.\n\n"
+          "It updates the derivatives of the cost function with respect to the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: action data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ActionModelAbstract_wrap::createData, &ActionModelAbstract_wrap::default_createData,
            bp::args("self"),
            "Create the action data.\n\n"

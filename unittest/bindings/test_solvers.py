@@ -48,6 +48,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_compute_search_direction(self):
         # Compute the direction
+        self.solver.setCandidate([], [], False)
+        self.solver_der.setCandidate([], [], False)
         self.solver.computeDirection()
         self.solver_der.computeDirection()
         # Check the LQ model of the Hamiltonian
@@ -60,7 +62,7 @@ class SolverAbstractTestCase(unittest.TestCase):
         for qxu1, qxu2 in zip(self.solver.Qxu, self.solver_der.Qxu):
             self.assertTrue(np.allclose(qxu1, qxu2, atol=1e-9), "Quu doesn't match.")
         for quu1, quu2 in zip(self.solver.Quu, self.solver_der.Quu):
-            self.assertTrue(np.allclose(qx1, qx2, atol=1e-9), "Quu doesn't match.")
+            self.assertTrue(np.allclose(quu1, quu2, atol=1e-9), "Quu doesn't match.")
         for vx1, vx2 in zip(self.solver.Vx, self.solver_der.Vx):
             self.assertTrue(np.allclose(vx1, vx2, atol=1e-9), "Vx doesn't match.")
         for vxx1, vxx2 in zip(self.solver.Vxx, self.solver_der.Vxx):
@@ -68,15 +70,17 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_try_step(self):
         # Try a full step and check the improvement in the cost
+        self.solver.setCandidate([], [], False)
+        self.solver_der.setCandidate([], [], False)
         self.solver.computeDirection()
         self.solver_der.computeDirection()
         cost = self.solver.tryStep()
         costDer = self.solver_der.tryStep()
-        self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value for full step")
+        self.assertAlmostEqual(cost, costDer, 9, "Wrong cost value for full step")
         # Try a half step and check the improvement in the cost
         cost = self.solver.tryStep(0.5)
         costDer = self.solver_der.tryStep(0.5)
-        self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value for half step")
+        self.assertAlmostEqual(cost, costDer, 9, "Wrong cost value for half step")
 
     def test_stopping_criteria(self):
         # Run 2 iteration in order to boost test analysis
@@ -85,7 +89,7 @@ class SolverAbstractTestCase(unittest.TestCase):
         # Compute and check the stopping criteria
         stop = self.solver.stoppingCriteria()
         stopDer = self.solver_der.stoppingCriteria()
-        self.assertAlmostEqual(stop, stopDer, 10, "Wrong stopping value")
+        self.assertAlmostEqual(stop, stopDer, 9, "Wrong stopping value")
 
     def test_expected_improvement(self):
         # Run 2 iteration in order to boost test analysis
@@ -118,7 +122,7 @@ class TalosArmDDPTest(SolverAbstractTestCase):
         crocoddyl.CostModelResidual(
             STATE,
             crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                                                  pinocchio.SE3.Random())), 1e-3)
+                                                  pinocchio.SE3.Random())), 1e-5)
     COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
@@ -137,7 +141,7 @@ class TalosArmFDDPTest(SolverAbstractTestCase):
         crocoddyl.CostModelResidual(
             STATE,
             crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                                                  pinocchio.SE3.Random())), 1e-3)
+                                                  pinocchio.SE3.Random())), 1e-5)
     COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
