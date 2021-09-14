@@ -158,6 +158,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   // Computing the cost value and residuals
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
+  if (constraints_ != nullptr) {
+    constraints_->calc(d->constraints, x);
+  }
 }
 
 template <typename Scalar>
@@ -228,6 +231,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   }
   Data* d = static_cast<Data*>(data.get());
   costs_->calcDiff(d->costs, x);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x);
+  }
 }
 
 template <typename Scalar>
