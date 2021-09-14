@@ -23,9 +23,9 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for action model
  *
- * In Crocoddyl, an action model combines dynamics and cost models. Each node, in our optimal control problem, is
- * described through an action model. Every time that we want describe a problem, we need to provide ways of computing
- * the dynamics, cost functions and their derivatives. All these is described inside the action model.
+ * An action model combines dynamics and cost models. Each node, in our optimal control problem, is described through
+ * an action model. Every time that we want describe a problem, we need to provide ways of computing the dynamics, cost
+ * functions and their derivatives. All these is described inside the action model.
  *
  * Concretely speaking, the action model describes a time-discrete action model with a first-order ODE along a cost
  * function, i.e.

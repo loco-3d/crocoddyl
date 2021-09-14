@@ -26,10 +26,10 @@ void exposeActionAbstract() {
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",
       "Abstract class for action models.\n\n"
-      "In crocoddyl, an action model combines dynamics and cost data. Each node, in our optimal\n"
-      "control problem, is described through an action model. Every time that we want to describe\n"
+      "An action model combines dynamics and cost data. Each node, in our optimal control\n"
+      "problem, is described through an action model. Every time that we want to describe\n"
       "a problem, we need to provide ways of computing the dynamics, cost functions and their\n"
-      "derivatives. These computations are mainly carry on inside calc() and calcDiff(),\n"
+      "derivatives. These computations are mainly carrying on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int, bp::optional<int> >(
           bp::args("self", "state", "nu", "nr"),
@@ -50,7 +50,7 @@ void exposeActionAbstract() {
                                          const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
-          "It updates the total cost when the next state remains the same to current one.\n"
+          "It updates the total cost and the next state is not computed as it is not expected to change.\n"
           "This function is commonly used in the terminal nodes of an optimal control problem.\n"
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)")
