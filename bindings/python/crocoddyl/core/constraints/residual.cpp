@@ -36,8 +36,8 @@ void exposeConstraintResidual() {
           "calc", &ConstraintModelResidual::calc, bp::args("self", "data", "x", "u"),
           "Compute the residual constraint.\n\n"
           ":param data: constraint data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input")
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)")
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
@@ -52,9 +52,9 @@ void exposeConstraintResidual() {
           "calcDiff", &ConstraintModelResidual::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the residual constraint.\n\n"
           "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: time-discrete state vector\n"
-          ":param u: time-discrete control input\n")
+          ":param data: constraint data\n"
+          ":param x: state point (dim. state.nx)\n"
+          ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"),

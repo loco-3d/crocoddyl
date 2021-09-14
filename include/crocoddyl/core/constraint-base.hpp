@@ -22,21 +22,21 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for constraint models
  *
- * In Crocoddyl, a constraint model defines both: inequality \f$\mathbf{g}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{ng}\f$
- * and equality \f$\mathbf{h}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{nh}\f$ constraints.
- * The constraint function depends on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold
- * described with a `nq`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to
- * the tangent space with `nv` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
+ * A constraint model defines both: inequality \f$\mathbf{g}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{ng}\f$
+ * and equality \f$\mathbf{h}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{nh}\f$ constraints. The constraint
+ * function depends on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold
+ * described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to
+ * the tangent space with `ndx` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
  *
- * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the constraint residual and
- * `calcDiff` computes the Jacobians of the constraint function. Concretely speaking, `calcDiff` builds
- * a linear approximation of the constraint function with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
- * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
- * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
- * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * The main computations are carrying out in `calc()` and `calcDiff()` routines. `calc()` computes the
+ * constraint residual and `calcDiff()` computes the Jacobians of the constraint function. Concretely speaking,
+ * `calcDiff()` builds a linear approximation of the constraint function with the form:
+ * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$, \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$. Additionally, it is
+ * important remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
+ * need to run first `calc()`.
  *
- * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class ConstraintModelAbstractTpl {
@@ -86,7 +86,7 @@ class ConstraintModelAbstractTpl {
   virtual ~ConstraintModelAbstractTpl();
 
   /**
-   * @brief Compute the constraint value and its residual vector
+   * @brief Compute the constraint value
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$

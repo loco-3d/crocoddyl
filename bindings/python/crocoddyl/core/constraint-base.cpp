@@ -18,9 +18,9 @@ void exposeConstraintAbstract() {
   bp::class_<ConstraintModelAbstract_wrap, boost::noncopyable>(
       "ConstraintModelAbstract",
       "Abstract multibody constraint models.\n\n"
-      "In Crocoddyl, a constraint model defines both: inequality g(x,u) and equality h(x, u) constraints.\n"
+      "A constraint model defines both: inequality g(x,u) and equality h(x, u) constraints.\n"
       "The constraint function depends on the state point x, which lies in the state manifold\n"
-      "described with a nq-tuple, its velocity xd that belongs to the tangent space with nv dimension,\n"
+      "described with a nx-tuple, its velocity xd that belongs to the tangent space with ndx dimension,\n"
       "and the control input u.",
       bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "residual", "ng", "nh"),
@@ -45,8 +45,8 @@ void exposeConstraintAbstract() {
       .def("calc", pure_virtual(&ConstraintModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the constraint value.\n\n"
            ":param data: constraint data\n"
-           ":param x: state vector\n"
-           ":param u: control input")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
       .def<void (ConstraintModelAbstract::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
@@ -60,8 +60,8 @@ void exposeConstraintAbstract() {
            "It computes the Jacobians of the constraint function.\n"
            "It assumes that calc has been run first.\n"
            ":param data: constraint data\n"
-           ":param x: state vector\n"
-           ":param u: control input\n")
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelAbstract::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
                                              const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"),
