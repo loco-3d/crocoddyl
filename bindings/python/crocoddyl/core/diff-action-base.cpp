@@ -49,8 +49,9 @@ void exposeDifferentialActionAbstract() {
                                                      const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the state.\n\n"
-          "It updates the total cost and the system acceleration is not updated as it is expected to be zero.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "It updates the total cost and the system acceleration is not updated as the control\n"
+          "input is undefined. This function is commonly used in the terminal nodes of an optimal\n"
+          "control problem.\n"
           ":param data: differential action data\n"
           ":param x: state point (dim. state.nx)")
       .def("calcDiff", pure_virtual(&DifferentialActionModelAbstract_wrap::calcDiff),
