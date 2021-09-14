@@ -22,15 +22,18 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for action model
  *
- * An action model combines dynamics and cost models. Each node, in our optimal control problem, is described through
- * an action model. Every time that we want describe a problem, we need to provide ways of computing the dynamics, cost
- * functions and their derivatives. All these is described inside the action model.
+ * An action model combines dynamics, cost functions and constraints. Each node, in our optimal control problem, is
+ * described through an action model. Every time that we want describe a problem, we need to provide ways of computing
+ * the dynamics, cost functions, constraints and their derivatives. All these is described inside the action model.
  *
  * Concretely speaking, the action model describes a time-discrete action model with a first-order ODE along a cost
  * function, i.e.
+ *  - the state \f$\mathbf{z}\in\mathcal{Z}\f$ lies in a manifold described with a `nx`-tuple,
+ *  - the state rate \f$\mathbf{\dot{x}}\in T_{\mathbf{q}}\mathcal{Q}\f$ is the tangent vector to the state manifold
+ * with `ndx` dimension,
  *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean vector
  *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
- * `ActivationModelAbstractTpl`),
+ * `ResidualModelAbstractTpl` and `ActivationModelAbstractTpl`, respetively),
  *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
  * equality vector functions, respectively.
  *
@@ -42,10 +45,11 @@ namespace crocoddyl {
  * are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the action model,
  * i.e.: \f[ \begin{aligned}
  * &\delta\mathbf{x}_{k+1} = \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k, &\textrm{(dynamics)}\\
- * &l(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
+ * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
  * \delta\mathbf{u}_k\end{bmatrix}^T
- * \begin{bmatrix}0 & \mathbf{l_x}^T & \mathbf{l_u}^T \\ \mathbf{l_x} & \mathbf{l_{xx}} & \mathbf{l_{ux}}^T \\
- * \mathbf{l_u} & \mathbf{l_{ux}} & \mathbf{l_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
+ * \begin{bmatrix}0 & \mathbf{\ell_x}^T & \mathbf{\ell_u}^T \\ \mathbf{\ell_x} & \mathbf{\ell_{xx}} &
+ * \mathbf{\ell_{ux}}^T \\
+ * \mathbf{\ell_u} & \mathbf{\ell_{ux}} & \mathbf{\ell_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
  * \delta\mathbf{u}_k\end{bmatrix}, &\textrm{(cost)}\\
  * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)<\mathbf{0}, &\textrm{(inequality constraint)}\\
  * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)=\mathbf{0}, &\textrm{(equality constraint)}
@@ -54,15 +58,16 @@ namespace crocoddyl {
  * where
  *  - \f$\mathbf{f_x}\in\mathbb{R}^{ndx\times ndx}\f$ and \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ are the
  * Jacobians of the dynamics,
- *  - \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$ and \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the cost
- * function,
- *  - \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the cost function,
+ *  - \f$\mathbf{\ell_x}\in\mathbb{R}^{ndx}\f$ and \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the
+ * cost function,
+ *  - \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
+ * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the cost function,
  *  - \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$ and \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the
  * Jacobians of the inequality constraints, and
  *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the
  * Jacobians of the equality constraints.
- * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ *
+ * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
