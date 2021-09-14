@@ -23,17 +23,17 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for differential action model
  *
- * In Crocoddyl, a differential action model combines dynamics, cost and constraints models. We can use it in each node
- * of our optimal control problem thanks to dedicated integration rules (e.g. `IntegratedActionModelEulerTpl` or
+ * A differential action model combines dynamics, cost and constraints models. We can use it in each node
+ * of our optimal control problem thanks to dedicated integration rules (e.g., `IntegratedActionModelEulerTpl` or
  * `IntegratedActionModelRK4Tpl`). These integrated action models produces action models (`ActionModelAbstractTpl`).
  * Thus, every time that we want describe a problem, we need to provide ways of computing the dynamics, cost,
  * constraints functions and their derivatives. All these is described inside the differential action model.
  *
- * Concretely speaking, the differential action model is the time-continuous version of an action model, i.e.
+ * Concretely speaking, the differential action model is the time-continuous version of an action model, i.e.,
  * \f[
  * \begin{aligned}
  * &\dot{\mathbf{v}} = \mathbf{f}(\mathbf{q}, \mathbf{v}, \mathbf{u}), &\textrm{(dynamics)}\\
- * &l(\mathbf{q}, \mathbf{v},\mathbf{u}) = \int_0^{\delta t} a(\mathbf{r}(\mathbf{q}, \mathbf{v},\mathbf{u}))\,dt,
+ * &\ell(\mathbf{q}, \mathbf{v},\mathbf{u}) = \int_0^{\delta t} a(\mathbf{r}(\mathbf{q}, \mathbf{v},\mathbf{u}))\,dt,
  * &\textrm{(cost)}\\
  * &\mathbf{g}(\mathbf{q}, \mathbf{v},\mathbf{u})<\mathbf{0}, &\textrm{(inequality constraint)}\\
  * &\mathbf{h}(\mathbf{q}, \mathbf{v},\mathbf{u})=\mathbf{0}, &\textrm{(equality constraint)}
@@ -41,15 +41,15 @@ namespace crocoddyl {
  * \f]
  * where
  *  - the configuration \f$\mathbf{q}\in\mathcal{Q}\f$ lies in the configuration manifold described with a `nq`-tuple,
- *  - the velocity \f$\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ its a tangent vector to this manifold with `nv`
- * dimension,
+ *  - the velocity \f$\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ is the tangent vector to the configuration manifold
+ * with `nv` dimension,
  *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean vector,
  *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
- * `ActivationModelAbstractTpl`),
+ * `ResidualModelAbstractTpl` and `ActivationModelAbstractTpl`, respectively),
  *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
  * equality vector functions, respectively.
  *
- * Both configuration and velocity describe the system space \f$\mathbf{x}=(\mathbf{q}, \mathbf{v})\in\mathbf{X}\f$
+ * Both configuration and velocity describe the system space \f$\mathbf{x}=(\mathbf{q}, \mathbf{v})\in\mathcal{X}\f$
  * which lies in the state manifold. Note that the acceleration \f$\dot{\mathbf{v}}\in T_{\mathbf{q}}\mathcal{Q}\f$
  * lies also in the tangent space of the configuration manifold.
  * The computation of these equations are carrying out inside `calc()` function. In short, this function computes
@@ -58,17 +58,18 @@ namespace crocoddyl {
  *
  * However, during numerical optimization, we also need to run backward passes of the differential action model. These
  * calculations are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the
- * differential action model, i.e.:
+ * differential action model, i.e.,
  * \f[
  * \begin{aligned}
  * &\delta\dot{\mathbf{v}} =
  * \mathbf{f_{q}}\delta\mathbf{q}+\mathbf{f_{v}}\delta\mathbf{v}+\mathbf{f_{u}}\delta\mathbf{u}, &\textrm{(dynamics)}\\
- * &l(\delta\mathbf{q},\delta\mathbf{v},\delta\mathbf{u}) = \begin{bmatrix}1 \\ \delta\mathbf{q} \\ \delta\mathbf{v} \\
- * \delta\mathbf{u}\end{bmatrix}^T
- * \begin{bmatrix}0 & \mathbf{l_q}^T & \mathbf{l_v}^T & \mathbf{l_u}^T \\ \mathbf{l_q} & \mathbf{l_{qq}} &
- * \mathbf{l_{qv}} & \mathbf{l_{uq}}^T \\
- * \mathbf{l_v} & \mathbf{l_{vq}} & \mathbf{l_{vv}} & \mathbf{l_{uv}}^T \\
- * \mathbf{l_u} & \mathbf{l_{uq}} & \mathbf{l_{uv}} & \mathbf{l_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{q}
+ * &\ell(\delta\mathbf{q},\delta\mathbf{v},\delta\mathbf{u}) = \begin{bmatrix}1 \\ \delta\mathbf{q} \\ \delta\mathbf{v}
+ * \\ \delta\mathbf{u}\end{bmatrix}^T \begin{bmatrix}0 & \mathbf{\ell_q}^T & \mathbf{\ell_v}^T & \mathbf{\ell_u}^T \\
+ * \mathbf{\ell_q} & \mathbf{\ell_{qq}} &
+ * \mathbf{\ell_{qv}} & \mathbf{\ell_{uq}}^T \\
+ * \mathbf{\ell_v} & \mathbf{\ell_{vq}} & \mathbf{\ell_{vv}} & \mathbf{\ell_{uv}}^T \\
+ * \mathbf{\ell_u} & \mathbf{\ell_{uq}} & \mathbf{\ell_{uv}} & \mathbf{\ell_{uu}}\end{bmatrix} \begin{bmatrix}1 \\
+ * \delta\mathbf{q}
  * \\ \delta\mathbf{v} \\
  * \delta\mathbf{u}\end{bmatrix}, &\textrm{(cost)}\\
  * &\mathbf{g_q}\delta\mathbf{q}+\mathbf{g_v}\delta\mathbf{v}+\mathbf{g_u}\delta\mathbf{u}\leq\mathbf{0},
@@ -77,20 +78,21 @@ namespace crocoddyl {
  * &\textrm{(equality constraints)} \end{aligned} \f] where
  *  - \f$\mathbf{f_x}=(\mathbf{f_q};\,\, \mathbf{f_v})\in\mathbb{R}^{nv\times ndx}\f$ and
  * \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nu}\f$ are the Jacobians of the dynamics,
- *  - \f$\mathbf{l_x}=(\mathbf{l_q};\,\, \mathbf{l_v})\in\mathbb{R}^{ndx}\f$ and \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$
- * are the Jacobians of the cost function,
- *  - \f$\mathbf{l_{xx}}=(\mathbf{l_{qq}}\,\, \mathbf{l_{qv}};\,\, \mathbf{l_{vq}}\,
- * \mathbf{l_{vv}})\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}=(\mathbf{l_q};\,\,
- * \mathbf{l_v})\in\mathbb{R}^{ndx\times nu}\f$ and \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians
- * of the cost function,
+ *  - \f$\mathbf{\ell_x}=(\mathbf{\ell_q};\,\, \mathbf{\ell_v})\in\mathbb{R}^{ndx}\f$ and
+ * \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the cost function,
+ *  - \f$\mathbf{\ell_{xx}}=(\mathbf{\ell_{qq}}\,\, \mathbf{\ell_{qv}};\,\, \mathbf{\ell_{vq}}\,
+ * \mathbf{\ell_{vv}})\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{\ell_{xu}}=(\mathbf{\ell_q};\,\,
+ * \mathbf{\ell_v})\in\mathbb{R}^{ndx\times nu}\f$ and \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
+ * Hessians of the cost function,
  *  - \f$\mathbf{g_x}=(\mathbf{g_q};\,\, \mathbf{g_v})\in\mathbb{R}^{ng\times ndx}\f$ and
  * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the Jacobians of the inequality constraints, and
  *  - \f$\mathbf{h_x}=(\mathbf{h_q};\,\, \mathbf{h_v})\in\mathbb{R}^{nh\times ndx}\f$ and
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the Jacobians of the equality constraints.
- * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ *
+ * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`
+ * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
 class DifferentialActionModelAbstractTpl {
