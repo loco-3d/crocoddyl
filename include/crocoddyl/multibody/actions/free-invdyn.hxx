@@ -102,7 +102,6 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
   d->xout = a;
   pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   actuation_->calc(d->multibody.actuation, x, tau);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
