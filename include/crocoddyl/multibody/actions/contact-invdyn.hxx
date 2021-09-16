@@ -119,8 +119,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   pinocchio::centerOfMass(pinocchio_, d->pinocchio, q, v, a);
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
-  pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, q);
+  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
 
   actuation_->calc(d->multibody.actuation, x, tau);
   contacts_->calc(d->multibody.contacts, x);
@@ -152,6 +151,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
       d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>().transpose();
+  pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, false);
 
   actuation_->calcDiff(d->multibody.actuation, x, tau);
   contacts_->calcDiff(d->multibody.contacts, x);
