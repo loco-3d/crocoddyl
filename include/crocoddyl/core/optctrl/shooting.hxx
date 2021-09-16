@@ -10,6 +10,7 @@
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
 #endif  // CROCODDYL_WITH_MULTITHREADING
+#include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
 
@@ -149,6 +150,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
     throw_pretty("Invalid argument: "
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
+  START_PROFILER("ShootingProblem::calc");
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(nthreads_)
@@ -171,6 +173,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
     cost_ += running_datas_[i]->cost;
   }
   cost_ += terminal_data_->cost;
+  STOP_PROFILER("ShootingProblem::calc");
   return cost_;
 }
 
@@ -184,6 +187,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
     throw_pretty("Invalid argument: "
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
+  START_PROFILER("ShootingProblem::calcDiff");
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(nthreads_)
@@ -207,6 +211,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   }
   cost_ += terminal_data_->cost;
 
+  STOP_PROFILER("ShootingProblem::calcDiff");
   return cost_;
 }
 
@@ -220,6 +225,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     throw_pretty("Invalid argument: "
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
+  START_PROFILER("ShootingProblem::rollout");
 
   xs[0] = x0_;
   for (std::size_t i = 0; i < T_; ++i) {
@@ -236,6 +242,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
     xs[i + 1] = data->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());
+  STOP_PROFILER("ShootingProblem::rollout");
 }
 
 template <typename Scalar>

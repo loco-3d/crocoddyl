@@ -10,7 +10,6 @@
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
 
@@ -133,7 +132,9 @@ void SolverDDP::computeDirection(const bool recalcDiff) {
 }
 
 double SolverDDP::tryStep(const double steplength) {
+  START_PROFILER("SolverDDP::tryStep");
   forwardPass(steplength);
+  STOP_PROFILER("SolverDDP::tryStep");
   return cost_ - cost_try_;
 }
 
@@ -261,11 +262,11 @@ void SolverDDP::backwardPass() {
 }
 
 void SolverDDP::forwardPass(const double steplength) {
-  START_PROFILER("SolverDDP::forwardPass");
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
+  START_PROFILER("SolverDDP::forwardPass");
   cost_try_ = 0.;
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
@@ -289,9 +290,11 @@ void SolverDDP::forwardPass(const double steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
+      STOP_PROFILER("SolverDDP::forwardPass");
       throw_pretty("forward_error");
     }
     if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
+      STOP_PROFILER("SolverDDP::forwardPass");
       throw_pretty("forward_error");
     }
   }
@@ -302,6 +305,7 @@ void SolverDDP::forwardPass(const double steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverDDP::forwardPass");
     throw_pretty("forward_error");
   }
   STOP_PROFILER("SolverDDP::forwardPass");
@@ -316,6 +320,7 @@ void SolverDDP::computeGains(const std::size_t t) {
     STOP_PROFILER("SolverDDP::Quu_inv");
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
+      STOP_PROFILER("SolverDDP::computeGains");
       throw_pretty("backward_error");
     }
     K_[t].topRows(nu) = Qxu_[t].leftCols(nu).transpose();

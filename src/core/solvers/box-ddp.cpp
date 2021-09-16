@@ -45,6 +45,7 @@ void SolverBoxDDP::allocateData() {
 }
 
 void SolverBoxDDP::computeGains(const std::size_t t) {
+  START_PROFILER("SolverBoxDDP::computeGains");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() || !is_feasible_) {
@@ -56,25 +57,34 @@ void SolverBoxDDP::computeGains(const std::size_t t) {
     du_lb_.head(nu) = problem_->get_runningModels()[t]->get_u_lb() - us_[t].head(nu);
     du_ub_.head(nu) = problem_->get_runningModels()[t]->get_u_ub() - us_[t].head(nu);
 
+    START_PROFILER("SolverBoxDDP::boxQP");
     const BoxQPSolution& boxqp_sol =
         qp_.solve(Quu_[t].topLeftCorner(nu, nu), Qu_[t].head(nu), du_lb_.head(nu), du_ub_.head(nu), k_[t].head(nu));
+    START_PROFILER("SolverBoxDDP::boxQP");
 
     // Compute controls
+    START_PROFILER("SolverBoxDDP::Quu_invproj");
     Quu_inv_[t].topLeftCorner(nu, nu).setZero();
     for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
       for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
         Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
       }
     }
+    STOP_PROFILER("SolverBoxDDP::Quu_invproj");
+    START_PROFILER("SolverBoxDDP::Quu_invproj_Qxu");
     K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu, nu) * Qxu_[t].leftCols(nu).transpose();
+    STOP_PROFILER("SolverBoxDDP::Quu_invproj_Qxu");
     k_[t].topRows(nu) = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)
+    START_PROFILER("SolverBoxDDP::Qu_proj");
     for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
       Qu_[t].head(nu)(boxqp_sol.clamped_idx[i]) = 0.;
     }
+    STOP_PROFILER("SolverBoxDDP::Qu_proj");
   }
+  STOP_PROFILER("SolverBoxDDP::computeGains");
 }
 
 void SolverBoxDDP::forwardPass(double steplength) {
@@ -82,6 +92,7 @@ void SolverBoxDDP::forwardPass(double steplength) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
+  START_PROFILER("SolverBoxDDP::forwardPass");
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
@@ -107,9 +118,11 @@ void SolverBoxDDP::forwardPass(double steplength) {
     cost_try_ += d->cost;
 
     if (raiseIfNaN(cost_try_)) {
+      STOP_PROFILER("SolverBoxDDP::forwardPass");
       throw_pretty("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      STOP_PROFILER("SolverBoxDDP::forwardPass");
       throw_pretty("forward_error");
     }
   }
@@ -125,6 +138,7 @@ void SolverBoxDDP::forwardPass(double steplength) {
   cost_try_ += d->cost;
 
   if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverBoxDDP::forwardPass");
     throw_pretty("forward_error");
   }
 }

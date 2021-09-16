@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
+#include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
 
