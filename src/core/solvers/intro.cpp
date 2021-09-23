@@ -159,18 +159,28 @@ void SolverIntro::backwardPass() {
     const std::size_t nu = m->get_nu();
 
     FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
+    START_PROFILER("SolverIntro::Qx");
     Qx_[t] = d->Lx;
     Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    STOP_PROFILER("SolverIntro::Qx");
+    START_PROFILER("SolverIntro::Qxx");
     Qxx_[t] = d->Lxx;
     Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    STOP_PROFILER("SolverIntro::Qxx");
     if (nu != 0) {
       FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
+      START_PROFILER("SolverIntro::Qu");
       Qu_[t].head(nu) = d->Lu;
       Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
+      STOP_PROFILER("SolverIntro::Qu");
+      START_PROFILER("SolverIntro::Quu");
       Quu_[t].topLeftCorner(nu, nu) = d->Luu;
       Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      STOP_PROFILER("SolverIntro::Quu");
+      START_PROFILER("SolverIntro::Qxu");
       Qxu_[t].leftCols(nu) = d->Lxu;
       Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
+      STOP_PROFILER("SolverIntro::Qxu");
       if (!std::isnan(ureg_)) {
         Quu_[t].diagonal().head(nu).array() += ureg_;
       }
@@ -181,13 +191,17 @@ void SolverIntro::backwardPass() {
     Vx_[t] = Qx_[t];
     Vxx_[t] = Qxx_[t];
     if (nu != 0) {
+      START_PROFILER("SolverIntro::Vx");
       Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
       Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
       Vx_[t].noalias() -= Qxu_[t].leftCols(nu) * k_[t].head(nu);
       Vx_[t].noalias() += K_[t].topRows(nu).transpose() * Quuk_[t].head(nu);
+      STOP_PROFILER("SolverIntro::Vx");
+      START_PROFILER("SolverIntro::Vxx");
       QuuK_tmp_.topRows(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * K_[t].topRows(nu);
       Vxx_[t].noalias() -= 2 * Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
       Vxx_[t].noalias() += K_[t].topRows(nu).transpose() * QuuK_tmp_.topRows(nu);
+      STOP_PROFILER("SolverIntro::Vxx");
     }
     Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
     Vxx_[t] = Vxx_tmp_;
@@ -217,6 +231,7 @@ double SolverIntro::stoppingCriteria() {
 }
 
 void SolverIntro::computeGains(const std::size_t t) {
+  START_PROFILER("SolverIntro::computeGains");
   SolverDDP::computeGains(t);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem_->get_runningModels()[t];
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem_->get_runningDatas()[t];
@@ -242,6 +257,7 @@ void SolverIntro::computeGains(const std::size_t t) {
     k_[t].head(nu).noalias() += QuuinvHuT_[t].topRows(nu) * k_hat_[t];
     K_[t].topRows(nu) += QuuinvHuT_[t].topRows(nu) * K_hat_[t];
   }
+  STOP_PROFILER("SolverIntro::computeGains");
 }
 
 double SolverIntro::get_rho() const { return rho_; }
