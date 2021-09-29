@@ -46,6 +46,11 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
   typedef ControlParametrizationDataPolyTwoRK4Tpl<Scalar> Data;
 
+  /**
+   * @brief Initialize the poly-two RK4 control parametrization
+   *
+   * @param[in] nw  Dimension of control vector
+   */
   explicit ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyTwoRK4Tpl();
 

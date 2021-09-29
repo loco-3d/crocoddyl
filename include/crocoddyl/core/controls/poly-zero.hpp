@@ -39,6 +39,11 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the poly-zero control parametrization
+   *
+   * @param[in] nw  Dimension of control vector
+   */
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyZeroTpl();
 

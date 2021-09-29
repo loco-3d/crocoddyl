@@ -43,6 +43,11 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
   typedef ControlParametrizationDataPolyOneTpl<Scalar> Data;
 
+  /**
+   * @brief Initialize the poly-one control parametrization
+   *
+   * @param[in] nw  Dimension of control vector
+   */
   explicit ControlParametrizationModelPolyOneTpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyOneTpl();
 
