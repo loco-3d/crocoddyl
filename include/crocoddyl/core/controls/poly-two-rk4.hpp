@@ -40,11 +40,11 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
   typedef ControlParametrizationDataPolyTwoRK4Tpl<Scalar> Data;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the poly-two RK4 control parametrization

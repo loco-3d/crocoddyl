@@ -37,11 +37,11 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
   typedef ControlParametrizationDataPolyOneTpl<Scalar> Data;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the poly-one control parametrization
