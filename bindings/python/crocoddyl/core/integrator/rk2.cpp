@@ -33,8 +33,8 @@ void exposeIntegratedActionRK2() {
           ":param diffModel: differential action model\n"
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and derivatives."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, 
-                    boost::shared_ptr<ControlAbstract>, bp::optional<double, bool> >(
+      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, boost::shared_ptr<ControlAbstract>,
+                    bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
           "Initialize the RK2 integrator.\n\n"
           ":param diffModel: differential action model\n"
@@ -101,9 +101,10 @@ void exposeIntegratedActionRK2() {
       .add_property("dki_dx", bp::make_getter(&IntegratedActionDataRK2::dki_dx, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the state of the RK2 "
                     "integration method. d(x+dx)/dx")
-      .add_property("dki_dudiff", bp::make_getter(&IntegratedActionDataRK2::dki_dudiff, bp::return_internal_reference<>()),
-                    "List with the partial derivatives of dynamics with respect to to the control of the differential model "
-                    "integration method. d(x+dx)/dudiff")
+      .add_property(
+          "dki_dudiff", bp::make_getter(&IntegratedActionDataRK2::dki_dudiff, bp::return_internal_reference<>()),
+          "List with the partial derivatives of dynamics with respect to to the control of the differential model "
+          "integration method. d(x+dx)/dudiff")
       .add_property("dki_du", bp::make_getter(&IntegratedActionDataRK2::dki_du, bp::return_internal_reference<>()),
                     "List with the partial derivatives of dynamics with respect to to the control of the RK2 "
                     "integration method. d(x+dx)/du")
