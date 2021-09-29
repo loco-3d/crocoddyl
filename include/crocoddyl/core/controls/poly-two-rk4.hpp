@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,12 +18,12 @@ namespace crocoddyl {
 /**
  * @brief A polynomial function of time of degree two, that is a quadratic function
  *
- * The size of the parameters p is 3 times the size of the control input u.
- * The first third of p represents the value of u at time 0.
- * The second third of p represents the value of u at time 0.5.
- * The last third of p represents the value of u at time 1.
- * This parametrization is suitable to be used with the RK-4 integration scheme,
- * because it requires the value of u exactly at 0, 0.5 and 1.
+ * The size of the parameters \f$\mathbf{p}\f$ is 3 times the size of the control input \f$\mathbf{u}\f$.
+ * The first third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0. The second
+ * third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0.5. The last third of
+ * \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 1. This parametrization is suitable
+ * to be used with the RK-4 integration scheme, because it requires the value of \f$\mathbf{u}\f$ exactly
+ * at 0, 0.5 and 1.
  *
  * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
@@ -33,7 +33,8 @@ namespace crocoddyl {
  * dual of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`, `multiplyJacobianTransposeBy`
+ * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
+ * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
 class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationModelAbstractTpl<_Scalar> {

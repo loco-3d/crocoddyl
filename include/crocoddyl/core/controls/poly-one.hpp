@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,9 +18,9 @@ namespace crocoddyl {
 /**
  * @brief A polynomial function of time of degree one, that is a linear function
  *
- * The size of the parameters p is twice the size of the control input u.
- * The first half of p represents the value of u at time 0.
- * The second half of p represents the value of u at time 0.5.
+ * The size of the parameters \f$\mathbf{p}\f$ is twice the size of the control input \f$\mathbf{u}\f$.
+ * The first half of \f$\mathbf{p}\f$ represents the value of u at time 0. The second half of
+ * \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0.5.
  *
  * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
@@ -30,7 +30,8 @@ namespace crocoddyl {
  * dual of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`, `multiplyJacobianTransposeBy`
+ * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
+ * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
 class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
