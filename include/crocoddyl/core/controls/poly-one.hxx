@@ -24,8 +24,8 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
-  d->c[1] = 2 * t;
-  d->c[0] = 1 - d->c[1];
+  d->c[1] = Scalar(2.) * t;
+  d->c[0] = Scalar(1.) - d->c[1];
   data->w = d->c[0] * u.head(nw_) + d->c[1] * u.tail(nw_);
 }
 

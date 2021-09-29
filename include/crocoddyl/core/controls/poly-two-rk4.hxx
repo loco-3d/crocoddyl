@@ -28,9 +28,9 @@ void ControlParametrizationModelPolyTwoRK4Tpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
   d->tmp_t2 = t * t;
-  d->c[2] = 2 * d->tmp_t2 - t;
-  d->c[1] = -2 * d->c[2] + 2 * t;
-  d->c[0] = d->c[2] - 2 * t + 1;
+  d->c[2] = Scalar(2.) * d->tmp_t2 - t;
+  d->c[1] = -Scalar(2.) * d->c[2] + Scalar(2.) * t;
+  d->c[0] = d->c[2] - Scalar(2.) * t + Scalar(1.);
   d->w = d->c[2] * p2 + d->c[1] * p1 + d->c[0] * p0;
 }
 
