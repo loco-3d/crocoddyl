@@ -18,44 +18,147 @@ namespace crocoddyl {
 /**
  * @brief A polynomial function of time of degree two, that is a quadratic function
  *
- * The size of the parameters p is 3 times the size of the control input u.
- * The first third of p represents the value of u at time 0.
- * The second third of p represents the value of u at time 1/3.
- * The last third of p represents the value of u at time 2/3.
- * This parametrization is suitable to be used with the RK-3 integration scheme,
- * because it requires the value of u exactly at 0, 1/3 and 2/3.
+ * The size of the parameters \f$\mathbf{p}\f$ is 3 times the size of the control input \f$\mathbf{u}\f$.
+ * The first third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0. The second
+ * third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 1/3. The last third of
+ * \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 2/3. This parametrization is suitable
+ * to be used with the RK-3 integration scheme, because it requires the value of \f$\mathbf{u}\f$ exactly
+ * at 0, 1/3 and 2/3.
+ *
+ * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
+ * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
+ * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
+ * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
+ * dual of `calc`.
+ * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
+ *
+ * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
+ * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
-class ControlParametrizationPolyTwoRK3Tpl : public ControlParametrizationAbstractTpl<_Scalar> {
+class ControlParametrizationModelPolyTwoRK3Tpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
+  typedef ControlParametrizationDataPolyTwoRK3Tpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ControlParametrizationPolyTwoRK3Tpl(const std::size_t nu);
-  virtual ~ControlParametrizationPolyTwoRK3Tpl();
+  /**
+   * @brief Initialize the poly-two RK3 control parametrization
+   *
+   * @param[in] nw  Dimension of control vector
+   */
+  explicit ControlParametrizationModelPolyTwoRK3Tpl(const std::size_t nw);
+  virtual ~ControlParametrizationModelPolyTwoRK3Tpl();
 
-  virtual void resize(const std::size_t nu);
+  /**
+   * @brief Get the value of the control at the specified time
+   *
+   * @param[in]  data   Control-parametrization data
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control parameters
+   */
+  virtual void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+                    const Eigen::Ref<const VectorXs>& u) const;
 
-  virtual void value(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<VectorXs> u_out) const;
+  /**
+   * @brief Get the value of the Jacobian of the control with respect to the parameters
+   *
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  u      Control parameters
+   */
+  virtual void calcDiff(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+                        const Eigen::Ref<const VectorXs>& u) const;
 
-  virtual void value_inv(double t, const Eigen::Ref<const VectorXs>& u, Eigen::Ref<VectorXs> p_out) const;
+  /**
+   * @brief Create the control-parametrization data
+   *
+   * @return the control-parametrization data
+   */
+  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
-  virtual void convert_bounds(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
-                              Eigen::Ref<VectorXs> p_lb, Eigen::Ref<VectorXs> p_ub) const;
+  /**
+   * @brief Get a value of the control parameters such that the control at the specified time
+   * t is equal to the specified value u
+   *
+   * @param[in]  data   Control-parametrization data
+   * @param[in]  t      Time in [0,1]
+   * @param[in]  w      Control values
+   */
+  virtual void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+                      const Eigen::Ref<const VectorXs>& w) const;
 
-  virtual void dValue(double t, const Eigen::Ref<const VectorXs>& p, Eigen::Ref<MatrixXs> J_out) const;
+  /**
+   * @brief Map the specified bounds from the control space to the parameter space
+   *
+   * @param[in]  w_lb   Control lower bound
+   * @param[in]  w_ub   Control lower bound
+   * @param[out] u_lb   Control parameters lower bound
+   * @param[out] u_ub   Control parameters upper bound
+   */
+  virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb, const Eigen::Ref<const VectorXs>& w_ub,
+                             Eigen::Ref<VectorXs> u_lb, Eigen::Ref<VectorXs> u_ub) const;
 
-  virtual void multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p, const Eigen::Ref<const MatrixXs>& A,
-                                Eigen::Ref<MatrixXs> out) const;
+  /**
+   * @brief Compute the product between a specified matrix and the Jacobian of the control (with respect to the
+   * parameters)
+   *
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
+   * @param[in]  A      A matrix to multiply times the Jacobian
+   * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyByJacobian(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                  const AssignmentOp = setto) const;
 
-  virtual void multiplyDValueTransposeBy(double t, const Eigen::Ref<const VectorXs>& p,
-                                         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out) const;
+  /**
+   * @brief Compute the product between the transposed Jacobian of the control (with respect to the parameters) and
+   * a specified matrix
+   *
+   * It assumes that `calc()` has been run first
+   *
+   * @param[in]  data   Control-parametrization data
+   * @param[in]  A      A matrix to multiply times the Jacobian
+   * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
+   * matrix A
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyJacobianTransposeBy(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+                                           const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                           const AssignmentOp = setto) const;
 
  protected:
-  using ControlParametrizationAbstractTpl<Scalar>::nu_;
-  using ControlParametrizationAbstractTpl<Scalar>::np_;
+  using Base::nu_;
+  using Base::nw_;
+};
+
+template <typename _Scalar>
+struct ControlParametrizationDataPolyTwoRK3Tpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Vector3s Vector3s;
+
+  template <template <typename Scalar> class Model>
+  explicit ControlParametrizationDataPolyTwoRK3Tpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
+    c.setZero();
+  }
+  virtual ~ControlParametrizationDataPolyTwoRK3Tpl() {}
+
+  Vector3s c;     //!< Polynomial coefficients of the second-order control model that depends on time
+  Scalar tmp_t2;  //!< Temporary variable to store the square of the time
 };
 
 }  // namespace crocoddyl

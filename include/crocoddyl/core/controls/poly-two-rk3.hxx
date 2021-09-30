@@ -9,66 +9,67 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationPolyTwoRK3Tpl<Scalar>::ControlParametrizationPolyTwoRK3Tpl(const std::size_t nu)
-    : ControlParametrizationAbstractTpl<Scalar>(nu, 3 * nu) {}
+ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::ControlParametrizationModelPolyTwoRK3Tpl(const std::size_t nw)
+    : ControlParametrizationModelAbstractTpl<Scalar>(nw, 3 * nw) {}
 
 template <typename Scalar>
-ControlParametrizationPolyTwoRK3Tpl<Scalar>::~ControlParametrizationPolyTwoRK3Tpl() {}
+ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::~ControlParametrizationModelPolyTwoRK3Tpl() {}
 
 template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::resize(const std::size_t nu) {
-  nu_ = nu;
-  np_ = 3 * nu;
-}
-
-template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::value(double t, const Eigen::Ref<const VectorXs>& p,
-                                                        Eigen::Ref<VectorXs> u_out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
-  if (static_cast<std::size_t>(u_out.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u_out has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = p.head(nu_);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = p.segment(nu_, nu_);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = p.tail(nu_);
-  Scalar t2 = t * t;
-  u_out = (Scalar(4.5) * t2 - Scalar(1.5) * t) * p2 + (-Scalar(9.) * t2 + Scalar(6.) * t) * p1 +
-          (Scalar(4.5) * (t2 - t) + Scalar(1.)) * p0;
-}
-
-template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::value_inv(double, const Eigen::Ref<const VectorXs>& u,
-                                                            Eigen::Ref<VectorXs> p_out) const {
-  if (static_cast<std::size_t>(p_out.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p_out has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::calc(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
+    const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  p_out.head(nu_) = u;
-  p_out.segment(nu_, nu_) = u;
-  p_out.tail(nu_) = u;
+  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
+
+  d->tmp_t2 = t * t;
+  d->c[2] = Scalar(4.5) * d->tmp_t2 - Scalar(1.5) * t;
+  d->c[1] = -Scalar(9.) * d->tmp_t2 + Scalar(6.) * t;
+  d->c[0] = Scalar(4.5) * (d->tmp_t2 - t) + Scalar(1.);
+  d->w = d->c[2] * p2 + d->c[1] * p1 + d->c[0] * p0;
 }
 
 template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::convert_bounds(const Eigen::Ref<const VectorXs>& u_lb,
-                                                                 const Eigen::Ref<const VectorXs>& u_ub,
-                                                                 Eigen::Ref<VectorXs> p_lb,
-                                                                 Eigen::Ref<VectorXs> p_ub) const {
-  if (static_cast<std::size_t>(p_lb.size()) != np_) {
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
+    const Eigen::Ref<const VectorXs>&) const {
+  Data* d = static_cast<Data*>(data.get());
+  d->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
+  d->dw_du.middleCols(nw_, nw_).diagonal().array() = d->c[1];
+  d->dw_du.rightCols(nw_).diagonal().array() = d->c[2];
+}
+
+template <typename Scalar>
+boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::createData() {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::params(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
+    const Eigen::Ref<const VectorXs>& w) const {
+  if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
-                 << "p_lb has wrong dimension (it should be " + std::to_string(np_) + ")");
+                 << "w has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  if (static_cast<std::size_t>(p_ub.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p_ub has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
+  Data* d = static_cast<Data*>(data.get());
+  d->u.head(nw_) = w;
+  d->u.segment(nw_, nw_) = w;
+  d->u.tail(nw_) = w;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
+                                                                     const Eigen::Ref<const VectorXs>& w_ub,
+                                                                     Eigen::Ref<VectorXs> u_lb,
+                                                                     Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -77,71 +78,88 @@ void ControlParametrizationPolyTwoRK3Tpl<Scalar>::convert_bounds(const Eigen::Re
     throw_pretty("Invalid argument: "
                  << "u_ub has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  p_lb.head(nu_) = u_lb;
-  p_lb.segment(nu_, nu_) = u_lb;
-  p_lb.tail(nu_) = u_lb;
-  p_ub.head(nu_) = u_ub;
-  p_ub.segment(nu_, nu_) = u_ub;
-  p_ub.tail(nu_) = u_ub;
+  if (static_cast<std::size_t>(w_lb.size()) != nw_) {
+    throw_pretty("Invalid argument: "
+                 << "w_lb has wrong dimension (it should be " + std::to_string(nw_) + ")");
+  }
+  if (static_cast<std::size_t>(w_ub.size()) != nw_) {
+    throw_pretty("Invalid argument: "
+                 << "w_ub has wrong dimension (it should be " + std::to_string(nw_) + ")");
+  }
+  u_lb.head(nw_) = w_lb;
+  u_lb.segment(nw_, nw_) = w_lb;
+  u_lb.tail(nw_) = w_lb;
+  u_ub.head(nw_) = w_ub;
+  u_ub.segment(nw_, nw_) = w_ub;
+  u_ub.tail(nw_) = w_ub;
 }
 
 template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::dValue(double t, const Eigen::Ref<const VectorXs>& p,
-                                                         Eigen::Ref<MatrixXs> J_out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
-  if (static_cast<std::size_t>(J_out.rows()) != nu_ || static_cast<std::size_t>(J_out.cols()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "J_out has wrong dimension (it should be " + std::to_string(nu_) + "," + std::to_string(np_) +
-                        ")");
-  }
-  Scalar t2 = t * t;
-  J_out.leftCols(nu_).diagonal() = MathBase::VectorXs::Constant(nu_, Scalar(4.5) * (t2 - t) + Scalar(1.));
-  J_out.middleCols(nu_, nu_).diagonal() = MathBase::VectorXs::Constant(nu_, -Scalar(9.) * t2 + Scalar(6.) * t);
-  J_out.rightCols(nu_).diagonal() = MathBase::VectorXs::Constant(nu_, Scalar(4.5) * t2 - Scalar(1.5) * t);
-}
-
-template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::multiplyByDValue(double t, const Eigen::Ref<const VectorXs>& p,
-                                                                   const Eigen::Ref<const MatrixXs>& A,
-                                                                   Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
-  if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nu_ ||
-      static_cast<std::size_t>(out.cols()) != np_) {
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::multiplyByJacobian(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
+      static_cast<std::size_t>(out.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + +")");
   }
-  Scalar t2 = t * t;
-  out.leftCols(nu_) = (Scalar(4.5) * (t2 - t) + Scalar(1.)) * A;
-  out.middleCols(nu_, nu_) = (-Scalar(9.) * t2 + Scalar(6.) * t) * A;
-  out.rightCols(nu_) = (Scalar(4.5) * t2 - Scalar(1.5) * t) * A;
+  Data* d = static_cast<Data*>(data.get());
+  switch (op) {
+    case setto:
+      out.leftCols(nw_) = d->c[0] * A;
+      out.middleCols(nw_, nw_) = d->c[1] * A;
+      out.rightCols(nw_) = d->c[2] * A;
+      break;
+    case addto:
+      out.leftCols(nw_) += d->c[0] * A;
+      out.middleCols(nw_, nw_) += d->c[1] * A;
+      out.rightCols(nw_) += d->c[2] * A;
+      break;
+    case rmfrom:
+      out.leftCols(nw_) -= d->c[0] * A;
+      out.middleCols(nw_, nw_) -= d->c[1] * A;
+      out.rightCols(nw_) -= d->c[2] * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 template <typename Scalar>
-void ControlParametrizationPolyTwoRK3Tpl<Scalar>::multiplyDValueTransposeBy(double t,
-                                                                            const Eigen::Ref<const VectorXs>& p,
-                                                                            const Eigen::Ref<const MatrixXs>& A,
-                                                                            Eigen::Ref<MatrixXs> out) const {
-  if (static_cast<std::size_t>(p.size()) != np_) {
-    throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(np_) + ")");
-  }
-  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nu_ ||
-      static_cast<std::size_t>(out.rows()) != np_) {
+void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::multiplyJacobianTransposeBy(
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
+    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
+      static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
                         " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
-  Scalar t2 = t * t;
-  out.topRows(nu_) = (Scalar(4.5) * (t2 - t) + Scalar(1.)) * A;
-  out.middleRows(nu_, nu_) = (-Scalar(9.) * t2 + Scalar(6.) * t) * A;
-  out.bottomRows(nu_) = (Scalar(4.5) * t2 - Scalar(1.5) * t) * A;
+  Data* d = static_cast<Data*>(data.get());
+  switch (op) {
+    case setto:
+      out.topRows(nw_) = d->c[0] * A;
+      out.middleRows(nw_, nw_) = d->c[1] * A;
+      out.bottomRows(nw_) = d->c[2] * A;
+      break;
+    case addto:
+      out.topRows(nw_) += d->c[0] * A;
+      out.middleRows(nw_, nw_) += d->c[1] * A;
+      out.bottomRows(nw_) += d->c[2] * A;
+      break;
+    case rmfrom:
+      out.topRows(nw_) -= d->c[0] * A;
+      out.middleRows(nw_, nw_) -= d->c[1] * A;
+      out.bottomRows(nw_) -= d->c[2] * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
 }
 
 }  // namespace crocoddyl

@@ -14,58 +14,74 @@ namespace crocoddyl {
 namespace python {
 
 void exposeControlParametrizationPolyTwoRK3() {
-  bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationPolyTwoRK3> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationModelPolyTwoRK3> >();
 
-  bp::class_<ControlParametrizationPolyTwoRK3, bp::bases<ControlParametrizationAbstract> >(
-      "ControlParametrizationPolyTwoRK3",
-      "Quadratic control.\n\n"
+  bp::class_<ControlParametrizationModelPolyTwoRK3, bp::bases<ControlParametrizationModelAbstract> >(
+      "ControlParametrizationModelPolyTwoRK3",
+      "Second-order polynomial control for RK3 integrator.\n\n"
       "This control is a quadratic function of time (normalized in [0,1])."
-      "The first third of the parameter vector contains the initial value of u, "
-      "the second third contains the value of u at t=0.5, and the last third "
-      "contains its value at t=1.",
-      bp::init<int>(bp::args("self", "nu"),
-                    "Initialize the control dimensions.\n\n"
-                    ":param nu: dimension of control space\n"))
-      .def("value", &ControlParametrizationPolyTwoRK3::value_u, bp::args("self", "t", "p"),
-           "Compute the control value.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
-           ":return u value (dim control.nu).")
-      .def("value_inv", &ControlParametrizationPolyTwoRK3::value_inv_p, bp::args("self", "t", "u"),
-           "Compute the control value.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param u: control value (dim control.nu).\n"
-           ":return p value (dim control.np).")
-      .def("convert_bounds", &ControlParametrizationPolyTwoRK3::convert_bounds, bp::args("self", "u_lb", "u_ub"),
+      "The first third of the parameter vector contains the initial value of the differential control w, "
+      "the second third contains the value of w at t=1/3, and the last third contains its value at t=2/3.",
+      bp::init<std::size_t>(bp::args("self", "nw"),
+                            "Initialize the control dimensions.\n\n"
+                            ":param nw: dimension of differential control space"))
+      .def<void (ControlParametrizationModelPolyTwoRK3::*)(
+          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const Eigen::Ref<const Eigen::VectorXd>&) const>("calc", &ControlParametrizationModelPolyTwoRK3::calc,
+                                                           bp::args("self", "data", "t", "u"),
+                                                           "Compute the control value.\n\n"
+                                                           ":param data: control-parametrization data\n"
+                                                           ":param t: normalized time in [0, 1]\n"
+                                                           ":param u: control parameters (dim control.nu)")
+      .def<void (ControlParametrizationModelPolyTwoRK3::*)(
+          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const Eigen::Ref<const Eigen::VectorXd>&) const>(
+          "calcDiff", &ControlParametrizationModelPolyTwoRK3::calcDiff, bp::args("self", "data", "t", "u"),
+          "Compute the value of the Jacobian of the control with respect to the parameters.\n\n"
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
+      .def<void (ControlParametrizationModelPolyTwoRK3::*)(
+          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const Eigen::Ref<const Eigen::VectorXd>&) const>("params", &ControlParametrizationModelPolyTwoRK3::params,
+                                                           bp::args("self", "data", "t", "w"),
+                                                           "Compute the control parameters.\n\n"
+                                                           ":param data: control-parametrization data\n"
+                                                           ":param t: normalized time in [0, 1]\n"
+                                                           ":param w: control value (dim control.nw)")
+      .def("convertBounds", &ControlParametrizationModelPolyTwoRK3::convertBounds, bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param u_lb: lower bounds on u (dim control.nu).\n"
-           ":param u_ub: upper bounds on u (dim control.nu).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.np).")
-      .def("dValue", &ControlParametrizationPolyTwoRK3::dValue_J, bp::args("self", "t", "p"),
-           "Compute the derivative of the control with respect to the parameters.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
-           ":return Partial derivative of the value function (dim control.nu x control.np).")
-      .def("multiplyByDValue", &ControlParametrizationPolyTwoRK3::multiplyByDValue_J, bp::args("self", "t", "p", "A"),
+           ":param w_lb: lower bounds on u (dim control.nw)\n"
+           ":param w_ub: upper bounds on u (dim control.nw)\n"
+           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
+      .def("multiplyByJacobian", &ControlParametrizationModelPolyTwoRK3::multiplyByJacobian_J,
+           bp::args("self", "data", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
            "parameters.\n\n"
-           ":param t: normalized time in [0, 1].\n"
-           ":param p: control parameters (dim control.np).\n"
-           ":param A: matrix to multiply (dim na x control.nu).\n"
-           ":return Product between A and the partial derivative of the value function (dim na x control.np).")
+           "It assumes that calc has been run first.\n"
+           ":param data: control-parametrization data\n"
+           ":param A: matrix to multiply (dim na x control.nw)\n"
+           ":return Product between A and the partial derivative of the value function (dim na x control.nu)")
       .def(
-          "multiplyDValueTransposeBy", &ControlParametrizationPolyTwoRK3::multiplyDValueTransposeBy_J,
-          bp::args("self", "t", "p", "A"),
+          "multiplyJacobianTransposeBy", &ControlParametrizationModelPolyTwoRK3::multiplyJacobianTransposeBy_J,
+          bp::args("self", "data", "A"),
           "Compute the product between the transpose of the derivative of the control with respect to the parameters\n"
           "and a given matrix A.\n\n"
-          ":param t: normalized time in [0, 1].\n"
-          ":param p: control parameters (dim control.np).\n"
-          ":param A: matrix to multiply (dim control.nu x na).\n"
-          ":return Product between the partial derivative of the value function (transposed) and A (dim control.np x "
-          "na).")
-      .add_property("nu", bp::make_function(&ControlParametrizationPolyTwoRK3::get_nu), "dimension of control tuple")
-      .add_property("np", bp::make_function(&ControlParametrizationPolyTwoRK3::get_np),
-                    "dimension of the control parameters");
+          "It assumes that calc has been run first.\n"
+          ":param data: control-parametrization data\n"
+          ":param A: matrix to multiply (dim control.nw x na)\n"
+          ":return Product between the partial derivative of the value function (transposed) and A (dim control.nu x "
+          "na)");
+
+  boost::python::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataPolyTwoRK3> >();
+
+  bp::class_<ControlParametrizationDataPolyTwoRK3, bp::bases<ControlParametrizationDataAbstract> >(
+      "ControlParametrizationDataPolyTwoRK3", "Control-parametrization data for the second-order polynomial control.",
+      bp::init<ControlParametrizationModelPolyTwoRK3*>(bp::args("self", "model"),
+                                                       "Create control-parametrization data.\n\n"
+                                                       ":param model: second-order polynomial control model"))
+      .add_property("c", bp::make_getter(&ControlParametrizationDataPolyTwoRK3::c, bp::return_internal_reference<>()),
+                    "polynomial coefficients of the second-order control model");
 }
 
 }  // namespace python
