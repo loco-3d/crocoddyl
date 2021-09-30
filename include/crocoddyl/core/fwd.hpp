@@ -152,6 +152,7 @@ class ControlParametrizationModelPolyTwoRK3Tpl;
 template <typename Scalar>
 struct ControlParametrizationDataPolyTwoRK3Tpl;
 
+template <typename Scalar>
 class ControlParametrizationModelPolyTwoRK4Tpl;
 template <typename Scalar>
 struct ControlParametrizationDataPolyTwoRK4Tpl;

@@ -56,7 +56,7 @@ boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory
       control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
       break;
     case ControlTypes::PolyTwoRK3:
-      control = boost::make_shared<crocoddyl::ControlPolyTwoRK3>(nu);
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK3>(nu);
       break;
     case ControlTypes::PolyTwoRK4:
       control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK4>(nu);
