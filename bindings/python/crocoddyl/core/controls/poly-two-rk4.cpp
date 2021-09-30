@@ -18,13 +18,13 @@ void exposeControlParametrizationPolyTwoRK4() {
 
   bp::class_<ControlParametrizationModelPolyTwoRK4, bp::bases<ControlParametrizationModelAbstract> >(
       "ControlParametrizationModelPolyTwoRK4",
-      "Second-order polynomial control.\n\n"
+      "Second-order polynomial control for RK4 integrator.\n\n"
       "This control is a quadratic function of time (normalized in [0,1])."
       "The first third of the parameter vector contains the initial value of the differential control w, "
       "the second third contains the value of w at t=0.5, and the last third is the final value of w at time t=1.",
       bp::init<std::size_t>(bp::args("self", "nw"),
                             "Initialize the control dimensions.\n\n"
-                            ":param nw: dimension of differential control space\n"))
+                            ":param nw: dimension of differential control space"))
       .def<void (ControlParametrizationModelPolyTwoRK4::*)(
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>("calc", &ControlParametrizationModelPolyTwoRK4::calc,
@@ -33,6 +33,15 @@ void exposeControlParametrizationPolyTwoRK4() {
                                                            ":param data: control-parametrization data\n"
                                                            ":param t: normalized time in [0, 1]\n"
                                                            ":param u: control parameters (dim control.nu)")
+      .def<void (ControlParametrizationModelPolyTwoRK4::*)(
+          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const Eigen::Ref<const Eigen::VectorXd>&) const>(
+          "calcDiff", &ControlParametrizationModelPolyTwoRK4::calcDiff, bp::args("self", "data", "t", "u"),
+          "Compute the Jacobian of the control value with respect to the control parameters.\n"
+          "It assumes that calc has been run first.\n\n"
+          ":param data: control-parametrization data\n"
+          ":param t: normalized time in [0, 1]\n"
+          ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyTwoRK4::*)(
           const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>("params", &ControlParametrizationModelPolyTwoRK4::params,
@@ -46,15 +55,6 @@ void exposeControlParametrizationPolyTwoRK4() {
            ":param w_lb: lower bounds on u (dim control.nw)\n"
            ":param w_ub: upper bounds on u (dim control.nw)\n"
            ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
-      .def<void (ControlParametrizationModelPolyTwoRK4::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "calcDiff", &ControlParametrizationModelPolyTwoRK4::calcDiff, bp::args("self", "data", "t", "u"),
-          "Compute the Jacobian of the control value with respect to the control parameters.\n"
-          "It assumes that calc has been run first.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param u: control parameters (dim control.nu)")
       .def("multiplyByJacobian", &ControlParametrizationModelPolyTwoRK4::multiplyByJacobian_J,
            bp::args("self", "data", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
