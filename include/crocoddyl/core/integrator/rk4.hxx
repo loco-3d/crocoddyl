@@ -105,7 +105,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
   assert_pretty(MatrixXs(d->dyi_dx[0]).isApprox(MatrixXs::Identity(state_->get_ndx(), state_->get_ndx())),
                 "you have changed dyi_dx[0] values that supposed to be constant.");
   assert_pretty(MatrixXs(d->dki_dx[0]).topRightCorner(nv, nv).isApprox(MatrixXs::Identity(nv, nv)),
@@ -261,8 +261,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  // Static casting the data
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
   d->control[0]->w *= 0.;
   differential_->quasiStatic(d->differential[0], d->control[0]->w, x, maxiter, tol);
   control_->params(d->control[0], 0., d->control[0]->w);
