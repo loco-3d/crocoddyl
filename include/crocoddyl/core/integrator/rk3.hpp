@@ -197,7 +197,7 @@ struct IntegratedActionDataRK3Tpl : public IntegratedActionDataAbstractTpl<_Scal
 
     for (std::size_t i = 0; i < 3; ++i) {
       differential.push_back(
-          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
+          boost::shared_ptr<DifferentialActionDataAbstract>(model->get_differential()->createData()));
       control.push_back(boost::shared_ptr<ControlParametrizationDataAbstract>(model->get_control()->createData()));
     }
 
