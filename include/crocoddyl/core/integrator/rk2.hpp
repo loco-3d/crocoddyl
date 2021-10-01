@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh,
-//                     University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,10 +10,23 @@
 #define CROCODDYL_CORE_INTEGRATOR_RK2_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/integr-action-base.hpp"
+#include "crocoddyl/core/integ-action-base.hpp"
 
 namespace crocoddyl {
 
+/**
+ * @brief Standard RK2 integrator
+ *
+ * It applies a standard RK2 integration scheme to a differential (i.e., continuous time) action model.
+ *
+ * This standard RK2 scheme introduces also the possibility to parametrize the control trajectory inside an
+ * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
+ * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
+ * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
+ * control inputs of the integrated action model.
+ *
+ * \sa `IntegratedActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ */
 template <typename _Scalar>
 class IntegratedActionModelRK2Tpl : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
@@ -26,53 +38,122 @@ class IntegratedActionModelRK2Tpl : public IntegratedActionModelAbstractTpl<_Sca
   typedef IntegratedActionDataRK2Tpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
-  typedef ControlAbstractTpl<Scalar> ControlAbstract;
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ControlParametrizationModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the RK2 integrator
+   *
+   * @param[in] model      Differential action model
+   * @param[in] control    Control parametrization
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
+  IntegratedActionModelRK2Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                              boost::shared_ptr<ControlParametrizationModelAbstract> control,
+                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+
+  /**
+   * @brief Initialize the RK2 integrator
+   *
+   * This initialization uses `ControlParametrizationPolyZeroTpl` for the control parametrization.
+   *
+   * @param[in] model      Differential action model
+   * @param[in] time_step  Step time (default 1e-3)
+   * @param[in] with_cost_residual  Compute cost residual (default true)
+   */
   IntegratedActionModelRK2Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
                               const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
-  IntegratedActionModelRK2Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                              boost::shared_ptr<ControlAbstract> control, const Scalar time_step = Scalar(1e-3),
-                              const bool with_cost_residual = true);
   virtual ~IntegratedActionModelRK2Tpl();
 
+  /**
+   * @brief Integrate the differential action model using RK2 scheme
+   *
+   * @param[in] data  RK2 integrator data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Integrate the total cost value for nodes that depends only on the state using RK2 scheme
+   *
+   * It computes the total cost and defines the next state as the current one. This function is used in the
+   * terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  RK2 integrator data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the partial derivatives of the RK2 integrator
+   *
+   * @param[in] data  RK2 integrator data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the partial derivatives of the cost
+   *
+   * It updates the derivatives of the cost function with respect to the state only. This function is used in
+   * the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  RK2 integrator data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Create the RK2 data
+   *
+   * @return the RK2 data
+   */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
+   * for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   *
+   * @param[in] data    RK2 integrator data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
 
   /**
-   * @brief Print relevant information of the Runge-Kutta 2 integrator model
+   * @brief Print relevant information of the RK2 integrator model
    *
    * @param[out] os  Output stream object
    */
   virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::control_;  //!< Control discretization
-  using Base::differential_;
-  using Base::enable_integration_;
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Dimension of the control
-  using Base::state_;               //!< Model of the state
-  using Base::time_step_;
-  using Base::u_lb_;   //!< Lower control limits
-  using Base::u_ub_;   //!< Upper control limits
-  using Base::unone_;  //!< Neutral state
+  using Base::control_;       //!< Control parametrization
+  using Base::differential_;  //!< Differential action model
+  using Base::nu_;            //!< Dimension of the control
+  using Base::state_;         //!< Model of the state
+  using Base::time_step_;     //!< Time step used for integration
   using Base::with_cost_residual_;
 
-  void init();
-
  private:
-  std::vector<Scalar> rk2_c_;
+  std::array<Scalar, 2> rk2_c_;
 };
 
 template <typename _Scalar>
@@ -82,84 +163,88 @@ struct IntegratedActionDataRK2Tpl : public IntegratedActionDataAbstractTpl<_Scal
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef IntegratedActionDataAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataRK2Tpl(Model<Scalar>* const model) : Base(model) {
-    const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nx = model->get_state()->get_nx();
-    const std::size_t nv = model->get_state()->get_nv();
-    const std::size_t nu_diff = model->get_nu_diff();
-    const std::size_t nu = model->get_nu();
+  explicit IntegratedActionDataRK2Tpl(Model<Scalar>* const model)
+      : Base(model),
+        integral(2, Scalar(0.)),
+        dx(model->get_state()->get_ndx()),
+        ki(2, VectorXs::Zero(model->get_state()->get_ndx())),
+        y(2, VectorXs::Zero(model->get_state()->get_nx())),
+        ws(2, VectorXs::Zero(model->get_control()->get_nw())),
+        dx_rk2(2, VectorXs::Zero(model->get_state()->get_ndx())),
+        dki_dx(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        dki_du(4, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        dyi_dx(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        dyi_du(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        dli_dx(2, VectorXs::Zero(model->get_state()->get_ndx())),
+        dli_du(2, VectorXs::Zero(model->get_nu())),
+        ddli_ddx(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        ddli_ddw(2, MatrixXs::Zero(model->get_control()->get_nw(), model->get_control()->get_nw())),
+        ddli_ddu(2, MatrixXs::Zero(model->get_nu(), model->get_nu())),
+        ddli_dxdw(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_control()->get_nw())),
+        ddli_dxdu(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        ddli_dwdu(2, MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu())),
+        Luu_partialx(2, MatrixXs::Zero(model->get_nu(), model->get_nu())),
+        Lxu_i(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())),
+        Lxx_partialx(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_state()->get_ndx())),
+        Lxx_partialu(2, MatrixXs::Zero(model->get_state()->get_ndx(), model->get_nu())) {
+    dx.setZero();
 
     for (std::size_t i = 0; i < 2; ++i) {
       differential.push_back(
-          boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >(model->get_differential()->createData()));
+          boost::shared_ptr<DifferentialActionDataAbstract>(model->get_differential()->createData()));
+      control.push_back(boost::shared_ptr<ControlParametrizationDataAbstract>(model->get_control()->createData()));
     }
 
-    dx = VectorXs::Zero(ndx);
-    u_diff = std::vector<VectorXs>(2, VectorXs::Zero(nu_diff));
-    integral = std::vector<Scalar>(2, Scalar(0.));
-
-    ki = std::vector<VectorXs>(2, VectorXs::Zero(ndx));
-    y = std::vector<VectorXs>(2, VectorXs::Zero(nx));
-    dx_rk2 = std::vector<VectorXs>(2, VectorXs::Zero(ndx));
-
-    dki_dx = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, ndx));
-    dki_dudiff = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu_diff));
-    dki_du = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-    dfi_du = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-    dyi_dx = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, ndx));
-    dyi_du = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-    dki_dy = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, ndx));
-
-    dli_dx = std::vector<VectorXs>(2, VectorXs::Zero(ndx));
-    dli_dudiff = std::vector<VectorXs>(2, VectorXs::Zero(nu_diff));
-    dli_du = std::vector<VectorXs>(2, VectorXs::Zero(nu));
-    ddli_ddx = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, ndx));
-    ddli_ddudiff = std::vector<MatrixXs>(2, MatrixXs::Zero(nu_diff, nu_diff));
-    ddli_dudiffdu = std::vector<MatrixXs>(2, MatrixXs::Zero(nu_diff, nu));
-    ddli_ddu = std::vector<MatrixXs>(2, MatrixXs::Zero(nu, nu));
-    ddli_dxdudiff = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu_diff));
-    ddli_dxdu = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-    Luu_partialx = std::vector<MatrixXs>(2, MatrixXs::Zero(nu, nu));
-    Lxu_i = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-    Lxx_partialx = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, ndx));
-    Lxx_partialu = std::vector<MatrixXs>(2, MatrixXs::Zero(ndx, nu));
-
-    dyi_dx[0].diagonal().array() = (Scalar)1;
-    for (std::size_t i = 0; i < 2; ++i) {
-      dki_dy[i].topRightCorner(nv, nv).diagonal().array() = (Scalar)1;
-    }
+    const std::size_t nv = model->get_state()->get_nv();
+    dyi_dx[0].diagonal().setOnes();
+    dki_dx[0].topRightCorner(nv, nv).diagonal().setOnes();
   }
   virtual ~IntegratedActionDataRK2Tpl() {}
 
-  VectorXs dx;
-  std::vector<VectorXs> u_diff;
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > > differential;
+  std::vector<boost::shared_ptr<DifferentialActionDataAbstract> > differential;  //!< List of differential model data
+  std::vector<boost::shared_ptr<ControlParametrizationDataAbstract> >
+      control;  //!< List of control parametrization data
   std::vector<Scalar> integral;
-  std::vector<VectorXs> ki;
-  std::vector<VectorXs> y;
+  VectorXs dx;               //!< State rate
+  std::vector<VectorXs> ki;  //!< List of RK2 terms related to system dynamics
+  std::vector<VectorXs> y;   //!< List of states where f is evaluated in the RK2 integration
+  std::vector<VectorXs> ws;  //!< Control inputs evaluated in the RK2 integration
   std::vector<VectorXs> dx_rk2;
 
-  std::vector<MatrixXs> dki_dx;
-  std::vector<MatrixXs> dki_dudiff;
-  std::vector<MatrixXs> dki_du;
-  std::vector<MatrixXs> dfi_du;
-  std::vector<MatrixXs> dyi_dx;
-  std::vector<MatrixXs> dyi_du;
-  std::vector<MatrixXs> dki_dy;
+  std::vector<MatrixXs>
+      dki_dx;  //!< List of partial derivatives of RK2 nodes with respect to the state of the RK2 integration. dki/dx
+  std::vector<MatrixXs> dki_du;  //!< List of partial derivatives of RK2 nodes with respect to the control parameters
+                                 //!< of the RK2 integration. dki/du
 
-  std::vector<VectorXs> dli_dx;
-  std::vector<VectorXs> dli_dudiff;  // not used
-  std::vector<VectorXs> dli_du;
-  std::vector<MatrixXs> ddli_ddx;
-  std::vector<MatrixXs> ddli_ddudiff;
-  std::vector<MatrixXs> ddli_dudiffdu;
-  std::vector<MatrixXs> ddli_ddu;
-  std::vector<MatrixXs> ddli_dxdudiff;
-  std::vector<MatrixXs> ddli_dxdu;
+  std::vector<MatrixXs>
+      dyi_dx;  //!< List of partial derivatives of RK2 dynamics with respect to the state of the RK2 integrator. dyi/dx
+  std::vector<MatrixXs> dyi_du;  //!< List of partial derivatives of RK2 dynamics with respect to the control
+                                 //!< parameters of the RK2 integrator. dyi/du
+
+  std::vector<VectorXs>
+      dli_dx;  //!< List of partial derivatives of the cost with respect to the state of the RK2 integration. dli_dx
+  std::vector<VectorXs> dli_du;  //!< List of partial derivatives of the cost with respect to the control input of the
+                                 //!< RK2 integration. dli_du
+
+  std::vector<MatrixXs> ddli_ddx;  //!< List of second partial derivatives of the cost with respect to the state of the
+                                   //!< RK2 integration. ddli_ddx
+  std::vector<MatrixXs> ddli_ddw;  //!< List of second partial derivatives of the cost with respect to the control
+                                   //!< parameters of the RK2 integration. ddli_ddw
+  std::vector<MatrixXs> ddli_ddu;  //!< List of second partial derivatives of the cost with respect to the control
+                                   //!< input of the RK2 integration. ddli_ddu
+  std::vector<MatrixXs> ddli_dxdw;  //!< List of second partial derivatives of the cost with respect to the state and
+                                    //!< control input of the RK2 integration. ddli_dxdw
+  std::vector<MatrixXs> ddli_dxdu;  //!< List of second partial derivatives of the cost with respect to the state and
+                                    //!< control parameters of the RK2 integration. ddli_dxdu
+  std::vector<MatrixXs> ddli_dwdu;  //!< List of second partial derivatives of the cost with respect to the control
+                                    //!< parameters and inputs control of the RK2 integration. ddli_dwdu
+
   std::vector<MatrixXs> Luu_partialx;
   std::vector<MatrixXs> Lxu_i;
   std::vector<MatrixXs> Lxx_partialx;

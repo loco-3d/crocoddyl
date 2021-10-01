@@ -1,16 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh,
-//                     University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/rk2.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 using namespace std;
 
@@ -18,35 +15,18 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelRK2Tpl<Scalar>::IntegratedActionModelRK2Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {
-  init();
+    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    const bool with_cost_residual)
+    : Base(model, control, time_step, with_cost_residual) {
+  rk2_c_ = {Scalar(0.), Scalar(0.5)};
 }
 
 template <typename Scalar>
 IntegratedActionModelRK2Tpl<Scalar>::IntegratedActionModelRK2Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, boost::shared_ptr<ControlAbstract> control,
-    const Scalar time_step, const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual) {
-  init();
-}
-
-template <typename Scalar>
-void IntegratedActionModelRK2Tpl<Scalar>::init() {
-  VectorXs p_lb(nu_), p_ub(nu_);
-  control_->convert_bounds(differential_->get_u_lb(), differential_->get_u_ub(), p_lb, p_ub);
-  Base::set_u_lb(p_lb);
-  Base::set_u_ub(p_ub);
-  if (time_step_ < Scalar(0.)) {
-    time_step_ = Scalar(1e-3);
-    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
-  enable_integration_ = true;
-  if (time_step_ == Scalar(0.)) {
-    enable_integration_ = false;
-  }
-  rk2_c_.push_back(Scalar(0.));
-  rk2_c_.push_back(Scalar(0.5));
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
+    : Base(model, time_step, with_cost_residual) {
+  rk2_c_ = {Scalar(0.), Scalar(0.5)};
 }
 
 template <typename Scalar>
@@ -55,162 +35,192 @@ IntegratedActionModelRK2Tpl<Scalar>::~IntegratedActionModelRK2Tpl() {}
 template <typename Scalar>
 void IntegratedActionModelRK2Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
                                                const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& p) {
+                                               const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(p.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
 
-  const std::size_t nv = differential_->get_state()->get_nv();
+  const std::size_t nv = state_->get_nv();
+  Data* d = static_cast<Data*>(data.get());
 
-  // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
+  control_->calc(u0_data, rk2_c_[0], u);
+  d->ws[0] = u0_data->w;
+  differential_->calc(k0_data, x, d->ws[0]);
+  d->y[0] = x;
+  d->ki[0].head(nv) = d->y[0].tail(nv);
+  d->ki[0].tail(nv) = k0_data->xout;
+  d->integral[0] = k0_data->cost;
 
-  // Computing the acceleration and cost
-  control_->value(rk2_c_[0], p, d->u_diff[0]);
-  differential_->calc(d->differential[0], x, d->u_diff[0]);
+  d->dx_rk2[1] = Scalar(0.5) * time_step_ * d->ki[0];
+  state_->integrate(x, d->dx_rk2[1], d->y[1]);
+  control_->calc(d->control[1], rk2_c_[1], u);
+  d->ws[1] = d->control[1]->w;
+  differential_->calc(d->differential[1], d->y[1], d->ws[1]);
+  d->ki[1].head(nv) = d->y[1].tail(nv);
+  d->ki[1].tail(nv) = d->differential[1]->xout;
+  d->integral[1] = d->differential[1]->cost;
 
-  // Computing the next state (discrete time)
-  if (enable_integration_) {
-    d->y[0] = x;
-    d->ki[0].head(nv) = d->y[0].tail(nv);
-    d->ki[0].tail(nv) = d->differential[0]->xout;
-    d->integral[0] = d->differential[0]->cost;
-
-    d->dx_rk2[1] = Scalar(0.5) * time_step_ * d->ki[0];
-    differential_->get_state()->integrate(x, d->dx_rk2[1], d->y[1]);
-    control_->value(0.5, p, d->u_diff[1]);
-    differential_->calc(d->differential[1], d->y[1], d->u_diff[1]);
-    d->ki[1].head(nv) = d->y[1].tail(nv);
-    d->ki[1].tail(nv) = d->differential[1]->xout;
-    d->integral[1] = d->differential[1]->cost;
-
-    d->dx = d->ki[1] * time_step_;
-    differential_->get_state()->integrate(x, d->dx, d->xnext);
-    d->cost = d->integral[1] * time_step_;
-  } else {
-    d->dx.setZero();
-    d->xnext = x;
-    d->cost = d->differential[0]->cost;
-  }
-
-  // Updating the cost value
+  d->dx = d->ki[1] * time_step_;
+  state_->integrate(x, d->dx, d->xnext);
+  d->cost = d->integral[1] * time_step_;
   if (with_cost_residual_) {
-    d->r = d->differential[0]->r;
+    d->r = k0_data->r;
+  }
+}
+
+template <typename Scalar>
+void IntegratedActionModelRK2Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                               const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+  differential_->calc(k0_data, x);
+  d->dx.setZero();
+  d->cost = k0_data->cost;
+  if (with_cost_residual_) {
+    d->r = k0_data->r;
   }
 }
 
 template <typename Scalar>
 void IntegratedActionModelRK2Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                                    const Eigen::Ref<const VectorXs>& x,
-                                                   const Eigen::Ref<const VectorXs>& p) {
+                                                   const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  if (static_cast<std::size_t>(p.size()) != nu_) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "p has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nu = control_->get_nu();
+  Data* d = static_cast<Data*>(data.get());
+  assert_pretty(MatrixXs(d->dyi_dx[0]).isApprox(MatrixXs::Identity(state_->get_ndx(), state_->get_ndx())),
+                "you have changed dyi_dx[0] values that supposed to be constant.");
+  assert_pretty(MatrixXs(d->dki_dx[0]).topRightCorner(nv, nv).isApprox(MatrixXs::Identity(nv, nv)),
+                "you have changed dki_dx[0] values that supposed to be constant.");
+
+  for (std::size_t i = 0; i < 2; ++i) {
+    differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
   }
 
-  const std::size_t nv = differential_->get_state()->get_nv();
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
+  control_->multiplyByJacobian(u0_data, k0_data->Fu,
+                               d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  d->dli_dx[0] = k0_data->Lx;
+  control_->multiplyJacobianTransposeBy(u0_data, k0_data->Lu,
+                                        d->dli_du[0]);  // dli_du = dli_dw * dw_du
 
-  control_->value(0.0, p, d->u_diff[0]);
-  differential_->calcDiff(d->differential[0], x, d->u_diff[0]);
+  d->ddli_ddx[0] = k0_data->Lxx;
+  d->ddli_ddw[0] = k0_data->Luu;
+  control_->multiplyByJacobian(u0_data, d->ddli_ddw[0], d->ddli_dwdu[0]);  // ddli_dwdu = ddli_ddw * dw_du
+  control_->multiplyJacobianTransposeBy(u0_data, d->ddli_dwdu[0],
+                                        d->ddli_ddu[0]);  // ddli_ddu = dw_du.T * ddli_dwdu
+  d->ddli_dxdw[0] = k0_data->Lxu;
+  control_->multiplyByJacobian(u0_data, d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
-  if (enable_integration_) {
-    d->dki_dy[0].bottomRows(nv) = d->differential[0]->Fx;
-    d->dki_dx[0] = d->dki_dy[0];
-    d->dki_dudiff[0].bottomRows(nv) = d->differential[0]->Fu;
-    control_->multiplyByDValue(0.0, p, d->dki_dudiff[0], d->dki_du[0]);  // dki_du = dki_dudiff * dudiff_du
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k1_data = d->differential[1];
+  const boost::shared_ptr<ControlParametrizationDataAbstract>& u1_data = d->control[1];
+  d->dyi_dx[1].noalias() = d->dki_dx[0] * rk2_c_[1] * time_step_;
+  d->dyi_du[1].noalias() = d->dki_du[0] * rk2_c_[1] * time_step_;
+  state_->JintegrateTransport(x, d->dx_rk2[1], d->dyi_dx[1], second);
+  state_->Jintegrate(x, d->dx_rk2[1], d->dyi_dx[1], d->dyi_dx[1], first, addto);
+  state_->JintegrateTransport(x, d->dx_rk2[1], d->dyi_du[1], second);  // dyi_du = Jintegrate * dyi_du
 
-    d->dli_dx[0] = d->differential[0]->Lx;
-    // d->dli_dudiff[0] = d->differential[0]->Lu;
-    // control_->multiplyByDValue(0.0, p, d->differential[0]->Lu, d->dli_du[0]); // dli_du = dli_dudiff * dudiff_du
-    control_->multiplyDValueTransposeBy(0.0, p, d->differential[0]->Lu,
-                                        d->dli_du[0]);  // dli_du = dli_dudiff * dudiff_du
+  // Sparse matrix-matrix multiplication for computing:
+  Eigen::Block<MatrixXs> dkv1_dq = d->dki_dx[1].bottomLeftCorner(nv, nv);
+  Eigen::Block<MatrixXs> dkv1_dv = d->dki_dx[1].bottomRightCorner(nv, nv);
+  Eigen::Block<MatrixXs> dkq1_du = d->dki_du[1].topLeftCorner(nv, nu);
+  Eigen::Block<MatrixXs> dkv1_du = d->dki_du[1].bottomLeftCorner(nv, nu);
+  const Eigen::Block<MatrixXs> dk1_dq1 = k1_data->Fx.bottomLeftCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dk1_dv1 = k1_data->Fx.bottomRightCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dqi_dq = d->dyi_dx[1].topLeftCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dqi_dv = d->dyi_dx[1].topRightCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dvi_dq = d->dyi_dx[1].bottomLeftCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dvi_dv = d->dyi_dx[1].bottomRightCorner(nv, nv);
+  const Eigen::Block<MatrixXs> dqi_du = d->dyi_du[1].topLeftCorner(nv, nu);
+  const Eigen::Block<MatrixXs> dvi_du = d->dyi_du[1].bottomLeftCorner(nv, nu);
+  //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i], where dki_dy is ki_data.Fx
+  d->dki_dx[1].topRows(nv) = d->dyi_dx[1].bottomRows(nv);
+  dkv1_dq.noalias() = dk1_dq1 * dqi_dq;
+  // dkv1_dv = time_step_ * dk1_dq1; /todo(cmastalli) debug the code
+  dkv1_dv.noalias() = dk1_dq1 * dqi_dv;
+  dkv1_dq.noalias() += dk1_dv1 * dvi_dq;
+  dkv1_dv.noalias() += dk1_dv1 * dvi_dv;
+  //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i], where dki_dy is ki_data.Fx
+  dkq1_du = dvi_du;
+  dkv1_du.noalias() = dk1_dq1 * dqi_du;
+  dkv1_du.noalias() += dk1_dv1 * dvi_du;
 
-    d->ddli_ddx[0] = d->differential[0]->Lxx;
-    d->ddli_ddudiff[0] = d->differential[0]->Luu;
-    control_->multiplyByDValue(0.0, p, d->ddli_ddudiff[0],
-                               d->ddli_dudiffdu[0]);  // ddli_dudiffdu = ddli_ddudiff * dudiff_du
-    control_->multiplyDValueTransposeBy(0.0, p, d->ddli_dudiffdu[0],
-                                        d->ddli_ddu[0]);  // ddli_ddu = dudiff_du.T * ddli_dudiffdu
-    d->ddli_dxdudiff[0] = d->differential[0]->Lxu;
-    control_->multiplyByDValue(0.0, p, d->ddli_dxdudiff[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdudiff * dudiff_du
+  control_->multiplyByJacobian(u1_data, k1_data->Fu, d->dki_du[1].bottomRows(nv),
+                               addto);  // dfi_du = dki_dw * dw_du
 
-    const std::size_t i = 1;
-    control_->value(rk2_c_[i], p, d->u_diff[i]);
-    differential_->calcDiff(d->differential[i], d->y[i], d->u_diff[i]);
-    d->dki_dy[i].bottomRows(nv) = d->differential[i]->Fx;
+  d->dli_dx[1].noalias() = k1_data->Lx.transpose() * d->dyi_dx[1];
+  control_->multiplyJacobianTransposeBy(u1_data, k1_data->Lu,
+                                        d->dli_du[1]);  // dli_du = Lu * dw_du
+  d->dli_du[1].noalias() += k1_data->Lx.transpose() * d->dyi_du[1];
 
-    d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk2_c_[i] * time_step_;
-    differential_->get_state()->JintegrateTransport(x, d->dx_rk2[i], d->dyi_dx[i], second);
-    differential_->get_state()->Jintegrate(x, d->dx_rk2[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
-    d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i];
+  d->Lxx_partialx[1].noalias() = k1_data->Lxx * d->dyi_dx[1];
+  d->ddli_ddx[1].noalias() = d->dyi_dx[1].transpose() * d->Lxx_partialx[1];
 
-    d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk2_c_[i] * time_step_;
-    differential_->get_state()->JintegrateTransport(x, d->dx_rk2[i], d->dyi_du[i],
-                                                    second);  // dyi_du = Jintegrate * dyi_du
-    d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i];     // TODO: optimize this matrix-matrix multiplication
-    d->dki_dudiff[i].bottomRows(nv) = d->differential[i]->Fu;
-    control_->multiplyByDValue(rk2_c_[i], p, d->dki_dudiff[i], d->dfi_du[i]);  // dfi_du = dki_dudiff * dudiff_du
-    d->dki_du[i] += d->dfi_du[i];
+  control_->multiplyByJacobian(u1_data, k1_data->Lxu, d->Lxu_i[1]);  // Lxu = Lxw * dw_du
+  d->Luu_partialx[1].noalias() = d->Lxu_i[1].transpose() * d->dyi_du[1];
+  d->Lxx_partialu[1].noalias() = k1_data->Lxx * d->dyi_du[1];
+  control_->multiplyByJacobian(u1_data, k1_data->Luu,
+                               d->ddli_dwdu[1]);  // ddli_dwdu = ddli_ddw * dw_du
+  control_->multiplyJacobianTransposeBy(u1_data, d->ddli_dwdu[1],
+                                        d->ddli_ddu[1]);  // ddli_ddu = dw_du.T * ddli_dwdu
+  d->ddli_ddu[1].noalias() +=
+      d->Luu_partialx[1].transpose() + d->Luu_partialx[1] + d->dyi_du[1].transpose() * d->Lxx_partialu[1];
 
-    d->dli_dx[i].noalias() = d->differential[i]->Lx.transpose() * d->dyi_dx[i];
-    // d->dli_dudiff[i].noalias() = d->differential[i]->Lu.transpose();
-    // control_->multiplyByDValue(rk2_c_[i], p, d->differential[i]->Lu.transpose(), d->dli_du[i]); // dli_du = Lu *
-    // dudiff_du
-    control_->multiplyDValueTransposeBy(rk2_c_[i], p, d->differential[i]->Lu,
-                                        d->dli_du[i]);  // dli_du = Lu * dudiff_du
-    d->dli_du[i].noalias() += d->differential[i]->Lx.transpose() * d->dyi_du[i];
+  d->ddli_dxdw[1].noalias() = d->dyi_dx[1].transpose() * d->differential[1]->Lxu;
+  control_->multiplyByJacobian(u1_data, d->ddli_dxdw[1],
+                               d->ddli_dxdu[1]);  // ddli_dxdu = ddli_dxdw * dw_du
+  d->ddli_dxdu[1].noalias() += d->dyi_dx[1].transpose() * d->Lxx_partialu[1];
 
-    d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
-    d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
+  d->Fx.noalias() = time_step_ * d->dki_dx[1];
+  state_->JintegrateTransport(x, d->dx, d->Fx, second);
+  state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
 
-    control_->multiplyByDValue(rk2_c_[i], p, d->differential[i]->Lxu, d->Lxu_i[i]);  // Lxu = Lxudiff * dudiff_du
-    d->Luu_partialx[i].noalias() = d->Lxu_i[i].transpose() * d->dyi_du[i];
-    d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
-    control_->multiplyByDValue(rk2_c_[i], p, d->differential[i]->Luu,
-                               d->ddli_dudiffdu[i]);  // ddli_dudiffdu = ddli_ddudiff * dudiff_du
-    control_->multiplyDValueTransposeBy(rk2_c_[i], p, d->ddli_dudiffdu[i],
-                                        d->ddli_ddu[i]);  // ddli_ddu = dudiff_du.T * ddli_dudiffdu
-    d->ddli_ddu[i].noalias() +=
-        d->Luu_partialx[i].transpose() + d->Luu_partialx[i] + d->dyi_du[i].transpose() * d->Lxx_partialu[i];
+  d->Fu.noalias() = time_step_ * d->dki_du[1];
+  state_->JintegrateTransport(x, d->dx, d->Fu, second);
 
-    d->ddli_dxdudiff[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
-    control_->multiplyByDValue(rk2_c_[i], p, d->ddli_dxdudiff[i],
-                               d->ddli_dxdu[i]);  // ddli_dxdu = ddli_dxdudiff * dudiff_du
-    d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
+  d->Lx.noalias() = time_step_ * d->dli_dx[1];
+  d->Lu.noalias() = time_step_ * d->dli_du[1];
 
-    d->Fx.noalias() = time_step_ * d->dki_dx[1];
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fx, second);
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
+  d->Lxx.noalias() = time_step_ * d->ddli_ddx[1];
+  d->Luu.noalias() = time_step_ * d->ddli_ddu[1];
+  d->Lxu.noalias() = time_step_ * d->ddli_dxdu[1];
+}
 
-    d->Fu.noalias() = time_step_ * d->dki_du[1];
-    differential_->get_state()->JintegrateTransport(x, d->dx, d->Fu, second);
-
-    d->Lx.noalias() = time_step_ * d->dli_dx[1];
-    d->Lu.noalias() = time_step_ * d->dli_du[1];
-
-    d->Lxx.noalias() = time_step_ * d->ddli_ddx[1];
-    d->Luu.noalias() = time_step_ * d->ddli_ddu[1];
-    d->Lxu.noalias() = time_step_ * d->ddli_dxdu[1];
-  } else {
-    differential_->get_state()->Jintegrate(x, d->dx, d->Fx, d->Fx);
-    d->Fu.setZero();
-    d->Lx = d->differential[0]->Lx;
-    d->Lu = d->differential[0]->Lu;
-    d->Lxx = d->differential[0]->Lxx;
-    d->Lxu = d->differential[0]->Lxu;
-    d->Luu = d->differential[0]->Luu;
+template <typename Scalar>
+void IntegratedActionModelRK2Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                   const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  Data* d = static_cast<Data*>(data.get());
+
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
+  differential_->calcDiff(k0_data, x);
+  d->Lx = k0_data->Lx;
+  d->Lxx = k0_data->Lxx;
 }
 
 template <typename Scalar>
@@ -241,11 +251,12 @@ void IntegratedActionModelRK2Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
 
-  // Static casting the data
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-  VectorXs uc(control_->get_nu());
-  differential_->quasiStatic(d->differential[0], uc, x, maxiter, tol);
-  control_->value_inv(0.0, uc, u);
+  Data* d = static_cast<Data*>(data.get());
+  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
+  u0_data->w *= 0.;
+  differential_->quasiStatic(d->differential[0], u0_data->w, x, maxiter, tol);
+  control_->params(u0_data, 0., u0_data->w);
+  u = u0_data->u;
 }
 
 template <typename Scalar>
