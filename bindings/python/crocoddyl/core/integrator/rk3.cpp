@@ -77,7 +77,7 @@ void exposeIntegratedActionRK3() {
       .add_property(
           "differential",
           bp::make_getter(&IntegratedActionDataRK3::differential, bp::return_value_policy<bp::return_by_value>()),
-          "differential action data")
+          "list of differential action data")
       .add_property("control",
                     bp::make_getter(&IntegratedActionDataRK3::control, bp::return_value_policy<bp::return_by_value>()),
                     "list of control parametrization data")

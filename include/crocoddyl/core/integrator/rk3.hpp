@@ -19,7 +19,7 @@ namespace crocoddyl {
  *
  * It applies a standard RK3 integration scheme to a differential (i.e., continuous time) action model.
  *
- * This standard RK4 scheme introduces also the possibility to parametrize the control trajectory inside an
+ * This standard RK3 scheme introduces also the possibility to parametrize the control trajectory inside an
  * integration step, for instance using polynomials. This requires introducing some notation to clarify the difference
  * between the control inputs of the differential model and the control inputs to the integrated model. We have decided
  * to use \f$\mathbf{w}\f$ to refer to the control inputs of the differential model and \f$\mathbf{u}\f$ for the
@@ -214,18 +214,18 @@ struct IntegratedActionDataRK3Tpl : public IntegratedActionDataAbstractTpl<_Scal
   VectorXs dx;               //!< State rate
   std::vector<VectorXs> ki;  //!< List of RK3 terms related to system dynamics
   std::vector<VectorXs> y;   //!< List of states where f is evaluated in the RK3 integration
-  std::vector<VectorXs> ws;  //!< Control inputs evaluated in the RK4 integration
+  std::vector<VectorXs> ws;  //!< Control inputs evaluated in the RK3 integration
   std::vector<VectorXs> dx_rk3;
 
   std::vector<MatrixXs>
-      dki_dx;  //!< List of partial derivatives of RK4 nodes with respect to the state of the RK3 integration. dki/dx
-  std::vector<MatrixXs> dki_du;  //!< List of partial derivatives of RK4 nodes with respect to the control parameters
+      dki_dx;  //!< List of partial derivatives of RK3 nodes with respect to the state of the RK3 integration. dki/dx
+  std::vector<MatrixXs> dki_du;  //!< List of partial derivatives of RK3 nodes with respect to the control parameters
                                  //!< of the RK3 integration. dki/du
 
   std::vector<MatrixXs>
-      dyi_dx;  //!< List of partial derivatives of RK4 dynamics with respect to the state of the RK3 integrator. dyi/dx
-  std::vector<MatrixXs> dyi_du;  //!< List of partial derivatives of RK4 dynamics with respect to the control
-                                 //!< parameters of the RK4 integrator. dyi/du
+      dyi_dx;  //!< List of partial derivatives of RK3 dynamics with respect to the state of the RK3 integrator. dyi/dx
+  std::vector<MatrixXs> dyi_du;  //!< List of partial derivatives of RK3 dynamics with respect to the control
+                                 //!< parameters of the RK3 integrator. dyi/du
 
   std::vector<VectorXs>
       dli_dx;  //!< List of partial derivatives of the cost with respect to the state of the RK3 integration. dli_dx
