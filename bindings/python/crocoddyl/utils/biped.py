@@ -33,9 +33,9 @@ class SimpleBipedGaitProblem:
         if control == 'one':
             self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
         elif control == 'rk4':
-            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK4(self.actuation.nu)
+            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK(self.actuation.nu, crocoddyl.RKType.four)
         elif control == 'rk3':
-            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK3(self.actuation.nu)
+            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK(self.actuation.nu, crocoddyl.RKType.three)
         else:
             self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         # Defining default state

@@ -41,8 +41,7 @@ void exposeCore() {
   exposeStateEuclidean();
   exposeControlParametrizationPolyZero();
   exposeControlParametrizationPolyOne();
-  exposeControlParametrizationPolyTwoRK3();
-  exposeControlParametrizationPolyTwoRK4();
+  exposeControlParametrizationPolyTwoRK();
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();

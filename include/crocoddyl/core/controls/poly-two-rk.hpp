@@ -6,12 +6,13 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_CONTROLS_POLY_TWO_RK3_HPP_
-#define CROCODDYL_CORE_CONTROLS_POLY_TWO_RK3_HPP_
+#ifndef CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_
+#define CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/control-base.hpp"
+#include "crocoddyl/core/integrator/rk.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -19,11 +20,13 @@ namespace crocoddyl {
  * @brief A polynomial function of time of degree two, that is a quadratic function
  *
  * The size of the parameters \f$\mathbf{p}\f$ is 3 times the size of the control input \f$\mathbf{u}\f$.
+ * It defines polynomial of degree two for the RK4 and RK4 integrators.
  * The first third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0. The second
- * third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 1/3. The last third of
- * \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 2/3. This parametrization is suitable
- * to be used with the RK-3 integration scheme, because it requires the value of \f$\mathbf{u}\f$ exactly
- * at 0, 1/3 and 2/3.
+ * third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0.5 or 1/3 for RK4 and RK3
+ * parametrization, respectively. The last third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$
+ * at time 1 or 2 /3 for the RK4 and RK3 parametrization, respectively. This parametrization is suitable
+ * to be used with the RK-4 (or RK-3) integration scheme, because it requires the value of \f$\mathbf{u}\f$ exactly
+ * at 0, 0.5 and 1 (or 0, 1/3 and 2/3).
  *
  * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
@@ -37,23 +40,24 @@ namespace crocoddyl {
  * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
-class ControlParametrizationModelPolyTwoRK3Tpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
+class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
-  typedef ControlParametrizationDataPolyTwoRK3Tpl<Scalar> Data;
+  typedef ControlParametrizationDataPolyTwoRKTpl<Scalar> Data;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the poly-two RK3 control parametrization
+   * @brief Initialize the poly-two RK4 control parametrization
    *
-   * @param[in] nw  Dimension of control vector
+   * @param[in] nw      Dimension of control vector
+   * @param[in] rktype  Type of RK parametrization
    */
-  explicit ControlParametrizationModelPolyTwoRK3Tpl(const std::size_t nw);
-  virtual ~ControlParametrizationModelPolyTwoRK3Tpl();
+  explicit ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw, const RKType rktype);
+  virtual ~ControlParametrizationModelPolyTwoRKTpl();
 
   /**
    * @brief Get the value of the control at the specified time
@@ -140,10 +144,13 @@ class ControlParametrizationModelPolyTwoRK3Tpl : public ControlParametrizationMo
  protected:
   using Base::nu_;
   using Base::nw_;
+
+ private:
+  RKType rktype_;
 };
 
 template <typename _Scalar>
-struct ControlParametrizationDataPolyTwoRK3Tpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
+struct ControlParametrizationDataPolyTwoRKTpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -152,10 +159,11 @@ struct ControlParametrizationDataPolyTwoRK3Tpl : public ControlParametrizationDa
   typedef typename MathBase::Vector3s Vector3s;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataPolyTwoRK3Tpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
+  explicit ControlParametrizationDataPolyTwoRKTpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
     c.setZero();
   }
-  virtual ~ControlParametrizationDataPolyTwoRK3Tpl() {}
+
+  virtual ~ControlParametrizationDataPolyTwoRKTpl() {}
 
   Vector3s c;     //!< Polynomial coefficients of the second-order control model that depends on time
   Scalar tmp_t2;  //!< Temporary variable to store the square of the time
@@ -166,6 +174,6 @@ struct ControlParametrizationDataPolyTwoRK3Tpl : public ControlParametrizationDa
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/core/controls/poly-two-rk3.hxx"
+#include "crocoddyl/core/controls/poly-two-rk.hxx"
 
-#endif  // CROCODDYL_CORE_CONTROLS_POLY_TWO_RK3_HPP_
+#endif  // CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_

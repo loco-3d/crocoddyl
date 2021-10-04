@@ -9,34 +9,46 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::ControlParametrizationModelPolyTwoRK3Tpl(const std::size_t nw)
-    : ControlParametrizationModelAbstractTpl<Scalar>(nw, 3 * nw) {}
+ControlParametrizationModelPolyTwoRKTpl<Scalar>::ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw,
+                                                                                         const RKType rktype)
+    : Base(nw, 3 * nw), rktype_(rktype) {}
 
 template <typename Scalar>
-ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::~ControlParametrizationModelPolyTwoRK3Tpl() {}
+ControlParametrizationModelPolyTwoRKTpl<Scalar>::~ControlParametrizationModelPolyTwoRKTpl() {}
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::calc(
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
     const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p1 = u.segment(nw_, nw_);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p2 = u.tail(nw_);
-
   d->tmp_t2 = t * t;
-  d->c[2] = Scalar(4.5) * d->tmp_t2 - Scalar(1.5) * t;
-  d->c[1] = -Scalar(9.) * d->tmp_t2 + Scalar(6.) * t;
-  d->c[0] = Scalar(4.5) * (d->tmp_t2 - t) + Scalar(1.);
+  switch (rktype_) {
+    case two:
+      std::cerr << "RK2 parametrization is not yet supported" << std::endl;
+      break;
+    case three:
+      d->c[2] = Scalar(4.5) * d->tmp_t2 - Scalar(1.5) * t;
+      d->c[1] = -Scalar(9.) * d->tmp_t2 + Scalar(6.) * t;
+      d->c[0] = Scalar(4.5) * (d->tmp_t2 - t) + Scalar(1.);
+      break;
+    case four:
+      d->c[2] = Scalar(2.) * d->tmp_t2 - t;
+      d->c[1] = -Scalar(2.) * d->c[2] + Scalar(2.) * t;
+      d->c[0] = d->c[2] - Scalar(2.) * t + Scalar(1.);
+      break;
+  }
   d->w = d->c[2] * p2 + d->c[1] * p1 + d->c[0] * p0;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::calcDiff(
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
   Data* d = static_cast<Data*>(data.get());
@@ -47,29 +59,28 @@ void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
-ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::createData() {
+ControlParametrizationModelPolyTwoRKTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::params(
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar,
     const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty("Invalid argument: "
                  << "w has wrong dimension (it should be " + std::to_string(nw_) + ")");
   }
-  Data* d = static_cast<Data*>(data.get());
-  d->u.head(nw_) = w;
-  d->u.segment(nw_, nw_) = w;
-  d->u.tail(nw_) = w;
+  data->u.head(nw_) = w;
+  data->u.segment(nw_, nw_) = w;
+  data->u.tail(nw_) = w;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
-                                                                     const Eigen::Ref<const VectorXs>& w_ub,
-                                                                     Eigen::Ref<VectorXs> u_lb,
-                                                                     Eigen::Ref<VectorXs> u_ub) const {
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
+                                                                    const Eigen::Ref<const VectorXs>& w_ub,
+                                                                    Eigen::Ref<VectorXs> u_lb,
+                                                                    Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u_lb has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -95,7 +106,7 @@ void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::convertBounds(const Eigen
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::multiplyByJacobian(
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::multiplyByJacobian(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
     Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -129,7 +140,7 @@ void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::multiplyByJacobian(
 }
 
 template <typename Scalar>
-void ControlParametrizationModelPolyTwoRK3Tpl<Scalar>::multiplyJacobianTransposeBy(
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::multiplyJacobianTransposeBy(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
     Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
