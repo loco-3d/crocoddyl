@@ -34,6 +34,8 @@ class SimpleBipedGaitProblem:
             self.control = crocoddyl.ControlParametrizationModelPolyOne(self.actuation.nu)
         elif control == 'rk4':
             self.control = crocoddyl.ControlParametrizationModelPolyTwoRK4(self.actuation.nu)
+        elif control == 'rk3':
+            self.control = crocoddyl.ControlParametrizationModelPolyTwoRK3(self.actuation.nu)
         else:
             self.control = crocoddyl.ControlParametrizationModelPolyZero(self.actuation.nu)
         # Defining default state
@@ -253,6 +255,12 @@ class SimpleBipedGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
         elif self.integrator == 'rk4':
             model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
+        elif self.integrator == 'rk3':
+            model = crocoddyl.IntegratedActionModelRK3(dmodel, self.control, timeStep)
+        elif self.integrator == 'rk2':
+            model = crocoddyl.IntegratedActionModelRK2(dmodel, self.control, timeStep)
+        else:
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
         return model
 
     def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=True):
@@ -321,6 +329,12 @@ class SimpleBipedGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         elif self.integrator == 'rk4':
             model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.)
+        elif self.integrator == 'rk3':
+            model = crocoddyl.IntegratedActionModelRK3(dmodel, 0.)
+        elif self.integrator == 'rk2':
+            model = crocoddyl.IntegratedActionModelRK2(dmodel, 0.)
+        else:
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
     def createImpulseModel(self, supportFootIds, swingFootTask):
