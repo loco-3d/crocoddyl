@@ -58,18 +58,21 @@ void IntegratedActionModelRK2Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   d->ki[0].tail(nv) = k0_data->xout;
   d->integral[0] = k0_data->cost;
 
-  d->dx_rk2[1] = Scalar(0.5) * time_step_ * d->ki[0];
+  const boost::shared_ptr<DifferentialActionDataAbstract>& k1_data = d->differential[1];
+  const boost::shared_ptr<ControlParametrizationDataAbstract>& u1_data = d->control[1];
+  d->dx_rk2[1] = time_step_ * rk2_c_[1] * d->ki[0];
   state_->integrate(x, d->dx_rk2[1], d->y[1]);
-  control_->calc(d->control[1], rk2_c_[1], u);
-  d->ws[1] = d->control[1]->w;
-  differential_->calc(d->differential[1], d->y[1], d->ws[1]);
+  control_->calc(u1_data, rk2_c_[1], u);
+  d->ws[1] = u1_data->w;
+  differential_->calc(k1_data, d->y[1], d->ws[1]);
   d->ki[1].head(nv) = d->y[1].tail(nv);
-  d->ki[1].tail(nv) = d->differential[1]->xout;
-  d->integral[1] = d->differential[1]->cost;
+  d->ki[1].tail(nv) = k1_data->xout;
+  d->integral[1] = k1_data->cost;
 
   d->dx = d->ki[1] * time_step_;
   state_->integrate(x, d->dx, d->xnext);
   d->cost = d->integral[1] * time_step_;
+
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -119,6 +122,7 @@ void IntegratedActionModelRK2Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
+  d->dki_dx[0].bottomRows(nv) = k0_data->Fx;
   control_->multiplyByJacobian(u0_data, k0_data->Fu,
                                d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
@@ -150,7 +154,6 @@ void IntegratedActionModelRK2Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   const Eigen::Block<MatrixXs> dk1_dq1 = k1_data->Fx.bottomLeftCorner(nv, nv);
   const Eigen::Block<MatrixXs> dk1_dv1 = k1_data->Fx.bottomRightCorner(nv, nv);
   const Eigen::Block<MatrixXs> dqi_dq = d->dyi_dx[1].topLeftCorner(nv, nv);
-  const Eigen::Block<MatrixXs> dqi_dv = d->dyi_dx[1].topRightCorner(nv, nv);
   const Eigen::Block<MatrixXs> dvi_dq = d->dyi_dx[1].bottomLeftCorner(nv, nv);
   const Eigen::Block<MatrixXs> dvi_dv = d->dyi_dx[1].bottomRightCorner(nv, nv);
   const Eigen::Block<MatrixXs> dqi_du = d->dyi_du[1].topLeftCorner(nv, nu);
@@ -158,8 +161,7 @@ void IntegratedActionModelRK2Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   //   i. d->dki_dx[i].noalias() = d->dki_dy[i] * d->dyi_dx[i], where dki_dy is ki_data.Fx
   d->dki_dx[1].topRows(nv) = d->dyi_dx[1].bottomRows(nv);
   dkv1_dq.noalias() = dk1_dq1 * dqi_dq;
-  // dkv1_dv = time_step_ * dk1_dq1; /todo(cmastalli) debug the code
-  dkv1_dv.noalias() = dk1_dq1 * dqi_dv;
+  dkv1_dv = time_step_ / Scalar(2.) * dk1_dq1;
   dkv1_dq.noalias() += dk1_dv1 * dvi_dq;
   dkv1_dv.noalias() += dk1_dv1 * dvi_dv;
   //  ii. d->dki_du[i].noalias() = d->dki_dy[i] * d->dyi_du[i], where dki_dy is ki_data.Fx
