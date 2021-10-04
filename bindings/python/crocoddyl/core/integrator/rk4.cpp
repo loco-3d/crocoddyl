@@ -11,6 +11,9 @@
 #include "python/crocoddyl/core/integ-action-base.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 namespace crocoddyl {
 namespace python {
 
@@ -138,3 +141,5 @@ void exposeIntegratedActionRK4() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#pragma GCC diagnostic pop

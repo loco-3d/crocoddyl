@@ -254,11 +254,11 @@ class SimpleBipedGaitProblem:
         if self.integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
         elif self.integrator == 'rk4':
-            model = crocoddyl.IntegratedActionModelRK4(dmodel, self.control, timeStep)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.four, timeStep)
         elif self.integrator == 'rk3':
-            model = crocoddyl.IntegratedActionModelRK3(dmodel, self.control, timeStep)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.three, timeStep)
         elif self.integrator == 'rk2':
-            model = crocoddyl.IntegratedActionModelRK2(dmodel, self.control, timeStep)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, self.control, crocoddyl.RKType.two, timeStep)
         else:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.control, timeStep)
         return model
@@ -328,11 +328,11 @@ class SimpleBipedGaitProblem:
         if self.integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         elif self.integrator == 'rk4':
-            model = crocoddyl.IntegratedActionModelRK4(dmodel, 0.)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.four, 0.)
         elif self.integrator == 'rk3':
-            model = crocoddyl.IntegratedActionModelRK3(dmodel, 0.)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.three, 0.)
         elif self.integrator == 'rk2':
-            model = crocoddyl.IntegratedActionModelRK2(dmodel, 0.)
+            model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.two, 0.)
         else:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model

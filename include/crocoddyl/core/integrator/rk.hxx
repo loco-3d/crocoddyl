@@ -1,41 +1,41 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2019-2021, University of Edinburgh, University of Trento,
+//                          LAAS-CNRS, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/integrator/rk3.hpp"
+#include <iostream>
 #include "crocoddyl/core/utils/exception.hpp"
-
-using namespace std;
 
 namespace crocoddyl {
 
 template <typename Scalar>
-IntegratedActionModelRK3Tpl<Scalar>::IntegratedActionModelRK3Tpl(
+IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
+    boost::shared_ptr<ControlParametrizationModelAbstract> control, const RKType rktype, const Scalar time_step,
     const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual) {
-  rk3_c_ = {Scalar(0.), Scalar(1. / 3.), Scalar(2. / 3.)};
+  set_rk_type(rktype);
 }
 
 template <typename Scalar>
-IntegratedActionModelRK3Tpl<Scalar>::IntegratedActionModelRK3Tpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
+IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
+    boost::shared_ptr<DifferentialActionModelAbstract> model, const RKType rktype, const Scalar time_step,
+    const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual) {
-  rk3_c_ = {Scalar(0.), Scalar(1. / 3.), Scalar(2. / 3.)};
+  set_rk_type(rktype);
 }
 
 template <typename Scalar>
-IntegratedActionModelRK3Tpl<Scalar>::~IntegratedActionModelRK3Tpl() {}
+IntegratedActionModelRKTpl<Scalar>::~IntegratedActionModelRKTpl() {}
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& u) {
+void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                              const Eigen::Ref<const VectorXs>& x,
+                                              const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -49,28 +49,38 @@ void IntegratedActionModelRK3Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
-  control_->calc(u0_data, rk3_c_[0], u);
+  control_->calc(u0_data, rk_c_[0], u);
   d->ws[0] = u0_data->w;
   differential_->calc(k0_data, x, d->ws[0]);
   d->y[0] = x;
   d->ki[0].head(nv) = d->y[0].tail(nv);
   d->ki[0].tail(nv) = k0_data->xout;
   d->integral[0] = k0_data->cost;
-  for (std::size_t i = 1; i < 3; ++i) {
+  for (std::size_t i = 1; i < ni_; ++i) {
     const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data = d->differential[i];
     const boost::shared_ptr<ControlParametrizationDataAbstract>& ui_data = d->control[i];
-    d->dx_rk3[i].noalias() = time_step_ * rk3_c_[i] * d->ki[i - 1];
-    state_->integrate(x, d->dx_rk3[i], d->y[i]);
-    control_->calc(ui_data, rk3_c_[i], u);
+    d->dx_rk[i].noalias() = time_step_ * rk_c_[i] * d->ki[i - 1];
+    state_->integrate(x, d->dx_rk[i], d->y[i]);
+    control_->calc(ui_data, rk_c_[i], u);
     d->ws[i] = ui_data->w;
     differential_->calc(ki_data, d->y[i], d->ws[i]);
     d->ki[i].head(nv) = d->y[i].tail(nv);
     d->ki[i].tail(nv) = ki_data->xout;
     d->integral[i] = ki_data->cost;
   }
-  d->dx = (d->ki[0] + Scalar(3.) * d->ki[2]) * time_step_ / Scalar(4.);
+
+  if (ni_ == 2) {
+    d->dx = d->ki[1] * time_step_;
+    d->cost = d->integral[1] * time_step_;
+  } else if (ni_ == 3) {
+    d->dx = (d->ki[0] + Scalar(3.) * d->ki[2]) * time_step_ / Scalar(4.);
+    d->cost = (d->integral[0] + Scalar(3.) * d->integral[2]) * time_step_ / Scalar(4.);
+  } else {
+    d->dx = (d->ki[0] + Scalar(2.) * d->ki[1] + Scalar(2.) * d->ki[2] + d->ki[3]) * time_step_ / Scalar(6.);
+    d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] + Scalar(2.) * d->integral[2] + d->integral[3]) *
+              time_step_ / Scalar(6.);
+  }
   state_->integrate(x, d->dx, d->xnext);
-  d->cost = (d->integral[0] + Scalar(3.) * d->integral[2]) * time_step_ / Scalar(4.);
 
   if (with_cost_residual_) {
     d->r = k0_data->r;
@@ -78,8 +88,8 @@ void IntegratedActionModelRK3Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x) {
+void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                                              const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -96,9 +106,9 @@ void IntegratedActionModelRK3Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>& x,
-                                                   const Eigen::Ref<const VectorXs>& u) {
+void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                  const Eigen::Ref<const VectorXs>& x,
+                                                  const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -107,7 +117,6 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
   Data* d = static_cast<Data*>(data.get());
@@ -116,17 +125,19 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   assert_pretty(MatrixXs(d->dki_dx[0]).topRightCorner(nv, nv).isApprox(MatrixXs::Identity(nv, nv)),
                 "you have changed dki_dx[0] values that supposed to be constant.");
 
-  for (std::size_t i = 0; i < 3; ++i) {
+  for (std::size_t i = 0; i < ni_; ++i) {
     differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
   }
 
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data = d->control[0];
   d->dki_dx[0].bottomRows(nv) = k0_data->Fx;
-  control_->multiplyByJacobian(u0_data, k0_data->Fu, d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
+  control_->multiplyByJacobian(u0_data, k0_data->Fu,
+                               d->dki_du[0].bottomRows(nv));  // dki_du = dki_dw * dw_du
 
   d->dli_dx[0] = k0_data->Lx;
-  control_->multiplyJacobianTransposeBy(u0_data, k0_data->Lu, d->dli_du[0]);  // dli_du = dli_dudiff * dw_du
+  control_->multiplyJacobianTransposeBy(u0_data, k0_data->Lu,
+                                        d->dli_du[0]);  // dli_du = dli_dw * dw_du
 
   d->ddli_ddx[0] = k0_data->Lxx;
   d->ddli_ddw[0] = k0_data->Luu;
@@ -136,14 +147,14 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   d->ddli_dxdw[0] = k0_data->Lxu;
   control_->multiplyByJacobian(u0_data, d->ddli_dxdw[0], d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
-  for (std::size_t i = 1; i < 3; ++i) {
+  for (std::size_t i = 1; i < ni_; ++i) {
     const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data = d->differential[i];
     const boost::shared_ptr<ControlParametrizationDataAbstract>& ui_data = d->control[i];
-    d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk3_c_[i] * time_step_;
-    d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk3_c_[i] * time_step_;
-    state_->JintegrateTransport(x, d->dx_rk3[i], d->dyi_dx[i], second);
-    state_->Jintegrate(x, d->dx_rk3[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
-    state_->JintegrateTransport(x, d->dx_rk3[i], d->dyi_du[i], second);  // dyi_du = Jintegrate * dyi_du
+    d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk_c_[i] * time_step_;
+    d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk_c_[i] * time_step_;
+    state_->JintegrateTransport(x, d->dx_rk[i], d->dyi_dx[i], second);
+    state_->Jintegrate(x, d->dx_rk[i], d->dyi_dx[i], d->dyi_dx[i], first, addto);
+    state_->JintegrateTransport(x, d->dx_rk[i], d->dyi_du[i], second);  // dyi_du = Jintegrate * dyi_du
 
     // Sparse matrix-matrix multiplication for computing:
     Eigen::Block<MatrixXs> dkvi_dq = d->dki_dx[i].bottomLeftCorner(nv, nv);
@@ -200,24 +211,48 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
   }
 
-  d->Fx.noalias() = time_step_ / Scalar(4.) * (d->dki_dx[0] + Scalar(3.) * d->dki_dx[2]);
+  if (ni_ == 2) {
+    d->Fx.noalias() = time_step_ * d->dki_dx[1];
+    d->Fu.noalias() = time_step_ * d->dki_du[1];
+    d->Lx.noalias() = time_step_ * d->dli_dx[1];
+    d->Lu.noalias() = time_step_ * d->dli_du[1];
+    d->Lxx.noalias() = time_step_ * d->ddli_ddx[1];
+    d->Luu.noalias() = time_step_ * d->ddli_ddu[1];
+    d->Lxu.noalias() = time_step_ * d->ddli_dxdu[1];
+  } else if (ni_ == 3) {
+    d->Fx.noalias() = time_step_ / Scalar(4.) * (d->dki_dx[0] + Scalar(3.) * d->dki_dx[2]);
+    d->Fu.noalias() = time_step_ / Scalar(4.) * (d->dki_du[0] + Scalar(3.) * d->dki_du[2]);
+    d->Lx.noalias() = time_step_ / Scalar(4.) * (d->dli_dx[0] + Scalar(3.) * d->dli_dx[2]);
+    d->Lu.noalias() = time_step_ / Scalar(4.) * (d->dli_du[0] + Scalar(3.) * d->dli_du[2]);
+    d->Lxx.noalias() = time_step_ / Scalar(4.) * (d->ddli_ddx[0] + Scalar(3.) * d->ddli_ddx[2]);
+    d->Luu.noalias() = time_step_ / Scalar(4.) * (d->ddli_ddu[0] + Scalar(3.) * d->ddli_ddu[2]);
+    d->Lxu.noalias() = time_step_ / Scalar(4.) * (d->ddli_dxdu[0] + Scalar(3.) * d->ddli_dxdu[2]);
+  } else {
+    d->Fx.noalias() = time_step_ / Scalar(6.) *
+                      (d->dki_dx[0] + Scalar(2.) * d->dki_dx[1] + Scalar(2.) * d->dki_dx[2] + d->dki_dx[3]);
+    d->Fu.noalias() = time_step_ / Scalar(6.) *
+                      (d->dki_du[0] + Scalar(2.) * d->dki_du[1] + Scalar(2.) * d->dki_du[2] + d->dki_du[3]);
+    d->Lx.noalias() = time_step_ / Scalar(6.) *
+                      (d->dli_dx[0] + Scalar(2.) * d->dli_dx[1] + Scalar(2.) * d->dli_dx[2] + d->dli_dx[3]);
+    d->Lu.noalias() = time_step_ / Scalar(6.) *
+                      (d->dli_du[0] + Scalar(2.) * d->dli_du[1] + Scalar(2.) * d->dli_du[2] + d->dli_du[3]);
+    d->Lxx.noalias() = time_step_ / Scalar(6.) *
+                       (d->ddli_ddx[0] + Scalar(2.) * d->ddli_ddx[1] + Scalar(2.) * d->ddli_ddx[2] + d->ddli_ddx[3]);
+    d->Luu.noalias() = time_step_ / Scalar(6.) *
+                       (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] + Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
+    d->Lxu.noalias() =
+        time_step_ / Scalar(6.) *
+        (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
+  }
+
   state_->JintegrateTransport(x, d->dx, d->Fx, second);
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
-
-  d->Fu.noalias() = time_step_ / Scalar(4.) * (d->dki_du[0] + Scalar(3.) * d->dki_du[2]);
   state_->JintegrateTransport(x, d->dx, d->Fu, second);
-
-  d->Lx.noalias() = time_step_ / Scalar(4.) * (d->dli_dx[0] + Scalar(3.) * d->dli_dx[2]);
-  d->Lu.noalias() = time_step_ / Scalar(4.) * (d->dli_du[0] + Scalar(3.) * d->dli_du[2]);
-
-  d->Lxx.noalias() = time_step_ / Scalar(4.) * (d->ddli_ddx[0] + Scalar(3.) * d->ddli_ddx[2]);
-  d->Luu.noalias() = time_step_ / Scalar(4.) * (d->ddli_ddu[0] + Scalar(3.) * d->ddli_ddu[2]);
-  d->Lxu.noalias() = time_step_ / Scalar(4.) * (d->ddli_dxdu[0] + Scalar(3.) * d->ddli_dxdu[2]);
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>& x) {
+void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                  const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -231,25 +266,29 @@ void IntegratedActionModelRK3Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelRK3Tpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelRKTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-bool IntegratedActionModelRK3Tpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+bool IntegratedActionModelRKTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
-    return differential_->checkData(d->differential[0]) && differential_->checkData(d->differential[2]) &&
-           differential_->checkData(d->differential[1]);
+    for (std::size_t i = 0; i < ni_; ++i) {
+      if (!differential_->checkData(d->differential[i])) {
+        return false;
+      }
+    }
+    return true;
   } else {
     return false;
   }
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                      Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                      const std::size_t maxiter, const Scalar tol) {
+void IntegratedActionModelRKTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                     Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                                                     const std::size_t maxiter, const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
@@ -268,8 +307,40 @@ void IntegratedActionModelRK3Tpl<Scalar>::quasiStatic(const boost::shared_ptr<Ac
 }
 
 template <typename Scalar>
-void IntegratedActionModelRK3Tpl<Scalar>::print(std::ostream& os) const {
-  os << "IntegratedActionModelRK3 {dt=" << time_step_ << ", " << *differential_ << "}";
+std::size_t IntegratedActionModelRKTpl<Scalar>::get_ni() const {
+  return ni_;
+}
+
+template <typename Scalar>
+void IntegratedActionModelRKTpl<Scalar>::print(std::ostream& os) const {
+  os << "IntegratedActionModelRK {dt=" << time_step_ << ", " << *differential_ << "}";
+}
+
+template <typename Scalar>
+void IntegratedActionModelRKTpl<Scalar>::set_rk_type(const RKType rktype) {
+  switch (rktype) {
+    case two:
+      ni_ = 2;
+      rk_c_.resize(ni_);
+      rk_c_[0] = Scalar(0.);
+      rk_c_[1] = Scalar(0.5);
+      break;
+    case three:
+      ni_ = 3;
+      rk_c_.resize(ni_);
+      rk_c_[0] = Scalar(0.);
+      rk_c_[1] = Scalar(1. / 3.);
+      rk_c_[2] = Scalar(2. / 3.);
+      break;
+    case four:
+      ni_ = 4;
+      rk_c_.resize(ni_);
+      rk_c_[0] = Scalar(0.);
+      rk_c_[1] = Scalar(0.5);
+      rk_c_[2] = Scalar(0.5);
+      rk_c_[3] = Scalar(1.);
+      break;
+  }
 }
 
 }  // namespace crocoddyl

@@ -20,6 +20,7 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual) {
   rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
+  std::cerr << "Deprecated IntegratedActionModelRK4: Use IntegratedActionModelRK" << std::endl;
 }
 
 template <typename Scalar>
@@ -27,6 +28,7 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual) {
   rk4_c_ = {Scalar(0.), Scalar(0.5), Scalar(0.5), Scalar(1.)};
+  std::cerr << "Deprecated IntegratedActionModelRK4: Use IntegratedActionModelRK" << std::endl;
 }
 
 template <typename Scalar>

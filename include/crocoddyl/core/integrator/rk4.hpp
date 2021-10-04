@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/integ-action-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -50,9 +51,10 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
    * @param[in] time_step  Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                              boost::shared_ptr<ControlParametrizationModelAbstract> control,
-                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  DEPRECATED("Use IntegratedActionModelRK",
+             IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                         boost::shared_ptr<ControlParametrizationModelAbstract> control,
+                                         const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);)
 
   /**
    * @brief Initialize the RK4 integrator
@@ -63,8 +65,9 @@ class IntegratedActionModelRK4Tpl : public IntegratedActionModelAbstractTpl<_Sca
    * @param[in] time_step  Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
-                              const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);
+  DEPRECATED("Use IntegratedActionModelRK",
+             IntegratedActionModelRK4Tpl(boost::shared_ptr<DifferentialActionModelAbstract> model,
+                                         const Scalar time_step = Scalar(1e-3), const bool with_cost_residual = true);)
   virtual ~IntegratedActionModelRK4Tpl();
 
   /**
