@@ -20,9 +20,10 @@ void exposeControlParametrizationPolyTwoRK() {
       "ControlParametrizationModelPolyTwoRK",
       "Second-order polynomial control for RK integrators.\n\n"
       "This control is a quadratic function of time (normalized in [0,1]).\n"
+      "It comes in two versions, one specialized for RK3 integration, another for RK4 integration."
       "The first third of the parameter vector contains the initial value of the differential control w,\n"
-      "the second third contains the value of w at t=0.5 (or 1/3), and the last third is the final value\n"
-      "of w at time t=1. (or 2/3), for the RK4 (or RK3) integrator.",
+      "the second third contains the value of w at t=0.5 (for RK4) or 1/3 (for RK3), and the last third is the final\n"
+      "value\n of w at time t=1 (for RK4) or 2/3 (for RK3).",
       bp::init<std::size_t, RKType>(bp::args("self", "nw", "rktype"),
                                     "Initialize the control dimensions.\n\n"
                                     ":param nw: dimension of differential control space\n"
@@ -51,9 +52,9 @@ void exposeControlParametrizationPolyTwoRK() {
           ":param w: control value (dim control.nw)")
       .def("convertBounds", &ControlParametrizationModelPolyTwoRK::convertBounds, bp::args("self", "w_lb", "w_ub"),
            "Convert the bounds on the control to bounds on the control parameters.\n\n"
-           ":param w_lb: lower bounds on u (dim control.nw)\n"
-           ":param w_ub: upper bounds on u (dim control.nw)\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control parameters (dim control.nu)")
+           ":param w_lb: lower bounds on w (dim control.nw)\n"
+           ":param w_ub: upper bounds on w (dim control.nw)\n"
+           ":return u_lb, u_ub: lower and upper bounds on the control parameters (dim control.nu)")
       .def("multiplyByJacobian", &ControlParametrizationModelPolyTwoRK::multiplyByJacobian_J,
            bp::args("self", "data", "A"),
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
@@ -61,7 +62,7 @@ void exposeControlParametrizationPolyTwoRK() {
            "It assumes that calc has been run first.\n"
            ":param data: control-parametrization data\n"
            ":param A: matrix to multiply (dim na x control.nw)\n"
-           ":return Product between A and the partial derivative of the value function (dim na x control.nu)")
+           ":return Product between A and the partial derivative of the control (dim na x control.nu)")
       .def(
           "multiplyJacobianTransposeBy", &ControlParametrizationModelPolyTwoRK::multiplyJacobianTransposeBy_J,
           bp::args("self", "data", "A"),
@@ -70,7 +71,7 @@ void exposeControlParametrizationPolyTwoRK() {
           "It assumes that calc has been run first.\n"
           ":param data: control-parametrization data\n"
           ":param A: matrix to multiply (dim control.nw x na)\n"
-          ":return Product between the partial derivative of the value function (transposed) and A (dim control.nu x "
+          ":return Product between the partial derivative of the control (transposed) and A (dim control.nu x "
           "na)");
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataPolyTwoRK> >();

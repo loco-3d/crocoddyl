@@ -18,16 +18,16 @@ namespace crocoddyl {
 /**
  * @brief A polynomial function of time of degree one, that is a linear function
  *
- * The size of the parameters \f$\mathbf{p}\f$ is twice the size of the control input \f$\mathbf{u}\f$.
- * The first half of \f$\mathbf{p}\f$ represents the value of u at time 0. The second half of
- * \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0.5.
+ * The size of the parameters \f$\mathbf{u}\f$ is twice the size of the control input \f$\mathbf{w}\f$.
+ * The first half of \f$\mathbf{u}\f$ represents the value of w at time 0. The second half of
+ * \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$ at time 0.5.
  *
- * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * The main computations are carried out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
  * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
  * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
- * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
- * dual of `calc`.
+ * Finally, `params` allows us to obtain the control parameters from the control input, i.e., it is the
+ * inverse of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
  * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
@@ -83,7 +83,7 @@ class ControlParametrizationModelPolyOneTpl : public ControlParametrizationModel
 
   /**
    * @brief Get a value of the control parameters such that the control at the specified time
-   * t is equal to the specified value u
+   * t is equal to the specified value w
    *
    * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]

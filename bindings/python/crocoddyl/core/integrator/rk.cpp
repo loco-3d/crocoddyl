@@ -118,23 +118,23 @@ void exposeIntegratedActionRK() {
                     "list of second partial derivatives of the cost with respect to the state of the RK "
                     "integration. ddli_ddx")
       .add_property("ddli_ddw", bp::make_getter(&IntegratedActionDataRK::ddli_ddw, bp::return_internal_reference<>()),
-                    "list of second partial derivatives of the cost with respect to the control parameters of "
-                    "the RK integration. ddli_ddw")
+                    "list of second partial derivatives of the cost with respect to the control of the differential"
+                    "action model w. ddli_ddw")
       .add_property("ddli_ddu", bp::make_getter(&IntegratedActionDataRK::ddli_ddu, bp::return_internal_reference<>()),
                     "list of second partial derivatives of the cost with respect to the control input of the RK "
                     "integration. ddli_ddu")
       .add_property(
           "ddli_dxdw", bp::make_getter(&IntegratedActionDataRK::ddli_dxdw, bp::return_internal_reference<>()),
-          "list of second partial derivatives of the cost with respect to the state and control parameters of "
-          "the RK integration. ddli_dxdw")
+          "list of second partial derivatives of the cost with respect to the state and control of the differential"
+          "action model. ddli_dxdw")
       .add_property("ddli_dxdu",
                     bp::make_getter(&IntegratedActionDataRK::ddli_dxdu, bp::return_internal_reference<>()),
                     "list of second partial derivatives of the cost with respect to the state and control input "
                     "of the RK integration. ddli_dxdu")
-      .add_property("ddli_dwdu",
-                    bp::make_getter(&IntegratedActionDataRK::ddli_dwdu, bp::return_internal_reference<>()),
-                    "list of second partial derivatives of the cost with respect to the control parameters and "
-                    "inputs control of the RK integration. ddli_dxdu");
+      .add_property(
+          "ddli_dwdu", bp::make_getter(&IntegratedActionDataRK::ddli_dwdu, bp::return_internal_reference<>()),
+          "list of second partial derivatives of the cost with respect to the control of the differential action"
+          "model and the control inputs of the RK integration. ddli_dwdu");
 }
 
 }  // namespace python

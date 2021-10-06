@@ -19,21 +19,22 @@ namespace crocoddyl {
 /**
  * @brief A polynomial function of time of degree two, that is a quadratic function
  *
- * The size of the parameters \f$\mathbf{p}\f$ is 3 times the size of the control input \f$\mathbf{u}\f$.
- * It defines polynomial of degree two for the RK4 and RK4 integrators.
- * The first third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0. The second
- * third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$ at time 0.5 or 1/3 for RK4 and RK3
- * parametrization, respectively. The last third of \f$\mathbf{p}\f$ represents the value of \f$\mathbf{u}\f$
- * at time 1 or 2 /3 for the RK4 and RK3 parametrization, respectively. This parametrization is suitable
- * to be used with the RK-4 (or RK-3) integration scheme, because it requires the value of \f$\mathbf{u}\f$ exactly
- * at 0, 0.5 and 1 (or 0, 1/3 and 2/3).
+ * The size of the parameters \f$\mathbf{u}\f$ is 3 times the size of the control input \f$\mathbf{w}\f$.
+ * It defines a polynomial of degree two, customized for the RK4 and RK4 integrators (even though it can be used
+ * with whatever integration scheme).
+ * The first third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$ at time 0. The second
+ * third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$ at time 0.5 or 1/3 for RK4 and RK3
+ * parametrization, respectively. The last third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$
+ * at time 1 or 2/3 for the RK4 and RK3 parametrization, respectively. This parametrization is suitable
+ * to be used with the RK-4 or RK-3 integration schemes, because they require the value of \f$\mathbf{w}\f$ exactly
+ * at 0, 0.5, 1 (for RK4) or 0, 1/3, 2/3 (for RK3).
  *
- * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * The main computations are carried out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
  * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
  * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
  * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
- * dual of `calc`.
+ * inverse of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
  * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
@@ -51,7 +52,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the poly-two RK4 control parametrization
+   * @brief Initialize the poly-two RK control parametrization
    *
    * @param[in] nw      Dimension of control vector
    * @param[in] rktype  Type of RK parametrization
@@ -89,8 +90,8 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
   virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
-   * @brief Get a value of the control parameters such that the control at the specified time
-   * t is equal to the specified value u
+   * @brief Get a value of the control parameters u such that the control at the specified time
+   * t is equal to the specified value w
    *
    * @param[in]  data   Control-parametrization data
    * @param[in]  t      Time in [0,1]
