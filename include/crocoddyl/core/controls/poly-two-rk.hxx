@@ -11,7 +11,11 @@ namespace crocoddyl {
 template <typename Scalar>
 ControlParametrizationModelPolyTwoRKTpl<Scalar>::ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw,
                                                                                          const RKType rktype)
-    : Base(nw, 3 * nw), rktype_(rktype) {}
+    : Base(nw, 3 * nw), rktype_(rktype) {
+  if (rktype_ == RKType::two) {
+    std::cerr << "Invalid argument: RK2 parametrization is not supported" << std::endl;
+  }
+}
 
 template <typename Scalar>
 ControlParametrizationModelPolyTwoRKTpl<Scalar>::~ControlParametrizationModelPolyTwoRKTpl() {}
@@ -31,7 +35,7 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calc(
   d->tmp_t2 = t * t;
   switch (rktype_) {
     case two:
-      std::cerr << "RK2 parametrization is not yet supported" << std::endl;
+      std::cerr << "Invalid argument: RK2 parametrization is not supported" << std::endl;
       break;
     case three:
       d->c[2] = Scalar(4.5) * d->tmp_t2 - Scalar(1.5) * t;
