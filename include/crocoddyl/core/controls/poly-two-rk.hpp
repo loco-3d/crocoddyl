@@ -63,7 +63,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -75,7 +75,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -93,7 +93,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
    * @brief Get a value of the control parameters u such that the control at the specified time
    * t is equal to the specified value w
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */
@@ -117,7 +117,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    * @param[in] op      Assignment operator which sets, adds, or removes the given results
@@ -132,7 +132,7 @@ class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationMod
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A

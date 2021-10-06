@@ -32,7 +32,7 @@ void exposeControlParametrizationPolyTwoRK() {
                                                           double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyTwoRK::calc, bp::args("self", "data", "t", "u"),
           "Compute the control value.\n\n"
-          ":param data: control-parametrization data\n"
+          ":param data: poly-two-rk data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyTwoRK::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
@@ -40,14 +40,14 @@ void exposeControlParametrizationPolyTwoRK() {
           "calcDiff", &ControlParametrizationModelPolyTwoRK::calcDiff, bp::args("self", "data", "t", "u"),
           "Compute the Jacobian of the control value with respect to the control parameters.\n"
           "It assumes that calc has been run first.\n\n"
-          ":param data: control-parametrization data\n"
+          ":param data: poly-two-rk data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyTwoRK::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                           double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyTwoRK::params, bp::args("self", "data", "t", "w"),
           "Compute the control parameters.\n\n"
-          ":param data: control-parametrization data\n"
+          ":param data: poly-two-rk data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param w: control value (dim control.nw)")
       .def("convertBounds", &ControlParametrizationModelPolyTwoRK::convertBounds, bp::args("self", "w_lb", "w_ub"),
@@ -60,7 +60,7 @@ void exposeControlParametrizationPolyTwoRK() {
            "Compute the product between the given matrix A and the derivative of the control with respect to the "
            "parameters.\n\n"
            "It assumes that calc has been run first.\n"
-           ":param data: control-parametrization data\n"
+           ":param data: poly-two-rk data\n"
            ":param A: matrix to multiply (dim na x control.nw)\n"
            ":return Product between A and the partial derivative of the control (dim na x control.nu)")
       .def(
@@ -69,7 +69,7 @@ void exposeControlParametrizationPolyTwoRK() {
           "Compute the product between the transpose of the derivative of the control with respect to the parameters\n"
           "and a given matrix A.\n\n"
           "It assumes that calc has been run first.\n"
-          ":param data: control-parametrization data\n"
+          ":param data: poly-two-rk data\n"
           ":param A: matrix to multiply (dim control.nw x na)\n"
           ":return Product between the partial derivative of the control (transposed) and A (dim control.nu x "
           "na)");
