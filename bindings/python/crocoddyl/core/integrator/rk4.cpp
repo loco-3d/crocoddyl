@@ -11,6 +11,9 @@
 #include "python/crocoddyl/core/integ-action-base.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 namespace crocoddyl {
 namespace python {
 
@@ -22,11 +25,11 @@ void exposeIntegratedActionRK4() {
       "RK4 integrator for differential action models.\n\n"
       "This class implements an RK4 integrator\n"
       "given a differential action model, i.e.:\n"
-      "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)) with \n"
-      "k0 = f(x, u) \n"
-      "k1 = f(x + dt / 2 * k0, u) \n"
-      "k2 = f(x + dt / 2 * k1, u) \n"
-      "k3 = f(x + dt * k2, u) \n",
+      "  [q+, v+] = State.integrate([q, v], dt / 6 (k0 + k1 + k2 + k3)) with\n"
+      "k0 = f(x, u)\n"
+      "k1 = f(x + dt / 2 * k0, u)\n"
+      "k2 = f(x + dt / 2 * k1, u)\n"
+      "k3 = f(x + dt * k2, u)",
       bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
           "Initialize the RK4 integrator.\n\n"
@@ -138,3 +141,5 @@ void exposeIntegratedActionRK4() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#pragma GCC diagnostic pop

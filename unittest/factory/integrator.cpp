@@ -8,7 +8,7 @@
 
 #include "integrator.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/integrator/rk4.hpp"
+#include "crocoddyl/core/integrator/rk.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -20,6 +20,12 @@ std::ostream& operator<<(std::ostream& os, IntegratorTypes::Type type) {
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
       os << "IntegratorEuler";
+      break;
+    case IntegratorTypes::IntegratorRK2:
+      os << "IntegratorRK2";
+      break;
+    case IntegratorTypes::IntegratorRK3:
+      os << "IntegratorRK3";
       break;
     case IntegratorTypes::IntegratorRK4:
       os << "IntegratorRK4";
@@ -43,8 +49,14 @@ boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::c
     case IntegratorTypes::IntegratorEuler:
       action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model);
       break;
+    case IntegratorTypes::IntegratorRK2:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, RKType::two);
+      break;
+    case IntegratorTypes::IntegratorRK3:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, RKType::three);
+      break;
     case IntegratorTypes::IntegratorRK4:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK4>(model);
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, RKType::four);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong IntegratorTypes::Type given");
@@ -61,8 +73,14 @@ boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> IntegratorFactory::c
     case IntegratorTypes::IntegratorEuler:
       action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model, control);
       break;
+    case IntegratorTypes::IntegratorRK2:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, control, RKType::two);
+      break;
+    case IntegratorTypes::IntegratorRK3:
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, control, RKType::three);
+      break;
     case IntegratorTypes::IntegratorRK4:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK4>(model, control);
+      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(model, control, RKType::four);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong IntegratorTypes::Type given");

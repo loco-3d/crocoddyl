@@ -1,16 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-// #include <boost/make_shared.hpp>
 #include "control.hpp"
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/controls/poly-one.hpp"
-#include "crocoddyl/core/controls/poly-two-rk4.hpp"
+#include "crocoddyl/core/controls/poly-two-rk.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -25,6 +24,9 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
       break;
     case ControlTypes::PolyOne:
       os << "PolyOne";
+      break;
+    case ControlTypes::PolyTwoRK3:
+      os << "PolyTwoRK3";
       break;
     case ControlTypes::PolyTwoRK4:
       os << "PolyTwoRK4";
@@ -51,8 +53,11 @@ boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory
     case ControlTypes::PolyOne:
       control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
       break;
+    case ControlTypes::PolyTwoRK3:
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(nu, RKType::three);
+      break;
     case ControlTypes::PolyTwoRK4:
-      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK4>(nu);
+      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(nu, RKType::four);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ControlTypes::Type given");

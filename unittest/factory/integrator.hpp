@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct IntegratorTypes {
-  enum Type { IntegratorEuler, IntegratorRK4, NbIntegratorTypes };
+  enum Type { IntegratorEuler, IntegratorRK2, IntegratorRK3, IntegratorRK4, NbIntegratorTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

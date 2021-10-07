@@ -85,7 +85,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * It computes the total cost and defines the next state as the current one. This function is used in the
    * terminal nodes of an optimal control problem.
    *
-   * @param[in] data  Action data
+   * @param[in] data  Symplectic Euler data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -106,7 +106,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * It updates the derivatives of the cost function with respect to the state only. This function is used in
    * the terminal nodes of an optimal control problem.
    *
-   * @param[in] data  Action data
+   * @param[in] data  Symplectic Euler data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -129,7 +129,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
    * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
    * for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
-   * @param[in] data    Action data
+   * @param[in] data    Symplectic Euler data
    * @param[out] u      Quasic static commands
    * @param[in] x       State point (velocity has to be zero)
    * @param[in] maxiter Maximum allowed number of iterations

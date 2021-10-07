@@ -1,58 +1,69 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_CORE_CONTROLS_POLY_TWO_RK4_HPP_
-#define CROCODDYL_CORE_CONTROLS_POLY_TWO_RK4_HPP_
+#ifndef CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_
+#define CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/control-base.hpp"
+#include "crocoddyl/core/integrator/rk.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief A polynomial function of time of degree two, that is a quadratic function
  *
- * The size of the parameters p is 3 times the size of the control input u.
- * The first third of p represents the value of u at time 0.
- * The second third of p represents the value of u at time 0.5.
- * The last third of p represents the value of u at time 1.
- * This parametrization is suitable to be used with the RK-4 integration scheme,
- * because it requires the value of u exactly at 0, 0.5 and 1.
+ * The size of the parameters \f$\mathbf{u}\f$ is 3 times the size of the control input \f$\mathbf{w}\f$.
+ * It defines a polynomial of degree two, customized for the RK4 and RK4 integrators (even though it can be used
+ * with whatever integration scheme).
+ * The first third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$ at time 0. The second
+ * third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$ at time 0.5 or 1/3 for RK4 and RK3
+ * parametrization, respectively. The last third of \f$\mathbf{u}\f$ represents the value of \f$\mathbf{w}\f$
+ * at time 1 or 2/3 for the RK4 and RK3 parametrization, respectively. This parametrization is suitable
+ * to be used with the RK-4 or RK-3 integration schemes, because they require the value of \f$\mathbf{w}\f$ exactly
+ * at 0, 0.5, 1 (for RK4) or 0, 1/3, 2/3 (for RK3).
  *
- * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * The main computations are carried out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
  * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
  * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
  * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
- * dual of `calc`.
+ * inverse of `calc`.
  * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`, `multiplyJacobianTransposeBy`
+ * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
+ * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
-class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
+class ControlParametrizationModelPolyTwoRKTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar> Base;
-  typedef ControlParametrizationDataPolyTwoRK4Tpl<Scalar> Data;
+  typedef ControlParametrizationDataPolyTwoRKTpl<Scalar> Data;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ControlParametrizationModelPolyTwoRK4Tpl(const std::size_t nw);
-  virtual ~ControlParametrizationModelPolyTwoRK4Tpl();
+  /**
+   * @brief Initialize the poly-two RK control parametrization
+   *
+   * @param[in] nw      Dimension of control vector
+   * @param[in] rktype  Type of RK parametrization
+   */
+  explicit ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw, const RKType rktype);
+  virtual ~ControlParametrizationModelPolyTwoRKTpl();
 
   /**
    * @brief Get the value of the control at the specified time
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -64,7 +75,7 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
@@ -79,10 +90,10 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
   virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
-   * @brief Get a value of the control parameters such that the control at the specified time
-   * t is equal to the specified value u
+   * @brief Get a value of the control parameters u such that the control at the specified time
+   * t is equal to the specified value w
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */
@@ -106,7 +117,7 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the matrix A and the Jacobian of the control with respect to the parameters
    * @param[in] op      Assignment operator which sets, adds, or removes the given results
@@ -121,7 +132,7 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
    *
    * It assumes that `calc()` has been run first
    *
-   * @param[in]  data   Control-parametrization data
+   * @param[in]  data   Poly-two-RK data
    * @param[in]  A      A matrix to multiply times the Jacobian
    * @param[out] out    Product between the transposed Jacobian of the control with respect to the parameters and the
    * matrix A
@@ -134,10 +145,13 @@ class ControlParametrizationModelPolyTwoRK4Tpl : public ControlParametrizationMo
  protected:
   using Base::nu_;
   using Base::nw_;
+
+ private:
+  RKType rktype_;
 };
 
 template <typename _Scalar>
-struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
+struct ControlParametrizationDataPolyTwoRKTpl : public ControlParametrizationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -146,11 +160,11 @@ struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDa
   typedef typename MathBase::Vector3s Vector3s;
 
   template <template <typename Scalar> class Model>
-  explicit ControlParametrizationDataPolyTwoRK4Tpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
+  explicit ControlParametrizationDataPolyTwoRKTpl(Model<Scalar>* const model) : Base(model), tmp_t2(0.) {
     c.setZero();
   }
 
-  virtual ~ControlParametrizationDataPolyTwoRK4Tpl() {}
+  virtual ~ControlParametrizationDataPolyTwoRKTpl() {}
 
   Vector3s c;     //!< Polynomial coefficients of the second-order control model that depends on time
   Scalar tmp_t2;  //!< Temporary variable to store the square of the time
@@ -161,6 +175,6 @@ struct ControlParametrizationDataPolyTwoRK4Tpl : public ControlParametrizationDa
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/core/controls/poly-two-rk4.hxx"
+#include "crocoddyl/core/controls/poly-two-rk.hxx"
 
-#endif  // CROCODDYL_CORE_CONTROLS_POLY_TWO_RK4_HPP_
+#endif  // CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_

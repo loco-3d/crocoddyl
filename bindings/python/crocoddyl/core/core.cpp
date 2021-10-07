@@ -26,6 +26,7 @@ void exposeCore() {
   exposeActuationSquashing();
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
+  exposeIntegratedActionRK();
   exposeIntegratedActionRK4();
   exposeCostAbstract();
   exposeResidualControl();
@@ -40,7 +41,7 @@ void exposeCore() {
   exposeStateEuclidean();
   exposeControlParametrizationPolyZero();
   exposeControlParametrizationPolyOne();
-  exposeControlParametrizationPolyTwoRK4();
+  exposeControlParametrizationPolyTwoRK();
   exposeActionUnicycle();
   exposeActionLQR();
   exposeDifferentialActionLQR();

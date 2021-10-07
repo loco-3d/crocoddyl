@@ -146,7 +146,7 @@ class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
     COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
-    MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
+    MODEL = crocoddyl.IntegratedActionModelRK(DIFFERENTIAL, crocoddyl.RKType.four, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
 
 
@@ -160,7 +160,7 @@ class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
     COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE, ACTUATION.nu)),
                      1e-7)
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
-    MODEL = crocoddyl.IntegratedActionModelRK4(DIFFERENTIAL, 1e-3)
+    MODEL = crocoddyl.IntegratedActionModelRK(DIFFERENTIAL, crocoddyl.RKType.four, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
 
 

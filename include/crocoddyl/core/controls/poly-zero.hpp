@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Trento
+// Copyright (C) 2021, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,10 +23,10 @@ namespace crocoddyl {
  * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
  * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.
  * Finally, `params` allows us to obtain the control parameters from a the control input, i.e., it is the
- * dual of `calc`.
- * Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
+ * dual of `calc`. Note that `multiplyByJacobian` and `multiplyJacobianTransposeBy` requires to run `calc` first.
  *
- * \sa `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`, `multiplyJacobianTransposeBy`
+ * \sa `ControlParametrizationAbstractTpl`, `calc()`, `calcDiff()`, `createData()`, `params`, `multiplyByJacobian`,
+ * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
 class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationModelAbstractTpl<_Scalar> {
@@ -39,6 +39,11 @@ class ControlParametrizationModelPolyZeroTpl : public ControlParametrizationMode
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the poly-zero control parametrization
+   *
+   * @param[in] nw  Dimension of control vector
+   */
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nw);
   virtual ~ControlParametrizationModelPolyZeroTpl();
 
