@@ -228,10 +228,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                      (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] + Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
   d->Lxu.noalias() = time_step_ / Scalar(6.) *
                      (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
-  d->Gx = d->differential[0]->Gx;
-  d->Hx = d->differential[0]->Hx;
-  control_->multiplyByJacobian(d->control[0], d->differential[0]->Gu, d->Gu);
-  control_->multiplyByJacobian(d->control[0], d->differential[0]->Hu, d->Hu);
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
+  control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
+  control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 }
 
 template <typename Scalar>
@@ -247,8 +247,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
   d->Lxx = k0_data->Lxx;
-  d->Gx = d->differential[0]->Gx;
-  d->Hx = d->differential[0]->Hx;
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
 }
 
 template <typename Scalar>
