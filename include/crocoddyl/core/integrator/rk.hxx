@@ -81,6 +81,8 @@ void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionData
               time_step_ / Scalar(6.);
   }
   state_->integrate(x, d->dx, d->xnext);
+  d->g = k0_data->g;
+  d->h = k0_data->h;
 
   if (with_cost_residual_) {
     d->r = k0_data->r;
@@ -100,6 +102,8 @@ void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionData
   differential_->calc(k0_data, x);
   d->dx.setZero();
   d->cost = k0_data->cost;
+  d->g = k0_data->g;
+  d->h = k0_data->h;
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -244,6 +248,10 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<Action
         time_step_ / Scalar(6.) *
         (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   }
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
+  control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
+  control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 
   state_->JintegrateTransport(x, d->dx, d->Fx, second);
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
@@ -263,6 +271,8 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<Action
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
   d->Lxx = k0_data->Lxx;
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
 }
 
 template <typename Scalar>
