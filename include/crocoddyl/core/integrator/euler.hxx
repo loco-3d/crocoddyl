@@ -75,9 +75,6 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
-  // TODO(cmastalli): share the memory with the differential constraint datas
-  d->g = d->differential->g;
-  d->h = d->differential->h;
 }
 
 template <typename Scalar>
