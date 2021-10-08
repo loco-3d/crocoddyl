@@ -14,7 +14,7 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/integrator/rk4.hpp"
+#include "crocoddyl/core/integrator/rk.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
-      boost::make_shared<crocoddyl::IntegratedActionModelRK4>(runningDAM, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelRK>(runningDAM, crocoddyl::RKType::four, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
       boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
 
