@@ -83,7 +83,6 @@ void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionData
   state_->integrate(x, d->dx, d->xnext);
   d->g = k0_data->g;
   d->h = k0_data->h;
-
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
