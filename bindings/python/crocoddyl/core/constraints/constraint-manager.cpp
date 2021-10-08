@@ -88,24 +88,34 @@ void exposeConstraintManager() {
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x", "u"),
           "Compute the total constraint.\n\n"
-          ":param data: constraint-sum data\n"
+          ":param data: constraint-manager data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ConstraintModelManager::*)(const boost::shared_ptr<ConstraintDataManager>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x"))
+          "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x"),
+          "Compute the total constraint value for nodes that depends only on the state.\n\n"
+          "It updates the total constraint based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint-manager data\n"
+          ":param x: state point (dim. state.nx)")
       .def<void (ConstraintModelManager::*)(const boost::shared_ptr<ConstraintDataManager>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelManager::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the total constraint.\n\n"
           "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
+          ":param data: constraint-manager data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelManager::*)(const boost::shared_ptr<ConstraintDataManager>&,
                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ConstraintModelManager::calcDiff, bp::args("self", "data", "x"))
+          "calcDiff", &ConstraintModelManager::calcDiff, bp::args("self", "data", "x"),
+          "Compute the Jacobian of the total constraint for nodes that depends on the state only.\n\n"
+          "It updates the Jacobian of the total constraint based on the state only.\n"
+          "This function is used in the terminal nodes of an optimal control problem.\n"
+          ":param data: constraint-manager data\n"
+          ":param x: state point (dim. state.nx)")
       .def("createData", &ConstraintModelManager::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total constraint data.\n\n"
