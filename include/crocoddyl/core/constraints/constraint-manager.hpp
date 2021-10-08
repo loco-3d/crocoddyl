@@ -132,6 +132,17 @@ class ConstraintModelManagerTpl {
             const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the total constraint value for nodes that depends only on the state
+   *
+   * It updates the constraint based on the state only. This function is commonly used in the terminal nodes of an
+   * optimal control problem.
+   *
+   * @param[in] data  Constraint data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  void calc(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the Jacobian of the total constraint
    *
    * @param[in] data  Constraint data
@@ -140,6 +151,17 @@ class ConstraintModelManagerTpl {
    */
   void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the Jacobian of the total constraint with respect to the state only
+   *
+   * It computes the Jacobian of the constraint function based on the state only. This function is commonly used
+   * in the terminal nodes of an optimal control problem.
+   *
+   * @param[in] data  Constraint data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the constraint data
@@ -152,22 +174,6 @@ class ConstraintModelManagerTpl {
    * @return the constraint data
    */
   boost::shared_ptr<ConstraintDataManager> createData(DataCollectorAbstract* const data);
-
-  /**
-   * @copybrief calc()
-   *
-   * @param[in] data  Constraint data
-   * @param[in] x     State point
-   */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @copybrief calcDiff()
-   *
-   * @param[in] data  Constraint data
-   * @param[in] x     State point
-   */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Return the state

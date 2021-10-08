@@ -142,6 +142,48 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
 }
 
 template <typename Scalar>
+void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataManager>& data,
+                                             const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (data->constraints.size() != constraints_.size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of constraint datas and models");
+  }
+  assert_pretty(static_cast<std::size_t>(data->g.size()) == ng_,
+                "the dimension of data.g doesn't correspond with ng=" << ng_);
+  assert_pretty(static_cast<std::size_t>(data->h.size()) == nh_,
+                "the dimension of data.g doesn't correspond with nh=" << nh_);
+  data->g.setZero();
+  data->h.setZero();
+  std::size_t ng_i = 0;
+  std::size_t nh_i = 0;
+
+  typename ConstraintModelContainer::iterator it_m, end_m;
+  typename ConstraintDataContainer::iterator it_d, end_d;
+  for (it_m = constraints_.begin(), end_m = constraints_.end(), it_d = data->constraints.begin(),
+      end_d = data->constraints.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    if (m_i->active) {
+      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the constraint name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
+
+      m_i->constraint->calc(d_i, x);
+      const std::size_t ng = m_i->constraint->get_ng();
+      const std::size_t nh = m_i->constraint->get_nh();
+      data->g.segment(ng_i, ng) = d_i->g;
+      data->h.segment(nh_i, nh) = d_i->h;
+      ng_i += ng;
+      nh_i += nh;
+    }
+  }
+}
+
+template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
                                                  const Eigen::Ref<const VectorXs>& x,
                                                  const Eigen::Ref<const VectorXs>& u) {
@@ -194,21 +236,54 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
 }
 
 template <typename Scalar>
+void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+                                                 const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (data->constraints.size() != constraints_.size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of constraint datas and models");
+  }
+  assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == ng_,
+                "the dimension of data.Gx,u doesn't correspond with ng=" << ng_);
+  assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == nh_,
+                "the dimension of data.Hx,u doesn't correspond with nh=" << nh_);
+  const std::size_t ndx = state_->get_ndx();
+  data->Gx.setZero();
+  data->Gu.setZero();
+  data->Hx.setZero();
+  data->Hu.setZero();
+  std::size_t ng_i = 0;
+  std::size_t nh_i = 0;
+
+  typename ConstraintModelContainer::iterator it_m, end_m;
+  typename ConstraintDataContainer::iterator it_d, end_d;
+  for (it_m = constraints_.begin(), end_m = constraints_.end(), it_d = data->constraints.begin(),
+      end_d = data->constraints.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    if (m_i->active) {
+      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the constraint name between model and data ("
+                                                    << it_m->first << " != " << it_d->first << ")");
+
+      m_i->constraint->calcDiff(d_i, x);
+      const std::size_t ng = m_i->constraint->get_ng();
+      const std::size_t nh = m_i->constraint->get_nh();
+      data->Gx.block(ng_i, 0, ng, ndx) = d_i->Gx;
+      data->Hx.block(nh_i, 0, nh, ndx) = d_i->Hx;
+      ng_i += ng;
+      nh_i += nh;
+    }
+  }
+}
+
+template <typename Scalar>
 boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > ConstraintModelManagerTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return boost::allocate_shared<ConstraintDataManager>(Eigen::aligned_allocator<ConstraintDataManager>(), this, data);
-}
-
-template <typename Scalar>
-void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataManagerTpl<Scalar> >& data,
-                                             const Eigen::Ref<const VectorXs>& x) {
-  calc(data, x, unone_);
-}
-
-template <typename Scalar>
-void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataManagerTpl<Scalar> >& data,
-                                                 const Eigen::Ref<const VectorXs>& x) {
-  calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
