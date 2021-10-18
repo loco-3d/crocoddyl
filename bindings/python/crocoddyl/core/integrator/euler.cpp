@@ -64,7 +64,19 @@ void exposeIntegratedActionEuler() {
                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
-           "Create the Euler integrator data.");
+           "Create the Euler integrator data.")
+      .def("multiplyByFu", &IntegratedActionModelEuler::multiplyByFu, bp::args("self", "data", "A"),
+           "Compute the product between the given matrix A and the Jacobian of the dynamics wrt control.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param data: action data\n"
+           ":param A: matrix to multiply (dim na x state.ndx)\n"
+           ":return product between A and the Jacobian of the dynamics with respect the control (dim na x nu)")
+      .def("multiplyFuTransposeBy", &IntegratedActionModelEuler::multiplyFuTransposeBy, bp::args("self", "data", "A"),
+           "Compute the product between the transpose of the Jacobian of the dynamics wrt control and the given matrix A.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param data: action data\n"
+           ":param A: matrix to multiply (dim state.ndx x na)\n"
+           ":return product between the tranpose of the Jacobian of the dynamics with respect the control and A  (dim nu x na)");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 

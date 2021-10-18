@@ -61,6 +61,7 @@ class DifferentialActionModelAbstractTpl {
   typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
 
   /**
    * @brief Initialize the differential action model
@@ -150,6 +151,66 @@ class DifferentialActionModelAbstractTpl {
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the control
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] data  Differential action data
+   * @param[in] A     A matrix to multiply times the Jacobian (`na` x `state_->get_nv()`)
+   * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control (`na` x
+   * `state_->get_ndx()`)
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyByFx(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                            const AssignmentOp = setto) const;
+
+  /**
+   * @brief Compute the product between the transpose of the Jacobian of the dynamics with respect to the control and a
+   * given matrix A
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in]  data   Differential action data
+   * @param[in]  A      A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[out] out    Product between the transposed Jacobian of the dynamics with respect to the control and A
+   * (`state_->get_ndx()` x `na`)
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyFxTransposeBy(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
+                                     const AssignmentOp = setto) const;
+
+  /**
+   * @brief Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the control
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] Fu    Jacobian matrix
+   * @param[in] A     A matrix to multiply times the Jacobian (`na` x `state_->get_nv()`)
+   * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control (`na` x `nu_`)
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+                            const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                            const AssignmentOp = setto) const;
+  /**
+   * @brief Compute the product between the transpose of the Jacobian of the dynamics with respect to the control and a
+   * given matrix A
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in]  Fu     Jacobian matrix
+   * @param[in]  A      A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[out] out    Product between the transposed Jacobian of the dynamics with respect to the control and A
+   * (`nu_` x `na`)
+   * @param[in] op      Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
+                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
+                                     const AssignmentOp = setto) const;
+
+  /**
    * @copybrief quasicStatic()
    *
    * @copydetails quasicStatic()
@@ -162,6 +223,55 @@ class DifferentialActionModelAbstractTpl {
    */
   VectorXs quasiStatic_x(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x,
                          const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+
+  /**
+   * @copybrief multiplyByFx()
+   *
+   * @copydetails multiplyByFx()
+   *
+   * @param[in] data  Differential action data
+   * @param[in] A     A matrix to multiply times the Jacobian (dim `na` x `state_->get_nv()`)
+   * @return Product between A and the Jacobian of the dynamics with respect to the control (dim `na` x
+   * `state_->get_ndx()`)
+   */
+  MatrixXs multiplyByFx_A(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                          const Eigen::Ref<const MatrixXs>& A);
+
+  /**
+   * @copybrief multiplyFxTransposeBy()
+   *
+   * @copydetails multiplyFxTransposeBy()
+   *
+   * @param[in] data  Differential action data
+   * @param[in] A     A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `state_->get_ndx()` x
+   * `na`)
+   */
+  MatrixXsRowMajor multiplyFxTransposeBy_A(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                                           const Eigen::Ref<const MatrixXs>& A);
+
+  /**
+   * @copybrief multiplyByFu()
+   *
+   * @copydetails multiplyByFu()
+   *
+   * @param[in] Fu    Jacobian matrix
+   * @param[in] A     A matrix to multiply times the Jacobian (dim `na` x `state_->get_nv()`)
+   * @return Product between A and the Jacobian of the dynamics with respect to the control (dim `na` x `nu_`)
+   */
+  MatrixXs multiplyByFu_A(const Eigen::Ref<const MatrixXs>& Fu,
+                          const Eigen::Ref<const MatrixXs>& A);
+  /**
+   * @copybrief multiplyFuTransposeBy()
+   *
+   * @copydetails multiplyFuTransposeBy()
+   *
+   * @param[in] Fu    Jacobian matrix
+   * @param[in] A     A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `nu_` x `na`)
+   */
+  MatrixXsRowMajor multiplyFuTransposeBy_A(const Eigen::Ref<const MatrixXs>& Fu,
+                                           const Eigen::Ref<const MatrixXs>& A);
 
   /**
    * @brief Return the dimension of the control input
