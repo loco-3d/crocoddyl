@@ -93,6 +93,80 @@ void exposeDifferentialActionAbstract() {
       .def("quasiStatic", &DifferentialActionModelAbstract_wrap::quasiStatic,
            &DifferentialActionModelAbstract_wrap::default_quasiStatic,
            bp::args("self", "data", "u", "x", "maxiter", "tol"))
+      .def("multiplyByFx", &DifferentialActionModelAbstract_wrap::multiplyByFx,
+           &DifferentialActionModelAbstract_wrap::default_multiplyByFx, bp::args("self", "Fx", "A", "out", "op"),
+           "Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the "
+           "state.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param Fx: Jacobian matrix with respect to the state\n"
+           ":param A: matrix to multiply (dim na x state.nv)\n"
+           ":param out: product between A and the Jacobian of the dynamics with respect to the state (dim na x "
+           "state.ndx)\n"
+           ":param op: assignment operator which sets, adds, or removes the given results")
+      .def("multiplyByFx", &DifferentialActionModelAbstract_wrap::multiplyByFx_A, bp::args("self", "Fx", "A"),
+           "Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the "
+           "state.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param Fx: Jacobian matrix with respect to the state\n"
+           ":param A: matrix to multiply (dim na x state.nv)\n"
+           "return out: product between A and the Jacobian of the dynamics with respect to the state (dim na x "
+           "state.ndx)")
+      .def("multiplyFxTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFxTransposeBy,
+           &DifferentialActionModelAbstract_wrap::default_multiplyFxTransposeBy,
+           bp::args("self", "FxTranspose", "A", "out", "op"),
+           "Compute the product between the transpose of the Jacobian of the dynamics with respect to the state\n"
+           "and a given matrix A.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param FxTranspose: transpose of Jacobian matrix with respect to the state\n"
+           ":param A: matrix to multiply (dim state.nv x na)\n"
+           ":param out: product between the transpose of the Jacobian of the dynamics with respec the state and A "
+           "(dim state.ndx x na)\n"
+           ":param op: assignment operator which sets, adds, or removes the given results")
+      .def("multiplyFxTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFxTransposeBy_A,
+           bp::args("self", "FxTranspose", "A"),
+           "Compute the product between the transpose of the Jacobian of the dynamics with respect to the state\n"
+           "and a given matrix A.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param FxTranspose: transpose of Jacobian matrix with respect to the state\n"
+           ":param A: matrix to multiply (dim state.nv x na)\n"
+           ":return product between the transpose of the Jacobian of the dynamics with respec the state and A (dim "
+           "state.ndx x na)")
+      .def("multiplyByFu", &DifferentialActionModelAbstract_wrap::multiplyByFu,
+           &DifferentialActionModelAbstract_wrap::default_multiplyByFu, bp::args("self", "Fu", "A", "out", "op"),
+           "Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the "
+           "control.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param Fu: Jacobian matrix with respect to the control\n"
+           ":param A: matrix to multiply (dim na x state.nv)\n"
+           ":param out: product between A and the Jacobian of the dynamics with respect to the control (dim na x nu)\n"
+           ":param op: assignment operator which sets, adds, or removes the given results")
+      .def("multiplyByFu", &DifferentialActionModelAbstract_wrap::multiplyByFu_A, bp::args("self", "Fu", "A"),
+           "Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the "
+           "control.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param Fu: Jacobian matrix w.r.t control\n"
+           ":param A: matrix to multiply (dim na x state.nv)\n"
+           "return out: product between A and the Jacobian of the dynamics with respect to the control (dim na x nu)")
+      .def("multiplyFuTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFuTransposeBy,
+           &DifferentialActionModelAbstract_wrap::default_multiplyFuTransposeBy,
+           bp::args("self", "Fu", "A", "out", "op"),
+           "Compute the product between the transpose of the Jacobian of the dynamics with respect to the control\n"
+           "and a given matrix A.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param FuTranspose: transpose of Jacobian matrix of the dynamics with respect to the control\n"
+           ":param A: matrix to multiply (dim state.nv x na)\n"
+           ":param out: product between the transpose of the Jacobian of the dynamics with respec the control and A "
+           "(dim nu x na)\n"
+           ":param op: assignment operator which sets, adds, or removes the given results")
+      .def("multiplyFuTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFuTransposeBy_A,
+           bp::args("self", "Fu", "A"),
+           "Compute the product between the transpose of the Jacobian of the dynamics with respect to the control\n"
+           "and a given matrix A.\n\n"
+           "It assumes that calcDiff has been run first.\n"
+           ":param FuTranspose: transpose of Jacobian matrix of the dynamics with respect to the control\n"
+           ":param A: matrix to multiply (dim state.nv x na)\n"
+           ":return product between the transpose of the Jacobian of the dynamics with respec the control and A (dim "
+           "nu x na)")
       .add_property("nu", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nu),
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),

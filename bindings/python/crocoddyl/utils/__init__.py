@@ -218,6 +218,18 @@ class UnicycleModelDerived(crocoddyl.ActionModelAbstract):
         data = UnicycleDataDerived(self)
         return data
 
+    def multiplyByFx(self, Fx, A):
+        return np.dot(A, Fx)
+
+    def multiplyByFu(self, Fu, A):
+        return np.dot(A, Fu)
+
+    def multiplyFxTransposeBy(self, FxTranspose, A):
+        return np.dot(FxTranspose, A)
+
+    def multiplyFuTransposeBy(self, FuTranspose, A):
+        return np.dot(FuTranspose, A)
+
 
 class UnicycleDataDerived(crocoddyl.ActionDataAbstract):
 
@@ -263,6 +275,18 @@ class LQRModelDerived(crocoddyl.ActionModelAbstract):
     def createData(self):
         data = LQRDataDerived(self)
         return data
+
+    def multiplyByFx(self, Fx, A):
+        return np.dot(A, Fx)
+
+    def multiplyByFu(self, Fu, A):
+        return np.dot(A, Fu)
+
+    def multiplyFxTransposeBy(self, FxTranspose, A):
+        return np.dot(FxTranspose, A)
+
+    def multiplyFuTransposeBy(self, FuTranspose, A):
+        return np.dot(FuTranspose, A)
 
 
 class LQRDataDerived(crocoddyl.ActionDataAbstract):
@@ -310,6 +334,18 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
     def createData(self):
         data = DifferentialLQRDataDerived(self)
         return data
+
+    def multiplyByFx(self, Fx, A):
+        return np.dot(A, Fx)
+
+    def multiplyByFu(self, Fu, A):
+        return np.dot(A, Fu)
+
+    def multiplyFxTransposeBy(self, FxTranspose, A):
+        return np.dot(FxTranspose, A)
+
+    def multiplyFuTransposeBy(self, FuTranspose, A):
+        return np.dot(FuTranspose, A)
 
 
 class DifferentialLQRDataDerived(crocoddyl.DifferentialActionDataAbstract):
@@ -381,6 +417,18 @@ class DifferentialFreeFwdDynamicsModelDerived(crocoddyl.DifferentialActionModelA
     def createData(self):
         data = DifferentialFreeFwdDynamicsDataDerived(self)
         return data
+
+    def multiplyByFx(self, Fx, A):
+        return np.dot(A, Fx)
+
+    def multiplyByFu(self, Fu, A):
+        return np.dot(A, Fu)
+
+    def multiplyFxTransposeBy(self, FxTranspose, A):
+        return np.dot(FxTranspose, A)
+
+    def multiplyFuTransposeBy(self, FuTranspose, A):
+        return np.dot(FuTranspose, A)
 
     def set_armature(self, armature):
         if armature.size is not self.state.nv:
@@ -464,9 +512,6 @@ class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
         self.nq = self.differential.state.nq
         self.nv = self.differential.state.nv
         self.enable_integration = (self.timeStep > 0.)
-
-    def createData(self):
-        return IntegratedActionDataRK4Derived(self)
 
     def calc(self, data, x, u=None):
         nq, dt = self.nq, self.timeStep
@@ -566,6 +611,21 @@ class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
             data.Lxx = data.differential[0].Lxx
             data.Luu = data.differential[0].Luu
             data.Lxu = data.differential[0].Lxu
+
+    def createData(self):
+        return IntegratedActionDataRK4Derived(self)
+
+    def multiplyByFx(self, Fx, A):
+        return np.dot(A, Fx)
+
+    def multiplyByFu(self, Fu, A):
+        return np.dot(A, Fu)
+
+    def multiplyFxTransposeBy(self, FxTranspose, A):
+        return np.dot(FxTranspose, A)
+
+    def multiplyFuTransposeBy(self, FuTranspose, A):
+        return np.dot(FuTranspose, A)
 
 
 class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):

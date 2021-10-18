@@ -21,6 +21,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.u = np.random.rand(self.MODEL.nu)
         self.DATA = self.MODEL.createData()
         self.DATA_DER = self.MODEL_DER.createData()
+        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
+            self.A = np.random.rand(10, state.ndx)
+        else:
+            self.A = np.random.rand(10, state.nv)
 
     def test_calc(self):
         # Run calc for both action models
@@ -45,7 +49,6 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         # Run calcDiff for both action models
         self.MODEL.calc(self.DATA, self.x, self.u)
         self.MODEL.calcDiff(self.DATA, self.x, self.u)
-
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         self.MODEL_DER.calcDiff(self.DATA_DER, self.x, self.u)
         # Checking the next state value
@@ -62,6 +65,28 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(self.DATA.Lxx, self.DATA_DER.Lxx, atol=1e-9), "Wrong Lxx.")
         self.assertTrue(np.allclose(self.DATA.Lxu, self.DATA_DER.Lxu, atol=1e-9), "Wrong Lxu.")
         self.assertTrue(np.allclose(self.DATA.Luu, self.DATA_DER.Luu, atol=1e-9), "Wrong Luu.")
+
+    def test_multiply_operators(self):
+        # Run calcDiff for both action models
+        self.MODEL.calc(self.DATA, self.x, self.u)
+        self.MODEL.calcDiff(self.DATA, self.x, self.u)
+        self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
+        self.MODEL_DER.calcDiff(self.DATA_DER, self.x, self.u)
+        # Test operators
+        self.assertTrue(
+            np.allclose(self.MODEL.multiplyByFx(self.DATA.Fx, self.A), np.dot(self.A, self.DATA.Fx), atol=1e-9),
+            "Wrong multiplyByFx operator.")
+        self.assertTrue(
+            np.allclose(self.MODEL.multiplyByFu(self.DATA.Fu, self.A), np.dot(self.A, self.DATA.Fu), atol=1e-9),
+            "Wrong multiplyByFu operator.")
+        self.assertTrue(
+            np.allclose(self.MODEL.multiplyFxTransposeBy(self.DATA.Fx.T, self.A.T),
+                        np.dot(self.DATA.Fx.T, self.A.T),
+                        atol=1e-9), "Wrong multiplyFxTransposeBy operator.")
+        self.assertTrue(
+            np.allclose(self.MODEL.multiplyFuTransposeBy(self.DATA.Fu.T, self.A.T),
+                        np.dot(self.DATA.Fu.T, self.A.T),
+                        atol=1e-9), "Wrong multiplyFuTransposeBy operator.")
 
 
 class UnicycleTest(ActionModelAbstractTestCase):

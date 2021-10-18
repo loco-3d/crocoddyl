@@ -43,6 +43,7 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   typedef ControlParametrizationDataAbstractTpl<Scalar> ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBaseTpl<double>::MatrixXsRowMajor MatrixXdRowMajor;
 
   /**
    * @brief Initialize the symplectic Euler integrator
@@ -138,6 +139,35 @@ class IntegratedActionModelEulerTpl : public IntegratedActionModelAbstractTpl<_S
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
+
+  /**
+   * @brief Compute the Sparse product between the given matrix A and the Jacobian of the dynamics with respect to the
+   * control
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] Fu    Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A     A matrix to multiply times the Jacobian
+   * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
+                            Eigen::Ref<MatrixXs> out, const AssignmentOp = setto) const;
+
+  /**
+   * @brief Compute the Sparse product between the Jacobian of the dynamics with respect to the
+   * control and the given matrix A
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] FuTranspose  Transpose of Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A            A matrix to multiply times the Jacobian
+   * @param[out] out         Product between A and the Jacobian of the dynamics with respect to the control
+   * @param[in] op           Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXdRowMajor> out,
+                                     const AssignmentOp = setto) const;
 
   /**
    * @brief Print relevant information of the Euler integrator model

@@ -75,6 +75,149 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 }
 
 template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx,
+                                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                                  const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.cols()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of A is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(A.cols()));
+  }
+  if (A.rows() != out.rows()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of rows: " + std::to_string(A.rows()) + " and " +
+                        std::to_string(out.rows()));
+  }
+  if (static_cast<std::size_t>(out.cols()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(out.cols()));
+  }
+
+  switch (op) {
+    case setto:
+      out.noalias() = A * Fx;
+      break;
+    case addto:
+      out.noalias() += A * Fx;
+      break;
+    case rmfrom:
+      out.noalias() -= A * Fx;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
+                                                           const Eigen::Ref<const MatrixXs>& A,
+                                                           Eigen::Ref<MatrixXsRowMajor> out,
+                                                           const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.rows()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of A is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(A.rows()));
+  }
+  if (A.cols() != out.cols()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of columns: " + std::to_string(A.cols()) + " and " +
+                        std::to_string(out.cols()));
+  }
+  if (static_cast<std::size_t>(out.rows()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(out.cols()));
+  }
+  switch (op) {
+    case setto:
+      out.noalias() = FxTranspose * A;
+      break;
+    case addto:
+      out.noalias() += FxTranspose * A;
+      break;
+    case rmfrom:
+      out.noalias() -= FxTranspose * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+                                                  const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                                  const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.cols()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of A is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(A.cols()));
+  }
+  if (A.rows() != out.rows()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of rows: " + std::to_string(A.rows()) + " and " +
+                        std::to_string(out.rows()));
+  }
+  if (static_cast<std::size_t>(out.cols()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
+                        std::to_string(out.cols()));
+  }
+  switch (op) {
+    case setto:
+      out.noalias() = A * Fu;
+      break;
+    case addto:
+      out.noalias() += A * Fu;
+      break;
+    case rmfrom:
+      out.noalias() -= A * Fu;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+                                                           const Eigen::Ref<const MatrixXs>& A,
+                                                           Eigen::Ref<MatrixXsRowMajor> out,
+                                                           const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.rows()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of A is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(A.rows()));
+  }
+  if (A.cols() != out.cols()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of columns: " + std::to_string(A.cols()) + " and " +
+                        std::to_string(out.cols()));
+  }
+  if (static_cast<std::size_t>(out.rows()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
+                        std::to_string(out.cols()));
+  }
+  switch (op) {
+    case setto:
+      out.noalias() = FuTranspose * A;
+      break;
+    case addto:
+      out.noalias() += FuTranspose * A;
+      break;
+    case rmfrom:
+      out.noalias() -= FuTranspose * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStatic_x(
     const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x, const std::size_t maxiter,
     const Scalar tol) {
@@ -82,6 +225,42 @@ typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStat
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);
   return u;
+}
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyByFx_A(
+    const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A) {
+  MatrixXs out(A.rows(), state_->get_ndx());
+  out.setZero();
+  multiplyByFx(Fx, A, out);
+  return out;
+}
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
+    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
+  MatrixXsRowMajor out(state_->get_ndx(), A.cols());
+  out.setZero();
+  multiplyFxTransposeBy(FxTranspose, A, out);
+  return out;
+}
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyByFu_A(
+    const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A) {
+  MatrixXs out(A.rows(), nu_);
+  out.setZero();
+  multiplyByFu(Fu, A, out);
+  return out;
+}
+
+template <typename Scalar>
+typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy_A(
+    const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A) {
+  MatrixXsRowMajor out(nu_, A.cols());
+  out.setZero();
+  multiplyFuTransposeBy(FuTranspose, A, out);
+  return out;
 }
 
 template <typename Scalar>

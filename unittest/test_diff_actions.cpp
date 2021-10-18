@@ -159,6 +159,78 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
   }
 }
 
+void test_multiply_operators(DifferentialActionModelTypes::Type action_type) {
+  // create the model
+  DifferentialActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+
+  // create the corresponding data object
+  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+
+  // Generating random state and control vectors
+  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+
+  // Getting the state dimension from calc() call
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+
+  // Creating the matrices
+  const std::size_t na = 10;
+  const std::size_t nv = model->get_state()->get_nv();
+  const std::size_t ndx = model->get_state()->get_ndx();
+  const std::size_t nu = model->get_nu();
+  Eigen::MatrixXd A = Eigen::MatrixXd::Random(na, nv);
+
+  // Check the multiplyByFx
+  Eigen::MatrixXd out1 = Eigen::MatrixXd::Zero(na, ndx);
+  Eigen::MatrixXd tmp = Eigen::MatrixXd::Random(na, ndx);
+  model->multiplyByFx(data->Fx, A, out1);
+  BOOST_CHECK((A * data->Fx - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFx(data->Fx, A, out1, crocoddyl::addto);
+  BOOST_CHECK((tmp + A * data->Fx - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFx(data->Fx, A, out1, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - A * data->Fx - out1).isZero());
+
+  // Check the multiplyFxTransposeBy
+  crocoddyl::MathBaseTpl<double>::MatrixXsRowMajor out2 = Eigen::MatrixXd::Zero(ndx, na);
+  tmp = Eigen::MatrixXd::Random(ndx, na);
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2);
+  BOOST_CHECK((data->Fx.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2, crocoddyl::addto);
+  BOOST_CHECK((tmp + data->Fx.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - data->Fx.transpose() * A.transpose() - out2).isZero());
+
+  // Check the multiplyByFu
+  out1 = Eigen::MatrixXd::Zero(na, nu);
+  tmp = Eigen::MatrixXd::Random(na, nu);
+  model->multiplyByFu(data->Fu, A, out1);
+  BOOST_CHECK((A * data->Fu - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFu(data->Fu, A, out1, crocoddyl::addto);
+  BOOST_CHECK((tmp + A * data->Fu - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFu(data->Fu, A, out1, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - A * data->Fu - out1).isZero());
+
+  // Check the multiplyFuTransposeBy
+  out2 = Eigen::MatrixXd::Zero(nu, na);
+  tmp = Eigen::MatrixXd::Random(nu, na);
+  model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2);
+  BOOST_CHECK((data->Fu.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2, crocoddyl::addto);
+  BOOST_CHECK((tmp + data->Fu.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - data->Fu.transpose() * A.transpose() - out2).isZero());
+}
+
 //----------------------------------------------------------------------------//
 
 void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_type) {
@@ -171,6 +243,7 @@ void register_action_model_unit_tests(DifferentialActionModelTypes::Type action_
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, action_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_quasi_static, action_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_multiply_operators, action_type)));
   framework::master_test_suite().add(ts);
 }
 

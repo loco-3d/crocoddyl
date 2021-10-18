@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,6 +167,60 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
   differential_->quasiStatic(d->differential, d->control->w, x, maxiter, tol);
   control_->params(d->control, 0., d->control->w);
   u = d->control->u;
+}
+
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+                                                         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+                                                         const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.cols()) != state_->get_ndx()) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of A is wrong, it should be " + std::to_string(state_->get_ndx()) +
+                        " instead of " + std::to_string(A.cols()));
+  }
+  if (A.rows() != out.rows()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of rows: " + std::to_string(A.rows()) + " and " +
+                        std::to_string(out.rows()));
+  }
+  if (static_cast<std::size_t>(out.cols()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
+                        std::to_string(out.cols()));
+  }
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nw = control_->get_nw();
+
+  differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), op);
+  if (op == setto) {
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
+  } else {
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), op);
+  }
+}
+
+template <typename Scalar>
+void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+                                                                  const Eigen::Ref<const MatrixXs>& A,
+                                                                  Eigen::Ref<MatrixXdRowMajor> out,
+                                                                  const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != state_->get_ndx() ||
+      static_cast<std::size_t>(out.rows()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
+                        " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
+  }
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nw = control_->get_nw();
+
+  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv), out.topRows(nw), op);
+  if (op == setto) {
+    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
+  } else {
+    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), op);
+  }
 }
 
 template <typename Scalar>
