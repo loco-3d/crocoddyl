@@ -17,8 +17,8 @@ void exposeActivation2NormBarrier() {
   bp::class_<ActivationModel2NormBarrier, bp::bases<ActivationModelAbstract> >(
       "ActivationModel2NormBarrier",
       "An 2-norm activation model for a defined barrier alpha\n\n"
-      "If the residual is over an alpha threshold, this function imposes a quadratic term. \n"
-      "In short, the activation value is 0 if the residual is major to alpha, otherwise, it is \n"
+      "If the residual is lower than an alpha threshold, this function imposes a quadratic term. \n"
+      "In short, the activation value is 0 if the residual is major or equals to alpha, otherwise, it is \n"
       "equals to 0.5 *(||r|| - alpha)^2",
       bp::init<std::size_t, bp::optional<double, bool> >(bp::args("self", "nr", "alpha", "true_hessian"),
                                                          "Initialize the activation model.\n\n"
