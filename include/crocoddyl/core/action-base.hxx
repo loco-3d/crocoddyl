@@ -75,7 +75,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyByFx(const boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelAbstractTpl<Scalar>::multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx,
                                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
                                                   const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -97,13 +97,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFx(const boost::shared_ptr<Action
 
   switch (op) {
     case setto:
-      out.noalias() = A * data->Fx;
+      out.noalias() = A * Fx;
       break;
     case addto:
-      out.noalias() += A * data->Fx;
+      out.noalias() += A * Fx;
       break;
     case rmfrom:
-      out.noalias() -= A * data->Fx;
+      out.noalias() -= A * Fx;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -111,7 +111,7 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFx(const boost::shared_ptr<Action
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
                                                            const Eigen::Ref<const MatrixXs>& A,
                                                            Eigen::Ref<MatrixXsRowMajor> out,
                                                            const AssignmentOp op) const {
@@ -133,13 +133,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const boost::shared_p
   }
   switch (op) {
     case setto:
-      out.noalias() = data->Fx.transpose() * A;
+      out.noalias() = FxTranspose * A;
       break;
     case addto:
-      out.noalias() += data->Fx.transpose() * A;
+      out.noalias() += FxTranspose * A;
       break;
     case rmfrom:
-      out.noalias() -= data->Fx.transpose() * A;
+      out.noalias() -= FxTranspose * A;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -147,7 +147,7 @@ void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const boost::shared_p
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyByFu(const boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelAbstractTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
                                                   const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
                                                   const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -168,13 +168,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFu(const boost::shared_ptr<Action
   }
   switch (op) {
     case setto:
-      out.noalias() = A * data->Fu;
+      out.noalias() = A * Fu;
       break;
     case addto:
-      out.noalias() += A * data->Fu;
+      out.noalias() += A * Fu;
       break;
     case rmfrom:
-      out.noalias() -= A * data->Fu;
+      out.noalias() -= A * Fu;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -182,7 +182,7 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFu(const boost::shared_ptr<Action
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const boost::shared_ptr<ActionDataAbstract>& data,
+void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
                                                            const Eigen::Ref<const MatrixXs>& A,
                                                            Eigen::Ref<MatrixXsRowMajor> out,
                                                            const AssignmentOp op) const {
@@ -204,13 +204,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const boost::shared_p
   }
   switch (op) {
     case setto:
-      out.noalias() = data->Fu.transpose() * A;
+      out.noalias() = FuTranspose * A;
       break;
     case addto:
-      out.noalias() += data->Fu.transpose() * A;
+      out.noalias() += FuTranspose * A;
       break;
     case rmfrom:
-      out.noalias() -= data->Fu.transpose() * A;
+      out.noalias() -= FuTranspose * A;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -229,37 +229,37 @@ typename MathBaseTpl<Scalar>::VectorXs ActionModelAbstractTpl<Scalar>::quasiStat
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyByFx_A(
-    const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXs out(A.rows(), state_->get_ndx());
   out.setZero();
-  multiplyByFx(data, A, out);
+  multiplyByFx(Fx, A, out);
   return out;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyByFu_A(
-    const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXs out(A.rows(), nu_);
   out.setZero();
-  multiplyByFu(data, A, out);
+  multiplyByFu(Fu, A, out);
   return out;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
-    const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXsRowMajor out(A.rows(), nu_);
   out.setZero();
-  multiplyFxTransposeBy(data, A, out);
+  multiplyFxTransposeBy(FxTranspose, A, out);
   return out;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy_A(
-    const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXsRowMajor out(A.rows(), nu_);
   out.setZero();
-  multiplyFuTransposeBy(data, A, out);
+  multiplyFuTransposeBy(FuTranspose, A, out);
   return out;
 }
 

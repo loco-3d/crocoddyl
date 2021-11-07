@@ -155,13 +155,13 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in] data  Differential action data
+   * @param[in] Fx    Jacobian matrix of the dynamics w.r.t. state
    * @param[in] A     A matrix to multiply times the Jacobian (`na` x `state_->get_nv()`)
    * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control (`na` x
    * `state_->get_ndx()`)
    * @param[in] op    Assignment operator which sets, adds, or removes the given results
    */
-  virtual void multiplyByFx(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  virtual void multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx,
                             const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
                             const AssignmentOp = setto) const;
 
@@ -171,13 +171,13 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in]  data   Differential action data
+   * @param[in]  FxTranspose     Transpose of Jacobian matrix of the dynamics w.r.t state
    * @param[in]  A      A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
    * @param[out] out    Product between the transposed Jacobian of the dynamics with respect to the control and A
    * (`state_->get_ndx()` x `na`)
    * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
-  virtual void multiplyFxTransposeBy(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  virtual void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
                                      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
                                      const AssignmentOp = setto) const;
 
@@ -186,7 +186,7 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in] Fu    Jacobian matrix
+   * @param[in] Fu    Jacobian matrix of the dynamics w.r.t control
    * @param[in] A     A matrix to multiply times the Jacobian (`na` x `state_->get_nv()`)
    * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control (`na` x `nu_`)
    * @param[in] op    Assignment operator which sets, adds, or removes the given results
@@ -200,13 +200,13 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in]  Fu     Jacobian matrix
+   * @param[in]  FuTranspose     Transpose of Jacobian matrix of the dynamics w.r.t. control
    * @param[in]  A      A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
    * @param[out] out    Product between the transposed Jacobian of the dynamics with respect to the control and A
    * (`nu_` x `na`)
    * @param[in] op      Assignment operator which sets, adds, or removes the given results
    */
-  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
+  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
                                      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
                                      const AssignmentOp = setto) const;
 
@@ -229,12 +229,12 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyByFx()
    *
-   * @param[in] data  Differential action data
+   * @param[in] Fx    Jacobian matrix of the dynamics w.r.t. state
    * @param[in] A     A matrix to multiply times the Jacobian (dim `na` x `state_->get_nv()`)
    * @return Product between A and the Jacobian of the dynamics with respect to the control (dim `na` x
    * `state_->get_ndx()`)
    */
-  MatrixXs multiplyByFx_A(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  MatrixXs multiplyByFx_A(const Eigen::Ref<const MatrixXs>& Fx,
                           const Eigen::Ref<const MatrixXs>& A);
 
   /**
@@ -242,12 +242,12 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyFxTransposeBy()
    *
-   * @param[in] data  Differential action data
-   * @param[in] A     A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[in] FxTranspose     Transpose of Jacobian matrix of the dynamics w.r.t. state
+   * @param[in] A               A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
    * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `state_->get_ndx()` x
    * `na`)
    */
-  MatrixXsRowMajor multiplyFxTransposeBy_A(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  MatrixXsRowMajor multiplyFxTransposeBy_A(const Eigen::Ref<const MatrixXs>& FxTranspose,
                                            const Eigen::Ref<const MatrixXs>& A);
 
   /**
@@ -255,7 +255,7 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyByFu()
    *
-   * @param[in] Fu    Jacobian matrix
+   * @param[in] Fu    Jacobian matrix of the dynamics w.r.t. control
    * @param[in] A     A matrix to multiply times the Jacobian (dim `na` x `state_->get_nv()`)
    * @return Product between A and the Jacobian of the dynamics with respect to the control (dim `na` x `nu_`)
    */
@@ -266,11 +266,11 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyFuTransposeBy()
    *
-   * @param[in] Fu    Jacobian matrix
-   * @param[in] A     A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[in] FuTranspose    Transpose of Jacobian matrix of the dynamics w.r.t. control
+   * @param[in] A              A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
    * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `nu_` x `na`)
    */
-  MatrixXsRowMajor multiplyFuTransposeBy_A(const Eigen::Ref<const MatrixXs>& Fu,
+  MatrixXsRowMajor multiplyFuTransposeBy_A(const Eigen::Ref<const MatrixXs>& FuTranspose,
                                            const Eigen::Ref<const MatrixXs>& A);
 
   /**

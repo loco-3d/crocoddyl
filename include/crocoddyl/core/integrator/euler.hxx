@@ -170,7 +170,7 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(const boost::shared_ptr<
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const boost::shared_ptr<ActionDataAbstract>& data,
+void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
                                                          const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
                                                          const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -191,25 +191,28 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const boost::shared_ptr
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
-  Data* d = static_cast<Data*>(data.get());
-    switch (op) {
+
+  switch (op) {
   case setto:
-    differential_->multiplyByFu(d->Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw));
-    differential_->multiplyByFu(d->Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
+    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw));
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
     break;
   case addto:
-    differential_->multiplyByFu(d->Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw),addto);
-    differential_->multiplyByFu(d->Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
+    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), addto);
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
     break;
   case rmfrom:
-    differential_->multiplyByFu(d->Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), rmfrom);
-    differential_->multiplyByFu(d->Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), rmfrom);
+    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), rmfrom);
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), rmfrom);
+    break;
+  default:
+    throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
     break;
     }
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const boost::shared_ptr<ActionDataAbstract> &data,
+void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
                                                                   const Eigen::Ref<const MatrixXs> &A, Eigen::Ref<MatrixXdRowMajor> out,
                                                                   const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -221,23 +224,23 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const boost::s
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
-  Data *d = static_cast<Data *>(data.get());
 
-
-   switch (op) {
+  switch (op) {
   case setto:
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().leftCols(nv), A.topRows(nv), out.topRows(nw));
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
+  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv), out.topRows(nw));
+  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
     break;
   case addto:
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().leftCols(nv), A.topRows(nv) , out.topRows(nw), addto);
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
+  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv) , out.topRows(nw), addto);
+  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
     break;
   case rmfrom:
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().leftCols(nv), A.topRows(nv) , out.topRows(nw), rmfrom);
-  differential_->multiplyFuTransposeBy(d->Fu.transpose().rightCols(nv), A.bottomRows(nv), out.topRows(nw), rmfrom);
+  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv) , out.topRows(nw), rmfrom);
+  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), rmfrom);
+    break;
   default:
     throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+    break;
   }
 }
 

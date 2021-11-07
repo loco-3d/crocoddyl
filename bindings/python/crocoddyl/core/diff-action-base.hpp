@@ -75,7 +75,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     return DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
   }
 
-  void multiplyByFx(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
                     Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
     if (static_cast<std::size_t>(A.cols()) != state_->get_nv()) {
       throw_pretty("Invalid argument: "
@@ -93,7 +93,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of columns of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
                             " instead of " + std::to_string(out.cols()));
       }
-      MatrixXs res = bp::call<MatrixXs>(multiplyByFx.ptr(), data, (Eigen::MatrixXd)A);
+      MatrixXs res = bp::call<MatrixXs>(multiplyByFx.ptr(), Fx, (Eigen::MatrixXd)A);
       if (res.rows() != A.rows() || static_cast<std::size_t>(res.cols()) != state_->get_ndx()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(A.rows()) + "," +
@@ -103,10 +103,10 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
       assigmentOperator(out, res, op);
       return;
     }
-    return DifferentialActionModelAbstract::multiplyByFx(data, A, out, op);
+    return DifferentialActionModelAbstract::multiplyByFx(Fx, A, out, op);
   }
 
-  void multiplyFxTransposeBy(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
                              const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
                              const AssignmentOp op) const {
     if (static_cast<std::size_t>(A.rows()) != state_->get_nv()) {
@@ -125,7 +125,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of rows of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
                             " instead of " + std::to_string(out.cols()));
       }
-      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), data, (MatrixXs)A);
+      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), FxTranspose, (MatrixXs)A);
       if (static_cast<std::size_t>(res.rows()) != state_->get_ndx() || res.cols() != A.cols()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(state_->get_ndx()) +
@@ -135,7 +135,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
       assigmentOperator(out, res, op);
       return;
     }
-    return DifferentialActionModelAbstract::multiplyFxTransposeBy(data, A, out, op);
+    return DifferentialActionModelAbstract::multiplyFxTransposeBy(FxTranspose, A, out, op);
   }
 
   void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
@@ -207,16 +207,16 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     return this->DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
   }
 
-  void default_multiplyByFx(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  void default_multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx,
                             const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
                             const AssignmentOp op) const {
-    return this->DifferentialActionModelAbstract::multiplyByFx(data, A, out, op);
+    return this->DifferentialActionModelAbstract::multiplyByFx(Fx, A, out, op);
   }
 
-  void default_multiplyFxTransposeBy(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  void default_multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
                                      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
                                      const AssignmentOp op) const {
-    return this->DifferentialActionModelAbstract::multiplyFxTransposeBy(data, A, out, op);
+    return this->DifferentialActionModelAbstract::multiplyFxTransposeBy(FxTranspose, A, out, op);
   }
 
   void default_multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
@@ -225,10 +225,10 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
     return this->DifferentialActionModelAbstract::multiplyByFu(Fu, A, out, op);
   }
 
-  void default_multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
+  void default_multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
                                      const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
                                      const AssignmentOp op) const {
-    return this->DifferentialActionModelAbstract::multiplyFuTransposeBy(Fu, A, out, op);
+    return this->DifferentialActionModelAbstract::multiplyFuTransposeBy(FuTranspose, A, out, op);
   }
 
  protected:

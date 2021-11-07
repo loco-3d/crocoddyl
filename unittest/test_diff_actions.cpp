@@ -184,23 +184,51 @@ void test_multiply_operators(DifferentialActionModelTypes::Type action_type) {
 
   // Check the multiplyByFx
   Eigen::MatrixXd out1 = Eigen::MatrixXd::Zero(na, ndx);
-  model->multiplyByFx(data, A, out1);
+  Eigen::MatrixXd tmp = Eigen::MatrixXd::Random(na, ndx);
+  model->multiplyByFx(data->Fx, A, out1);
   BOOST_CHECK((A * data->Fx - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFx(data->Fx, A, out1,  crocoddyl::addto);
+  BOOST_CHECK((tmp + A * data->Fx - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFx(data->Fx, A, out1, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - A * data->Fx - out1).isZero());
 
   // Check the multiplyFxTransposeBy
   crocoddyl::MathBaseTpl<double>::MatrixXsRowMajor out2 = Eigen::MatrixXd::Zero(ndx, na);
-  model->multiplyFxTransposeBy(data, A.transpose(), out2);
+  tmp = Eigen::MatrixXd::Random(ndx, na);
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2);
   BOOST_CHECK((data->Fx.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2, crocoddyl::addto);
+  BOOST_CHECK((tmp + data->Fx.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFxTransposeBy(data->Fx.transpose(), A.transpose(), out2, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - data->Fx.transpose() * A.transpose() - out2).isZero());
 
   // Check the multiplyByFu
   out1 = Eigen::MatrixXd::Zero(na, nu);
+  tmp = Eigen::MatrixXd::Random(na, nu);
   model->multiplyByFu(data->Fu, A, out1);
   BOOST_CHECK((A * data->Fu - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFu(data->Fu, A, out1,  crocoddyl::addto);
+  BOOST_CHECK((tmp + A * data->Fu - out1).isZero());
+  out1 = tmp;
+  model->multiplyByFu(data->Fu, A, out1, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - A * data->Fu - out1).isZero());
 
   // Check the multiplyFuTransposeBy
   out2 = Eigen::MatrixXd::Zero(nu, na);
+  tmp = Eigen::MatrixXd::Random(nu, na);  
   model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2);
   BOOST_CHECK((data->Fu.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2, crocoddyl::addto);
+  BOOST_CHECK((tmp + data->Fu.transpose() * A.transpose() - out2).isZero());
+  out2 = tmp;
+  model->multiplyFuTransposeBy(data->Fu.transpose(), A.transpose(), out2, crocoddyl::rmfrom);
+  BOOST_CHECK((tmp - data->Fu.transpose() * A.transpose() - out2).isZero());
 }
 
 //----------------------------------------------------------------------------//
