@@ -192,23 +192,12 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const 
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
 
-  switch (op) {
-  case setto:
-    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw));
+  differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), op);
+  if (op == setto) {
     differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
-    break;
-  case addto:
-    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), addto);
-    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
-    break;
-  case rmfrom:
-    differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), rmfrom);
-    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), rmfrom);
-    break;
-  default:
-    throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-    break;
-    }
+  } else {
+    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), op);
+  }
 }
 
 template <typename Scalar>
@@ -226,22 +215,11 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::R
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
 
-  switch (op) {
-  case setto:
-  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv), out.topRows(nw));
-  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
-    break;
-  case addto:
-  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv) , out.topRows(nw), addto);
-  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
-    break;
-  case rmfrom:
-  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv) , out.topRows(nw), rmfrom);
-  differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), rmfrom);
-    break;
-  default:
-    throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-    break;
+  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv), out.topRows(nw), op);
+  if (op == setto) {
+    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
+  } else {
+    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), op);
   }
 }
 
