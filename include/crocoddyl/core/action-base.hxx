@@ -237,6 +237,15 @@ typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyB
 }
 
 template <typename Scalar>
+typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
+    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
+  MatrixXsRowMajor out(state_->get_ndx(), A.cols());
+  out.setZero();
+  multiplyFxTransposeBy(FxTranspose, A, out);
+  return out;
+}
+
+template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyByFu_A(
     const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXs out(A.rows(), nu_);
@@ -246,18 +255,9 @@ typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyB
 }
 
 template <typename Scalar>
-typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
-    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
-  MatrixXsRowMajor out(A.rows(), nu_);
-  out.setZero();
-  multiplyFxTransposeBy(FxTranspose, A, out);
-  return out;
-}
-
-template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy_A(
     const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A) {
-  MatrixXsRowMajor out(A.rows(), nu_);
+  MatrixXsRowMajor out(nu_, A.cols());
   out.setZero();
   multiplyFuTransposeBy(FuTranspose, A, out);
   return out;

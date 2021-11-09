@@ -93,7 +93,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of columns of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
                             " instead of " + std::to_string(out.cols()));
       }
-      MatrixXs res = bp::call<MatrixXs>(multiplyByFx.ptr(), Fx, (Eigen::MatrixXd)A);
+      MatrixXs res = bp::call<MatrixXs>(multiplyByFx.ptr(), (MatrixXs)Fx, (MatrixXs)A);
       if (res.rows() != A.rows() || static_cast<std::size_t>(res.cols()) != state_->get_ndx()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(A.rows()) + "," +
@@ -124,7 +124,8 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of rows of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
                             " instead of " + std::to_string(out.cols()));
       }
-      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), FxTranspose, (MatrixXs)A);
+      MatrixXsRowMajor res =
+          bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), (MatrixXs)FxTranspose, (MatrixXs)A);
       if (static_cast<std::size_t>(res.rows()) != state_->get_ndx() || res.cols() != A.cols()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(state_->get_ndx()) +
@@ -155,7 +156,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of columns of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
                             std::to_string(out.cols()));
       }
-      MatrixXs res = bp::call<MatrixXs>(multiplyByFu.ptr(), Fu, (MatrixXs)A);
+      MatrixXs res = bp::call<MatrixXs>(multiplyByFu.ptr(), (MatrixXs)Fu, (MatrixXs)A);
       if (res.rows() != A.rows() || static_cast<std::size_t>(res.cols()) != nu_) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(A.rows()) + "," +
@@ -186,7 +187,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
                      << "number of rows of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
                             std::to_string(out.cols()));
       }
-      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFuTransposeBy.ptr(), Fu, (MatrixXs)A);
+      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFuTransposeBy.ptr(), (MatrixXs)Fu, (MatrixXs)A);
       if (static_cast<std::size_t>(res.rows()) != nu_ || res.cols() != A.cols()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(nu_) + "," +

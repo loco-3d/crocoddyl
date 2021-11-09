@@ -239,7 +239,7 @@ bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_p
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs DifferentialActionModelAbstractTpl<Scalar>::multiplyByFx_A(
     const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A) {
-  MatrixXs out(A.rows(), nu_);
+  MatrixXs out(A.rows(), state_->get_ndx());
   out.setZero();
   multiplyByFx(Fx, A, out);
   return out;
@@ -248,7 +248,7 @@ typename MathBaseTpl<Scalar>::MatrixXs DifferentialActionModelAbstractTpl<Scalar
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor DifferentialActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
     const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
-  MatrixXsRowMajor out(A.rows(), nu_);
+  MatrixXsRowMajor out(state_->get_ndx(), A.cols());
   out.setZero();
   multiplyFxTransposeBy(FxTranspose, A, out);
   return out;
