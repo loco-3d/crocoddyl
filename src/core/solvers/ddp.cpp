@@ -213,7 +213,7 @@ void SolverDDP::backwardPass() {
       m->multiplyFuTransposeBy(d->Fu.transpose(), Vxx_p, FuTVxx_p_[t].topRows(nu));  // Fu.T * Vxx_p
       START_PROFILER("SolverDDP::Qu");
       Qu_[t].head(nu) = d->Lu;
-      m->multiplyFuTransposeBy(d->Fu.transpose(), Vx_p, Qu_[t], addto);  // + Fu.T * Vx_p
+      m->multiplyFuTransposeBy(d->Fu.transpose(), Vx_p, Qu_[t].head(nu), addto);  // + Fu.T * Vx_p
       STOP_PROFILER("SolverDDP::Qu");
       START_PROFILER("SolverDDP::Quu");
       Quu_[t].topLeftCorner(nu, nu) = d->Luu;
