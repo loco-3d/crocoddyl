@@ -59,16 +59,16 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(Act
       break;
     case ActionModelTypes::ActionModelLQRDriftFree:
       if (secondInstance) {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, true);
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, true);
       } else {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, true);
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, true);
       }
       break;
     case ActionModelTypes::ActionModelLQR:
       if (secondInstance) {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 40, false);
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, false);
       } else {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(80, 20, false);
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, false);
       }
       break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
