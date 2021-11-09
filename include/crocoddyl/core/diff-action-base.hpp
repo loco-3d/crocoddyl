@@ -192,6 +192,7 @@ class DifferentialActionModelAbstractTpl {
    */
   virtual void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
                             Eigen::Ref<MatrixXs> out, const AssignmentOp = setto) const;
+
   /**
    * @brief Compute the product between the transpose of the Jacobian of the dynamics with respect to the control and a
    * given matrix A
@@ -257,6 +258,7 @@ class DifferentialActionModelAbstractTpl {
    * @return Product between A and the Jacobian of the dynamics with respect to the control (dim `na` x `nu_`)
    */
   MatrixXs multiplyByFu_A(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A);
+
   /**
    * @copybrief multiplyFuTransposeBy()
    *
