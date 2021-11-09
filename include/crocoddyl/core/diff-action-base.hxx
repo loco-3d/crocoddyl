@@ -90,9 +90,9 @@ DifferentialActionModelAbstractTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFx(
-    const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx,
+                                                              const Eigen::Ref<const MatrixXs>& A,
+                                                              Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (static_cast<std::size_t>(A.cols()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
@@ -125,9 +125,10 @@ void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFx(
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(
-    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
+void DifferentialActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
+                                                                       const Eigen::Ref<const MatrixXs>& A,
+                                                                       Eigen::Ref<MatrixXsRowMajor> out,
+                                                                       const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (static_cast<std::size_t>(A.rows()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
@@ -160,9 +161,9 @@ void DifferentialActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFu(
-    const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
+void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+                                                              const Eigen::Ref<const MatrixXs>& A,
+                                                              Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (static_cast<std::size_t>(A.cols()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
@@ -195,9 +196,10 @@ void DifferentialActionModelAbstractTpl<Scalar>::multiplyByFu(
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(
-    const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
+void DifferentialActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+                                                                       const Eigen::Ref<const MatrixXs>& A,
+                                                                       Eigen::Ref<MatrixXsRowMajor> out,
+                                                                       const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (static_cast<std::size_t>(A.rows()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "

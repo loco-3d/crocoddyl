@@ -200,35 +200,28 @@ void SolverDDP::backwardPass() {
     const Eigen::VectorXd& Vx_p = Vx_[t + 1];
     const std::size_t nu = m->get_nu();
 
-    // FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    m->multiplyFxTransposeBy(d->Fx.transpose(), Vxx_p, FxTVxx_p_); // Fx.T * Vxx_p
+    m->multiplyFxTransposeBy(d->Fx.transpose(), Vxx_p, FxTVxx_p_);  // Fx.T * Vxx_p
     START_PROFILER("SolverDDP::Qx");
     Qx_[t] = d->Lx;
-    m->multiplyFxTransposeBy(d->Fx.transpose(), Vx_p, Qx_[t], addto); // Fx.T * Vx_p
-    // Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
+    m->multiplyFxTransposeBy(d->Fx.transpose(), Vx_p, Qx_[t], addto);  // + Fx.T * Vx_p
     STOP_PROFILER("SolverDDP::Qx");
     START_PROFILER("SolverDDP::Qxx");
     Qxx_[t] = d->Lxx;
-    m->multiplyByFx(d->Fx, FxTVxx_p_, Qxx_[t], addto); // Fx.T Vxx_p_ * Fx
-    // Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
+    m->multiplyByFx(d->Fx, FxTVxx_p_, Qxx_[t], addto);  // + (Fx.T * Vxx_p) * Fx
     STOP_PROFILER("SolverDDP::Qxx");
     if (nu != 0) {
-      m->multiplyFuTransposeBy(d->Fu.transpose(), Vxx_p, FuTVxx_p_[t].topRows(nu));
-      // FuTVxx_p_[t].topRows(nu).noalias() = d->Fu.transpose() * Vxx_p;
+      m->multiplyFuTransposeBy(d->Fu.transpose(), Vxx_p, FuTVxx_p_[t].topRows(nu));  // Fu.T * Vxx_p
       START_PROFILER("SolverDDP::Qu");
       Qu_[t].head(nu) = d->Lu;
-      m->multiplyFuTransposeBy(d->Fu.transpose(), Vx_p, Qu_[t], addto); //Fu.T *Vx_p
-      // Qu_[t].head(nu).noalias() += d->Fu.transpose() * Vx_p;
+      m->multiplyFuTransposeBy(d->Fu.transpose(), Vx_p, Qu_[t], addto);  // + Fu.T * Vx_p
       STOP_PROFILER("SolverDDP::Qu");
       START_PROFILER("SolverDDP::Quu");
       Quu_[t].topLeftCorner(nu, nu) = d->Luu;
-      m->multiplyByFu(d->Fu, FuTVxx_p_[t].topRows(nu), Quu_[t].topLeftCorner(nu, nu), addto); //Fu.T Vxx_p_topRows(nu) * Fu
-      // Quu_[t].topLeftCorner(nu, nu).noalias() += FuTVxx_p_[t].topRows(nu) * d->Fu;
+      m->multiplyByFu(d->Fu, FuTVxx_p_[t].topRows(nu), Quu_[t].topLeftCorner(nu, nu), addto);  // + (Fu.T * Vxx_p) * Fu
       STOP_PROFILER("SolverDDP::Quu");
       START_PROFILER("SolverDDP::Qxu");
       Qxu_[t].leftCols(nu) = d->Lxu;
-      // Qxu_[t].leftCols(nu).noalias() += FxTVxx_p_ * d->Fu;
-      m->multiplyByFu(d->Fu, FxTVxx_p_, Qxu_[t].leftCols(nu), addto); //Fx.T Vxx_p_ * Fu
+      m->multiplyByFu(d->Fu, FxTVxx_p_, Qxu_[t].leftCols(nu), addto);  // + (Fx.T * Vxx_p) * Fu
       STOP_PROFILER("SolverDDP::Qxu");
       if (!std::isnan(ureg_)) {
         Quu_[t].diagonal().head(nu).array() += ureg_;

@@ -158,12 +158,11 @@ void test_multiply_operators(ActionModelTypes::Type action_type) {
   model->multiplyByFx(data->Fx, A, out1);
   BOOST_CHECK((A * data->Fx - out1).isZero());
   out1 = tmp;
-  model->multiplyByFx(data->Fx, A, out1,  crocoddyl::addto);
+  model->multiplyByFx(data->Fx, A, out1, crocoddyl::addto);
   BOOST_CHECK((tmp + A * data->Fx - out1).isZero());
   out1 = tmp;
   model->multiplyByFx(data->Fx, A, out1, crocoddyl::rmfrom);
   BOOST_CHECK((tmp - A * data->Fx - out1).isZero());
-
 
   // Check the multiplyFxTransposeBy
   crocoddyl::MathBaseTpl<double>::MatrixXsRowMajor out2 = Eigen::MatrixXd::Zero(ndx, na);
@@ -183,7 +182,7 @@ void test_multiply_operators(ActionModelTypes::Type action_type) {
   model->multiplyByFu(data->Fu, A, out1);
   BOOST_CHECK((A * data->Fu - out1).isZero());
   out1 = tmp;
-  model->multiplyByFu(data->Fu, A, out1,  crocoddyl::addto);
+  model->multiplyByFu(data->Fu, A, out1, crocoddyl::addto);
   BOOST_CHECK((tmp + A * data->Fu - out1).isZero());
   out1 = tmp;
   model->multiplyByFu(data->Fu, A, out1, crocoddyl::rmfrom);
@@ -261,7 +260,7 @@ void test_multiply_operators_integrated_action_model(DifferentialActionModelType
   model->multiplyByFx(data->Fx, A, out1);
   BOOST_CHECK((A * data->Fx - out1).isZero());
   out1 = tmp;
-  model->multiplyByFx(data->Fx, A, out1,  crocoddyl::addto);
+  model->multiplyByFx(data->Fx, A, out1, crocoddyl::addto);
   BOOST_CHECK((tmp + A * data->Fx - out1).isZero());
   out1 = tmp;
   model->multiplyByFx(data->Fx, A, out1, crocoddyl::rmfrom);
@@ -285,7 +284,7 @@ void test_multiply_operators_integrated_action_model(DifferentialActionModelType
   model->multiplyByFu(data->Fu, A, out1);
   BOOST_CHECK((A * data->Fu - out1).isZero());
   out1 = tmp;
-  model->multiplyByFu(data->Fu, A, out1,  crocoddyl::addto);
+  model->multiplyByFu(data->Fu, A, out1, crocoddyl::addto);
   BOOST_CHECK((tmp + A * data->Fu - out1).isZero());
   out1 = tmp;
   model->multiplyByFu(data->Fu, A, out1, crocoddyl::rmfrom);

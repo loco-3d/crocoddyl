@@ -213,14 +213,15 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const 
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
-                                                                  const Eigen::Ref<const MatrixXs> &A, Eigen::Ref<MatrixXdRowMajor> out,
+                                                                  const Eigen::Ref<const MatrixXs>& A,
+                                                                  Eigen::Ref<MatrixXdRowMajor> out,
                                                                   const AssignmentOp op) const {
-  assert_pretty(is_a_AssignmentOp(op),("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
-  if (A.cols() != out.cols() ||static_cast<std::size_t>(A.rows()) != state_->get_ndx() ||
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != state_->get_ndx() ||
       static_cast<std::size_t>(out.rows()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) + " and " +
-                        std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
+                 << "A and out have wrong dimensions (" + std::to_string(A.rows()) + "," + std::to_string(A.cols()) +
+                        " and " + std::to_string(out.rows()) + "," + std::to_string(out.cols()) + ")");
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
