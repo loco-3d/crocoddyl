@@ -21,6 +21,7 @@ struct StateModelTypes {
   enum Type {
     StateVector,
     StateMultibody_TalosArm,
+    StateMultibodyContact2D_TalosArm,
     StateMultibody_HyQ,
     StateMultibody_Talos,
     StateMultibody_RandomHumanoid,

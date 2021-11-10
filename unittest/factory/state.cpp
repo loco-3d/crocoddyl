@@ -29,6 +29,9 @@ std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
     case StateModelTypes::StateMultibody_TalosArm:
       os << "StateMultibody_TalosArm";
       break;
+    case StateModelTypes::StateMultibodyContact2D_TalosArm:
+      os << "StateMultibodyContact2D_TalosArm";
+      break;
     case StateModelTypes::StateMultibody_HyQ:
       os << "StateMultibody_HyQ";
       break;
@@ -58,6 +61,10 @@ boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModel
       state = boost::make_shared<crocoddyl::StateVector>(80);
       break;
     case StateModelTypes::StateMultibody_TalosArm:
+      model = PinocchioModelFactory(PinocchioModelTypes::TalosArm).create();
+      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      break;
+    case StateModelTypes::StateMultibodyContact2D_TalosArm:
       model = PinocchioModelFactory(PinocchioModelTypes::TalosArm).create();
       state = boost::make_shared<crocoddyl::StateMultibody>(model);
       break;
