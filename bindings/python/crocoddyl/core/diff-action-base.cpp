@@ -113,21 +113,21 @@ void exposeDifferentialActionAbstract() {
            "state.ndx)")
       .def("multiplyFxTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFxTransposeBy,
            &DifferentialActionModelAbstract_wrap::default_multiplyFxTransposeBy,
-           bp::args("self", "FxTranspose", "A", "out", "op"),
+           bp::args("self", "Fx", "A", "out", "op"),
            "Compute the product between the transpose of the Jacobian of the dynamics with respect to the state\n"
            "and a given matrix A.\n\n"
            "It assumes that calcDiff has been run first.\n"
-           ":param FxTranspose: transpose of Jacobian matrix with respect to the state\n"
+           ":param Fx: Jacobian matrix with respect to the state\n"
            ":param A: matrix to multiply (dim state.nv x na)\n"
            ":param out: product between the transpose of the Jacobian of the dynamics with respec the state and A "
            "(dim state.ndx x na)\n"
            ":param op: assignment operator which sets, adds, or removes the given results")
       .def("multiplyFxTransposeBy", &DifferentialActionModelAbstract_wrap::multiplyFxTransposeBy_A,
-           bp::args("self", "FxTranspose", "A"),
+           bp::args("self", "Fx", "A"),
            "Compute the product between the transpose of the Jacobian of the dynamics with respect to the state\n"
            "and a given matrix A.\n\n"
            "It assumes that calcDiff has been run first.\n"
-           ":param FxTranspose: transpose of Jacobian matrix with respect to the state\n"
+           ":param Fx: Jacobian matrix with respect to the state\n"
            ":param A: matrix to multiply (dim state.nv x na)\n"
            ":return product between the transpose of the Jacobian of the dynamics with respec the state and A (dim "
            "state.ndx x na)")
@@ -153,7 +153,7 @@ void exposeDifferentialActionAbstract() {
            "Compute the product between the transpose of the Jacobian of the dynamics with respect to the control\n"
            "and a given matrix A.\n\n"
            "It assumes that calcDiff has been run first.\n"
-           ":param FuTranspose: transpose of Jacobian matrix of the dynamics with respect to the control\n"
+           ":param Fu: Jacobian matrix of the dynamics with respect to the control\n"
            ":param A: matrix to multiply (dim state.nv x na)\n"
            ":param out: product between the transpose of the Jacobian of the dynamics with respec the control and A "
            "(dim nu x na)\n"
@@ -163,7 +163,7 @@ void exposeDifferentialActionAbstract() {
            "Compute the product between the transpose of the Jacobian of the dynamics with respect to the control\n"
            "and a given matrix A.\n\n"
            "It assumes that calcDiff has been run first.\n"
-           ":param FuTranspose: transpose of Jacobian matrix of the dynamics with respect to the control\n"
+           ":param Fu: Jacobian matrix of the dynamics with respect to the control\n"
            ":param A: matrix to multiply (dim state.nv x na)\n"
            ":return product between the transpose of the Jacobian of the dynamics with respec the control and A (dim "
            "nu x na)")

@@ -111,7 +111,7 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFx(const Eigen::Ref<const MatrixX
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
+void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& Fx,
                                                            const Eigen::Ref<const MatrixXs>& A,
                                                            Eigen::Ref<MatrixXsRowMajor> out,
                                                            const AssignmentOp op) const {
@@ -133,13 +133,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy(const Eigen::Ref<cons
   }
   switch (op) {
     case setto:
-      out.noalias() = FxTranspose * A;
+      out.noalias() = Fx.transpose() * A;
       break;
     case addto:
-      out.noalias() += FxTranspose * A;
+      out.noalias() += Fx.transpose() * A;
       break;
     case rmfrom:
-      out.noalias() -= FxTranspose * A;
+      out.noalias() -= Fx.transpose() * A;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -182,7 +182,7 @@ void ActionModelAbstractTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixX
 }
 
 template <typename Scalar>
-void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
                                                            const Eigen::Ref<const MatrixXs>& A,
                                                            Eigen::Ref<MatrixXsRowMajor> out,
                                                            const AssignmentOp op) const {
@@ -204,13 +204,13 @@ void ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<cons
   }
   switch (op) {
     case setto:
-      out.noalias() = FuTranspose * A;
+      out.noalias() = Fu.transpose() * A;
       break;
     case addto:
-      out.noalias() += FuTranspose * A;
+      out.noalias() += Fu.transpose() * A;
       break;
     case rmfrom:
-      out.noalias() -= FuTranspose * A;
+      out.noalias() -= Fu.transpose() * A;
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -238,10 +238,10 @@ typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyB
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFxTransposeBy_A(
-    const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXsRowMajor out(state_->get_ndx(), A.cols());
   out.setZero();
-  multiplyFxTransposeBy(FxTranspose, A, out);
+  multiplyFxTransposeBy(Fx, A, out);
   return out;
 }
 
@@ -256,10 +256,10 @@ typename MathBaseTpl<Scalar>::MatrixXs ActionModelAbstractTpl<Scalar>::multiplyB
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXsRowMajor ActionModelAbstractTpl<Scalar>::multiplyFuTransposeBy_A(
-    const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A) {
+    const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A) {
   MatrixXsRowMajor out(nu_, A.cols());
   out.setZero();
-  multiplyFuTransposeBy(FuTranspose, A, out);
+  multiplyFuTransposeBy(Fu, A, out);
   return out;
 }
 

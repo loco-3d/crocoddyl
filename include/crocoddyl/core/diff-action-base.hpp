@@ -170,15 +170,14 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in] FxTranspose  Transpose of Jacobian matrix of the dynamics with respect to the state
-   * @param[in] A            A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
-   * @param[out] out         Product between the transposed Jacobian of the dynamics with respect to the control and A
+   * @param[in] Fx    Jacobian matrix of the dynamics with respect to the state
+   * @param[in] A     A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[out] out  Product between the transposed Jacobian of the dynamics with respect to the control and A
    * (`state_->get_ndx()` x `na`)
-   * @param[in] op           Assignment operator which sets, adds, or removes the given results
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
    */
-  virtual void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
-                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
-                                     const AssignmentOp = setto) const;
+  virtual void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
+                                     Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp = setto) const;
 
   /**
    * @brief Compute the product between the given matrix A and the Jacobian of the dynamics with respect to the control
@@ -199,15 +198,14 @@ class DifferentialActionModelAbstractTpl {
    *
    * It assumes that `calcDiff()` has been run first
    *
-   * @param[in] FuTranspose  Transpose of Jacobian matrix of the dynamics with respect to the control
-   * @param[in] A            A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
-   * @param[out] out         Product between the transposed Jacobian of the dynamics with respect to the control and A
+   * @param[in] Fu    Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A     A matrix to multiply times the transposed Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[out] out  Product between the transposed Jacobian of the dynamics with respect to the control and A
    * (`nu_` x `na`)
-   * @param[in] op           Assignment operator which sets, adds, or removes the given results
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
    */
-  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
-                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
-                                     const AssignmentOp = setto) const;
+  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
+                                     Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp = setto) const;
 
   /**
    * @copybrief quasicStatic()
@@ -240,13 +238,12 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyFxTransposeBy()
    *
-   * @param[in] FxTranspose  Transpose of Jacobian matrix of the dynamics with respect to the state
-   * @param[in] A            A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[in] Fx  Jacobian matrix of the dynamics with respect to the state
+   * @param[in] A   A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
    * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `state_->get_ndx()` x
    * `na`)
    */
-  MatrixXsRowMajor multiplyFxTransposeBy_A(const Eigen::Ref<const MatrixXs>& FxTranspose,
-                                           const Eigen::Ref<const MatrixXs>& A);
+  MatrixXsRowMajor multiplyFxTransposeBy_A(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A);
 
   /**
    * @copybrief multiplyByFu()
@@ -264,12 +261,11 @@ class DifferentialActionModelAbstractTpl {
    *
    * @copydetails multiplyFuTransposeBy()
    *
-   * @param[in] FuTranspose  Transpose of Jacobian matrix of the dynamics with respect to the control
-   * @param[in] A            A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
+   * @param[in] Fu  Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A   A matrix to multiply times the Jacobian (dim `state_->get_nv()` x `na`)
    * @return Product between A and the Jacobian of the dynamics with respect to the state (dim `nu_` x `na`)
    */
-  MatrixXsRowMajor multiplyFuTransposeBy_A(const Eigen::Ref<const MatrixXs>& FuTranspose,
-                                           const Eigen::Ref<const MatrixXs>& A);
+  MatrixXsRowMajor multiplyFuTransposeBy_A(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A);
 
   /**
    * @brief Return the dimension of the control input
