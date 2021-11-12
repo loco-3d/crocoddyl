@@ -54,8 +54,8 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_p
   switch (d->contact_type) {
     case Contact2D: {
       // Valid for xz plane
-      data->Rx.noalias() = A(Eigen::all, {0, 2}) * df_dx;
-      data->Ru.noalias() = A(Eigen::all, {0, 2}) * df_du;
+      data->Rx.noalias() = A.col(0) * df_dx.row(0) + A.col(2) * df_dx.row(1);
+      data->Ru.noalias() = A.col(0) * df_du.row(0) + A.col(2) * df_du.row(1);
       break;
     }
     case Contact3D:
