@@ -14,16 +14,22 @@
 
 namespace crocoddyl {
 
-SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
-    : SolverDDP(problem), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.) {
+SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem, const bool reduced)
+    : SolverDDP(problem), reduced_(reduced), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.) {
   reg_incfactor_ = 1e6;
 
   const std::size_t T = problem_->get_T();
+  N_.resize(T);
+  Qz_.resize(T);
+  Qzz_.resize(T);
+  Quz_.resize(T);
+  Qxz_.resize(T);
   k_hat_.resize(T);
   K_hat_.resize(T);
-  Quu_hat_.resize(T);
+  Qzz_.resize(T);
   QuuinvHuT_.resize(T);
-  Quu_hat_llt_.resize(T);
+  Qzz_llt_.resize(T);
+  lu_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t nu = problem_->get_nu_max();
@@ -33,11 +39,21 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nh = model->get_nh();
 
+    YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
+    HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    Qz_[t] = Eigen::VectorXd::Zero(nh);
+    Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    Quz_[t] = Eigen::MatrixXd::Zero(nu, nh);
+    Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
+
     k_hat_[t] = Eigen::VectorXd::Zero(nh);
     K_hat_[t] = Eigen::MatrixXd::Zero(nh, ndx);
-    Quu_hat_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    
+    k_hat_[t] = Eigen::VectorXd::Zero(nh);
+    K_hat_[t] = Eigen::MatrixXd::Zero(nh, ndx);
+    Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
     QuuinvHuT_[t] = Eigen::MatrixXd::Zero(nu, nh);
-    Quu_hat_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
+    Qzz_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
   }
 }
 
@@ -230,32 +246,76 @@ double SolverIntro::stoppingCriteria() {
   return stop_;
 }
 
+double SolverIntro::calcDiff() {
+  START_PROFILER("SolverIntro::calcDiff");
+  SolverDDP::calcDiff();
+  if (reduced_) {
+    const std::size_t T = problem_->get_T();
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(problem_->get_nthreads())
+#endif
+    for (std::size_t i = 0; i < T; ++i) {
+      const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem_->get_runningModels()[i];
+      const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem_->get_runningDatas()[i];
+      if (model->get_nh() > 0) {
+        lu_[i].compute(data->Hu);
+        N_[i] = lu_[i].kernel();
+      }
+    }
+  }
+  STOP_PROFILER("SolverIntro::calcDiff");
+  return cost_;
+}
+
 void SolverIntro::computeGains(const std::size_t t) {
   START_PROFILER("SolverIntro::computeGains");
-  SolverDDP::computeGains(t);
   const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem_->get_runningModels()[t];
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem_->get_runningDatas()[t];
 
   const std::size_t nu = model->get_nu();
-  if (nu > 0 && model->get_nh() > 0) {
-    QuuinvHuT_[t].topRows(nu) = data->Hu.transpose();
-
-    Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> QuuinvHuT = QuuinvHuT_[t].topRows(nu);
-    Quu_llt_[t].solveInPlace(QuuinvHuT);
-    Quu_hat_[t].noalias() = data->Hu * QuuinvHuT;
-    Quu_hat_llt_[t].compute(Quu_hat_[t]);
-    const Eigen::ComputationInfo& info = Quu_hat_llt_[t].info();
-    if (info != Eigen::Success) {
-      throw_pretty("backward error");
+  const std::size_t nh = model->get_nh();
+  if (reduced_) {
+    if (nu > 0 && nh > 0) {
+      Quz_[t].noalias() = Quu_[t] * N_[t];
+      Qzz_[t].noalias() = N_[t].transpose() * Quz_[t];
+      Qz_[t].noalias() = N_[t].transpose() * Qu_[t];
+      Qxz_[t].noalias() = Qxu_[t] * N_[t];
+      Qzz_llt_[t].compute(Qzz_[t]);
+      const Eigen::ComputationInfo& info = Qzz_llt_[t].info();
+      if (info != Eigen::Success) {
+        throw_pretty("backward error");
+      }
+      k_hat_[t] = Qz_[t];
+      Qzz_llt_[t].solveInPlace(k_hat_[t]);
+      K_hat_[t] = Qxz_[t];
+      Qzz_llt_[t].solveInPlace(K_hat_[t]);
+      k_[t].noalias() = N_[t] * k_hat_[t];
+      k_[t].bottomRows(nh) -= data->h;
+      K_[t].noalias() = N_[t] * K_hat_[t];
+      K_[t].bottomRows(nh) -= data->Hx;
     }
-    Eigen::Transpose<Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> > HuQuuinv = QuuinvHuT_[t].topRows(nu).transpose();
-    Quu_hat_llt_[t].solveInPlace(HuQuuinv);
-    k_hat_[t] = data->h;
-    k_hat_[t].noalias() -= data->Hu * k_[t].head(nu);
-    K_hat_[t] = data->Hx;
-    K_hat_[t].noalias() -= data->Hu * K_[t].topRows(nu);
-    k_[t].head(nu).noalias() += QuuinvHuT_[t].topRows(nu) * k_hat_[t];
-    K_[t].topRows(nu) += QuuinvHuT_[t].topRows(nu) * K_hat_[t];
+  } else {
+    SolverDDP::computeGains(t);
+    if (nu > 0 && nh > 0) {
+      QuuinvHuT_[t].topRows(nu) = data->Hu.transpose();
+
+      Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> QuuinvHuT = QuuinvHuT_[t].topRows(nu);
+      Quu_llt_[t].solveInPlace(QuuinvHuT);
+      Qzz_[t].noalias() = data->Hu * QuuinvHuT;
+      Qzz_llt_[t].compute(Qzz_[t]);
+      const Eigen::ComputationInfo& info = Qzz_llt_[t].info();
+      if (info != Eigen::Success) {
+        throw_pretty("backward error");
+      }
+      Eigen::Transpose<Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic> > HuQuuinv = QuuinvHuT_[t].topRows(nu).transpose();
+      Qzz_llt_[t].solveInPlace(HuQuuinv);
+      k_hat_[t] = data->h;
+      k_hat_[t].noalias() -= data->Hu * k_[t].head(nu);
+      K_hat_[t] = data->Hx;
+      K_hat_[t].noalias() -= data->Hu * K_[t].topRows(nu);
+      k_[t].head(nu).noalias() += QuuinvHuT_[t].topRows(nu) * k_hat_[t];
+      K_[t].topRows(nu) += QuuinvHuT_[t].topRows(nu) * K_hat_[t];
+    }
   }
   STOP_PROFILER("SolverIntro::computeGains");
 }
