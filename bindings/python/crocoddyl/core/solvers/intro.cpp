@@ -18,6 +18,12 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIntro_trySteps, SolverIntro::trySte
 void exposeSolverIntro() {
   bp::register_ptr_to_python<boost::shared_ptr<SolverIntro> >();
 
+  bp::enum_<EqualitySolverType>("EqualitySolverType")
+      .value("LuNull", LuNull)
+      .value("QrNull", QrNull)
+      .value("Schur", Schur)
+      .export_values();
+
   bp::class_<SolverIntro, bp::bases<SolverDDP> >(
       "SolverIntro", bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
                                                                    "Initialize the vector dimension.\n\n"
@@ -43,14 +49,17 @@ void exposeSolverIntro() {
                                 "Rollout the system with a predefined step length.\n\n"
                                 ":param stepLength: step length (default 1)\n"
                                 ":returns the cost improvement."))
+      .add_property("eq_solver", bp::make_function(&SolverIntro::get_equality_solver),
+                    bp::make_function(&SolverIntro::set_equality_solver),
+                    "type of solver used for handling the equality constraints.")
       .add_property("rho", bp::make_function(&SolverIntro::get_rho), bp::make_function(&SolverIntro::set_rho),
-                    "parameter used in the merit function to predict the expected reduction")
-      .add_property("dPhi", bp::make_function(&SolverIntro::get_dPhi), "reduction in the merit function")
+                    "parameter used in the merit function to predict the expected reduction.")
+      .add_property("dPhi", bp::make_function(&SolverIntro::get_dPhi), "reduction in the merit function.")
       .add_property("dPhiexp", bp::make_function(&SolverIntro::get_dPhiexp),
-                    "expected reduction in the merit function")
+                    "expected reduction in the merit function.")
       .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
                     "estimated penalty paramter that balances relative contribution of the cost function and equality "
-                    "constraints");
+                    "constraints.");
 }
 
 }  // namespace python
