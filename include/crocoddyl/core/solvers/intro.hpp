@@ -104,7 +104,7 @@ class SolverIntro : public SolverDDP {
   void set_rho(const double rho);
 
  protected:
-  bool reduced_;       //!< True for reduced Schur complement approach
+  bool reduced_;      //!< True for reduced Schur complement approach
   double rho_;        //!< Parameter used in the merit function to predict the expected reduction
   double dPhi_;       //!< Reduction in the merit function obtained by `tryStep()`
   double dPhiexp_;    //!< Expected reduction in the merit function
@@ -113,8 +113,12 @@ class SolverIntro : public SolverDDP {
                       //!< equality constraints
 
   Eigen::MatrixXd QuuK_tmp_;
-  std::vector<Eigen::MatrixXd> YZ_;     //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the control-equality constraints \f$\mathbf{H_u}\f$
-  std::vector<Eigen::MatrixXd> HuY_;    //!< Span-projected Jacobian of the equality-constraint with respect to the control
+  Eigen::MatrixXd ZQzzinvQzuI_;
+  std::vector<Eigen::MatrixXd>
+      YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
+            //!< control-equality constraints \f$\mathbf{H_u}\f$
+  std::vector<Eigen::MatrixXd>
+      HuY_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
   std::vector<Eigen::VectorXd> Qz_;     //!< Reduced gradient of the Hamiltonian \f$\mathbf{Q_z}\f$
   std::vector<Eigen::MatrixXd> Qzz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{zz}}\f$
   std::vector<Eigen::MatrixXd> Quz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{uz}}\f$
@@ -125,7 +129,13 @@ class SolverIntro : public SolverDDP {
   std::vector<Eigen::MatrixXd> K_hat_;  //!< Feedback gain related to the equality constraints
   std::vector<Eigen::MatrixXd> QuuinvHuT_;
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Qzz_llt_;  //!< Cholesky LLT solver
-  std::vector<Eigen::FullPivLU<Eigen::MatrixXd> > lu_;  //!< LU solvers used for computing the nullspace projector matrix
+  // std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
+  //     Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
+  std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
+      Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
+  std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
+      HuY_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward and feedback gain related to the
+                //!< equality constraint
 };
 
 }  // namespace crocoddyl
