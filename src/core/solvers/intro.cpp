@@ -29,7 +29,6 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem, const bool 
   K_z_.resize(T);
   k_hat_.resize(T);
   K_hat_.resize(T);
-  Qzz_.resize(T);
   QuuinvHuT_.resize(T);
   Qzz_llt_.resize(T);
   Hu_lu_.resize(T);
@@ -54,11 +53,10 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem, const bool 
     K_z_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     k_hat_[t] = Eigen::VectorXd::Zero(nh);
     K_hat_[t] = Eigen::MatrixXd::Zero(nh, ndx);
-    Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
     QuuinvHuT_[t] = Eigen::MatrixXd::Zero(nu, nh);
     Qzz_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
-    Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
     // Hu_lu_[t] = Eigen::ColPivHouseholderQR<Eigen::MatrixXd>(nu, nh);
+    Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
     HuY_lu_[t] = Eigen::PartialPivLU<Eigen::MatrixXd>(nh);
   }
 }
@@ -264,19 +262,17 @@ double SolverIntro::calcDiff() {
       const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem_->get_runningModels()[t];
       const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem_->get_runningDatas()[t];
       if (model->get_nu() > 0 && model->get_nh() > 0) {
+        // Hu_lu_[t].compute(data->Hu.transpose());
+        // YZ_[t] = Hu_lu_[t].householderQ();
         Hu_lu_[t].compute(data->Hu);
         YZ_[t] << Hu_lu_[t].image(data->Hu), Hu_lu_[t].kernel();
-        // YZ_[t] = Hu_lu_[t].householderQ();
         const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
             YZ_[t].leftCols(Hu_lu_[t].rank());
         HuY_[t].noalias() = -data->Hu * Y;
         HuY_lu_[t].compute(HuY_[t]);
-        k_hat_[t].noalias() = HuY_lu_[t].inverse() * data->h;
-        K_hat_[t].noalias() = HuY_lu_[t].inverse() * data->Hx;
-        // k_hat_[t] = data->h;
-        // HuY_lu_[t].solveInPlace(k_hat_[t]);
-        // K_hat_[t] = data->Hx;
-        // HuY_lu_[t].solveInPlace(K_hat_[t]);
+        const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
+        k_hat_[t].noalias() = HuYinv * data->h;
+        K_hat_[t].noalias() = HuYinv * data->Hx;
         k_z_[t].noalias() = Y * k_hat_[t];
         K_z_[t].noalias() = Y * K_hat_[t];
       }
@@ -295,7 +291,7 @@ void SolverIntro::computeGains(const std::size_t t) {
   const std::size_t nh = model->get_nh();
   if (reduced_) {
     if (nu > 0 && nh > 0) {
-      const std::size_t nullity = Hu_lu_[t].dimensionOfKernel();
+      const std::size_t nullity = data->Hu.cols() - Hu_lu_[t].rank();
       const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Z =
           YZ_[t].rightCols(nullity);
       Quz_[t].noalias() = Quu_[t] * Z;
@@ -313,13 +309,13 @@ void SolverIntro::computeGains(const std::size_t t) {
       k_[t].noalias() = ZQzzinvQzuI_ * k_z_[t];
       K_[t].noalias() = ZQzzinvQzuI_ * K_z_[t];
 
+      Eigen::VectorBlock<Eigen::VectorXd> k_z = k_z_[t].tail(nullity);
+      Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> K_z = K_z_[t].bottomRows(nullity);
       Qz_[t].noalias() = Z.transpose() * Qu_[t];
       Qxz_[t].noalias() = Qxu_[t] * Z;
-      k_z_[t] = Qz_[t];
-      Eigen::VectorBlock<Eigen::VectorXd> k_z = k_z_[t].tail(nullity);
+      k_z = Qz_[t];
       Qzz_llt_[t].solveInPlace(k_z);
-      K_z_[t] = Qxz_[t].transpose();
-      Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> K_z = K_z_[t].rightCols(nullity);
+      K_z = Qxz_[t].transpose();
       Qzz_llt_[t].solveInPlace(K_z);
       k_[t].noalias() += Z * k_z;
       K_[t].noalias() += Z * K_z;
