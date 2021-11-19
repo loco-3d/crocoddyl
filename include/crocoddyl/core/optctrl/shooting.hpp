@@ -15,6 +15,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/to-string.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -228,7 +229,7 @@ class ShootingProblemTpl {
   /**
    * @brief Return the maximum dimension of the control vector
    */
-  std::size_t get_nu_max() const;
+  DEPRECATED("Compute yourself the maximum dimension of the control vector", std::size_t get_nu_max() const;)
 
   /**
    * @brief Return the number of threads
