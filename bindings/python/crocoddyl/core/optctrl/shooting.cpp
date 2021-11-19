@@ -113,6 +113,8 @@ void exposeShootingProblem() {
                     "dimension of the tangent space of the state manifold")
       .add_property("nu_max", bp::make_function(&ShootingProblem::get_nu_max),
                     "dimension of the maximum control vector")
+      .add_property("is_updated", bp::make_function(&ShootingProblem::is_updated),
+                    "Returns True if the shooting problem has been updated, otherwise False")
       .def(PrintableVisitor<ShootingProblem>());
 }
 

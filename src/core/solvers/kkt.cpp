@@ -258,13 +258,15 @@ void SolverKKT::allocateData() {
   nu_ = 0;
   const std::size_t nx = problem_->get_nx();
   const std::size_t ndx = problem_->get_ndx();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
       xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
     }
-    const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+    const std::size_t nu = model->get_nu();
     us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
     dxs_[t] = Eigen::VectorXd::Zero(ndx);
     dus_[t] = Eigen::VectorXd::Zero(nu);
@@ -273,12 +275,11 @@ void SolverKKT::allocateData() {
     ndx_ += ndx;
     nu_ += nu;
   }
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
   nx_ += nx;
   ndx_ += ndx;
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
-  dxs_.back() = Eigen::VectorXd::Zero(model->get_state()->get_ndx());
-  lambdas_.back() = Eigen::VectorXd::Zero(model->get_state()->get_ndx());
+  dxs_.back() = Eigen::VectorXd::Zero(ndx);
+  lambdas_.back() = Eigen::VectorXd::Zero(ndx);
 
   // Set dimensions for kkt matrix and kkt_ref vector
   kkt_.resize(2 * ndx_ + nu_, 2 * ndx_ + nu_);

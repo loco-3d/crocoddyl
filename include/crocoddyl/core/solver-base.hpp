@@ -123,6 +123,14 @@ class SolverAbstract {
   virtual const Eigen::Vector2d& expectedImprovement() = 0;
 
   /**
+   * @brief Resizing the solver data
+   *
+   * If the shooting problem has changed after construction, then this function resizes all the data before starting
+   * resolve the problem.
+   */
+  virtual void resizeData();
+
+  /**
    * @brief Compute the dynamic feasibility \f$\|\mathbf{f}_{\mathbf{s}}\|_{\infty,1}\f$ for
    * the current guess \f$(\mathbf{x}^k,\mathbf{u}^k)\f$
    *

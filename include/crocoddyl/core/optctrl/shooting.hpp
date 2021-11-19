@@ -236,6 +236,11 @@ class ShootingProblemTpl {
   std::size_t get_nthreads() const;
 
   /**
+   * @brief Return only once true is the shooting problem has been changed, otherwise false
+   */
+  bool is_updated();
+
+  /**
    * @brief Print information on the 'ShootingProblem'
    */
   template <class Scalar>
@@ -253,6 +258,7 @@ class ShootingProblemTpl {
   std::size_t ndx_;                                                      //!< State rate dimension
   std::size_t nu_max_;                                                   //!< Maximum control dimension
   std::size_t nthreads_;  //!< Number of threads launch by the multi-threading application
+  bool is_updated_;
 
  private:
   void allocateData();
