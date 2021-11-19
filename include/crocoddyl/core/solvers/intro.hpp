@@ -112,8 +112,8 @@ class SolverIntro : public SolverDDP {
   double upsilon_;    //!< Estimated penalty paramter that balances relative contribution of the cost function and
                       //!< equality constraints
 
-  Eigen::MatrixXd QuuK_tmp_;
-  Eigen::MatrixXd ZQzzinvQzuI_;
+  std::vector<Eigen::MatrixXd> QuuK_tmp_;
+  std::vector<Eigen::MatrixXd> ZQzzinvQzuI_;
   std::vector<Eigen::MatrixXd>
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
             //!< control-equality constraints \f$\mathbf{H_u}\f$
@@ -129,10 +129,10 @@ class SolverIntro : public SolverDDP {
   std::vector<Eigen::MatrixXd> K_hat_;  //!< Feedback gain related to the equality constraints
   std::vector<Eigen::MatrixXd> QuuinvHuT_;
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Qzz_llt_;  //!< Cholesky LLT solver
-  // std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
-  //     Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
-  std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
+  std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
       Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
+  // std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
+  //     Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
   std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
       HuY_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward and feedback gain related to the
                 //!< equality constraint
