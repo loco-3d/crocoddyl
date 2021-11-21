@@ -33,6 +33,7 @@ class SolverIntro : public SolverDDP {
                      const bool is_feasible = false, const double regInit = 1e-9);
   virtual double tryStep(const double step_length = 1);
   virtual double stoppingCriteria();
+  virtual void resizeData();
   virtual double calcDiff();
 
   /**

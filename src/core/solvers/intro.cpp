@@ -44,7 +44,6 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
-
     Hu_rank_[t] = nh;
     QuuK_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     ZQzzinvQzuI_[t] = Eigen::MatrixXd::Zero(nu, nu);
@@ -253,6 +252,34 @@ void SolverIntro::backwardPass() {
 double SolverIntro::stoppingCriteria() {
   stop_ = std::max(hfeas_, abs(d_[0] + 0.5 * d_[1]));
   return stop_;
+}
+
+void SolverIntro::resizeData() {
+  START_PROFILER("SolverIntro::resizeData");
+  SolverDDP::resizeData();
+
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t nh = model->get_nh();
+    QuuK_tmp_[t].conservativeResize(nu, ndx);
+    ZQzzinvQzuI_[t].conservativeResize(nu, nu);
+    YZ_[t].conservativeResize(nu, nu);
+    HuY_[t].conservativeResize(nh, nh);
+    Qz_[t].conservativeResize(nh);
+    Qzz_[t].conservativeResize(nh, nh);
+    Quz_[t].conservativeResize(nu, nh);
+    Qxz_[t].conservativeResize(ndx, nh);
+    k_z_[t].conservativeResize(nu);
+    K_z_[t].conservativeResize(nu, ndx);
+    k_hat_[t].conservativeResize(nh);
+    K_hat_[t].conservativeResize(nh, ndx);
+    QuuinvHuT_[t].conservativeResize(nu, nh);
+  }
+  STOP_PROFILER("SolverIntro::resizeData");
 }
 
 double SolverIntro::calcDiff() {
