@@ -24,10 +24,8 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   ZQzzinvQzuI_.resize(T);
   YZ_.resize(T);
   HuY_.resize(T);
-  Qz_.resize(T);
   Qzz_.resize(T);
   Quz_.resize(T);
-  Qxz_.resize(T);
   k_z_.resize(T);
   K_z_.resize(T);
   k_hat_.resize(T);
@@ -44,16 +42,13 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
-
     Hu_rank_[t] = nh;
     QuuK_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     ZQzzinvQzuI_[t] = Eigen::MatrixXd::Zero(nu, nu);
     YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
     HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
-    Qz_[t] = Eigen::VectorXd::Zero(nh);
     Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
     Quz_[t] = Eigen::MatrixXd::Zero(nu, nh);
-    Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
     k_z_[t] = Eigen::VectorXd::Zero(nu);
     K_z_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     k_hat_[t] = Eigen::VectorXd::Zero(nh);
@@ -255,6 +250,32 @@ double SolverIntro::stoppingCriteria() {
   return stop_;
 }
 
+void SolverIntro::resizeData() {
+  START_PROFILER("SolverIntro::resizeData");
+  SolverDDP::resizeData();
+
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t nh = model->get_nh();
+    QuuK_tmp_[t].conservativeResize(nu, ndx);
+    ZQzzinvQzuI_[t].conservativeResize(nu, nu);
+    YZ_[t].conservativeResize(nu, nu);
+    HuY_[t].conservativeResize(nh, nh);
+    Qzz_[t].conservativeResize(nh, nh);
+    Quz_[t].conservativeResize(nu, nh);
+    k_z_[t].conservativeResize(nu);
+    K_z_[t].conservativeResize(nu, ndx);
+    k_hat_[t].conservativeResize(nh);
+    K_hat_[t].conservativeResize(nh, ndx);
+    QuuinvHuT_[t].conservativeResize(nu, nh);
+  }
+  STOP_PROFILER("SolverIntro::resizeData");
+}
+
 double SolverIntro::calcDiff() {
   START_PROFILER("SolverIntro::calcDiff");
   SolverDDP::calcDiff();
@@ -348,11 +369,9 @@ void SolverIntro::computeGains(const std::size_t t) {
         Eigen::VectorBlock<Eigen::VectorXd> k_z = k_z_[t].tail(nullity);
         Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> K_z =
             K_z_[t].bottomRows(nullity);
-        Qz_[t].noalias() = Z.transpose() * Qu_[t];
-        Qxz_[t].noalias() = Qxu_[t] * Z;
-        k_z = Qz_[t];
+        k_z.noalias() = Z.transpose() * Qu_[t];
         Qzz_llt_[t].solveInPlace(k_z);
-        K_z = Qxz_[t].transpose();
+        K_z.transpose().noalias() = Qxu_[t] * Z;
         Qzz_llt_[t].solveInPlace(K_z);
         k_[t].noalias() += Z * k_z;
         K_[t].noalias() += Z * K_z;
