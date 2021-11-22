@@ -27,14 +27,15 @@ class SolverBoxDDP : public SolverDDP {
   virtual void allocateData();
   virtual void computeGains(const std::size_t t);
   virtual void forwardPass(const double steplength);
+  virtual void resizeData();
 
   const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
 
  protected:
   BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
-  Eigen::VectorXd du_lb_;
-  Eigen::VectorXd du_ub_;
+  std::vector<Eigen::VectorXd> du_lb_;
+  std::vector<Eigen::VectorXd> du_ub_;
 };
 
 }  // namespace crocoddyl
