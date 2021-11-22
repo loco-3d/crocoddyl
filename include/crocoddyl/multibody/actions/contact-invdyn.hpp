@@ -396,14 +396,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
-        costs(model->get_costs()->createData(&multibody)),
-        constraints(model->get_constraints()->createData(&multibody)),
         tmp_xstatic(model->get_state()->get_nx()),
         tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()),
         tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
-    costs->shareMemory(this);
-    constraints->shareMemory(this);
-
     // Set constant values for Fu, df_dx, and df_du
     const std::size_t na = model->get_actuation()->get_nu();
     const std::size_t nv = model->get_state()->get_nv();
@@ -419,6 +414,11 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       fid += nc;
     }
     model->get_contacts()->updateForceDiff(multibody.contacts, df_dx, df_du);
+
+    costs = model->get_costs()->createData(&multibody);
+    constraints = model->get_constraints()->createData(&multibody);
+    costs->shareMemory(this);
+    constraints->shareMemory(this);
 
     tmp_xstatic.setZero();
     tmp_Jstatic.setZero();
