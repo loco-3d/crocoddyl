@@ -80,11 +80,11 @@ class ActionModelAbstractTestCase(unittest.TestCase):
             np.allclose(self.MODEL.multiplyByFu(self.DATA.Fu, self.A), np.dot(self.A, self.DATA.Fu), atol=1e-9),
             "Wrong multiplyByFu operator.")
         self.assertTrue(
-            np.allclose(self.MODEL.multiplyFxTransposeBy(self.DATA.Fx.T, self.A.T),
+            np.allclose(self.MODEL.multiplyFxTransposeBy(self.DATA.Fx, self.A.T),
                         np.dot(self.DATA.Fx.T, self.A.T),
                         atol=1e-9), "Wrong multiplyFxTransposeBy operator.")
         self.assertTrue(
-            np.allclose(self.MODEL.multiplyFuTransposeBy(self.DATA.Fu.T, self.A.T),
+            np.allclose(self.MODEL.multiplyFuTransposeBy(self.DATA.Fu, self.A.T),
                         np.dot(self.DATA.Fu.T, self.A.T),
                         atol=1e-9), "Wrong multiplyFuTransposeBy operator.")
 
