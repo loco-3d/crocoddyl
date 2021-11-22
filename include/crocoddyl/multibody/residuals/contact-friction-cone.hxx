@@ -50,12 +50,24 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_p
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
   const MatrixX3s& A = fref_.get_A();
-  if (d->more_than_3_constraints) {
-    data->Rx.noalias() = A * df_dx.template topRows<3>();
-    data->Ru.noalias() = A * df_du.template topRows<3>();
-  } else {
-    data->Rx.noalias() = A * df_dx;
-    data->Ru.noalias() = A * df_du;
+
+  switch (d->contact_type) {
+    case Contact2D: {
+      // Valid for xz plane
+      data->Rx.noalias() = A.col(0) * df_dx.row(0) + A.col(2) * df_dx.row(1);
+      data->Ru.noalias() = A.col(0) * df_du.row(0) + A.col(2) * df_du.row(1);
+      break;
+    }
+    case Contact3D:
+      data->Rx.noalias() = A * df_dx;
+      data->Ru.noalias() = A * df_du;
+      break;
+    case Contact6D:
+      data->Rx.noalias() = A * df_dx.template topRows<3>();
+      data->Ru.noalias() = A * df_du.template topRows<3>();
+      break;
+    default:
+      break;
   }
 }
 

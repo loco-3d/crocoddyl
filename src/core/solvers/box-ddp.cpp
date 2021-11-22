@@ -31,17 +31,37 @@ SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
 
 SolverBoxDDP::~SolverBoxDDP() {}
 
+void SolverBoxDDP::resizeData() {
+  START_PROFILER("SolverBoxDDP::resizeData");
+  SolverDDP::resizeData();
+
+  const std::size_t T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    Quu_inv_[t].conservativeResize(nu, nu);
+    du_lb_[t].conservativeResize(nu);
+    du_ub_[t].conservativeResize(nu);
+  }
+  STOP_PROFILER("SolverBoxDDP::resizeData");
+}
+
 void SolverBoxDDP::allocateData() {
   SolverDDP::allocateData();
 
   const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
-  const std::size_t nu = problem_->get_nu_max();
+  du_lb_.resize(T);
+  du_ub_.resize(T);
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
+    du_lb_[t] = Eigen::VectorXd::Zero(nu);
+    du_ub_[t] = Eigen::VectorXd::Zero(nu);
   }
-  du_lb_.resize(nu);
-  du_ub_.resize(nu);
 }
 
 void SolverBoxDDP::computeGains(const std::size_t t) {
@@ -54,17 +74,16 @@ void SolverBoxDDP::computeGains(const std::size_t t) {
       return;
     }
 
-    du_lb_.head(nu) = problem_->get_runningModels()[t]->get_u_lb() - us_[t].head(nu);
-    du_ub_.head(nu) = problem_->get_runningModels()[t]->get_u_ub() - us_[t].head(nu);
+    du_lb_[t] = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
+    du_ub_[t] = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
 
     START_PROFILER("SolverBoxDDP::boxQP");
-    const BoxQPSolution& boxqp_sol =
-        qp_.solve(Quu_[t].topLeftCorner(nu, nu), Qu_[t].head(nu), du_lb_.head(nu), du_ub_.head(nu), k_[t].head(nu));
+    const BoxQPSolution& boxqp_sol = qp_.solve(Quu_[t], Qu_[t], du_lb_[t], du_ub_[t], k_[t]);
     START_PROFILER("SolverBoxDDP::boxQP");
 
     // Compute controls
     START_PROFILER("SolverBoxDDP::Quu_invproj");
-    Quu_inv_[t].topLeftCorner(nu, nu).setZero();
+    Quu_inv_[t].setZero();
     for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
       for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j) {
         Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
@@ -72,15 +91,15 @@ void SolverBoxDDP::computeGains(const std::size_t t) {
     }
     STOP_PROFILER("SolverBoxDDP::Quu_invproj");
     START_PROFILER("SolverBoxDDP::Quu_invproj_Qxu");
-    K_[t].topRows(nu).noalias() = Quu_inv_[t].topLeftCorner(nu, nu) * Qxu_[t].leftCols(nu).transpose();
+    K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     STOP_PROFILER("SolverBoxDDP::Quu_invproj_Qxu");
-    k_[t].topRows(nu) = -boxqp_sol.x;
+    k_[t] = -boxqp_sol.x;
 
     // The box-QP clamped the gradient direction; this is important for accounting
     // the algorithm advancement (i.e. stopping criteria)
     START_PROFILER("SolverBoxDDP::Qu_proj");
     for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
-      Qu_[t].head(nu)(boxqp_sol.clamped_idx[i]) = 0.;
+      Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
     }
     STOP_PROFILER("SolverBoxDDP::Qu_proj");
   }
@@ -106,11 +125,11 @@ void SolverBoxDDP::forwardPass(double steplength) {
     xs_try_[t] = xnext_;
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (nu != 0) {
-      us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
+      us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
       if (m->get_has_control_limits()) {  // clamp control
-        us_try_[t].head(nu) = us_try_[t].head(nu).cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
+        us_try_[t] = us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
       }
-      m->calc(d, xs_try_[t], us_try_[t].head(nu));
+      m->calc(d, xs_try_[t], us_try_[t]);
     } else {
       m->calc(d, xs_try_[t]);
     }

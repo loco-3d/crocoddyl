@@ -42,6 +42,9 @@ SolverDDP::~SolverDDP() {}
 bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
                       const std::size_t maxiter, const bool is_feasible, const double reginit) {
   START_PROFILER("SolverDDP::solve");
+  if (problem_->is_updated()) {
+    resizeData();
+  }
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
@@ -146,7 +149,7 @@ double SolverDDP::stoppingCriteria() {
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
-      stop_ += Qu_[t].head(nu).squaredNorm();
+      stop_ += Qu_[t].squaredNorm();
     }
   }
   return stop_;
@@ -159,11 +162,33 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
-      d_[0] += Qu_[t].head(nu).dot(k_[t].head(nu));
-      d_[1] -= k_[t].head(nu).dot(Quuk_[t].head(nu));
+      d_[0] += Qu_[t].dot(k_[t]);
+      d_[1] -= k_[t].dot(Quuk_[t]);
     }
   }
   return d_;
+}
+
+void SolverDDP::resizeData() {
+  START_PROFILER("SolverDDP::resizeData");
+  SolverAbstract::resizeData();
+
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    Qxu_[t].conservativeResize(ndx, nu);
+    Quu_[t].conservativeResize(nu, nu);
+    Qu_[t].conservativeResize(nu);
+    K_[t].conservativeResize(nu, ndx);
+    k_[t].conservativeResize(nu);
+    us_try_[t].conservativeResize(nu);
+    FuTVxx_p_[t].conservativeResize(nu, ndx);
+    Quuk_[t].conservativeResize(nu);
+  }
+  STOP_PROFILER("SolverDDP::resizeData");
 }
 
 double SolverDDP::calcDiff() {
@@ -210,21 +235,21 @@ void SolverDDP::backwardPass() {
     m->multiplyByFx(d->Fx, FxTVxx_p_, Qxx_[t], addto);  // + (Fx.T * Vxx_p) * Fx
     STOP_PROFILER("SolverDDP::Qxx");
     if (nu != 0) {
-      m->multiplyFuTransposeBy(d->Fu, Vxx_p, FuTVxx_p_[t].topRows(nu));  // Fu.T * Vxx_p
+      m->multiplyFuTransposeBy(d->Fu, Vxx_p, FuTVxx_p_[t]);  // Fu.T * Vxx_p
       START_PROFILER("SolverDDP::Qu");
-      Qu_[t].head(nu) = d->Lu;
-      m->multiplyFuTransposeBy(d->Fu, Vx_p, Qu_[t].head(nu), addto);  // + Fu.T * Vx_p
+      Qu_[t] = d->Lu;
+      m->multiplyFuTransposeBy(d->Fu, Vx_p, Qu_[t], addto);  // + Fu.T * Vx_p
       STOP_PROFILER("SolverDDP::Qu");
       START_PROFILER("SolverDDP::Quu");
-      Quu_[t].topLeftCorner(nu, nu) = d->Luu;
-      m->multiplyByFu(d->Fu, FuTVxx_p_[t].topRows(nu), Quu_[t].topLeftCorner(nu, nu), addto);  // + (Fu.T * Vxx_p) * Fu
+      Quu_[t] = d->Luu;
+      m->multiplyByFu(d->Fu, FuTVxx_p_[t], Quu_[t], addto);  // + (Fu.T * Vxx_p) * Fu
       STOP_PROFILER("SolverDDP::Quu");
       START_PROFILER("SolverDDP::Qxu");
-      Qxu_[t].leftCols(nu) = d->Lxu;
-      m->multiplyByFu(d->Fu, FxTVxx_p_, Qxu_[t].leftCols(nu), addto);  // + (Fx.T * Vxx_p) * Fu
+      Qxu_[t] = d->Lxu;
+      m->multiplyByFu(d->Fu, FxTVxx_p_, Qxu_[t], addto);  // + (Fx.T * Vxx_p) * Fu
       STOP_PROFILER("SolverDDP::Qxu");
       if (!std::isnan(ureg_)) {
-        Quu_[t].diagonal().head(nu).array() += ureg_;
+        Quu_[t].diagonal().array() += ureg_;
       }
     }
 
@@ -233,10 +258,10 @@ void SolverDDP::backwardPass() {
     Vx_[t] = Qx_[t];
     Vxx_[t] = Qxx_[t];
     if (nu != 0) {
-      Quuk_[t].head(nu).noalias() = Quu_[t].topLeftCorner(nu, nu) * k_[t].head(nu);
-      Vx_[t].noalias() -= K_[t].topRows(nu).transpose() * Qu_[t].head(nu);
+      Quuk_[t].noalias() = Quu_[t] * k_[t];
+      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
       START_PROFILER("SolverDDP::Vxx");
-      Vxx_[t].noalias() -= Qxu_[t].leftCols(nu) * K_[t].topRows(nu);
+      Vxx_[t].noalias() -= Qxu_[t] * K_[t];
       STOP_PROFILER("SolverDDP::Vxx");
     }
     Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
@@ -277,12 +302,10 @@ void SolverDDP::forwardPass(const double steplength) {
 
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (m->get_nu() != 0) {
-      const std::size_t nu = m->get_nu();
-
-      us_try_[t].head(nu).noalias() = us_[t].head(nu);
-      us_try_[t].head(nu).noalias() -= k_[t].head(nu) * steplength;
-      us_try_[t].head(nu).noalias() -= K_[t].topRows(nu) * dx_[t];
-      m->calc(d, xs_try_[t], us_try_[t].head(nu));
+      us_try_[t].noalias() = us_[t];
+      us_try_[t].noalias() -= k_[t] * steplength;
+      us_try_[t].noalias() -= K_[t] * dx_[t];
+      m->calc(d, xs_try_[t], us_try_[t]);
     } else {
       m->calc(d, xs_try_[t]);
     }
@@ -316,23 +339,20 @@ void SolverDDP::computeGains(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     START_PROFILER("SolverDDP::Quu_inv");
-    Quu_llt_[t].compute(Quu_[t].topLeftCorner(nu, nu));
+    Quu_llt_[t].compute(Quu_[t]);
     STOP_PROFILER("SolverDDP::Quu_inv");
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
       STOP_PROFILER("SolverDDP::computeGains");
       throw_pretty("backward_error");
     }
-    K_[t].topRows(nu) = Qxu_[t].leftCols(nu).transpose();
+    K_[t] = Qxu_[t].transpose();
 
-    Eigen::Block<MatrixXdRowMajor, Eigen::Dynamic, Eigen::internal::traits<MatrixXdRowMajor>::ColsAtCompileTime, true>
-        K = K_[t].topRows(nu);
     START_PROFILER("SolverDDP::Quu_inv_Qux");
-    Quu_llt_[t].solveInPlace(K);
+    Quu_llt_[t].solveInPlace(K_[t]);
     STOP_PROFILER("SolverDDP::Quu_inv_Qux");
-    k_[t].head(nu) = Qu_[t].head(nu);
-    Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> k = k_[t].head(nu);
-    Quu_llt_[t].solveInPlace(k);
+    k_[t] = Qu_[t];
+    Quu_llt_[t].solveInPlace(k_[t]);
   }
   STOP_PROFILER("SolverDDP::computeGains");
 }
@@ -374,10 +394,10 @@ void SolverDDP::allocateData() {
   Quuk_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
-  const std::size_t nu = problem_->get_nu_max();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
     Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
     Vx_[t] = Eigen::VectorXd::Zero(ndx);
     Qxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -397,7 +417,7 @@ void SolverDDP::allocateData() {
     dx_[t] = Eigen::VectorXd::Zero(ndx);
 
     FuTVxx_p_[t] = MatrixXdRowMajor::Zero(nu, ndx);
-    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(model->get_nu());
+    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
     Quuk_[t] = Eigen::VectorXd(nu);
   }
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);

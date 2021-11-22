@@ -33,8 +33,8 @@ class SolverBoxFDDP : public SolverFDDP {
  protected:
   BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
-  Eigen::VectorXd du_lb_;
-  Eigen::VectorXd du_ub_;
+  std::vector<Eigen::VectorXd> du_lb_;
+  std::vector<Eigen::VectorXd> du_ub_;
 };
 
 }  // namespace crocoddyl

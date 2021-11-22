@@ -23,6 +23,9 @@ SolverFDDP::~SolverFDDP() {}
 bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
                        const std::size_t maxiter, const bool is_feasible, const double reginit) {
   START_PROFILER("SolverFDDP::solve");
+  if (problem_->is_updated()) {
+    resizeData();
+  }
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
@@ -145,8 +148,8 @@ void SolverFDDP::updateExpectedImprovement() {
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
-      dg_ += Qu_[t].head(nu).dot(k_[t].head(nu));
-      dq_ -= k_[t].head(nu).dot(Quuk_[t].head(nu));
+      dg_ += Qu_[t].dot(k_[t]);
+      dq_ -= k_[t].dot(Quuk_[t]);
     }
     if (!is_feasible_) {
       dg_ -= Vx_[t].dot(fs_[t]);
@@ -176,8 +179,8 @@ void SolverFDDP::forwardPass(const double steplength) {
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {
-        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t].head(nu));
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t]);
       } else {
         m->calc(d, xs_try_[t]);
       }
@@ -212,8 +215,8 @@ void SolverFDDP::forwardPass(const double steplength) {
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {
-        us_try_[t].head(nu).noalias() = us_[t].head(nu) - k_[t].head(nu) * steplength - K_[t].topRows(nu) * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t].head(nu));
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t]);
       } else {
         m->calc(d, xs_try_[t]);
       }

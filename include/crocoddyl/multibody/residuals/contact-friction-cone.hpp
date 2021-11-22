@@ -15,6 +15,7 @@
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "crocoddyl/multibody/contacts/contact-2d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
@@ -189,7 +190,8 @@ struct ResidualDataContactFrictionConeTpl : public ResidualDataAbstractTpl<_Scal
 
   template <template <typename Scalar> class Model>
   ResidualDataContactFrictionConeTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data), more_than_3_constraints(false) {
+      : Base(model, data) {
+    contact_type = ContactUndefined;
     // Check that proper shared data has been passed
     bool is_contact = true;
     DataCollectorContactTpl<Scalar>* d1 = dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
@@ -211,20 +213,28 @@ struct ResidualDataContactFrictionConeTpl : public ResidualDataAbstractTpl<_Scal
       for (typename ContactModelMultiple::ContactDataContainer::iterator it = d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
         if (it->second->frame == id) {
+          ContactData2DTpl<Scalar>* d2d = dynamic_cast<ContactData2DTpl<Scalar>*>(it->second.get());
+          if (d2d != NULL) {
+            contact_type = Contact2D;
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
           ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
           if (d3d != NULL) {
+            contact_type = Contact3D;
             found_contact = true;
             contact = it->second;
             break;
           }
           ContactData6DTpl<Scalar>* d6d = dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
           if (d6d != NULL) {
-            more_than_3_constraints = true;
+            contact_type = Contact6D;
             found_contact = true;
             contact = it->second;
             break;
           }
-          throw_pretty("Domain error: there isn't defined at least a 3d contact for " + frame_name);
+          throw_pretty("Domain error: there isn't defined at least a 2d contact for " + frame_name);
           break;
         }
       }
@@ -234,13 +244,14 @@ struct ResidualDataContactFrictionConeTpl : public ResidualDataAbstractTpl<_Scal
         if (it->second->frame == id) {
           ImpulseData3DTpl<Scalar>* d3d = dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
           if (d3d != NULL) {
+            contact_type = Contact3D;
             found_contact = true;
             contact = it->second;
             break;
           }
           ImpulseData6DTpl<Scalar>* d6d = dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
           if (d6d != NULL) {
-            more_than_3_constraints = true;
+            contact_type = Contact6D;
             found_contact = true;
             contact = it->second;
             break;
@@ -256,7 +267,7 @@ struct ResidualDataContactFrictionConeTpl : public ResidualDataAbstractTpl<_Scal
   }
 
   boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force data
-  bool more_than_3_constraints;                              //!< Label that indicates if the contact is bigger than 3D
+  ContactType contact_type;                                  //!< Type of contact (2D / 3D / 6D)
   using Base::r;
   using Base::Ru;
   using Base::Rx;

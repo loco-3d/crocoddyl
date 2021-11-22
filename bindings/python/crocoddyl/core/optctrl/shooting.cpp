@@ -11,11 +11,16 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeShootingProblem() {
+// TODO: Remove once the deprecated update call has been removed in a future release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
 
   bp::class_<ShootingProblem, boost::noncopyable>(
@@ -111,9 +116,15 @@ void exposeShootingProblem() {
       .add_property("nx", bp::make_function(&ShootingProblem::get_nx), "dimension of state tuple")
       .add_property("ndx", bp::make_function(&ShootingProblem::get_ndx),
                     "dimension of the tangent space of the state manifold")
-      .add_property("nu_max", bp::make_function(&ShootingProblem::get_nu_max),
+      .add_property("nu_max",
+                    bp::make_function(&ShootingProblem::get_nu_max,
+                                      deprecated<>("Compute yourself the maximum dimension of the control vector")),
                     "dimension of the maximum control vector")
+      .add_property("is_updated", bp::make_function(&ShootingProblem::is_updated),
+                    "Returns True if the shooting problem has been updated, otherwise False")
       .def(PrintableVisitor<ShootingProblem>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

@@ -67,6 +67,7 @@ class SolverDDP : public SolverAbstract {
   virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
+  virtual void resizeData();
 
   /**
    * @brief Update the Jacobian, Hessian and feasibility of the optimal control problem
