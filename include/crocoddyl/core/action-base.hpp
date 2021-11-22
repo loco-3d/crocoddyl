@@ -207,7 +207,7 @@ class ActionModelAbstractTpl {
   /**
    * @brief Return the number of equality constraints
    */
-  const std::size_t get_nh() const;
+  std::size_t get_nh() const;
 
   /**
    * @brief Return the state
