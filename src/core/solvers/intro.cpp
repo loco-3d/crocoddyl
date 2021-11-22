@@ -410,7 +410,7 @@ void SolverIntro::computeGains(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeGains");
 }
 
-EqualitySolverType SolverIntro::get_equality_solver() const { return eq_solver_; };
+EqualitySolverType SolverIntro::get_equality_solver() const { return eq_solver_; }
 
 double SolverIntro::get_rho() const { return rho_; }
 
