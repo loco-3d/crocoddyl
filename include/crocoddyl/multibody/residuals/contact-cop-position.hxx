@@ -13,23 +13,17 @@ namespace crocoddyl {
 template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref,
-    const std::size_t nu)
-    : Base(state, 4, nu, true, true, true), id_(id), cref_(cref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
-  }
-}
+    const std::size_t nu, const bool fwddyn)
+    : Base(state, 4, nu, fwddyn ? true : false, fwddyn ? true : false, true),
+      fwddyn_(fwddyn),
+      update_jacobians_(true),
+      id_(id),
+      cref_(cref) {}
 
 template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref)
-    : Base(state, 4), id_(id), cref_(cref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
-  }
-}
+    : Base(state, 4), fwddyn_(true), update_jacobians_(true), id_(id), cref_(cref) {}
 
 template <typename Scalar>
 ResidualModelContactCoPPositionTpl<Scalar>::~ResidualModelContactCoPPositionTpl() {}
@@ -54,17 +48,9 @@ template <typename Scalar>
 void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                           const Eigen::Ref<const VectorXs>&,
                                                           const Eigen::Ref<const VectorXs>&) {
-  // Update all data
-  Data* d = static_cast<Data*>(data.get());
-
-  // Get the derivatives of the local contact wrench
-  const MatrixXs& df_dx = d->contact->df_dx;
-  const MatrixXs& df_du = d->contact->df_du;
-  const Matrix46& A = cref_.get_A();
-
-  // Compute the derivatives of the residual residual
-  data->Rx.noalias() = A * df_dx;
-  data->Ru.noalias() = A * df_du;
+  if (fwddyn_ || update_jacobians_) {
+    updateJacobians(data);
+  }
 }
 
 template <typename Scalar>
@@ -76,7 +62,23 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_pt
 template <typename Scalar>
 boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactCoPPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  boost::shared_ptr<ResidualDataAbstract> d =
+      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  if (!fwddyn_) {
+    updateJacobians(d);
+  }
+  return d;
+}
+
+template <typename Scalar>
+void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data) {
+  Data* d = static_cast<Data*>(data.get());
+
+  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_du = d->contact->df_du;
+  const Matrix46& A = cref_.get_A();
+  data->Rx.noalias() = A * df_dx;
+  data->Ru.noalias() = A * df_du;
 }
 
 template <typename Scalar>
@@ -85,6 +87,11 @@ void ResidualModelContactCoPPositionTpl<Scalar>::print(std::ostream& os) const {
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
   os << "ResidualModelContactCoPPosition {frame=" << s->get_pinocchio()->frames[id_].name
      << ", box=" << cref_.get_box().transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
+bool ResidualModelContactCoPPositionTpl<Scalar>::is_fwddyn() const {
+  return fwddyn_;
 }
 
 template <typename Scalar>
@@ -105,6 +112,7 @@ void ResidualModelContactCoPPositionTpl<Scalar>::set_id(const pinocchio::FrameIn
 template <typename Scalar>
 void ResidualModelContactCoPPositionTpl<Scalar>::set_reference(const CoPSupport& reference) {
   cref_ = reference;
+  update_jacobians_ = true;
 }
 
 }  // namespace crocoddyl

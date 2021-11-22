@@ -71,18 +71,23 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   /**
    * @brief Initialize the contact friction cone residual model
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] id     Reference frame id
-   * @param[in] fref   Reference friction cone
-   * @param[in] nu     Dimension of the control vector
+   * Note that for the inverse-dynamic cases, the control vector contains the generalized accelerations,
+   * torques, and all the contact forces.
+   *
+   * @param[in] state   State of the multibody system
+   * @param[in] id      Reference frame id
+   * @param[in] fref    Reference friction cone
+   * @param[in] nu      Dimension of the control vector
+   * @param[in] fwddyn  Indicates that we have a forward dynamics problem (true) or inverse dynamics (false)
    */
   ResidualModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                                      const FrictionCone& fref, const std::size_t nu);
+                                      const FrictionCone& fref, const std::size_t nu, const bool fwddyn = true);
 
   /**
    * @brief Initialize the contact friction cone residual model
    *
-   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`. Note that this constructor can be
+   * used for forward-dynamics cases only.
    *
    * @param[in] state  State of the multibody system
    * @param[in] id     Reference frame id
@@ -140,6 +145,18 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
+   * @brief Update the Jacobians of the contact friction cone residual
+   *
+   * @param[in] data  Contact friction cone residual data
+   */
+  void updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data);
+
+  /**
+   * @brief Indicates if we are using the forward-dynamics (true) or inverse-dynamics (false)
+   */
+  bool is_fwddyn() const;
+
+  /**
    * @brief Return the reference frame id
    */
   pinocchio::FrameIndex get_id() const;
@@ -172,6 +189,8 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   using Base::unone_;
 
  private:
+  bool fwddyn_;               //!< Indicates if we are using this function for forward dynamics
+  bool update_jacobians_;     //!< Indicates if we need to update the Jacobians (used for inverse dynamics case)
   pinocchio::FrameIndex id_;  //!< Reference frame id
   FrictionCone fref_;         //!< Reference contact friction cone
 };

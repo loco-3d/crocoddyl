@@ -20,17 +20,20 @@ void exposeResidualContactFrictionCone() {
       "ResidualModelContactFrictionCone",
       "This residual function is defined as r = A*f, where A, f describe the linearized friction cone and\n"
       "the spatial force, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, FrictionCone, std::size_t>(
-          bp::args("self", "state", "id", "fref", "nu"),
-          "Initialize the contact friction cone residual model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id\n"
-          ":param fref: frame friction cone\n"
-          ":param nu: dimension of control vector"))
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, FrictionCone, std::size_t,
+               bp::optional<bool> >(bp::args("self", "state", "id", "fref", "nu", "fwddyn"),
+                                    "Initialize the contact friction cone residual model.\n\n"
+                                    ":param state: state of the multibody system\n"
+                                    ":param id: reference frame id\n"
+                                    ":param fref: frame friction cone\n"
+                                    ":param nu: dimension of control vector\n"
+                                    ":param fwddyn: indicate if we have a forward dynamics problem (True) or inverse "
+                                    "dynamics problem (False) (default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, FrictionCone>(
           bp::args("self", "state", "id", "fref"),
           "Initialize the contact friction cone residual model.\n\n"
-          "The default nu value is obtained from state.nv.\n"
+          "The default nu is obtained from state.nv. Note that this constructor can be used for forward-dynamics\n"
+          "cases only.\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id\n"
           ":param fref: frame friction cone"))

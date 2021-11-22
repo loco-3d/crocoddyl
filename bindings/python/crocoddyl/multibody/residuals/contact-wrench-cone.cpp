@@ -18,17 +18,20 @@ void exposeResidualContactWrenchCone() {
 
   bp::class_<ResidualModelContactWrenchCone, bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactWrenchCone",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, WrenchCone, std::size_t>(
-          bp::args("self", "state", "id", "fref", "nu"),
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, WrenchCone, std::size_t, bp::optional<bool> >(
+          bp::args("self", "state", "id", "fref", "nu", "fwddyn"),
           "Initialize the contact wrench cone residual model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id\n"
           ":param fref: contact wrench cone\n"
-          ":param nu: dimension of control vector"))
+          ":param nu: dimension of control vector\n"
+          ":param fwddyn: indicate if we have a forward dynamics problem (True) or inverse dynamics problem (False) "
+          "(default True)"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, WrenchCone>(
           bp::args("self", "state", "id", "fref"),
           "Initialize the contact wrench cone residual model.\n\n"
-          "For this case the default nu is equals to model.nv.\n"
+          "The default nu is obtained from state.nv. Note that this constructor can be used for forward-dynamics\n"
+          "cases only.\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id\n"
           ":param fref: contact wrench cone"))
