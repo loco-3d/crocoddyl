@@ -195,7 +195,8 @@ bool init_function() {
         if (ActuationModelTypes::all[actuation_type] != ActuationModelTypes::ActuationModelMultiCopterBase) {
           register_residual_model_unit_tests(ResidualModelTypes::all[residual_type], StateModelTypes::all[state_type],
                                              ActuationModelTypes::all[actuation_type]);
-        } else if (StateModelTypes::all[state_type] != StateModelTypes::StateMultibody_TalosArm) {
+        } else if (StateModelTypes::all[state_type] != StateModelTypes::StateMultibody_TalosArm &&
+                   StateModelTypes::all[state_type] != StateModelTypes::StateMultibodyContact2D_TalosArm) {
           register_residual_model_unit_tests(ResidualModelTypes::all[residual_type], StateModelTypes::all[state_type],
                                              ActuationModelTypes::all[actuation_type]);
         }

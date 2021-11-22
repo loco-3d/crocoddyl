@@ -48,6 +48,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       os << "DifferentialActionModelContactFwdDynamics_TalosArm";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamics_TalosArm:
+      os << "DifferentialActionModelContact2DFwdDynamics_TalosArm";
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       os << "DifferentialActionModelContactFwdDynamics_HyQ";
       break;
@@ -56,6 +59,9 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm:
+      os << "DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_HyQ";
@@ -97,6 +103,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
                                          ActuationModelTypes::ActuationModelFull, false);
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamics_TalosArm:
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibodyContact2D_TalosArm,
+                                         ActuationModelTypes::ActuationModelFull, false);
+      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
@@ -108,6 +118,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       action =
           create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm:
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibodyContact2D_TalosArm,
+                                         ActuationModelTypes::ActuationModelFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
@@ -195,6 +209,22 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
                                      state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"), force,
                                      3, actuation->get_nu())),
                       0.1);
+      }
+      break;
+    case StateModelTypes::StateMultibodyContact2D_TalosArm:
+      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel2D>(
+                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
+                                    Eigen::Vector2d::Zero(), actuation->get_nu()));
+      if (with_friction) {
+        // friction cone
+        cost->addCost("lf_cone",
+                      boost::make_shared<crocoddyl::CostModelResidual>(
+                          state, friction_activation,
+                          boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
+                              state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
+                              friction_cone, actuation->get_nu())),
+                      0.1);
+        // TODO: enable force regularization once it would support Contact2D
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
