@@ -185,6 +185,80 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
+void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+                                                                     const Eigen::Ref<const MatrixXs>& A,
+                                                                     Eigen::Ref<MatrixXs> out,
+                                                                     const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.cols()) != state_->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of A is wrong, it should be " + std::to_string(state_->get_nv()) +
+                        " instead of " + std::to_string(A.cols()));
+  }
+  if (A.rows() != out.rows()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of rows: " + std::to_string(A.rows()) + " and " +
+                        std::to_string(out.rows()));
+  }
+  if (static_cast<std::size_t>(out.cols()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "number of columns of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
+                        std::to_string(out.cols()));
+  }
+  const std::size_t nv = state_->get_nv();
+  switch (op) {
+    case setto:
+      out.leftCols(nv).noalias() = A * Fu.leftCols(nv);
+      break;
+    case addto:
+      out.leftCols(nv).noalias() += A * Fu.leftCols(nv);
+      break;
+    case rmfrom:
+      out.leftCols(nv).noalias() -= A * Fu.leftCols(nv);
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
+void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
+                                                                              const Eigen::Ref<const MatrixXs>& A,
+                                                                              Eigen::Ref<MatrixXdRowMajor> out,
+                                                                              const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+  if (static_cast<std::size_t>(A.rows()) != state_->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of A is wrong, it should be " + std::to_string(state_->get_nv()) + " instead of " +
+                        std::to_string(A.rows()));
+  }
+  if (A.cols() != out.cols()) {
+    throw_pretty("Invalid argument: "
+                 << "A and out have different number of columns: " + std::to_string(A.cols()) + " and " +
+                        std::to_string(out.cols()));
+  }
+  if (static_cast<std::size_t>(out.rows()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "number of rows of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
+                        std::to_string(out.cols()));
+  }
+  const std::size_t nv = state_->get_nv();
+  switch (op) {
+    case setto:
+      out.topRows(nv).noalias() = Fu.transpose().topRows(nv) * A;
+      break;
+    case addto:
+      out.topRows(nv).noalias() += Fu.transpose().topRows(nv) * A;
+      break;
+    case rmfrom:
+      out.topRows(nv).noalias() -= Fu.transpose().topRows(nv) * A;
+      break;
+    default:
+      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+  }
+}
+
+template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelFreeFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << "}";

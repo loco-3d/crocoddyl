@@ -68,6 +68,22 @@ void exposeDifferentialActionContactInvDynamics() {
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
             .def("createData", &DifferentialActionModelContactInvDynamics::createData, bp::args("self"),
                  "Create the contact inverse-dynamics differential action data.")
+            .def("multiplyByFu", &DifferentialActionModelContactInvDynamics::multiplyByFu, bp::args("self", "Fu", "A"),
+                 "Compute the product between the given matrix A and the Jacobian of the dynamics wrt control.\n\n"
+                 "It assumes that calcDiff has been run first.\n"
+                 ":param Fu: Jacobian matrix of the dynamics with respect to the control\n"
+                 ":param A: matrix to multiply (dim na x state.ndx)\n"
+                 ":return product between A and the Jacobian of the dynamics with respect the control (dim na x nu)")
+            .def("multiplyFuTransposeBy", &DifferentialActionModelContactInvDynamics::multiplyFuTransposeBy,
+                 bp::args("self", "Fu", "A"),
+                 "Compute the product between the transpose of the Jacobian of the dynamics wrt control and the given "
+                 "matrix A.\n\n"
+                 "It assumes that calcDiff has been run first.\n"
+                 ":param Fu: Jacobian matrix of the dynamics with respect to the control\n"
+                 ":param A: matrix to multiply (dim state.ndx x na)\n"
+                 ":return product between the tranpose of the Jacobian of the dynamics with respect the control and A "
+                 " (dim "
+                 "nu x na)")
             .add_property("actuation",
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_actuation,
                                             bp::return_value_policy<bp::return_by_value>()),
