@@ -260,8 +260,10 @@ void SolverDDP::backwardPass() {
     Vx_[t] = Qx_[t];
     Vxx_[t] = Qxx_[t];
     if (nu != 0) {
+      START_PROFILER("SolverDDP::Vx");
       Quuk_[t].noalias() = Quu_[t] * k_[t];
       Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+      STOP_PROFILER("SolverDDP::Vx");
       START_PROFILER("SolverDDP::Vxx");
       Vxx_[t].noalias() -= Qxu_[t] * K_[t];
       STOP_PROFILER("SolverDDP::Vxx");
