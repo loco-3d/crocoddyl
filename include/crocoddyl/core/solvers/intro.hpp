@@ -137,10 +137,8 @@ class SolverIntro : public SolverDDP {
             //!< control-equality constraints \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd>
       HuY_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
-  std::vector<Eigen::VectorXd> Qz_;     //!< Reduced gradient of the Hamiltonian \f$\mathbf{Q_z}\f$
   std::vector<Eigen::MatrixXd> Qzz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{zz}}\f$
   std::vector<Eigen::MatrixXd> Quz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{uz}}\f$
-  std::vector<Eigen::MatrixXd> Qxz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{xz}}\f$
   std::vector<Eigen::VectorXd> k_z_;    //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd> K_z_;    //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
   std::vector<Eigen::VectorXd> k_hat_;  //!< Feedforward term related to the equality constraints
