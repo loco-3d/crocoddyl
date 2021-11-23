@@ -156,95 +156,6 @@ double SolverIntro::tryStep(const double steplength) {
   return cost_ - cost_try_;
 }
 
-void SolverIntro::backwardPass() {
-  START_PROFILER("SolverIntro::backwardPass");
-  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
-  Vxx_.back() = d_T->Lxx;
-  Vx_.back() = d_T->Lx;
-
-  if (!std::isnan(xreg_)) {
-    Vxx_.back().diagonal().array() += xreg_;
-  }
-
-  if (!is_feasible_) {
-    Vx_.back().noalias() += Vxx_.back() * fs_.back();
-  }
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const std::size_t nu = m->get_nu();
-
-    FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    START_PROFILER("SolverIntro::Qx");
-    Qx_[t] = d->Lx;
-    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
-    STOP_PROFILER("SolverIntro::Qx");
-    START_PROFILER("SolverIntro::Qxx");
-    Qxx_[t] = d->Lxx;
-    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
-    STOP_PROFILER("SolverIntro::Qxx");
-    if (nu != 0) {
-      FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
-      START_PROFILER("SolverIntro::Qu");
-      Qu_[t] = d->Lu;
-      Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
-      STOP_PROFILER("SolverIntro::Qu");
-      START_PROFILER("SolverIntro::Quu");
-      Quu_[t] = d->Luu;
-      Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
-      STOP_PROFILER("SolverIntro::Quu");
-      START_PROFILER("SolverIntro::Qxu");
-      Qxu_[t] = d->Lxu;
-      Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
-      STOP_PROFILER("SolverIntro::Qxu");
-      if (!std::isnan(ureg_)) {
-        Quu_[t].diagonal().array() += ureg_;
-      }
-    }
-
-    computeGains(t);
-
-    Vx_[t] = Qx_[t];
-    Vxx_[t] = Qxx_[t];
-    if (nu != 0) {
-      START_PROFILER("SolverIntro::Vx");
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
-      Vx_[t].noalias() -= Qxu_[t] * k_[t];
-      Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
-      STOP_PROFILER("SolverIntro::Vx");
-      START_PROFILER("SolverIntro::Vxx");
-      QuuK_tmp_[t].noalias() = Quu_[t] * K_[t];
-      Vxx_[t].noalias() -= 2 * Qxu_[t] * K_[t];
-      Vxx_[t].noalias() += K_[t].transpose() * QuuK_tmp_[t];
-      STOP_PROFILER("SolverIntro::Vxx");
-    }
-    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
-    Vxx_[t] = Vxx_tmp_;
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal().array() += xreg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-    if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * fs_[t];
-    }
-
-    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
-      throw_pretty("backward_error");
-    }
-    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
-      throw_pretty("backward_error");
-    }
-  }
-  STOP_PROFILER("SolverIntro::backwardPass");
-}
-
 double SolverIntro::stoppingCriteria() {
   stop_ = std::max(hfeas_, abs(d_[0] + 0.5 * d_[1]));
   return stop_;
@@ -335,6 +246,31 @@ double SolverIntro::calcDiff() {
 
   STOP_PROFILER("SolverIntro::calcDiff");
   return cost_;
+}
+
+void SolverIntro::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+  const std::size_t nu = model->get_nu();
+  Vx_[t] = Qx_[t];
+  Vxx_[t] = Qxx_[t];
+  if (nu != 0) {
+    START_PROFILER("SolverIntro::Vx");
+    Quuk_[t].noalias() = Quu_[t] * k_[t];
+    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+    Vx_[t].noalias() -= Qxu_[t] * k_[t];
+    Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+    STOP_PROFILER("SolverIntro::Vx");
+    START_PROFILER("SolverIntro::Vxx");
+    QuuK_tmp_[t].noalias() = Quu_[t] * K_[t];
+    Vxx_[t].noalias() -= 2 * Qxu_[t] * K_[t];
+    Vxx_[t].noalias() += K_[t].transpose() * QuuK_tmp_[t];
+    STOP_PROFILER("SolverIntro::Vxx");
+  }
+  Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+  Vxx_[t] = Vxx_tmp_;
+  // Compute and store the Vx gradient at end of the interval (rollout state)
+  if (!is_feasible_) {
+    Vx_[t].noalias() += Vxx_[t] * fs_[t];
+  }
 }
 
 void SolverIntro::computeGains(const std::size_t t) {
