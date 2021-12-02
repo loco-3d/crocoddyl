@@ -15,6 +15,7 @@
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
@@ -223,6 +224,13 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
       for (typename ContactModelMultiple::ContactDataContainer::iterator it = d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
         if (it->second->frame == id) {
+          ContactData1DTpl<Scalar>* d1d = dynamic_cast<ContactData1DTpl<Scalar>*>(it->second.get());
+          if (d1d != NULL) {
+            contact_type = Contact1D;
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
           ContactData3DTpl<Scalar>* d3d = dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
           if (d3d != NULL) {
             contact_type = Contact3D;

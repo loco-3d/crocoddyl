@@ -71,6 +71,7 @@ void exposeCostImpulseFrictionCone();
 void exposeCostImpulseWrenchCone();
 void exposeCostImpulseCoPPosition();
 void exposeCostImpulseCoM();
+void exposeContact1D();
 void exposeContact2D();
 void exposeContact3D();
 void exposeContact6D();
