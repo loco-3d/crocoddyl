@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,11 +53,11 @@ void exposeStateAbstract() {
            ":param x0: previous state point (dim state.nx).\n"
            ":param x1: current state point (dim state.nx).\n"
            ":return x1 [-] x0 value (dim state.ndx).")
-      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate), bp::args("self", "x", "dx"),
+      .def("integrate", pure_virtual(&StateAbstract_wrap::integrate_wrap), bp::args("self", "x", "dx"),
            "Compute the state manifold integration.\n\n"
            "It returns the value of x [+] dx operation. x and dx are points in the state.diff(x0,x1) (in M)\n"
            "and its tangent, respectively. Note that the operator result lies on M too.\n"
-           ":param x: state point (dim. state.nx) (dim state.nx).\n"
+           ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":return x [+] dx value (dim state.nx).")
       .def("Jdiff", pure_virtual(&StateAbstract_wrap::Jdiff_wrap), bp::args("self", "x0", "x1", "firstsecond"),
@@ -80,7 +80,7 @@ void exposeStateAbstract() {
            "\\partial{integrate(x, dx)}{dx}. By default, this function returns the derivatives of\n"
            "the first and second argument (i.e. firstsecond='both').\n"
            "partial derivative by setting firstsecond='first' or firstsecond='second'.\n"
-           ":param x: state point (dim. state.nx) (dim state.nx).\n"
+           ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param firstsecond: derivative w.r.t x or dx or both\n"
            ":return the partial derivative(s) of the integrate(x, dx) function")
@@ -89,16 +89,18 @@ void exposeStateAbstract() {
            "Parallel transport from integrate(x, dx) to x.\n\n"
            "This function performs the parallel transportation of an input matrix whose columns\n"
            "are expressed in the tangent space at integrate(x, dx) to the tangent space at x point\n"
-           ":param x: state point (dim. state.nx) (dim state.nx).\n"
+           ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")
-      .add_property("nx", bp::make_function(&StateAbstract_wrap::get_nx), "dimension of state tuple")
+      .add_property("nx", bp::make_function(&StateAbstract_wrap::get_nx), 
+               bp::make_setter(&StateAbstract_wrap::nx_,bp::return_internal_reference<>()), "dimension of state tuple")
       .add_property("ndx", bp::make_function(&StateAbstract_wrap::get_ndx),
-                    "dimension of the tangent space of the state manifold")
-      .add_property("nq", bp::make_function(&StateAbstract_wrap::get_nq), "dimension of the configuration tuple")
+                    bp::make_setter(&StateAbstract_wrap::ndx_,bp::return_internal_reference<>()), "dimension of the tangent space of the state manifold")
+      .add_property("nq", bp::make_function(&StateAbstract_wrap::get_nq),
+               bp::make_setter(&StateAbstract_wrap::nq_,bp::return_internal_reference<>()), "dimension of the configuration tuple")
       .add_property("nv", bp::make_function(&StateAbstract_wrap::get_nv),
-                    "dimension of tangent space of the configuration manifold")
+                    bp::make_setter(&StateAbstract_wrap::nv_,bp::return_internal_reference<>()), "dimension of tangent space of the configuration manifold")
       .add_property("has_limits", bp::make_function(&StateAbstract_wrap::get_has_limits),
                     "indicates whether problem has finite state limits")
       .add_property("lb", bp::make_getter(&StateAbstract_wrap::lb_, bp::return_internal_reference<>()),

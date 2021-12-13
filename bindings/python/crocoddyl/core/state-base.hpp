@@ -23,6 +23,10 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
  public:
   using StateAbstract::lb_;
   using StateAbstract::ub_;
+  using StateAbstract::nx_;
+  using StateAbstract::ndx_;
+  using StateAbstract::nq_;
+  using StateAbstract::nv_;
 
   StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
 
@@ -245,7 +249,7 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       throw_pretty("Invalid argument: "
                    << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
     }
-    return bp::call<Eigen::MatrixXd>(this->get_override("JintegrateTransport").ptr(), x, dx, (Eigen::MatrixXd)Jin,
+    return bp::call<Eigen::MatrixXd>(this->get_override("JintegrateTransport").ptr(), (Eigen::VectorXd)x, (Eigen::VectorXd)dx, (Eigen::MatrixXd)Jin,
                                      firstsecond);
   }
 };
