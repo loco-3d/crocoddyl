@@ -107,8 +107,6 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   const Scalar get_reference() const;
 
-  DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
-
   /**
    * @brief Create the 1d contact data
    */
