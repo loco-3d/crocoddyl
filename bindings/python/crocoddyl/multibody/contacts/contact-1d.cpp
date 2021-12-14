@@ -20,8 +20,8 @@ void exposeContact1D() {
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",
       "Rigid 1D contact model.\n\n"
-      "It defines a rigid 1D contact models (point contact) based on acceleration-based holonomic constraints, in x,z "
-      "directions.\n"
+      "It defines a rigid 1D contact model (point contact) based on acceleration-based holonomic constraints, in the z "
+      "direction.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double, std::size_t,
@@ -40,19 +40,6 @@ void exposeContact1D() {
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, std::size_t, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "xref", "nu", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param xref: reference frame translation\n"
-          ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "xref", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param Mref: reference frame translation\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
       .def("calc", &ContactModel1D::calc, bp::args("self", "data", "x"),
            "Compute the 1D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -80,9 +67,6 @@ void exposeContact1D() {
       .add_property("reference",
                     bp::make_function(&ContactModel1D::get_reference, bp::return_value_policy<bp::return_by_value>()),
                     &ContactModel1D::set_reference, "reference contact translation")
-      .add_property("xref",
-                    bp::make_function(&ContactModel1D::get_xref, deprecated<>("Deprecated. Use id or reference.")),
-                    "reference frame translation")
       .add_property("gains",
                     bp::make_function(&ContactModel1D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
