@@ -472,8 +472,8 @@ DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<doub
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
-enum ContactType { Contact1D, Contact2D, Contact3D, Contact6D, ContactUndefined };
-enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
+enum ContactType { ContactUndefined, Contact1D, Contact2D, Contact3D, Contact6D };
+enum ImpulseType { ImpulseUndefined, Impulse3D, Impulse6D };
 
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
