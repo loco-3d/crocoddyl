@@ -16,8 +16,6 @@ namespace python {
 void exposeContact1D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",
@@ -89,7 +87,6 @@ void exposeContact1D() {
                     bp::make_function(&ContactModel1D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
 
-#pragma GCC diagnostic pop
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData1D> >();
 
