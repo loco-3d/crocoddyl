@@ -63,12 +63,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Scalar xref,
                     const Vector2s& gains = Vector2s::Zero());
-  DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
-                               const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
-  DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
-                               const Vector2s& gains = Vector2s::Zero());)
+
   virtual ~ContactModel1DTpl();
 
   /**
