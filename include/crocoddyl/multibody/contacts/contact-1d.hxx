@@ -35,7 +35,7 @@ void ContactModel1DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_);
   d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
 
-  d->Jc.row(0) = d->fJf.row(2);
+  d->Jc.template row(0) = d->fJf.template row(2);
 
   d->vw = d->v.angular();
   d->vv = d->v.linear();
@@ -64,22 +64,22 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
 
-  d->da0_dx.leftCols(nv).row(0) = d->fXjda_dq.row(2);
-  d->da0_dx.leftCols(nv).row(0).noalias() += d->vw_skew.row(2) * d->fXjdv_dq.template topRows<3>();
-  d->da0_dx.leftCols(nv).row(0).noalias() -= d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_dx.template leftCols(nv).template row(0).noalias() = d->fXjda_dq.template row(2);
+  d->da0_dx.template leftCols(nv).template row(0).noalias() += d->vw_skew.template row(2) * d->fXjdv_dq.template topRows<3>();
+  d->da0_dx.template leftCols(nv).template row(0).noalias() -= d->vv_skew.template row(2) * d->fXjdv_dq.template bottomRows<3>();
 
-  d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(2);
-  d->da0_dx.rightCols(nv).row(0).noalias() += d->vw_skew.row(2) * d->fJf.template topRows<3>();
-  d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
+  d->da0_dx.template rightCols(nv).template row(0).noalias() = d->fXjda_dv.template row(2);
+  d->da0_dx.template rightCols(nv).template row(0).noalias() += d->vw_skew.template row(2) * d->fJf.template topRows<3>();
+  d->da0_dx.template rightCols(nv).template row(0).noalias() -= d->vv_skew.template row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
     const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
     d->oRf(0, 0) = oRf(2, 2);
-    d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
+    d->da0_dx.template leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->da0_dx.leftCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(2) * d->v_partial_dq;
-    d->da0_dx.rightCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(2) * d->a_partial_da;
+    d->da0_dx.template leftCols(nv).template row(0).noalias() += gains_[1] * d->fXj.template row(2) * d->v_partial_dq;
+    d->da0_dx.template rightCols(nv).template row(0).noalias() += gains_[1] * d->fXj.template row(2) * d->a_partial_da;
   }
 }
 
