@@ -64,7 +64,7 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
   }
   switch (contact_type) {
     case ContactModelTypes::ContactModel1D:
-      contact = boost::make_shared<crocoddyl::ContactModel1D>(state, frame_id, double(0.), nu);
+      contact = boost::make_shared<crocoddyl::ContactModel1D>(state, frame_id, 0., nu);
       break;
     case ContactModelTypes::ContactModel2D:
       contact = boost::make_shared<crocoddyl::ContactModel2D>(state, frame_id, Eigen::Vector2d::Zero(), nu);
