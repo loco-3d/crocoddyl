@@ -16,11 +16,11 @@ namespace python {
 void exposeContact1D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
 
-
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",
       "Rigid 1D contact model.\n\n"
-      "It defines a rigid 1D contact model (point contact) based on acceleration-based holonomic constraints, in the z "
+      "It defines a rigid 1D contact model (point contact) based on acceleration-based holonomic constraints, in the "
+      "z "
       "direction.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
@@ -70,7 +70,6 @@ void exposeContact1D() {
       .add_property("gains",
                     bp::make_function(&ContactModel1D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains");
-
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData1D> >();
 

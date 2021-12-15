@@ -22,7 +22,6 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> s
   id_ = id;
 }
 
-
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::~ContactModel1DTpl() {}
 
@@ -65,12 +64,16 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
 
   d->da0_dx.template leftCols(nv).template row(0).noalias() = d->fXjda_dq.template row(2);
-  d->da0_dx.template leftCols(nv).template row(0).noalias() += d->vw_skew.template row(2) * d->fXjdv_dq.template topRows<3>();
-  d->da0_dx.template leftCols(nv).template row(0).noalias() -= d->vv_skew.template row(2) * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_dx.template leftCols(nv).template row(0).noalias() +=
+      d->vw_skew.template row(2) * d->fXjdv_dq.template topRows<3>();
+  d->da0_dx.template leftCols(nv).template row(0).noalias() -=
+      d->vv_skew.template row(2) * d->fXjdv_dq.template bottomRows<3>();
 
   d->da0_dx.template rightCols(nv).template row(0).noalias() = d->fXjda_dv.template row(2);
-  d->da0_dx.template rightCols(nv).template row(0).noalias() += d->vw_skew.template row(2) * d->fJf.template topRows<3>();
-  d->da0_dx.template rightCols(nv).template row(0).noalias() -= d->vv_skew.template row(2) * d->fJf.template bottomRows<3>();
+  d->da0_dx.template rightCols(nv).template row(0).noalias() +=
+      d->vw_skew.template row(2) * d->fJf.template topRows<3>();
+  d->da0_dx.template rightCols(nv).template row(0).noalias() -=
+      d->vv_skew.template row(2) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
     const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
@@ -111,7 +114,6 @@ template <typename Scalar>
 const Scalar ContactModel1DTpl<Scalar>::get_reference() const {
   return xref_;
 }
-
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel1DTpl<Scalar>::get_gains() const {
