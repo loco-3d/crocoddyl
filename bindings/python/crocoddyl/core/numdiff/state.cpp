@@ -74,10 +74,10 @@ void exposeStateNumDiff() {
            ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
-           ":param firstsecond: derivative w.r.t x or dx");
+           ":param firstsecond: derivative w.r.t x or dx")
       .add_property("disturbance", bp::make_function(&StateNumDiff::get_disturbance),
                     &StateNumDiff::set_disturbance,
-                    "disturbance value used in the numerical differentiation")
+                    "disturbance value used in the numerical differentiation");
 }
 
 }  // namespace python
