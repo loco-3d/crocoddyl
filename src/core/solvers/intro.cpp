@@ -20,7 +20,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
 
   const std::size_t T = problem_->get_T();
   Hu_rank_.resize(T);
-  QuuK_tmp_.resize(T);
+  KQuu_tmp_.resize(T);
   ZQzzinvQzuI_.resize(T);
   YZ_.resize(T);
   HuY_.resize(T);
@@ -43,7 +43,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     Hu_rank_[t] = nh;
-    QuuK_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    KQuu_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
     ZQzzinvQzuI_[t] = Eigen::MatrixXd::Zero(nu, nu);
     YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
     HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
@@ -172,7 +172,7 @@ void SolverIntro::resizeData() {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
-    QuuK_tmp_[t].conservativeResize(nu, ndx);
+    KQuu_tmp_[t].conservativeResize(ndx, nu);
     ZQzzinvQzuI_[t].conservativeResize(nu, nu);
     YZ_[t].conservativeResize(nu, nu);
     HuY_[t].conservativeResize(nh, nh);
@@ -255,14 +255,15 @@ void SolverIntro::computeValueFunction(const std::size_t t, const boost::shared_
   if (nu != 0) {
     START_PROFILER("SolverIntro::Vx");
     Quuk_[t].noalias() = Quu_[t] * k_[t];
-    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
     Vx_[t].noalias() -= Qxu_[t] * k_[t];
-    Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+    Qu_[t] -= Quuk_[t];
+    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+    Qu_[t] += Quuk_[t];
     STOP_PROFILER("SolverIntro::Vx");
     START_PROFILER("SolverIntro::Vxx");
-    QuuK_tmp_[t].noalias() = Quu_[t] * K_[t];
-    Vxx_[t].noalias() -= 2 * Qxu_[t] * K_[t];
-    Vxx_[t].noalias() += K_[t].transpose() * QuuK_tmp_[t];
+    KQuu_tmp_[t].noalias() = K_[t].transpose() * Quu_[t];
+    KQuu_tmp_[t].noalias() -= 2 * Qxu_[t];
+    Vxx_[t].noalias() += KQuu_tmp_[t] * K_[t];
     STOP_PROFILER("SolverIntro::Vxx");
   }
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
