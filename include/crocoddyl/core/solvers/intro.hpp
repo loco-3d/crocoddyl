@@ -87,7 +87,7 @@ class SolverIntro : public SolverDDP {
                     //!< equality constraints
 
   std::vector<std::size_t> Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
-  std::vector<Eigen::MatrixXd> QuuK_tmp_;
+  std::vector<Eigen::MatrixXd> KQuu_tmp_;
   std::vector<Eigen::MatrixXd> ZQzzinvQzuI_;
   std::vector<Eigen::MatrixXd>
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
