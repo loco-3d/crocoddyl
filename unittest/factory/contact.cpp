@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "contact.hpp"
+#include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-2d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
@@ -19,6 +20,9 @@ const std::vector<ContactModelTypes::Type> ContactModelTypes::all(ContactModelTy
 
 std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type) {
   switch (type) {
+    case ContactModelTypes::ContactModel1D:
+      os << "ContactModel1D";
+      break;
     case ContactModelTypes::ContactModel2D:
       os << "ContactModel2D";
       break;
@@ -59,6 +63,9 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
     nu = state->get_nv();
   }
   switch (contact_type) {
+    case ContactModelTypes::ContactModel1D:
+      contact = boost::make_shared<crocoddyl::ContactModel1D>(state, frame_id, 0., nu);
+      break;
     case ContactModelTypes::ContactModel2D:
       contact = boost::make_shared<crocoddyl::ContactModel2D>(state, frame_id, Eigen::Vector2d::Zero(), nu);
       break;
@@ -83,9 +90,11 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact() {
   }
   boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
   ContactModelFactory factory;
-  if (rand() % 3 == 0) {
+  if (rand() % 4 == 0) {
+    contact = factory.create(ContactModelTypes::ContactModel1D, PinocchioModelTypes::RandomHumanoid);
+  } else if (rand() % 4 == 1) {
     contact = factory.create(ContactModelTypes::ContactModel2D, PinocchioModelTypes::RandomHumanoid);
-  } else if (rand() % 3 == 1) {
+  } else if (rand() % 4 == 2) {
     contact = factory.create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::RandomHumanoid);
   } else {
     contact = factory.create(ContactModelTypes::ContactModel6D, PinocchioModelTypes::RandomHumanoid);
