@@ -8,7 +8,6 @@
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {

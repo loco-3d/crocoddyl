@@ -17,7 +17,6 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 #include "crocoddyl/multibody/frames-deprecated.hpp"
 
