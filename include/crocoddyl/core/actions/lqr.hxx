@@ -125,7 +125,7 @@ void ActionModelLQRTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstr
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelLQRTpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar>> ActionModelLQRTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
