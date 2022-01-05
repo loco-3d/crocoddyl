@@ -50,24 +50,13 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
   }
 
   // cost = 0.5 * x^T*Lxx*x + 0.5 * u^T*Luu*u + x^T*Lxu*u + lx^T*x + lu^T*u
-  data->cost = Scalar(0.0);
-
-  // 0.5 * x^T*Lxx*x
-  d->Hx_tmp.noalias() = Lxx_ * x;
-  data->cost += Scalar(0.5) * x.transpose() * d->Hx_tmp;
-
-  // 0.5 * u^T*Luu*u
-  d->Hu_tmp.noalias() = Luu_ * u;
-  data->cost += Scalar(0.5) * u.transpose() * d->Hu_tmp;
-
-  // x^T*Lxu*u
-  d->Hx_tmp.noalias() = Lxu_ * u;
-  data->cost += x.transpose() * d->Hx_tmp;
-
-  // lx^T*x
+  d->Lxx_x_tmp.noalias() = Lxx_ * x;
+  data->cost = Scalar(0.5) * x.dot(d->Lxx_x_tmp);
+  d->Luu_u_tmp.noalias() = Luu_ * u;
+  data->cost += Scalar(0.5) * u.dot(d->Luu_u_tmp);
+  d->Lxx_x_tmp.noalias() = Lxu_ * u;
+  data->cost += x.dot(d->Lxx_x_tmp);
   data->cost += lx_.transpose() * x;
-
-  // lu^T*u
   data->cost += lu_.transpose() * u;
 }
 
@@ -81,8 +70,8 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
   boost::shared_ptr<ActionDataLQRTpl<Scalar>> d = boost::static_pointer_cast<ActionDataLQRTpl<Scalar>>(data);
 
   // cost = 0.5 * x^T*Lxx*x + lx^T*x
-  d->Hx_tmp.noalias() = Lxx_ * x;
-  data->cost = Scalar(0.5) * x.transpose() * d->Hx_tmp;
+  d->Lxx_x_tmp.noalias() = Lxx_ * x;
+  data->cost = Scalar(0.5) * x.dot(d->Lxx_x_tmp);
   data->cost += lx_.dot(x);
 }
 

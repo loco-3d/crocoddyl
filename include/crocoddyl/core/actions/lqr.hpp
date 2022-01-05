@@ -87,17 +87,19 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::VectorXs VectorXs;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
+  explicit ActionDataLQRTpl(Model<Scalar>* const model)
+      : Base(model),
+        Luu_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
+        Lxx_x_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
     // Setting the linear model and quadratic cost here because they are constant
     Fx = model->get_Fx();
     Fu = model->get_Fu();
     Lxx = model->get_Lxx();
     Luu = model->get_Luu();
     Lxu = model->get_Lxu();
-    Hu_tmp.resize(static_cast<Eigen::Index>(model->get_nu()));
-    Hx_tmp.resize(static_cast<Eigen::Index>(model->get_state()->get_ndx()));
   }
 
   using Base::cost;
@@ -110,8 +112,8 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
-  typename MathBase::VectorXs Hu_tmp;  // Temporary variable for storing Hessian-vector product (size: nu)
-  typename MathBase::VectorXs Hx_tmp;  // Temporary variable for storing Hessian-vector product (size: nx)
+  VectorXs Luu_u_tmp;  // Temporary variable for storing Hessian-vector product (size: nu)
+  VectorXs Lxx_x_tmp;  // Temporary variable for storing Hessian-vector product (size: nx)
 };
 
 }  // namespace crocoddyl
