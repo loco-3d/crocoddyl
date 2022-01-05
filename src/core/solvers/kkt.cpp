@@ -187,7 +187,7 @@ double SolverKKT::calcDiff() {
   std::size_t ix = 0;
   std::size_t iu = 0;
   const std::size_t T = problem_->get_T();
-  kkt_.block(ndx_ + nu_, 0, ndx_, ndx_) = Eigen::MatrixXd::Identity(ndx_, ndx_);
+  kkt_.block(ndx_ + nu_, 0, ndx_, ndx_).setIdentity();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_runningDatas()[t];
