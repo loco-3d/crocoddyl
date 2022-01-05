@@ -40,7 +40,6 @@ class SolverIntro : public SolverDDP {
 
   /**
    * @brief Return the type of solver used for handling the equality constraints
-   *
    */
   EqualitySolverType get_equality_solver() const;
 
