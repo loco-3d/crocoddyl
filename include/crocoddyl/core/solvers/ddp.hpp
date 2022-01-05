@@ -302,7 +302,7 @@ class SolverDDP : public SolverAbstract {
   double cost_try_;                      //!< Total cost computed by line-search procedure
   std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
   std::vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
-  std::vector<Eigen::VectorXd> dx_;
+  std::vector<Eigen::VectorXd> dx_;      //!< State error during the roll-out/forward-pass (size T)
 
   // allocate data
   std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function \f$\mathbf{V_{xx}}\f$
