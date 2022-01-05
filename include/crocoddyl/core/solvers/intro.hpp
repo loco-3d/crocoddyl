@@ -89,13 +89,14 @@ class SolverIntro : public SolverDDP {
 
   std::vector<std::size_t> Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
   std::vector<Eigen::MatrixXd> KQuu_tmp_;
-  std::vector<Eigen::MatrixXd> ZQzzinvQzuI_;
   std::vector<Eigen::MatrixXd>
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
             //!< control-equality constraints \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd>
       HuY_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
+  std::vector<Eigen::VectorXd> Qz_;     //!< Jacobian of the Hamiltonian \f$\mathbf{Q_{z}}\f$
   std::vector<Eigen::MatrixXd> Qzz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{zz}}\f$
+  std::vector<Eigen::MatrixXd> Qxz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{xz}}\f$
   std::vector<Eigen::MatrixXd> Quz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{uz}}\f$
   std::vector<Eigen::VectorXd> k_z_;    //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd> K_z_;    //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$

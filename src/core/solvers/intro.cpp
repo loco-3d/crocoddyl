@@ -21,10 +21,11 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   const std::size_t T = problem_->get_T();
   Hu_rank_.resize(T);
   KQuu_tmp_.resize(T);
-  ZQzzinvQzuI_.resize(T);
   YZ_.resize(T);
   HuY_.resize(T);
+  Qz_.resize(T);
   Qzz_.resize(T);
+  Qxz_.resize(T);
   Quz_.resize(T);
   k_z_.resize(T);
   K_z_.resize(T);
@@ -44,10 +45,11 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const std::size_t nh = model->get_nh();
     Hu_rank_[t] = nh;
     KQuu_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
-    ZQzzinvQzuI_[t] = Eigen::MatrixXd::Zero(nu, nu);
     YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
     HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    Qz_[t] = Eigen::VectorXd::Zero(nh);
     Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
     Quz_[t] = Eigen::MatrixXd::Zero(nu, nh);
     k_z_[t] = Eigen::VectorXd::Zero(nu);
     K_z_[t] = Eigen::MatrixXd::Zero(nu, ndx);
@@ -173,10 +175,11 @@ void SolverIntro::resizeData() {
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     KQuu_tmp_[t].conservativeResize(ndx, nu);
-    ZQzzinvQzuI_[t].conservativeResize(nu, nu);
     YZ_[t].conservativeResize(nu, nu);
     HuY_[t].conservativeResize(nh, nh);
+    Qz_[t].conservativeResize(nh);
     Qzz_[t].conservativeResize(nh, nh);
+    Qxz_[t].conservativeResize(ndx, nh);
     Quz_[t].conservativeResize(nu, nh);
     k_z_[t].conservativeResize(nu);
     K_z_[t].conservativeResize(nu, ndx);
@@ -298,20 +301,18 @@ void SolverIntro::computeGains(const std::size_t t) {
         }
         Eigen::Transpose<Eigen::MatrixXd> Qzu = Quz_[t].transpose();
         Qzz_llt_[t].solveInPlace(Qzu);
-        ZQzzinvQzuI_[t].noalias() = Z * Qzu;
-        ZQzzinvQzuI_[t].diagonal().array() -= 1.;
-        k_[t].noalias() = ZQzzinvQzuI_[t] * k_z_[t];
-        K_[t].noalias() = ZQzzinvQzuI_[t] * K_z_[t];
+        k_[t] = -k_z_[t];
+        K_[t] = -K_z_[t];
 
-        Eigen::VectorBlock<Eigen::VectorXd> k_z = k_z_[t].tail(nullity);
-        Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> K_z =
-            K_z_[t].bottomRows(nullity);
-        k_z.noalias() = Z.transpose() * Qu_[t];
-        Qzz_llt_[t].solveInPlace(k_z);
-        K_z.transpose().noalias() = Qxu_[t] * Z;
-        Qzz_llt_[t].solveInPlace(K_z);
-        k_[t].noalias() += Z * k_z;
-        K_[t].noalias() += Z * K_z;
+        Qz_[t].noalias() = Z.transpose() * Qu_[t];
+        Qzz_llt_[t].solveInPlace(Qz_[t]);
+        Qxz_[t].noalias() = Qxu_[t] * Z;
+        Eigen::Transpose<Eigen::MatrixXd> Qzx = Qxz_[t].transpose();
+        Qzz_llt_[t].solveInPlace(Qzx);
+        Qz_[t].noalias() += Qzu * k_z_[t];
+        Qzx.noalias() += Qzu * K_z_[t];
+        k_[t].noalias() += Z * Qz_[t];
+        K_[t].noalias() += Z * Qzx;
       } else {
         SolverDDP::computeGains(t);
       }
