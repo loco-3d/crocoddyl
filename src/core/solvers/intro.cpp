@@ -210,7 +210,7 @@ double SolverIntro::calcDiff() {
           Hu_rank_[t] = Hu_lu_[t].rank();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
               YZ_[t].leftCols(Hu_lu_[t].rank());
-          HuY_[t].noalias() = -data->Hu * Y;
+          HuY_[t].noalias() = data->Hu * Y;
           HuY_lu_[t].compute(HuY_[t]);
           const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
           k_hat_[t].noalias() = HuYinv * data->h;
@@ -233,7 +233,7 @@ double SolverIntro::calcDiff() {
           Hu_rank_[t] = Hu_qr_[t].rank();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
               YZ_[t].leftCols(Hu_lu_[t].rank());
-          HuY_[t].noalias() = -data->Hu * Y;
+          HuY_[t].noalias() = data->Hu * Y;
           HuY_lu_[t].compute(HuY_[t]);
           const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
           k_hat_[t].noalias() = HuYinv * data->h;
@@ -288,6 +288,7 @@ void SolverIntro::computeGains(const std::size_t t) {
     case LuNull:
     case QrNull:
       if (nu > 0 && nh > 0) {
+        START_PROFILER("SolverIntro::Qzz_inv");
         const std::size_t rank = Hu_rank_[t];
         const std::size_t nullity = data->Hu.cols() - rank;
         const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Z =
@@ -295,22 +296,23 @@ void SolverIntro::computeGains(const std::size_t t) {
         Quz_[t].noalias() = Quu_[t] * Z;
         Qzz_[t].noalias() = Z.transpose() * Quz_[t];
         Qzz_llt_[t].compute(Qzz_[t]);
+        STOP_PROFILER("SolverIntro::Qzz_inv");
         const Eigen::ComputationInfo& info = Qzz_llt_[t].info();
         if (info != Eigen::Success) {
           throw_pretty("backward error");
         }
-        Eigen::Transpose<Eigen::MatrixXd> Qzu = Quz_[t].transpose();
-        Qzz_llt_[t].solveInPlace(Qzu);
-        k_[t] = -k_z_[t];
-        K_[t] = -K_z_[t];
 
+        k_[t] = k_z_[t];
+        K_[t] = K_z_[t];
+        Eigen::Transpose<Eigen::MatrixXd> QzzinvQzu = Quz_[t].transpose();
+        Qzz_llt_[t].solveInPlace(QzzinvQzu);
         Qz_[t].noalias() = Z.transpose() * Qu_[t];
         Qzz_llt_[t].solveInPlace(Qz_[t]);
         Qxz_[t].noalias() = Qxu_[t] * Z;
         Eigen::Transpose<Eigen::MatrixXd> Qzx = Qxz_[t].transpose();
         Qzz_llt_[t].solveInPlace(Qzx);
-        Qz_[t].noalias() += Qzu * k_z_[t];
-        Qzx.noalias() += Qzu * K_z_[t];
+        Qz_[t].noalias() -= QzzinvQzu * k_z_[t];
+        Qzx.noalias() -= QzzinvQzu * K_z_[t];
         k_[t].noalias() += Z * Qz_[t];
         K_[t].noalias() += Z * Qzx;
       } else {
@@ -320,10 +322,12 @@ void SolverIntro::computeGains(const std::size_t t) {
     case Schur:
       SolverDDP::computeGains(t);
       if (nu > 0 && nh > 0) {
+        START_PROFILER("SolverIntro::Qzz_inv");
         QuuinvHuT_[t] = data->Hu.transpose();
         Quu_llt_[t].solveInPlace(QuuinvHuT_[t]);
         Qzz_[t].noalias() = data->Hu * QuuinvHuT_[t];
         Qzz_llt_[t].compute(Qzz_[t]);
+        STOP_PROFILER("SolverIntro::Qzz_inv");
         const Eigen::ComputationInfo& info = Qzz_llt_[t].info();
         if (info != Eigen::Success) {
           throw_pretty("backward error");
