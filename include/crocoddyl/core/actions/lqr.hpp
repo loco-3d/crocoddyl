@@ -96,6 +96,8 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
     Lxx = model->get_Lxx();
     Luu = model->get_Luu();
     Lxu = model->get_Lxu();
+    Hu_tmp.resize(static_cast<Eigen::Index>(model->get_nu()));
+    Hx_tmp.resize(static_cast<Eigen::Index>(model->get_state()->get_ndx()));
   }
 
   using Base::cost;
@@ -108,6 +110,8 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
+  typename MathBase::VectorXs Hu_tmp;  // Temporary variable for storing Hessian-vector product (size: nu)
+  typename MathBase::VectorXs Hx_tmp;  // Temporary variable for storing Hessian-vector product (size: nx)
 };
 
 }  // namespace crocoddyl

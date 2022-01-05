@@ -38,6 +38,7 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
+  boost::shared_ptr<ActionDataLQRTpl<Scalar>> d = boost::static_pointer_cast<ActionDataLQRTpl<Scalar>>(data);
 
   if (drift_free_) {
     data->xnext.noalias() = Fx_ * x;
@@ -47,8 +48,27 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     data->xnext.noalias() += Fu_ * u;
     data->xnext += f0_;
   }
-  data->cost =
-      Scalar(0.5) * x.dot(Lxx_ * x) + Scalar(0.5) * u.dot(Luu_ * u) + x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
+
+  // cost = 0.5 * x^T*Lxx*x + 0.5 * u^T*Luu*u + x^T*Lxu*u + lx^T*x + lu^T*u
+  data->cost = Scalar(0.0);
+
+  // 0.5 * x^T*Lxx*x
+  d->Hx_tmp.noalias() = Lxx_ * x;
+  data->cost += Scalar(0.5) * x.transpose() * d->Hx_tmp;
+
+  // 0.5 * u^T*Luu*u
+  d->Hu_tmp.noalias() = Luu_ * u;
+  data->cost += Scalar(0.5) * u.transpose() * d->Hu_tmp;
+
+  // x^T*Lxu*u
+  d->Hx_tmp.noalias() = Lxu_ * u;
+  data->cost += x.transpose() * d->Hx_tmp;
+
+  // lx^T*x
+  data->cost += lx_.transpose() * x;
+
+  // lu^T*u
+  data->cost += lu_.transpose() * u;
 }
 
 template <typename Scalar>
@@ -58,8 +78,12 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  boost::shared_ptr<ActionDataLQRTpl<Scalar>> d = boost::static_pointer_cast<ActionDataLQRTpl<Scalar>>(data);
 
-  data->cost = Scalar(0.5) * x.dot(Lxx_ * x) + lx_.dot(x);
+  // cost = 0.5 * x^T*Lxx*x + lx^T*x
+  d->Hx_tmp.noalias() = Lxx_ * x;
+  data->cost = Scalar(0.5) * x.transpose() * d->Hx_tmp;
+  data->cost += lx_.dot(x);
 }
 
 template <typename Scalar>
