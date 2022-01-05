@@ -119,6 +119,10 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
   const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
+    // NB: The dimension of vectors xs_try_ and xs_ are T+1, whereas the dimension of dx_ is T. Here, we are re-using
+    // the final element of dx_ for the computation of the difference at the terminal node. Using the access iterator
+    // back() this re-use of the final element is fine. Cf. the discussion at
+    // https://github.com/loco-3d/crocoddyl/issues/1022
     problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
