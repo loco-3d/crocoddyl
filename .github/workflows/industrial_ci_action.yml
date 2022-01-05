@@ -13,6 +13,7 @@ jobs:
         env:
           - {ROS_DISTRO: melodic}
           - {ROS_DISTRO: noetic}
+          - {ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
       UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
