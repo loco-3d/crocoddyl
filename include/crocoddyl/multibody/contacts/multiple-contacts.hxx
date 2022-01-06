@@ -34,10 +34,10 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
   } else if (active) {
     nc_ += contact->get_nc();
     nc_total_ += contact->get_nc();
-    active_.insert(name);
+    active_set_.insert(name);
   } else if (!active) {
     nc_total_ += contact->get_nc();
-    inactive_.insert(name);
+    inactive_set_.insert(name);
   }
 }
 
@@ -48,8 +48,8 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
     nc_ -= it->second->contact->get_nc();
     nc_total_ -= it->second->contact->get_nc();
     contacts_.erase(it);
-    active_.erase(name);
-    inactive_.erase(name);
+    active_set_.erase(name);
+    inactive_set_.erase(name);
   } else {
     std::cerr << "Warning: we couldn't remove the " << name << " contact item, it doesn't exist." << std::endl;
   }
@@ -61,12 +61,12 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& nam
   if (it != contacts_.end()) {
     if (active && !it->second->active) {
       nc_ += it->second->contact->get_nc();
-      active_.insert(name);
-      inactive_.erase(name);
+      active_set_.insert(name);
+      inactive_set_.erase(name);
     } else if (!active && it->second->active) {
       nc_ -= it->second->contact->get_nc();
-      inactive_.insert(name);
-      active_.erase(name);
+      inactive_set_.insert(name);
+      active_set_.erase(name);
     }
     // "else" case: Contact status unchanged - already in desired state
     it->second->active = active;
@@ -264,13 +264,13 @@ std::size_t ContactModelMultipleTpl<Scalar>::get_nu() const {
 }
 
 template <typename Scalar>
-const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_active() const {
-  return active_;
+const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_active_set() const {
+  return active_set_;
 }
 
 template <typename Scalar>
-const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_inactive() const {
-  return inactive_;
+const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_inactive_set() const {
+  return inactive_set_;
 }
 
 template <typename Scalar>
@@ -287,8 +287,8 @@ bool ContactModelMultipleTpl<Scalar>::getContactStatus(const std::string& name) 
 
 template <class Scalar>
 std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model) {
-  const std::set<std::string>& active = model.get_active();
-  const std::set<std::string>& inactive = model.get_inactive();
+  const auto& active = model.get_active_set();
+  const auto& inactive = model.get_inactive_set();
   os << "ContactModelMultiple:" << std::endl;
   os << "  Active:" << std::endl;
   for (std::set<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
