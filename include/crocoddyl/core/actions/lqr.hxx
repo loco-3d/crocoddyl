@@ -67,7 +67,7 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
-  boost::shared_ptr<ActionDataLQRTpl<Scalar>> d = boost::static_pointer_cast<ActionDataLQRTpl<Scalar>>(data);
+  Data* d = static_cast<Data*>(data.get());
 
   // cost = 0.5 * x^T*Lxx*x + lx^T*x
   d->Lxx_x_tmp.noalias() = Lxx_ * x;
