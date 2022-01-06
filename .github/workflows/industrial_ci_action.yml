@@ -12,21 +12,21 @@ jobs:
       matrix:
         env:
           # Ubuntu 18.04, g++, Release
-          - {name: "Bionic - g++ - Release", ROS_DISTRO: melodic}
+          - {name: "Bionic / g++ / Release", ROS_DISTRO: melodic}
           # Ubuntu 20.04, g++, Release
-          - {name: "Focal - g++ - Release", ROS_DISTRO: noetic}
+          - {name: "Focal / g++ / Release", ROS_DISTRO: noetic}
           # Ubuntu 20.04, clang, Release
-          - {name: "Focal - clang - Release", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++}
+          - {name: "Focal / clang / Release", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++}
           # Ubuntu 20.04, clang, Release, multi-threading
-          - {name: "Focal - clang - Release - Multi-threading", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
-          # Format check - awaits https://github.com/ros-industrial/industrial_ci/issues/767
+          - {name: "Focal / clang / Release / Multi-threading", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # Format check
           - {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0", AFTER_INSTALL_CLANG_FORMAT_CHECK: "wget https://raw.githubusercontent.com/Gepetto/linters/master/.clang-format-6.0 -O /tmp/clang_format_check/crocoddyl/.clang-format"}
           ## Working configs for Debug mode. However, tests take too long in Debug mode (~1h on a laptop).
           ## Hence, not active on GitHub Actions
-          # Ubuntu 20.04, g++, Debug
-          - {name: "Focal - g++ - Debug", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
-          # # Ubuntu 20.04, clang, Debug
-          # - {ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
+          # # Ubuntu 20.04, g++, Debug
+          # - {name: "Focal / g++ / Debug", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
+          # Ubuntu 20.04, clang, Debug
+          - {ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
@@ -51,7 +51,7 @@ jobs:
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
-      # Run industrial_ci
+      # Run industrial_ci - use fork until awaits https://github.com/ros-industrial/industrial_ci/issues/767 is resolved
       - uses: 'wxmerkt/industrial_ci@topic/clang-format-check-in-deterministic-location'
         env: ${{ matrix.env }}
       # # Run industrial_ci
