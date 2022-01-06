@@ -19,6 +19,8 @@ TARGET_LINK_BOOST_PYTHON(${PROJECT_NAME}_pywrap)
 # BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS spews conversion warnings from int to long unsigned int.
 # Unfortunately, using literals does not work in a macro. As such, this turns them off for the entire wrapper:
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-conversion")
+# We are also exposing deprecated declarations until they are removed. Ignore the errors for the wrapper:
+TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-deprecated-declarations")
 
 IF(UNIX AND NOT APPLE)
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_pywrap PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
