@@ -34,14 +34,10 @@ void ContactModelMultipleTpl<Scalar>::addContact(const std::string& name,
   } else if (active) {
     nc_ += contact->get_nc();
     nc_total_ += contact->get_nc();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-    active_.insert(it, name);
+    active_.insert(name);
   } else if (!active) {
     nc_total_ += contact->get_nc();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-    inactive_.insert(it, name);
+    inactive_.insert(name);
   }
 }
 
@@ -52,8 +48,8 @@ void ContactModelMultipleTpl<Scalar>::removeContact(const std::string& name) {
     nc_ -= it->second->contact->get_nc();
     nc_total_ -= it->second->contact->get_nc();
     contacts_.erase(it);
-    active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+    active_.erase(name);
+    inactive_.erase(name);
   } else {
     std::cerr << "Warning: we couldn't remove the " << name << " contact item, it doesn't exist." << std::endl;
   }
@@ -65,17 +61,14 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(const std::string& nam
   if (it != contacts_.end()) {
     if (active && !it->second->active) {
       nc_ += it->second->contact->get_nc();
-      std::vector<std::string>::iterator it =
-          std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-      active_.insert(it, name);
-      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+      active_.insert(name);
+      inactive_.erase(name);
     } else if (!active && it->second->active) {
       nc_ -= it->second->contact->get_nc();
-      active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-      std::vector<std::string>::iterator it =
-          std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-      inactive_.insert(it, name);
+      inactive_.insert(name);
+      active_.erase(name);
     }
+    // "else" case: Contact status unchanged - already in desired state
     it->second->active = active;
   } else {
     std::cerr << "Warning: we couldn't change the status of the " << name << " contact item, it doesn't exist."
@@ -271,12 +264,12 @@ std::size_t ContactModelMultipleTpl<Scalar>::get_nu() const {
 }
 
 template <typename Scalar>
-const std::vector<std::string>& ContactModelMultipleTpl<Scalar>::get_active() const {
+const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_active() const {
   return active_;
 }
 
 template <typename Scalar>
-const std::vector<std::string>& ContactModelMultipleTpl<Scalar>::get_inactive() const {
+const std::set<std::string>& ContactModelMultipleTpl<Scalar>::get_inactive() const {
   return inactive_;
 }
 
@@ -294,11 +287,11 @@ bool ContactModelMultipleTpl<Scalar>::getContactStatus(const std::string& name) 
 
 template <class Scalar>
 std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>& model) {
-  const std::vector<std::string>& active = model.get_active();
-  const std::vector<std::string>& inactive = model.get_inactive();
+  const std::set<std::string>& active = model.get_active();
+  const std::set<std::string>& inactive = model.get_inactive();
   os << "ContactModelMultiple:" << std::endl;
   os << "  Active:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
     const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
         model.get_contacts().find(*it)->second;
     if (it != --active.end()) {
@@ -308,7 +301,7 @@ std::ostream& operator<<(std::ostream& os, const ContactModelMultipleTpl<Scalar>
     }
   }
   os << "  Inactive:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
     const boost::shared_ptr<typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
         model.get_contacts().find(*it)->second;
     if (it != --inactive.end()) {

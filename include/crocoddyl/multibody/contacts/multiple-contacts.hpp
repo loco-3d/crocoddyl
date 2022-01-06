@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <utility>
 
 #include "crocoddyl/multibody/fwd.hpp"
@@ -205,12 +206,12 @@ class ContactModelMultipleTpl {
   /**
    * @brief Return the names of the active contacts
    */
-  const std::vector<std::string>& get_active() const;
+  const std::set<std::string>& get_active() const;
 
   /**
    * @brief Return the names of the inactive contacts
    */
-  const std::vector<std::string>& get_inactive() const;
+  const std::set<std::string>& get_inactive() const;
 
   /**
    * @brief Return the status of a given contact name
@@ -229,8 +230,8 @@ class ContactModelMultipleTpl {
   std::size_t nc_;
   std::size_t nc_total_;
   std::size_t nu_;
-  std::vector<std::string> active_;
-  std::vector<std::string> inactive_;
+  std::set<std::string> active_;
+  std::set<std::string> inactive_;
 };
 
 /**
