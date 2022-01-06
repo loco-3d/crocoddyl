@@ -38,7 +38,7 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
     throw_pretty("Invalid argument: "
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
-  boost::shared_ptr<ActionDataLQRTpl<Scalar>> d = boost::static_pointer_cast<ActionDataLQRTpl<Scalar>>(data);
+  Data* d = static_cast<Data*>(data.get());
 
   if (drift_free_) {
     data->xnext.noalias() = Fx_ * x;
