@@ -20,14 +20,14 @@ using namespace crocoddyl::unittest;
 void test_check_data(DifferentialActionModelTypes::Type action_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
 
   // Run the print function
   std::ostringstream tmp;
   tmp << *model;
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
 
   BOOST_CHECK(model->checkData(data));
 }
@@ -35,14 +35,14 @@ void test_check_data(DifferentialActionModelTypes::Type action_type) {
 void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
 
   // Generating random state and control vectors
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
@@ -53,15 +53,15 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
 void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
   model->calc(data, x, u);
 
   // Checking that calc returns a cost value
@@ -69,13 +69,13 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
 }
 
 void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
-  // create the model
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed) return;
+  // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
 
   // Getting the cost value computed by calc()
   Eigen::VectorXd x = model->get_state()->rand();
@@ -107,17 +107,17 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
 void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type action_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data = model->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
 
   crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data_num_diff = model_num_diff.createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);
