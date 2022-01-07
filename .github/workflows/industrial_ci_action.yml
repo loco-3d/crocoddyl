@@ -26,7 +26,7 @@ jobs:
           # # Ubuntu 20.04, g++, Debug
           # - {name: "Focal / g++ / Debug", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           # Ubuntu 20.04, clang, Debug
-          - {ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
+          - {name: "Focal / clang / Debug", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
