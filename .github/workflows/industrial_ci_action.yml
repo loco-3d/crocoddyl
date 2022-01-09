@@ -20,7 +20,7 @@ jobs:
           # Ubuntu 20.04, clang, Release, multi-threading
           - {name: "Focal / clang / Release / Multi-threading", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
           # Format check
-          - {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0", AFTER_INSTALL_CLANG_FORMAT_CHECK: "wget https://raw.githubusercontent.com/Gepetto/linters/master/.clang-format-6.0 -O /tmp/clang_format_check/crocoddyl/.clang-format"}
+          - {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0", BEFORE_RUN_CLANG_FORMAT_CHECK: "wget https://raw.githubusercontent.com/Gepetto/linters/master/.clang-format-6.0 -O /tmp/clang_format_check/crocoddyl/.clang-format", ADDITIONAL_DEBS: wget}
           ## Working configs for Debug mode. However, tests take too long in Debug mode (~1h on a laptop).
           ## Hence, not active on GitHub Actions
           # # Ubuntu 20.04, g++, Debug
