@@ -24,6 +24,9 @@ namespace python {
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_addContact_wrap, ContactModelMultiple::addContact, 2, 3)
 
 void exposeContactMultiple() {
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated signature has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ContactItem> ContactItemPtr;
   typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
@@ -116,8 +119,6 @@ void exposeContactMultiple() {
       .add_property("nc_total", bp::make_function(&ContactModelMultiple::get_nc_total),
                     "dimension of the total contact vector")
       .add_property("nu", bp::make_function(&ContactModelMultiple::get_nu), "dimension of control vector")
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated signature has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
       .add_property("active",
                     bp::make_function(&ContactModelMultiple::get_active,
                                       deprecated<bp::return_value_policy<bp::return_by_value>>(
@@ -128,7 +129,6 @@ void exposeContactMultiple() {
                                       deprecated<bp::return_value_policy<bp::return_by_value>>(
                                           "Deprecated. Use property inactive_set")),
                     "list of names of inactive contact items")
-#pragma GCC diagnostic pop
       .add_property(
           "active_set",
           bp::make_function(&ContactModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
@@ -173,6 +173,8 @@ void exposeContactMultiple() {
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")
       .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python
