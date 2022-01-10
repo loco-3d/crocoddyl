@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,9 +12,11 @@
 #include <utility>
 #include <string>
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -114,14 +116,27 @@ void exposeContactMultiple() {
       .add_property("nc_total", bp::make_function(&ContactModelMultiple::get_nc_total),
                     "dimension of the total contact vector")
       .add_property("nu", bp::make_function(&ContactModelMultiple::get_nu), "dimension of control vector")
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated signature has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+      .add_property("active",
+                    bp::make_function(&ContactModelMultiple::get_active,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property active_set")),
+                    "list of names of active contact items")
+      .add_property("inactive",
+                    bp::make_function(&ContactModelMultiple::get_inactive,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property inactive_set")),
+                    "list of names of inactive contact items")
+#pragma GCC diagnostic pop
       .add_property(
-          "active",
-          bp::make_function(&ContactModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
-          "name of active contact items")
+          "active_set",
+          bp::make_function(&ContactModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of active contact items")
       .add_property(
-          "inactive",
-          bp::make_function(&ContactModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-          "name of inactive contact items")
+          "inactive_set",
+          bp::make_function(&ContactModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of inactive contact items")
       .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
            "Return the contact status of a given contact name.\n\n"
            ":param name: contact name")
