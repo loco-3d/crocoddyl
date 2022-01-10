@@ -48,6 +48,40 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract, public bp::wr
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
+  void commands(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+                const Eigen::Ref<const Eigen::VectorXd>& tau) {
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty("Invalid argument: "
+                   << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+    }
+    if (static_cast<std::size_t>(tau.size()) != state_->get_nv()) {
+      throw_pretty("Invalid argument: "
+                   << "tau has wrong dimension (it should be " + std::to_string(state_->get_nv()) + ")");
+    }
+    return bp::call<void>(this->get_override("commands").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)tau);
+  }
+
+  void torqueTransform(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                       const Eigen::Ref<const VectorXs>& u) {
+    if (boost::python::override torqueTransform = this->get_override("torqueTransform")) {
+      if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+        throw_pretty("Invalid argument: "
+                     << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+      }
+      if (static_cast<std::size_t>(u.size()) != nu_) {
+        throw_pretty("Invalid argument: "
+                     << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+      }
+      return bp::call<void>(torqueTransform.ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    }
+    return ActuationModelAbstract::torqueTransform(data, x, u);
+  }
+
+  void default_torqueTransform(const boost::shared_ptr<ActuationDataAbstract>& data,
+                               const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+    return this->ActuationModelAbstract::torqueTransform(data, x, u);
+  }
+
   boost::shared_ptr<ActuationDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {

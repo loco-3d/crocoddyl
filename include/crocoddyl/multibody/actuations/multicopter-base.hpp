@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,6 +66,7 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
     if (nu_ > n_rotors_) {
       tau_f_.bottomRightCorner(nu_ - n_rotors_, nu_ - n_rotors_).diagonal().setOnes();
     }
+    Mtau_ = pseudoInverse(MatrixXs(tau_f));
   }
 
   DEPRECATED("Use constructor without n_rotors",
@@ -94,9 +95,29 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
     assert_pretty(MatrixXs(data->dtau_du).isApprox(tau_f_), "dtau_du has wrong value");
   }
 
+  virtual void commands(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&,
+                        const Eigen::Ref<const VectorXs>& tau) {
+    data->u.noalias() = Mtau_ * tau;
+  }
+
+#ifndef NDEBUG
+  virtual void torqueTransform(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&,
+                               const Eigen::Ref<const VectorXs>&) {
+#else
+  virtual void torqueTransform(const boost::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                               const Eigen::Ref<const VectorXs>&) {
+#endif
+    // The torque transform has constant values which were set in createData.
+    assert_pretty(MatrixXs(data->Mtau).isApprox(Mtau_), "Mtau has wrong value");
+  }
+
   boost::shared_ptr<Data> createData() {
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du = tau_f_;
+    data->Mtau = Mtau_;
+    for (std::size_t i = 0; i < 2; ++i) {
+      data->tau_set[i] = false;
+    }
     return data;
   }
 
@@ -105,12 +126,17 @@ class ActuationModelMultiCopterBaseTpl : public ActuationModelAbstractTpl<_Scala
   void set_tauf(const Eigen::Ref<const MatrixXs>& tau_f) { tau_f_ = tau_f; }
 
  protected:
-  // Specific of multicopter
-  MatrixXs tau_f_;  // Matrix from rotors thrust to body force/moments
-  std::size_t n_rotors_;
+  MatrixXs tau_f_;        //!< Matrix from rotors thrust to body force/moments
+  MatrixXs Mtau_;         //!< Constaint torque transform from generalized torques to joint torque inputs
+  std::size_t n_rotors_;  //!< Number of rotors
 
   using Base::nu_;
   using Base::state_;
+
+#ifndef NDEBUG
+ private:
+  MatrixXs S_;
+#endif
 };
 
 template <typename Scalar>

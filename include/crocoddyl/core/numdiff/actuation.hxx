@@ -105,6 +105,24 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
 }
 
 template <typename Scalar>
+void ActuationModelNumDiffTpl<Scalar>::commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+                                                const Eigen::Ref<const VectorXs>& x,
+                                                const Eigen::Ref<const VectorXs>& tau) {
+  if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(model_->get_state()->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(tau.size()) != model_->get_state()->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "tau has wrong dimension (it should be " + std::to_string(model_->get_state()->get_nv()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+
+  model_->torqueTransform(d->data_x[0], x, tau);
+  data->u.noalias() = d->data_x[0]->Mtau * tau;
+}
+
+template <typename Scalar>
 boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > ActuationModelNumDiffTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }

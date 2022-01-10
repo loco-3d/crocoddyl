@@ -43,6 +43,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     squashing_->calc(d->squashing, u);
     actuation_->calc(d->actuation, x, d->squashing->u);
     data->tau = d->actuation->tau;
+    data->tau_set = d->actuation->tau_set;
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
@@ -53,6 +54,16 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     actuation_->calcDiff(d->actuation, x, d->squashing->u);
     data->dtau_du.noalias() = d->actuation->dtau_du * d->squashing->du_ds;
   };
+
+  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& tau) {
+    if (static_cast<std::size_t>(tau.size()) != this->state_->get_nv()) {
+      throw_pretty("Invalid argument: "
+                   << "tau has wrong dimension (it should be " + std::to_string(this->state_->get_nv()) + ")");
+    }
+    this->torqueTransform(data, x, tau);
+    data->u.noalias() = data->Mtau * tau;
+  }
 
   boost::shared_ptr<ActuationDataAbstract> createData() {
     return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
@@ -91,6 +102,7 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
   using Base::dtau_du;
   using Base::dtau_dx;
   using Base::tau;
+  using Base::tau_set;
 };
 
 }  // namespace crocoddyl
