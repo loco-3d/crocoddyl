@@ -10,7 +10,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_VECTOR_CONVERTER_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_UTILS_VECTOR_CONVERTER_HPP_
 
-#include <Eigen/Dense>
 #include <vector>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
@@ -51,19 +50,17 @@ struct list_to_vector {
 
   /** @brief Check if PyObject is iterable. */
   static void* convertible(PyObject* object) {
-    namespace python = boost::python;
-
     // Check if it is a list
     if (!PyList_Check(object)) return 0;
 
     // Retrieve the underlying list
     bp::object bp_obj(bp::handle<>(bp::borrowed(object)));
-    python::list bp_list(bp_obj);
-    python::ssize_t list_size = python::len(bp_list);
+    bp::list bp_list(bp_obj);
+    bp::ssize_t list_size = bp::len(bp_list);
 
     // Check if all the elements contained in the current vector is of type T
-    for (python::ssize_t k = 0; k < list_size; ++k) {
-      python::extract<typename Container::value_type> elt(bp_list[k]);
+    for (bp::ssize_t k = 0; k < list_size; ++k) {
+      bp::extract<typename Container::value_type> elt(bp_list[k]);
       if (!elt.check()) return 0;
     }
     return object;
@@ -77,31 +74,29 @@ struct list_to_vector {
    * i.e. Container(begin, end)
    */
   static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
-    namespace python = boost::python;
     // Object is a borrowed reference, so create a handle indicting it is
     // borrowed for proper reference counting.
-    python::handle<> handle(python::borrowed(object));
+    bp::handle<> handle(bp::borrowed(object));
 
     // Obtain a handle to the memory block that the converter has allocated
     // for the C++ type.
-    typedef python::converter::rvalue_from_python_storage<Container> storage_type;
+    typedef bp::converter::rvalue_from_python_storage<Container> storage_type;
     void* storage = reinterpret_cast<storage_type*>(data)->storage.bytes;
 
-    typedef python::stl_input_iterator<typename Container::value_type> iterator;
+    typedef bp::stl_input_iterator<typename Container::value_type> iterator;
 
     // Allocate the C++ type into the converter's memory block, and assign
     // its handle to the converter's convertible variable.  The C++
     // container is populated by passing the begin and end iterators of
     // the python object to the container's constructor.
-    new (storage) Container(iterator(python::object(handle)),  // begin
-                            iterator());                       // end
+    new (storage) Container(iterator(bp::object(handle)),  // begin
+                            iterator());                   // end
     data->convertible = storage;
   }
 
   static boost::python::list tolist(Container& self) {
-    namespace python = boost::python;
-    typedef python::iterator<Container> iterator;
-    python::list list(iterator()(self));
+    typedef bp::iterator<Container> iterator;
+    bp::list list(iterator()(self));
     return list;
   }
 };
