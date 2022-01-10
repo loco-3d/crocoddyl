@@ -28,16 +28,16 @@ void exposeContactMultiple() {
   typedef boost::shared_ptr<ContactItem> ContactItemPtr;
   typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
   StdMapPythonVisitor<std::string, ContactItemPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ContactItemPtr> >,
+                      std::allocator<std::pair<const std::string, ContactItemPtr>>,
                       true>::expose("StdMap_ContactItem");
   StdMapPythonVisitor<std::string, ContactDataPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ContactDataPtr> >,
+                      std::allocator<std::pair<const std::string, ContactDataPtr>>,
                       true>::expose("StdMap_ContactData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactItem> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactItem>>();
 
   bp::class_<ContactItem>("ContactItem", "Describe a contact item.\n\n",
-                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
+                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool>>(
                               bp::args("self", "name", "contact", "active"),
                               "Initialize the contact item.\n\n"
                               ":param name: contact name\n"
@@ -49,10 +49,10 @@ void exposeContactMultiple() {
       .def_readwrite("active", &ContactItem::active, "contact status")
       .def(PrintableVisitor<ContactItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple>>();
 
   bp::class_<ContactModelMultiple>("ContactModelMultiple",
-                                   bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t> >(
+                                   bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t>>(
                                        bp::args("self", "state", "nu"),
                                        "Initialize the multiple contact model.\n\n"
                                        ":param state: state of the multibody system\n"
@@ -142,7 +142,7 @@ void exposeContactMultiple() {
            ":param name: contact name")
       .def(PrintableVisitor<ContactModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple>>();
 
   bp::class_<ContactDataMultiple>(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",
@@ -150,7 +150,7 @@ void exposeContactMultiple() {
           bp::args("self", "model", "data"),
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::Jc),
                     "contact Jacobian in frame coordinate (memory defined for active and inactive contacts)")
