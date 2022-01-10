@@ -44,6 +44,13 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_solvers
 )
 
+# test_diff_actions fails with Clang, cf. https://github.com/loco-3d/crocoddyl/issues/964
+# It's difficult to identify the source - it appears to be a double free from inside boost's unittest framework.
+# Hence, we will remove it for now, it's still tested with g++:
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  LIST(REMOVE_ITEM ${PROJECT_NAME}_CPP_TESTS test_diff_actions)
+ENDIF()
+
 IF(BUILD_WITH_CODEGEN_SUPPORT)
   SET(${PROJECT_NAME}_CODEGEN_CPP_TESTS
     test_codegen

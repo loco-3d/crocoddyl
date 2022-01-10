@@ -10,7 +10,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_MAP_CONVERTER_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_UTILS_MAP_CONVERTER_HPP_
 
-#include <Eigen/Dense>
 #include <map>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
@@ -49,8 +48,6 @@ struct dict_to_map {
 
   /// Check if conversion is possible
   static void* convertible(PyObject* object) {
-    namespace python = boost::python;
-
     // Check if it is a list
     if (!PyObject_GetIter(object)) return 0;
     return object;
@@ -58,14 +55,13 @@ struct dict_to_map {
 
   /// Perform the conversion
   static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
-    namespace python = boost::python;
     // convert the PyObject pointed to by `object` to a boost::python::dict
-    python::handle<> handle(python::borrowed(object));  // "smart ptr"
-    python::dict dict(handle);
+    bp::handle<> handle(bp::borrowed(object));  // "smart ptr"
+    bp::dict dict(handle);
 
     // get a pointer to memory into which we construct the map
     // this is provided by the Python runtime
-    typedef python::converter::rvalue_from_python_storage<Container> storage_type;
+    typedef bp::converter::rvalue_from_python_storage<Container> storage_type;
     void* storage = reinterpret_cast<storage_type*>(data)->storage.bytes;
 
     // placement-new allocate the result
@@ -73,24 +69,24 @@ struct dict_to_map {
 
     // iterate over the dictionary `dict`, fill up the map `map`
     Container& map(*(static_cast<Container*>(storage)));
-    python::list keys(dict.keys());
-    int keycount(static_cast<int>(python::len(keys)));
+    bp::list keys(dict.keys());
+    int keycount(static_cast<int>(bp::len(keys)));
     for (int i = 0; i < keycount; ++i) {
       // get the key
-      python::object keyobj(keys[i]);
-      python::extract<typename Container::key_type> keyproxy(keyobj);
+      bp::object keyobj(keys[i]);
+      bp::extract<typename Container::key_type> keyproxy(keyobj);
       if (!keyproxy.check()) {
         PyErr_SetString(PyExc_KeyError, "Bad key type");
-        python::throw_error_already_set();
+        bp::throw_error_already_set();
       }
       typename Container::key_type key = keyproxy();
 
       // get the corresponding value
-      python::object valobj(dict[keyobj]);
-      python::extract<typename Container::mapped_type> valproxy(valobj);
+      bp::object valobj(dict[keyobj]);
+      bp::extract<typename Container::mapped_type> valproxy(valobj);
       if (!valproxy.check()) {
         PyErr_SetString(PyExc_ValueError, "Bad value type");
-        python::throw_error_already_set();
+        bp::throw_error_already_set();
       }
       typename Container::mapped_type val = valproxy();
       map[key] = val;
@@ -101,8 +97,7 @@ struct dict_to_map {
   }
 
   static boost::python::dict todict(Container& self) {
-    namespace python = boost::python;
-    python::dict dict;
+    bp::dict dict;
     typename Container::const_iterator it;
     for (it = self.begin(); it != self.end(); ++it) {
       dict.setdefault(it->first, it->second);

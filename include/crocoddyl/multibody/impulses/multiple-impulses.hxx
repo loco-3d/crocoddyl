@@ -24,7 +24,7 @@ void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
       impulses_.insert(std::make_pair(name, boost::make_shared<ImpulseItem>(name, impulse, active)));
   if (ret.second == false) {
-    std::cout << "Warning: we couldn't add the " << name << " impulse item, it already existed." << std::endl;
+    std::cerr << "Warning: we couldn't add the " << name << " impulse item, it already existed." << std::endl;
   } else if (active) {
     nc_ += impulse->get_nc();
     nc_total_ += impulse->get_nc();
@@ -49,7 +49,7 @@ void ImpulseModelMultipleTpl<Scalar>::removeImpulse(const std::string& name) {
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
     inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
-    std::cout << "Warning: we couldn't remove the " << name << " impulse item, it doesn't exist." << std::endl;
+    std::cerr << "Warning: we couldn't remove the " << name << " impulse item, it doesn't exist." << std::endl;
   }
 }
 
@@ -72,7 +72,7 @@ void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(const std::string& nam
     }
     it->second->active = active;
   } else {
-    std::cout << "Warning: we couldn't change the status of the " << name << " impulse item, it doesn't exist."
+    std::cerr << "Warning: we couldn't change the status of the " << name << " impulse item, it doesn't exist."
               << std::endl;
   }
 }
@@ -278,7 +278,7 @@ bool ImpulseModelMultipleTpl<Scalar>::getImpulseStatus(const std::string& name) 
   if (it != impulses_.end()) {
     return it->second->active;
   } else {
-    std::cout << "Warning: we couldn't get the status of the " << name << " impulse item, it doesn't exist."
+    std::cerr << "Warning: we couldn't get the status of the " << name << " impulse item, it doesn't exist."
               << std::endl;
     return false;
   }

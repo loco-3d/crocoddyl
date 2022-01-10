@@ -10,7 +10,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_COST_BASE_HPP_
 
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

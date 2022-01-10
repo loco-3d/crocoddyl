@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,9 +12,11 @@
 #include <utility>
 #include <string>
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -22,20 +24,23 @@ namespace python {
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_addContact_wrap, ContactModelMultiple::addContact, 2, 3)
 
 void exposeContactMultiple() {
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated signature has been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ContactItem> ContactItemPtr;
   typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
   StdMapPythonVisitor<std::string, ContactItemPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ContactItemPtr> >,
+                      std::allocator<std::pair<const std::string, ContactItemPtr>>,
                       true>::expose("StdMap_ContactItem");
   StdMapPythonVisitor<std::string, ContactDataPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ContactDataPtr> >,
+                      std::allocator<std::pair<const std::string, ContactDataPtr>>,
                       true>::expose("StdMap_ContactData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactItem> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactItem>>();
 
   bp::class_<ContactItem>("ContactItem", "Describe a contact item.\n\n",
-                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool> >(
+                          bp::init<std::string, boost::shared_ptr<ContactModelAbstract>, bp::optional<bool>>(
                               bp::args("self", "name", "contact", "active"),
                               "Initialize the contact item.\n\n"
                               ":param name: contact name\n"
@@ -47,10 +52,10 @@ void exposeContactMultiple() {
       .def_readwrite("active", &ContactItem::active, "contact status")
       .def(PrintableVisitor<ContactItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple>>();
 
   bp::class_<ContactModelMultiple>("ContactModelMultiple",
-                                   bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t> >(
+                                   bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t>>(
                                        bp::args("self", "state", "nu"),
                                        "Initialize the multiple contact model.\n\n"
                                        ":param state: state of the multibody system\n"
@@ -114,20 +119,30 @@ void exposeContactMultiple() {
       .add_property("nc_total", bp::make_function(&ContactModelMultiple::get_nc_total),
                     "dimension of the total contact vector")
       .add_property("nu", bp::make_function(&ContactModelMultiple::get_nu), "dimension of control vector")
+      .add_property("active",
+                    bp::make_function(&ContactModelMultiple::get_active,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property active_set")),
+                    "list of names of active contact items")
+      .add_property("inactive",
+                    bp::make_function(&ContactModelMultiple::get_inactive,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property inactive_set")),
+                    "list of names of inactive contact items")
       .add_property(
-          "active",
-          bp::make_function(&ContactModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
-          "name of active contact items")
+          "active_set",
+          bp::make_function(&ContactModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of active contact items")
       .add_property(
-          "inactive",
-          bp::make_function(&ContactModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-          "name of inactive contact items")
+          "inactive_set",
+          bp::make_function(&ContactModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of inactive contact items")
       .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
            "Return the contact status of a given contact name.\n\n"
            ":param name: contact name")
       .def(PrintableVisitor<ContactModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple>>();
 
   bp::class_<ContactDataMultiple>(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",
@@ -135,7 +150,7 @@ void exposeContactMultiple() {
           bp::args("self", "model", "data"),
           "Create multicontact data.\n\n"
           ":param model: multicontact model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .add_property("Jc", bp::make_getter(&ContactDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataMultiple::Jc),
                     "contact Jacobian in frame coordinate (memory defined for active and inactive contacts)")
@@ -158,6 +173,8 @@ void exposeContactMultiple() {
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")
       .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates");
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

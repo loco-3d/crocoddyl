@@ -1,19 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
+// Copyright (C) 2022, University of Oxford
 // Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright (C) 2020, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_VECTOR_CONVERTER_HPP_
-#define BINDINGS_PYTHON_CROCODDYL_UTILS_VECTOR_CONVERTER_HPP_
+#ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_SET_CONVERTER_HPP_
+#define BINDINGS_PYTHON_CROCODDYL_UTILS_SET_CONVERTER_HPP_
 
-#include <vector>
+#include <set>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/indexing_suite.hpp>
+
+#include <iostream>
 
 namespace crocoddyl {
 namespace python {
@@ -21,48 +24,52 @@ namespace python {
 namespace bp = boost::python;
 
 /**
- * @brief Create a pickle interface for the std::vector
+ * @brief Create a pickle interface for the std::set
  *
- * @param[in] Container  Vector type to be pickled
+ * @param[in] Container  Set type to be pickled
  * \sa Pickle
  */
 template <typename Container>
-struct PickleVector : boost::python::pickle_suite {
+struct PickleSet : boost::python::pickle_suite {
   static boost::python::tuple getinitargs(const Container&) { return boost::python::make_tuple(); }
   static boost::python::tuple getstate(boost::python::object op) {
-    return boost::python::make_tuple(boost::python::list(boost::python::extract<const Container&>(op)()));
+    bp::list list;
+    const Container& ret = boost::python::extract<const Container&>(op);
+    for (const auto& it : ret) {
+      list.append(it);
+    }
+    return boost::python::make_tuple(list);
   }
   static void setstate(boost::python::object op, boost::python::tuple tup) {
     Container& o = boost::python::extract<Container&>(op)();
     boost::python::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
-    o.insert(o.begin(), begin, end);
+    o.insert(begin, end);
   }
 };
 
 /** @brief Type that allows for registration of conversions from python iterable types. */
 template <typename Container>
-struct list_to_vector {
+struct set_to_set {
   /** @note Registers converter from a python iterable type to the provided type. */
   static void register_converter() {
-    boost::python::converter::registry::push_back(&list_to_vector::convertible, &list_to_vector::construct,
+    boost::python::converter::registry::push_back(&set_to_set::convertible, &set_to_set::construct,
                                                   boost::python::type_id<Container>());
   }
 
   /** @brief Check if PyObject is iterable. */
   static void* convertible(PyObject* object) {
-    // Check if it is a list
-    if (!PyList_Check(object)) return 0;
+    // Check if it is a set
+    if (!PySet_Check(object)) return 0;
 
-    // Retrieve the underlying list
-    bp::object bp_obj(bp::handle<>(bp::borrowed(object)));
-    bp::list bp_list(bp_obj);
-    bp::ssize_t list_size = bp::len(bp_list);
-
-    // Check if all the elements contained in the current vector is of type T
-    for (bp::ssize_t k = 0; k < list_size; ++k) {
-      bp::extract<typename Container::value_type> elt(bp_list[k]);
+    PyObject* iter = PyObject_GetIter(object);
+    PyObject* item;
+    while ((item = PyIter_Next(iter))) {
+      bp::extract<typename Container::value_type> elt(iter);
+      // Py_DECREF(item);
       if (!elt.check()) return 0;
     }
+    Py_DECREF(iter);
+
     return object;
   }
 
@@ -70,8 +77,6 @@ struct list_to_vector {
    *
    * Container Concept requirements:
    *    * Container::value_type is CopyConstructable.
-   *    * Container can be constructed and populated with two iterators.
-   * i.e. Container(begin, end)
    */
   static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
     // Object is a borrowed reference, so create a handle indicting it is
@@ -94,40 +99,45 @@ struct list_to_vector {
     data->convertible = storage;
   }
 
-  static boost::python::list tolist(Container& self) {
-    typedef bp::iterator<Container> iterator;
-    bp::list list(iterator()(self));
-    return list;
+  static boost::python::object toset(Container& self) {
+    PyObject* set = PySet_New(NULL);
+    for (auto it = self.begin(); it != self.end(); ++it) {
+      PySet_Add(set, bp::object(*it).ptr());
+    }
+    return bp::object(bp::handle<>(set));
   }
 };
 
 /**
- * @brief Expose an std::vector from a type given as template argument.
+ * @brief Expose an std::set from a type given as template argument.
  *
- * @param[in] T          Type to expose as std::vector<T>.
- * @param[in] Allocator  Type for the Allocator in std::vector<T,Allocator>.
- * @param[in] NoProxy    When set to false, the elements will be copied when returned to Python.
+ * @param[in] T          Type to expose as std::set<T>.
+ * @param[in] Compare    Type for the comparison function in
+ * std::set<T,Compare,Allocator>.
+ * @param[in] Allocator  Type for the Allocator in
+ * std::set<T,Compare,Allocator>.
+ * @param[in] NoProxy    When set to false, the elements will be copied when
+ * returned to Python.
  */
-template <class T, class Allocator = std::allocator<T>, bool NoProxy = false>
-struct StdVectorPythonVisitor
-    : public boost::python::vector_indexing_suite<typename std::vector<T, Allocator>, NoProxy>,
-      public list_to_vector<std::vector<T, Allocator> > {
-  typedef std::vector<T, Allocator> Container;
-  typedef list_to_vector<Container> FromPythonListConverter;
+template <class T, class Compare = std::less<T>, class Allocator = std::allocator<T>, bool NoProxy = false>
+struct StdSetPythonVisitor : public set_to_set<std::set<T, Compare, Allocator>> {
+  typedef std::set<T, Compare, Allocator> Container;
+  typedef set_to_set<Container> FromPythonSetConverter;
 
   static void expose(const std::string& class_name, const std::string& doc_string = "") {
     namespace bp = boost::python;
 
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
-        .def(StdVectorPythonVisitor())
-        .def("tolist", &FromPythonListConverter::tolist, bp::arg("self"), "Returns the std::vector as a Python list.")
-        .def_pickle(PickleVector<Container>());
+        // .def(StdSetPythonVisitor());  // TODO: Needs an indexing_suite for
+        // set
+        .def("toset", &FromPythonSetConverter::toset, bp::arg("self"), "Returns the std::set as a Python set.")
+        .def_pickle(PickleSet<Container>());
     // Register conversion
-    FromPythonListConverter::register_converter();
+    FromPythonSetConverter::register_converter();
   }
 };
 
 }  // namespace python
 }  // namespace crocoddyl
 
-#endif  // BINDINGS_PYTHON_CROCODDYL_UTILS_VECTOR_CONVERTER_HPP_
+#endif  // BINDINGS_PYTHON_CROCODDYL_UTILS_SET_CONVERTER_HPP_
