@@ -45,6 +45,37 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type, StateModelT
   BOOST_CHECK(static_cast<std::size_t>(data->tau.size()) == model->get_state()->get_nv());
 }
 
+void test_actuationSet(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
+  // create the model
+  ActuationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model = factory.create(actuation_type, state_type);
+
+  // create the corresponding data object and set the cost to nan
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
+
+  crocoddyl::ActuationModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff = model_num_diff.createData();
+
+  // Generating random values for the state and control
+  Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+
+  // Computing the selection matrix
+  model->calc(data, x, u);
+  model_num_diff.calc(data_num_diff, x, u);
+  model_num_diff.calcDiff(data_num_diff, x, u);
+
+  const std::size_t nv = model->get_state()->get_nv();
+  Eigen::MatrixXd S = data_num_diff->dtau_du * pseudoInverse(data_num_diff->dtau_du);
+  for (std::size_t k = 0; k < nv; ++k) {
+    if (fabs(S(k, k)) < std::numeric_limits<double>::epsilon()) {
+      BOOST_CHECK(data->tau_set[k] == false);
+    } else {
+      BOOST_CHECK(data->tau_set[k] == true);
+    }
+  }
+}
+
 void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuation_type,
                                               StateModelTypes::Type state_type) {
   // create the model
@@ -85,6 +116,54 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
 }
 
+void test_commands(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
+  // create the model
+  ActuationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model = factory.create(actuation_type, state_type);
+
+  // create the corresponding data object and set the cost to nan
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
+
+  crocoddyl::ActuationModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff = model_num_diff.createData();
+
+  // Generating random values for the state and control
+  Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd& tau = Eigen::VectorXd::Random(model->get_state()->get_nv());
+
+  // Computing the actuation commands
+  model->commands(data, x, tau);
+  model_num_diff.commands(data_num_diff, x, tau);
+
+  // Checking the joint torques
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->u - data_num_diff->u).isZero(tol));
+}
+
+void test_torqueTransform(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
+  // create the model
+  ActuationModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model = factory.create(actuation_type, state_type);
+
+  // create the corresponding data object and set the cost to nan
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
+
+  crocoddyl::ActuationModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff = model_num_diff.createData();
+
+  // Generating random values for the state and control
+  Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+
+  // Computing the torque transform
+  model->torqueTransform(data, x, u);
+  model_num_diff.torqueTransform(data_num_diff, x, u);
+
+  // Checking the torque transform
+  double tol = sqrt(model_num_diff.get_disturbance());
+  BOOST_CHECK((data->Mtau - data_num_diff->Mtau).isZero(tol));
+}
+
 //----------------------------------------------------------------------------//
 
 void register_actuation_model_unit_tests(ActuationModelTypes::Type actuation_type, StateModelTypes::Type state_type) {
@@ -94,7 +173,10 @@ void register_actuation_model_unit_tests(ActuationModelTypes::Type actuation_typ
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_construct_data, actuation_type, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_tau, actuation_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_actuationSet, actuation_type, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, actuation_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_commands, actuation_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_torqueTransform, actuation_type, state_type)));
   framework::master_test_suite().add(ts);
 }
 

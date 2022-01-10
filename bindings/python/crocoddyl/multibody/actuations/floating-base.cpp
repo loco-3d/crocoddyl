@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,11 +24,11 @@ void exposeActuationFloatingBase() {
                                                    "Initialize the floating-base actuation model.\n\n"
                                                    ":param state: state of multibody system"))
       .def("calc", &ActuationModelFloatingBase::calc, bp::args("self", "data", "x", "u"),
-           "Compute the floating-base actuation signal from the control input u.\n\n"
+           "Compute the floating-base actuation signal and actuation set from the joint torque input u.\n\n"
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state point (dim. state.nx)\n"
-           ":param u: control input (dim. nu)")
+           ":param u: joint torque input (dim. nu)")
       .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the floating-base actuation model.\n\n"
            "It computes the partial derivatives of the floating-base actuation. It assumes that calc\n"
@@ -36,7 +36,19 @@ void exposeActuationFloatingBase() {
            "defined in createData. The derivatives are constant, so we don't write again these values.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state point (dim. state.nx)\n"
-           ":param u: control input (dim. nu)")
+           ":param u: joint torque input (dim. nu)")
+      .def("commands", &ActuationModelFloatingBase::commands, bp::args("self", "data", "x", "tau"),
+           "Compute the joint torque commands from the generalized torques.\n\n"
+           "It stores the results in data.u.\n"
+           ":param data: actuation data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param tau: generalized torques (dim state.nv)")
+      .def("torqueTransform", &ActuationModelFloatingBase::torqueTransform, bp::args("self", "data", "x", "tau"),
+           "Compute the torque transform from generalized torques to joint torque inputs.\n\n"
+           "It stores the results in data.Mtau.\n"
+           ":param data: actuation data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param tau: generalized torques (dim state.nv)")
       .def("createData", &ActuationModelFloatingBase::createData, bp::args("self"),
            "Create the floating-base actuation data.\n\n"
            "Each actuation model (AM) has its own data that needs to be allocated.\n"
