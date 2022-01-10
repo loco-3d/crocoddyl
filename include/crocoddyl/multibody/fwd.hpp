@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -323,6 +323,9 @@ template <typename Scalar>
 struct DataCollectorActMultibodyTpl;
 
 template <typename Scalar>
+struct DataCollectorJointActMultibodyTpl;
+
+template <typename Scalar>
 struct DataCollectorContactTpl;
 
 template <typename Scalar>
@@ -330,6 +333,9 @@ struct DataCollectorMultibodyInContactTpl;
 
 template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInContactTpl;
 
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
@@ -502,9 +508,11 @@ typedef StateMultibodyTpl<double> StateMultibody;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
+typedef DataCollectorJointActMultibodyTpl<double> DataCollectorJointActMultibody;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
+typedef DataCollectorJointActMultibodyInContactTpl<double> DataCollectorJointActMultibodyInContact;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
 

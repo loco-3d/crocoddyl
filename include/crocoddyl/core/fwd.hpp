@@ -172,12 +172,22 @@ struct SquashingDataAbstractTpl;
 template <typename Scalar>
 class SquashingModelSmoothSatTpl;
 
+// joint
+template <typename Scalar>
+struct JointDataAbstractTpl;
+
 // data collector
 template <typename Scalar>
 struct DataCollectorAbstractTpl;
 
 template <typename Scalar>
 struct DataCollectorActuationTpl;
+
+template <typename Scalar>
+struct DataCollectorJointTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActuationTpl;
 
 // residual
 template <typename Scalar>
@@ -342,8 +352,12 @@ typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
 typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
 typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 
+typedef JointDataAbstractTpl<double> JointDataAbstract;
+
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
+typedef DataCollectorJointTpl<double> DataCollectorJoint;
+typedef DataCollectorJointActuationTpl<double> DataCollectorJointActuation;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
