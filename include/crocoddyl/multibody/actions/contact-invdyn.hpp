@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Pisa
+// Copyright (C) 2021-2022, University of Edinburgh, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,75 +28,6 @@ namespace crocoddyl {
  * cost and constraint functions are implemented in `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively.
  * The acceleration, torques and contact forces are decision variables defined as the control inputs, and the RNEA
  * and contact constraint are under the name `rnea` and its frame name, thus the user is not allow to use it.
- *
- * In Crocoddyl, a differential action model combines dynamics, cost and constraints models. We can use it in each node
- * of our optimal control problem thanks to dedicated integration rules (e.g. `IntegratedActionModelEulerTpl` or
- * `IntegratedActionModelRK4Tpl`). These integrated action models produces action models (`ActionModelAbstractTpl`).
- * Thus, every time that we want describe a problem, we need to provide ways of computing the dynamics, cost,
- * constraints functions and their derivatives. All these is described inside the differential action model.
- *
- * As described in `DifferentialActionModelAbstractTpl`, the differential action model is the time-continuous version
- * of an action model, i.e.,
- * \f[
- * \begin{aligned}
- * &\dot{\mathbf{v}} = \mathbf{f}(\mathbf{q}, \mathbf{v}, \mathbf{u}), &\textrm{(dynamics)}\\
- * &l(\mathbf{q}, \mathbf{v},\mathbf{u}) = \int_0^{\delta t} a(\mathbf{r}(\mathbf{q}, \mathbf{v},\mathbf{u}))\,dt,
- * &\textrm{(cost)}\\
- * &\mathbf{g}(\mathbf{q}, \mathbf{v},\mathbf{u})<\mathbf{0}, &\textrm{(inequality constraint)}\\
- * &\mathbf{h}(\mathbf{q}, \mathbf{v},\mathbf{u})=\mathbf{0}, &\textrm{(equality constraint)}
- * \end{aligned}
- * \f]
- * where
- *  - the configuration \f$\mathbf{q}\in\mathcal{Q}\f$ lies in the configuration manifold described with a `nq`-tuple,
- *  - the velocity \f$\mathbf{v}\in T_{\mathbf{q}}\mathcal{Q}\f$ its a tangent vector to this manifold with `nv`
- * dimension,
- *  - the control input \f$\mathbf{u}= (\mathbf{a},\mathbf{\tau}, \boldsymbold{\lambda}) \in\mathbb{R}^{nu+nv}\f$ is an
- Euclidean vector,
- *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
- * `ActivationModelAbstractTpl`),
- *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
- * equality vector functions, respectively.
- * Both configuration and velocity describe the system space \f$\mathbf{x}=(\mathbf{q}, \mathbf{v})\in\mathbf{X}\f$
- * which lies in the state manifold. Note that the acceleration \f$\dot{\mathbf{v}}\in T_{\mathbf{q}}\mathcal{Q}\f$
- * lies also in the tangent space of the configuration manifold.
-
- * The computation of these equations are carrying out inside `calc()` function. In short, this function computes
- * the cost and constraints values (also called constraints violations).
- *
- * However, during numerical optimization, we also need to run backward passes of the differential action model. These
- * calculations are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the
- * differential action model, i.e.:
- * \f[
- * \begin{aligned}
- * &\delta\dot{\mathbf{v}} =
- * \mathbf{f_{q}}\delta\mathbf{q}+\mathbf{f_{v}}\delta\mathbf{v}+\mathbf{f_{u}}\delta\mathbf{u}, &\textrm{(dynamics)}\\
- * &l(\delta\mathbf{q},\delta\mathbf{v},\delta\mathbf{u}) = \begin{bmatrix}1 \\ \delta\mathbf{q} \\ \delta\mathbf{v} \\
- * \delta\mathbf{u}\end{bmatrix}^T
- * \begin{bmatrix}0 & \mathbf{l_q}^T & \mathbf{l_v}^T & \mathbf{l_u}^T \\ \mathbf{l_q} & \mathbf{l_{qq}} &
- * \mathbf{l_{qv}} & \mathbf{l_{uq}}^T \\
- * \mathbf{l_v} & \mathbf{l_{vq}} & \mathbf{l_{vv}} & \mathbf{l_{uv}}^T \\
- * \mathbf{l_u} & \mathbf{l_{uq}} & \mathbf{l_{uv}} & \mathbf{l_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{q}
- * \\ \delta\mathbf{v} \\
- * \delta\mathbf{u}\end{bmatrix}, &\textrm{(cost)}\\
- * &\mathbf{g_q}\delta\mathbf{q}+\mathbf{g_v}\delta\mathbf{v}+\mathbf{g_u}\delta\mathbf{u}\leq\mathbf{0},
- * &\textrm{(inequality constraints)}\\
- * &\mathbf{h_q}\delta\mathbf{q}+\mathbf{h_v}\delta\mathbf{v}+\mathbf{h_u}\delta\mathbf{u}=\mathbf{0},
- * &\textrm{(equality constraints)} \end{aligned} \f] where
- *  - \f$\mathbf{f_x}=(\mathbf{f_q};\,\, \mathbf{f_v})\in\mathbb{R}^{nv\times ndx}\f$ and
- * \f$\mathbf{f_u}\in\mathbb{R}^{nv\times nv+nu}\f$ are the Jacobians of the dynamics and in this case these are
- constant matrices,
- *  - \f$\mathbf{l_x}=(\mathbf{l_q};\,\, \mathbf{l_v})\in\mathbb{R}^{ndx}\f$ and
- \f$\mathbf{l_u}\in\mathbb{R}^{nv+nu}\f$
- * are the Jacobians of the cost function,
- *  - \f$\mathbf{l_{xx}}=(\mathbf{l_{qq}}\,\, \mathbf{l_{qv}};\,\, \mathbf{l_{vq}}\,
- * \mathbf{l_{vv}})\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}=(\mathbf{l_q};\,\,
- * \mathbf{l_v})\in\mathbb{R}^{ndx\times nv+nu}\f$ and \f$\mathbf{l_{uu}}\in\mathbb{R}^{{nv+nu} \times {nv+nu}}\f$ are
- * the Hessians
- * of the cost function,
- *  - \f$\mathbf{g_x}=(\mathbf{g_q};\,\, \mathbf{g_v})\in\mathbb{R}^{ng\times ndx}\f$ and
- * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times {nv+nu}}\f$ are the Jacobians of the inequality constraints, and
- *  - \f$\mathbf{h_x}=(\mathbf{h_q};\,\, \mathbf{h_v})\in\mathbb{R}^{nh\times ndx}\f$ and
- * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times {mv+nu}}\f$ are the Jacobians of the equality constraints.
  *
  * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
@@ -168,8 +99,8 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the derivatives of the dynamics, cost and constraint functions
@@ -182,8 +113,8 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &u);
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the contact inverse-dynamics data
@@ -195,7 +126,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   /**
    * @brief Checks that a specific data belongs to the contact inverse-dynamics model
    */
-  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract> &data);
+  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
@@ -209,41 +140,41 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    * @param[in] maxiter  Maximum allowed number of iterations (default 100)
    * @param[in] tol      Tolerance (default 1e-9)
    */
-  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract> &data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs> &x, const std::size_t maxiter = 100,
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
 
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract> &get_actuation() const;
+  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
 
   /**
    * @brief Return the contact model
    */
-  const boost::shared_ptr<ContactModelMultiple> &get_contacts() const;
+  const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum> &get_costs() const;
+  const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model
    */
-  const boost::shared_ptr<ConstraintModelManager> &get_constraints() const;
+  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
    */
-  pinocchio::ModelTpl<Scalar> &get_pinocchio() const;
+  pinocchio::ModelTpl<Scalar>& get_pinocchio() const;
 
   /**
    * @brief Print relevant information of the contact inverse-dynamics model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream &os) const;
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::ng_;     //!< Number of inequality constraints
@@ -252,12 +183,12 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   using Base::state_;  //!< Model of the state
 
  private:
-  void init(const boost::shared_ptr<StateMultibody> &state);
+  void init(const boost::shared_ptr<StateMultibody>& state);
   boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
   boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
   boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar> &pinocchio_;                 //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
 
  public:
   /**
@@ -305,10 +236,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
-                      const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+                      const Eigen::Ref<const VectorXs>&) {
+      typename Data::ResidualDataRnea* d = static_cast<typename Data::ResidualDataRnea*>(data.get());
       data->r = d->pinocchio->tau - d->actuation->tau;
     }
 
@@ -319,10 +249,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
-                          const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataRnea> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataRnea>(data);
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+                          const Eigen::Ref<const VectorXs>&) {
+      typename Data::ResidualDataRnea* d = static_cast<typename Data::ResidualDataRnea*>(data.get());
       const std::size_t nv = state_->get_nv();
       data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
       data->Rx.rightCols(nv) = d->pinocchio->dtau_dv;
@@ -337,7 +266,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      *
      * @return RNEA residual data
      */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data) {
+    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
       return boost::allocate_shared<typename Data::ResidualDataRnea>(
           Eigen::aligned_allocator<typename Data::ResidualDataRnea>(), this, data);
     }
@@ -347,7 +276,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      *
      * @param[out] os  Output stream object
      */
-    virtual void print(std::ostream &os) const {
+    virtual void print(std::ostream& os) const {
       os << "ResidualModelRnea {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
          << "nc=" << nc_;
     }
@@ -409,10 +338,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
-    void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
-              const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataContact> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataContact>(data);
+    void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+              const Eigen::Ref<const VectorXs>&) {
+      typename Data::ResidualDataContact* d = static_cast<typename Data::ResidualDataContact*>(data.get());
       d->r = d->contact->a0;
     }
 
@@ -423,10 +351,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
-    void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &,
-                  const Eigen::Ref<const VectorXs> &) {
-      const boost::shared_ptr<typename Data::ResidualDataContact> &d =
-          boost::static_pointer_cast<typename Data::ResidualDataContact>(data);
+    void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+                  const Eigen::Ref<const VectorXs>&) {
+      typename Data::ResidualDataContact* d = static_cast<typename Data::ResidualDataContact*>(data.get());
       d->Rx = d->contact->da0_dx;
       d->Ru.leftCols(state_->get_nv()) = d->contact->Jc;
     }
@@ -436,7 +363,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      *
      * @return contact-acceleration residual data
      */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data) {
+    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
       return boost::allocate_shared<typename Data::ResidualDataContact>(
           Eigen::aligned_allocator<typename Data::ResidualDataContact>(), this, data, id_);
     }
@@ -465,7 +392,7 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataContactInvDynamicsTpl(Model<Scalar> *const model)
+  explicit DifferentialActionDataContactInvDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
@@ -527,9 +454,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     typedef DataCollectorActMultibodyInContactTpl<Scalar> DataCollectorActMultibodyInContact;
 
     template <template <typename Scalar> class Model>
-    ResidualDataRnea(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
+    ResidualDataRnea(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
       // Check that proper shared data has been passed
-      DataCollectorActMultibodyInContact *d = dynamic_cast<DataCollectorActMultibodyInContact *>(shared);
+      DataCollectorActMultibodyInContact* d = dynamic_cast<DataCollectorActMultibodyInContact*>(shared);
       if (d == NULL) {
         throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibodyInContact");
       }
@@ -539,9 +466,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       contact = d->contacts.get();
     }
 
-    pinocchio::DataTpl<Scalar> *pinocchio;        //!< Pinocchio data
-    ActuationDataAbstractTpl<Scalar> *actuation;  //!< Actuation data
-    ContactDataMultipleTpl<Scalar> *contact;      //!< Contact data
+    pinocchio::DataTpl<Scalar>* pinocchio;        //!< Pinocchio data
+    ActuationDataAbstractTpl<Scalar>* actuation;  //!< Actuation data
+    ContactDataMultipleTpl<Scalar>* contact;      //!< Contact data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
@@ -559,9 +486,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
 
     template <template <typename Scalar> class Model>
-    ResidualDataContact(Model<Scalar> *const model, DataCollectorAbstract *const data, const std::size_t id)
+    ResidualDataContact(Model<Scalar>* const model, DataCollectorAbstract* const data, const std::size_t id)
         : Base(model, data) {
-      DataCollectorMultibodyInContact *d = dynamic_cast<DataCollectorMultibodyInContact *>(shared);
+      DataCollectorMultibodyInContact* d = dynamic_cast<DataCollectorMultibodyInContact*>(shared);
       if (d == NULL) {
         throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibodyInContact");
       }
@@ -574,7 +501,7 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       }
     }
 
-    ContactDataAbstractTpl<Scalar> *contact;  //!< Contact force data
+    ContactDataAbstractTpl<Scalar>* contact;  //!< Contact force data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
