@@ -29,10 +29,13 @@ struct DifferentialActionModelTypes {
   enum Type {
     DifferentialActionModelLQR,
     DifferentialActionModelLQRDriftFree,
+    DifferentialActionModelFreeFwdDynamics_Hector,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
     DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed,
+    DifferentialActionModelFreeInvDynamicsCondensed_Hector,
     DifferentialActionModelFreeInvDynamicsCondensed_TalosArm,
     DifferentialActionModelFreeInvDynamicsCondensed_TalosArm_Squashed,
+    DifferentialActionModelFreeInvDynamics_Hector,
     DifferentialActionModelFreeInvDynamics_TalosArm,
     DifferentialActionModelFreeInvDynamics_TalosArm_Squashed,
     DifferentialActionModelContactFwdDynamics_TalosArm,
@@ -74,13 +77,13 @@ class DifferentialActionModelFactory {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> create_freeFwdDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamicsCondensed> create_freeInvDynamicsCondensed(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> create_freeInvDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
