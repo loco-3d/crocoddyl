@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,10 +27,10 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   Qzz_.resize(T);
   Qxz_.resize(T);
   Quz_.resize(T);
-  k_z_.resize(T);
-  K_z_.resize(T);
-  k_hat_.resize(T);
-  K_hat_.resize(T);
+  kz_.resize(T);
+  Kz_.resize(T);
+  ks_.resize(T);
+  Ks_.resize(T);
   QuuinvHuT_.resize(T);
   Qzz_llt_.resize(T);
   Hu_lu_.resize(T);
@@ -51,10 +51,10 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
     Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
     Quz_[t] = Eigen::MatrixXd::Zero(nu, nh);
-    k_z_[t] = Eigen::VectorXd::Zero(nu);
-    K_z_[t] = Eigen::MatrixXd::Zero(nu, ndx);
-    k_hat_[t] = Eigen::VectorXd::Zero(nh);
-    K_hat_[t] = Eigen::MatrixXd::Zero(nh, ndx);
+    kz_[t] = Eigen::VectorXd::Zero(nu);
+    Kz_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    ks_[t] = Eigen::VectorXd::Zero(nh);
+    Ks_[t] = Eigen::MatrixXd::Zero(nh, ndx);
     QuuinvHuT_[t] = Eigen::MatrixXd::Zero(nu, nh);
     Qzz_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
     Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
@@ -181,10 +181,10 @@ void SolverIntro::resizeData() {
     Qzz_[t].conservativeResize(nh, nh);
     Qxz_[t].conservativeResize(ndx, nh);
     Quz_[t].conservativeResize(nu, nh);
-    k_z_[t].conservativeResize(nu);
-    K_z_[t].conservativeResize(nu, ndx);
-    k_hat_[t].conservativeResize(nh);
-    K_hat_[t].conservativeResize(nh, ndx);
+    kz_[t].conservativeResize(nu);
+    Kz_[t].conservativeResize(nu, ndx);
+    ks_[t].conservativeResize(nh);
+    Ks_[t].conservativeResize(nh, ndx);
     QuuinvHuT_[t].conservativeResize(nu, nh);
   }
   STOP_PROFILER("SolverIntro::resizeData");
@@ -213,10 +213,10 @@ double SolverIntro::calcDiff() {
           HuY_[t].noalias() = data->Hu * Y;
           HuY_lu_[t].compute(HuY_[t]);
           const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
-          k_hat_[t].noalias() = HuYinv * data->h;
-          K_hat_[t].noalias() = HuYinv * data->Hx;
-          k_z_[t].noalias() = Y * k_hat_[t];
-          K_z_[t].noalias() = Y * K_hat_[t];
+          ks_[t].noalias() = HuYinv * data->h;
+          Ks_[t].noalias() = HuYinv * data->Hx;
+          kz_[t].noalias() = Y * ks_[t];
+          Kz_[t].noalias() = Y * Ks_[t];
         }
       }
       break;
@@ -236,10 +236,10 @@ double SolverIntro::calcDiff() {
           HuY_[t].noalias() = data->Hu * Y;
           HuY_lu_[t].compute(HuY_[t]);
           const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
-          k_hat_[t].noalias() = HuYinv * data->h;
-          K_hat_[t].noalias() = HuYinv * data->Hx;
-          k_z_[t].noalias() = Y * k_hat_[t];
-          K_z_[t].noalias() = Y * K_hat_[t];
+          ks_[t].noalias() = HuYinv * data->h;
+          Ks_[t].noalias() = HuYinv * data->Hx;
+          kz_[t].noalias() = Y * ks_[t];
+          Kz_[t].noalias() = Y * Ks_[t];
         }
       }
       break;
@@ -307,8 +307,8 @@ void SolverIntro::computeGains(const std::size_t t) {
           throw_pretty("backward error");
         }
 
-        k_[t] = k_z_[t];
-        K_[t] = K_z_[t];
+        k_[t] = kz_[t];
+        K_[t] = Kz_[t];
         Eigen::Transpose<Eigen::MatrixXd> QzzinvQzu = Quz_[t].transpose();
         Qzz_llt_[t].solveInPlace(QzzinvQzu);
         Qz_[t].noalias() = Z.transpose() * Qu_[t];
@@ -316,8 +316,8 @@ void SolverIntro::computeGains(const std::size_t t) {
         Qxz_[t].noalias() = Qxu_[t] * Z;
         Eigen::Transpose<Eigen::MatrixXd> Qzx = Qxz_[t].transpose();
         Qzz_llt_[t].solveInPlace(Qzx);
-        Qz_[t].noalias() -= QzzinvQzu * k_z_[t];
-        Qzx.noalias() -= QzzinvQzu * K_z_[t];
+        Qz_[t].noalias() -= QzzinvQzu * kz_[t];
+        Qzx.noalias() -= QzzinvQzu * Kz_[t];
         k_[t].noalias() += Z * Qz_[t];
         K_[t].noalias() += Z * Qzx;
       } else {
@@ -339,12 +339,12 @@ void SolverIntro::computeGains(const std::size_t t) {
         }
         Eigen::Transpose<Eigen::MatrixXd> HuQuuinv = QuuinvHuT_[t].transpose();
         Qzz_llt_[t].solveInPlace(HuQuuinv);
-        k_hat_[t] = data->h;
-        k_hat_[t].noalias() -= data->Hu * k_[t];
-        K_hat_[t] = data->Hx;
-        K_hat_[t].noalias() -= data->Hu * K_[t];
-        k_[t].noalias() += QuuinvHuT_[t] * k_hat_[t];
-        K_[t] += QuuinvHuT_[t] * K_hat_[t];
+        ks_[t] = data->h;
+        ks_[t].noalias() -= data->Hu * k_[t];
+        Ks_[t] = data->Hx;
+        Ks_[t].noalias() -= data->Hu * K_[t];
+        k_[t].noalias() += QuuinvHuT_[t] * ks_[t];
+        K_[t] += QuuinvHuT_[t] * Ks_[t];
       }
       break;
   }
@@ -360,6 +360,26 @@ double SolverIntro::get_dPhi() const { return dPhi_; }
 double SolverIntro::get_dPhiexp() const { return dPhiexp_; }
 
 double SolverIntro::get_upsilon() const { return upsilon_; }
+
+const std::vector<std::size_t>& SolverIntro::get_Hu_rank() const { return Hu_rank_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_YZ() const { return YZ_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzz() const { return Qzz_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qxz() const { return Qxz_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Quz() const { return Quz_; }
+
+const std::vector<Eigen::VectorXd>& SolverIntro::get_Qz() const { return Qz_; }
+
+const std::vector<Eigen::VectorXd>& SolverIntro::get_kz() const { return kz_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Kz() const { return Kz_; }
+
+const std::vector<Eigen::VectorXd>& SolverIntro::get_ks() const { return ks_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Ks() const { return Ks_; }
 
 void SolverIntro::set_equality_solver(const EqualitySolverType type) { eq_solver_ = type; }
 

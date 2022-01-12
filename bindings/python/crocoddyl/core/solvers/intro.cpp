@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,28 @@ void exposeSolverIntro() {
                     "expected reduction in the merit function.")
       .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
                     "estimated penalty paramter that balances relative contribution of the cost function and equality "
-                    "constraints.");
+                    "constraints.")
+      .add_property("Hu_rank",
+                    make_function(&SolverIntro::get_Hu_rank, bp::return_value_policy<bp::copy_const_reference>()),
+                    "rank of Hu")
+      .add_property("YZ", make_function(&SolverIntro::get_YZ, bp::return_value_policy<bp::copy_const_reference>()),
+                    "span and kernel of Hu")
+      .add_property("Qzz", make_function(&SolverIntro::get_Qzz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Qzz")
+      .add_property("Qxz", make_function(&SolverIntro::get_Qxz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Qxz")
+      .add_property("Quz", make_function(&SolverIntro::get_Quz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Quz")
+      .add_property("Qz", make_function(&SolverIntro::get_Qz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Qz")
+      .add_property("Kz", make_function(&SolverIntro::get_Kz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Kz")
+      .add_property("kz", make_function(&SolverIntro::get_kz, bp::return_value_policy<bp::copy_const_reference>()),
+                    "kz")
+      .add_property("Ks", make_function(&SolverIntro::get_Ks, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Ks")
+      .add_property("ks", make_function(&SolverIntro::get_ks, bp::return_value_policy<bp::copy_const_reference>()),
+                    "ks");
 }
 
 }  // namespace python
