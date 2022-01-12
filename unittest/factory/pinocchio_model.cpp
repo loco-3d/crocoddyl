@@ -31,6 +31,9 @@ const std::vector<PinocchioModelTypes::Type> PinocchioModelTypes::all(PinocchioM
 
 std::ostream& operator<<(std::ostream& os, PinocchioModelTypes::Type type) {
   switch (type) {
+    case PinocchioModelTypes::Hector:
+      os << "Hector";
+      break;
     case PinocchioModelTypes::TalosArm:
       os << "TalosArm";
       break;
@@ -56,6 +59,10 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
   frame_name_.clear();
   frame_id_.clear();
   switch (type) {
+    case PinocchioModelTypes::Hector:
+      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hector_description/robots/quadrotor_base.urdf");
+      contact_nc_ = 0;
+      break;
     case PinocchioModelTypes::TalosArm:
       construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
                       EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", false);
@@ -120,10 +127,14 @@ void PinocchioModelFactory::construct_model(const std::string& urdf_file, const 
       pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *model_.get());
       model_->lowerPositionLimit.segment<7>(0).fill(-1.);
       model_->upperPositionLimit.segment<7>(0).fill(1.);
-      pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      if (srdf_file.size() != 0) {
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      }
     } else {
       pinocchio::urdf::buildModel(urdf_file, *model_.get());
-      pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      if (srdf_file.size() != 0) {
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+      }
     }
   } else {
     pinocchio::buildModels::humanoidRandom(*model_.get(), free_flyer);

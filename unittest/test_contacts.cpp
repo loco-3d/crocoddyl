@@ -204,7 +204,7 @@ void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, Pin
 
 bool init_function() {
   for (size_t contact_type = 0; contact_type < ContactModelTypes::all.size(); ++contact_type) {
-    for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
+    for (size_t model_type = 1; model_type < PinocchioModelTypes::all.size(); ++model_type) {
       register_contact_model_unit_tests(ContactModelTypes::all[contact_type], PinocchioModelTypes::all[model_type]);
     }
   }
