@@ -33,6 +33,7 @@ void exposeIntegratedActionRK();
 void exposeIntegratedActionRK4();
 void exposeCostAbstract();
 void exposeResidualControl();
+void exposeResidualJointTorque();
 void exposeCostSum();
 void exposeCostResidual();
 void exposeCostControl();
