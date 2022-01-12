@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,56 @@ class SolverIntro : public SolverDDP {
   double get_upsilon() const;
 
   /**
+   * @brief Return the rank of control-equality constraints \f$\mathbf{H_u}\f
+   */
+  const std::vector<std::size_t>& get_Hu_rank() const;
+
+  /**
+   * @brief Return the span and kernel of control-equality constraints \f$\mathbf{H_u}\f
+   */
+  const std::vector<Eigen::MatrixXd>& get_YZ() const;
+
+  /**
+   * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Qzz() const;
+
+  /**
+   * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Qxz() const;
+
+  /**
+   * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Quz() const;
+
+  /**
+   * @brief Return Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_Qz() const;
+
+  /**
+   * @brief Return feedforward term related to the nullspace of \f$\mathbf{H_u}\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_kz() const;
+
+  /**
+   * @brief Return feedback gain related to the nullspace of \f$\mathbf{H_u}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Kz() const;
+
+  /**
+   * @brief Return feedforward term related to the equality constraints
+   */
+  const std::vector<Eigen::VectorXd>& get_ks() const;
+
+  /**
+   * @brief Return feedback gain related to the equality constraints
+   */
+  const std::vector<Eigen::MatrixXd>& get_Ks() const;
+
+  /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
    * Note that the default solver is nullspace LU. When we enable parallelization, this strategy is is generally faster
@@ -93,14 +143,14 @@ class SolverIntro : public SolverDDP {
             //!< control-equality constraints \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd>
       HuY_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
-  std::vector<Eigen::VectorXd> Qz_;     //!< Jacobian of the Hamiltonian \f$\mathbf{Q_{z}}\f$
-  std::vector<Eigen::MatrixXd> Qzz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{zz}}\f$
-  std::vector<Eigen::MatrixXd> Qxz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{xz}}\f$
-  std::vector<Eigen::MatrixXd> Quz_;    //!< Reduced Hessian of the Hamiltonian \f$\mathbf{Q_{uz}}\f$
-  std::vector<Eigen::VectorXd> k_z_;    //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::MatrixXd> K_z_;    //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::VectorXd> k_hat_;  //!< Feedforward term related to the equality constraints
-  std::vector<Eigen::MatrixXd> K_hat_;  //!< Feedback gain related to the equality constraints
+  std::vector<Eigen::VectorXd> Qz_;   //!< Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
+  std::vector<Eigen::MatrixXd> Qzz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
+  std::vector<Eigen::MatrixXd> Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
+  std::vector<Eigen::MatrixXd> Quz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
+  std::vector<Eigen::VectorXd> kz_;   //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
+  std::vector<Eigen::MatrixXd> Kz_;   //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
+  std::vector<Eigen::VectorXd> ks_;   //!< Feedforward term related to the equality constraints
+  std::vector<Eigen::MatrixXd> Ks_;   //!< Feedback gain related to the equality constraints
   std::vector<Eigen::MatrixXd> QuuinvHuT_;
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Qzz_llt_;  //!< Cholesky LLT solver
   std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
