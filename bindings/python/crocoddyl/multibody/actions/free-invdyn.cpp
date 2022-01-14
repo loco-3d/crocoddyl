@@ -45,8 +45,8 @@ void exposeDifferentialActionFreeInvDynamics() {
                                                            bp::args("self", "data", "x", "u"),
                                                            "Compute the next state and cost value.\n\n"
                                                            ":param data: free inverse-dynamics action data\n"
-                                                           ":param x: time-continuous state vector\n"
-                                                           ":param u: time-continuous control input")
+                                                           ":param x: state point (dim. state.nx)\n"
+                                                           ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -61,8 +61,8 @@ void exposeDifferentialActionFreeInvDynamics() {
                 "This function builds a quadratic approximation of the\n"
                 "action model (i.e. dynamical system and cost function).\n"
                 ":param data: free inverse-dynamics action data\n"
-                ":param x: time-continuous state vector\n"
-                ":param u: time-continuous control input")
+                ":param x: state point (dim. state.nx)\n"
+                ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -114,8 +114,8 @@ void exposeDifferentialActionFreeInvDynamics() {
             bp::args("self", "data", "x", "u"),
             "Compute the RNEA residual.\n\n"
             ":param data: residual data\n"
-            ":param x: state vector\n"
-            ":param u: control input")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
         .def<void (DifferentialActionModelFreeInvDynamics::ResidualModelRnea::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -127,8 +127,8 @@ void exposeDifferentialActionFreeInvDynamics() {
             "Compute the Jacobians of the RNEA residual.\n\n"
             "It assumes that calc has been run first.\n"
             ":param data: action data\n"
-            ":param x: state vector\n"
-            ":param u: control input\n")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)\n")
         .def<void (DifferentialActionModelFreeInvDynamics::ResidualModelRnea::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))

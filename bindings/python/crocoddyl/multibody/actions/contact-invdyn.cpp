@@ -47,7 +47,7 @@ void exposeDifferentialActionContactInvDynamics() {
                                                            "Compute the next state, cost value and constraints.\n\n"
                                                            ":param data: inverse-dynamics action data\n"
                                                            ":param x: state vector\n"
-                                                           ":param u: control input")
+                                                           ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -62,7 +62,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 "of the action model (i.e., dynamical system, cost and constraint functions).\n"
                 ":param data: inverse-dynamics action data\n"
                 ":param x: state vector\n"
-                ":param u: control input")
+                ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -119,8 +119,8 @@ void exposeDifferentialActionContactInvDynamics() {
             bp::args("self", "data", "x", "u"),
             "Compute the RNEA residual.\n\n"
             ":param data: residual data\n"
-            ":param x: state vector\n"
-            ":param u: control input")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelRnea::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -132,8 +132,8 @@ void exposeDifferentialActionContactInvDynamics() {
             "Compute the Jacobians of the RNEA residual.\n\n"
             "It assumes that calc has been run first.\n"
             ":param data: action data\n"
-            ":param x: state vector\n"
-            ":param u: control input\n")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)\n")
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelRnea::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -154,6 +154,9 @@ void exposeDifferentialActionContactInvDynamics() {
         bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, std::size_t, std::size_t, std::size_t>(
             bp::args("self", "state", "id", "nr", "nc", "nu"),
             "Initialize the contact-acceleration residual model.\n\n"
+            ":param id: contact id\n"
+            ":param nr: dimension of the contact residual\n"
+            ":param nc: dimension of contact vector\n"
             ":param nu: dimension of control vector"))
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&,
@@ -162,8 +165,8 @@ void exposeDifferentialActionContactInvDynamics() {
             bp::args("self", "data", "x", "u"),
             "Compute the contact-acceleration residual.\n\n"
             ":param data: residual data\n"
-            ":param x: state vector\n"
-            ":param u: control input")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -175,8 +178,8 @@ void exposeDifferentialActionContactInvDynamics() {
             "Compute the Jacobians of the contact-acceleration residual.\n\n"
             "It assumes that calc has been run first.\n"
             ":param data: action data\n"
-            ":param x: state vector\n"
-            ":param u: control input\n")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)\n")
         .def<void (DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))

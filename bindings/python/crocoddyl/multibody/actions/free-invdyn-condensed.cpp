@@ -42,8 +42,8 @@ void exposeDifferentialActionFreeInvDynamicsCondensed() {
                 "calc", &DifferentialActionModelFreeInvDynamicsCondensed::calc, bp::args("self", "data", "x", "u"),
                 "Compute the next state and cost value.\n\n"
                 ":param data: free inverse-dynamics action data\n"
-                ":param x: time-continuous state vector\n"
-                ":param u: time-continuous control input")
+                ":param x: state point (dim. state.nx)\n"
+                ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamicsCondensed::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc, bp::args("self", "data", "x"))
@@ -59,8 +59,8 @@ void exposeDifferentialActionFreeInvDynamicsCondensed() {
                 "This function builds a quadratic approximation of the\n"
                 "action model (i.e. dynamical system and cost function).\n"
                 ":param data: free inverse-dynamics action data\n"
-                ":param x: time-continuous state vector\n"
-                ":param u: time-continuous control input")
+                ":param x: state point (dim. state.nx)\n"
+                ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamicsCondensed::*)(
                 const boost::shared_ptr<DifferentialActionDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -99,8 +99,8 @@ void exposeDifferentialActionFreeInvDynamicsCondensed() {
             bp::args("self", "data", "x", "u"),
             "Compute the actuation residual.\n\n"
             ":param data: residual data\n"
-            ":param x: state vector\n"
-            ":param u: control input")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
         .def<void (DifferentialActionModelFreeInvDynamicsCondensed::ResidualModelActuation::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
@@ -112,8 +112,8 @@ void exposeDifferentialActionFreeInvDynamicsCondensed() {
             "Compute the Jacobians of the actuation residual.\n\n"
             "It assumes that calc has been run first.\n"
             ":param data: action data\n"
-            ":param x: state vector\n"
-            ":param u: control input\n")
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)\n")
         .def<void (DifferentialActionModelFreeInvDynamicsCondensed::ResidualModelActuation::*)(
             const boost::shared_ptr<ResidualDataAbstract>&, const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))
@@ -139,10 +139,6 @@ void exposeDifferentialActionFreeInvDynamicsCondensed() {
                         bp::make_getter(&DifferentialActionDataFreeInvDynamicsCondensed::pinocchio,
                                         bp::return_internal_reference<>()),
                         "pinocchio data")
-          .add_property("joint",
-                        bp::make_getter(&DifferentialActionDataFreeInvDynamicsCondensed::joint,
-                                        bp::return_value_policy<bp::return_by_value>()),
-                        "joint data")
           .add_property("multibody",
                         bp::make_getter(&DifferentialActionDataFreeInvDynamicsCondensed::multibody,
                                         bp::return_internal_reference<>()),

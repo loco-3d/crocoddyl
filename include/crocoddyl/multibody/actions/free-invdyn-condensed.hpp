@@ -223,11 +223,11 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
                       const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
       // Update the under-actuation set and residual
-      std::size_t row = 0;
+      std::size_t nrow = 0;
       for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
         if (!d->actuation->tau_set[k]) {
-          data->r(row) = d->pinocchio->tau(k);
-          row += 1;
+          data->r(nrow) = d->pinocchio->tau(k);
+          nrow += 1;
         }
       }
     }
@@ -242,16 +242,16 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
                           const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
-      std::size_t na = 0;
+      std::size_t nrow = 0;
       const std::size_t nv = state_->get_nv();
       d->dtau_dx.leftCols(nv) = d->pinocchio->dtau_dq;
       d->dtau_dx.rightCols(nv) = d->pinocchio->dtau_dv;
       d->dtau_dx -= d->actuation->dtau_dx;
       for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
         if (!d->actuation->tau_set[k]) {
-          d->Rx.row(na) = d->dtau_dx.row(k);
-          d->Ru.row(na) = d->pinocchio->M.row(k);
-          na += 1;
+          d->Rx.row(nrow) = d->dtau_dx.row(k);
+          d->Ru.row(nrow) = d->pinocchio->M.row(k);
+          nrow += 1;
         }
       }
     }
@@ -299,21 +299,20 @@ struct DifferentialActionDataFreeInvDynamicsCondensedTpl : public DifferentialAc
   explicit DifferentialActionDataFreeInvDynamicsCondensedTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        joint(boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
-        multibody(&pinocchio, model->get_actuation()->createData(), joint),
+        multibody(&pinocchio, model->get_actuation()->createData(),
+                  boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         constraints(model->get_constraints()->createData(&multibody)),
         tmp_xstatic(model->get_state()->get_nx()) {
     const std::size_t nv = model->get_state()->get_nv();
+    Fu.leftCols(nv).diagonal().setOnes();
+    multibody.joint->da_du.leftCols(nv).diagonal().setOnes();
     costs->shareMemory(this);
     constraints->shareMemory(this);
-    Fu.leftCols(nv).setIdentity();
-    multibody.joint->da_du.leftCols(nv).setIdentity();
     tmp_xstatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
-  boost::shared_ptr<JointDataAbstract> joint;            //!< Joint data
   DataCollectorJointActMultibody multibody;              //!< Multibody data
   boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
