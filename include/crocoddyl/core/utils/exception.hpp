@@ -11,6 +11,7 @@
 
 #include <exception>
 #include <sstream>
+#include <iostream>
 
 #define NOEXCEPT noexcept
 
