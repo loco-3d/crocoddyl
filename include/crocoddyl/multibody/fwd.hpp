@@ -62,6 +62,11 @@ template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
 
 template <typename Scalar>
+class DifferentialActionModelContactInvDynamicsCondensedTpl;
+template <typename Scalar>
+struct DifferentialActionDataContactInvDynamicsCondensedTpl;
+
+template <typename Scalar>
 class DifferentialActionModelContactInvDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl;
@@ -387,6 +392,9 @@ typedef DifferentialActionModelFreeInvDynamicsTpl<double> DifferentialActionMode
 typedef DifferentialActionDataFreeInvDynamicsTpl<double> DifferentialActionDataFreeInvDynamics;
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
+typedef DifferentialActionModelContactInvDynamicsCondensedTpl<double>
+    DifferentialActionModelContactInvDynamicsCondensed;
+typedef DifferentialActionDataContactInvDynamicsCondensedTpl<double> DifferentialActionDataContactInvDynamicsCondensed;
 typedef DifferentialActionModelContactInvDynamicsTpl<double> DifferentialActionModelContactInvDynamics;
 typedef DifferentialActionDataContactInvDynamicsTpl<double> DifferentialActionDataContactInvDynamics;
 

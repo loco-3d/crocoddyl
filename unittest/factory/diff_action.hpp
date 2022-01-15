@@ -20,6 +20,7 @@
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
 #include "crocoddyl/multibody/actions/free-invdyn-condensed.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+#include "crocoddyl/multibody/actions/contact-invdyn-condensed.hpp"
 #include "crocoddyl/multibody/actions/contact-invdyn.hpp"
 
 namespace crocoddyl {
@@ -46,6 +47,12 @@ struct DifferentialActionModelTypes {
     DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm,
     DifferentialActionModelContactFwdDynamicsWithFriction_HyQ,
     DifferentialActionModelContactFwdDynamicsWithFriction_Talos,
+    DifferentialActionModelContactInvDynamicsCondensed_TalosArm,
+    DifferentialActionModelContactInvDynamicsCondensed_HyQ,
+    DifferentialActionModelContactInvDynamicsCondensed_Talos,
+    DifferentialActionModelContactInvDynamicsCondensedWithFriction_TalosArm,
+    DifferentialActionModelContactInvDynamicsCondensedWithFriction_HyQ,
+    DifferentialActionModelContactInvDynamicsCondensedWithFriction_Talos,
     DifferentialActionModelContactInvDynamics_TalosArm,
     DifferentialActionModelContactInvDynamics_HyQ,
     DifferentialActionModelContactInvDynamics_Talos,
@@ -86,6 +93,9 @@ class DifferentialActionModelFactory {
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamicsCondensed> create_contactInvDynamicsCondensed(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> create_contactInvDynamics(
