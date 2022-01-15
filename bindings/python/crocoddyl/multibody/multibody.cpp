@@ -33,6 +33,7 @@ void exposeMultibody() {
   exposeDifferentialActionFreeInvDynamics();
   exposeDifferentialActionContactFwdDynamics();
   exposeDifferentialActionContactInvDynamics();
+  exposeDifferentialActionContactInvDynamicsCondensed();
   exposeActionImpulseFwdDynamics();
   exposeResidualState();
   exposeResidualCentroidalMomentum();
