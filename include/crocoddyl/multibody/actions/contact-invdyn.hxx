@@ -78,17 +78,19 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(const boost::sha
       boost::make_shared<ConstraintModelResidual>(
           state_, boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelRnea>(
                       state, nc, nu)));
-  typename ContactModelMultiple::ContactModelContainer contact_list;
-  contact_list = contacts_->get_contacts();
-  typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
-  for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m; ++it_m) {
-    const boost::shared_ptr<ContactItem>& contact = it_m->second;
-    constraints_->addConstraint(
-        contact->name,
-        boost::make_shared<ConstraintModelResidual>(
-            state_,
-            boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContact>(
-                state, contact->contact->get_id(), contact->contact->get_nc(), nc, nu)));
+  if (contacts_->get_nc() != 0) {
+    typename ContactModelMultiple::ContactModelContainer contact_list;
+    contact_list = contacts_->get_contacts();
+    typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
+    for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m; ++it_m) {
+      const boost::shared_ptr<ContactItem>& contact = it_m->second;
+      constraints_->addConstraint(
+          contact->name,
+          boost::make_shared<ConstraintModelResidual>(
+              state_,
+              boost::make_shared<typename DifferentialActionModelContactInvDynamicsTpl<Scalar>::ResidualModelContact>(
+                  state, contact->contact->get_id(), contact->contact->get_nc(), nc, nu)));
+    }
   }
 }
 
@@ -197,7 +199,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_Jstatic.resize(nv, nu + nc);
   d->tmp_Jstatic.leftCols(nu) = d->multibody.actuation->dtau_du;
   d->tmp_Jstatic.rightCols(nc) = d->multibody.contacts->Jc.topRows(nc).transpose();
-  u.segment(nv, nu).noalias() = pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau;
+  u.segment(nv, nu) = (pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau).head(nu);
   if (nc != 0) {
     d->tmp_Jcstatic.resize(nv, nc);
     d->tmp_Jcstatic = d->tmp_Jstatic.rightCols(nc);

@@ -414,6 +414,9 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef DataCollectorActMultibodyInContactTpl<Scalar> DataCollectorActMultibodyInContact;
+  typedef CostDataSumTpl<Scalar> CostDataSum;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -451,13 +454,13 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     tmp_Jcstatic.setZero();
   }
 
-  pinocchio::DataTpl<Scalar> pinocchio;                              //!< Pinocchio data
-  DataCollectorActMultibodyInContactTpl<Scalar> multibody;           //!< Multibody data
-  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;                  //!< Costs data
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;   //!< quasistatic state point (velocity has to be zero)
-  MatrixXs tmp_Jstatic;   //!< quasistatic Jacobian
-  MatrixXs tmp_Jcstatic;  //!< quasistatic partial Jacobian
+  pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
+  DataCollectorActMultibodyInContact multibody;          //!< Multibody data
+  boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
+  boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
+  VectorXs tmp_xstatic;                                  //!< quasistatic state point (velocity has to be zero)
+  MatrixXs tmp_Jstatic;                                  //!< quasistatic Jacobian
+  MatrixXs tmp_Jcstatic;                                 //!< quasistatic partial Jacobian
 
   using Base::cost;
   using Base::Fu;
