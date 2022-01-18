@@ -39,6 +39,8 @@ void exposeControlParametrizationPolyZero() {
           ":param data: control-parametrization data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
+      .def("createData", &ControlParametrizationModelPolyZero::createData, bp::args("self"),
+           "Create the poly-zero data.")
       .def<void (ControlParametrizationModelPolyZero::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                          double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyZero::params, bp::args("self", "data", "t", "u"),

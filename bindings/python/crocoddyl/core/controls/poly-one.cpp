@@ -40,6 +40,8 @@ void exposeControlParametrizationPolyOne() {
           ":param data: control-parametrization data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
+      .def("createData", &ControlParametrizationModelPolyOne::createData, bp::args("self"),
+           "Create the poly-one data.")
       .def<void (ControlParametrizationModelPolyOne::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                         double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyOne::params, bp::args("self", "data", "t", "w"),
