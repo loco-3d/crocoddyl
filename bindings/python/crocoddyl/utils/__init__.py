@@ -28,6 +28,7 @@ def raiseIfNan(A, error=None):
 
 
 class StateVectorDerived(crocoddyl.StateAbstract):
+
     def __init__(self, nx):
         crocoddyl.StateAbstract.__init__(self, nx, nx)
 
@@ -64,6 +65,7 @@ class StateVectorDerived(crocoddyl.StateAbstract):
 
 
 class StateMultibodyDerived(crocoddyl.StateAbstract):
+
     def __init__(self, pinocchioModel):
         crocoddyl.StateAbstract.__init__(self, pinocchioModel.nq + pinocchioModel.nv, 2 * pinocchioModel.nv)
         self.model = pinocchioModel
@@ -128,6 +130,7 @@ class StateMultibodyDerived(crocoddyl.StateAbstract):
 
 
 class SquashingSmoothSatDerived(crocoddyl.SquashingModelAbstract):
+
     def __init__(self, u_lb, u_ub, ns):
         self.u_lb = u_lb
         self.u_ub = u_ub
@@ -148,6 +151,7 @@ class SquashingSmoothSatDerived(crocoddyl.SquashingModelAbstract):
 
 
 class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
+
     def __init__(self, state):
         assert (state.pinocchio.joints[1].shortname() == 'JointModelFreeFlyer')
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
@@ -160,6 +164,7 @@ class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
 
 
 class FullActuationDerived(crocoddyl.ActuationModelAbstract):
+
     def __init__(self, state):
         assert (state.pinocchio.joints[1].shortname() != 'JointModelFreeFlyer')
         crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
@@ -172,6 +177,7 @@ class FullActuationDerived(crocoddyl.ActuationModelAbstract):
 
 
 class UnicycleModelDerived(crocoddyl.ActionModelAbstract):
+
     def __init__(self):
         crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(3), 2, 5)
         self.dt = .1
@@ -214,6 +220,7 @@ class UnicycleModelDerived(crocoddyl.ActionModelAbstract):
 
 
 class UnicycleDataDerived(crocoddyl.ActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
         nx, nu = model.state.nx, model.nu
@@ -225,6 +232,7 @@ class UnicycleDataDerived(crocoddyl.ActionDataAbstract):
 
 
 class LQRModelDerived(crocoddyl.ActionModelAbstract):
+
     def __init__(self, nx, nu, driftFree=True):
         crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(nx), nu)
 
@@ -258,6 +266,7 @@ class LQRModelDerived(crocoddyl.ActionModelAbstract):
 
 
 class LQRDataDerived(crocoddyl.ActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
         self.Fx[:, :] = model.Fx
@@ -268,6 +277,7 @@ class LQRDataDerived(crocoddyl.ActionDataAbstract):
 
 
 class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
+
     def __init__(self, nq, nu, driftFree=True):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(2 * nq), nu)
 
@@ -303,6 +313,7 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
 
 
 class DifferentialLQRDataDerived(crocoddyl.DifferentialActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.DifferentialActionDataAbstract.__init__(self, model)
         self.Lxx[:, :] = model.Lxx
@@ -313,6 +324,7 @@ class DifferentialLQRDataDerived(crocoddyl.DifferentialActionDataAbstract):
 
 
 class DifferentialFreeFwdDynamicsModelDerived(crocoddyl.DifferentialActionModelAbstract):
+
     def __init__(self, state, actuationModel, costModel):
         crocoddyl.DifferentialActionModelAbstract.__init__(self, state, actuationModel.nu, costModel.nr)
         self.actuation = actuationModel
@@ -379,6 +391,7 @@ class DifferentialFreeFwdDynamicsModelDerived(crocoddyl.DifferentialActionModelA
 
 
 class DifferentialFreeFwdDynamicsDataDerived(crocoddyl.DifferentialActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.DifferentialActionDataAbstract.__init__(self, model)
         self.pinocchio = pinocchio.Model.createData(model.state.pinocchio)
@@ -390,6 +403,7 @@ class DifferentialFreeFwdDynamicsDataDerived(crocoddyl.DifferentialActionDataAbs
 
 
 class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
+
     def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
         crocoddyl.ActionModelAbstract.__init__(self, diffModel.state, diffModel.nv, diffModel.nr)
         self.differential = diffModel
@@ -432,12 +446,14 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
 
 
 class IntegratedActionDataEulerDerived(crocoddyl.ActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
         self.differential = model.differential.createData(self)
 
 
 class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
+
     def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
         crocoddyl.ActionModelAbstract.__init__(self, diffModel.state, diffModel.nu, diffModel.nr)
         self.differential = diffModel
@@ -553,6 +569,7 @@ class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
 
 
 class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
+
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
 
@@ -600,6 +617,7 @@ class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
 
 
 class StateCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, xref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
         self.xref = xref if xref is not None else state.zero()
@@ -621,6 +639,7 @@ class StateCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class ControlCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, uref=None, nu=None):
         nu = nu if nu is not None else state.nv
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(nu)
@@ -639,6 +658,7 @@ class ControlCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class CoMPositionCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, cref=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
         if nu is None:
@@ -668,6 +688,7 @@ class CoMPositionCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, frame_id=None, placement=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
         if nu is None:
@@ -705,6 +726,7 @@ class FramePlacementCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FramePlacementCostDataDerived(crocoddyl.CostDataAbstract):
+
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
         self.rMf = pinocchio.SE3.Identity()
@@ -715,6 +737,7 @@ class FramePlacementCostDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameTranslationCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, frame_id=None, translation=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
         if nu is None:
@@ -752,6 +775,7 @@ class FrameTranslationCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FrameTranslationDataDerived(crocoddyl.CostDataAbstract):
+
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
         self.R = np.eye(3)
@@ -759,6 +783,7 @@ class FrameTranslationDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, frame_id=None, rotation=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(3)
         if nu is None:
@@ -796,6 +821,7 @@ class FrameRotationCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FrameRotationCostDataDerived(crocoddyl.CostDataAbstract):
+
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
         self.rRf = np.eye(3)
@@ -805,6 +831,7 @@ class FrameRotationCostDataDerived(crocoddyl.CostDataAbstract):
 
 
 class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
+
     def __init__(self, state, activation=None, frame_id=None, velocity=None, nu=None):
         activation = activation if activation is not None else crocoddyl.ActivationModelQuad(6)
         if nu is None:
@@ -836,6 +863,7 @@ class FrameVelocityCostModelDerived(crocoddyl.CostModelAbstract):
 
 
 class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
+
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
         self.fXj = model.state.pinocchio.frames[model._frame_id].placement.inverse().action
@@ -843,6 +871,7 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
 
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
+
     def __init__(self, state, xref, gains=[0., 0.]):
         crocoddyl.ContactModelAbstract.__init__(self, state, 3)
         self.xref = xref
@@ -899,6 +928,7 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
 
 
 class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
+
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
         self.fXj = model.state.pinocchio.frames[model.xref.id].placement.inverse().action
@@ -910,6 +940,7 @@ class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
 
 
 class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
+
     def __init__(self, state, Mref, gains=[0., 0.]):
         crocoddyl.ContactModelAbstract.__init__(self, state, 6)
         self.Mref = Mref
@@ -947,6 +978,7 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
 
 
 class Contact6DDataDerived(crocoddyl.ContactDataAbstract):
+
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
         self.fXj = model.state.pinocchio.frames[model.Mref.id].placement.inverse().action
@@ -957,6 +989,7 @@ class Contact6DDataDerived(crocoddyl.ContactDataAbstract):
 
 
 class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
+
     def __init__(self, state, frame):
         crocoddyl.ImpulseModelAbstract.__init__(self, state, 3)
         self.frame = frame
@@ -976,6 +1009,7 @@ class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
 
 
 class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
+
     def __init__(self, model, data):
         crocoddyl.ImpulseDataAbstract.__init__(self, model, data)
         self.fXj = model.state.pinocchio.frames[model.frame].placement.inverse().action
@@ -983,6 +1017,7 @@ class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
 
 
 class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
+
     def __init__(self, state, frame):
         crocoddyl.ImpulseModelAbstract.__init__(self, state, 6)
         self.frame = frame
@@ -1002,6 +1037,7 @@ class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
 
 
 class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
+
     def __init__(self, model, data):
         crocoddyl.ImpulseDataAbstract.__init__(self, model, data)
         self.fXj = model.state.pinocchio.frames[model.frame].placement.inverse().action
@@ -1009,6 +1045,7 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
 
 
 class DDPDerived(crocoddyl.SolverAbstract):
+
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
         self.allocateData()  # TODO remove it?
@@ -1211,6 +1248,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
 
 class FDDPDerived(DDPDerived):
+
     def __init__(self, shootingProblem):
         DDPDerived.__init__(self, shootingProblem)
 

@@ -43,6 +43,8 @@ void exposeControlParametrizationPolyTwoRK() {
           ":param data: poly-two-rk data\n"
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
+      .def("createData", &ControlParametrizationModelPolyTwoRK::createData, bp::args("self"),
+           "Create the poly-two-rk data.")
       .def<void (ControlParametrizationModelPolyTwoRK::*)(const boost::shared_ptr<ControlParametrizationDataAbstract>&,
                                                           double, const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyTwoRK::params, bp::args("self", "data", "t", "w"),

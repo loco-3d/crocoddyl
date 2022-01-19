@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ class ContactModelMultipleTpl {
              const std::vector<std::string>& get_inactive() {
                inactive_.clear();
                inactive_.reserve(inactive_set_.size());
-               for (const auto& contact : active_set_) {
+               for (const auto& contact : inactive_set_) {
                  inactive_.push_back(contact);
                }
                return inactive_;

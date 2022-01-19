@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,16 +28,16 @@ void exposeImpulseMultiple() {
   typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
   typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
   StdMapPythonVisitor<std::string, ImpulseItemPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ImpulseItemPtr> >,
+                      std::allocator<std::pair<const std::string, ImpulseItemPtr>>,
                       true>::expose("StdMap_ImpulseItem");
   StdMapPythonVisitor<std::string, ImpulseDataPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ImpulseDataPtr> >,
+                      std::allocator<std::pair<const std::string, ImpulseDataPtr>>,
                       true>::expose("StdMap_ImpulseData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem>>();
 
   bp::class_<ImpulseItem>("ImpulseItem", "Describe a impulse item.\n\n",
-                          bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool> >(
+                          bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool>>(
                               bp::args("self", "name", "impulse", "active"),
                               "Initialize the impulse item.\n\n"
                               ":param name: impulse name\n"
@@ -50,9 +50,9 @@ void exposeImpulseMultiple() {
       .def(PrintableVisitor<ImpulseItem>());
   ;
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple>>();
 
-  bp::class_<ImpulseModelMultiple>("ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody> >(
+  bp::class_<ImpulseModelMultiple>("ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody>>(
                                                                bp::args("self", "state"),
                                                                "Initialize the multiple impulse model.\n\n"
                                                                ":param state: state of the multibody system"))
@@ -118,20 +118,30 @@ void exposeImpulseMultiple() {
       .add_property("ni_total",
                     bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
                     "dimension of the total impulse vector")
+      .add_property("active",
+                    bp::make_function(&ImpulseModelMultiple::get_active,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property active_set")),
+                    "list of names of active contact items")
+      .add_property("inactive",
+                    bp::make_function(&ImpulseModelMultiple::get_inactive,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property inactive_set")),
+                    "list of names of inactive contact items")
       .add_property(
-          "active",
-          bp::make_function(&ImpulseModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
-          "name of active impulse items")
+          "active_set",
+          bp::make_function(&ImpulseModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of active contact items")
       .add_property(
-          "inactive",
-          bp::make_function(&ImpulseModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-          "name of inactive impulse items")
+          "inactive_set",
+          bp::make_function(&ImpulseModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of inactive contact items")
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
            ":param name: impulse name")
       .def(PrintableVisitor<ImpulseModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple>>();
 
   bp::class_<ImpulseDataMultiple>(
       "ImpulseDataMultiple", "Data class for multiple impulses.\n\n",
@@ -139,7 +149,7 @@ void exposeImpulseMultiple() {
           bp::args("self", "model", "data"),
           "Create multi-impulse data.\n\n"
           ":param model: multi-impulse model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::Jc), "Jacobian for all impulses (active and inactive)")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),

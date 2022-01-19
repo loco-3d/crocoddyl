@@ -447,7 +447,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
                    << "ndx in " << i << " node is not consistent with the other nodes")
     }
   }
-  is_updated_ = false;
+  is_updated_ = true;
   T_ = models.size();
   running_models_.clear();
   running_datas_.clear();
@@ -467,7 +467,7 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(boost::shared_ptr<ActionModel
     throw_pretty("Invalid argument: "
                  << "ndx is not consistent with the other nodes")
   }
-  is_updated_ = false;
+  is_updated_ = true;
   terminal_model_ = model;
   terminal_data_ = terminal_model_->createData();
 }
