@@ -27,6 +27,7 @@ class SolverBoxFDDP : public SolverFDDP {
   virtual void allocateData();
   virtual void computeGains(const std::size_t t);
   virtual void forwardPass(const double steplength);
+  virtual void resizeData();
 
   const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
 
