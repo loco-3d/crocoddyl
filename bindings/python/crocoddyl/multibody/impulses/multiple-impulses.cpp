@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,14 +118,24 @@ void exposeImpulseMultiple() {
       .add_property("ni_total",
                     bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
                     "dimension of the total impulse vector")
+      .add_property("active",
+                    bp::make_function(&ImpulseModelMultiple::get_active,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property active_set")),
+                    "list of names of active contact items")
+      .add_property("inactive",
+                    bp::make_function(&ImpulseModelMultiple::get_inactive,
+                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                          "Deprecated. Use property inactive_set")),
+                    "list of names of inactive contact items")
       .add_property(
-          "active",
-          bp::make_function(&ImpulseModelMultiple::get_active, bp::return_value_policy<bp::return_by_value>()),
-          "name of active impulse items")
+          "active_set",
+          bp::make_function(&ImpulseModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of active contact items")
       .add_property(
-          "inactive",
-          bp::make_function(&ImpulseModelMultiple::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-          "name of inactive impulse items")
+          "inactive_set",
+          bp::make_function(&ImpulseModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+          "set of names of inactive contact items")
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
            ":param name: impulse name")
