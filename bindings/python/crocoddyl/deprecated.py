@@ -12,10 +12,12 @@ def deprecated(instructions):
         instructions: A human-friendly string of instructions, such
             as: 'Please migrate to add_proxy() ASAP.'
     """
+
     def decorator(func):
         '''This is a decorator which can be used to mark functions
         as deprecated. It will result in a warning being emitted
         when the function is used.'''
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             message = 'Call to deprecated function {}. {}'.format(func.__name__, instructions)
@@ -33,6 +35,7 @@ def deprecated(instructions):
 
 
 class DeprecationHelper(object):
+
     def __init__(self, new_target, old_name):
         self.new_target = new_target
         self.warning_str = '%s is deprecated: Use %s' % (old_name, new_target.__name__)
