@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,14 +93,18 @@ void exposeStateAbstract() {
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")
-      .add_property("nx", bp::make_function(&StateAbstract_wrap::get_nx), 
-               bp::make_setter(&StateAbstract_wrap::nx_,bp::return_internal_reference<>()), "dimension of state tuple")
+      .add_property("nx", bp::make_function(&StateAbstract_wrap::get_nx),
+                    bp::make_setter(&StateAbstract_wrap::nx_, bp::return_internal_reference<>()),
+                    "dimension of state tuple")
       .add_property("ndx", bp::make_function(&StateAbstract_wrap::get_ndx),
-                    bp::make_setter(&StateAbstract_wrap::ndx_,bp::return_internal_reference<>()), "dimension of the tangent space of the state manifold")
+                    bp::make_setter(&StateAbstract_wrap::ndx_, bp::return_internal_reference<>()),
+                    "dimension of the tangent space of the state manifold")
       .add_property("nq", bp::make_function(&StateAbstract_wrap::get_nq),
-               bp::make_setter(&StateAbstract_wrap::nq_,bp::return_internal_reference<>()), "dimension of the configuration tuple")
+                    bp::make_setter(&StateAbstract_wrap::nq_, bp::return_internal_reference<>()),
+                    "dimension of the configuration tuple")
       .add_property("nv", bp::make_function(&StateAbstract_wrap::get_nv),
-                    bp::make_setter(&StateAbstract_wrap::nv_,bp::return_internal_reference<>()), "dimension of tangent space of the configuration manifold")
+                    bp::make_setter(&StateAbstract_wrap::nv_, bp::return_internal_reference<>()),
+                    "dimension of tangent space of the configuration manifold")
       .add_property("has_limits", bp::make_function(&StateAbstract_wrap::get_has_limits),
                     "indicates whether problem has finite state limits")
       .add_property("lb", bp::make_getter(&StateAbstract_wrap::lb_, bp::return_internal_reference<>()),
