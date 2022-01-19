@@ -32,7 +32,6 @@ void ImpulseModelMultipleTpl<Scalar>::addImpulse(const std::string& name,
   } else if (!active) {
     nc_total_ += impulse->get_nc();
     inactive_set_.insert(name);
-
   }
 }
 

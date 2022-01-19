@@ -28,16 +28,16 @@ void exposeImpulseMultiple() {
   typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
   typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
   StdMapPythonVisitor<std::string, ImpulseItemPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ImpulseItemPtr> >,
+                      std::allocator<std::pair<const std::string, ImpulseItemPtr>>,
                       true>::expose("StdMap_ImpulseItem");
   StdMapPythonVisitor<std::string, ImpulseDataPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, ImpulseDataPtr> >,
+                      std::allocator<std::pair<const std::string, ImpulseDataPtr>>,
                       true>::expose("StdMap_ImpulseData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem>>();
 
   bp::class_<ImpulseItem>("ImpulseItem", "Describe a impulse item.\n\n",
-                          bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool> >(
+                          bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>, bp::optional<bool>>(
                               bp::args("self", "name", "impulse", "active"),
                               "Initialize the impulse item.\n\n"
                               ":param name: impulse name\n"
@@ -50,9 +50,9 @@ void exposeImpulseMultiple() {
       .def(PrintableVisitor<ImpulseItem>());
   ;
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple>>();
 
-  bp::class_<ImpulseModelMultiple>("ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody> >(
+  bp::class_<ImpulseModelMultiple>("ImpulseModelMultiple", bp::init<boost::shared_ptr<StateMultibody>>(
                                                                bp::args("self", "state"),
                                                                "Initialize the multiple impulse model.\n\n"
                                                                ":param state: state of the multibody system"))
@@ -141,7 +141,7 @@ void exposeImpulseMultiple() {
            ":param name: impulse name")
       .def(PrintableVisitor<ImpulseModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple> >();
+  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple>>();
 
   bp::class_<ImpulseDataMultiple>(
       "ImpulseDataMultiple", "Data class for multiple impulses.\n\n",
@@ -149,7 +149,7 @@ void exposeImpulseMultiple() {
           bp::args("self", "model", "data"),
           "Create multi-impulse data.\n\n"
           ":param model: multi-impulse model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
       .add_property("Jc", bp::make_getter(&ImpulseDataMultiple::Jc, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataMultiple::Jc), "Jacobian for all impulses (active and inactive)")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataMultiple::dv0_dq, bp::return_internal_reference<>()),
