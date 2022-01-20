@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Pisa
+// Copyright (C) 2021-2022, University of Edinburgh, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,11 +17,11 @@ void exposeStateNumDiff() {
   bp::register_ptr_to_python<boost::shared_ptr<StateNumDiff> >();
 
   bp::class_<StateNumDiff, bp::bases<StateAbstract> >(
-      "StateNumDiff", "Abstract class for computing calcDiff by using numerical differentiation.\n\n",
+      "StateNumDiff", "Abstract class for computing Jdiff and Jintegrate by using numerical differentiation.\n\n",
       bp::init<boost::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
-          "Initialize the state NumDiff.\n\n"
-          ":param model: state where we compute the derivatives through NumDiff"))
+          "Initialize the state numdiff.\n\n"
+          ":param model: state where we compute the derivatives through numerial differentiation"))
       .def("zero", &StateNumDiff::zero, bp::args("self"),
            "Return a zero reference state.\n\n"
            ":return zero reference state")
@@ -67,7 +67,8 @@ void exposeStateNumDiff() {
                        ":param dx: displacement of the state (dim state.nx()).\n"
                        ":param firstsecond: derivative w.r.t x or dx or both\n"
                        ":return the partial derivative(s) of the integrate(x, dx) function"))
-      .def("JintegrateTransport", &StateNumDiff::JintegrateTransport, bp::args("self", "x", "dx", "Jin", "firstsecond"),
+      .def("JintegrateTransport", &StateNumDiff::JintegrateTransport,
+           bp::args("self", "x", "dx", "Jin", "firstsecond"),
            "Parallel transport from integrate(x, dx) to x.\n\n"
            "This function performs the parallel transportation of an input matrix whose columns\n"
            "are expressed in the tangent space at integrate(x, dx) to the tangent space at x point\n"
@@ -75,8 +76,7 @@ void exposeStateNumDiff() {
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")
-      .add_property("disturbance", bp::make_function(&StateNumDiff::get_disturbance),
-                    &StateNumDiff::set_disturbance,
+      .add_property("disturbance", bp::make_function(&StateNumDiff::get_disturbance), &StateNumDiff::set_disturbance,
                     "disturbance value used in the numerical differentiation");
 }
 
