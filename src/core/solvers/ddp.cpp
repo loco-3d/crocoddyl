@@ -223,61 +223,22 @@ void SolverDDP::backwardPass() {
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const std::size_t nu = m->get_nu();
 
-    m->multiplyFxTransposeBy(d->Fx, Vxx_p, FxTVxx_p_);  // Fx.T * Vxx_p
-    START_PROFILER("SolverDDP::Qx");
-    Qx_[t] = d->Lx;
-    m->multiplyFxTransposeBy(d->Fx, Vx_p, Qx_[t], addto);  // + Fx.T * Vx_p
-    STOP_PROFILER("SolverDDP::Qx");
-    START_PROFILER("SolverDDP::Qxx");
-    Qxx_[t] = d->Lxx;
-    m->multiplyByFx(d->Fx, FxTVxx_p_, Qxx_[t], addto);  // + (Fx.T * Vxx_p) * Fx
-    STOP_PROFILER("SolverDDP::Qxx");
-    if (nu != 0) {
-      m->multiplyFuTransposeBy(d->Fu, Vxx_p, FuTVxx_p_[t]);  // Fu.T * Vxx_p
-      START_PROFILER("SolverDDP::Qu");
-      Qu_[t] = d->Lu;
-      m->multiplyFuTransposeBy(d->Fu, Vx_p, Qu_[t], addto);  // + Fu.T * Vx_p
-      STOP_PROFILER("SolverDDP::Qu");
-      START_PROFILER("SolverDDP::Quu");
-      Quu_[t] = d->Luu;
-      m->multiplyByFu(d->Fu, FuTVxx_p_[t], Quu_[t], addto);  // + (Fu.T * Vxx_p) * Fu
-      STOP_PROFILER("SolverDDP::Quu");
-      START_PROFILER("SolverDDP::Qxu");
-      Qxu_[t] = d->Lxu;
-      m->multiplyByFu(d->Fu, FxTVxx_p_, Qxu_[t], addto);  // + (Fx.T * Vxx_p) * Fu
-      STOP_PROFILER("SolverDDP::Qxu");
-      if (!std::isnan(ureg_)) {
-        Quu_[t].diagonal().array() += ureg_;
-      }
+    // Compute the linear-quadratic approximation of the control Hamiltonian function
+    computeHamiltonianFunction(t, m, d);
+
+    if (!std::isnan(ureg_)) {
+      Quu_[t].diagonal().array() += ureg_;
     }
 
+    // Compute the feedforward and feedback gains
     computeGains(t);
 
-    Vx_[t] = Qx_[t];
-    Vxx_[t] = Qxx_[t];
-    if (nu != 0) {
-      START_PROFILER("SolverDDP::Vx");
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
-      STOP_PROFILER("SolverDDP::Vx");
-      START_PROFILER("SolverDDP::Vxx");
-      Vxx_[t].noalias() -= Qxu_[t] * K_[t];
-      STOP_PROFILER("SolverDDP::Vxx");
-    }
-    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
-    Vxx_[t] = Vxx_tmp_;
+    // Compute the linear-quadratic approximation of the Value function
+    computeValueFunction(t, m);
 
     if (!std::isnan(xreg_)) {
       Vxx_[t].diagonal().array() += xreg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-    if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * fs_[t];
     }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
@@ -336,6 +297,59 @@ void SolverDDP::forwardPass(const double steplength) {
     throw_pretty("forward_error");
   }
   STOP_PROFILER("SolverDDP::forwardPass");
+}
+
+void SolverDDP::computeHamiltonianFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
+                                           const boost::shared_ptr<ActionDataAbstract>& data) {
+  const std::size_t nu = model->get_nu();
+  const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
+  const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+
+  model->multiplyFxTransposeBy(data->Fx, Vxx_p, FxTVxx_p_);  // Fx.T * Vxx_p
+  START_PROFILER("SolverDDP::Qx");
+  Qx_[t] = data->Lx;
+  model->multiplyFxTransposeBy(data->Fx, Vx_p, Qx_[t], addto);  // + Fx.T * Vx_p
+  STOP_PROFILER("SolverDDP::Qx");
+  START_PROFILER("SolverDDP::Qxx");
+  Qxx_[t] = data->Lxx;
+  model->multiplyByFx(data->Fx, FxTVxx_p_, Qxx_[t], addto);  // + (Fx.T * Vxx_p) * Fx
+  STOP_PROFILER("SolverDDP::Qxx");
+  if (nu != 0) {
+    model->multiplyFuTransposeBy(data->Fu, Vxx_p, FuTVxx_p_[t]);  // Fu.T * Vxx_p
+    START_PROFILER("SolverDDP::Qu");
+    Qu_[t] = data->Lu;
+    model->multiplyFuTransposeBy(data->Fu, Vx_p, Qu_[t], addto);  // + Fu.T * Vx_p
+    STOP_PROFILER("SolverDDP::Qu");
+    START_PROFILER("SolverDDP::Quu");
+    Quu_[t] = data->Luu;
+    model->multiplyByFu(data->Fu, FuTVxx_p_[t], Quu_[t], addto);  // + (Fu.T * Vxx_p) * Fu
+    STOP_PROFILER("SolverDDP::Quu");
+    START_PROFILER("SolverDDP::Qxu");
+    Qxu_[t] = data->Lxu;
+    model->multiplyByFu(data->Fu, FxTVxx_p_, Qxu_[t], addto);  // + (Fx.T * Vxx_p) * Fu
+    STOP_PROFILER("SolverDDP::Qxu");
+  }
+}
+
+void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+  const std::size_t nu = model->get_nu();
+  Vx_[t] = Qx_[t];
+  Vxx_[t] = Qxx_[t];
+  if (nu != 0) {
+    START_PROFILER("SolverDDP::Vx");
+    Quuk_[t].noalias() = Quu_[t] * k_[t];
+    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+    STOP_PROFILER("SolverDDP::Vx");
+    START_PROFILER("SolverDDP::Vxx");
+    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    STOP_PROFILER("SolverDDP::Vxx");
+  }
+  Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+  Vxx_[t] = Vxx_tmp_;
+  // Compute and store the Vx gradient at end of the interval (rollout state)
+  if (!is_feasible_) {
+    Vx_[t].noalias() += Vxx_[t] * fs_[t];
+  }
 }
 
 void SolverDDP::computeGains(const std::size_t t) {

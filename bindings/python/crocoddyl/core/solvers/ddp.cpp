@@ -85,6 +85,16 @@ void exposeSolverDDP() {
            "It rollouts the action model given the computed policy (feedforward terns and feedback\n"
            "gains) by the backwardPass. We can define different step lengths\n"
            ":param stepLength: applied step length (<= 1. and >= 0.)")
+      .def("computeHamiltonianFunction", &SolverDDP::computeHamiltonianFunction, bp::args("self, t, model, data"),
+           "Compute the linear-quadratic model of the control Hamiltonian\n\n"
+           ":param t: time instance\n"
+           ":param model: action model in the given time instance\n"
+           ":param data: action data in the given time instance")
+      .def("computeValueFunction", &SolverDDP::computeValueFunction, bp::args("self, t, model"),
+           "Compute the linear-quadratic model of the control Hamiltonian\n\n"
+           "This function is called in the backward pass after updating the local Hamiltonian.\n"
+           ":param t: time instance\n"
+           ":param model: action model in the given time instance")
       .add_property("Vxx", make_function(&SolverDDP::get_Vxx, bp::return_value_policy<bp::copy_const_reference>()),
                     "Vxx")
       .add_property("Vx", make_function(&SolverDDP::get_Vx, bp::return_value_policy<bp::copy_const_reference>()), "Vx")

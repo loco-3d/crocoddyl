@@ -126,6 +126,26 @@ class SolverDDP : public SolverAbstract {
   virtual void forwardPass(const double stepLength);
 
   /**
+   * @brief Compute the linear-quadratic approximation of the control Hamiltonian function
+   *
+   * @param[in] t      Time instance
+   * @param[in] model  Action model in the given time instance
+   * @param[in] data   Action data in the given time instance
+   */
+  virtual void computeHamiltonianFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
+                                          const boost::shared_ptr<ActionDataAbstract>& data);
+
+  /**
+   * @brief Compute the linear-quadratic approximation of the Value function
+   *
+   * This function is called in the backward pass after updating the local Hamiltonian.
+   *
+   * @param[in] t      Time instance
+   * @param[in] model  Action model in the given time instance
+   */
+  virtual void computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model);
+
+  /**
    * @brief Compute the feedforward and feedback terms using a Cholesky decomposition
    *
    * To compute the feedforward \f$\mathbf{k}_k\f$ and feedback \f$\mathbf{K}_k\f$ terms, we use a Cholesky
