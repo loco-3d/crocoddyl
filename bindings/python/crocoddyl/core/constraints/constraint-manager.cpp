@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,23 +118,14 @@ void exposeConstraintManager() {
           "constraints",
           bp::make_function(&ConstraintModelManager::get_constraints, bp::return_value_policy<bp::return_by_value>()),
           "stack of constraints")
-      .add_property("nu",
-                    bp::make_function(&ConstraintModelManager::get_nu, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector")
-      .add_property("ng",
-                    bp::make_function(&ConstraintModelManager::get_ng, bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nu", bp::make_function(&ConstraintModelManager::get_nu), "dimension of control vector")
+      .add_property("ng", bp::make_function(&ConstraintModelManager::get_ng),
                     "number of active inequality constraints")
-      .add_property("nh",
-                    bp::make_function(&ConstraintModelManager::get_nh, bp::return_value_policy<bp::return_by_value>()),
-                    "number of active equality constraints")
-      .add_property(
-          "ng_total",
-          bp::make_function(&ConstraintModelManager::get_ng_total, bp::return_value_policy<bp::return_by_value>()),
-          "number of the total inequality constraints")
-      .add_property(
-          "nh_total",
-          bp::make_function(&ConstraintModelManager::get_nh_total, bp::return_value_policy<bp::return_by_value>()),
-          "number of the total equality constraints")
+      .add_property("nh", bp::make_function(&ConstraintModelManager::get_nh), "number of active equality constraints")
+      .add_property("ng_total", bp::make_function(&ConstraintModelManager::get_ng_total),
+                    "number of the total inequality constraints")
+      .add_property("nh_total", bp::make_function(&ConstraintModelManager::get_nh_total),
+                    "number of the total equality constraints")
       .add_property(
           "active",
           bp::make_function(&ConstraintModelManager::get_active, bp::return_value_policy<bp::return_by_value>()),

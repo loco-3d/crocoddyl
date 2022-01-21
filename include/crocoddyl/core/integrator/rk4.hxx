@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

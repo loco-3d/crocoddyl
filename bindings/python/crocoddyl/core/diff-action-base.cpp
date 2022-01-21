@@ -173,13 +173,9 @@ void exposeDifferentialActionAbstract() {
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
-      .add_property("ng",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_ng,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("ng", bp::make_function(&DifferentialActionModelAbstract_wrap::get_ng),
                     "number of inequality constraints")
-      .add_property("nh",
-                    bp::make_function(&DifferentialActionModelAbstract_wrap::get_nh,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("nh", bp::make_function(&DifferentialActionModelAbstract_wrap::get_nh),
                     "number of equality constraints")
       .add_property("state",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
