@@ -217,62 +217,15 @@ void SolverDDP::backwardPass() {
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-    const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
-    const Eigen::VectorXd& Vx_p = Vx_[t + 1];
-    const std::size_t nu = m->get_nu();
 
-    FxTVxx_p_.noalias() = d->Fx.transpose() * Vxx_p;
-    START_PROFILER("SolverDDP::Qx");
-    Qx_[t] = d->Lx;
-    Qx_[t].noalias() += d->Fx.transpose() * Vx_p;
-    STOP_PROFILER("SolverDDP::Qx");
-    START_PROFILER("SolverDDP::Qxx");
-    Qxx_[t] = d->Lxx;
-    Qxx_[t].noalias() += FxTVxx_p_ * d->Fx;
-    STOP_PROFILER("SolverDDP::Qxx");
-    if (nu != 0) {
-      FuTVxx_p_[t].noalias() = d->Fu.transpose() * Vxx_p;
-      START_PROFILER("SolverDDP::Qu");
-      Qu_[t] = d->Lu;
-      Qu_[t].noalias() += d->Fu.transpose() * Vx_p;
-      STOP_PROFILER("SolverDDP::Qu");
-      START_PROFILER("SolverDDP::Quu");
-      Quu_[t] = d->Luu;
-      Quu_[t].noalias() += FuTVxx_p_[t] * d->Fu;
-      STOP_PROFILER("SolverDDP::Quu");
-      START_PROFILER("SolverDDP::Qxu");
-      Qxu_[t] = d->Lxu;
-      Qxu_[t].noalias() += FxTVxx_p_ * d->Fu;
-      STOP_PROFILER("SolverDDP::Qxu");
-      if (!std::isnan(ureg_)) {
-        Quu_[t].diagonal().array() += ureg_;
-      }
-    }
+    // Compute the linear-quadratic approximation of the control Hamiltonian function
+    computeActionValueFunction(t, m, d);
 
+    // Compute the feedforward and feedback gains
     computeGains(t);
 
-    Vx_[t] = Qx_[t];
-    Vxx_[t] = Qxx_[t];
-    if (nu != 0) {
-      START_PROFILER("SolverDDP::Vx");
-      Quuk_[t].noalias() = Quu_[t] * k_[t];
-      Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
-      STOP_PROFILER("SolverDDP::Vx");
-      START_PROFILER("SolverDDP::Vxx");
-      Vxx_[t].noalias() -= Qxu_[t] * K_[t];
-      STOP_PROFILER("SolverDDP::Vxx");
-    }
-    Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
-    Vxx_[t] = Vxx_tmp_;
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal().array() += xreg_;
-    }
-
-    // Compute and store the Vx gradient at end of the interval (rollout state)
-    if (!is_feasible_) {
-      Vx_[t].noalias() += Vxx_[t] * fs_[t];
-    }
+    // Compute the linear-quadratic approximation of the Value function
+    computeValueFunction(t, m);
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
       throw_pretty("backward_error");
@@ -330,6 +283,71 @@ void SolverDDP::forwardPass(const double steplength) {
     throw_pretty("forward_error");
   }
   STOP_PROFILER("SolverDDP::forwardPass");
+}
+
+void SolverDDP::computeActionValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
+                                           const boost::shared_ptr<ActionDataAbstract>& data) {
+  assert_pretty(t > problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
+  const std::size_t nu = model->get_nu();
+  const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
+  const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+
+  FxTVxx_p_.noalias() = data->Fx.transpose() * Vxx_p;
+  START_PROFILER("SolverDDP::Qx");
+  Qx_[t] = data->Lx;
+  Qx_[t].noalias() += data->Fx.transpose() * Vx_p;
+  STOP_PROFILER("SolverDDP::Qx");
+  START_PROFILER("SolverDDP::Qxx");
+  Qxx_[t] = data->Lxx;
+  Qxx_[t].noalias() += FxTVxx_p_ * data->Fx;
+  STOP_PROFILER("SolverDDP::Qxx");
+  if (nu != 0) {
+    FuTVxx_p_[t].noalias() = data->Fu.transpose() * Vxx_p;
+    START_PROFILER("SolverDDP::Qu");
+    Qu_[t] = data->Lu;
+    Qu_[t].noalias() += data->Fu.transpose() * Vx_p;
+    STOP_PROFILER("SolverDDP::Qu");
+    START_PROFILER("SolverDDP::Quu");
+    Quu_[t] = data->Luu;
+    Quu_[t].noalias() += FuTVxx_p_[t] * data->Fu;
+    STOP_PROFILER("SolverDDP::Quu");
+    START_PROFILER("SolverDDP::Qxu");
+    Qxu_[t] = data->Lxu;
+    Qxu_[t].noalias() += FxTVxx_p_ * data->Fu;
+    STOP_PROFILER("SolverDDP::Qxu");
+    if (!std::isnan(ureg_)) {
+      Quu_[t].diagonal().array() += ureg_;
+    }
+  }
+}
+
+void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+  assert_pretty(t > problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
+  const std::size_t nu = model->get_nu();
+  Vx_[t] = Qx_[t];
+  Vxx_[t] = Qxx_[t];
+  if (nu != 0) {
+    START_PROFILER("SolverDDP::Vx");
+    Quuk_[t].noalias() = Quu_[t] * k_[t];
+    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+    STOP_PROFILER("SolverDDP::Vx");
+    START_PROFILER("SolverDDP::Vxx");
+    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    STOP_PROFILER("SolverDDP::Vxx");
+  }
+  Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+  Vxx_[t] = Vxx_tmp_;
+
+  if (!std::isnan(xreg_)) {
+    Vxx_[t].diagonal().array() += xreg_;
+  }
+
+  // Compute and store the Vx gradient at end of the interval (rollout state)
+  if (!is_feasible_) {
+    Vx_[t].noalias() += Vxx_[t] * fs_[t];
+  }
 }
 
 void SolverDDP::computeGains(const std::size_t t) {
