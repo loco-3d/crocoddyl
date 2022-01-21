@@ -32,7 +32,7 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carrying on inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, std::size_t, bp::optional<std::size_t, std::size_t, std::size_t> >(
-          bp::args("self", "state", "nu", "nr", "ng"),
+          bp::args("self", "state", "nu", "nr", "ng", "nh"),
           "Initialize the action model.\n\n"
           "You can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state description,\n"

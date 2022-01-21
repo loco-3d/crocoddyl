@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,13 +10,13 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                               const std::size_t& nu, const std::size_t& ng,
-                                                               const std::size_t& nh)
+                                                               const std::size_t nu, const std::size_t ng,
+                                                               const std::size_t nh)
     : state_(state), nu_(nu), ng_(ng), nh_(nh), unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                               const std::size_t& ng, const std::size_t& nh)
+                                                               const std::size_t ng, const std::size_t nh)
     : state_(state), nu_(state->get_nv()), ng_(ng), nh_(nh), unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -47,17 +47,17 @@ const boost::shared_ptr<StateAbstractTpl<Scalar> >& ConstraintModelAbstractTpl<S
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelAbstractTpl<Scalar>::get_nu() const {
+std::size_t ConstraintModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelAbstractTpl<Scalar>::get_ng() const {
+std::size_t ConstraintModelAbstractTpl<Scalar>::get_ng() const {
   return ng_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelAbstractTpl<Scalar>::get_nh() const {
+std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
 }
 

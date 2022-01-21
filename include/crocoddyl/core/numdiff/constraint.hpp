@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define CROCODDYL_CORE_NUMDIFF_CONSTRAINT_HPP_
 
 #include <boost/function.hpp>
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/constraint-base.hpp"
 
 namespace crocoddyl {
@@ -70,12 +69,12 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the disturbance value used by the numdiff routine
    */
-  const Scalar& get_disturbance() const;
+  const Scalar get_disturbance() const;
 
   /**
    * @brief Modify the disturbance value used by the numdiff routine
    */
-  void set_disturbance(const Scalar& disturbance);
+  void set_disturbance(const Scalar disturbance);
 
   /**
    * @brief Register functions that updates the shared data computed for a system rollout

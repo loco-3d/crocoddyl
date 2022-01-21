@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,18 +22,19 @@ void exposeConstraintAbstract() {
       "The constraint function depends on the state point x, which lies in the state manifold\n"
       "described with a nq-tuple, its velocity xd that belongs to the tangent space with nv dimension,\n"
       "and the control input u.",
-      bp::init<boost::shared_ptr<StateAbstract>, int, int, int>(
+      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, std::size_t>(
           bp::args("self", "state", "nu", "ng", "nh"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector (default state.nv)\n"
           ":param ng: number of inequality constraints\n"
           ":param nh: number of equality constraints"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, int, int>(bp::args("self", "state", "ng", "nh"),
-                                                                "Initialize the constraint model.\n\n"
-                                                                ":param state: state description\n"
-                                                                ":param ng: number of inequality constraints\n"
-                                                                ":param nh: number of equality constraints"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
+          bp::args("self", "state", "ng", "nh"),
+          "Initialize the constraint model.\n\n"
+          ":param state: state description\n"
+          ":param ng: number of inequality constraints\n"
+          ":param nh: number of equality constraints"))
       .def("calc", pure_virtual(&ConstraintModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the constraint value.\n\n"
            ":param data: constraint data\n"
@@ -65,18 +66,9 @@ void exposeConstraintAbstract() {
           "state",
           bp::make_function(&ConstraintModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
           "state description")
-      .add_property(
-          "nu",
-          bp::make_function(&ConstraintModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
-          "dimension of control vector")
-      .add_property(
-          "ng",
-          bp::make_function(&ConstraintModelAbstract_wrap::get_ng, bp::return_value_policy<bp::return_by_value>()),
-          "number of inequality constraints")
-      .add_property(
-          "nh",
-          bp::make_function(&ConstraintModelAbstract_wrap::get_nh, bp::return_value_policy<bp::return_by_value>()),
-          "number of equality constraints");
+      .add_property("nu", bp::make_function(&ConstraintModelAbstract_wrap::get_nu), "dimension of control vector")
+      .add_property("ng", bp::make_function(&ConstraintModelAbstract_wrap::get_ng), "number of inequality constraints")
+      .add_property("nh", bp::make_function(&ConstraintModelAbstract_wrap::get_nh), "number of equality constraints");
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();
 

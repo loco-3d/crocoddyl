@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,8 +57,8 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& ng,
-                             const std::size_t& nh);
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
+                             const std::size_t nh);
 
   /**
    * @copybrief ConstraintModelAbstractTpl()
@@ -69,7 +69,7 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& ng, const std::size_t& nh);
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh);
   virtual ~ConstraintModelAbstractTpl();
 
   /**
@@ -131,17 +131,17 @@ class ConstraintModelAbstractTpl {
   /**
    * @brief Return the dimension of the control input
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  const std::size_t& get_ng() const;
+  std::size_t get_ng() const;
 
   /**
    * @brief Return the number of equality constraints
    */
-  const std::size_t& get_nh() const;
+  std::size_t get_nh() const;
 
   /**
    * @brief Modify the constraint reference

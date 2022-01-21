@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state,
-                                                             const std::size_t& nu)
+                                                             const std::size_t nu)
     : state_(state), nu_(nu), ng_(0), ng_total_(0), nh_(0), nh_total_(0) {}
 
 template <typename Scalar>
@@ -26,7 +26,7 @@ ConstraintModelManagerTpl<Scalar>::~ConstraintModelManagerTpl() {}
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::addConstraint(const std::string& name,
                                                       boost::shared_ptr<ConstraintModelAbstract> constraint,
-                                                      bool active) {
+                                                      const bool active) {
   if (constraint->get_nu() != nu_) {
     throw_pretty(name << " constraint item doesn't have the same control dimension (it should be " +
                              std::to_string(nu_) + ")");
@@ -127,8 +127,8 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->constraint->calc(d_i, x, u);
-      const std::size_t& ng = m_i->constraint->get_ng();
-      const std::size_t& nh = m_i->constraint->get_nh();
+      const std::size_t ng = m_i->constraint->get_ng();
+      const std::size_t nh = m_i->constraint->get_nh();
       data->g.segment(ng_i, ng) = d_i->g;
       data->h.segment(nh_i, nh) = d_i->h;
       ng_i += ng;
@@ -153,7 +153,7 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of constraint datas and models");
   }
-  const std::size_t& ndx = state_->get_ndx();
+  const std::size_t ndx = state_->get_ndx();
   data->Gx.setZero();
   data->Gu.setZero();
   data->Hx.setZero();
@@ -173,8 +173,8 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
                                                     << it_m->first << " != " << it_d->first << ")");
 
       m_i->constraint->calcDiff(d_i, x, u);
-      const std::size_t& ng = m_i->constraint->get_ng();
-      const std::size_t& nh = m_i->constraint->get_nh();
+      const std::size_t ng = m_i->constraint->get_ng();
+      const std::size_t nh = m_i->constraint->get_nh();
       data->Gx.block(ng_i, 0, ng, ndx) = d_i->Gx;
       data->Gu.block(ng_i, 0, ng, nu_) = d_i->Gu;
       data->Hx.block(nh_i, 0, nh, ndx) = d_i->Hx;
@@ -215,27 +215,27 @@ ConstraintModelManagerTpl<Scalar>::get_constraints() const {
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelManagerTpl<Scalar>::get_nu() const {
+std::size_t ConstraintModelManagerTpl<Scalar>::get_nu() const {
   return nu_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelManagerTpl<Scalar>::get_ng() const {
+std::size_t ConstraintModelManagerTpl<Scalar>::get_ng() const {
   return ng_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelManagerTpl<Scalar>::get_ng_total() const {
+std::size_t ConstraintModelManagerTpl<Scalar>::get_ng_total() const {
   return ng_total_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelManagerTpl<Scalar>::get_nh() const {
+std::size_t ConstraintModelManagerTpl<Scalar>::get_nh() const {
   return nh_;
 }
 
 template <typename Scalar>
-const std::size_t& ConstraintModelManagerTpl<Scalar>::get_nh_total() const {
+std::size_t ConstraintModelManagerTpl<Scalar>::get_nh_total() const {
   return nh_total_;
 }
 

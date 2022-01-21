@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ class ConstraintModelManagerTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu);
+  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
 
   /**
    * @brief Initialize the constraint-manager model
@@ -96,7 +96,7 @@ class ConstraintModelManagerTpl {
    * @param[in] active      True if the constraint is activated (default true)
    */
   void addConstraint(const std::string& name, boost::shared_ptr<ConstraintModelAbstract> constraint,
-                     bool active = true);
+                     const bool active = true);
 
   /**
    * @brief Remove a constraint item
@@ -174,27 +174,27 @@ class ConstraintModelManagerTpl {
   /**
    * @brief Return the dimension of the control input
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the number of active inequality constraints
    */
-  const std::size_t& get_ng() const;
+  std::size_t get_ng() const;
 
   /**
    * @brief Return the number of active equality constraints
    */
-  const std::size_t& get_nh() const;
+  std::size_t get_nh() const;
 
   /**
    * @brief Return the number of total inequality constraints
    */
-  const std::size_t& get_ng_total() const;
+  std::size_t get_ng_total() const;
 
   /**
    * @brief Return the number of total equality constraints
    */
-  const std::size_t& get_nh_total() const;
+  std::size_t get_nh_total() const;
 
   /**
    * @brief Return the names of the active constraints

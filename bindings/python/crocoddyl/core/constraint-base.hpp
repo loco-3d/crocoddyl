@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2021, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,11 +17,11 @@ namespace python {
 
 class ConstraintModelAbstract_wrap : public ConstraintModelAbstract, public bp::wrapper<ConstraintModelAbstract> {
  public:
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& ng,
-                               const std::size_t& nh)
+  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
+                               const std::size_t nh)
       : ConstraintModelAbstract(state, nu, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
 
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t& ng, const std::size_t& nh)
+  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh)
       : ConstraintModelAbstract(state, ng, nh) {}
 
   void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,

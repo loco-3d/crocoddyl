@@ -113,12 +113,12 @@ std::size_t ActionModelAbstractTpl<Scalar>::get_nr() const {
 }
 
 template <typename Scalar>
-const std::size_t ActionModelAbstractTpl<Scalar>::get_ng() const {
+std::size_t ActionModelAbstractTpl<Scalar>::get_ng() const {
   return ng_;
 }
 
 template <typename Scalar>
-const std::size_t ActionModelAbstractTpl<Scalar>::get_nh() const {
+std::size_t ActionModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
 }
 

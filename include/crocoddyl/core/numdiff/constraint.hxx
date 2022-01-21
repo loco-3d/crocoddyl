@@ -91,12 +91,12 @@ const boost::shared_ptr<ConstraintModelAbstractTpl<Scalar> >& ConstraintModelNum
 }
 
 template <typename Scalar>
-const Scalar& ConstraintModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ConstraintModelNumDiffTpl<Scalar>::get_disturbance() const {
   return disturbance_;
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(const Scalar& disturbance) {
+void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   disturbance_ = disturbance;
 }
 
