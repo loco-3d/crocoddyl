@@ -107,7 +107,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     return ActionModelAbstract::multiplyByFx(Fx, A, out, op);
   }
 
-  void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
                              Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
     if (static_cast<std::size_t>(A.rows()) != state_->get_ndx()) {
       throw_pretty("Invalid argument: "
@@ -125,8 +125,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
                      << "number of rows of out is wrong, it should be " + std::to_string(state_->get_ndx()) +
                             " instead of " + std::to_string(out.cols()));
       }
-      MatrixXsRowMajor res =
-          bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), (MatrixXs)FxTranspose, (MatrixXs)A);
+      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFxTransposeBy.ptr(), (MatrixXs)Fx, (MatrixXs)A);
       if (static_cast<std::size_t>(res.rows()) != state_->get_ndx() || res.cols() != A.cols()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(state_->get_ndx()) +
@@ -136,7 +135,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       assigmentOperator(out, res, op);
       return;
     }
-    return ActionModelAbstract::multiplyFxTransposeBy(FxTranspose, A, out, op);
+    return ActionModelAbstract::multiplyFxTransposeBy(Fx, A, out, op);
   }
 
   void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
@@ -170,7 +169,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     return ActionModelAbstract::multiplyByFu(Fu, A, out, op);
   }
 
-  void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose, const Eigen::Ref<const MatrixXs>& A,
+  void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
                              Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
     if (static_cast<std::size_t>(A.rows()) != state_->get_ndx()) {
       throw_pretty("Invalid argument: "
@@ -188,8 +187,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
                      << "number of rows of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
                             std::to_string(out.cols()));
       }
-      MatrixXsRowMajor res =
-          bp::call<MatrixXsRowMajor>(multiplyFuTransposeBy.ptr(), (MatrixXs)FuTranspose, (MatrixXs)A);
+      MatrixXsRowMajor res = bp::call<MatrixXsRowMajor>(multiplyFuTransposeBy.ptr(), (MatrixXs)Fu, (MatrixXs)A);
       if (static_cast<std::size_t>(res.rows()) != nu_ || res.cols() != A.cols()) {
         throw_pretty("Invalid argument: "
                      << "resulting matrix has wrong dimension, it should be (" + std::to_string(nu_) + "," +
@@ -199,7 +197,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
       assigmentOperator(out, res, op);
       return;
     }
-    return ActionModelAbstract::multiplyFuTransposeBy(FuTranspose, A, out, op);
+    return ActionModelAbstract::multiplyFuTransposeBy(Fu, A, out, op);
   }
 
   void default_multiplyByFx(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
@@ -207,10 +205,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     return this->ActionModelAbstract::multiplyByFx(Fx, A, out, op);
   }
 
-  void default_multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& FxTranspose,
-                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
-                                     const AssignmentOp op) const {
-    return this->ActionModelAbstract::multiplyFxTransposeBy(FxTranspose, A, out, op);
+  void default_multiplyFxTransposeBy(const Eigen::Ref<const MatrixXs>& Fx, const Eigen::Ref<const MatrixXs>& A,
+                                     Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
+    return this->ActionModelAbstract::multiplyFxTransposeBy(Fx, A, out, op);
   }
 
   void default_multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
@@ -218,10 +215,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
     return this->ActionModelAbstract::multiplyByFu(Fu, A, out, op);
   }
 
-  void default_multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
-                                     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXsRowMajor> out,
-                                     const AssignmentOp op) const {
-    return this->ActionModelAbstract::multiplyFuTransposeBy(FuTranspose, A, out, op);
+  void default_multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
+                                     Eigen::Ref<MatrixXsRowMajor> out, const AssignmentOp op) const {
+    return this->ActionModelAbstract::multiplyFuTransposeBy(Fu, A, out, op);
   }
 
  protected:

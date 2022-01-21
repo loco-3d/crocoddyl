@@ -201,7 +201,7 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const 
 }
 
 template <typename Scalar>
-void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& FuTranspose,
+void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
                                                                   const Eigen::Ref<const MatrixXs>& A,
                                                                   Eigen::Ref<MatrixXdRowMajor> out,
                                                                   const AssignmentOp op) const {
@@ -215,11 +215,11 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::R
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
 
-  differential_->multiplyFuTransposeBy(FuTranspose.leftCols(nv), A.topRows(nv), out.topRows(nw), op);
+  differential_->multiplyFuTransposeBy(Fu.topRows(nv), A.topRows(nv), out.topRows(nw), op);
   if (op == setto) {
-    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), addto);
+    differential_->multiplyFuTransposeBy(Fu.bottomRows(nv), A.bottomRows(nv), out.topRows(nw), addto);
   } else {
-    differential_->multiplyFuTransposeBy(FuTranspose.rightCols(nv), A.bottomRows(nv), out.topRows(nw), op);
+    differential_->multiplyFuTransposeBy(Fu.bottomRows(nv), A.bottomRows(nv), out.topRows(nw), op);
   }
 }
 
