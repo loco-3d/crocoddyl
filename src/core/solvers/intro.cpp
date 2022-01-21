@@ -232,7 +232,7 @@ double SolverIntro::calcDiff() {
           YZ_[t] = Hu_qr_[t].householderQ();
           Hu_rank_[t] = Hu_qr_[t].rank();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
-              YZ_[t].leftCols(Hu_lu_[t].rank());
+              YZ_[t].leftCols(Hu_qr_[t].rank());
           HuY_[t].noalias() = data->Hu * Y;
           HuY_lu_[t].compute(HuY_[t]);
           const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
