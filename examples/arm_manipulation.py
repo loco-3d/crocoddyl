@@ -87,8 +87,9 @@ solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 # Solving it with the DDP algorithm
 solver.solve()
 
-print('Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
-    "gripper_left_joint")].translation.T)
+print(
+    'Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
+        "gripper_left_joint")].translation.T)
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:

@@ -421,26 +421,30 @@ class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
         self.xs = []
         self.us = []
         self.fs = []
-        self.steps = []
         self.iters = []
         self.costs = []
-        self.u_regs = []
-        self.x_regs = []
         self.stops = []
         self.grads = []
+        self.u_regs = []
+        self.x_regs = []
+        self.steps = []
+        self.ffeass = []
+        self.hfeass = []
 
     def __call__(self, solver):
         import copy
         self.xs = copy.copy(solver.xs)
         self.us = copy.copy(solver.us)
         self.fs.append(copy.copy(solver.fs))
-        self.steps.append(solver.stepLength)
         self.iters.append(solver.iter)
         self.costs.append(solver.cost)
-        self.u_regs.append(solver.u_reg)
-        self.x_regs.append(solver.x_reg)
         self.stops.append(solver.stoppingCriteria())
         self.grads.append(-solver.expectedImprovement()[1].item())
+        self.u_regs.append(solver.u_reg)
+        self.x_regs.append(solver.x_reg)
+        self.steps.append(solver.stepLength)
+        self.ffeass.append(solver.ffeas)
+        self.hfeass.append(solver.hfeas)
 
 
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
@@ -480,6 +484,26 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
         [plt.plot(U[i], label="u" + str(i)) for i in range(nu)]
         plt.legend()
         plt.xlabel("knots")
+    if show:
+        plt.show()
+
+
+def plotFeasibility(ffeass, hfeass, figIndex=1, show=True, figTitle=""):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+    plt.figure(figIndex, figsize=(6.4, 8))
+
+    # Plotting the feasibility
+    plt.ylabel("feasibiltiy")
+    plt.plot(ffeass)
+    plt.plot(hfeass)
+    plt.plot([max(ffeas, hfeas) for ffeas, hfeas in zip(ffeass, hfeass)])
+    plt.title(figTitle, fontsize=14)
+    plt.xlabel("iteration")
+    plt.yscale('log')
+    plt.legend(["dynamic", "equality", "total"])
     if show:
         plt.show()
 

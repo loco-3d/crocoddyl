@@ -84,8 +84,9 @@ else:
 # Solving it with the solver algorithm
 solver.solve()
 
-print('Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
-    "gripper_left_joint")].translation.T)
+print(
+    'Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
+        "gripper_left_joint")].translation.T)
 
 # Plotting the solution and the DDP convergence
 if WITHPLOT:
