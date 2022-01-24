@@ -15,7 +15,7 @@
 namespace crocoddyl {
 
 SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
-    : SolverDDP(problem), eq_solver_(LuNull), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.) {
+    : SolverFDDP(problem), eq_solver_(LuNull), th_feas_(1e-4), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.) {
   reg_incfactor_ = 1e6;
 
   const std::size_t T = problem_->get_T();
@@ -97,15 +97,15 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       }
       break;
     }
+    updateExpectedImprovement();
     expectedImprovement();
 
     // Update the penalty parameter for computing the merit function and its directional derivative
     // For more details see Section 3 of "An Interior Point Algorithm for Large Scale Nonlinear Programming"
-    if (hfeas_ != 0) {
+    if (hfeas_ != 0 && iter_ != 0) {
       upsilon_ = std::max(upsilon_, (d_[0] + .5 * d_[1]) / ((1 - rho_) * hfeas_));
     }
 
-    // We need to recalculate the derivatives when the step length passes
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
       steplength_ = *it;
       try {
@@ -114,14 +114,25 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       } catch (std::exception& e) {
         continue;
       }
+      expectedImprovement();
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
-      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * hfeas_;
-      if (abs(d_[0]) < th_grad_ || !is_feasible_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
-        was_feasible_ = is_feasible_;
-        setCandidate(xs_try_, us_try_, true);
-        cost_ = cost_try_;
-        hfeas_ = hfeas_try_;
-        break;
+      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * (hfeas_ - hfeas_try_);
+      if (dPhiexp_ >= 0) {  // descend direction
+        if (abs(d_[0]) < th_grad_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
+          was_feasible_ = is_feasible_;
+          setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
+          cost_ = cost_try_;
+          hfeas_ = hfeas_try_;
+          break;
+        }
+      } else {  // reducing the gaps by allowing a small increment in the cost value
+        if (dV_ > th_acceptnegstep_ * dVexp_) {
+          was_feasible_ = is_feasible_;
+          setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
+          cost_ = cost_try_;
+          hfeas_ = hfeas_try_;
+          break;
+        }
       }
     }
 
@@ -135,7 +146,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
     if (steplength_ > th_stepdec_ && dV_ >= 0.) {
       decreaseRegularization();
     }
-    if (steplength_ <= th_stepinc_) {
+    if (steplength_ <= th_stepinc_ || abs(d_[1]) <= th_feas_) {
       if (xreg_ == reg_max_) {
         STOP_PROFILER("SolverIntro::solve");
         return false;
@@ -165,7 +176,7 @@ double SolverIntro::stoppingCriteria() {
 
 void SolverIntro::resizeData() {
   START_PROFILER("SolverIntro::resizeData");
-  SolverDDP::resizeData();
+  SolverFDDP::resizeData();
 
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
@@ -192,7 +203,7 @@ void SolverIntro::resizeData() {
 
 double SolverIntro::calcDiff() {
   START_PROFILER("SolverIntro::calcDiff");
-  SolverDDP::calcDiff();
+  SolverFDDP::calcDiff();
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
@@ -316,11 +327,11 @@ void SolverIntro::computeGains(const std::size_t t) {
         k_[t].noalias() += Z * Qz_[t];
         K_[t].noalias() += Z * Qzx;
       } else {
-        SolverDDP::computeGains(t);
+        SolverFDDP::computeGains(t);
       }
       break;
     case Schur:
-      SolverDDP::computeGains(t);
+      SolverFDDP::computeGains(t);
       if (nu > 0 && nh > 0) {
         START_PROFILER("SolverIntro::Qzz_inv");
         QuuinvHuT_[t] = data->Hu.transpose();
@@ -347,6 +358,8 @@ void SolverIntro::computeGains(const std::size_t t) {
 }
 
 EqualitySolverType SolverIntro::get_equality_solver() const { return eq_solver_; }
+
+double SolverIntro::get_th_feas() const { return th_feas_; }
 
 double SolverIntro::get_rho() const { return rho_; }
 
@@ -377,6 +390,8 @@ const std::vector<Eigen::VectorXd>& SolverIntro::get_ks() const { return ks_; }
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_Ks() const { return Ks_; }
 
 void SolverIntro::set_equality_solver(const EqualitySolverType type) { eq_solver_ = type; }
+
+void SolverIntro::set_th_feas(const double th_feas) { th_feas_ = th_feas; }
 
 void SolverIntro::set_rho(const double rho) {
   if (0. >= rho || rho > 1.) {

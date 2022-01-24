@@ -24,7 +24,7 @@ void exposeSolverIntro() {
       .value("Schur", Schur)
       .export_values();
 
-  bp::class_<SolverIntro, bp::bases<SolverDDP> >(
+  bp::class_<SolverIntro, bp::bases<SolverFDDP> >(
       "SolverIntro", bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
                                                                    "Initialize the vector dimension.\n\n"
                                                                    ":param problem: shooting problem."))
@@ -60,6 +60,8 @@ void exposeSolverIntro() {
       .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
                     "estimated penalty paramter that balances relative contribution of the cost function and equality "
                     "constraints.")
+      .add_property("th_feas", bp::make_function(&SolverIntro::get_th_feas),
+                    bp::make_function(&SolverIntro::set_th_feas), "criteria to define optimality, then.")
       .add_property("Hu_rank",
                     make_function(&SolverIntro::get_Hu_rank, bp::return_value_policy<bp::copy_const_reference>()),
                     "rank of Hu")

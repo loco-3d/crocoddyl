@@ -9,13 +9,13 @@
 #ifndef CROCODDYL_CORE_SOLVERS_INTRO_HPP_
 #define CROCODDYL_CORE_SOLVERS_INTRO_HPP_
 
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 
 namespace crocoddyl {
 
 enum EqualitySolverType { LuNull = 0, QrNull, Schur };
 
-class SolverIntro : public SolverDDP {
+class SolverIntro : public SolverFDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -42,6 +42,11 @@ class SolverIntro : public SolverDDP {
    * @brief Return the type of solver used for handling the equality constraints
    */
   EqualitySolverType get_equality_solver() const;
+
+  /**
+   * @brief Return the threshold for switching to feasibility
+   */
+  double get_th_feas() const;
 
   /**
    * @brief Return the rho parameter used in the merit function
@@ -123,12 +128,18 @@ class SolverIntro : public SolverDDP {
   void set_equality_solver(const EqualitySolverType type);
 
   /**
+   * @brief Modify the threshold for switching to feasibility
+   */
+  void set_th_feas(const double th_feas);
+
+  /**
    * @brief Modify the rho parameter used in the merit function
    */
   void set_rho(const double rho);
 
  protected:
   enum EqualitySolverType eq_solver_;  //!< Strategy used for handling the equality constraints
+  double th_feas_;                     //!< Threshold for switching to feasibility
   double rho_;                         //!< Parameter used in the merit function to predict the expected reduction
   double dPhi_;                        //!< Reduction in the merit function obtained by `tryStep()`
   double dPhiexp_;                     //!< Expected reduction in the merit function
