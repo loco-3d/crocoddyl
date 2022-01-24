@@ -146,8 +146,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
       const std::size_t nu = model->get_nu();
       if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
         throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be equals to " +
-                            std::to_string(nu) + ")");
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (" << us_warm[t].size()
+                     << " provided - it should be equal to " + std::to_string(nu) + "). ActionModel: " << *model);
       }
     }
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
