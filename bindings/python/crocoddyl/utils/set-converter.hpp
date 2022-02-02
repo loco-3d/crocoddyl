@@ -1,9 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Oxford
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
-// Copyright (C) 2020, INRIA
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, INRIA
+//                          University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,19 +29,21 @@ namespace bp = boost::python;
  * \sa Pickle
  */
 template <typename Container>
-struct PickleSet : boost::python::pickle_suite {
-  static boost::python::tuple getinitargs(const Container&) { return boost::python::make_tuple(); }
-  static boost::python::tuple getstate(boost::python::object op) {
+struct PickleSet : bp::pickle_suite {
+  static bp::tuple getinitargs(const Container&) { return bp::make_tuple(); }
+
+  static bp::tuple getstate(bp::object op) {
     bp::list list;
-    const Container& ret = boost::python::extract<const Container&>(op);
+    const Container& ret = bp::extract<const Container&>(op);
     for (const auto& it : ret) {
       list.append(it);
     }
-    return boost::python::make_tuple(list);
+    return bp::make_tuple(list);
   }
-  static void setstate(boost::python::object op, boost::python::tuple tup) {
-    Container& o = boost::python::extract<Container&>(op)();
-    boost::python::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
+
+  static void setstate(bp::object op, bp::tuple tup) {
+    Container& o = bp::extract<Container&>(op)();
+    bp::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
     o.insert(begin, end);
   }
 };
@@ -52,8 +53,7 @@ template <typename Container>
 struct set_to_set {
   /** @note Registers converter from a python iterable type to the provided type. */
   static void register_converter() {
-    boost::python::converter::registry::push_back(&set_to_set::convertible, &set_to_set::construct,
-                                                  boost::python::type_id<Container>());
+    bp::converter::registry::push_back(&set_to_set::convertible, &set_to_set::construct, bp::type_id<Container>());
   }
 
   /** @brief Check if PyObject is iterable. */
@@ -78,7 +78,7 @@ struct set_to_set {
    * Container Concept requirements:
    *    * Container::value_type is CopyConstructable.
    */
-  static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
+  static void construct(PyObject* object, bp::converter::rvalue_from_python_stage1_data* data) {
     // Object is a borrowed reference, so create a handle indicting it is
     // borrowed for proper reference counting.
     bp::handle<> handle(bp::borrowed(object));
@@ -99,7 +99,7 @@ struct set_to_set {
     data->convertible = storage;
   }
 
-  static boost::python::object toset(Container& self) {
+  static bp::object toset(Container& self) {
     PyObject* set = PySet_New(NULL);
     for (auto it = self.begin(); it != self.end(); ++it) {
       PySet_Add(set, bp::object(*it).ptr());
@@ -125,8 +125,6 @@ struct StdSetPythonVisitor : public set_to_set<std::set<T, Compare, Allocator>> 
   typedef set_to_set<Container> FromPythonSetConverter;
 
   static void expose(const std::string& class_name, const std::string& doc_string = "") {
-    namespace bp = boost::python;
-
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
         // .def(StdSetPythonVisitor());  // TODO: Needs an indexing_suite for
         // set

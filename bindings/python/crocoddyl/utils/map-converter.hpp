@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh,
-// Copyright (C) 2020, INRIA
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,8 +41,7 @@ struct PickleMap : public PickleVector<Container> {
 template <typename Container>
 struct dict_to_map {
   static void register_converter() {
-    boost::python::converter::registry::push_back(&dict_to_map::convertible, &dict_to_map::construct,
-                                                  boost::python::type_id<Container>());
+    bp::converter::registry::push_back(&dict_to_map::convertible, &dict_to_map::construct, bp::type_id<Container>());
   }
 
   /// Check if conversion is possible
@@ -54,8 +52,8 @@ struct dict_to_map {
   }
 
   /// Perform the conversion
-  static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
-    // convert the PyObject pointed to by `object` to a boost::python::dict
+  static void construct(PyObject* object, bp::converter::rvalue_from_python_stage1_data* data) {
+    // convert the PyObject pointed to by `object` to a bp::dict
     bp::handle<> handle(bp::borrowed(object));  // "smart ptr"
     bp::dict dict(handle);
 
@@ -96,7 +94,7 @@ struct dict_to_map {
     data->convertible = storage;
   }
 
-  static boost::python::dict todict(Container& self) {
+  static bp::dict todict(Container& self) {
     bp::dict dict;
     typename Container::const_iterator it;
     for (it = self.begin(); it != self.end(); ++it) {
@@ -116,14 +114,13 @@ struct dict_to_map {
  */
 template <class Key, class T, class Compare = std::less<Key>,
           class Allocator = std::allocator<std::pair<const Key, T> >, bool NoProxy = false>
-struct StdMapPythonVisitor
-    : public boost::python::map_indexing_suite<typename std::map<Key, T, Compare, Allocator>, NoProxy>,
-      public dict_to_map<std::map<Key, T, Compare, Allocator> > {
+struct StdMapPythonVisitor : public bp::map_indexing_suite<typename std::map<Key, T, Compare, Allocator>, NoProxy>,
+                             public dict_to_map<std::map<Key, T, Compare, Allocator> > {
   typedef std::map<Key, T, Compare, Allocator> Container;
   typedef dict_to_map<Container> FromPythonDictConverter;
 
   static void expose(const std::string& class_name, const std::string& doc_string = "") {
-    namespace bp = boost::python;
+    namespace bp = bp;
 
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
         .def(StdMapPythonVisitor())

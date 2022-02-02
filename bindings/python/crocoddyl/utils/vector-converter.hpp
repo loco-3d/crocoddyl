@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
-// Copyright (C) 2020, INRIA
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,14 +26,12 @@ namespace bp = boost::python;
  * \sa Pickle
  */
 template <typename Container>
-struct PickleVector : boost::python::pickle_suite {
-  static boost::python::tuple getinitargs(const Container&) { return boost::python::make_tuple(); }
-  static boost::python::tuple getstate(boost::python::object op) {
-    return boost::python::make_tuple(boost::python::list(boost::python::extract<const Container&>(op)()));
-  }
-  static void setstate(boost::python::object op, boost::python::tuple tup) {
-    Container& o = boost::python::extract<Container&>(op)();
-    boost::python::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
+struct PickleVector : bp::pickle_suite {
+  static bp::tuple getinitargs(const Container&) { return bp::make_tuple(); }
+  static bp::tuple getstate(bp::object op) { return bp::make_tuple(bp::list(bp::extract<const Container&>(op)())); }
+  static void setstate(bp::object op, bp::tuple tup) {
+    Container& o = bp::extract<Container&>(op)();
+    bp::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;
     o.insert(o.begin(), begin, end);
   }
 };
@@ -44,8 +41,8 @@ template <typename Container>
 struct list_to_vector {
   /** @note Registers converter from a python iterable type to the provided type. */
   static void register_converter() {
-    boost::python::converter::registry::push_back(&list_to_vector::convertible, &list_to_vector::construct,
-                                                  boost::python::type_id<Container>());
+    bp::converter::registry::push_back(&list_to_vector::convertible, &list_to_vector::construct,
+                                       bp::type_id<Container>());
   }
 
   /** @brief Check if PyObject is iterable. */
@@ -73,7 +70,7 @@ struct list_to_vector {
    *    * Container can be constructed and populated with two iterators.
    * i.e. Container(begin, end)
    */
-  static void construct(PyObject* object, boost::python::converter::rvalue_from_python_stage1_data* data) {
+  static void construct(PyObject* object, bp::converter::rvalue_from_python_stage1_data* data) {
     // Object is a borrowed reference, so create a handle indicting it is
     // borrowed for proper reference counting.
     bp::handle<> handle(bp::borrowed(object));
@@ -94,7 +91,7 @@ struct list_to_vector {
     data->convertible = storage;
   }
 
-  static boost::python::list tolist(Container& self) {
+  static bp::list tolist(Container& self) {
     typedef bp::iterator<Container> iterator;
     bp::list list(iterator()(self));
     return list;
@@ -109,14 +106,13 @@ struct list_to_vector {
  * @param[in] NoProxy    When set to false, the elements will be copied when returned to Python.
  */
 template <class T, class Allocator = std::allocator<T>, bool NoProxy = false>
-struct StdVectorPythonVisitor
-    : public boost::python::vector_indexing_suite<typename std::vector<T, Allocator>, NoProxy>,
-      public list_to_vector<std::vector<T, Allocator> > {
+struct StdVectorPythonVisitor : public bp::vector_indexing_suite<typename std::vector<T, Allocator>, NoProxy>,
+                                public list_to_vector<std::vector<T, Allocator> > {
   typedef std::vector<T, Allocator> Container;
   typedef list_to_vector<Container> FromPythonListConverter;
 
   static void expose(const std::string& class_name, const std::string& doc_string = "") {
-    namespace bp = boost::python;
+    namespace bp = bp;
 
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
         .def(StdVectorPythonVisitor())
