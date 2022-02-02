@@ -13,9 +13,7 @@
 #include <set>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
-#include <boost/python/suite/indexing/indexing_suite.hpp>
-
-#include <iostream>
+#include "set_indexing_suite.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -120,14 +118,14 @@ struct set_to_set {
  * returned to Python.
  */
 template <class T, class Compare = std::less<T>, class Allocator = std::allocator<T>, bool NoProxy = false>
-struct StdSetPythonVisitor : public set_to_set<std::set<T, Compare, Allocator>> {
+struct StdSetPythonVisitor : public set_indexing_suite<typename std::set<T, Compare, Allocator>, NoProxy>,
+                             set_to_set<std::set<T, Compare, Allocator>> {
   typedef std::set<T, Compare, Allocator> Container;
   typedef set_to_set<Container> FromPythonSetConverter;
 
   static void expose(const std::string& class_name, const std::string& doc_string = "") {
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
-        // .def(StdSetPythonVisitor());  // TODO: Needs an indexing_suite for
-        // set
+        .def(StdSetPythonVisitor())
         .def("toset", &FromPythonSetConverter::toset, bp::arg("self"), "Returns the std::set as a Python set.")
         .def_pickle(PickleSet<Container>());
     // Register conversion
