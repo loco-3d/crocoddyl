@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +50,7 @@ class DifferentialActionModelAbstract_wrap : public DifferentialActionModelAbstr
   }
 
   boost::shared_ptr<DifferentialActionDataAbstract> createData() {
+    enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
       return bp::call<boost::shared_ptr<DifferentialActionDataAbstract> >(createData.ptr());
     }
