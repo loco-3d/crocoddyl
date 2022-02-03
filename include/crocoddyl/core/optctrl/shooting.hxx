@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
   allocateData();
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-  nthreads_ = CROCODDYL_WITH_NTHREADS;
+  if (enableMultithreading()) {
+    nthreads_ = CROCODDYL_WITH_NTHREADS;
+  }
 #endif
 }
 
@@ -121,7 +123,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-  nthreads_ = CROCODDYL_WITH_NTHREADS;
+  if (enableMultithreading()) {
+    nthreads_ = CROCODDYL_WITH_NTHREADS;
+  }
 #endif
 }
 
@@ -484,6 +488,12 @@ void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
     nthreads_ = CROCODDYL_WITH_NTHREADS;
   } else {
     nthreads_ = static_cast<std::size_t>(nthreads);
+  }
+  if (enableMultithreading()) {
+    std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
+                 "support is not enabled."
+              << std::endl;
+    nthreads_ = 1;
   }
 #endif
 }

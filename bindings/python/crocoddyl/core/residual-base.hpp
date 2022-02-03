@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,7 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract, public bp::wrap
   }
 
   boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
+    enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
       return bp::call<boost::shared_ptr<ResidualDataAbstract> >(createData.ptr(), boost::ref(data));
     }

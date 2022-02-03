@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,6 +12,11 @@
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
+
+inline bool& enableMultithreading() {
+  static bool enable = true;
+  return enable;
+}
 
 enum AssignmentOp { setto, addto, rmfrom };
 
