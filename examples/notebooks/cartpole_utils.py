@@ -5,7 +5,7 @@ from matplotlib import animation
 from matplotlib import pyplot as plt
 
 
-def animateCartpole(xs, sleep=50):
+def animateCartpole(xs, sleep=50, show=False):
     print("processing the animation ... ")
     cart_size = 1.
     pole_length = 5.
@@ -35,4 +35,6 @@ def animateCartpole(xs, sleep=50):
 
     anim = animation.FuncAnimation(fig, animate, init_func=init, frames=len(xs), interval=sleep, blit=True)
     print("... processing done")
+    if show:
+        plt.show()
     return anim

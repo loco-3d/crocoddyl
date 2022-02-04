@@ -1,7 +1,5 @@
 # Display the solution
 import numpy as np
-from IPython.display import HTML
-
 from cartpole_utils import animateCartpole
 import crocoddyl
 
@@ -79,4 +77,5 @@ ddp = crocoddyl.SolverDDP(problem)
 ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 ddp.solve([], [], 300)
 
-HTML(animateCartpole(ddp.xs).to_html5_video())
+# Display animation
+animateCartpole(ddp.xs, show=True)
