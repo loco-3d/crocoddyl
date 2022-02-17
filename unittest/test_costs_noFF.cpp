@@ -98,6 +98,9 @@ void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type, ActivationMod
 
 void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type,
                                               ActivationModelTypes::Type activation_type) {
+#if BOOST_VERSION / 100 % 1000 >= 60
+  using namespace boost::placeholders;
+#endif
   // create the model
   CostModelFactory factory;
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, activation_type);
