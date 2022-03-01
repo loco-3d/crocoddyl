@@ -25,8 +25,10 @@ void exposeActivationQuadraticBarrier() {
                                    ":param lb: lower bounds\n"
                                    ":param ub: upper bounds\n"
                                    ":param beta: range of activation (between 0 to 1, default 1)"))
-      .add_property("lb", bp::make_getter(&ActivationBounds::lb, bp::return_internal_reference<>()), "lower bounds")
-      .add_property("ub", bp::make_getter(&ActivationBounds::ub, bp::return_internal_reference<>()), "upper bounds")
+      .add_property("lb", bp::make_getter(&ActivationBounds::lb),
+                    bp::make_setter(&ActivationBounds::lb, bp::return_internal_reference<>()), "lower bounds")
+      .add_property("ub", bp::make_getter(&ActivationBounds::ub),
+                    bp::make_setter(&ActivationBounds::lb, bp::return_internal_reference<>()), "upper bounds")
       .add_property("beta", &ActivationBounds::beta, "beta");
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelQuadraticBarrier> >();
@@ -54,11 +56,9 @@ void exposeActivationQuadraticBarrier() {
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuadraticBarrier::createData, bp::args("self"),
            "Create the weighted quadratic action data.")
-      .add_property("bounds",
-                    bp::make_function(&ActivationModelQuadraticBarrier::get_bounds,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&ActivationModelQuadraticBarrier::set_bounds),
-                    "bounds (beta, lower and upper bounds)");
+      .add_property(
+          "bounds", bp::make_function(&ActivationModelQuadraticBarrier::get_bounds, bp::return_internal_reference<>()),
+          bp::make_function(&ActivationModelQuadraticBarrier::set_bounds), "bounds (beta, lower and upper bounds)");
 }
 
 }  // namespace python
