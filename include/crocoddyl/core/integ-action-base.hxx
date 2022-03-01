@@ -40,7 +40,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
-      control_(new ControlParametrizationModelPolyZero(model->get_nu())),
+      control_(new ControlParametrizationModelPolyZeroTpl<Scalar>(model->get_nu())),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
   init();

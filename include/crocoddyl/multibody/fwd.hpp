@@ -271,6 +271,11 @@ template <typename Scalar>
 struct ContactDataMultipleTpl;
 
 template <typename Scalar>
+class ContactModel1DTpl;
+template <typename Scalar>
+struct ContactData1DTpl;
+
+template <typename Scalar>
 class ContactModel2DTpl;
 template <typename Scalar>
 struct ContactData2DTpl;
@@ -467,12 +472,14 @@ DEPRECATED("Use ResidualDataContactWrenchCone", typedef CostDataResidualTpl<doub
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
-enum ContactType { Contact2D, Contact3D, Contact6D, ContactUndefined };
-enum ImpulseType { Impulse3D, Impulse6D, ImpulseUndefined };
+enum ContactType { ContactUndefined, Contact1D, Contact2D, Contact3D, Contact6D };
+enum ImpulseType { ImpulseUndefined, Impulse3D, Impulse6D };
 
 typedef ContactItemTpl<double> ContactItem;
 typedef ContactModelMultipleTpl<double> ContactModelMultiple;
 typedef ContactDataMultipleTpl<double> ContactDataMultiple;
+typedef ContactModel1DTpl<double> ContactModel1D;
+typedef ContactData1DTpl<double> ContactData1D;
 typedef ContactModel2DTpl<double> ContactModel2D;
 typedef ContactData2DTpl<double> ContactData2D;
 typedef ContactModel3DTpl<double> ContactModel3D;

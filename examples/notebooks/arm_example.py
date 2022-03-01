@@ -18,9 +18,10 @@ robot.viewer.gui.refresh()
 
 # Create the cost functions
 state = crocoddyl.StateMultibody(robot.model)
-goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), target)
-xRegCost = crocoddyl.CostModelState(state)
-uRegCost = crocoddyl.CostModelControl(state)
+goalResidual = crocoddyl.ResidualModelFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), target)
+goalTrackingCost = crocoddyl.CostModelResidual(state, goalResidual)
+xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
+uRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelControl(state))
 
 # Create cost model per each action model
 runningCostModel = crocoddyl.CostModelSum(state)

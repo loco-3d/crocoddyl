@@ -70,7 +70,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
       if (dVexp_ >= 0) {  // descend direction
-        if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
+        if (abs(d_[0]) < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -119,6 +119,10 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
   const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
+    // NB: The dimension of vectors xs_try_ and xs_ are T+1, whereas the dimension of dx_ is T. Here, we are re-using
+    // the final element of dx_ for the computation of the difference at the terminal node. Using the access iterator
+    // back() this re-use of the final element is fine. Cf. the discussion at
+    // https://github.com/loco-3d/crocoddyl/issues/1022
     problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);

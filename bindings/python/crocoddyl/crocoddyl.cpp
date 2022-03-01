@@ -9,6 +9,7 @@
 #include "python/crocoddyl/fwd.hpp"
 #include "crocoddyl/core/utils/version.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "python/crocoddyl/utils/set-converter.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -40,6 +41,9 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
   StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose("StdVec_MatrixX");
   StdVectorPythonVisitor<RowMatrixX, std::allocator<RowMatrixX>, true>::expose("StdVec_RowMatrixX");
+
+  // Register converters between std::set and Python set
+  StdSetPythonVisitor<std::string, std::less<std::string>, std::allocator<std::string>, true>::expose("StdSet_String");
 
   exposeCore();
   exposeMultibody();

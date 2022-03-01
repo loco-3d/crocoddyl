@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_COST_BASE_HPP_
 
 #include "crocoddyl/core/cost-base.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -65,6 +64,7 @@ class CostModelAbstract_wrap : public CostModelAbstract, public bp::wrapper<Cost
   }
 
   boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data) {
+    enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
       return bp::call<boost::shared_ptr<CostDataAbstract> >(createData.ptr(), boost::ref(data));
     }

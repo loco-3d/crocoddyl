@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,20 +113,22 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   } else {
     if (xs_warm.size() != T + 1) {
-      throw_pretty("Warm start state has wrong dimension, got " << xs_warm.size() << " expecting " << (T + 1));
+      throw_pretty("Warm start state vector has wrong dimension, got " << xs_warm.size() << " expecting " << (T + 1));
     }
-    const std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
     for (std::size_t t = 0; t < T; ++t) {
+      const std::size_t nx = models[t]->get_state()->get_nx();
       if (static_cast<std::size_t>(xs_warm[t].size()) != nx) {
         throw_pretty("Invalid argument: "
-                     << "xs_init[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) +
-                            ")");
+                     << "xs_init[" + std::to_string(t) + "] has wrong dimension (" << xs_warm[t].size()
+                     << " provided - it should be equal to " + std::to_string(nx) + "). ActionModel: " << *models[t]);
       }
     }
+    const std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
     if (static_cast<std::size_t>(xs_warm[T].size()) != nx) {
       throw_pretty("Invalid argument: "
-                   << "xs_init[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) +
-                          ")");
+                   << "xs_init[" + std::to_string(T) + "] (terminal state) has wrong dimension (" << xs_warm[T].size()
+                   << " provided - it should be equal to " + std::to_string(nx) + "). ActionModel: "
+                   << *problem_->get_terminalModel());
     }
     std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
   }
@@ -146,8 +148,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
       const std::size_t nu = model->get_nu();
       if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
         throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be equals to " +
-                            std::to_string(nu) + ")");
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (" << us_warm[t].size()
+                     << " provided - it should be equal to " + std::to_string(nu) + "). ActionModel: " << *model);
       }
     }
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
@@ -203,19 +205,21 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
     throw_pretty("Invalid argument: "
-                 << "xs list has to be " + std::to_string(T + 1));
+                 << "xs list has to be of length " + std::to_string(T + 1));
   }
 
   const std::size_t nx = problem_->get_nx();
   for (std::size_t t = 0; t < T; ++t) {
     if (static_cast<std::size_t>(xs[t].size()) != nx) {
       throw_pretty("Invalid argument: "
-                   << "xs[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
+                   << "xs[" + std::to_string(t) + "] has wrong dimension (" << xs[t].size()
+                   << " provided - it should be " + std::to_string(nx) + ")")
     }
   }
   if (static_cast<std::size_t>(xs[T].size()) != nx) {
     throw_pretty("Invalid argument: "
-                 << "xs[" + std::to_string(T) + "] has wrong dimension (it should be " + std::to_string(nx) + ")")
+                 << "xs[" + std::to_string(T) + "] (terminal state) has wrong dimension (" << xs[T].size()
+                 << " provided - it should be " + std::to_string(nx) + ")")
   }
   xs_ = xs;
 }
@@ -224,7 +228,7 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
   const std::size_t T = problem_->get_T();
   if (us.size() != T) {
     throw_pretty("Invalid argument: "
-                 << "us list has to be " + std::to_string(T));
+                 << "us list has to be of length " + std::to_string(T));
   }
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
@@ -233,7 +237,8 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
     const std::size_t nu = model->get_nu();
     if (static_cast<std::size_t>(us[t].size()) != nu) {
       throw_pretty("Invalid argument: "
-                   << "us[" + std::to_string(t) + "] has wrong dimension (it should be " + std::to_string(nu) + ")")
+                   << "us[" + std::to_string(t) + "] has wrong dimension (" << us[t].size()
+                   << " provided - it should be " + std::to_string(nu) + ")")
     }
   }
   us_ = us;

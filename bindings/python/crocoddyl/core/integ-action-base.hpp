@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,7 @@ class IntegratedActionModelAbstract_wrap : public IntegratedActionModelAbstract,
   }
 
   boost::shared_ptr<ActionDataAbstract> createData() {
+    enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
       return bp::call<boost::shared_ptr<IntegratedActionDataAbstract> >(createData.ptr());
     }

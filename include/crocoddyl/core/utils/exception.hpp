@@ -11,14 +11,9 @@
 
 #include <exception>
 #include <sstream>
+#include <iostream>
 
-#include "crocoddyl/core/utils/to-string.hpp"
-
-#if __cplusplus >= 201103L  // We are using C++11 or a later version
 #define NOEXCEPT noexcept
-#else
-#define NOEXCEPT throw()
-#endif
 
 #define throw_pretty(m)                                                            \
   {                                                                                \

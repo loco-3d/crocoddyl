@@ -40,6 +40,9 @@ void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<Residual
 
   // We transform the force to the contact frame
   switch (d->contact_type) {
+    case Contact1D:
+      data->r = ((d->contact->jMf.actInv(d->contact->f) - fref_).linear()).row(2);
+      break;
     case Contact3D:
       data->r = (d->contact->jMf.actInv(d->contact->f) - fref_).linear();
       break;
@@ -66,6 +69,10 @@ void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<Resi
   const MatrixXs& df_dx = d->contact->df_dx;
   const MatrixXs& df_du = d->contact->df_du;
   switch (d->contact_type) {
+    case Contact1D:
+      data->Rx = df_dx.template topRows<1>();
+      data->Ru = df_du.template topRows<1>();
+      break;
     case Contact3D:
       data->Rx = df_dx.template topRows<3>();
       data->Ru = df_du.template topRows<3>();

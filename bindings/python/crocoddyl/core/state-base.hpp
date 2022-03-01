@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,9 +22,15 @@ namespace python {
 class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstract> {
  public:
   using StateAbstract::lb_;
+  using StateAbstract::ndx_;
+  using StateAbstract::nq_;
+  using StateAbstract::nv_;
+  using StateAbstract::nx_;
   using StateAbstract::ub_;
 
-  StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {}
+  StateAbstract_wrap(int nx, int ndx) : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {
+    enableMultithreading() = false;
+  }
 
   Eigen::VectorXd zero() const { return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr()); }
 
@@ -245,8 +251,8 @@ class StateAbstract_wrap : public StateAbstract, public bp::wrapper<StateAbstrac
       throw_pretty("Invalid argument: "
                    << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
     }
-    return bp::call<Eigen::MatrixXd>(this->get_override("JintegrateTransport").ptr(), x, dx, (Eigen::MatrixXd)Jin,
-                                     firstsecond);
+    return bp::call<Eigen::MatrixXd>(this->get_override("JintegrateTransport").ptr(), (Eigen::VectorXd)x,
+                                     (Eigen::VectorXd)dx, (Eigen::MatrixXd)Jin, firstsecond);
   }
 };
 

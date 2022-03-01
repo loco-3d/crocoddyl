@@ -29,6 +29,7 @@ def rotationMatrixFromTwoVectors(a, b):
 
 
 class DisplayAbstract:
+
     def __init__(self, rate=-1, freq=1):
         self.rate = rate
         self.freq = freq
@@ -63,6 +64,7 @@ class DisplayAbstract:
 
 
 class GepettoDisplay(DisplayAbstract):
+
     def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
@@ -182,10 +184,10 @@ class GepettoDisplay(DisplayAbstract):
                             R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
-                                if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                    if contact.frame == c.cost.reference.id:
-                                        R = c.cost.reference.cone.R
-                                        mu = c.cost.reference.cone.mu
+                                if isinstance(c.cost.residual, libcrocoddyl_pywrap.ResidualModelContactFrictionCone):
+                                    if contact.frame == c.cost.residual.id:
+                                        R = c.cost.residual.reference.R
+                                        mu = c.cost.residual.reference.mu
                                         continue
                             fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
@@ -200,10 +202,10 @@ class GepettoDisplay(DisplayAbstract):
                             R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
-                                if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                    if contact.frame == c.cost.reference.id:
-                                        R = c.cost.reference.cone.R
-                                        mu = c.cost.reference.cone.mu
+                                if isinstance(c.cost.residual, libcrocoddyl_pywrap.ResidualModelContactFrictionCone):
+                                    if contact.frame == c.cost.residual.id:
+                                        R = c.cost.residual.reference.R
+                                        mu = c.cost.residual.reference.mu
                                         continue
                             fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                     fs.append(fc)
@@ -218,10 +220,10 @@ class GepettoDisplay(DisplayAbstract):
                         R = np.eye(3)
                         mu = 0.7
                         for k, c in model.costs.costs.todict().items():
-                            if isinstance(c.cost, libcrocoddyl_pywrap.CostModelContactFrictionCone):
-                                if impulse.frame == c.cost.id:
-                                    R = c.cost.cone.R
-                                    mu = c.cost.cone.mu
+                            if isinstance(c.cost.residual, libcrocoddyl_pywrap.ResidualModelContactFrictionCone):
+                                if impulse.frame == c.cost.residual.id:
+                                    R = c.cost.residual.reference.R
+                                    mu = c.cost.residual.reference.mu
                                     continue
                         fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
                 fs.append(fc)
@@ -336,6 +338,7 @@ class GepettoDisplay(DisplayAbstract):
 
 
 class MeshcatDisplay(DisplayAbstract):
+
     def __init__(self, robot, rate=-1, freq=1, openWindow=True):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
@@ -362,6 +365,7 @@ class MeshcatDisplay(DisplayAbstract):
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
+
     def __init__(self, display):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.visualization = display
@@ -373,6 +377,7 @@ class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
 
 
 class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
+
     def __init__(self):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.xs = []

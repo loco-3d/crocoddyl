@@ -32,7 +32,7 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
   std::pair<typename CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(name, boost::make_shared<CostItem>(name, cost, weight, active)));
   if (ret.second == false) {
-    std::cout << "Warning: we couldn't add the " << name << " cost item, it already existed." << std::endl;
+    std::cerr << "Warning: we couldn't add the " << name << " cost item, it already existed." << std::endl;
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
     nr_total_ += cost->get_activation()->get_nr();
@@ -57,7 +57,7 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
     inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
   } else {
-    std::cout << "Warning: we couldn't remove the " << name << " cost item, it doesn't exist." << std::endl;
+    std::cerr << "Warning: we couldn't remove the " << name << " cost item, it doesn't exist." << std::endl;
   }
 }
 
@@ -80,7 +80,7 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, const bo
     }
     it->second->active = active;
   } else {
-    std::cout << "Warning: we couldn't change the status of the " << name << " cost item, it doesn't exist."
+    std::cerr << "Warning: we couldn't change the status of the " << name << " cost item, it doesn't exist."
               << std::endl;
   }
 }
@@ -264,7 +264,7 @@ bool CostModelSumTpl<Scalar>::getCostStatus(const std::string& name) const {
   if (it != costs_.end()) {
     return it->second->active;
   } else {
-    std::cout << "Warning: we couldn't get the status of the " << name << " cost item, it doesn't exist." << std::endl;
+    std::cerr << "Warning: we couldn't get the status of the " << name << " cost item, it doesn't exist." << std::endl;
     return false;
   }
 }
