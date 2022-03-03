@@ -63,6 +63,9 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type, StateM
 
 void test_calc_against_numdiff(ResidualModelTypes::Type residual_type, StateModelTypes::Type state_type,
                                ActuationModelTypes::Type actuation_type) {
+#if BOOST_VERSION / 100 % 1000 >= 60
+  using namespace boost::placeholders;
+#endif
   // Create the model
   ResidualModelFactory residual_factory;
   ActuationModelFactory actuation_factory;
@@ -108,6 +111,9 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type, StateMode
 
 void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_type, StateModelTypes::Type state_type,
                                               ActuationModelTypes::Type actuation_type) {
+#if BOOST_VERSION / 100 % 1000 >= 60
+  using namespace boost::placeholders;
+#endif
   // Create the model
   ResidualModelFactory residual_factory;
   ActuationModelFactory actuation_factory;
