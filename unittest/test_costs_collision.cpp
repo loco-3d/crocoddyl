@@ -58,8 +58,7 @@ void test_calc_returns_a_cost(CostModelCollisionTypes::Type cost_type, StateMode
 void test_calc_against_numdiff(CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
-      factory.create(cost_type, state_type);
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -89,11 +88,11 @@ void test_calc_against_numdiff(CostModelCollisionTypes::Type cost_type, StateMod
   BOOST_CHECK(data->cost == data_num_diff->cost);
 }
 
-void test_partial_derivatives_against_numdiff(CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type) {
+void test_partial_derivatives_against_numdiff(CostModelCollisionTypes::Type cost_type,
+                                              StateModelTypes::Type state_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
-      factory.create(cost_type, state_type);
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -146,8 +145,7 @@ void test_partial_derivatives_against_numdiff(CostModelCollisionTypes::Type cost
 void test_dimensions_in_cost_sum(CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
-      factory.create(cost_type, state_type);
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -177,8 +175,7 @@ void test_dimensions_in_cost_sum(CostModelCollisionTypes::Type cost_type, StateM
 void test_partial_derivatives_in_cost_sum(CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
-      factory.create(cost_type, state_type);
+  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -224,8 +221,7 @@ void register_cost_model_unit_tests(CostModelCollisionTypes::Type cost_type, Sta
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, cost_type, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, cost_type, state_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, cost_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, cost_type, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_cost_sum, cost_type, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_cost_sum, cost_type, state_type)));
   framework::master_test_suite().add(ts);
@@ -236,7 +232,7 @@ bool init_function() {
   for (size_t cost_type = 0; cost_type < CostModelCollisionTypes::all.size(); ++cost_type) {
     for (size_t state_type = StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
          state_type < StateModelTypes::all.size(); ++state_type) {
-        register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type], StateModelTypes::all[state_type]);
+      register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type], StateModelTypes::all[state_type]);
     }
   }
   return true;

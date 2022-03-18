@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
       break;
     case ResidualModelTypes::ResidualModelPairCollision:
       os << "ResidualModelPairCollision";
-      break;  
+      break;
     case ResidualModelTypes::NbResidualModelTypes:
       os << "NbResidualModelTypes";
       break;
@@ -75,23 +75,19 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
   pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
-  
+
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
-  boost::shared_ptr<pinocchio::GeometryModel> geometry = 
+  boost::shared_ptr<pinocchio::GeometryModel> geometry =
       boost::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-  pinocchio::GeomIndex ig_frame = 
-      geometry->addGeometryObject(pinocchio::GeometryObject("frame",
-                                                            frame_index,
-                                                            state->get_pinocchio()->frames[frame_index].parent, 
-                                                            boost::shared_ptr <hpp::fcl::CollisionGeometry>(new hpp::fcl::Sphere(0)), 
-                                                            frame_SE3));
-  pinocchio::GeomIndex ig_obs = geometry->addGeometryObject(pinocchio::GeometryObject("obs",
-											  state->get_pinocchio()->getFrameId("universe"),
-											  state->get_pinocchio()->frames[state->get_pinocchio()->getFrameId("universe")].parent,
-											  boost::shared_ptr <hpp::fcl::CollisionGeometry>(new hpp::fcl::Sphere(0)),
-											  frame_SE3_obstacle)); 
-  geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame,ig_obs));
+  pinocchio::GeomIndex ig_frame = geometry->addGeometryObject(
+      pinocchio::GeometryObject("frame", frame_index, state->get_pinocchio()->frames[frame_index].parent,
+                                boost::shared_ptr<hpp::fcl::CollisionGeometry>(new hpp::fcl::Sphere(0)), frame_SE3));
+  pinocchio::GeomIndex ig_obs = geometry->addGeometryObject(pinocchio::GeometryObject(
+      "obs", state->get_pinocchio()->getFrameId("universe"),
+      state->get_pinocchio()->frames[state->get_pinocchio()->getFrameId("universe")].parent,
+      boost::shared_ptr<hpp::fcl::CollisionGeometry>(new hpp::fcl::Sphere(0)), frame_SE3_obstacle));
+  geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
@@ -128,8 +124,8 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
       residual = boost::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
       break;
     case ResidualModelTypes::ResidualModelPairCollision:
-      residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(state, nu, geometry, 0, 
-          state->get_pinocchio()->frames[frame_index].parent );
+      residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(
+          state, nu, geometry, 0, state->get_pinocchio()->frames[frame_index].parent);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ResidualModelTypes::Type given");
