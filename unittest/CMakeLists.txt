@@ -44,13 +44,6 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_solvers
 )
 
-# test_diff_actions fails with Clang, cf. https://github.com/loco-3d/crocoddyl/issues/964
-# It's difficult to identify the source - it appears to be a double free from inside boost's unittest framework.
-# Hence, we will remove it for now, it's still tested with g++:
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  LIST(REMOVE_ITEM ${PROJECT_NAME}_CPP_TESTS test_diff_actions)
-ENDIF()
-
 IF(BUILD_WITH_CODEGEN_SUPPORT)
   SET(${PROJECT_NAME}_CODEGEN_CPP_TESTS
     test_codegen
@@ -81,7 +74,6 @@ FOREACH(NAME ${${PROJECT_NAME}_CPP_TESTS})
   ADD_TEST_CFLAGS(${UNITTEST_NAME} "-DBOOST_TEST_MODULE=${MODULE_NAME}")
 
   TARGET_LINK_LIBRARIES(${UNITTEST_NAME} ${PROJECT_NAME} ${PROJECT_NAME}_unittest)
-  TARGET_LINK_LIBRARIES(${UNITTEST_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   TARGET_LINK_LIBRARIES(${UNITTEST_NAME} example-robot-data::example-robot-data)
 
   ADD_TEST_CFLAGS(${UNITTEST_NAME} '-DCROCODDYL_SOURCE_DIR=\\\"${${PROJECT_NAME}_SOURCE_DIR}\\\"')
