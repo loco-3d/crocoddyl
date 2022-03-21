@@ -1,10 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#ifdef PINOCCHIO_WITH_HPP_FCL
+
+#include <pinocchio/multibody/fcl.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/algorithm/geometry.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -33,7 +39,7 @@ void ResidualModelPairCollisionTpl<Scalar>::calc(const boost::shared_ptr<Residua
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
 
-  // omputes the distance for the collision pair pair_id_
+  // computes the distance for the collision pair pair_id_
   pinocchio::updateGeometryPlacements(pin_model_, *d->pinocchio, *geom_model_.get(), d->geometry, q);
   pinocchio::computeDistance(*geom_model_.get(), d->geometry, pair_id_);
 
@@ -50,14 +56,14 @@ void ResidualModelPairCollisionTpl<Scalar>::calcDiff(const boost::shared_ptr<Res
 
   const std::size_t nv = state_->get_nv();
 
-  // Calculate the vector from the joint jointId to the collision p1, expressed in world frame
+  // calculate the vector from the joint jointId to the collision p1, expressed in world frame
   d->d = d->geometry.distanceResults[pair_id_].nearest_points[0] - d->pinocchio->oMi[joint_id_].translation();
   pinocchio::getJointJacobian(pin_model_, *d->pinocchio, joint_id_, pinocchio::LOCAL_WORLD_ALIGNED, d->J);
 
-  // Calculate the Jacobian at p1
-  d->J.template topRows<3>().noalias() += pinocchio::skew(d->d).transpose() * (d->J.template bottomRows<3>());
+  // calculate the Jacobian at p1
+  d->J.template topRows<3>().noalias() += pinocchio::skew(d->d).transpose() * d->J.template bottomRows<3>();
 
-  // --- Compute the residual derivatives ---
+  // compute the residual derivatives
   d->Rx.topLeftCorner(3, nv) = d->J.template topRows<3>();
 }
 
@@ -73,3 +79,5 @@ const pinocchio::GeometryModel &ResidualModelPairCollisionTpl<Scalar>::get_geome
 }
 
 }  // namespace crocoddyl
+
+#endif  // PINOCCHIO_WITH_HPP_FCL
