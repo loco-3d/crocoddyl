@@ -136,6 +136,7 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
         geometry(pinocchio::GeometryData(model->get_geometry())),
         J(6, model->get_state()->get_nv()) {
     d.setZero();
+    J.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
