@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,9 @@ struct ResidualModelTypes {
     ResidualModelFrameTranslation,
     ResidualModelFrameVelocity,
     ResidualModelControlGrav,
+#ifdef PINOCCHIO_WITH_HPP_FCL
+    ResidualModelPairCollision,
+#endif  // PINOCCHIO_WITH_HPP_FCL
     NbResidualModelTypes
   };
   static std::vector<Type> init_all() {

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, LAAS-CNRS, INRIA
+// Copyright (C) 2021-2022, University of Edinburgh, LAAS-CNRS, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,8 +54,6 @@ void exposeResidualPairCollision() {
       .def("createData", &ResidualModelPairCollision::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the pair collision residual data.\n\n"
-           "Each residual model has its own data that needs to be allocated. This function\n"
-           "returns the allocated data for a predefined residual.\n"
            ":param data: shared data\n"
            ":return residual data.");
 
@@ -73,9 +71,14 @@ void exposeResidualPairCollision() {
                     "pinocchio data")
       .add_property("geometry",
                     bp::make_getter(&ResidualDataPairCollision::geometry, bp::return_internal_reference<>()),
-                    "pinocchio geometry data");
+                    "pinocchio geometry data")
+      .add_property("J", bp::make_getter(&ResidualDataPairCollision::J, bp::return_internal_reference<>()),
+                    "Jacobian of the collision joint")
+      .add_property("d", bp::make_getter(&ResidualDataPairCollision::d, bp::return_internal_reference<>()),
+                    "vector from joint to collision point in world frame");
 }
 
 }  // namespace python
 }  // namespace crocoddyl
-#endif
+
+#endif  // PINOCCHIO_WITH_HPP_FCL

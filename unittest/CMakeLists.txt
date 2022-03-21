@@ -12,7 +12,7 @@ IF(UNIX)
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_unittest PROPERTIES LINKER_LANGUAGE CXX)
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}_unittest ${PROJECT_NAME} example-robot-data::example-robot-data)
 
-  if(OPENMP_FOUND)
+  IF(OPENMP_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}_unittest ${OpenMP_CXX_LIBRARIES})
   ENDIF()
 ENDIF(UNIX)
@@ -25,6 +25,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_residuals
   test_costs
   test_costs_noFF
+  test_costs_collision
   test_cost_sum
   test_contacts
   test_controls

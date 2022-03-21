@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,10 +10,9 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
-#include <pinocchio/multibody/fcl.hpp>
+
 #include <pinocchio/multibody/geometry.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/geometry.hpp>
+
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
@@ -135,7 +134,9 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
   ResidualDataPairCollisionTpl(Model<Scalar> *const model, DataCollectorAbstract *const data)
       : Base(model, data),
         geometry(pinocchio::GeometryData(model->get_geometry())),
-        J(Matrix6xs::Zero(6, model->get_state()->get_nv())) {
+        J(6, model->get_state()->get_nv()) {
+    d.setZero();
+    J.setZero();
     // Check that proper shared data has been passed
     DataCollectorMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
@@ -147,7 +148,7 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
   pinocchio::GeometryData geometry;       //!< Pinocchio geometry data
   pinocchio::DataTpl<Scalar> *pinocchio;  //!< Pinocchio data
   Matrix6xs J;                            //!< Jacobian at the collision joint
-  Vector3s d;                             //!< Vector from joint joint_id to collision point in world frame
+  Vector3s d;                             //!< Vector from joint point to collision point in world frame
   using Base::r;
   using Base::Ru;
   using Base::Rx;
