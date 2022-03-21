@@ -98,7 +98,6 @@ class CostModelFactory {
       CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 #endif  // PINOCCHIO_WITH_HPP_FCL
-
 };
 
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
