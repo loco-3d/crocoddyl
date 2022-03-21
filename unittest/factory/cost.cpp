@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,9 @@ namespace unittest {
 
 const std::vector<CostModelTypes::Type> CostModelTypes::all(CostModelTypes::init_all());
 const std::vector<CostModelNoFFTypes::Type> CostModelNoFFTypes::all(CostModelNoFFTypes::init_all());
+#ifdef PINOCCHIO_WITH_HPP_FCL
 const std::vector<CostModelCollisionTypes::Type> CostModelCollisionTypes::all(CostModelCollisionTypes::init_all());
+#endif  // PINOCCHIO_WITH_HPP_FCL
 
 std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
   switch (type) {
@@ -80,6 +82,7 @@ std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
   return os;
 }
 
+#ifdef PINOCCHIO_WITH_HPP_FCL
 std::ostream& operator<<(std::ostream& os, CostModelCollisionTypes::Type type) {
   switch (type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
@@ -93,6 +96,7 @@ std::ostream& operator<<(std::ostream& os, CostModelCollisionTypes::Type type) {
   }
   return os;
 }
+#endif  // PINOCCHIO_WITH_HPP_FCL
 
 CostModelFactory::CostModelFactory() {}
 CostModelFactory::~CostModelFactory() {}
@@ -189,7 +193,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
 }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
-
 boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostModelCollisionTypes::Type cost_type,
                                                                          StateModelTypes::Type state_type,
                                                                          std::size_t nu) const {
@@ -231,7 +234,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   }
   return cost;
 }
-
 #endif  // PINOCCHIO_WITH_HPP_FCL
 
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(StateModelTypes::Type state_type, std::size_t nu) {

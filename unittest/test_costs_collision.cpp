@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, New York University,
-//                          Max Planck Gesellschaft, University of Edinburgh,
-//                          INRIA
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +12,6 @@
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
 #include "crocoddyl/multibody/data/multibody.hpp"
-
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
 
@@ -239,5 +236,9 @@ bool init_function() {
 }
 
 int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+
+#else
+
+int main(int, char**) {}
 
 #endif  // PINOCCHIO_WITH_HPP_FCL

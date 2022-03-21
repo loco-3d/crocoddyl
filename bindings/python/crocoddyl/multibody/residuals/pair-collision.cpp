@@ -80,4 +80,5 @@ void exposeResidualPairCollision() {
 
 }  // namespace python
 }  // namespace crocoddyl
-#endif
+
+#endif  // PINOCCHIO_WITH_HPP_FCL
