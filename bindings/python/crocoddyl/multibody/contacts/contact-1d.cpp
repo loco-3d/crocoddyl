@@ -15,6 +15,12 @@ namespace python {
 void exposeContact1D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
 
+  bp::enum_<pinocchio::ReferenceFrame>("ReferenceFrame")
+      .value("LOCAL", pinocchio::LOCAL)
+      .value("WORLD", pinocchio::WORLD)
+      .value("LOCAL_WORLD_ALIGNED", pinocchio::LOCAL_WORLD_ALIGNED)
+      .export_values();
+
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",
       "Rigid 1D contact model.\n\n"
@@ -24,21 +30,23 @@ void exposeContact1D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double, std::size_t,
-               bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "nu", "gains"),
+               bp::optional<Eigen::Vector2d, std::size_t, pinocchio::ReferenceFrame> >(
+          bp::args("self", "state", "id", "xref", "nu", "gains", "type", "pinRefFrame"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double, bp::optional<Eigen::Vector2d> >(
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))\n"
+          ":param type: axis of the contact constraint (0=x, 1=y or 2=z)\n"
+          ":param pinRefFrame: pin.ReferenceFrame in {LOCAL, WORLD, LOCAL_WORLD_ALIGNED}"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double, bp::optional<Eigen::Vector2d, pinocchio::ReferenceFrame> >(
           bp::args("self", "state", "id", "xref", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+          ":param gains: gains of the contact model (default np.matrix([0.,0.]))\n"))
       .def("calc", &ContactModel1D::calc, bp::args("self", "data", "x"),
            "Compute the 1D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -68,7 +76,10 @@ void exposeContact1D() {
                     &ContactModel1D::set_reference, "reference contact translation")
       .add_property("gains",
                     bp::make_function(&ContactModel1D::get_gains, bp::return_value_policy<bp::return_by_value>()),
-                    "contact gains");
+                    "contact gains")
+      .add_property("pinReferenceFrame",
+                    bp::make_function(&ContactModel1D::get_pinReferenceFrame, bp::return_value_policy<bp::return_by_value>()),
+                    &ContactModel1D::set_pinReferenceFrame, "pin.ReferenceFrame");
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData1D> >();
 
