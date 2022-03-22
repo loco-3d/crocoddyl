@@ -112,22 +112,23 @@ void ContactModel1DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 1)");
   }
   Data* d = static_cast<Data*>(data.get());
+  pinocchio::SE3 jMc;
   switch( pinReferenceFrame_ ){
     case pinocchio::LOCAL: {
-      const pinocchio::SE3 jMc = d->jMf;
+      jMc = d->jMf;
       break;  
     }
     case pinocchio::WORLD: {
-      const pinocchio::SE3 jMc = d->jMf.act(d->pinocchio->oMf[id_].inverse());
+      jMc = d->jMf.act(d->pinocchio->oMf[id_].inverse());
       break;
     }
     case pinocchio::LOCAL_WORLD_ALIGNED: {
-      const pinocchio::SE3 jMc = pinocchio::SE3(Matrix3s::Identity(), jMc.translation());
+      jMc = pinocchio::SE3(Matrix3s::Identity(), d->jMf.translation());
       break;
     }
   }
-  data->f.linear() = d->jMf.rotation().col(type_) * force[0];
-  data->f.angular() = d->jMf.translation().cross(data->f.linear());
+  data->f.linear() = jMc.rotation().col(type_) * force[0];
+  data->f.angular() = jMc.translation().cross(data->f.linear());
 }
 
 template <typename Scalar>
