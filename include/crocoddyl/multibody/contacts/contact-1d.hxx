@@ -9,36 +9,25 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, 
-                                             const pinocchio::FrameIndex id,
-                                             const Scalar xref, 
-                                             const std::size_t nu, 
-                                             const Vector2s& gains, 
-                                             const std::size_t& type, 
-                                             const pinocchio::ReferenceFrame pinRefFrame)
-    : Base(state, 1, nu), xref_(xref), gains_(gains), type_(type), pinReferenceFrame_(pinRefFrame) {
+ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Scalar xref, const std::size_t nu, const Vector2s& gains,
+                                             const Contact1DMaskType& mask, const pinocchio::ReferenceFrame type)
+    : Base(state, 1, nu), xref_(xref), gains_(gains), mask_(mask), type_(type) {
   id_ = id;
-  if(type_ < 0 || type_ > 2){
-    throw_pretty("Invalid argument: " 
-      << "Contact1D type must be in {0,1,2} for {x,y,z}");
+  if (mask_ < 0 || mask_ > 2) {
+    throw_pretty("Invalid argument: "
+                 << "Contact1D mask must be in {0,1,2} for {x,y,z}");
   }
-  mask_ = Vector3s::Zero();
-  mask_[type] = 1;
 }
 
 template <typename Scalar>
-ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, 
-                                             const pinocchio::FrameIndex id,
-                                             const Scalar xref, 
-                                             const Vector2s& gains,
-                                             const pinocchio::ReferenceFrame pinRefFrame)
-    : Base(state, 1), xref_(xref), gains_(gains), pinReferenceFrame_(pinRefFrame){
+ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const Scalar xref, const Vector2s& gains,
+                                             const pinocchio::ReferenceFrame type)
+    : Base(state, 1), xref_(xref), gains_(gains), type_(type) {
   id_ = id;
-  // Default type is 2
-  type_ = 2;
-  mask_ = Vector3s::Zero();
-  mask_[type_] = 1;
-  
+  // Default mask is z
+  mask_ = Z_MASK;
 }
 
 template <typename Scalar>
@@ -49,25 +38,24 @@ void ContactModel1DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, id_);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinReferenceFrame_, d->fJf);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinReferenceFrame_);
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinReferenceFrame_);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_);
 
-  d->Jc.row(0) = d->fJf.row(type_);
+  d->Jc.row(0) = d->fJf.row(mask_);
   d->vw = d->v.angular();
   d->vv = d->v.linear();
-  d->a0[0] = mask_.dot( d->a.linear() + d->vw.cross(d->vv) );
+  d->a0[0] = (d->a.linear() + d->vw.cross(d->vv))[mask_];
 
   if (gains_[0] != 0.) {
-    if(pinReferenceFrame_ == pinocchio::WORLD){
-      d->a0[0] += gains_[0] * (d->pinocchio->oMf[id_].translation()[type_] - xref_);
-    }
-    else if (pinReferenceFrame_ == pinocchio::LOCAL || pinReferenceFrame_ == pinocchio::LOCAL_WORLD_ALIGNED){
-      d->a0[0] += - gains_[0] * xref_;
+    if (type_ == pinocchio::WORLD) {
+      d->a0[0] += gains_[0] * (d->pinocchio->oMf[id_].translation()[mask_] - xref_);
+    } else if (type_ == pinocchio::LOCAL || type_ == pinocchio::LOCAL_WORLD_ALIGNED) {
+      d->a0[0] += -gains_[0] * xref_;
     }
   }
   if (gains_[1] != 0.) {
-    d->a0[0] += gains_[1] * d->vv[type_];
+    d->a0[0] += gains_[1] * d->vv[mask_];
   }
 }
 
@@ -76,7 +64,7 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
                                          const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d->frame].parent;
-  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinReferenceFrame_,
+  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, type_,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
@@ -85,22 +73,22 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
 
-  d->da0_dx.leftCols(nv).row(0) = d->fXjda_dq.row(type_);
-  d->da0_dx.leftCols(nv).row(0).noalias() += d->vw_skew.row(type_) * d->fXjdv_dq.template topRows<3>();
-  d->da0_dx.leftCols(nv).row(0).noalias() -= d->vv_skew.row(type_) * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_dx.leftCols(nv).row(0) = d->fXjda_dq.row(mask_);
+  d->da0_dx.leftCols(nv).row(0).noalias() += d->vw_skew.row(mask_) * d->fXjdv_dq.template topRows<3>();
+  d->da0_dx.leftCols(nv).row(0).noalias() -= d->vv_skew.row(mask_) * d->fXjdv_dq.template bottomRows<3>();
 
-  d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(type_);
-  d->da0_dx.rightCols(nv).row(0).noalias() += d->vw_skew.row(type_) * d->fJf.template topRows<3>();
-  d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(type_) * d->fJf.template bottomRows<3>();
+  d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(mask_);
+  d->da0_dx.rightCols(nv).row(0).noalias() += d->vw_skew.row(mask_) * d->fJf.template topRows<3>();
+  d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(mask_) * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
     const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-    d->oRf(0, 0) = oRf(type_, type_);
+    d->oRf(0, 0) = oRf(mask_, mask_);
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->Jc;
   }
   if (gains_[1] != 0.) {
-    d->da0_dx.leftCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(type_) * d->v_partial_dq;
-    d->da0_dx.rightCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(type_) * d->a_partial_da;
+    d->da0_dx.leftCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(mask_) * d->v_partial_dq;
+    d->da0_dx.rightCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(mask_) * d->a_partial_da;
   }
 }
 
@@ -113,10 +101,10 @@ void ContactModel1DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
   }
   Data* d = static_cast<Data*>(data.get());
   pinocchio::SE3 jMc;
-  switch( pinReferenceFrame_ ){
+  switch (type_) {
     case pinocchio::LOCAL: {
       jMc = d->jMf;
-      break;  
+      break;
     }
     case pinocchio::WORLD: {
       jMc = d->jMf.act(d->pinocchio->oMf[id_].inverse());
@@ -127,7 +115,7 @@ void ContactModel1DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
       break;
     }
   }
-  data->f.linear() = jMc.rotation().col(type_) * force[0];
+  data->f.linear() = jMc.rotation().col(mask_) * force[0];
   data->f.angular() = jMc.translation().cross(data->f.linear());
 }
 
@@ -157,16 +145,24 @@ void ContactModel1DTpl<Scalar>::set_reference(const Scalar reference) {
   xref_ = reference;
 }
 
-
 template <typename Scalar>
-void ContactModel1DTpl<Scalar>::set_pinReferenceFrame(const pinocchio::ReferenceFrame reference) {
-  pinReferenceFrame_ = reference;
+void ContactModel1DTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
+  type_ = type;
 }
 
 template <typename Scalar>
-const pinocchio::ReferenceFrame ContactModel1DTpl<Scalar>::get_pinReferenceFrame() const {
-  return pinReferenceFrame_;
+const pinocchio::ReferenceFrame ContactModel1DTpl<Scalar>::get_type() const {
+  return type_;
 }
 
+template <typename Scalar>
+void ContactModel1DTpl<Scalar>::set_mask(const Contact1DMaskType mask) {
+  mask_ = mask;
+}
+
+template <typename Scalar>
+const Contact1DMaskType ContactModel1DTpl<Scalar>::get_mask() const {
+  return mask_;
+}
 
 }  // namespace crocoddyl

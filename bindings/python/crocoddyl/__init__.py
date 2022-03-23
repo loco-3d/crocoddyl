@@ -29,7 +29,6 @@ def rotationMatrixFromTwoVectors(a, b):
 
 
 class DisplayAbstract:
-
     def __init__(self, rate=-1, freq=1):
         self.rate = rate
         self.freq = freq
@@ -64,7 +63,6 @@ class DisplayAbstract:
 
 
 class GepettoDisplay(DisplayAbstract):
-
     def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
@@ -338,7 +336,6 @@ class GepettoDisplay(DisplayAbstract):
 
 
 class MeshcatDisplay(DisplayAbstract):
-
     def __init__(self, robot, rate=-1, freq=1, openWindow=True):
         DisplayAbstract.__init__(self, rate, freq)
         self.robot = robot
@@ -365,7 +362,6 @@ class MeshcatDisplay(DisplayAbstract):
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
-
     def __init__(self, display):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.visualization = display
@@ -377,7 +373,6 @@ class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
 
 
 class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
-
     def __init__(self):
         libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
         self.xs = []

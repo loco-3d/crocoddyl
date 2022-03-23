@@ -22,6 +22,8 @@
 
 namespace crocoddyl {
 
+enum Contact1DMaskType { X_MASK = 0, Y_MASK = 1, Z_MASK = 2 };
+
 template <typename _Scalar>
 class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
@@ -37,7 +39,6 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix3s Matrix3s;
-  typedef typename MathBase::Vector6s Vector6s;
 
   /**
    * @brief Initialize the 1d contact model
@@ -47,10 +48,12 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] xref   Contact position used for the Baumgarte stabilization
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
+   * @param[in] mask   Constraint 1D axis
+   * @param[in] ref    Reference type of contact
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Scalar xref,
-                    const std::size_t nu, const Vector2s& gains = Vector2s::Zero(), const std::size_t& type = 2, 
-                    const pinocchio::ReferenceFrame = pinocchio::LOCAL);
+                    const std::size_t nu, const Vector2s& gains = Vector2s::Zero(),
+                    const Contact1DMaskType& mask = Z_MASK, const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
 
   /**
    * @brief Initialize the 1d contact model
@@ -61,10 +64,10 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] id     Reference frame id of the contact
    * @param[in] xref   Contact position used for the Baumgarte stabilization
    * @param[in] gains  Baumgarte stabilization gains
+   * @param[in] ref    Reference type of contact
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Scalar xref,
-                    const Vector2s& gains = Vector2s::Zero(),
-                    const pinocchio::ReferenceFrame = pinocchio::LOCAL);
+                    const Vector2s& gains = Vector2s::Zero(), const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
 
   virtual ~ContactModel1DTpl();
 
@@ -114,17 +117,25 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   void set_reference(const Scalar reference);
 
-
   /**
    * @brief Modify pinocchio::ReferenceFrame
    */
-  void set_pinReferenceFrame(const pinocchio::ReferenceFrame);
+  void set_type(const pinocchio::ReferenceFrame type);
 
   /**
    * @brief Get pinocchio::ReferenceFrame
    */
-  const pinocchio::ReferenceFrame get_pinReferenceFrame() const;
+  const pinocchio::ReferenceFrame get_type() const;
 
+  /**
+   * @brief Modify contact 1D mask
+   */
+  void set_mask(const Contact1DMaskType mask);
+
+  /**
+   * @brief Get contact 1D mask
+   */
+  const Contact1DMaskType get_mask() const;
 
   /**
    * @brief Print relevant information of the 1d contact model
@@ -140,11 +151,10 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::state_;
 
  private:
-  Scalar xref_;                                    //!< Contact position used for the Baumgarte stabilization
-  Vector2s gains_;                                 //!< Baumgarte stabilization gains
-  Vector3s mask_;                     //!< Projection matrix selecting contact constraint direction in LOCAL frame
-  std::size_t type_;                               //!< Type of the 1D contact in {0,1,2} for {'x','y','z'} 
-  pinocchio::ReferenceFrame pinReferenceFrame_;    //!< Pinocchio reference frame   
+  Scalar xref_;                     //!< Contact position used for the Baumgarte stabilization
+  Vector2s gains_;                  //!< Baumgarte stabilization gains
+  Contact1DMaskType mask_;          //!< Axis of the 1D contact in (x,y,z)
+  pinocchio::ReferenceFrame type_;  //!< Reference type of contact
 };
 
 template <typename _Scalar>

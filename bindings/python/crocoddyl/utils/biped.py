@@ -13,7 +13,6 @@ class SimpleBipedGaitProblem:
     through a strict process of deprecation.
     Thus, we advice any user to DO NOT develop their application based on this class.
     """
-
     def __init__(self, rmodel, rightFoot, leftFoot, integrator='euler', control='zero'):
         """ Construct biped-gait problem.
 

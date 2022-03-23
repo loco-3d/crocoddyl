@@ -13,7 +13,6 @@ class SimpleQuadrupedalGaitProblem:
     through a strict process of deprecation.
     Thus, we advice any user to DO NOT develop their application based on this class.
     """
-
     def __init__(self, rmodel, lfFoot, rfFoot, lhFoot, rhFoot, integrator='euler', control='zero'):
         """ Construct quadrupedal-gait problem.
 
