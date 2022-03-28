@@ -20,7 +20,7 @@ ResidualModelFramePlacementTpl<Scalar>::ResidualModelFramePlacementTpl(boost::sh
       pref_(pref),
       oMf_inv_(pref.inverse()),
       pin_model_(state->get_pinocchio()) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }
@@ -34,7 +34,7 @@ ResidualModelFramePlacementTpl<Scalar>::ResidualModelFramePlacementTpl(boost::sh
       pref_(pref),
       oMf_inv_(pref.inverse()),
       pin_model_(state->get_pinocchio()) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }

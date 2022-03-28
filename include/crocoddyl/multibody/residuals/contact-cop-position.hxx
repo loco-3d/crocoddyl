@@ -15,7 +15,7 @@ ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref,
     const std::size_t nu)
     : Base(state, 4, nu, true, true, true), id_(id), cref_(cref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }
@@ -25,7 +25,7 @@ template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref)
     : Base(state, 4), id_(id), cref_(cref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }

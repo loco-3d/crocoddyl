@@ -18,7 +18,7 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }
@@ -32,7 +32,7 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }

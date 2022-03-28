@@ -15,7 +15,7 @@ ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const FrictionCone& fref,
     const std::size_t nu)
     : Base(state, fref.get_nf() + 1, nu, true, true, true), id_(id), fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }
@@ -25,7 +25,7 @@ template <typename Scalar>
 ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const FrictionCone& fref)
     : Base(state, fref.get_nf() + 1), id_(id), fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) == id) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
     throw_pretty("Invalid argument: "
                  << "the frame index is wrong (it does not exist in the robot)");
   }
