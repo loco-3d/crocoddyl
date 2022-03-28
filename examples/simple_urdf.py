@@ -14,7 +14,6 @@ import numpy as np
 import pathlib
 import crocoddyl
 import pinocchio
-from pinocchio.visualize import (GepettoVisualizer, MeshcatVisualizer)
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
