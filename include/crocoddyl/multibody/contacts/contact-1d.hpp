@@ -22,7 +22,7 @@
 
 namespace crocoddyl {
 
-enum Contact1DMaskType { X_MASK = 0, Y_MASK = 1, Z_MASK = 2 };
+enum Vector3MaskType { x = 0, y = 1, z = 2 };
 
 template <typename _Scalar>
 class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
@@ -39,7 +39,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix3s Matrix3s;
-
+  typedef typename MathBase::Matrix6s Matrix6s;
   /**
    * @brief Initialize the 1d contact model
    *
@@ -48,12 +48,12 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] xref   Contact position used for the Baumgarte stabilization
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
-   * @param[in] mask   Constraint 1D axis
+   * @param[in] mask   Constraint 1D axis (default z)
    * @param[in] ref    Reference type of contact
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Scalar xref,
                     const std::size_t nu, const Vector2s& gains = Vector2s::Zero(),
-                    const Contact1DMaskType& mask = Z_MASK, const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
+                    const Vector3MaskType& mask = Vector3MaskType::z, const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
 
   /**
    * @brief Initialize the 1d contact model
@@ -130,12 +130,12 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Modify contact 1D mask
    */
-  void set_mask(const Contact1DMaskType mask);
+  void set_mask(const Vector3MaskType mask);
 
   /**
    * @brief Get contact 1D mask
    */
-  const Contact1DMaskType get_mask() const;
+  const Vector3MaskType get_mask() const;
 
   /**
    * @brief Print relevant information of the 1d contact model
@@ -153,7 +153,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
  private:
   Scalar xref_;                     //!< Contact position used for the Baumgarte stabilization
   Vector2s gains_;                  //!< Baumgarte stabilization gains
-  Contact1DMaskType mask_;          //!< Axis of the 1D contact in (x,y,z)
+  Vector3MaskType mask_;          //!< Axis of the 1D contact in (x,y,z)
   pinocchio::ReferenceFrame type_;  //!< Reference type of contact
 };
 
@@ -182,7 +182,7 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
         fXjda_dv(6, model->get_state()->get_nv()) {
     frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
-    fXj = jMf.inverse().toActionMatrix();
+    fXj = pinocchio::SE3::Identity().toActionMatrix(); //jMf.inverse().toActionMatrix(); 
     fJf.setZero();
     v_partial_dq.setZero();
     a_partial_dq.setZero();
@@ -196,6 +196,11 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
     vv_skew.setZero();
     vw_skew.setZero();
     oRf.setZero();
+    type = model->get_type();
+    mask = model->get_mask();
+    jMc_ = pinocchio::SE3::Identity();
+    wMlwa_ = pinocchio::SE3::Identity();
+    lwaMj_ = pinocchio::SE3::Identity(); 
   }
 
   using Base::a0;
@@ -224,6 +229,11 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix3s vv_skew;
   Matrix3s vw_skew;
   Matrix2s oRf;
+  pinocchio::ReferenceFrame type;
+  Vector3MaskType mask;
+  pinocchio::SE3 jMc_;
+  pinocchio::SE3 wMlwa_;
+  pinocchio::SE3 lwaMj_;
 };
 
 }  // namespace crocoddyl

@@ -11,23 +11,17 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Scalar xref, const std::size_t nu, const Vector2s& gains,
-                                             const Contact1DMaskType& mask, const pinocchio::ReferenceFrame type)
+                                             const Vector3MaskType& mask, const pinocchio::ReferenceFrame type)
     : Base(state, 1, nu), xref_(xref), gains_(gains), mask_(mask), type_(type) {
   id_ = id;
-  if (mask_ < 0 || mask_ > 2) {
-    throw_pretty("Invalid argument: "
-                 << "Contact1D mask must be in {0,1,2} for {x,y,z}");
-  }
 }
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Scalar xref, const Vector2s& gains,
                                              const pinocchio::ReferenceFrame type)
-    : Base(state, 1), xref_(xref), gains_(gains), type_(type) {
+    : Base(state, 1), xref_(xref), gains_(gains), type_(type), mask_(Vector3MaskType::z) {
   id_ = id;
-  // Default mask is z
-  mask_ = Z_MASK;
 }
 
 template <typename Scalar>
@@ -69,6 +63,17 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
+  // Matrix6s fXj;
+  if (type_ == pinocchio::LOCAL){
+    d->fXj = d->jMf.inverse().toActionMatrix();
+  } 
+  else if (type_ == pinocchio::WORLD) {
+    d->fXj = d->fXj;
+  } 
+  else if (type_ == pinocchio::LOCAL_WORLD_ALIGNED) {
+    d->lwaMj_.translation(d->jMf.inverse().translation());
+    d->fXj = d->lwaMj_.toActionMatrix();
+  }
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
@@ -100,23 +105,23 @@ void ContactModel1DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 1)");
   }
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::SE3 jMc;
   switch (type_) {
     case pinocchio::LOCAL: {
-      jMc = d->jMf;
+      d->jMc_ = d->jMf;
       break;
     }
     case pinocchio::WORLD: {
-      jMc = d->jMf.act(d->pinocchio->oMf[id_].inverse());
+      d->jMc_ = d->jMf.act(d->pinocchio->oMf[id_].inverse());
       break;
     }
     case pinocchio::LOCAL_WORLD_ALIGNED: {
-      jMc = pinocchio::SE3(Matrix3s::Identity(), d->jMf.translation());
+      d->wMlwa_.translation(d->pinocchio->oMf[id_].translation());
+      d->jMc_ = d->jMf.act(d->pinocchio->oMf[id_].actInv(d->wMlwa_));
       break;
     }
   }
-  data->f.linear() = jMc.rotation().col(mask_) * force[0];
-  data->f.angular() = jMc.translation().cross(data->f.linear());
+  data->f.linear() = d->jMc_.rotation().col(mask_) * force[0];
+  data->f.angular() = d->jMc_.translation().cross(data->f.linear());
 }
 
 template <typename Scalar>
@@ -156,12 +161,12 @@ const pinocchio::ReferenceFrame ContactModel1DTpl<Scalar>::get_type() const {
 }
 
 template <typename Scalar>
-void ContactModel1DTpl<Scalar>::set_mask(const Contact1DMaskType mask) {
+void ContactModel1DTpl<Scalar>::set_mask(const Vector3MaskType mask) {
   mask_ = mask;
 }
 
 template <typename Scalar>
-const Contact1DMaskType ContactModel1DTpl<Scalar>::get_mask() const {
+const Vector3MaskType ContactModel1DTpl<Scalar>::get_mask() const {
   return mask_;
 }
 

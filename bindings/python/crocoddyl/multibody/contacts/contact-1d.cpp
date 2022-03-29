@@ -15,10 +15,10 @@ namespace python {
 void exposeContact1D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
 
-  bp::enum_<Contact1DMaskType>("Contact1DMaskType")
-      .value("X_MASK", X_MASK)
-      .value("Y_MASK", Y_MASK)
-      .value("Z_MASK", Z_MASK)
+  bp::enum_<Vector3MaskType>("Vector3MaskType")
+      .value("x", x)
+      .value("y", y)
+      .value("z", z)
       .export_values();
 
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
@@ -29,7 +29,7 @@ void exposeContact1D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double, std::size_t,
-               bp::optional<Eigen::Vector2d, Contact1DMaskType, pinocchio::ReferenceFrame> >(
+               bp::optional<Eigen::Vector2d, Vector3MaskType, pinocchio::ReferenceFrame> >(
           bp::args("self", "state", "id", "xref", "nu", "gains", "mask", "type"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
@@ -37,7 +37,7 @@ void exposeContact1D() {
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))\n"
-          ":param mask: axis of the contact constraint (0=x, 1=y or 2=z)\n"
+          ":param mask: axis of the contact constraint (default z)\n"
           ":param type: reference type of contact"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double,
                     bp::optional<Eigen::Vector2d, pinocchio::ReferenceFrame> >(

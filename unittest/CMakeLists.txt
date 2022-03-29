@@ -28,6 +28,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_costs_collision
   test_cost_sum
   test_contacts
+  test_contact1d
   test_controls
   test_impulses
   test_multiple_contacts
