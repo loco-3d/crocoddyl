@@ -26,7 +26,16 @@ ResidualModelPairCollisionTpl<Scalar>::ResidualModelPairCollisionTpl(boost::shar
       pin_model_(*state->get_pinocchio()),
       geom_model_(geom_model),
       pair_id_(pair_id),
-      joint_id_(joint_id) {}
+      joint_id_(joint_id) {
+  if (static_cast<pinocchio::FrameIndex>(geom_model->ngeoms) <= pair_id) {
+    throw_pretty("Invalid argument: "
+                 << "the pair index is wrong (it does not exist in the geometry model)");
+  }
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->njoints) <= joint_id) {
+    throw_pretty("Invalid argument: "
+                 << "the joint index is wrong (it does not exist in the robot)");
+  }
+}
 
 template <typename Scalar>
 ResidualModelPairCollisionTpl<Scalar>::~ResidualModelPairCollisionTpl() {}

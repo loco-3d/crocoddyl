@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,10 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
+  }
 }
 
 template <typename Scalar>
@@ -27,6 +31,10 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared
     : Base(state, nc), id_(id), fref_(fref) {
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
+  }
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 

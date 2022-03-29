@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,12 @@ ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(boost::shar
       id_(id),
       Rref_(Rref),
       oRf_inv_(Rref.transpose()),
-      pin_model_(state->get_pinocchio()) {}
+      pin_model_(state->get_pinocchio()) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
+  }
+}
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
@@ -29,7 +34,12 @@ ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(boost::shar
       id_(id),
       Rref_(Rref),
       oRf_inv_(Rref.transpose()),
-      pin_model_(state->get_pinocchio()) {}
+      pin_model_(state->get_pinocchio()) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
+  }
+}
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::~ResidualModelFrameRotationTpl() {}

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,14 +23,24 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shar
       id_(id),
       vref_(velocity),
       type_(type),
-      pin_model_(state->get_pinocchio()) {}
+      pin_model_(state->get_pinocchio()) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
+  }
+}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                                                                      const pinocchio::FrameIndex id,
                                                                      const Motion& velocity,
                                                                      const pinocchio::ReferenceFrame type)
-    : Base(state, 6, true, true, false), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {}
+    : Base(state, 6, true, true, false), id_(id), vref_(velocity), type_(type), pin_model_(state->get_pinocchio()) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
+    throw_pretty("Invalid argument: "
+                 << "the frame index is wrong (it does not exist in the robot)");
+  }
+}
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::~ResidualModelFrameVelocityTpl() {}
