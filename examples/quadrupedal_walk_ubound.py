@@ -41,14 +41,16 @@ print('*** SOLVE ***')
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+solver.getCallbacks()[0].precision = 3
+solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solve the DDP problem
 xs = [x0] * (solver.problem.T + 1)
@@ -61,7 +63,7 @@ if WITHPLOT:
     plotSolution(solver, bounds=True, figIndex=1, show=False)
 
     # Plot convergence
-    log = solver.getCallbacks()[0]
+    log = solver.getCallbacks()[1]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,

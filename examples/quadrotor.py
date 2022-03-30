@@ -51,26 +51,26 @@ T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverFDDP(problem)
 
-solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
-
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+solver.getCallbacks()[0].precision = 3
+solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the FDDP solver
 solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = solver.getCallbacks()[0]
+    log = solver.getCallbacks()[1]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2)
 

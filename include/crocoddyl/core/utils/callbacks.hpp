@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,13 +19,23 @@ namespace crocoddyl {
 enum VerboseLevel { _1 = 0, _2 };
 class CallbackVerbose : public CallbackAbstract {
  public:
-  explicit CallbackVerbose(VerboseLevel level = _1);
-  ~CallbackVerbose();
+  explicit CallbackVerbose(VerboseLevel level = _1, int precision = 5);
+  ~CallbackVerbose() override;
 
-  virtual void operator()(SolverAbstract& solver);
+  void operator()(SolverAbstract& solver) override;
+
+  VerboseLevel get_level() const;
+  void set_level(VerboseLevel level);
+
+  int get_precision() const;
+  void set_precision(int precision);
 
  private:
-  VerboseLevel level;
+  VerboseLevel level_;
+  int precision_;
+  std::string header_;
+
+  void update_header();
 };
 
 }  // namespace crocoddyl

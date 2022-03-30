@@ -51,19 +51,21 @@ for i, phase in enumerate(GAITPHASES):
     if WITHDISPLAY and WITHPLOT:
         display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
         solver[i].setCallbacks(
-            [crocoddyl.CallbackLogger(),
-             crocoddyl.CallbackVerbose(),
+            [crocoddyl.CallbackVerbose(),
+             crocoddyl.CallbackLogger(),
              crocoddyl.CallbackDisplay(display)])
     elif WITHDISPLAY:
         display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
         solver[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
     elif WITHPLOT:
         solver[i].setCallbacks([
-            crocoddyl.CallbackLogger(),
             crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackLogger(),
         ])
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
+    solver[i].getCallbacks()[0].precision = 3
+    solver[i].getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
     # Solving the problem with the DDP solver
     xs = [x0] * (solver[i].problem.T + 1)
@@ -85,7 +87,7 @@ if WITHPLOT:
 
     for i, phase in enumerate(GAITPHASES):
         title = list(phase.keys())[0] + " (phase " + str(i) + ")"
-        log = solver[i].getCallbacks()[0]
+        log = solver[i].getCallbacks()[1]
         crocoddyl.plotConvergence(log.costs,
                                   log.u_regs,
                                   log.x_regs,

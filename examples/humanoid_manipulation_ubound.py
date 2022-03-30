@@ -128,8 +128,8 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverBoxFDDP(problem)
 if WITHDISPLAY and WITHPLOT:
     solver.setCallbacks([
-        crocoddyl.CallbackLogger(),
         crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
         crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
     ])
 elif WITHDISPLAY:
@@ -138,9 +138,11 @@ elif WITHDISPLAY:
         crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
     ])
 elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+solver.getCallbacks()[0].precision = 3
+solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving it with the DDP algorithm
 xs = [x0] * (solver.problem.T + 1)
@@ -158,14 +160,14 @@ pinocchio.updateFramePlacements(rmodel, rdata)
 com = pinocchio.centerOfMass(rmodel, rdata, xT[:state.nq])
 finalPosEff = np.array(rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation.T.flat)
 
-print('Finally reached = ', finalPosEff)
-print('Distance between hand and target = ', np.linalg.norm(finalPosEff - target))
-print('Distance to default state = ', np.linalg.norm(x0 - np.array(xT.flat)))
-print('XY distance to CoM reference = ', np.linalg.norm(com[:2] - comRef[:2]))
+print('Finally reached = ({0:.3f}, {1:.3f}, {2:.3f})'.format(*finalPosEff))
+print('Distance between hand and target = {0:.3E}'.format(np.linalg.norm(finalPosEff - target)))
+print('Distance to default state = {0:.3E}'.format(np.linalg.norm(x0 - np.array(xT.flat))))
+print('XY distance to CoM reference = {0:.3E}'.format(np.linalg.norm(com[:2] - comRef[:2])))
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = solver.getCallbacks()[0]
+    log = solver.getCallbacks()[1]
     plotSolution(solver, bounds=False, figIndex=1, show=False)
 
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=3)
