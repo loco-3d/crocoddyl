@@ -1,3 +1,4 @@
+#!/bin/bash
 
 LOGPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 EXAMPLEPATH=${LOGPATH}/..
