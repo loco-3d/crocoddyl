@@ -51,24 +51,28 @@ boxddp = crocoddyl.SolverBoxDDP(
 # Added the callback functions
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxfddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-    boxddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
+    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
     boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
     boxfddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
         crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
     ])
     boxddp.setCallbacks([
-        crocoddyl.CallbackLogger(),
         crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
     ])
 else:
     boxfddp.setCallbacks([crocoddyl.CallbackVerbose()])
     boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
+boxfddp.getCallbacks()[0].precision = 3
+boxfddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
+boxddp.getCallbacks()[0].precision = 3
+boxddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the both solvers
 xs = [x0] * (boxfddp.problem.T + 1)
@@ -97,7 +101,7 @@ if WITHPLOT:
     plotSolution(boxfddp, figIndex=1, figTitle="Box-FDDP", show=False)
     plotSolution(boxddp, figIndex=3, figTitle="Box-DDP", show=False)
 
-    log = boxfddp.getCallbacks()[0]
+    log = boxfddp.getCallbacks()[1]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,
@@ -107,7 +111,7 @@ if WITHPLOT:
                               show=False,
                               figTitle="Box-FDDP",
                               figIndex=5)
-    log = boxddp.getCallbacks()[0]
+    log = boxddp.getCallbacks()[1]
     crocoddyl.plotConvergence(log.costs,
                               log.u_regs,
                               log.x_regs,
