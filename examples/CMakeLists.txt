@@ -24,6 +24,7 @@ FOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   # examples are too slow in Debug mode to be used as tests
   IF(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     ADD_PYTHON_UNIT_TEST("example-python-${examples}" "examples/${examples}.py" bindings/python)
-    # Compare logs
+    # Compare logs (NB: this depends on /bin/bash so won't work on non-Unix systems)
+    ADD_TEST("verify_logfiles" /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/update_logfiles.sh && /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
   ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 ENDFOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
