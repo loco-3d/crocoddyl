@@ -314,11 +314,6 @@ class ActionModelAbstractTpl {
   std::size_t get_nh() const;
 
   /**
-   * @brief Return the number of equality constraints
-   */
-  std::size_t get_nh() const;
-
-  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
