@@ -115,14 +115,6 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                                                boost::shared_ptr<ConstraintModelManager> constraints,
                                                const Scalar JMinvJt_damping = Scalar(0.),
                                                const bool enable_force = false);
-
-  DifferentialActionModelContactFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                               boost::shared_ptr<ActuationModelAbstract> actuation,
-                                               boost::shared_ptr<ContactModelMultiple> contacts,
-                                               boost::shared_ptr<CostModelSum> costs,
-                                               boost::shared_ptr<ConstraintModelManager> constraints,
-                                               const Scalar JMinvJt_damping = Scalar(0.),
-                                               const bool enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
 
   /**
