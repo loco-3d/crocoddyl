@@ -1,21 +1,21 @@
 SET(${PROJECT_NAME}_EXAMPLES_PYTHON
-  double_pendulum
+  double_pendulum_fwddyn
   double_pendulum_invdyn
-  boxfddp_vs_boxddp
-  quadrotor
+  quadrotor_fwddyn
   quadrotor_invdyn
   quadrotor_ubound
-  arm_manipulation
+  arm_manipulation_fwddyn
   arm_manipulation_invdyn
-  quadrupedal_gaits
+  quadrupedal_gaits_fwddyn
   quadrupedal_gaits_invdyn
   quadrupedal_walk_ubound
-  bipedal_walk
+  bipedal_walk_fwddyn
   bipedal_walk_invdyn
   bipedal_walk_ubound
   humanoid_manipulation
   humanoid_manipulation_ubound
   humanoid_taichi
+  boxfddp_vs_boxddp
   )
 
 INSTALL(FILES __init__.py DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/examples)
