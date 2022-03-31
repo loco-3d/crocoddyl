@@ -53,7 +53,8 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Scalar xref,
                     const std::size_t nu, const Vector2s& gains = Vector2s::Zero(),
-                    const Vector3MaskType& mask = Vector3MaskType::z, const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
+                    const Vector3MaskType& mask = Vector3MaskType::z,
+                    const pinocchio::ReferenceFrame ref = pinocchio::LOCAL);
 
   /**
    * @brief Initialize the 1d contact model
@@ -153,7 +154,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
  private:
   Scalar xref_;                     //!< Contact position used for the Baumgarte stabilization
   Vector2s gains_;                  //!< Baumgarte stabilization gains
-  Vector3MaskType mask_;          //!< Axis of the 1D contact in (x,y,z)
+  Vector3MaskType mask_;            //!< Axis of the 1D contact in (x,y,z)
   pinocchio::ReferenceFrame type_;  //!< Reference type of contact
 };
 
@@ -182,7 +183,7 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
         fXjda_dv(6, model->get_state()->get_nv()) {
     frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
-    fXj = pinocchio::SE3::Identity().toActionMatrix(); //jMf.inverse().toActionMatrix(); 
+    fXj = pinocchio::SE3::Identity().toActionMatrix();  // jMf.inverse().toActionMatrix();
     fJf.setZero();
     v_partial_dq.setZero();
     a_partial_dq.setZero();
@@ -200,7 +201,7 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
     mask = model->get_mask();
     jMc_ = pinocchio::SE3::Identity();
     wMlwa_ = pinocchio::SE3::Identity();
-    lwaMj_ = pinocchio::SE3::Identity(); 
+    lwaMj_ = pinocchio::SE3::Identity();
   }
 
   using Base::a0;

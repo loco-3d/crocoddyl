@@ -64,13 +64,11 @@ void ContactModel1DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   pinocchio::skew(d->vv, d->vv_skew);
   pinocchio::skew(d->vw, d->vw_skew);
   // Matrix6s fXj;
-  if (type_ == pinocchio::LOCAL){
+  if (type_ == pinocchio::LOCAL) {
     d->fXj = d->jMf.inverse().toActionMatrix();
-  } 
-  else if (type_ == pinocchio::WORLD) {
+  } else if (type_ == pinocchio::WORLD) {
     d->fXj = d->fXj;
-  } 
-  else if (type_ == pinocchio::LOCAL_WORLD_ALIGNED) {
+  } else if (type_ == pinocchio::LOCAL_WORLD_ALIGNED) {
     d->lwaMj_.translation(d->jMf.inverse().translation());
     d->fXj = d->lwaMj_.toActionMatrix();
   }

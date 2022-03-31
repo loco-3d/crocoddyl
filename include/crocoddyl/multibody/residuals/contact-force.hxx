@@ -40,17 +40,20 @@ void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<Residual
 
   // We transform the force to the contact frame
   switch (d->contact_type) {
-    case Contact1D:{
+    case Contact1D: {
       ContactData1DTpl<Scalar>* d1d = static_cast<ContactData1DTpl<Scalar>*>(d->contact.get());
-      if(d1d->type == pinocchio::LOCAL){
+      if (d1d->type == pinocchio::LOCAL) {
         data->r = ((d->contact->jMf.actInv(d->contact->f) - fref_).linear()).row(d1d->mask);
-      } 
-      else if(d1d->type == pinocchio::WORLD) {
-        data->r = ((d->contact->pinocchio->oMf[id_].act(d->contact->jMf.actInv(d->contact->f)) - fref_).linear()).row(d1d->mask);
-      }  
-      else if(d1d->type == pinocchio::LOCAL_WORLD_ALIGNED) {
+      } else if (d1d->type == pinocchio::WORLD) {
+        data->r = ((d->contact->pinocchio->oMf[id_].act(d->contact->jMf.actInv(d->contact->f)) - fref_).linear())
+                      .row(d1d->mask);
+      } else if (d1d->type == pinocchio::LOCAL_WORLD_ALIGNED) {
         d1d->wMlwa_.translation_impl(d->contact->pinocchio->oMf[id_].translation());
-        data->r = (( d1d->wMlwa_.actInv( d->contact->pinocchio->oMf[id_].act(d->contact->jMf.inverse()) ).act(d->contact->f) - fref_).linear()).row(d1d->mask);
+        data->r =
+            ((d1d->wMlwa_.actInv(d->contact->pinocchio->oMf[id_].act(d->contact->jMf.inverse())).act(d->contact->f) -
+              fref_)
+                 .linear())
+                .row(d1d->mask);
       }
       break;
     }

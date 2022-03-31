@@ -20,9 +20,8 @@
 namespace crocoddyl {
 namespace unittest {
 
-
 struct ContactModelMaskTypes {
-  enum Type {X, Y, Z, NbMaskTypes};
+  enum Type { X, Y, Z, NbMaskTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -35,7 +34,7 @@ struct ContactModelMaskTypes {
 };
 
 struct PinocchioReferenceTypes {
-  enum Type { LOCAL, WORLD, LOCAL_WORLD_ALIGNED, NbPinRefTypes};
+  enum Type { LOCAL, WORLD, LOCAL_WORLD_ALIGNED, NbPinRefTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();
@@ -47,11 +46,9 @@ struct PinocchioReferenceTypes {
   static const std::vector<Type> all;
 };
 
-
 std::ostream& operator<<(std::ostream& os, const ContactModelMaskTypes::Type& type);
 
 std::ostream& operator<<(std::ostream& os, const PinocchioReferenceTypes::Type& type);
-
 
 class ContactModel1DFactory {
  public:
@@ -62,8 +59,7 @@ class ContactModel1DFactory {
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> create(
       ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
-      PinocchioReferenceTypes::Type reference_type,
-      const std::string frame_name = std::string(""),
+      PinocchioReferenceTypes::Type reference_type, const std::string frame_name = std::string(""),
       const std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 

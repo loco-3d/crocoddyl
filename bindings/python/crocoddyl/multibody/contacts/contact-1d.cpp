@@ -15,11 +15,7 @@ namespace python {
 void exposeContact1D() {
   bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
 
-  bp::enum_<Vector3MaskType>("Vector3MaskType")
-      .value("x", x)
-      .value("y", y)
-      .value("z", z)
-      .export_values();
+  bp::enum_<Vector3MaskType>("Vector3MaskType").value("x", x).value("y", y).value("z", z).export_values();
 
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",

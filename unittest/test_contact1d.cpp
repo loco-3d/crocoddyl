@@ -25,8 +25,7 @@ using namespace boost::unit_test;
 
 //----------------------------------------------------------------------------//
 
-void test_construct_data(ContactModelMaskTypes::Type mask_type, 
-                         PinocchioModelTypes::Type model_type, 
+void test_construct_data(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
                          PinocchioReferenceTypes::Type reference_type) {
   // create the model
   ContactModel1DFactory factory;
@@ -42,9 +41,8 @@ void test_construct_data(ContactModelMaskTypes::Type mask_type,
   boost::shared_ptr<crocoddyl::ContactDataAbstract> data = model->createData(&pinocchio_data);
 }
 
-void test_calc_fetch_jacobians(ContactModelMaskTypes::Type mask_type, 
-                                PinocchioModelTypes::Type model_type, 
-                                PinocchioReferenceTypes::Type reference_type) {
+void test_calc_fetch_jacobians(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
+                               PinocchioReferenceTypes::Type reference_type) {
   // create the model
   ContactModel1DFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(mask_type, model_type, reference_type);
@@ -70,9 +68,8 @@ void test_calc_fetch_jacobians(ContactModelMaskTypes::Type mask_type,
   BOOST_CHECK(data->df_du.isZero());
 }
 
-void test_calc_diff_fetch_derivatives(ContactModelMaskTypes::Type mask_type, 
-                                        PinocchioModelTypes::Type model_type, 
-                                        PinocchioReferenceTypes::Type reference_type) {
+void test_calc_diff_fetch_derivatives(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
+                                      PinocchioReferenceTypes::Type reference_type) {
   // create the model
   ContactModel1DFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(mask_type, model_type, reference_type);
@@ -99,9 +96,8 @@ void test_calc_diff_fetch_derivatives(ContactModelMaskTypes::Type mask_type,
   BOOST_CHECK(data->df_du.isZero());
 }
 
-void test_update_force(ContactModelMaskTypes::Type mask_type, 
-                    PinocchioModelTypes::Type model_type, 
-                    PinocchioReferenceTypes::Type reference_type) {
+void test_update_force(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
+                       PinocchioReferenceTypes::Type reference_type) {
   // create the model
   ContactModel1DFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model = factory.create(mask_type, model_type, reference_type);
@@ -114,7 +110,7 @@ void test_update_force(ContactModelMaskTypes::Type mask_type,
   // Create a random force and update it
   Eigen::VectorXd f = Eigen::VectorXd::Random(data->Jc.rows());
   model->updateForce(data, f);
-//   boost::shared_ptr<crocoddyl::ContactModel3D> m = boost::static_pointer_cast<crocoddyl::ContactModel3D>(model);
+  //   boost::shared_ptr<crocoddyl::ContactModel3D> m = boost::static_pointer_cast<crocoddyl::ContactModel3D>(model);
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(data->Jc.isZero());
@@ -125,8 +121,7 @@ void test_update_force(ContactModelMaskTypes::Type mask_type,
   BOOST_CHECK(data->df_du.isZero());
 }
 
-void test_update_force_diff(ContactModelMaskTypes::Type mask_type, 
-                            PinocchioModelTypes::Type model_type, 
+void test_update_force_diff(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
                             PinocchioReferenceTypes::Type reference_type) {
   // create the model
   ContactModel1DFactory factory;
@@ -151,8 +146,8 @@ void test_update_force_diff(ContactModelMaskTypes::Type mask_type,
   BOOST_CHECK(!data->df_du.isZero());
 }
 
-void test_partial_derivatives_against_numdiff(ContactModelMaskTypes::Type mask_type, 
-                                              PinocchioModelTypes::Type model_type, 
+void test_partial_derivatives_against_numdiff(ContactModelMaskTypes::Type mask_type,
+                                              PinocchioModelTypes::Type model_type,
                                               PinocchioReferenceTypes::Type reference_type) {
 #if BOOST_VERSION / 100 % 1000 >= 60
   using namespace boost::placeholders;
@@ -196,9 +191,8 @@ void test_partial_derivatives_against_numdiff(ContactModelMaskTypes::Type mask_t
 
 //----------------------------------------------------------------------------//
 
-void register_contact_model_unit_tests(ContactModelMaskTypes::Type mask_type, 
-                                        PinocchioModelTypes::Type model_type, 
-                                        PinocchioReferenceTypes::Type reference_type) {
+void register_contact_model_unit_tests(ContactModelMaskTypes::Type mask_type, PinocchioModelTypes::Type model_type,
+                                       PinocchioReferenceTypes::Type reference_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << mask_type << "_" << model_type << "_" << reference_type;
   std::cout << "Running " << test_name.str() << std::endl;
@@ -208,7 +202,8 @@ void register_contact_model_unit_tests(ContactModelMaskTypes::Type mask_type,
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives, mask_type, model_type, reference_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force, mask_type, model_type, reference_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_update_force_diff, mask_type, model_type, reference_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, mask_type, model_type, reference_type)));
+  ts->add(
+      BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, mask_type, model_type, reference_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -216,9 +211,8 @@ bool init_function() {
   for (size_t mask_type = 0; mask_type < ContactModelMaskTypes::all.size(); ++mask_type) {
     for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
       for (size_t reference_type = 0; reference_type < PinocchioReferenceTypes::all.size(); ++reference_type) {
-      register_contact_model_unit_tests(ContactModelMaskTypes::all[mask_type], 
-                                        PinocchioModelTypes::all[model_type], 
-                                        PinocchioReferenceTypes::all[reference_type]);
+        register_contact_model_unit_tests(ContactModelMaskTypes::all[mask_type], PinocchioModelTypes::all[model_type],
+                                          PinocchioReferenceTypes::all[reference_type]);
       }
     }
   }
