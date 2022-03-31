@@ -43,27 +43,28 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 T = 100
 x0 = np.array([3.14, 0., 0., 0.])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
-problem.nthreads = 1  # TODO(cmastalli): Remove after Crocoddyl supports multithreading with Python-derived models
 solver = crocoddyl.SolverIntro(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY and WITHPLOT:
     display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
 elif WITHDISPLAY:
     display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
 elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+solver.getCallbacks()[0].precision = 3
+solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the solver
 solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = solver.getCallbacks()[0]
+    log = solver.getCallbacks()[1]
     crocoddyl.plotOCSolution(log.xs, [u[state.nv:] for u in log.us], figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
