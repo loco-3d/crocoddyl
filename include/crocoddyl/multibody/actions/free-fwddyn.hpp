@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,6 +184,8 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
+  typedef JointDataAbstractTpl<Scalar> JointDataAbstract;
+  typedef DataCollectorJointActMultibodyTpl<Scalar> DataCollectorJointActMultibody;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -190,12 +193,14 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   explicit DifferentialActionDataFreeFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData()),
+        multibody(&pinocchio, model->get_actuation()->createData(),
+                  boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
         u_drift(model->get_nu()),
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
         tmp_xstatic(model->get_state()->get_nx()) {
+    multibody.joint->dtau_du.diagonal().setOnes();
     costs->shareMemory(this);
     if (model->get_constraints() != nullptr) {
       constraints = model->get_constraints()->createData(&multibody);
@@ -208,7 +213,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
-  DataCollectorActMultibodyTpl<Scalar> multibody;
+  DataCollectorJointActMultibody multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Minv;

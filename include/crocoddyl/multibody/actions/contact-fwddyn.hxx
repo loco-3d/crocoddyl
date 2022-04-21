@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,8 +132,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   d->xout = d->pinocchio.ddq;
   contacts_->updateAcceleration(d->multibody.contacts, d->pinocchio.ddq);
   contacts_->updateForce(d->multibody.contacts, d->pinocchio.lambda_c);
-
-  // Computing the cost value and residuals
+  d->multibody.joint->a = d->pinocchio.ddq;
+  d->multibody.joint->tau = u;
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
@@ -154,8 +155,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
 
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
-
-  // Computing the cost value and residuals
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
@@ -205,6 +204,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   d->Fx.noalias() -= a_partial_da * d->multibody.contacts->da0_dx.topRows(nc);
   d->Fx.noalias() += a_partial_dtau * d->multibody.actuation->dtau_dx;
   d->Fu.noalias() = a_partial_dtau * d->multibody.actuation->dtau_du;
+  d->multibody.joint->da_dx = d->Fx;
+  d->multibody.joint->da_du = d->Fu;
 
   // Computing the cost derivatives
   if (enable_force_) {

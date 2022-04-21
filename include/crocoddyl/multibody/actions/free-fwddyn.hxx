@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,8 +81,8 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
     d->u_drift = d->multibody.actuation->tau - d->pinocchio.nle;
     d->xout.noalias() = d->Minv * d->u_drift;
   }
-
-  // Computing the cost value and residuals
+  d->multibody.joint->a = d->xout;
+  d->multibody.joint->tau = u;
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
@@ -144,8 +145,8 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
     d->Fx.noalias() = d->Minv * d->dtau_dx;
     d->Fu.noalias() = d->Minv * d->multibody.actuation->dtau_du;
   }
-
-  // Computing the cost derivatives
+  d->multibody.joint->da_dx = d->Fx;
+  d->multibody.joint->da_du = d->Fu;
   costs_->calcDiff(d->costs, x, u);
   if (constraints_ != nullptr) {
     constraints_->calcDiff(d->constraints, x, u);

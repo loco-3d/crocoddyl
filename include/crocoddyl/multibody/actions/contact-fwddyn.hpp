@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -258,6 +259,8 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
+  typedef JointDataAbstractTpl<Scalar> JointDataAbstract;
+  typedef DataCollectorJointActMultibodyInContactTpl<Scalar> DataCollectorJointActMultibodyInContact;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -265,7 +268,9 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   explicit DifferentialActionDataContactFwdDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
+        multibody(&pinocchio, model->get_actuation()->createData(),
+                  boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu()),
+                  model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
         Kinv(model->get_state()->get_nv() + model->get_contacts()->get_nc_total(),
              model->get_state()->get_nv() + model->get_contacts()->get_nc_total()),
@@ -273,6 +278,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
         df_du(model->get_contacts()->get_nc_total(), model->get_nu()),
         tmp_xstatic(model->get_state()->get_nx()),
         tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()) {
+    multibody.joint->dtau_du.diagonal().setOnes();
     costs->shareMemory(this);
     if (model->get_constraints() != nullptr) {
       constraints = model->get_constraints()->createData(&multibody);
@@ -288,7 +294,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl : public DifferentialActionDa
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;
-  DataCollectorActMultibodyInContactTpl<Scalar> multibody;
+  DataCollectorJointActMultibodyInContact multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
   boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Kinv;
