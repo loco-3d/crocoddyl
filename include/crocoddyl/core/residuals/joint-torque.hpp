@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh
+// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,23 +49,24 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the joint-torque residual model
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint torque
-   * @param[in] nu          Dimension of the control vector
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] uref       Reference joint torque
+   * @param[in] nu         Dimension of the control vector
+   * @param[in] fwddyn     Indicates that we have a forward dynamics problem (true) or inverse dynamics (false)
    */
   ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
-                              const std::size_t nu);
+                              const std::size_t nu, const bool fwddyn = false);
 
   /**
    * @brief Initialize the joint-torque residual model
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint torque
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] uref       Reference joint torque
    */
   ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref);
@@ -75,9 +76,9 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * The default reference joint torque is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] nu          Dimension of the control vector
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] nu         Dimension of the control vector
    */
   ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const std::size_t nu);
@@ -88,8 +89,8 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
    * The default reference joint torque is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
    */
   ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation);
@@ -123,6 +124,12 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the joint-torque residual data
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
@@ -151,6 +158,7 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   VectorXs uref_;  //!< Reference joint-torque input
+  bool fwddyn_;    //!< True for forward dynamics, False for inverse dynamics
 };
 
 template <typename _Scalar>
