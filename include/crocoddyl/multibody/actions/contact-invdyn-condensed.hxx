@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
 
-  if (state_->get_nv() - actuation_->get_nu() != 0) {
+  if (state_->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
         "tau", boost::make_shared<ConstraintModelResidual>(
                    state_,

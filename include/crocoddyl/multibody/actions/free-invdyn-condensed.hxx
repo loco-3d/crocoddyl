@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,23 +25,7 @@ DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::DifferentialActionMo
       costs_(costs),
       constraints_(boost::make_shared<ConstraintModelManager>(state, state->get_nv())),
       pinocchio_(*state->get_pinocchio().get()) {
-  if (costs_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
-  VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
-  Base::set_u_lb(lb);
-  Base::set_u_ub(ub);
-
-  if (state->get_nv() - actuation->get_nu() != 0) {
-    constraints_->addConstraint(
-        "tau",
-        boost::make_shared<ConstraintModelResidual>(
-            state_, boost::make_shared<
-                        typename DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::ResidualModelActuation>(
-                        state, actuation_->get_nu())));
-  }
+  init(state);
 }
 
 template <typename Scalar>
@@ -54,6 +38,11 @@ DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::DifferentialActionMo
       costs_(costs),
       constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()) {
+  init(state);
+}
+
+template <typename Scalar>
+void DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::init(const boost::shared_ptr<StateMultibody>& state) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
@@ -67,7 +56,7 @@ DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::DifferentialActionMo
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
 
-  if (state->get_nv() - actuation->get_nu()) {
+  if (state->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
         "tau",
         boost::make_shared<ConstraintModelResidual>(

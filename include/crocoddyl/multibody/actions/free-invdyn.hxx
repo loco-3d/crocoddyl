@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Pisa
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh,
+//                          University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,23 +26,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
       costs_(costs),
       constraints_(boost::make_shared<ConstraintModelManager>(state, state->get_nv() + actuation->get_nu())),
       pinocchio_(*state->get_pinocchio().get()) {
-  if (costs_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  const std::size_t nu = actuation_->get_nu();
-  VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
-  VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
-  lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
-  ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
-  Base::set_u_lb(lb);
-  Base::set_u_ub(ub);
-
-  constraints_->addConstraint(
-      "rnea",
-      boost::make_shared<ConstraintModelResidual>(
-          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRnea>(
-                      state, nu)));
+  init(state);
 }
 
 template <typename Scalar>
@@ -54,6 +39,11 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
       costs_(costs),
       constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()) {
+  init(state);
+}
+
+template <typename Scalar>
+void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(const boost::shared_ptr<StateMultibody>& state) {
   if (costs_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
