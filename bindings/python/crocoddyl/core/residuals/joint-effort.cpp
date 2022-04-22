@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh
+// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,12 +20,15 @@ void exposeResidualJointEffort() {
       "This residual function defines a residual vector as r = u - uref, with u and uref as the current and\n"
       "reference joint efforts, respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd,
-               std::size_t>(bp::args("self", "state", "actuation", "uref", "nu"),
-                            "Initialize the joint-effort residual model.\n\n"
-                            ":param state: state description\n"
-                            ":param actuation: actuation model\n"
-                            ":param uref: reference joint effort\n"
-                            ":param nu: dimension of the control vector"))
+               std::size_t, bp::optional<bool> >(
+          bp::args("self", "state", "actuation", "uref", "nu", "fwddyn"),
+          "Initialize the joint-effort residual model.\n\n"
+          ":param state: state description\n"
+          ":param actuation: actuation model\n"
+          ":param uref: reference joint effort\n"
+          ":param nu: dimension of the control vector\n"
+          ":param fwddyn: indicate if we have a forward dynamics problem (True) or inverse "
+          "dynamics problem (False) (default True)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "actuation", "uref"),
           "Initialize the joint-effort residual model.\n\n"
