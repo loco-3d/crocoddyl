@@ -46,7 +46,7 @@ runningModel = crocoddyl.IntegratedActionModelEuler(
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel), dt)
 
-# Creating the shooting problem and the FDDP solver
+# Creating the shooting problem and the solver
 T = 33
 problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverFDDP(problem)
@@ -65,13 +65,13 @@ else:
 solver.getCallbacks()[0].precision = 3
 solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
-# Solving the problem with the FDDP solver
+# Solving the problem with the solver
 solver.solve()
 
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+    crocoddyl.plotOCSolution(solver.xs, solver.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2)
 
 # Display the entire motion

@@ -22,17 +22,16 @@ tau_f = np.array([[0., 0., 0., 0.], [0., 0., 0., 0.], [1., 1., 1., 1.], [0., d_c
                   [-d_cog, 0., d_cog, 0.], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
 actuation = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
 
-nu = state.nv + actuation.nu
+nu = state.nv
 runningCostModel = crocoddyl.CostModelSum(state, nu)
 terminalCostModel = crocoddyl.CostModelSum(state, nu)
 
 # Costs
-uWeights = np.array([1e3] * state.nv + [1.] * actuation.nu)
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelWeightedQuad(np.array([0.1] * 3 + [1000.] * 3 + [1000.] * robot_model.nv))
-uResidual = crocoddyl.ResidualModelControl(state, nu)
+uResidual = crocoddyl.ResidualModelJointTorque(state, actuation, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
-uRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ActivationModelWeightedQuad(uWeights), uResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("base_link"),
                                                              pinocchio.SE3(target_quat.matrix(), target_pos), nu)
 goalTrackingCost = crocoddyl.CostModelResidual(state, goalTrackingResidual)
@@ -43,9 +42,9 @@ terminalCostModel.addCost("goalPose", goalTrackingCost, 3.)
 
 dt = 3e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, terminalCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, terminalCostModel), dt)
 
 # Creating the shooting problem and the solver
 T = 33
@@ -74,7 +73,9 @@ solver.solve()
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(log.xs, [u[state.nv:] for u in log.us], figIndex=1, show=False)
+    crocoddyl.plotOCSolution(solver.xs, [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
+                             figIndex=1,
+                             show=False)
     crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2)
 
 # Display the entire motion

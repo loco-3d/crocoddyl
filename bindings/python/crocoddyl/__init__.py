@@ -173,9 +173,9 @@ class GepettoDisplay(DisplayAbstract):
         for i, data in enumerate(datas):
             model = models[i]
             if hasattr(data, "differential"):
-                if isinstance(data.differential,
-                              libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics) or isinstance(
-                                  data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactInvDynamics):
+                if isinstance(
+                        data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics) or isinstance(
+                            data.differential, libcrocoddyl_pywrap.DifferentialActionDataContactInvDynamicsCondensed):
                     fc = []
                     for key, contact in data.differential.multibody.contacts.contacts.todict().items():
                         if model.differential.contacts.contacts[key].active:

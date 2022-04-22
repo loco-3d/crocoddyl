@@ -130,12 +130,11 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
-    log = solver[0].getCallbacks()[1]
     plotSolution(solver, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
         title = list(phase.keys())[0] + " (phase " + str(i) + ")"
-        log = solver[i].getCallbacks()[0]
+        log = solver[i].getCallbacks()[1]
         crocoddyl.plotConvergence(log.costs,
                                   log.u_regs,
                                   log.x_regs,
