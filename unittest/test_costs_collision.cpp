@@ -87,6 +87,9 @@ void test_calc_against_numdiff(CostModelCollisionTypes::Type cost_type, StateMod
 
 void test_partial_derivatives_against_numdiff(CostModelCollisionTypes::Type cost_type,
                                               StateModelTypes::Type state_type) {
+#if BOOST_VERSION / 100 % 1000 >= 60
+  using namespace boost::placeholders;
+#endif
   // create the model
   CostModelFactory factory;
   const boost::shared_ptr<crocoddyl::CostModelAbstract>& model = factory.create(cost_type, state_type);
