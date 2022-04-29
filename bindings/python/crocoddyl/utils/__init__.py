@@ -1184,7 +1184,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         return self.cost - self.cost_try
 
     def stoppingCriteria(self):
-        return sum([np.dot(q.T, q) for q in self.Qu])
+        return np.abs(self.d[0] + 0.5 * self.d[1])
 
     def expectedImprovement(self):
         d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
@@ -1342,7 +1342,8 @@ class FDDPDerived(DDPDerived):
                     self.dV = self.tryStep(a)
                 except ArithmeticError:
                     continue
-                d1, d2 = self.expectedImprovement()
+                self.d = self.expectedImprovement()
+                d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
 
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 if self.dV_exp >= 0.:  # descend direction
