@@ -282,6 +282,11 @@ void SolverIntro::computeValueFunction(const std::size_t t, const boost::shared_
   }
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
+
+  if (!std::isnan(xreg_)) {
+    Vxx_[t].diagonal().array() += xreg_;
+  }
+
   // Compute and store the Vx gradient at end of the interval (rollout state)
   if (!is_feasible_) {
     Vx_[t].noalias() += Vxx_[t] * fs_[t];
