@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,6 +191,7 @@ class BoxQP {
   Eigen::VectorXd g_;           //!< Current gradient
   Eigen::VectorXd dx_;          //!< Current search direction
 
+  Eigen::VectorXd gf_;                       //!< Gradient in the free subspace
   Eigen::VectorXd qf_;                       //!< Current problem gradient in the free subspace
   Eigen::VectorXd xf_;                       //!< Current decision variable in the free subspace
   Eigen::VectorXd xc_;                       //!< Current decision variable in the constrained subspace

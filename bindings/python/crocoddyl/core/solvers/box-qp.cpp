@@ -43,7 +43,7 @@ void exposeSolverBoxQP() {
                     "    x = argmin 0.5 x^T H x + q^T x\n"
                     "    subject to:   lb <= x <= ub"
                     "where nx is the number of decision variables.",
-                    bp::init<std::size_t, std::size_t, double, double, double>(
+                    bp::init<std::size_t, bp::optional<std::size_t, double, double, double> >(
                         bp::args("self", "nx", "maxiter", "th_acceptstep", "th_grad", "reg"),
                         "Initialize the Projected-Newton QP for bound constraints.\n\n"
                         ":param nx: dimension of the decision vector\n"
