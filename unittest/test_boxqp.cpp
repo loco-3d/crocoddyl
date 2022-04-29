@@ -125,7 +125,7 @@ void test_box_qp_with_identity_hessian() {
   // Checking the solution against a regularized case
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg = boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x - negbounded_gradient / (1 + reg)).isZero(1e-9));
+  BOOST_CHECK((sol_reg.x - negbounded_gradient_reg).isZero(1e-9));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nf);

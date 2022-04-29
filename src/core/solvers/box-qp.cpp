@@ -87,9 +87,12 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
   for (std::size_t k = 0; k < maxiter_; ++k) {
     solution_.clamped_idx.clear();
     solution_.free_idx.clear();
-    // Compute the gradient
+    // Compute the Cauchy point and active set
     g_ = q;
     g_.noalias() += H * x_;
+    if (k == 0) {
+      gf_ = g_;
+    }
     for (std::size_t j = 0; j < nx_; ++j) {
       const double gj = g_(j);
       const double xj = x_(j);
@@ -102,34 +105,10 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
       }
     }
 
-    // Check convergence
+    // Compute the search direction as Newton step along the free space
     nf_ = solution_.free_idx.size();
     nc_ = solution_.clamped_idx.size();
-    if (g_.lpNorm<Eigen::Infinity>() <= th_grad_ || nf_ == 0) {
-      if (k == 0) {  // compute the inverse of the free Hessian
-        Hff_.resize(nf_, nf_);
-        for (std::size_t i = 0; i < nf_; ++i) {
-          const std::size_t fi = solution_.free_idx[i];
-          for (std::size_t j = 0; j < nf_; ++j) {
-            Hff_(i, j) = H(fi, solution_.free_idx[j]);
-          }
-        }
-        if (reg_ != 0.) {
-          Hff_.diagonal().array() += reg_;
-        }
-        Hff_inv_llt_.compute(Hff_);
-        const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
-        if (info != Eigen::Success) {
-          throw_pretty("backward_error");
-        }
-        solution_.Hff_inv.setIdentity(nf_, nf_);
-        Hff_inv_llt_.solveInPlace(solution_.Hff_inv);
-      }
-      solution_.x = x_;
-      return solution_;
-    }
-
-    // Compute the search direction as Newton step along the free space
+    gf_.resize(nf_);
     qf_.resize(nf_);
     xf_.resize(nf_);
     xc_.resize(nc_);
@@ -159,15 +138,17 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
     }
     solution_.Hff_inv.setIdentity(nf_, nf_);
     Hff_inv_llt_.solveInPlace(solution_.Hff_inv);
-    dxf_ = -qf_;
+    gf_ = -qf_;
+    gf_.noalias() -= Hff_ * xf_;
     if (nc_ != 0) {
-      dxf_.noalias() -= Hfc_ * xc_;
+      gf_.noalias() -= Hfc_ * xc_;
     }
+    dxf_ = gf_;
     Hff_inv_llt_.solveInPlace(dxf_);
-    dxf_ -= xf_;
     dx_.setZero();
     for (std::size_t i = 0; i < nf_; ++i) {
       dx_(solution_.free_idx[i]) = dxf_(i);
+      g_(solution_.free_idx[i]) = gf_(i);
     }
 
     // Try different step lengths
@@ -182,6 +163,12 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
         x_ = xnew_;
         break;
       }
+    }
+
+    // Check convergence
+    if (gf_.lpNorm<Eigen::Infinity>() <= th_grad_) {
+      solution_.x = x_;
+      return solution_;
     }
   }
   solution_.x = x_;
