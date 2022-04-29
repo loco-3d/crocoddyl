@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,6 +108,9 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // set the function that needs to be called at every step of the numdiff
+#if BOOST_VERSION / 100 % 1000 >= 60
+  using namespace boost::placeholders;
+#endif
   std::vector<crocoddyl::ConstraintModelNumDiff::ReevaluationFunction> reevals;
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
