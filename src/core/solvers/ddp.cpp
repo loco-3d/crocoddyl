@@ -218,19 +218,11 @@ void SolverDDP::backwardPass() {
     // Compute the linear-quadratic approximation of the control Hamiltonian function
     computeHamiltonianFunction(t, m, d);
 
-    if (!std::isnan(ureg_)) {
-      Quu_[t].diagonal().array() += ureg_;
-    }
-
     // Compute the feedforward and feedback gains
     computeGains(t);
 
     // Compute the linear-quadratic approximation of the Value function
     computeValueFunction(t, m);
-
-    if (!std::isnan(xreg_)) {
-      Vxx_[t].diagonal().array() += xreg_;
-    }
 
     if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
       throw_pretty("backward_error");
@@ -320,6 +312,10 @@ void SolverDDP::computeHamiltonianFunction(const std::size_t t, const boost::sha
     model->multiplyByFu(data->Fu, FxTVxx_p_, Qxu_[t], addto);  // + (Fx.T * Vxx_p) * Fu
     STOP_PROFILER("SolverDDP::Qxu");
   }
+
+  if (!std::isnan(ureg_)) {
+    Quu_[t].diagonal().array() += ureg_;
+  }
 }
 
 void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
@@ -337,6 +333,11 @@ void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_pt
   }
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
+
+  if (!std::isnan(xreg_)) {
+    Vxx_[t].diagonal().array() += xreg_;
+  }
+
   // Compute and store the Vx gradient at end of the interval (rollout state)
   if (!is_feasible_) {
     Vx_[t].noalias() += Vxx_[t] * fs_[t];
