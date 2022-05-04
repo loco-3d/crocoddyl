@@ -93,6 +93,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(const boost::sha
                   state, contact->contact->get_id(), contact->contact->get_nc(), nc, nu)));
     }
   }
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>

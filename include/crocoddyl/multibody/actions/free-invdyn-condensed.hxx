@@ -64,6 +64,7 @@ void DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::init(const boos
                         typename DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::ResidualModelActuation>(
                         state, actuation_->get_nu())));
   }
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>

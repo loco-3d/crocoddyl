@@ -94,6 +94,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
                   state, contact->contact->get_id(), contact->contact->get_nc(), nc)));
     }
   }
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
