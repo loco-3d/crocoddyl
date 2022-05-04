@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,6 +228,24 @@ class ConstraintModelManagerTpl {
   bool getConstraintStatus(const std::string& name) const;
 
   /**
+   * @brief Share the dimensions with an action model
+   *
+   * It allows us to update dimensions when we change the constraint status.
+   *
+   * @param model  Action model
+   */
+  void shareDimensions(ActionModelAbstractTpl<Scalar>* const model);
+
+  /**
+   * @brief Share the dimensions with a differential action model
+   *
+   * It allows us to update dimensions when we change the constraint status.
+   *
+   * @param model  Action model
+   */
+  void shareDimensions(DifferentialActionModelAbstractTpl<Scalar>* const model);
+
+  /**
    * @brief Print information on the stack of constraints
    */
   template <class Scalar>
@@ -237,9 +255,11 @@ class ConstraintModelManagerTpl {
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   ConstraintModelContainer constraints_;    //!< Stack of constraint items
   std::size_t nu_;                          //!< Dimension of the control input
-  std::size_t ng_;                          //!< Number of the active inequality constraints
+  std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
+  std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
+  std::size_t* ng_;                          //!< Number of the active inequality constraints
   std::size_t ng_total_;                    //!< Number of the total inequality constraints
-  std::size_t nh_;                          //!< Number of the active equality constraints
+  std::size_t* nh_;                         //!< Number of the active equality constraints
   std::size_t nh_total_;                    //!< Number of the total equality constraints
   std::vector<std::string> active_;         //!< Names of the active constraint items
   std::vector<std::string> inactive_;       //!< Names of the inactive constraint items

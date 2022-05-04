@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -376,8 +377,10 @@ class DifferentialActionModelAbstractTpl {
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
-  std::size_t ng_;                          //!< Number of inequality constraints
-  std::size_t nh_;                          //!< Number of equality constraints
+  std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
+  std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
+  std::size_t* ng_;                         //!< Number of inequality constraints
+  std::size_t* nh_;                         //!< Number of equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs u_lb_;                           //!< Lower control limits
@@ -388,6 +391,9 @@ class DifferentialActionModelAbstractTpl {
    * @brief Update the status of the control limits (i.e. if there are defined limits)
    */
   void update_has_control_limits();
+
+  template <class Scalar> friend class IntegratedActionModelAbstractTpl;
+  template <class Scalar> friend class ConstraintModelManagerTpl;
 };
 
 template <typename _Scalar>

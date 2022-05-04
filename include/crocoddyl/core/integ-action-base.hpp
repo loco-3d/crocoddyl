@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                     University of Trento
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,6 +106,8 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
+  using Base::ng_;                  //!< Number of inequality constraints
+  using Base::nh_;                  //!< Number of equality constraints
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state

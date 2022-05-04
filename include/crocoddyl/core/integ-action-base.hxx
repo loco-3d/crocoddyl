@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                     University of Trento
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, University of Oxford,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,10 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
     time_step2_ = time_step_ * time_step_;
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
+  // Share the dimension with the differential action
+  DifferentialActionModelAbstract* action = static_cast<DifferentialActionModelAbstract*>(differential_.get());
+  ng_ = action->ng_;
+  nh_ = action->nh_;
 }
 
 template <typename Scalar>

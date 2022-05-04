@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, The University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,8 +23,10 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(b
                                                                                const std::size_t nh)
     : nu_(nu),
       nr_(nr),
-      ng_(ng),
-      nh_(nh),
+      ng_internal_(ng),
+      nh_internal_(nh),
+      ng_(&ng_internal_),
+      nh_(&nh_internal_),
       state_(state),
       unone_(VectorXs::Zero(nu)),
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
@@ -295,12 +298,12 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nr() const {
 
 template <typename Scalar>
 std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_ng() const {
-  return ng_;
+  return *ng_;
 }
 
 template <typename Scalar>
 std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
-  return nh_;
+  return *nh_;
 }
 
 template <typename Scalar>

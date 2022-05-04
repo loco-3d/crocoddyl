@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,10 +19,12 @@ template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state,
                                                        const std::size_t nu, const std::size_t nr,
                                                        const std::size_t ng, const std::size_t nh)
-    : nu_(nu),
+    : ng_internal_(ng),
+      nh_internal_(nh),
+      nu_(nu),
       nr_(nr),
-      ng_(ng),
-      nh_(nh),
+      ng_(&ng_internal_),
+      nh_(&nh_internal_),
       state_(state),
       unone_(MathBase::VectorXs::Zero(nu)),
       u_lb_(MathBase::VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
@@ -293,12 +296,12 @@ std::size_t ActionModelAbstractTpl<Scalar>::get_nr() const {
 
 template <typename Scalar>
 std::size_t ActionModelAbstractTpl<Scalar>::get_ng() const {
-  return ng_;
+  return *ng_;
 }
 
 template <typename Scalar>
 std::size_t ActionModelAbstractTpl<Scalar>::get_nh() const {
-  return nh_;
+  return *nh_;
 }
 
 template <typename Scalar>

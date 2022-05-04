@@ -41,8 +41,7 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
   Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
 
   if (constraints_ != nullptr) {
-    ng_ = constraints_->get_ng();
-    nh_ = constraints_->get_nh();
+    constraints_->shareDimensions(this);
   }
 }
 
