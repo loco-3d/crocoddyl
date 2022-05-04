@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,16 +24,7 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
       gravity_(state->get_pinocchio()->gravity) {
-  if (r_coeff_ < Scalar(0.)) {
-    r_coeff_ = Scalar(0.);
-    throw_pretty("Invalid argument: "
-                 << "The restitution coefficient has to be positive, set to 0");
-  }
-  if (JMinvJt_damping_ < Scalar(0.)) {
-    JMinvJt_damping_ = Scalar(0.);
-    throw_pretty("Invalid argument: "
-                 << "The damping factor has to be positive, set to 0");
-  }
+  init();
 }
 
 template <typename Scalar>
@@ -51,6 +43,14 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       JMinvJt_damping_(JMinvJt_damping),
       enable_force_(enable_force),
       gravity_(state->get_pinocchio()->gravity) {
+  init();
+}
+
+template <typename Scalar>
+ActionModelImpulseFwdDynamicsTpl<Scalar>::~ActionModelImpulseFwdDynamicsTpl() {}
+
+template <typename Scalar>
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::init() {
   if (r_coeff_ < Scalar(0.)) {
     r_coeff_ = Scalar(0.);
     throw_pretty("Invalid argument: "
@@ -62,9 +62,6 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
                  << "The damping factor has to be positive, set to 0");
   }
 }
-
-template <typename Scalar>
-ActionModelImpulseFwdDynamicsTpl<Scalar>::~ActionModelImpulseFwdDynamicsTpl() {}
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
