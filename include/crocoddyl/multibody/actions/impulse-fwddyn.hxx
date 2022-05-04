@@ -44,6 +44,7 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       enable_force_(enable_force),
       gravity_(state->get_pinocchio()->gravity) {
   init();
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>

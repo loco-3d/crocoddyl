@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,6 +129,16 @@ void exposeConstraintManager() {
           "constraints",
           bp::make_function(&ConstraintModelManager::get_constraints, bp::return_value_policy<bp::return_by_value>()),
           "stack of constraints")
+      .def<void (ConstraintModelManager::*)(ActionModelAbstract* const)>(
+          "shareDimension", &ConstraintModelManager::shareDimensions, bp::args("self", "model"),
+          "Share the constraint dimensions with an action model.\n\n"
+          "It allows us to update dimensions when we change the constraint status.\n"
+          ":param model: action model")
+      .def<void (ConstraintModelManager::*)(DifferentialActionModelAbstract* const)>(
+          "shareDimension", &ConstraintModelManager::shareDimensions, bp::args("self", "model"),
+          "Share the constraint dimensions with a differential action model.\n\n"
+          "It allows us to update dimensions when we change the constraint status.\n"
+          ":param model: differential action model")
       .add_property("nu", bp::make_function(&ConstraintModelManager::get_nu), "dimension of control vector")
       .add_property("ng", bp::make_function(&ConstraintModelManager::get_ng),
                     "number of active inequality constraints")

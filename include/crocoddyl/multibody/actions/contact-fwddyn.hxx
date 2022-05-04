@@ -54,6 +54,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
   init();
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
