@@ -242,6 +242,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   using Base::state_;  //!< Model of the state
 
  private:
+  void init();
   boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
   boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
   boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model

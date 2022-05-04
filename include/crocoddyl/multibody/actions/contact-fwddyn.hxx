@@ -36,22 +36,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
-  if (JMinvJt_damping_ < Scalar(0.)) {
-    JMinvJt_damping_ = Scalar(0.);
-    throw_pretty("Invalid argument: "
-                 << "The damping factor has to be positive, set to 0");
-  }
-  if (contacts_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Contacts doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  if (costs_->get_nu() != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
-  }
-
-  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
-  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
+  init();
 }
 
 template <typename Scalar>
@@ -69,6 +54,14 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
+  init();
+}
+
+template <typename Scalar>
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::~DifferentialActionModelContactFwdDynamicsTpl() {}
+
+template <typename Scalar>
+void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::init() {
   if (JMinvJt_damping_ < Scalar(0.)) {
     JMinvJt_damping_ = Scalar(0.);
     throw_pretty("Invalid argument: "
@@ -86,9 +79,6 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
   Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
   Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
 }
-
-template <typename Scalar>
-DifferentialActionModelContactFwdDynamicsTpl<Scalar>::~DifferentialActionModelContactFwdDynamicsTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
