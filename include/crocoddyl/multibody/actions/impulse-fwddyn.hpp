@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,6 +214,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   using Base::state_;  //!< Model of the state
 
  private:
+  void init();
   boost::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
   boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
