@@ -65,6 +65,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(const boost::shared
       boost::make_shared<ConstraintModelResidual>(
           state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRnea>(
                       state, nu)));
+  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
