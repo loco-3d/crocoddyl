@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/cost.hpp"
@@ -368,6 +369,34 @@ void test_get_nr(StateModelTypes::Type state_type) {
   BOOST_CHECK(nr == model.get_nr());
 }
 
+void test_shareMemory(StateModelTypes::Type state_type) {
+  // setup the test
+  StateModelFactory state_factory;
+  const boost::shared_ptr<crocoddyl::StateAbstract> state = state_factory.create(state_type);
+  crocoddyl::CostModelSum cost_model(state);
+  crocoddyl::DataCollectorAbstract shared_data;
+  const boost::shared_ptr<crocoddyl::CostDataSum>& cost_data = cost_model.createData(&shared_data);
+
+  const std::size_t ndx = state->get_ndx();
+  const std::size_t nu = cost_model.get_nu();
+  crocoddyl::ActionModelLQR action_model(ndx, nu);
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data = action_model.createData();
+
+  cost_data->shareMemory(action_data.get());
+  cost_data->Lx = Eigen::VectorXd::Random(ndx);
+  cost_data->Lu = Eigen::VectorXd::Random(nu);
+  cost_data->Lxx = Eigen::MatrixXd::Random(ndx, ndx);
+  cost_data->Luu = Eigen::MatrixXd::Random(nu, nu);
+  cost_data->Lxu = Eigen::MatrixXd::Random(ndx, nu);
+
+  // check that the data has been shared
+  BOOST_CHECK(action_data->Lx.isApprox(cost_data->Lx, 1e-9));
+  BOOST_CHECK(action_data->Lu.isApprox(cost_data->Lu, 1e-9));
+  BOOST_CHECK(action_data->Lxx.isApprox(cost_data->Lxx, 1e-9));
+  BOOST_CHECK(action_data->Luu.isApprox(cost_data->Luu, 1e-9));
+  BOOST_CHECK(action_data->Lxu.isApprox(cost_data->Lxu, 1e-9));
+}
+
 //----------------------------------------------------------------------------//
 
 void register_unit_tests(StateModelTypes::Type state_type) {
@@ -385,6 +414,7 @@ void register_unit_tests(StateModelTypes::Type state_type) {
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_get_costs, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_get_nr, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_shareMemory, state_type)));
   framework::master_test_suite().add(ts);
 }
 
