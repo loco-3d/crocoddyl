@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,6 +265,8 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   Hx.setZero();
   Hu.setZero();
   for (std::size_t i = 0; i < 5; ++i) {
+    models[i]->calc(datas[i], x1);
+    models[i]->calcDiff(datas[i], x1);
     const std::size_t ng = models[i]->get_ng();
     const std::size_t nh = models[i]->get_nh();
     g.segment(ng_i, ng) = datas[i]->g;
@@ -371,7 +373,7 @@ void register_unit_tests(StateModelTypes::Type state_type) {
   ts->add(BOOST_TEST_CASE(boost::bind(&test_removeConstraint, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_removeConstraint_error_message, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc, state_type)));
-  // ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_get_constraints, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_shareMemory, state_type)));
   framework::master_test_suite().add(ts);
