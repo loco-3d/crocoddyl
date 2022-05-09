@@ -191,10 +191,10 @@ class BoxQP {
   Eigen::VectorXd g_;           //!< Current gradient
   Eigen::VectorXd dx_;          //!< Current search direction
 
-  Eigen::VectorXd xo_;          //!< Organized decision
-  Eigen::VectorXd dxo_;         //!< Search direction organized by free and constrained subspaces
-  Eigen::VectorXd qo_;          //!< Gradient organized by free and constrained subspaces
-  Eigen::MatrixXd Ho_;          //!< Hessian organized by free and constrained subspaces
+  Eigen::VectorXd xo_;   //!< Organized decision
+  Eigen::VectorXd dxo_;  //!< Search direction organized by free and constrained subspaces
+  Eigen::VectorXd qo_;   //!< Gradient organized by free and constrained subspaces
+  Eigen::MatrixXd Ho_;   //!< Hessian organized by free and constrained subspaces
 
   Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;  //!< Cholesky solver
 };
