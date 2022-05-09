@@ -257,7 +257,7 @@ class ConstraintModelManagerTpl {
   std::size_t nu_;                          //!< Dimension of the control input
   std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
   std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
-  std::size_t* ng_;                          //!< Number of the active inequality constraints
+  std::size_t* ng_;                         //!< Number of the active inequality constraints
   std::size_t ng_total_;                    //!< Number of the total inequality constraints
   std::size_t* nh_;                         //!< Number of the active equality constraints
   std::size_t nh_total_;                    //!< Number of the total equality constraints
