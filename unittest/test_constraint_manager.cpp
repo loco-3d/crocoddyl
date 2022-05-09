@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 
 #include "factory/constraint.hpp"
@@ -312,6 +313,52 @@ void test_get_constraints(StateModelTypes::Type state_type) {
   }
 }
 
+void test_shareMemory(StateModelTypes::Type state_type) {
+  // setup the test
+  StateModelFactory state_factory;
+  const boost::shared_ptr<crocoddyl::StateAbstract> state = state_factory.create(state_type);
+  crocoddyl::ConstraintModelManager constraint_model(state);
+  crocoddyl::DataCollectorAbstract shared_data;
+  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& constraint_data =
+      constraint_model.createData(&shared_data);
+
+  std::size_t ng = state->get_ndx();
+  std::size_t nh = state->get_ndx();
+  const std::size_t ndx = state->get_ndx();
+  const std::size_t nu = constraint_model.get_nu();
+  crocoddyl::ActionModelLQR action_model(ndx, nu);
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data = action_model.createData();
+
+  constraint_data->shareMemory(action_data.get());
+  constraint_data->h = Eigen::VectorXd::Random(nh);
+  constraint_data->g = Eigen::VectorXd::Random(ng);
+  constraint_data->Gx = Eigen::MatrixXd::Random(ng, ndx);
+  constraint_data->Gu = Eigen::MatrixXd::Random(ng, nu);
+  constraint_data->Hx = Eigen::MatrixXd::Random(nh, ndx);
+  constraint_data->Hu = Eigen::MatrixXd::Random(nh, nu);
+
+  // check that the data has been shared
+  BOOST_CHECK(action_data->g.isApprox(constraint_data->g, 1e-9));
+  BOOST_CHECK(action_data->h.isApprox(constraint_data->h, 1e-9));
+  BOOST_CHECK(action_data->Gx.isApprox(constraint_data->Gx, 1e-9));
+  BOOST_CHECK(action_data->Gu.isApprox(constraint_data->Gu, 1e-9));
+  BOOST_CHECK(action_data->Hx.isApprox(constraint_data->Hx, 1e-9));
+  BOOST_CHECK(action_data->Hu.isApprox(constraint_data->Hu, 1e-9));
+
+  // let's now resize the data
+  ng /= 2;
+  nh /= 2;
+  constraint_data->resize(&action_model, action_data.get());
+
+  // check that the shared data has been resized
+  BOOST_CHECK(action_data->g.isApprox(constraint_data->g, 1e-9));
+  BOOST_CHECK(action_data->h.isApprox(constraint_data->h, 1e-9));
+  BOOST_CHECK(action_data->Gx.isApprox(constraint_data->Gx, 1e-9));
+  BOOST_CHECK(action_data->Gu.isApprox(constraint_data->Gu, 1e-9));
+  BOOST_CHECK(action_data->Hx.isApprox(constraint_data->Hx, 1e-9));
+  BOOST_CHECK(action_data->Hu.isApprox(constraint_data->Hu, 1e-9));
+}
+
 //----------------------------------------------------------------------------//
 
 void register_unit_tests(StateModelTypes::Type state_type) {
@@ -328,6 +375,7 @@ void register_unit_tests(StateModelTypes::Type state_type) {
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_get_constraints, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_shareMemory, state_type)));
   framework::master_test_suite().add(ts);
 }
 

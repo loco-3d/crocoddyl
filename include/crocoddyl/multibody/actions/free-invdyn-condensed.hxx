@@ -96,6 +96,7 @@ void DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::calc(
   actuation_->calc(d->multibody.actuation, x, d->multibody.joint->tau);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
+  d->constraints->resize(this, d);
   constraints_->calc(d->constraints, x, u);
 }
 
@@ -115,6 +116,7 @@ void DifferentialActionModelFreeInvDynamicsCondensedTpl<Scalar>::calcDiff(
   const std::size_t nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
+  d->constraints->resize(this, d);
 
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, u);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =

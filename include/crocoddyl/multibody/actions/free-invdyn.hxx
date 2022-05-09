@@ -96,6 +96,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
   actuation_->calc(d->multibody.actuation, x, tau);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
+  d->constraints->resize(this, d);
   constraints_->calc(d->constraints, x, u);
 }
 
