@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -229,6 +230,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                      (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   d->Gx = k0_data->Gx;
   d->Hx = k0_data->Hx;
+  d->Gu.resize(*ng_, nu_);
+  d->Hu.resize(*nh_, nu_);
   control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
   control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 }
