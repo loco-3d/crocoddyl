@@ -9,23 +9,19 @@ import warnings
 
 
 def rotationMatrixFromTwoVectors(a, b):
-    a_copy = a / np.linalg.norm(a)
-    b_copy = b / np.linalg.norm(b)
+    a_norm = np.linalg.norm(a)
+    b_norm = np.linalg.norm(b)
+    if a_norm == 0 or b_norm == 0:
+        return np.eye(3)
+    a_copy = a / a_norm
+    b_copy = b / b_norm
     a_cross_b = np.cross(a_copy, b_copy, axis=0)
     s = np.linalg.norm(a_cross_b)
-    if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
-        warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
-        if s == 0:
-            return np.matrix(np.eye(3))
-        c = np.asscalar(a_copy.T * b_copy)
-        ab_skew = pinocchio.skew(a_cross_b)
-        return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
-    else:
-        if s == 0:
-            return np.eye(3)
-        c = np.dot(a_copy, b_copy)
-        ab_skew = pinocchio.skew(a_cross_b)
-        return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
+    if s == 0:
+        return np.eye(3)
+    c = np.dot(a_copy, b_copy)
+    ab_skew = pinocchio.skew(a_cross_b)
+    return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
 class DisplayAbstract:
@@ -358,6 +354,7 @@ class MeshcatDisplay(DisplayAbstract):
                             R, pose.translation +
                             np.dot(R, np.array([0., forceMagnitud * self.forceLength / 2, 0.]))).homogeneous
                         forceName = self.forceGroup + "/" + key
+                        self.robot.viewer[forceName].set_property("visible", False)
                         self.robot.viewer[forceName].set_transform(forcePose)
                         self.robot.viewer[forceName].set_property("scale", [1., forceMagnitud, 1.])
                         self.robot.viewer[forceName].set_property("visible", True)
