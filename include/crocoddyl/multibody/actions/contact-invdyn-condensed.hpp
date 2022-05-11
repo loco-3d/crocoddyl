@@ -438,15 +438,16 @@ struct DifferentialActionDataContactInvDynamicsCondensedTpl : public Differentia
         tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
     // Set constant values for Fu, df_dx, and df_du
     const std::size_t nv = model->get_state()->get_nv();
-    const std::size_t nc = model->get_contacts()->get_nc();
+    const std::size_t nc = model->get_contacts()->get_nc_total();
     Fu.leftCols(nv).diagonal().setOnes();
     multibody.joint->da_du.leftCols(nv).diagonal().setOnes();
     MatrixXs df_dx = MatrixXs::Zero(nc, model->get_state()->get_ndx());
     MatrixXs df_du = MatrixXs::Zero(nc, model->get_nu());
     std::size_t fid = 0;
-    for (typename ContactModelMultiple::ContactDataContainer::iterator it = multibody.contacts->contacts.begin();
-         it != multibody.contacts->contacts.end(); ++it) {
-      const std::size_t nc = it->second->a0.size();
+    for (typename ContactModelMultiple::ContactModelContainer::const_iterator it =
+             model->get_contacts()->get_contacts().begin();
+         it != model->get_contacts()->get_contacts().end(); ++it) {
+      const std::size_t nc = it->second->contact->get_nc();
       df_du.block(fid, nv + fid, nc, nc).diagonal().setOnes();
       fid += nc;
     }
