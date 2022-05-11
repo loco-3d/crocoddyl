@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,6 +141,9 @@ void exposeContactMultiple() {
       .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
            "Return the contact status of a given contact name.\n\n"
            ":param name: contact name")
+      .add_property("computeAllContacts", bp::make_function(&ContactModelMultiple::getComputeAllContacts),
+                    bp::make_function(&ContactModelMultiple::setComputeAllContacts),
+                    "type of contact computation (True for all contacts and False for active contacts)")
       .def(PrintableVisitor<ContactModelMultiple>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple>>();
