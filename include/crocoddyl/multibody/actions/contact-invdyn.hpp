@@ -398,8 +398,8 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_actuation()->createData(), model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
-        tmp_Jstatic(model->get_state()->get_nv(), model->get_nu() + model->get_contacts()->get_nc_total()),
-        tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
+        tmp_rstatic(model->get_actuation()->get_nu() + model->get_contacts()->get_nc()),
+        tmp_Jstatic(model->get_state()->get_nv(), model->get_actuation()->get_nu() + model->get_contacts()->get_nc()) {
     // Set constant values for Fu, df_dx, and df_du
     const std::size_t na = model->get_actuation()->get_nu();
     const std::size_t nv = model->get_state()->get_nv();
@@ -423,17 +423,17 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
     constraints->shareMemory(this);
 
     tmp_xstatic.setZero();
+    tmp_rstatic.setZero();
     tmp_Jstatic.setZero();
-    tmp_Jcstatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
   DataCollectorActMultibodyInContact multibody;          //!< Multibody data
   boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;                                  //!< quasistatic state point (velocity has to be zero)
-  MatrixXs tmp_Jstatic;                                  //!< quasistatic Jacobian
-  MatrixXs tmp_Jcstatic;                                 //!< quasistatic partial Jacobian
+  VectorXs tmp_xstatic;                                  //!< State point used for computing the quasi-static input
+  VectorXs tmp_rstatic;                                  //!< Factorization used for computing the quasi-static input
+  MatrixXs tmp_Jstatic;                                  //!< Jacobian used for computing the quasi-static input
 
   using Base::cost;
   using Base::Fu;

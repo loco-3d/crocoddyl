@@ -317,7 +317,7 @@ struct DifferentialActionDataFreeInvDynamicsCondensedTpl : public DifferentialAc
   DataCollectorJointActMultibody multibody;              //!< Multibody data
   boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;                                  //!< quasistatic state point (velocity has to be zero)
+  VectorXs tmp_xstatic;                                  //!< State point used for computing the quasi-static input
   using Base::cost;
   using Base::Fu;
   using Base::Fx;

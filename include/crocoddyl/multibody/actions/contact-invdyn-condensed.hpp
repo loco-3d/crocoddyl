@@ -435,7 +435,8 @@ struct DifferentialActionDataContactInvDynamicsCondensedTpl : public Differentia
                   boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu()),
                   model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
-        tmp_Jcstatic(model->get_state()->get_nv(), model->get_contacts()->get_nc_total()) {
+        tmp_rstatic(model->get_actuation()->get_nu() + model->get_contacts()->get_nc()),
+        tmp_Jstatic(model->get_state()->get_nv(), model->get_actuation()->get_nu() + model->get_contacts()->get_nc()) {
     // Set constant values for Fu, df_dx, and df_du
     const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nc = model->get_contacts()->get_nc_total();
@@ -456,16 +457,19 @@ struct DifferentialActionDataContactInvDynamicsCondensedTpl : public Differentia
     constraints = model->get_constraints()->createData(&multibody);
     costs->shareMemory(this);
     constraints->shareMemory(this);
+
     tmp_xstatic.setZero();
-    tmp_Jcstatic.setZero();
+    tmp_rstatic.setZero();
+    tmp_Jstatic.setZero();
   }
 
   pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
   DataCollectorJointActMultibodyInContact multibody;     //!< Multibody data
   boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;                                  //!< quasistatic state point (velocity has to be zero)
-  MatrixXs tmp_Jcstatic;                                 //!< quasistatic partial Jacobian
+  VectorXs tmp_xstatic;                                  //!< State point used for computing the quasi-static input
+  VectorXs tmp_rstatic;                                  //!< Factorization used for computing the quasi-static input
+  MatrixXs tmp_Jstatic;                                  //!< Jacobian used for computing the quasi-static input
 
   using Base::cost;
   using Base::Fu;
