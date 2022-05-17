@@ -188,6 +188,9 @@ void SolverDDP::resizeData() {
     us_try_[t].conservativeResize(nu);
     FuTVxx_p_[t].conservativeResize(nu, ndx);
     Quuk_[t].conservativeResize(nu);
+    if (nu != 0) {
+      FuTVxx_p_[t].setZero();
+    }
   }
   STOP_PROFILER("SolverDDP::resizeData");
 }
