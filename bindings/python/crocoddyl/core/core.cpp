@@ -61,6 +61,7 @@ void exposeCore() {
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
   exposeSolverBoxFDDP();
+  exposeSolverIpOpt();
   exposeCallbacks();
   exposeStopWatch();
 }
