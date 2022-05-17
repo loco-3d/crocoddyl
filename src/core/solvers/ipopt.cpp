@@ -3,15 +3,15 @@
 namespace crocoddyl {
 
 SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
-    : SolverAbstract(problem), ipopt_iface_(new IpoptInterface(problem)), app_(IpoptApplicationFactory()) {
-  app_->Options()->SetNumericValue("tol", 3.82e-6);
-  app_->Options()->SetStringValue("mu_strategy", "adaptive");
+    : SolverAbstract(problem), ipopt_iface_(new IpoptInterface(problem)), ipopt_app_(IpoptApplicationFactory()) {
+  ipopt_app_->Options()->SetNumericValue("tol", 3.82e-6);
+  ipopt_app_->Options()->SetStringValue("mu_strategy", "adaptive");
   // app_->Options()->SetStringValue("max_iter", 100);
   // app->Options()->SetStringValue("output_file", "ipopt.out");
 
-  status_ = app_->Initialize();
+  ipopt_status_ = ipopt_app_->Initialize();
 
-  if (status_ != Ipopt::Solve_Succeeded) {
+  if (ipopt_status_ != Ipopt::Solve_Succeeded) {
     // Throw an exception here
     std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
   }
@@ -22,20 +22,17 @@ bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
   assert(init_xs.size() == ipopt_iface_->get_problem()->get_T() + 1);
   assert(init_us.size() == ipopt_iface_->get_problem()->get_T());
 
-  if (init_xs != DEFAULT_VECTOR) {
-    ipopt_iface_->set_xs(init_xs);
-  }
-  if (init_us != DEFAULT_VECTOR) {
-    ipopt_iface_->set_us(init_us);
-  }
+  setCandidate(init_xs, init_us, is_feasible);
+  ipopt_iface_->set_xs(xs_);
+  ipopt_iface_->set_us(us_);
 
-  app_->Options()->SetIntegerValue("max_iter", maxiter);
-  Ipopt::ApplicationReturnStatus status = app_->OptimizeTNLP(ipopt_iface_);
+  ipopt_app_->Options()->SetIntegerValue("max_iter", maxiter);
+  ipopt_status_ = ipopt_app_->OptimizeTNLP(ipopt_iface_);
 
   std::copy(ipopt_iface_->get_xs().begin(), ipopt_iface_->get_xs().end(), xs_.begin());
   std::copy(ipopt_iface_->get_us().begin(), ipopt_iface_->get_us().end(), us_.begin());
 
-  return status == Ipopt::Solve_Succeeded;
+  return ipopt_status_ == Ipopt::Solve_Succeeded;
 }
 
 SolverIpopt::~SolverIpopt() {}

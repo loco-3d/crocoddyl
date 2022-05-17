@@ -20,8 +20,8 @@ class SolverIpopt : public SolverAbstract {
 
  private:
   Ipopt::SmartPtr<IpoptInterface> ipopt_iface_;
-  Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
-  Ipopt::ApplicationReturnStatus status_;
+  Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app_;
+  Ipopt::ApplicationReturnStatus ipopt_status_;
 
   virtual void computeDirection(const bool recalc);
   virtual double tryStep(const double steplength = 1);
