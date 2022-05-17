@@ -2,8 +2,6 @@
 #include <cmath>
 #include <iostream>
 
-#include <coin-or/IpIpoptApplication.hpp>
-
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
 
 #ifdef __GNUC__
