@@ -6,6 +6,8 @@
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
+namespace crocoddyl {
+
 class IpoptInterface : public Ipopt::TNLP {
  public:
   IpoptInterface(const boost::shared_ptr<crocoddyl::ShootingProblem> &problem);
@@ -61,6 +63,9 @@ class IpoptInterface : public Ipopt::TNLP {
   std::vector<Eigen::VectorXd> xs_;
   std::vector<Eigen::VectorXd> us_;
 
+  std::vector<Eigen::VectorXd> xs_guess_; 
+  std::vector<Eigen::VectorXd> us_guess_;  
+
   std::size_t nx_;
   std::size_t ndx_;
   std::size_t nu_;
@@ -75,7 +80,7 @@ class IpoptInterface : public Ipopt::TNLP {
     Eigen::VectorXd dx;
     Eigen::VectorXd dxnext;
     Eigen::VectorXd x_diff;
-    Eigen::VectorXd control;
+    Eigen::VectorXd u;
 
     Eigen::MatrixXd Jsum_x;
     Eigen::MatrixXd Jsum_dx;
@@ -99,6 +104,8 @@ class IpoptInterface : public Ipopt::TNLP {
 
   IpoptInterface &operator=(const IpoptInterface &);
 };
+
+}  // namespace crocoddyl
 
 #endif
 #endif
