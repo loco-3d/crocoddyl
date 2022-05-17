@@ -1,18 +1,20 @@
+#ifdef CROCODDYL_WITH_IPOPT
+
 #include "python/crocoddyl/core/core.hpp"
-#include "crocoddyl/core/solvers/ipopt/ipopt.hpp"
+#include "crocoddyl/core/solvers/ipopt.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpOpt_solves, SolverIpOpt::solve, 0, 5)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve, 0, 5)
 
-void exposeSolverIpOpt() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverIpOpt>>();
-  bp::class_<SolverIpOpt, bp::bases<SolverAbstract>>(
-      "SolverIpOpt",
+void exposeSolverIpopt() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverIpopt>>();
+  bp::class_<SolverIpopt, bp::bases<SolverAbstract>>(
+      "SolverIpopt",
       bp::init<const boost::shared_ptr<crocoddyl::ShootingProblem>&>(bp::args("self", "problem"), "Initialize solver"))
-      .def("solve", &SolverIpOpt::solve,
-           SolverIpOpt_solves(
+      .def("solve", &SolverIpopt::solve,
+           SolverIpopt_solves(
                bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible", "regInit"),
                "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate\n"
@@ -31,3 +33,5 @@ void exposeSolverIpOpt() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#endif

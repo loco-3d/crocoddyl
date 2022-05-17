@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct SolverTypes {
-  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, SolverIpOpt, NbSolverTypes };
+  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, SolverIpopt, NbSolverTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.clear();

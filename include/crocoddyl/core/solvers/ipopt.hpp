@@ -1,22 +1,25 @@
+#ifdef CROCODDYL_WITH_IPOPT
 #ifndef CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_HPP_
 #define CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_HPP_
 
-#include "coin-or/IpIpoptApplication.hpp"
+#include <coin-or/IpIpoptApplication.hpp>
 
 #include "crocoddyl/core/solver-base.hpp"
-#include "crocoddyl/core/solvers/ipopt/multiple-shooting-nlp.hpp"
+#include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
+
 namespace crocoddyl {
-class SolverIpOpt : public SolverAbstract {
+
+class SolverIpopt : public SolverAbstract {
  public:
-  SolverIpOpt(boost::shared_ptr<crocoddyl::ShootingProblem> problem);
-  ~SolverIpOpt();
+  SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem);
+  ~SolverIpopt();
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
              const bool is_feasible = false, const double regInit = 1e-9);
 
  private:
-  Ipopt::SmartPtr<MultipleShootingNlp> ms_nlp_;
+  Ipopt::SmartPtr<IpoptInterface> ipopt_iface_;
   Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
   Ipopt::ApplicationReturnStatus status_;
 
@@ -27,4 +30,5 @@ class SolverIpOpt : public SolverAbstract {
 };
 }  // namespace crocoddyl
 
+#endif
 #endif
