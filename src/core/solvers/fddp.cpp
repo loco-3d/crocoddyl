@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
 SolverFDDP::~SolverFDDP() {}
 
 bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                       const std::size_t maxiter, const bool is_feasible, const double reginit) {
+                       const std::size_t maxiter, const bool is_feasible, const double init_reg) {
   START_PROFILER("SolverFDDP::solve");
   if (problem_->is_updated()) {
     resizeData();
@@ -29,12 +30,12 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
-  if (std::isnan(reginit)) {
+  if (std::isnan(init_reg)) {
     xreg_ = reg_min_;
     ureg_ = reg_min_;
   } else {
-    xreg_ = reginit;
-    ureg_ = reginit;
+    xreg_ = init_reg;
+    ureg_ = init_reg;
   }
   was_feasible_ = false;
 

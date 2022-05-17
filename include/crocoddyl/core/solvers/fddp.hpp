@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +62,7 @@ class SolverFDDP : public SolverDDP {
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
                      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-                     const bool is_feasible = false, const double regInit = 1e-9);
+                     const bool is_feasible = false, const double init_reg = 1e-9);
 
   /**
    * @copybrief SolverAbstract::expectedImprovement

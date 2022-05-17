@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,13 +68,13 @@ class SolverAbstract {
    * until `stoppingCriteria()` is below threshold. It also describes the globalization strategy used during the
    * numerical optimization.
    *
-   * @param[in] init_xs     initial guess for state trajectory with \f$T+1\f$ elements (default [])
-   * @param[in] init_us     initial guess for control trajectory with \f$T\f$ elements (default [])
-   * @param[in] maxiter     maximum allowed number of iterations (default 100)
-   * @param[in] isFeasible  true if the \p init_xs are obtained from integrating the \p init_us (rollout) (default
+   * @param[in] init_xs      initial guess for state trajectory with \f$T+1\f$ elements (default [])
+   * @param[in] init_us      initial guess for control trajectory with \f$T\f$ elements (default [])
+   * @param[in] maxiter      maximum allowed number of iterations (default 100)
+   * @param[in] is_feasible  true if the \p init_xs are obtained from integrating the \p init_us (rollout) (default
    * false)
-   * @param[in] regInit     initial guess for the regularization value. Very low values are typical used with very
-   * good guess points (init_xs, init_us)
+   * @param[in] init_reg     initial guess for the regularization value. Very low values are typical used with very
+   * good guess points (default 1e-9).
    * @return A boolean that describes if convergence was reached.
    */
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,

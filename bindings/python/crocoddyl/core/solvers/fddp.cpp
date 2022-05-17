@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, The University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,7 @@ void exposeSolverFDDP() {
                                                     ":param problem: shooting problem."))
       .def("solve", &SolverFDDP::solve,
            SolverFDDP_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible", "regInit"),
+               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible", "init_reg"),
                "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate\n"
                "over computeDirection and tryStep until stoppingCriteria is below\n"
@@ -41,10 +42,10 @@ void exposeSolverFDDP() {
                ":param init_xs: initial guess for state trajectory with T+1 elements (default [])\n"
                ":param init_us: initial guess for control trajectory with T elements (default []).\n"
                ":param maxiter: maximum allowed number of iterations (default 100).\n"
-               ":param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout) (default "
-               "False).\n"
-               ":param regInit: initial guess for the regularization value. Very low values are typical\n"
-               "                used with very good guess points (init_xs, init_us) (default None).\n"
+               ":param is_feasible: true if the init_xs are obtained from integrating the init_us (rollout)\n"
+               "(default False).\n"
+               ":param init_reg: initial guess for the regularization value. Very low values are typical\n"
+               "                 used with very good guess points (default 1e-9).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
       .def("updateExpectedImprovement", &SolverFDDP::updateExpectedImprovement,
            bp::return_value_policy<bp::copy_const_reference>(), bp::args("self"),
