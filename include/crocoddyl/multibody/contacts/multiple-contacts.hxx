@@ -207,20 +207,41 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
   std::size_t nc = 0;
   typename ContactModelContainer::iterator it_m, end_m;
   typename ContactDataContainer::iterator it_d, end_d;
-  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
-       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
-    if (m_i->active || compute_all_contacts_) {
+  if (compute_all_contacts_) {
+    for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(),
+        end_d = data->contacts.end();
+         it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
       const std::size_t nc_i = m_i->contact->get_nc();
-      const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
-      m_i->contact->updateForce(d_i, force_i);
-      const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
-      data->fext[joint] = d_i->f;
+      if (m_i->active) {
+        const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
+        m_i->contact->updateForce(d_i, force_i);
+        const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
+        data->fext[joint] = d_i->f;
+      } else {
+        m_i->contact->setZeroForce(d_i);
+      }
       nc += nc_i;
-    } else {
-      m_i->contact->setZeroForce(d_i);
+    }
+  } else {
+    for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(),
+        end_d = data->contacts.end();
+         it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+      if (m_i->active) {
+        const std::size_t nc_i = m_i->contact->get_nc();
+        const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
+        m_i->contact->updateForce(d_i, force_i);
+        const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
+        data->fext[joint] = d_i->f;
+        nc += nc_i;
+      } else {
+        m_i->contact->setZeroForce(d_i);
+      }
     }
   }
 }
@@ -261,19 +282,39 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
   std::size_t nc = 0;
   typename ContactModelContainer::const_iterator it_m, end_m;
   typename ContactDataContainer::const_iterator it_d, end_d;
-  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
-       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
-    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
-    if (m_i->active || compute_all_contacts_) {
+  if (compute_all_contacts_) {
+    for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(),
+        end_d = data->contacts.end();
+         it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
       const std::size_t nc_i = m_i->contact->get_nc();
-      const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
-      const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
-      m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
+      if (m_i->active) {
+        const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
+        const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
+        m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
+      } else {
+        m_i->contact->setZeroForceDiff(d_i);
+      }
       nc += nc_i;
-    } else {
-      m_i->contact->setZeroForceDiff(d_i);
+    }
+  } else {
+    for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(),
+        end_d = data->contacts.end();
+         it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+      if (m_i->active) {
+        const std::size_t nc_i = m_i->contact->get_nc();
+        const Eigen::Block<const MatrixXs> df_dx_i = df_dx.block(nc, 0, nc_i, ndx);
+        const Eigen::Block<const MatrixXs> df_du_i = df_du.block(nc, 0, nc_i, nu_);
+        m_i->contact->updateForceDiff(d_i, df_dx_i, df_du_i);
+        nc += nc_i;
+      } else {
+        m_i->contact->setZeroForceDiff(d_i);
+      }
     }
   }
 }

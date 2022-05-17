@@ -210,7 +210,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
   const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
-  const std::size_t nc = contacts_->get_nc_total();
+  std::size_t nc = contacts_->get_nc_total();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
   d->tmp_xstatic.head(nq) = q;
   d->tmp_xstatic.tail(nv).setZero();
@@ -220,12 +220,30 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic, d->tmp_xstatic.tail(nu));
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, d->tmp_xstatic.tail(nu));
+  contacts_->setComputeAllContacts(false);
   contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
+  contacts_->setComputeAllContacts(true);
+
+  d->tmp_Jstatic.conservativeResize(nv, nu + nc);
+  d->tmp_Jstatic.leftCols(nu) = d->multibody.actuation->dtau_du;
+  d->tmp_Jstatic.rightCols(nc) = d->multibody.contacts->Jc.topRows(nc).transpose();
+  d->tmp_rstatic.noalias() = pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau;
   if (nc != 0) {
-    d->tmp_Jcstatic.conservativeResize(nv, nc);
-    d->tmp_Jcstatic = d->multibody.contacts->Jc.topRows(nc).transpose();
-    d->pinocchio.tau -= d->multibody.actuation->tau;
-    u.tail(nc).noalias() = pseudoInverse(d->tmp_Jcstatic) * d->pinocchio.tau;
+    nc = 0;
+    std::size_t nc_r = 0;
+    for (typename ContactModelMultiple::ContactModelContainer::const_iterator it_m = contacts_->get_contacts().begin();
+         it_m != contacts_->get_contacts().end(); ++it_m) {
+      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::size_t nc_i = m_i->contact->get_nc();
+      if (m_i->active) {
+        u.segment(nv + nc, nc_i) = d->tmp_rstatic.segment(nu + nc_r, nc_i);
+        nc_r += nc_i;
+      } else {
+        u.segment(nv + nc, nc_i).setZero();
+      }
+      nc += nc_i;
+    }
   }
   d->pinocchio.tau.setZero();
 }
