@@ -30,7 +30,7 @@ void exposeSolverIntro() {
                                                                    ":param problem: shooting problem."))
       .def("solve", &SolverIntro::solve,
            SolverIntro_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible", "regInit"),
+               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible", "init_reg"),
                "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate\n"
                "over computeDirection and tryStep until stoppingCriteria is below\n"
@@ -39,10 +39,10 @@ void exposeSolverIntro() {
                ":param init_xs: initial guess for state trajectory with T+1 elements (default [])\n"
                ":param init_us: initial guess for control trajectory with T elements (default []).\n"
                ":param maxiter: maximum allowed number of iterations (default 100).\n"
-               ":param isFeasible: true if the init_xs are obtained from integrating the init_us (rollout) (default "
-               "False).\n"
-               ":param regInit: initial guess for the regularization value. Very low values are typical\n"
-               "                used with very good guess points (init_xs, init_us) (default None).\n"
+               ":param is_feasible: true if the init_xs are obtained from integrating the init_us (rollout)\n"
+               "(default False).\n"
+               ":param init_reg: initial guess for the regularization value. Very low values are typical\n"
+               "                 used with very good guess points (default 1e-9).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
       .def("tryStep", &SolverIntro::tryStep,
            SolverIntro_trySteps(bp::args("self", "stepLength"),
@@ -57,11 +57,15 @@ void exposeSolverIntro() {
       .add_property("dPhi", bp::make_function(&SolverIntro::get_dPhi), "reduction in the merit function.")
       .add_property("dPhiexp", bp::make_function(&SolverIntro::get_dPhiexp),
                     "expected reduction in the merit function.")
-      .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
-                    "estimated penalty paramter that balances relative contribution of the cost function and equality "
-                    "constraints.")
+      .add_property(
+          "upsilon", bp::make_function(&SolverIntro::get_upsilon),
+          "estimated penalty parameter that balances relative contribution of the cost function and equality "
+          "constraints.")
       .add_property("th_feas", bp::make_function(&SolverIntro::get_th_feas),
                     bp::make_function(&SolverIntro::set_th_feas), "criteria to define optimality, then.")
+      .add_property("zero_upsilon", bp::make_function(&SolverIntro::get_zero_upsilon),
+                    bp::make_function(&SolverIntro::set_zero_upsilon),
+                    "True if we set estimated penalty parameter (upsilon) to zero when solve is called.")
       .add_property("Hu_rank",
                     make_function(&SolverIntro::get_Hu_rank, bp::return_value_policy<bp::copy_const_reference>()),
                     "rank of Hu")

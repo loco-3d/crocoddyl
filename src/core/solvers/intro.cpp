@@ -15,9 +15,7 @@
 namespace crocoddyl {
 
 SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
-    : SolverFDDP(problem), eq_solver_(LuNull), th_feas_(1e-4), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.) {
-  reg_incfactor_ = 1e6;
-
+    : SolverFDDP(problem), eq_solver_(LuNull), th_feas_(1e-4), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.), zero_upsilon_(false) {
   const std::size_t T = problem_->get_T();
   Hu_rank_.resize(T);
   KQuu_tmp_.resize(T);
@@ -44,7 +42,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     Hu_rank_[t] = nh;
-    KQuu_tmp_[t] = Eigen::MatrixXd::Zero(nu, ndx);
+    KQuu_tmp_[t] = Eigen::MatrixXd::Zero(ndx, nu);
     YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
     HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
     Qz_[t] = Eigen::VectorXd::Zero(nh);
@@ -66,20 +64,22 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
 SolverIntro::~SolverIntro() {}
 
 bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                        const std::size_t maxiter, const bool is_feasible, const double reginit) {
+                        const std::size_t maxiter, const bool is_feasible, const double init_reg) {
   START_PROFILER("SolverIntro::solve");
   xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
-  if (std::isnan(reginit)) {
+  if (std::isnan(init_reg)) {
     xreg_ = reg_min_;
     ureg_ = reg_min_;
   } else {
-    xreg_ = reginit;
-    ureg_ = reginit;
+    xreg_ = init_reg;
+    ureg_ = init_reg;
   }
   was_feasible_ = false;
-  upsilon_ = 0.;
+  if (zero_upsilon_) {
+    upsilon_ = 0.;
+  }
 
   bool recalcDiff = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -106,6 +106,8 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
       upsilon_ = std::max(upsilon_, (d_[0] + .5 * d_[1]) / ((1 - rho_) * hfeas_));
     }
 
+    // We need to recalculate the derivatives when the step length passes
+    recalcDiff = false;
     for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
       steplength_ = *it;
       try {
@@ -123,6 +125,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           hfeas_ = hfeas_try_;
+          recalcDiff = true;
           break;
         }
       } else {  // reducing the gaps by allowing a small increment in the cost value
@@ -131,6 +134,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           hfeas_ = hfeas_try_;
+          recalcDiff = true;
           break;
         }
       }
@@ -374,6 +378,8 @@ double SolverIntro::get_dPhiexp() const { return dPhiexp_; }
 
 double SolverIntro::get_upsilon() const { return upsilon_; }
 
+bool SolverIntro::get_zero_upsilon() const { return zero_upsilon_; }
+
 const std::vector<std::size_t>& SolverIntro::get_Hu_rank() const { return Hu_rank_; }
 
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_YZ() const { return YZ_; }
@@ -404,6 +410,10 @@ void SolverIntro::set_rho(const double rho) {
                  << "rho value should between 0 and 1.");
   }
   rho_ = rho;
+}
+
+void SolverIntro::set_zero_upsilon(const bool zero_upsilon) {
+  zero_upsilon_ = zero_upsilon;
 }
 
 }  // namespace crocoddyl

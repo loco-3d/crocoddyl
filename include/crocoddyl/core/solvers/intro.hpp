@@ -30,7 +30,7 @@ class SolverIntro : public SolverFDDP {
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
                      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-                     const bool is_feasible = false, const double regInit = 1e-9);
+                     const bool is_feasible = false, const double init_reg = 1e-9);
   virtual double tryStep(const double step_length = 1);
   virtual double stoppingCriteria();
   virtual void resizeData();
@@ -120,6 +120,13 @@ class SolverIntro : public SolverFDDP {
   const std::vector<Eigen::MatrixXd>& get_Ks() const;
 
   /**
+   * @brief Return the zero-upsilon label
+   *
+   * True if we set the estimated penalty parameter (upsilon) to zero when solve is called.
+   */
+  bool get_zero_upsilon() const;
+
+  /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
    * Note that the default solver is nullspace LU. When we enable parallelization, this strategy is is generally faster
@@ -137,6 +144,13 @@ class SolverIntro : public SolverFDDP {
    */
   void set_rho(const double rho);
 
+  /**
+   * @brief Modify the zero-upsilon label
+   *
+   * @param zero_upsilon  True if we set estimated penalty parameter (upsilon) to zero when solve is called.
+   */
+  void set_zero_upsilon(const bool zero_upsilon);
+
  protected:
   enum EqualitySolverType eq_solver_;  //!< Strategy used for handling the equality constraints
   double th_feas_;                     //!< Threshold for switching to feasibility
@@ -144,8 +158,9 @@ class SolverIntro : public SolverFDDP {
   double dPhi_;                        //!< Reduction in the merit function obtained by `tryStep()`
   double dPhiexp_;                     //!< Expected reduction in the merit function
   double hfeas_try_;                   //!< Feasibility of the equality constraint computed by the line search
-  double upsilon_;  //!< Estimated penalty paramter that balances relative contribution of the cost function and
-                    //!< equality constraints
+  double upsilon_;     //!< Estimated penalty parameter that balances relative contribution of the cost function and
+                       //!< equality constraints
+  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter (upsilon) to zero when solve is called.
 
   std::vector<std::size_t> Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
   std::vector<Eigen::MatrixXd> KQuu_tmp_;
