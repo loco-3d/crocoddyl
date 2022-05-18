@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh,
+//                          University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,26 +22,27 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::DifferentialActionModelContactInvDynamicsCondensedTpl(
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::DifferentialActionModelContactInvDynamicsRedundantTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs)
-    : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(), 0,
-           state->get_nv() - actuation->get_nu() + contacts->get_nc_total()),
+    : Base(state, state->get_nv() + actuation->get_nu() + contacts->get_nc_total(), costs->get_nr(), 0,
+           state->get_nv() + contacts->get_nc_total()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      constraints_(boost::make_shared<ConstraintModelManager>(state, state->get_nv() + contacts->get_nc_total())),
+      constraints_(boost::make_shared<ConstraintModelManager>(
+          state, state->get_nv() + actuation->get_nu() + contacts->get_nc_total())),
       pinocchio_(*state->get_pinocchio().get()) {
   init(state);
 }
 
 template <typename Scalar>
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::DifferentialActionModelContactInvDynamicsCondensedTpl(
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::DifferentialActionModelContactInvDynamicsRedundantTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     boost::shared_ptr<ConstraintModelManager> constraints)
-    : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(), constraints->get_ng(),
-           state->get_nv() - actuation->get_nu() + contacts->get_nc_total() + constraints->get_nh()),
+    : Base(state, state->get_nv() + actuation->get_nu() + contacts->get_nc_total(), costs->get_nr(),
+           constraints->get_ng(), state->get_nv() + contacts->get_nc_total() + constraints->get_nh()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -50,11 +52,11 @@ DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::DifferentialActio
 }
 
 template <typename Scalar>
-DifferentialActionModelContactInvDynamicsCondensedTpl<
-    Scalar>::~DifferentialActionModelContactInvDynamicsCondensedTpl() {}
+DifferentialActionModelContactInvDynamicsRedundantTpl<
+    Scalar>::~DifferentialActionModelContactInvDynamicsRedundantTpl() {}
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::init(
     const boost::shared_ptr<StateMultibody>& state) {
   if (contacts_->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
@@ -64,22 +66,23 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
     throw_pretty("Invalid argument: "
                  << "Costs doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
+  const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
   const std::size_t nc = contacts_->get_nc_total();
   VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
   VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
+  lb.segment(nv, nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
+  ub.segment(nv, nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
   contacts_->setComputeAllContacts(true);
 
-  if (state_->get_nv() - actuation_->get_nu() > 0) {
-    constraints_->addConstraint(
-        "tau", boost::make_shared<ConstraintModelResidual>(
-                   state_,
-                   boost::make_shared<
-                       typename DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::ResidualModelActuation>(
-                       state, nu, nc)));
-  }
+  constraints_->addConstraint(
+      "rnea",
+      boost::make_shared<ConstraintModelResidual>(
+          state_, boost::make_shared<
+                      typename DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::ResidualModelRnea>(
+                      state, nc, nu)));
   if (contacts_->get_nc_total() != 0) {
     typename ContactModelMultiple::ContactModelContainer contact_list;
     contact_list = contacts_->get_contacts();
@@ -95,8 +98,8 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
           boost::make_shared<ConstraintModelResidual>(
               state_,
               boost::make_shared<
-                  typename DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::ResidualModelContact>(
-                  state, id, nc_i, nc)),
+                  typename DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::ResidualModelContact>(
+                  state, id, nc_i, nc, nu)),
           active);
       constraints_->addConstraint(name + "_force",
                                   boost::make_shared<ConstraintModelResidual>(
@@ -109,7 +112,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::init(
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calc(
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::calc(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -121,11 +124,13 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calc(
                  << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
-  const std::size_t nv = state_->get_nv();
   const std::size_t nc = contacts_->get_nc_total();
+  const std::size_t nv = state_->get_nv();
+  const std::size_t nu = actuation_->get_nu();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nu);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> f_ext = u.tail(nc);
 
   d->xout = a;
@@ -134,10 +139,8 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calc(
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   pinocchio::centerOfMass(pinocchio_, d->pinocchio, q, v, a);
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
-  actuation_->commands(d->multibody.actuation, x, d->pinocchio.tau);
-  d->multibody.joint->a = a;
-  d->multibody.joint->tau = d->multibody.actuation->u;
-  actuation_->calc(d->multibody.actuation, x, d->multibody.joint->tau);
+
+  actuation_->calc(d->multibody.actuation, x, tau);
   contacts_->calc(d->multibody.contacts, x);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
@@ -154,7 +157,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calc(
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calcDiff(
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -167,22 +170,18 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calcDiff(
   }
   Data* d = static_cast<Data*>(data.get());
   const std::size_t nv = state_->get_nv();
-  const std::size_t nc = contacts_->get_nc_total();
+  const std::size_t nu = actuation_->get_nu();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.segment(nv, nu);
 
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
       d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>().transpose();
   pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, false);
-  actuation_->calcDiff(d->multibody.actuation, x, d->multibody.joint->tau);
-  actuation_->torqueTransform(d->multibody.actuation, x, d->multibody.joint->tau);
-  d->multibody.joint->dtau_dx.leftCols(nv).noalias() = d->multibody.actuation->Mtau * d->pinocchio.dtau_dq;
-  d->multibody.joint->dtau_dx.rightCols(nv).noalias() = d->multibody.actuation->Mtau * d->pinocchio.dtau_dv;
-  d->multibody.joint->dtau_du.leftCols(nv).noalias() = d->multibody.actuation->Mtau * d->pinocchio.M;
-  d->multibody.joint->dtau_du.rightCols(nc).noalias() =
-      -d->multibody.actuation->Mtau * d->multibody.contacts->Jc.topRows(nc).transpose();
+
+  actuation_->calcDiff(d->multibody.actuation, x, tau);
   contacts_->calcDiff(d->multibody.contacts, x);
   costs_->calcDiff(d->costs, x, u);
   constraints_->calcDiff(d->constraints, x, u);
@@ -190,12 +189,12 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::createData() {
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, std::size_t, Scalar) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -210,7 +209,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
   const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = actuation_->get_nu();
-  std::size_t nc = contacts_->get_nc_total();
+  std::size_t nc = contacts_->get_nc();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
   d->tmp_xstatic.head(nq) = q;
   d->tmp_xstatic.tail(nv).setZero();
@@ -219,8 +218,8 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
   pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv));
   pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
   pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, d->tmp_xstatic.tail(nu));
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, d->tmp_xstatic.tail(nu));
+  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u.segment(nv, nu));
+  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u.segment(nv, nu));
   contacts_->setComputeAllContacts(false);
   contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
   contacts_->setComputeAllContacts(true);
@@ -229,6 +228,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
   d->tmp_Jstatic.leftCols(nu) = d->multibody.actuation->dtau_du;
   d->tmp_Jstatic.rightCols(nc) = d->multibody.contacts->Jc.topRows(nc).transpose();
   d->tmp_rstatic.noalias() = pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau;
+  u.segment(nv, nu) = d->tmp_rstatic.head(nu);
   if (nc != 0) {
     nc = 0;
     std::size_t nc_r = 0;
@@ -237,10 +237,10 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
       const boost::shared_ptr<ContactItem>& m_i = it_m->second;
       const std::size_t nc_i = m_i->contact->get_nc();
       if (m_i->active) {
-        u.segment(nv + nc, nc_i) = d->tmp_rstatic.segment(nu + nc_r, nc_i);
+        u.segment(nv + nu + nc, nc_i) = d->tmp_rstatic.segment(nu + nc_r, nc_i);
         nc_r += nc_i;
       } else {
-        u.segment(nv + nc, nc_i).setZero();
+        u.segment(nv + nu + nc, nc_i).setZero();
       }
       nc += nc_i;
     }
@@ -249,7 +249,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
                                                                                  const Eigen::Ref<const MatrixXs>& A,
                                                                                  Eigen::Ref<MatrixXs> out,
                                                                                  const AssignmentOp op) const {
@@ -286,7 +286,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::multiplyByFu
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::multiplyFuTransposeBy(
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::multiplyFuTransposeBy(
     const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXdRowMajor> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
@@ -322,7 +322,7 @@ void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::multiplyFuTr
 }
 
 template <typename Scalar>
-bool DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::checkData(
+bool DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::checkData(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
@@ -333,37 +333,37 @@ bool DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::checkData(
 }
 
 template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::print(std::ostream& os) const {
-  os << "DifferentialActionModelContactInvDynamicsCondensed {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+void DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelContactInvDynamicsRedundant {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << ", nc=" << contacts_->get_nc_total() << "}";
 }
 
 template <typename Scalar>
-pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::get_pinocchio() const {
+pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }
 
 template <typename Scalar>
 const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::get_actuation() const {
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
 
 template <typename Scalar>
 const boost::shared_ptr<ContactModelMultipleTpl<Scalar> >&
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::get_contacts() const {
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::get_contacts() const {
   return contacts_;
 }
 
 template <typename Scalar>
 const boost::shared_ptr<CostModelSumTpl<Scalar> >&
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::get_costs() const {
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
 template <typename Scalar>
 const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
-DifferentialActionModelContactInvDynamicsCondensedTpl<Scalar>::get_constraints() const {
+DifferentialActionModelContactInvDynamicsRedundantTpl<Scalar>::get_constraints() const {
   return constraints_;
 }
 
