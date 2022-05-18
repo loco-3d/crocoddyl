@@ -16,16 +16,15 @@ model = pendulum.model
 state = crocoddyl.StateMultibody(model)
 actuation = ActuationModelDoublePendulum(state, actLink=1)
 
-nu = state.nv + actuation.nu
+nu = state.nv
 runningCostModel = crocoddyl.CostModelSum(state, nu)
 terminalCostModel = crocoddyl.CostModelSum(state, nu)
 
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelQuad(state.ndx)
-uResidual = crocoddyl.ResidualModelControl(state, nu)
+uResidual = crocoddyl.ResidualModelJointTorque(state, actuation, np.zeros(actuation.nu), nu, False)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
-uRegCost = crocoddyl.CostModelResidual(
-    state, crocoddyl.ActivationModelWeightedQuad(np.array([0.] * state.nv + [1.] * actuation.nu)), uResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(np.array([1.] * 4 + [0.1] * 2)), nu)
 
 dt = 1e-2

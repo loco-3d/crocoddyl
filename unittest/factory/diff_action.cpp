@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, CTU, INRIA, University of Pisa
+// Copyright (C) 2019-2022, University of Edinburgh, CTU, INRIA,
+//                          Heriot-Watt University, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,15 +49,6 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
       os << "DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed";
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_Hector:
-      os << "DifferentialActionModelFreeInvDynamicsCondensed_Hector";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_TalosArm:
-      os << "DifferentialActionModelFreeInvDynamicsCondensed_TalosArm";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_TalosArm_Squashed:
-      os << "DifferentialActionModelFreeInvDynamicsCondensed_TalosArm_Squashed";
-      break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_Hector:
       os << "DifferentialActionModelFreeInvDynamics_Hector";
       break;
@@ -65,6 +57,15 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
       os << "DifferentialActionModelFreeInvDynamics_TalosArm_Squashed";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_Hector:
+      os << "DifferentialActionModelFreeInvDynamicsRedundant_Hector";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_TalosArm:
+      os << "DifferentialActionModelFreeInvDynamicsRedundant_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_TalosArm_Squashed:
+      os << "DifferentialActionModelFreeInvDynamicsRedundant_TalosArm_Squashed";
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       os << "DifferentialActionModelContactFwdDynamics_TalosArm";
@@ -90,24 +91,6 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
       os << "DifferentialActionModelContactFwdDynamicsWithFriction_Talos";
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_TalosArm:
-      os << "DifferentialActionModelContactInvDynamicsCondensed_TalosArm";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_HyQ:
-      os << "DifferentialActionModelContactInvDynamicsCondensed_HyQ";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_Talos:
-      os << "DifferentialActionModelContactInvDynamicsCondensed_Talos";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_TalosArm:
-      os << "DifferentialActionModelContactInvDynamicsCondensedWithFriction_TalosArm";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_HyQ:
-      os << "DifferentialActionModelContactInvDynamicsCondensedWithFriction_HyQ";
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_Talos:
-      os << "DifferentialActionModelContactInvDynamicsCondensedWithFriction_Talos";
-      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm:
       os << "DifferentialActionModelContactInvDynamics_TalosArm";
       break;
@@ -125,6 +108,24 @@ std::ostream& operator<<(std::ostream& os, DifferentialActionModelTypes::Type ty
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
       os << "DifferentialActionModelContactInvDynamicsWithFriction_Talos";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_TalosArm:
+      os << "DifferentialActionModelContactInvDynamicsRedundant_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_HyQ:
+      os << "DifferentialActionModelContactInvDynamicsRedundant_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_Talos:
+      os << "DifferentialActionModelContactInvDynamicsRedundant_Talos";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_TalosArm:
+      os << "DifferentialActionModelContactInvDynamicsRedundantWithFriction_TalosArm";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_HyQ:
+      os << "DifferentialActionModelContactInvDynamicsRedundantWithFriction_HyQ";
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_Talos:
+      os << "DifferentialActionModelContactInvDynamicsRedundantWithFriction_Talos";
       break;
     case DifferentialActionModelTypes::NbDifferentialActionModelTypes:
       os << "NbDifferentialActionModelTypes";
@@ -160,18 +161,6 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
                                       ActuationModelTypes::ActuationModelSquashingFull);
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_Hector:
-      action = create_freeInvDynamicsCondensed(StateModelTypes::StateMultibody_Hector,
-                                               ActuationModelTypes::ActuationModelMultiCopterBase);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_TalosArm:
-      action = create_freeInvDynamicsCondensed(StateModelTypes::StateMultibody_TalosArm,
-                                               ActuationModelTypes::ActuationModelFull);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsCondensed_TalosArm_Squashed:
-      action = create_freeInvDynamicsCondensed(StateModelTypes::StateMultibody_TalosArm,
-                                               ActuationModelTypes::ActuationModelSquashingFull);
-      break;
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_Hector:
       action = create_freeInvDynamics(StateModelTypes::StateMultibody_Hector,
                                       ActuationModelTypes::ActuationModelMultiCopterBase);
@@ -183,6 +172,18 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
       action = create_freeInvDynamics(StateModelTypes::StateMultibody_TalosArm,
                                       ActuationModelTypes::ActuationModelSquashingFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_Hector:
+      action = create_freeInvDynamicsRedundant(StateModelTypes::StateMultibody_Hector,
+                                               ActuationModelTypes::ActuationModelMultiCopterBase);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_TalosArm:
+      action = create_freeInvDynamicsRedundant(StateModelTypes::StateMultibody_TalosArm,
+                                               ActuationModelTypes::ActuationModelFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelFreeInvDynamicsRedundant_TalosArm_Squashed:
+      action = create_freeInvDynamicsRedundant(StateModelTypes::StateMultibody_TalosArm,
+                                               ActuationModelTypes::ActuationModelSquashingFull);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
@@ -216,30 +217,6 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase);
       break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_TalosArm:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_TalosArm,
-                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_HyQ:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_HyQ,
-                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensed_Talos:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_Talos,
-                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_TalosArm:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_TalosArm,
-                                                  ActuationModelTypes::ActuationModelFull);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_HyQ:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_HyQ,
-                                                  ActuationModelTypes::ActuationModelFloatingBase);
-      break;
-    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsCondensedWithFriction_Talos:
-      action = create_contactInvDynamicsCondensed(StateModelTypes::StateMultibody_Talos,
-                                                  ActuationModelTypes::ActuationModelFloatingBase);
-      break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm,
                                          ActuationModelTypes::ActuationModelFloatingBase, false);
@@ -263,6 +240,30 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
                                          ActuationModelTypes::ActuationModelFloatingBase);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_TalosArm:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_TalosArm,
+                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_HyQ:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_HyQ,
+                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundant_Talos:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_Talos,
+                                                  ActuationModelTypes::ActuationModelFloatingBase, false);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_TalosArm:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_TalosArm,
+                                                  ActuationModelTypes::ActuationModelFull);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_HyQ:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_HyQ,
+                                                  ActuationModelTypes::ActuationModelFloatingBase);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsRedundantWithFriction_Talos:
+      action = create_contactInvDynamicsRedundant(StateModelTypes::StateMultibody_Talos,
+                                                  ActuationModelTypes::ActuationModelFloatingBase);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
@@ -311,11 +312,11 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamicsCondensed>
-DifferentialActionModelFactory::create_freeInvDynamicsCondensed(StateModelTypes::Type state_type,
-                                                                ActuationModelTypes::Type actuation_type,
-                                                                bool constraints) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamicsCondensed> action;
+boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
+DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type state_type,
+                                                       ActuationModelTypes::Type actuation_type,
+                                                       bool constraints) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
@@ -344,19 +345,18 @@ DifferentialActionModelFactory::create_freeInvDynamicsCondensed(StateModelTypes:
     constraint->addConstraint("frame-velocity",
                               ConstraintModelFactory().create(
                                   ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type, nu));
-    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamicsCondensed>(state, actuation, cost,
-                                                                                            constraint);
+    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost, constraint);
   } else {
-    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamicsCondensed>(state, actuation, cost);
+    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost);
   }
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
-DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type state_type,
-                                                       ActuationModelTypes::Type actuation_type,
-                                                       bool constraints) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics> action;
+boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamicsRedundant>
+DifferentialActionModelFactory::create_freeInvDynamicsRedundant(StateModelTypes::Type state_type,
+                                                                ActuationModelTypes::Type actuation_type,
+                                                                bool constraints) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamicsRedundant> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::CostModelSum> cost;
@@ -385,9 +385,10 @@ DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type sta
     constraint->addConstraint("frame-velocity",
                               ConstraintModelFactory().create(
                                   ConstraintModelTypes::ConstraintModelResidualFrameVelocityEquality, state_type, nu));
-    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost, constraint);
+    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamicsRedundant>(state, actuation, cost,
+                                                                                            constraint);
   } else {
-    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamics>(state, actuation, cost);
+    action = boost::make_shared<crocoddyl::DifferentialActionModelFreeInvDynamicsRedundant>(state, actuation, cost);
   }
   return action;
 }
@@ -580,11 +581,11 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamicsCondensed>
-DifferentialActionModelFactory::create_contactInvDynamicsCondensed(StateModelTypes::Type state_type,
-                                                                   ActuationModelTypes::Type actuation_type,
-                                                                   bool with_friction) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamicsCondensed> action;
+boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics>
+DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type state_type,
+                                                          ActuationModelTypes::Type actuation_type,
+                                                          bool with_friction) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::ContactModelMultiple> contact;
@@ -739,16 +740,15 @@ DifferentialActionModelFactory::create_contactInvDynamicsCondensed(StateModelTyp
                 CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad, nu),
                 0.1);
-  action = boost::make_shared<crocoddyl::DifferentialActionModelContactInvDynamicsCondensed>(state, actuation, contact,
-                                                                                             cost);
+  action = boost::make_shared<crocoddyl::DifferentialActionModelContactInvDynamics>(state, actuation, contact, cost);
   return action;
 }
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics>
-DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type state_type,
-                                                          ActuationModelTypes::Type actuation_type,
-                                                          bool with_friction) const {
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> action;
+boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamicsRedundant>
+DifferentialActionModelFactory::create_contactInvDynamicsRedundant(StateModelTypes::Type state_type,
+                                                                   ActuationModelTypes::Type actuation_type,
+                                                                   bool with_friction) const {
+  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamicsRedundant> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
   boost::shared_ptr<crocoddyl::ContactModelMultiple> contact;
@@ -903,7 +903,8 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
                 CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad, nu),
                 0.1);
-  action = boost::make_shared<crocoddyl::DifferentialActionModelContactInvDynamics>(state, actuation, contact, cost);
+  action = boost::make_shared<crocoddyl::DifferentialActionModelContactInvDynamicsRedundant>(state, actuation, contact,
+                                                                                             cost);
   return action;
 }
 

@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh,
-//                          University of Pisa
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +11,6 @@
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 
-#include "crocoddyl/multibody/actions/free-invdyn.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {
@@ -21,10 +19,10 @@ template <typename Scalar>
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeInvDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<CostModelSum> costs)
-    : Base(state, state->get_nv() + actuation->get_nu(), costs->get_nr(), 0, state->get_nv()),
+    : Base(state, state->get_nv(), costs->get_nr(), 0, state->get_nv() - actuation->get_nu()),
       actuation_(actuation),
       costs_(costs),
-      constraints_(boost::make_shared<ConstraintModelManager>(state, state->get_nv() + actuation->get_nu())),
+      constraints_(boost::make_shared<ConstraintModelManager>(state, state->get_nv())),
       pinocchio_(*state->get_pinocchio().get()) {
   init(state);
 }
@@ -33,8 +31,8 @@ template <typename Scalar>
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeInvDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints)
-    : Base(state, state->get_nv() + actuation->get_nu(), costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh() + state->get_nv()),
+    : Base(state, state->get_nv(), costs->get_nr(), constraints->get_ng(),
+           constraints->get_nh() + state->get_nv() - actuation->get_nu()),
       actuation_(actuation),
       costs_(costs),
       constraints_(constraints),
@@ -52,19 +50,19 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(const boost::shared
     throw_pretty("Invalid argument: "
                  << "Constraints doesn't have the same control dimension (it should be " + std::to_string(nu_) + ")");
   }
-  const std::size_t nu = actuation_->get_nu();
   VectorXs lb = VectorXs::Constant(nu_, -std::numeric_limits<Scalar>::infinity());
   VectorXs ub = VectorXs::Constant(nu_, std::numeric_limits<Scalar>::infinity());
-  lb.tail(nu) = Scalar(-1.) * pinocchio_.effortLimit.tail(nu);
-  ub.tail(nu) = Scalar(1.) * pinocchio_.effortLimit.tail(nu);
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
 
-  constraints_->addConstraint(
-      "rnea",
-      boost::make_shared<ConstraintModelResidual>(
-          state_, boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelRnea>(
-                      state, nu)));
+  if (state->get_nv() - actuation_->get_nu() > 0) {
+    constraints_->addConstraint(
+        "tau",
+        boost::make_shared<ConstraintModelResidual>(
+            state_,
+            boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelActuation>(
+                state, actuation_->get_nu())));
+  }
   constraints_->shareDimensions(this);
 }
 
@@ -87,13 +85,14 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
   const std::size_t nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.tail(actuation_->get_nu());
 
-  d->xout = a;
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a);
+  d->xout = u;
+  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, u);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
-  actuation_->calc(d->multibody.actuation, x, tau);
+  actuation_->commands(d->multibody.actuation, x, d->pinocchio.tau);
+  d->multibody.joint->a = u;
+  d->multibody.joint->tau = d->multibody.actuation->u;
+  actuation_->calc(d->multibody.actuation, x, d->multibody.joint->tau);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   d->constraints->resize(this, d);
@@ -116,13 +115,16 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
   const std::size_t nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a = u.head(nv);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> tau = u.tail(actuation_->get_nu());
+  d->constraints->resize(this, d);
 
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a);
+  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, u);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
       d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>().transpose();
-  actuation_->calcDiff(d->multibody.actuation, x, tau);
+  actuation_->calcDiff(d->multibody.actuation, x, d->multibody.joint->tau);
+  actuation_->torqueTransform(d->multibody.actuation, x, d->multibody.joint->tau);
+  d->multibody.joint->dtau_dx.leftCols(nv).noalias() = d->multibody.actuation->Mtau * d->pinocchio.dtau_dq;
+  d->multibody.joint->dtau_dx.rightCols(nv).noalias() = d->multibody.actuation->Mtau * d->pinocchio.dtau_dv;
+  d->multibody.joint->dtau_du.noalias() = d->multibody.actuation->Mtau * d->pinocchio.M;
   costs_->calcDiff(d->costs, x, u);
   constraints_->calcDiff(d->constraints, x, u);
 }
@@ -143,116 +145,17 @@ bool DifferentialActionModelFreeInvDynamicsTpl<Scalar>::checkData(
     return false;
   }
 }
+
 template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs>& x, const std::size_t, const Scalar) {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
-  }
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
-  // Check the velocity input is zero
-  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
-
-  Data* d = static_cast<Data*>(data.get());
-  const std::size_t nq = state_->get_nq();
-  const std::size_t nv = state_->get_nv();
-  const std::size_t nu = actuation_->get_nu();
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
-
-  d->tmp_xstatic.head(nq) = q;
-  d->tmp_xstatic.tail(nv) *= 0;
+    const boost::shared_ptr<DifferentialActionDataAbstract>&, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>&, const std::size_t, const Scalar) {
   u.setZero();
-
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv), d->tmp_xstatic.tail(nv));
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u.tail(nu));
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u.tail(nu));
-
-  u.tail(nu).noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
-  d->pinocchio.tau.setZero();
-}
-
-template <typename Scalar>
-void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu,
-                                                                     const Eigen::Ref<const MatrixXs>& A,
-                                                                     Eigen::Ref<MatrixXs> out,
-                                                                     const AssignmentOp op) const {
-  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
-  if (static_cast<std::size_t>(A.cols()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "number of columns of A is wrong, it should be " + std::to_string(state_->get_nv()) +
-                        " instead of " + std::to_string(A.cols()));
-  }
-  if (A.rows() != out.rows()) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have different number of rows: " + std::to_string(A.rows()) + " and " +
-                        std::to_string(out.rows()));
-  }
-  if (static_cast<std::size_t>(out.cols()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "number of columns of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
-                        std::to_string(out.cols()));
-  }
-  const std::size_t nv = state_->get_nv();
-  switch (op) {
-    case setto:
-      out.leftCols(nv).noalias() = A * Fu.leftCols(nv);
-      break;
-    case addto:
-      out.leftCols(nv).noalias() += A * Fu.leftCols(nv);
-      break;
-    case rmfrom:
-      out.leftCols(nv).noalias() -= A * Fu.leftCols(nv);
-      break;
-    default:
-      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-  }
-}
-
-template <typename Scalar>
-void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu,
-                                                                              const Eigen::Ref<const MatrixXs>& A,
-                                                                              Eigen::Ref<MatrixXdRowMajor> out,
-                                                                              const AssignmentOp op) const {
-  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
-  if (static_cast<std::size_t>(A.rows()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "number of rows of A is wrong, it should be " + std::to_string(state_->get_nv()) + " instead of " +
-                        std::to_string(A.rows()));
-  }
-  if (A.cols() != out.cols()) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have different number of columns: " + std::to_string(A.cols()) + " and " +
-                        std::to_string(out.cols()));
-  }
-  if (static_cast<std::size_t>(out.rows()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "number of rows of out is wrong, it should be " + std::to_string(nu_) + " instead of " +
-                        std::to_string(out.cols()));
-  }
-  const std::size_t nv = state_->get_nv();
-  switch (op) {
-    case setto:
-      out.topRows(nv).noalias() = Fu.transpose().topRows(nv) * A;
-      break;
-    case addto:
-      out.topRows(nv).noalias() += Fu.transpose().topRows(nv) * A;
-      break;
-    case rmfrom:
-      out.topRows(nv).noalias() -= Fu.transpose().topRows(nv) * A;
-      break;
-    default:
-      throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
-  }
 }
 
 template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::print(std::ostream& os) const {
-  os << "DifferentialActionModelFreeFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
+  os << "DifferentialActionModelFreeInvDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << "}";
 }
 

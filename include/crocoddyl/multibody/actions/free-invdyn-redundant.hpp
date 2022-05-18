@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh,
+//                          University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_CONDENSED_HPP_
-#define CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_CONDENSED_HPP_
+#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_REDUNDANT_HPP_
+#define CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_REDUNDANT_HPP_
 
 #include <stdexcept>
 
@@ -26,24 +27,23 @@ namespace crocoddyl {
 /**
  * @brief Differential action model for free inverse dynamics in multibody systems.
  *
- * This class implements forward kinematic with an inverse-dynamics computed using the Recursive Newton Euler
- * Algorithm (RNEA). The stack of cost and constraint functions are implemented in
- * `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively. The accelerations are the decision
- * variables defined as the control inputs, and the under-actuation constraint is under the name `tau`, thus the
- *  user is not allow to use it.
- *
+ * This class implements forward kinematic with an inverse-dynamics equality constraint computed using the Recursive
+ * Newton Euler Algorithm (RNEA). The stack of cost and constraint functions are implemented in
+ * `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively. The acceleration and the torques are decision
+ * variables defined as the control inputs, and the RNEA constraint is under the name `rnea`, thus the user is not
+ * allow to use it.
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+class DifferentialActionModelFreeInvDynamicsRedundantTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
-  typedef DifferentialActionDataFreeInvDynamicsCondensedTpl<Scalar> Data;
+  typedef DifferentialActionDataFreeInvDynamicsRedundantTpl<Scalar> Data;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
@@ -57,14 +57,17 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
   /**
    * @brief Initialize the free inverse-dynamics action model
    *
-   * It describes the kinematic evolution of the multibody system and computes the needed torques
-   * using inverse dynamics.
+   * It describes the kinematic evolution of the multibody system without any contact,
+   * and imposes an inverse-dynamics (equality) constraint. Additionally, it computes
+   * the cost and extra constraint values associated to this state and control pair.
+   * Note that the name `rnea` in the `ConstraintModelManagerTpl` is reserved to store
+   * the inverse-dynamics constraint.
    *
    * @param[in] state      State of the multibody system
    * @param[in] actuation  Actuation model
    * @param[in] costs      Cost model
    */
-  DifferentialActionModelFreeInvDynamicsCondensedTpl(boost::shared_ptr<StateMultibody> state,
+  DifferentialActionModelFreeInvDynamicsRedundantTpl(boost::shared_ptr<StateMultibody> state,
                                                      boost::shared_ptr<ActuationModelAbstract> actuation,
                                                      boost::shared_ptr<CostModelSum> costs);
 
@@ -76,11 +79,11 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
    * @param[in] costs        Cost model
    * @param[in] constraints  Constraints model
    */
-  DifferentialActionModelFreeInvDynamicsCondensedTpl(boost::shared_ptr<StateMultibody> state,
+  DifferentialActionModelFreeInvDynamicsRedundantTpl(boost::shared_ptr<StateMultibody> state,
                                                      boost::shared_ptr<ActuationModelAbstract> actuation,
                                                      boost::shared_ptr<CostModelSum> costs,
                                                      boost::shared_ptr<ConstraintModelManager> constraints);
-  virtual ~DifferentialActionModelFreeInvDynamicsCondensedTpl();
+  virtual ~DifferentialActionModelFreeInvDynamicsRedundantTpl();
 
   /**
    * @brief Compute the system acceleration, cost value and constraint residuals
@@ -137,6 +140,34 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Compute the Sparse product between the given matrix A and the Jacobian of the dynamics with respect to the
+   * control
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] Fu    Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A     A matrix to multiply times the Jacobian
+   * @param[out] out  Product between A and the Jacobian of the dynamics with respect to the control
+   * @param[in] op    Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyByFu(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
+                            Eigen::Ref<MatrixXs> out, const AssignmentOp = setto) const;
+
+  /**
+   * @brief Compute the Sparse product between the Jacobian of the dynamics with respect to the
+   * control and the given matrix A
+   *
+   * It assumes that `calcDiff()` has been run first
+   *
+   * @param[in] Fu           Jacobian matrix of the dynamics with respect to the control
+   * @param[in] A            A matrix to multiply times the Jacobian
+   * @param[out] out         Product between A and the Jacobian of the dynamics with respect to the control
+   * @param[in] op           Assignment operator which sets, adds, or removes the given results
+   */
+  virtual void multiplyFuTransposeBy(const Eigen::Ref<const MatrixXs>& Fu, const Eigen::Ref<const MatrixXs>& A,
+                                     Eigen::Ref<MatrixXdRowMajor> out, const AssignmentOp = setto) const;
+
+  /**
    * @brief Return the actuation model
    */
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
@@ -178,18 +209,21 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
 
  public:
   /**
-   * @brief Actuation residual
+   * @brief RNEA residual
    *
-   * This residual function enforces the torques of under-actuated joints (e.g., floating-base joints) to be zero.
-   * We compute these torques and their derivatives using RNEA inside
-   * `DifferentialActionModelFreeInvDynamicsCondensedTpl`.
+   * This residual function is defined as \f$\mathbf{r} = \boldsymbol{\tau} -
+   * \mathrm{RNEA}(\mathbf{q},\mathbf{v},\dot{\mathbf{a}})\f$, where \f$\boldsymbol{\tau}\f$ is extracted from the
+   * control vector and \f$\mathrm{RNEA}\f$ evaluates the joint torque using \f$\mathbf{q}, \mathbf{v},
+   * \dot{\mathbf{a}}\f$ values. Furthermore, the Jacobians of the residual function are computed analytically.
+   * This is used by `ConstraintModelManagerTpl` inside parent `DifferentialActionModelFreeInvDynamicsRedundantTpl`
+   * class.
    *
    * As described in `ResidualModelAbstractTpl`, the residual value and its Jacobians are calculated by `calc` and
    * `calcDiff`, respectively.
    *
    * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
    */
-  class ResidualModelActuation : public ResidualModelAbstractTpl<_Scalar> {
+  class ResidualModelRnea : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -199,125 +233,103 @@ class DifferentialActionModelFreeInvDynamicsCondensedTpl : public DifferentialAc
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-    typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
     typedef typename MathBase::VectorXs VectorXs;
-    typedef typename MathBase::MatrixXs MatrixXs;
 
     /**
-     * @brief Initialize the actuation residual model
+     * @brief Initialize the RNEA residual model
      *
      * @param[in] state  State of the multibody system
-     * @param[in] nu     Dimension of the joint torques
+     * @param[in] nu     Dimension of the control vector
      */
-    ResidualModelActuation(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
-        : Base(state, state->get_nv() - nu, state->get_nv(), true, true, true), na_(nu) {}
-    virtual ~ResidualModelActuation() {}
+    ResidualModelRnea(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
+        : Base(state, state->get_nv(), state->get_nv() + nu, true, true, true), na_(nu) {}
+    virtual ~ResidualModelRnea() {}
 
     /**
-     * @brief Compute the actuation residual
+     * @brief Compute the RNEA residual
      *
-     * @param[in] data  Actuation residual data
+     * @param[in] data  RNEA residual data
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
     virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
                       const Eigen::Ref<const VectorXs>&) {
-      typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
-      // Update the under-actuation set and residual
-      std::size_t nrow = 0;
-      for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
-        if (!d->actuation->tau_set[k]) {
-          data->r(nrow) = d->pinocchio->tau(k);
-          nrow += 1;
-        }
-      }
+      typename Data::ResidualDataRnea* d = static_cast<typename Data::ResidualDataRnea*>(data.get());
+      data->r = d->pinocchio->tau - d->actuation->tau;
     }
 
     /**
-     * @brief Compute the derivatives of the actuation residual
+     * @brief Compute the derivatives of the RNEA residual
      *
-     * @param[in] data  Actuation residual data
+     * @param[in] data  RNEA residual data
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
     virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
                           const Eigen::Ref<const VectorXs>&) {
-      typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
-      std::size_t nrow = 0;
+      typename Data::ResidualDataRnea* d = static_cast<typename Data::ResidualDataRnea*>(data.get());
       const std::size_t nv = state_->get_nv();
-      d->dtau_dx.leftCols(nv) = d->pinocchio->dtau_dq;
-      d->dtau_dx.rightCols(nv) = d->pinocchio->dtau_dv;
-      d->dtau_dx -= d->actuation->dtau_dx;
-      for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
-        if (!d->actuation->tau_set[k]) {
-          d->Rx.row(nrow) = d->dtau_dx.row(k);
-          d->Ru.row(nrow) = d->pinocchio->M.row(k);
-          nrow += 1;
-        }
-      }
+      data->Rx.leftCols(nv) = d->pinocchio->dtau_dq;
+      data->Rx.rightCols(nv) = d->pinocchio->dtau_dv;
+      data->Rx -= d->actuation->dtau_dx;
+      data->Ru.leftCols(nv) = d->pinocchio->M;
+      data->Ru.rightCols(na_) = -d->actuation->dtau_du;
     }
 
     /**
-     * @brief Create the actuation residual data
+     * @brief Create the RNEA residual data
      *
-     * @return Actuation residual data
+     * @return RNEA residual data
      */
     virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
-      return boost::allocate_shared<typename Data::ResidualDataActuation>(
-          Eigen::aligned_allocator<typename Data::ResidualDataActuation>(), this, data);
+      return boost::allocate_shared<typename Data::ResidualDataRnea>(
+          Eigen::aligned_allocator<typename Data::ResidualDataRnea>(), this, data);
     }
 
     /**
-     * @brief Print relevant information of the actuation residual model
+     * @brief Print relevant information of the RNEA residual model
      *
      * @param[out] os  Output stream object
      */
     virtual void print(std::ostream& os) const {
-      os << "ResidualModelActuation {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
+      os << "ResidualModelRnea {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
          << ", na=" << na_ << "}";
     }
 
    protected:
-    std::size_t na_;  //!< Dimension of the joint torques
+    std::size_t na_;  //!< Number of actuated joints
     using Base::nu_;
     using Base::state_;
   };
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataFreeInvDynamicsCondensedTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataFreeInvDynamicsRedundantTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
-  typedef JointDataAbstractTpl<Scalar> JointDataAbstract;
-  typedef DataCollectorJointActMultibodyTpl<Scalar> DataCollectorJointActMultibody;
-  typedef CostDataSumTpl<Scalar> CostDataSum;
-  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef typename MathBase::VectorXs VectorXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataFreeInvDynamicsCondensedTpl(Model<Scalar>* const model)
+  explicit DifferentialActionDataFreeInvDynamicsRedundantTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData(),
-                  boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
+        multibody(&pinocchio, model->get_actuation()->createData()),
         costs(model->get_costs()->createData(&multibody)),
         constraints(model->get_constraints()->createData(&multibody)),
         tmp_xstatic(model->get_state()->get_nx()) {
-    const std::size_t nv = model->get_state()->get_nv();
-    Fu.leftCols(nv).diagonal().setOnes();
-    multibody.joint->da_du.leftCols(nv).diagonal().setOnes();
     costs->shareMemory(this);
     constraints->shareMemory(this);
+    Fu.leftCols(model->get_state()->get_nv()).diagonal().array() = 1;
     tmp_xstatic.setZero();
   }
 
-  pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
-  DataCollectorJointActMultibody multibody;              //!< Multibody data
-  boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
-  boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;                                  //!< State point used for computing the quasi-static input
+  pinocchio::DataTpl<Scalar> pinocchio;                              //!< Pinocchio data
+  DataCollectorActMultibodyTpl<Scalar> multibody;                    //!< Multibody data
+  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;                  //!< Costs data
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;  //!< Constraints data
+  VectorXs tmp_xstatic;  //!< quasistatic state point (velocity has to be zero)
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
@@ -329,35 +341,31 @@ struct DifferentialActionDataFreeInvDynamicsCondensedTpl : public DifferentialAc
   using Base::r;
   using Base::xout;
 
-  struct ResidualDataActuation : public ResidualDataAbstractTpl<_Scalar> {
+  struct ResidualDataRnea : public ResidualDataAbstractTpl<_Scalar> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
     typedef ResidualDataAbstractTpl<Scalar> Base;
     typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-    typedef DataCollectorActMultibodyTpl<Scalar> DataCollectorActMultibody;
-    typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
-    typedef typename MathBase::MatrixXs MatrixXs;
 
     template <template <typename Scalar> class Model>
-    ResidualDataActuation(Model<Scalar>* const model, DataCollectorAbstract* const data)
-        : Base(model, data), dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()) {
-      dtau_dx.setZero();
+    ResidualDataRnea(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
       // Check that proper shared data has been passed
-      DataCollectorActMultibody* d = dynamic_cast<DataCollectorActMultibody*>(shared);
+      DataCollectorActMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar>*>(shared);
       if (d == NULL) {
         throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibody");
       }
+      const std::size_t na = Ru.cols() - model->get_state()->get_nv();
+      Ru.rightCols(na) = -d->actuation->dtau_du;
 
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
       actuation = d->actuation.get();
     }
 
-    pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-    ActuationDataAbstract* actuation;       //!< Actuation data
-    MatrixXs dtau_dx;
+    pinocchio::DataTpl<Scalar>* pinocchio;        //!< Pinocchio data
+    ActuationDataAbstractTpl<Scalar>* actuation;  //!< Actuation data
     using Base::r;
     using Base::Ru;
     using Base::Rx;
@@ -370,6 +378,6 @@ struct DifferentialActionDataFreeInvDynamicsCondensedTpl : public DifferentialAc
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include <crocoddyl/multibody/actions/free-invdyn-condensed.hxx>
+#include <crocoddyl/multibody/actions/free-invdyn-redundant.hxx>
 
-#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_CONDENSED_HPP_
+#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_REDUNDANT_HPP_

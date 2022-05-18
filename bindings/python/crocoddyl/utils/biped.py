@@ -255,8 +255,8 @@ class SimpleBipedGaitProblem:
             dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                          costModel, 0., True)
         else:
-            dmodel = crocoddyl.DifferentialActionModelContactInvDynamicsCondensed(self.state, self.actuation,
-                                                                                  contactModel, costModel)
+            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel)
         if self._control == 'one':
             control = crocoddyl.ControlParametrizationModelPolyOne(nu)
         elif self._control == 'rk4':
@@ -342,8 +342,8 @@ class SimpleBipedGaitProblem:
             dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
                                                                          costModel, 0., True)
         else:
-            dmodel = crocoddyl.DifferentialActionModelContactInvDynamicsCondensed(self.state, self.actuation,
-                                                                                  contactModel, costModel)
+            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(self.state, self.actuation, contactModel,
+                                                                         costModel)
         if self._integrator == 'euler':
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         elif self.integrator == 'rk4':
