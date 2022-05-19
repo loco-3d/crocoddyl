@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -151,7 +152,7 @@ class ResidualModelContactFrictionConeTpl : public ResidualModelAbstractTpl<_Sca
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(const pinocchio::FrameIndex id);
+  DEPRECATED("Do not use set_id, instead create a new model", void set_id(const pinocchio::FrameIndex id);)
 
   /**
    * @brief Modify the reference contact friction cone

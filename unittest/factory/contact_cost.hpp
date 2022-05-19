@@ -38,7 +38,7 @@ struct ContactCostModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type);
+std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type);
 
 class ContactCostModelFactory {
  public:

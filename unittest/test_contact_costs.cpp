@@ -10,7 +10,6 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "factory/contact_cost.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -39,11 +38,8 @@ void test_partial_derivatives_against_contact_numdiff(ContactCostModelTypes::Typ
   // Computing the action derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
-
-  // Checking the partial derivatives against numdiff
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
@@ -61,11 +57,8 @@ void test_partial_derivatives_against_contact_numdiff(ContactCostModelTypes::Typ
   x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
-
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
-
-  // Checking the partial derivatives against numdiff
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));

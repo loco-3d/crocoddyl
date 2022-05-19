@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,10 @@ void exposeResidualContactForce() {
            "returns the allocated data for the contact force residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
-      .add_property("id", &ResidualModelContactForce::get_id, &ResidualModelContactForce::set_id, "reference frame id")
+      .add_property("id", bp::make_function(&ResidualModelContactForce::get_id),
+                    bp::make_function(&ResidualModelContactForce::set_id,
+                                      deprecated<>("Deprecated. Do not use set_id, instead create a new model")),
+                    "reference frame id")
       .add_property("reference",
                     bp::make_function(&ResidualModelContactForce::get_reference, bp::return_internal_reference<>()),
                     &ResidualModelContactForce::set_reference, "reference spatial force");

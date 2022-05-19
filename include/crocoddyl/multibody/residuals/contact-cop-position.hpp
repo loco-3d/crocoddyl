@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2022, University of Duisburg-Essen, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +175,7 @@ class ResidualModelContactCoPPositionTpl : public ResidualModelAbstractTpl<_Scal
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(pinocchio::FrameIndex id);
+  DEPRECATED("Do not use set_id, instead create a new model", void set_id(pinocchio::FrameIndex id);)
 
   /**
    * @brief Modify the reference support region of CoP
