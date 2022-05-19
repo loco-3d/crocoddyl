@@ -42,9 +42,9 @@ terminalCostModel.addCost("goalPose", goalTrackingCost, 3.)
 
 dt = 3e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, terminalCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, terminalCostModel), dt)
 
 # Creating the shooting problem and the solver
 T = 33
