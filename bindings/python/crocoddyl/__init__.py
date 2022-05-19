@@ -60,20 +60,12 @@ class DisplayAbstract:
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
 
     def displayFromSolver(self, solver, factor=1.):
-        numpy_conversion = False
-        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
-            numpy_conversion = True
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
-            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
         models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
-        if numpy_conversion:
-            numpy_conversion = False
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
         """ Display the state, force and frame trajectories"""
