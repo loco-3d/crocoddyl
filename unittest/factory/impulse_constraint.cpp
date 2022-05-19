@@ -66,6 +66,9 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseConstraintModelFactory:
     case PinocchioModelTypes::RandomHumanoid:
       state_type = StateModelTypes::StateMultibody_RandomHumanoid;
       break;
+    case PinocchioModelTypes::HyQ:
+      state_type = StateModelTypes::StateMultibody_HyQ;
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
       break;
@@ -83,19 +86,21 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseConstraintModelFactory:
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, 0);
   constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, 0);
   std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
+  std::vector<std::string> frame_names = model_factory.get_frame_names();
   // Define the impulse model
   switch (state_type) {
     case StateModelTypes::StateMultibody_Talos:
-      impulse->addImpulse(
-          "lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type, "left_sole_link"));
-      impulse->addImpulse(
-          "rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type, "right_sole_link"));
-      break;
     case StateModelTypes::StateMultibody_RandomHumanoid:
-      impulse->addImpulse("lf",
-                          ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type, "lleg6_body"));
-      impulse->addImpulse("rf",
-                          ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type, "rleg6_body"));
+      for (std::size_t i = 0; i < frame_names.size(); ++i) {
+        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type,
+                                                                         frame_names[i]));
+      }
+      break;
+    case StateModelTypes::StateMultibody_HyQ:
+      for (std::size_t i = 0; i < frame_names.size(); ++i) {
+        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, model_type,
+                                                                         frame_names[i]));
+      }
       break;
     default:
       throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");
@@ -121,43 +126,47 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseConstraintModelFactory:
       break;
     case ImpulseConstraintModelTypes::ConstraintModelResidualImpulseForceEquality:
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
-        constraint->addConstraint("constraint", boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                                    state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
-                                                               state, frame_ids[i], pinocchio::Force::Random(),
-                                                               model_factory.get_contact_nc(), 0)));
+        constraint->addConstraint(
+            "constraint_" + std::to_string(i),
+            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
+                           state, frame_ids[i], pinocchio::Force::Random(), model_factory.get_contact_nc(), 0)));
       }
       break;
     case ImpulseConstraintModelTypes::ConstraintModelResidualImpulseCoPPositionInequality:
       lb = cop_support.get_lb();
       ub = cop_support.get_ub();
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
-        constraint->addConstraint("constraint", boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                                    state,
-                                                    boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
-                                                        state, frame_ids[i], cop_support, 0),
-                                                    lb, ub));
+        constraint->addConstraint(
+            "constraint_" + std::to_string(i),
+            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                state,
+                boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(state, frame_ids[i], cop_support, 0),
+                lb, ub));
       }
       break;
     case ImpulseConstraintModelTypes::ConstraintModelResidualImpulseFrictionConeInequality:
       lb = friction_cone.get_lb();
       ub = friction_cone.get_ub();
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
-        constraint->addConstraint("constraint", boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                                    state,
-                                                    boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                                                        state, frame_ids[i], friction_cone, 0),
-                                                    lb, ub));
+        constraint->addConstraint(
+            "constraint_" + std::to_string(i),
+            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                state,
+                boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(state, frame_ids[i], friction_cone, 0),
+                lb, ub));
       }
       break;
     case ImpulseConstraintModelTypes::ConstraintModelResidualImpulseWrenchConeInequality:
       lb = wrench_cone.get_lb();
       ub = wrench_cone.get_ub();
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
-        constraint->addConstraint("constraint", boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                                    state,
-                                                    boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
-                                                        state, frame_ids[i], wrench_cone, 0),
-                                                    lb, ub));
+        constraint->addConstraint(
+            "constraint_" + std::to_string(i),
+            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                state,
+                boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(state, frame_ids[i], wrench_cone, 0), lb,
+                ub));
       }
       break;
     default:

@@ -66,6 +66,9 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
     case PinocchioModelTypes::RandomHumanoid:
       state_type = StateModelTypes::StateMultibody_RandomHumanoid;
       break;
+    case PinocchioModelTypes::HyQ:
+      state_type = StateModelTypes::StateMultibody_HyQ;
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
       break;
@@ -84,19 +87,21 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
   constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, actuation->get_nu());
   std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
+  std::vector<std::string> frame_names = model_factory.get_frame_names();
   // Define the contact model
   switch (state_type) {
     case StateModelTypes::StateMultibody_Talos:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D, model_type,
-                                                             "left_sole_link", actuation->get_nu()));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D, model_type,
-                                                             "right_sole_link", actuation->get_nu()));
-      break;
     case StateModelTypes::StateMultibody_RandomHumanoid:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D, model_type,
-                                                             "lleg6_body", actuation->get_nu()));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D, model_type,
-                                                             "rleg6_body", actuation->get_nu()));
+      for (std::size_t i = 0; i < frame_names.size(); ++i) {
+        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel6D, model_type,
+                                                                         frame_names[i], actuation->get_nu()));
+      }
+      break;
+    case StateModelTypes::StateMultibody_HyQ:
+      for (std::size_t i = 0; i < frame_names.size(); ++i) {
+        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel3D, model_type,
+                                                                         frame_names[i], actuation->get_nu()));
+      }
       break;
     default:
       throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");

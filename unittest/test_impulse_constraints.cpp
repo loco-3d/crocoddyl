@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,6 +67,13 @@ bool init_function() {
                                                  PinocchioModelTypes::Talos);
     register_impulse_constraint_model_unit_tests(ImpulseConstraintModelTypes::all[constraint_type],
                                                  PinocchioModelTypes::RandomHumanoid);
+    if (ImpulseConstraintModelTypes::all[constraint_type] ==
+            ImpulseConstraintModelTypes::ConstraintModelResidualImpulseForceEquality ||
+        ImpulseConstraintModelTypes::all[constraint_type] ==
+            ImpulseConstraintModelTypes::ConstraintModelResidualImpulseFrictionConeInequality) {
+      register_impulse_constraint_model_unit_tests(ImpulseConstraintModelTypes::all[constraint_type],
+                                                   PinocchioModelTypes::HyQ);
+    }
   }
 
   return true;
