@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,8 @@ bool init_function() {
   // Test all the impulse cost model. Note that we can do it only with humanoids as it needs to test the contact wrench
   // cone
   for (size_t cost_type = 0; cost_type < ImpulseCostModelTypes::all.size(); ++cost_type) {
-    for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
+    for (size_t activation_type = 0; activation_type < ActivationModelTypes::ActivationModelQuadraticBarrier;
+         ++activation_type) {
       register_impulse_cost_model_unit_tests(ImpulseCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
                                              ActivationModelTypes::all[activation_type]);
     }

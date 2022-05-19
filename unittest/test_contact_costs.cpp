@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "factory/contact_cost.hpp"
+#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -92,7 +93,8 @@ bool init_function() {
   // Test all the contact cost model. Note that we can do it only with humanoids
   // as it needs to test the contact wrench cone
   for (size_t cost_type = 0; cost_type < ContactCostModelTypes::all.size(); ++cost_type) {
-    for (size_t activation_type = 0; activation_type < ActivationModelTypes::all.size(); ++activation_type) {
+    for (size_t activation_type = 0; activation_type < ActivationModelTypes::ActivationModelQuadraticBarrier;
+         ++activation_type) {
       if (ActivationModelTypes::all[activation_type] != ActivationModelTypes::ActivationModel2NormBarrier) {
         register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
                                                ActivationModelTypes::all[activation_type],
