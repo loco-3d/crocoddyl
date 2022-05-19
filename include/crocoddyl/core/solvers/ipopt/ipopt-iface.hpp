@@ -60,11 +60,11 @@ class IpoptInterface : public Ipopt::TNLP {
   boost::shared_ptr<crocoddyl::ShootingProblem> problem_;
   boost::shared_ptr<crocoddyl::StateAbstract> state_;
 
-  std::vector<Eigen::VectorXd> xs_;
-  std::vector<Eigen::VectorXd> us_;
+  std::vector<Eigen::VectorXd> xs_; // before solve: store initial; after solve: store solution  
+  std::vector<Eigen::VectorXd> us_; // before solve: store initial; after solve: store solution 
 
-  std::vector<Eigen::VectorXd> xs_guess_; 
-  std::vector<Eigen::VectorXd> us_guess_;  
+  std::vector<Eigen::VectorXd> xs_guess_; // not used
+  std::vector<Eigen::VectorXd> us_guess_; // not used 
 
   std::size_t nx_;
   std::size_t ndx_;
@@ -94,6 +94,7 @@ class IpoptInterface : public Ipopt::TNLP {
     Eigen::MatrixXd Jg_dx;
     Eigen::MatrixXd Jg_dxnext;
     Eigen::MatrixXd Jg_u;
+    Eigen::MatrixXd Jg_ic;
 
     Eigen::VectorXd Ldx;
     Eigen::MatrixXd Ldxdx;

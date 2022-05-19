@@ -19,8 +19,8 @@ SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
 
 bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
                         const std::size_t maxiter, const bool is_feasible, const double regInit) {
-  assert(init_xs.size() == ipopt_iface_->get_problem()->get_T() + 1);
-  assert(init_us.size() == ipopt_iface_->get_problem()->get_T());
+  // assert_pretty(init_xs.size() == ipopt_iface_->get_problem()->get_T() + 1, "Bad Number of initial states");
+  // assert_pretty(init_us.size() == ipopt_iface_->get_problem()->get_T(), "Bad Number of initial controls");
 
   setCandidate(init_xs, init_us, is_feasible);
   ipopt_iface_->set_xs(xs_);

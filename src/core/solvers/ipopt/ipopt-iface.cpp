@@ -16,7 +16,7 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem> &problem
       ndx_(problem_->get_ndx()),
       nu_(problem_->get_nu_max()),
       T_(problem_->get_T()),
-      nconst_(T_ * ndx_ + nx_),        // T*nx eq. constraints for dynamics , nx eq constraints for initial conditions
+      nconst_(T_ * ndx_ + ndx_),  // T*ndx eq. constraints for dynamics , ndx eq constraints for initial conditions
       nvar_(T_ * (ndx_ + nu_) + ndx_)  // Multiple shooting, states and controls
 {
   xs_.resize(T_ + 1);
@@ -54,6 +54,7 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem> &problem
   data_.Jg_dx = Eigen::MatrixXd::Zero(ndx_, ndx_);
   data_.Jg_dxnext = Eigen::MatrixXd::Zero(ndx_, ndx_);
   data_.Jg_u = Eigen::MatrixXd::Zero(ndx_, ndx_);
+  data_.Jg_ic = Eigen::MatrixXd::Zero(ndx_, ndx_);
 
   data_.Ldx = Eigen::VectorXd::Zero(ndx_);
   data_.Ldxdx = Eigen::MatrixXd::Zero(ndx_, ndx_);
@@ -74,7 +75,7 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index &n, Ipopt::Index &m, Ipopt::Index
   // Jacobian nonzeros for initial condition
   nnz_jac_g += ndx_;
 
-  // Hessian is only affected by costs
+  // Hessian is only affected by costs (only lower triangular part)
   // Running Costs
   std::size_t nonzero = 0;
   for (size_t i = 1; i <= (ndx_ + nu_); i++) {
@@ -123,15 +124,19 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index n, Ipopt::Number *x_l, Ipopt::
   }
 
   // Dynamics
-  for (Ipopt::Index i = 0; i < nconst_ - nx_; i++) {
+  for (Ipopt::Index i = 0; i < nconst_; i++) {
     g_l[i] = 0;
     g_u[i] = 0;
   }
 
   // Initital conditions
-  for (Ipopt::Index i = 0; i < nx_; i++) {
-    g_l[nconst_ - nx_ + i] = problem_->get_x0()[i];
-    g_u[nconst_ - nx_ + i] = problem_->get_x0()[i];
+  // for (Ipopt::Index i = 0; i < nx_; i++) {
+  //   g_l[nconst_ - nx_ + i] = problem_->get_x0()[i];
+  //   g_u[nconst_ - nx_ + i] = problem_->get_x0()[i];
+  // }
+  for (Ipopt::Index i = 0; i < ndx_; i++) {
+    g_l[nconst_ - ndx_ + i] = 0;
+    g_u[nconst_ - ndx_ + i] = 0;
   }
 
   return true;
@@ -170,20 +175,26 @@ bool IpoptInterface::eval_f(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     data_.dx = Eigen::VectorXd::Map(x + i * (ndx_ + nu_), ndx_);
     data_.u = Eigen::VectorXd::Map(x + i * (ndx_ + nu_) + ndx_, nu_);
 
+    const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[i];
+    const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[i];
+
     state_->integrate(xs_[i], data_.dx, data_.x);
 
-    problem_->get_runningModels()[i]->calc(problem_->get_runningDatas()[i], data_.x, data_.u);
+    model->calc(data, data_.x, data_.u);
 
-    obj_value += problem_->get_runningDatas()[i]->cost;
+    obj_value += data->cost;
   }
 
   // Terminal costs
   data_.dx = Eigen::VectorXd::Map(x + T_ * (ndx_ + nu_), ndx_);
 
+  const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_terminalData();
+
   state_->integrate(xs_[T_], data_.dx, data_.x);
 
-  problem_->get_terminalModel()->calc(problem_->get_terminalData(), data_.x);
-  obj_value += problem_->get_terminalData()->cost;
+  model->calc(data, data_.x);
+  obj_value += data->cost;
 
   return true;
 }
@@ -201,7 +212,7 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool ne
     state_->integrate(xs_[i], data_.dx, data_.x);
 
     state_->Jintegrate(xs_[i], data_.dx, data_.Jsum_x, data_.Jsum_dx, second, setto);
-    // model->calc(data, data_.x, data_.u);
+    model->calc(data, data_.x, data_.u);
     model->calcDiff(data, data_.x, data_.u);
     data_.Ldx = data_.Jsum_dx.transpose() * data->Lx;
 
@@ -221,7 +232,7 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool ne
   state_->integrate(xs_[T_], data_.dx, data_.x);
   state_->Jintegrate(xs_[T_], data_.dx, data_.Jsum_x, data_.Jsum_dx, second, setto);
 
-  // model->calc(data, data_.x);
+  model->calc(data, data_.x);
   model->calcDiff(data, data_.x);
   data_.Ldx = data_.Jsum_dx.transpose() * data->Lx;
 
@@ -250,6 +261,7 @@ bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
 
     model->calc(data, data_.x, data_.u);
 
+    // This computes: data_.xnext - data->xnext (x_next - f(x, u))
     state_->diff(data->xnext, data_.xnext, data_.x_diff);
 
     for (size_t j = 0; j < ndx_; j++) {
@@ -260,9 +272,11 @@ bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
   // Initial conditions
   data_.dx = Eigen::VectorXd::Map(x, ndx_);
   state_->integrate(xs_[0], data_.dx, data_.x);
+  // x(0) - x_0
+  state_->diff(data_.x, problem_->get_x0(), data_.x_diff);
 
-  for (size_t j = 0; j < nx_; j++) {
-    g[T_ * ndx_ + j] = data_.x[j];
+  for (size_t j = 0; j < ndx_; j++) {
+    g[T_ * ndx_ + j] = data_.x_diff[j];
   }
 
   return true;
@@ -318,13 +332,19 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
       model->calc(data, data_.x, data_.u);
       model->calcDiff(data, data_.x, data_.u);
 
-      state_->Jintegrate(xs_[idx_block], data_.dx, data_.Jsum_x, data_.Jsum_dx, second, setto);
-      state_->Jintegrate(xs_[idx_block + 1], data_.dxnext, data_.Jsum_xnext, data_.Jsum_dxnext, second, setto);
-      state_->Jdiff(data->xnext, data_.xnext, data_.Jdiff_x, data_.Jdiff_xnext, both);
+      // x_next derivatives
+      state_->Jintegrate(xs_[idx_block + 1], data_.dxnext, data_.Jsum_xnext, data_.Jsum_dxnext, second,
+                         setto);  // data_.Jsum_dxnext == eq. 81
+      state_->Jdiff(data->xnext, data_.xnext, data_.Jdiff_x, data_.Jdiff_xnext,
+                    both);                                      // data_.Jdiff_xnext == eq. 83, data_.Jdiff_x == eq.82
+      data_.Jg_dxnext = data_.Jdiff_xnext * data_.Jsum_dxnext;  // chain rule
+
+      state_->Jintegrate(xs_[idx_block], data_.dx, data_.Jsum_x, data_.Jsum_dx, second,
+                         setto);  // data_.Jsum_dx == eq. 81
 
       data_.Jg_dx = data_.Jdiff_x * data->Fx * data_.Jsum_dx;
+
       data_.Jg_u = data_.Jdiff_x * data->Fu;
-      data_.Jg_dxnext = data_.Jdiff_xnext * data_.Jsum_dxnext;
 
       for (size_t idx_row = 0; idx_row < ndx_; idx_row++) {
         for (size_t idx_col = 0; idx_col < ndx_; idx_col++) {
@@ -347,13 +367,17 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
 
     // Initial condition
     data_.dx = Eigen::VectorXd::Map(x, ndx_);
+    state_->integrate(xs_[0], data_.dx, data_.x);
+    state_->Jdiff(data_.x, problem_->get_x0(), data_.Jdiff_x, data_.Jdiff_xnext, first);
 
     state_->Jintegrate(xs_[0], data_.dx, data_.Jsum_x, data_.Jsum_dx, second, setto);
 
-    for (size_t idx_row = 0; idx_row < nx_; idx_row++) {
+    data_.Jg_ic = data_.Jdiff_x * data_.Jsum_dx;
+
+    for (size_t idx_row = 0; idx_row < ndx_; idx_row++) {
       for (size_t idx_col = 0; idx_col < ndx_; idx_col++) {
         if (idx_row == idx_col) {
-          values[idx_value] = data_.Jsum_dx(idx_row, idx_col);
+          values[idx_value] = data_.Jg_ic(idx_row, idx_col);
           idx_value++;
         }
       }
