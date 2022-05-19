@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
     ActuationModelTypes::Type actuation_type) const {
   // Identify the state type given the model type
   StateModelTypes::Type state_type;
+  PinocchioModelFactory model_factory(model_type);
   switch (model_type) {
     case PinocchioModelTypes::Talos:
       state_type = StateModelTypes::StateMultibody_Talos;
@@ -82,6 +83,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
   contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, actuation->get_nu());
   cost = boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
   constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, actuation->get_nu());
+  std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
   // Define the contact model
   switch (state_type) {
     case StateModelTypes::StateMultibody_Talos:
@@ -111,7 +113,6 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
                 0.1);
 
   // Define the constraint function
-  PinocchioModelFactory model_factory(model_type);
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   crocoddyl::FrictionCone friction_cone(R, 1.);
   crocoddyl::WrenchCone wrench_cone(R, 1., Eigen::Vector2d(0.1, 0.1));
@@ -119,49 +120,57 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
   Eigen::VectorXd lb, ub;
   switch (constraint_type) {
     case ContactConstraintModelTypes::ConstraintModelResidualContactForceEquality:
-      constraint->addConstraint("constraint",
-                                boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                    state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
-                                               state, model_factory.get_frame_id(), pinocchio::Force::Random(),
-                                               model_factory.get_contact_nc(), actuation->get_nu())));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        constraint->addConstraint("constraint_" + std::to_string(i),
+                                  boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                                      state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
+                                                 state, frame_ids[i], pinocchio::Force::Random(),
+                                                 model_factory.get_contact_nc(), actuation->get_nu())));
+      }
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactCoPPositionInequality:
       lb = cop_support.get_lb();
       ub = cop_support.get_ub();
-      constraint->addConstraint("constraint",
-                                boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                    state,
-                                    boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
-                                        state, model_factory.get_frame_id(), cop_support, actuation->get_nu()),
-                                    lb, ub));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        constraint->addConstraint("constraint_" + std::to_string(i),
+                                  boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                                      state,
+                                      boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
+                                          state, frame_ids[i], cop_support, actuation->get_nu()),
+                                      lb, ub));
+      }
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactFrictionConeInequality:
       lb = friction_cone.get_lb();
       ub = friction_cone.get_ub();
-      constraint->addConstraint("constraint",
-                                boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                    state,
-                                    boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
-                                        state, model_factory.get_frame_id(), friction_cone, actuation->get_nu()),
-                                    lb, ub),
-                                true);
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        constraint->addConstraint("constraint_" + std::to_string(i),
+                                  boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                                      state,
+                                      boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
+                                          state, frame_ids[i], friction_cone, actuation->get_nu()),
+                                      lb, ub),
+                                  true);
+      }
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactWrenchConeInequality:
       lb = wrench_cone.get_lb();
       ub = wrench_cone.get_ub();
-      constraint->addConstraint("constraint",
-                                boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                                    state,
-                                    boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
-                                        state, model_factory.get_frame_id(), wrench_cone, actuation->get_nu()),
-                                    lb, ub),
-                                true);
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        constraint->addConstraint("constraint_" + std::to_string(i),
+                                  boost::make_shared<crocoddyl::ConstraintModelResidual>(
+                                      state,
+                                      boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
+                                          state, frame_ids[i], wrench_cone, actuation->get_nu()),
+                                      lb, ub),
+                                  true);
+      }
       break;
     case ContactConstraintModelTypes::ConstraintModelResidualContactControlGravInequality:
       lb = Eigen::VectorXd::Zero(state->get_nv());
       ub = Eigen::VectorXd::Random(state->get_nv()).cwiseAbs();
       constraint->addConstraint(
-          "constraint",
+          "constraint_0",
           boost::make_shared<crocoddyl::ConstraintModelResidual>(
               state, boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, actuation->get_nu()), lb,
               ub));
