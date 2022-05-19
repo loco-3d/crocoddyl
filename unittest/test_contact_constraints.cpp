@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,6 +73,16 @@ bool init_function() {
     register_contact_constraint_model_unit_tests(ContactConstraintModelTypes::all[constraint_type],
                                                  PinocchioModelTypes::RandomHumanoid,
                                                  ActuationModelTypes::ActuationModelFloatingBase);
+    if (ContactConstraintModelTypes::all[constraint_type] ==
+            ContactConstraintModelTypes::ConstraintModelResidualContactForceEquality ||
+        ContactConstraintModelTypes::all[constraint_type] ==
+            ContactConstraintModelTypes::ConstraintModelResidualContactFrictionConeInequality ||
+        ContactConstraintModelTypes::all[constraint_type] ==
+            ContactConstraintModelTypes::ConstraintModelResidualContactControlGravInequality) {
+      register_contact_constraint_model_unit_tests(ContactConstraintModelTypes::all[constraint_type],
+                                                   PinocchioModelTypes::HyQ,
+                                                   ActuationModelTypes::ActuationModelFloatingBase);
+    }
   }
   return true;
 }
