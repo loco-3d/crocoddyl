@@ -21,7 +21,7 @@ namespace unittest {
 
 const std::vector<ContactCostModelTypes::Type> ContactCostModelTypes::all(ContactCostModelTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type) {
   switch (type) {
     case ContactCostModelTypes::CostModelResidualContactForce:
       os << "CostModelResidualContactForce";
@@ -60,6 +60,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
       action = DifferentialActionModelFactory().create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                                                           actuation_type, false);
       break;
+    case PinocchioModelTypes::HyQ:
+      action = DifferentialActionModelFactory().create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+                                                                          actuation_type, false);
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
       break;
@@ -79,7 +83,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
     case ContactCostModelTypes::CostModelResidualContactForce:
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         cost = boost::make_shared<crocoddyl::CostModelResidual>(
-            state, ActivationModelFactory().create(activation_type, 6),
+            state, ActivationModelFactory().create(activation_type, model_factory.get_contact_nc()),
             boost::make_shared<crocoddyl::ResidualModelContactForce>(state, frame_ids[i], pinocchio::Force::Random(),
                                                                      model_factory.get_contact_nc(), nu));
         action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
@@ -91,7 +95,6 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
             state, ActivationModelFactory().create(activation_type, 4),
             boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
                 state, frame_ids[i], crocoddyl::CoPSupport(R, Eigen::Vector2d(0.1, 0.1)), nu));
-
         action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
       }
       break;
@@ -125,10 +128,9 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
       throw_pretty(__FILE__ ": Wrong ContactCostModelTypes::Type given");
       break;
   }
-
   // Include the cost in the contact model
   return action;
-}  // namespace unittest
+}
 
 }  // namespace unittest
 }  // namespace crocoddyl

@@ -59,6 +59,9 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
     case PinocchioModelTypes::Talos:
       action = ActionModelFactory().create_impulseFwdDynamics(StateModelTypes::StateMultibody_Talos);
       break;
+    case PinocchioModelTypes::HyQ:
+      action = ActionModelFactory().create_impulseFwdDynamics(StateModelTypes::StateMultibody_HyQ);
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
       break;
@@ -82,7 +85,7 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseCostModelFactory::creat
     case ImpulseCostModelTypes::CostModelResidualContactForce:
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         cost = boost::make_shared<crocoddyl::CostModelResidual>(
-            state, ActivationModelFactory().create(activation_type, 6),
+            state, ActivationModelFactory().create(activation_type, model_factory.get_contact_nc()),
             boost::make_shared<crocoddyl::ResidualModelContactForce>(state, frame_ids[i], pinocchio::Force::Random(),
                                                                      model_factory.get_contact_nc(), 0));
         action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.01);

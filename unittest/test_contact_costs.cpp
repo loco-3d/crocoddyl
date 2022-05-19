@@ -92,11 +92,16 @@ void register_contact_cost_model_unit_tests(ContactCostModelTypes::Type cost_typ
 bool init_function() {
   // Test all the contact cost model. Note that we can do it only with humanoids
   // as it needs to test the contact wrench cone
-  for (size_t cost_type = 0; cost_type < ContactCostModelTypes::all.size(); ++cost_type) {
-    for (size_t activation_type = 0; activation_type < ActivationModelTypes::ActivationModelQuadraticBarrier;
+  for (std::size_t cost_type = 0; cost_type < ContactCostModelTypes::all.size(); ++cost_type) {
+    for (std::size_t activation_type = 0; activation_type < ActivationModelTypes::ActivationModelQuadraticBarrier;
          ++activation_type) {
-      if (ActivationModelTypes::all[activation_type] != ActivationModelTypes::ActivationModel2NormBarrier) {
-        register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
+      register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
+                                             ActivationModelTypes::all[activation_type],
+                                             ActuationModelTypes::ActuationModelFloatingBase);
+      if (ContactCostModelTypes::all[cost_type] == ContactCostModelTypes::CostModelResidualContactForce ||
+          ContactCostModelTypes::all[cost_type] == ContactCostModelTypes::CostModelResidualContactFrictionCone ||
+          ContactCostModelTypes::all[cost_type] == ContactCostModelTypes::CostModelResidualContactControlGrav) {
+        register_contact_cost_model_unit_tests(ContactCostModelTypes::all[cost_type], PinocchioModelTypes::HyQ,
                                                ActivationModelTypes::all[activation_type],
                                                ActuationModelTypes::ActuationModelFloatingBase);
       }
