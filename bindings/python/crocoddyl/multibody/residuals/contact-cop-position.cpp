@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2022, University of Duisburg-Essen, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -54,7 +56,9 @@ void exposeResidualContactCoPPosition() {
            "returns the allocated data for the CoP position residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
-      .add_property("id", &ResidualModelContactCoPPosition::get_id, &ResidualModelContactCoPPosition::set_id,
+      .add_property("id", bp::make_function(&ResidualModelContactCoPPosition::get_id),
+                    bp::make_function(&ResidualModelContactCoPPosition::set_id,
+                                      deprecated<>("Deprecated. Do not use set_id, instead create a new model")),
                     "reference frame id")
       .add_property(
           "reference",

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ namespace unittest {
 
 const std::vector<ContactCostModelTypes::Type> ContactCostModelTypes::all(ContactCostModelTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os, ContactCostModelTypes::Type type) {
+std::ostream& operator<<(std::ostream& os, ContactCostModelTypes::Type type) {
   switch (type) {
     case ContactCostModelTypes::CostModelResidualContactForce:
       os << "CostModelResidualContactForce";
@@ -60,6 +60,10 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
       action = DifferentialActionModelFactory().create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
                                                                           actuation_type, false);
       break;
+    case PinocchioModelTypes::HyQ:
+      action = DifferentialActionModelFactory().create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
+                                                                          actuation_type, false);
+      break;
     default:
       throw_pretty(__FILE__ ": Wrong PinocchioModelTypes::Type given");
       break;
@@ -74,43 +78,57 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactCostModelFa
       boost::static_pointer_cast<crocoddyl::StateMultibody>(action->get_state());
   const std::size_t nu = action->get_actuation()->get_nu();
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+  std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
   switch (cost_type) {
     case ContactCostModelTypes::CostModelResidualContactForce:
-      cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, ActivationModelFactory().create(activation_type, 6),
-          boost::make_shared<crocoddyl::ResidualModelContactForce>(
-              state, model_factory.get_frame_id(), pinocchio::Force::Random(), model_factory.get_contact_nc(), nu));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        cost = boost::make_shared<crocoddyl::CostModelResidual>(
+            state, ActivationModelFactory().create(activation_type, model_factory.get_contact_nc()),
+            boost::make_shared<crocoddyl::ResidualModelContactForce>(state, frame_ids[i], pinocchio::Force::Random(),
+                                                                     model_factory.get_contact_nc(), nu));
+        action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
+      }
       break;
     case ContactCostModelTypes::CostModelResidualContactCoPPosition:
-      cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, ActivationModelFactory().create(activation_type, 4),
-          boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
-              state, model_factory.get_frame_id(), crocoddyl::CoPSupport(R, Eigen::Vector2d(0.1, 0.1)), nu));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        cost = boost::make_shared<crocoddyl::CostModelResidual>(
+            state, ActivationModelFactory().create(activation_type, 4),
+            boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
+                state, frame_ids[i], crocoddyl::CoPSupport(R, Eigen::Vector2d(0.1, 0.1)), nu));
+        action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
+      }
       break;
     case ContactCostModelTypes::CostModelResidualContactFrictionCone:
-      cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, ActivationModelFactory().create(activation_type, 5),
-          boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(state, model_factory.get_frame_id(),
-                                                                          crocoddyl::FrictionCone(R, 1.), nu));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        cost = boost::make_shared<crocoddyl::CostModelResidual>(
+            state, ActivationModelFactory().create(activation_type, 5),
+            boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(state, frame_ids[i],
+                                                                            crocoddyl::FrictionCone(R, 1.), nu));
+        action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
+      }
       break;
     case ContactCostModelTypes::CostModelResidualContactWrenchCone:
-      cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, ActivationModelFactory().create(activation_type, 17),
-          boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
-              state, model_factory.get_frame_id(), crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1)), nu));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        cost = boost::make_shared<crocoddyl::CostModelResidual>(
+            state, ActivationModelFactory().create(activation_type, 17),
+            boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
+                state, frame_ids[i], crocoddyl::WrenchCone(R, 1., Eigen::Vector2d(0.1, 0.1)), nu));
+        action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
+      }
       break;
     case ContactCostModelTypes::CostModelResidualContactControlGrav:
-      cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state, ActivationModelFactory().create(activation_type, state->get_nv()),
-          boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, nu));
+      for (std::size_t i = 0; i < frame_ids.size(); ++i) {
+        cost = boost::make_shared<crocoddyl::CostModelResidual>(
+            state, ActivationModelFactory().create(activation_type, state->get_nv()),
+            boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(state, nu));
+        action->get_costs()->addCost("cost_" + std::to_string(i), cost, 0.001);
+      }
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactCostModelTypes::Type given");
       break;
   }
-
   // Include the cost in the contact model
-  action->get_costs()->addCost("cost", cost, 0.001);
   return action;
 }
 

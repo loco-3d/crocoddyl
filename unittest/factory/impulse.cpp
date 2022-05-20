@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2022, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(I
   boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
   std::size_t frame_id = 0;
   if (frame_name == "") {
-    frame_id = model_factory.get_frame_id();
+    frame_id = model_factory.get_frame_ids()[0];
   } else {
     frame_id = state->get_pinocchio()->getFrameId(frame_name);
   }

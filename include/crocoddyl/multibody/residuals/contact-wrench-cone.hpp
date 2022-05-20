@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ class ResidualModelContactWrenchConeTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(const pinocchio::FrameIndex id);
+  DEPRECATED("Do not use set_id, instead create a new model", void set_id(const pinocchio::FrameIndex id);)
 
   /**
    * @brief Modify the reference contact wrench cone

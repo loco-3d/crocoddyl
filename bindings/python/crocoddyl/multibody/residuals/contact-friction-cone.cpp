@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -63,7 +64,9 @@ void exposeResidualContactFrictionCone() {
            "returns the allocated data for the contact friction cone residual.\n"
            ":param data: shared data\n"
            ":return residual data.")
-      .add_property("id", &ResidualModelContactFrictionCone::get_id, &ResidualModelContactFrictionCone::set_id,
+      .add_property("id", bp::make_function(&ResidualModelContactFrictionCone::get_id),
+                    bp::make_function(&ResidualModelContactFrictionCone::set_id,
+                                      deprecated<>("Deprecated. Do not use set_id, instead create a new model")),
                     "reference frame id")
       .add_property(
           "reference",
