@@ -334,7 +334,9 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      */
     ResidualModelContact(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const std::size_t nr,
                          const std::size_t nc)
-        : Base(state, nr, state->get_nv() + nc, true, true, true), id_(id) {}
+        : Base(state, nr, state->get_nv() + nc, true, true, true),
+          id_(id),
+          frame_name_(state->get_pinocchio()->frames[id].name) {}
     virtual ~ResidualModelContact() {}
 
     /**
@@ -374,6 +376,15 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
           Eigen::aligned_allocator<typename Data::ResidualDataContact>(), this, data, id_);
     }
 
+    /**
+     * @brief Print relevant information of the contact-acceleration residual model
+     *
+     * @param[out] os  Output stream object
+     */
+    virtual void print(std::ostream& os) const {
+      os << "ResidualModelContact {frame=" << frame_name_  << ", nr=" << nr_ << "}";
+    }
+
    protected:
     using Base::nr_;
     using Base::nu_;
@@ -382,6 +393,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
 
    private:
     pinocchio::FrameIndex id_;  //!< Reference frame id
+    std::string frame_name_;    //!< Reference frame name
   };
 };
 template <typename _Scalar>
