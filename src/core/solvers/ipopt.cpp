@@ -6,6 +6,7 @@ SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
     : SolverAbstract(problem), ipopt_iface_(new IpoptInterface(problem)), ipopt_app_(IpoptApplicationFactory()) {
   ipopt_app_->Options()->SetNumericValue("tol", 3.82e-6);
   ipopt_app_->Options()->SetStringValue("mu_strategy", "adaptive");
+  // ipopt_app_->Options()->SetStringValue("hessian_approximation", "limited-memory");  // "exact" or "limited-memory"
   // app_->Options()->SetStringValue("max_iter", 100);
   // app->Options()->SetStringValue("output_file", "ipopt.out");
 
@@ -41,5 +42,18 @@ void SolverIpopt::computeDirection(const bool recalc) {}
 double SolverIpopt::tryStep(const double steplength) { return 0.0; }
 double SolverIpopt::stoppingCriteria() { return 0.0; }
 const Eigen::Vector2d& SolverIpopt::expectedImprovement() { return Eigen::Vector2d::Zero(); }
+
+void SolverIpopt::setStringIpoptOption(const std::string& tag, const std::string& value) {
+  ipopt_app_->Options()->SetStringValue(tag, value);
+}
+
+void SolverIpopt::setNumericIpoptOption(const std::string& tag, Ipopt::Number value) {
+  ipopt_app_->Options()->SetNumericValue(tag, value);
+}
+
+void SolverIpopt::setConsiderControlBounds(const bool& consider) {
+  ipopt_iface_->set_consider_control_bounds(consider);
+}
+
 
 }  // namespace crocoddyl
