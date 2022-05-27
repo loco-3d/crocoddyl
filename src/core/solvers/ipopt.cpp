@@ -6,14 +6,10 @@ SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
     : SolverAbstract(problem), ipopt_iface_(new IpoptInterface(problem)), ipopt_app_(IpoptApplicationFactory()) {
   ipopt_app_->Options()->SetNumericValue("tol", 3.82e-6);
   ipopt_app_->Options()->SetStringValue("mu_strategy", "adaptive");
-  // ipopt_app_->Options()->SetStringValue("hessian_approximation", "limited-memory");  // "exact" or "limited-memory"
-  // app_->Options()->SetStringValue("max_iter", 100);
-  // app->Options()->SetStringValue("output_file", "ipopt.out");
 
   ipopt_status_ = ipopt_app_->Initialize();
 
   if (ipopt_status_ != Ipopt::Solve_Succeeded) {
-    // Throw an exception here
     std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
   }
 }

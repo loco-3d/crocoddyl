@@ -19,7 +19,7 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem> &problem
   nvar_ = 0;
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const std::size_t nxi = models[t]->get_state()->get_nx();
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
@@ -63,7 +63,7 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index &n, Ipopt::Index &m, Ipopt::Index
   nnz_h_lag = 0;  // Hessian nonzeros (only lower triangular part)
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t ndxi_next =
         t + 1 == T_ ? problem_->get_terminalModel()->get_state()->get_ndx() : models[t + 1]->get_state()->get_ndx();
@@ -73,7 +73,7 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index &n, Ipopt::Index &m, Ipopt::Index
 
     // Hessian
     std::size_t nonzero = 0;
-    for (size_t i = 1; i <= (ndxi + nui); i++) {
+    for (std::size_t i = 1; i <= (ndxi + nui); i++) {
       nonzero += i;
     }
     nnz_h_lag += nonzero;
@@ -91,7 +91,7 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index &n, Ipopt::Index &m, Ipopt::Index
     const std::size_t ndxi = model->get_state()->get_ndx();
 
     std::size_t nonzero = 0;
-    for (size_t i = 1; i <= ndxi; i++) {
+    for (std::size_t i = 1; i <= ndxi; i++) {
       nonzero += i;
     }
     nnz_h_lag += nonzero;
@@ -111,24 +111,24 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index n, Ipopt::Number *x_l, Ipopt::
   // Adding bounds
   const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
   std::size_t ixu = 0;
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     // Running state bounds
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       x_l[ixu + j] = -2e19;
       x_u[ixu + j] = 2e19;
     }
 
     // Control bounds
     if (consider_control_bounds_) {
-      for (size_t j = 0; j < nui; j++) {
+      for (std::size_t j = 0; j < nui; j++) {
         x_l[ixu + ndxi + j] = models[t]->get_has_control_limits() ? models[t]->get_u_lb()(j) : -2e19;
         x_u[ixu + ndxi + j] = models[t]->get_has_control_limits() ? models[t]->get_u_ub()(j) : 2e19;
       }
     } else {
-      for (size_t j = 0; j < nui; j++) {
+      for (std::size_t j = 0; j < nui; j++) {
         x_l[ixu + ndxi + j] = -2e19;
         x_u[ixu + ndxi + j] = 2e19;
       }
@@ -142,7 +142,7 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index n, Ipopt::Number *x_l, Ipopt::
     const std::size_t ndxi = model->get_state()->get_ndx();
 
     // Final state bounds
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       x_l[ixu + j] = -2e19;
       x_u[ixu + j] = 2e19;
     }
@@ -167,15 +167,15 @@ bool IpoptInterface::get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Numb
   // State variables are always at 0 since they represent increments from the given initial point
   const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
   std::size_t ixu = 0;
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       x[ixu + j] = 0;
     }
 
-    for (size_t j = 0; j < nui; j++) {
+    for (std::size_t j = 0; j < nui; j++) {
       x[ixu + ndxi + j] = us_[t](j);
     }
 
@@ -186,7 +186,7 @@ bool IpoptInterface::get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Numb
   {
     const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_terminalModel();
     const std::size_t ndxi = model->get_state()->get_ndx();
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       x[ixu + j] = 0;
     }
   }
@@ -199,7 +199,7 @@ bool IpoptInterface::eval_f(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
 
   // Running costs
   std::size_t ixu = 0;
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
@@ -238,7 +238,7 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool ne
 
   std::size_t ixu = 0;
 
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
@@ -248,17 +248,17 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool ne
     datas_[t]->u = Eigen::VectorXd::Map(x + ixu + ndxi, nui);
 
     model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
-    model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_x, datas_[t]->Jsum_dx, second, setto);
+    model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_dx, datas_[t]->Jsum_dx, second, setto);
 
     model->calc(data, datas_[t]->x, datas_[t]->u);
     model->calcDiff(data, datas_[t]->x, datas_[t]->u);
     datas_[t]->Ldx = datas_[t]->Jsum_dx.transpose() * data->Lx;
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       grad_f[ixu + j] = datas_[t]->Ldx(j);
     }
 
-    for (size_t j = 0; j < nui; j++) {
+    for (std::size_t j = 0; j < nui; j++) {
       grad_f[ixu + ndxi + j] = data->Lu(j);
     }
     ixu += ndxi + nui;
@@ -273,13 +273,13 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool ne
     datas_[T_]->dx = Eigen::VectorXd::Map(x + ixu, ndxi);
 
     model->get_state()->integrate(xs_[T_], datas_[T_]->dx, datas_[T_]->x);
-    model->get_state()->Jintegrate(xs_[T_], datas_[T_]->dx, datas_[T_]->Jsum_x, datas_[T_]->Jsum_dx, second, setto);
+    model->get_state()->Jintegrate(xs_[T_], datas_[T_]->dx, datas_[T_]->Jsum_dx, datas_[T_]->Jsum_dx, second, setto);
 
     model->calc(data, datas_[T_]->x);
     model->calcDiff(data, datas_[T_]->x);
-    datas_[T_]->Ldx = datas_[T_]->Jsum_dx.transpose() * data->Lx;
+    datas_[T_]->Ldx.noalias() = datas_[T_]->Jsum_dx.transpose() * data->Lx;
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       grad_f[ixu + j] = datas_[T_]->Ldx(j);
     }
   }
@@ -294,7 +294,7 @@ bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
   std::size_t ixu = 0;
   std::size_t ix = 0;
   // Dynamic constraints
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[t];
     const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
@@ -318,7 +318,7 @@ bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     // This computes: datas_[t+1]->x - data->xnext (x_next - f(x, u))
     model->get_state()->diff(data->xnext, datas_[t + 1]->x, datas_[t]->x_diff);
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       g[ix + j] = datas_[t]->x_diff[j];
     }
 
@@ -336,7 +336,7 @@ bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     // x(0) - x_0
     model->get_state()->diff(datas_[0]->x, problem_->get_x0(), datas_[0]->x_diff);
 
-    for (size_t j = 0; j < ndxi; j++) {
+    for (std::size_t j = 0; j < ndxi; j++) {
       g[ix + j] = datas_[0]->x_diff[j];
     }
   }
@@ -354,13 +354,13 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
     std::size_t idx_value = 0;
     std::size_t ixu = 0;
     std::size_t ix = 0;
-    for (size_t t = 0; t < T_; t++) {
+    for (std::size_t t = 0; t < T_; t++) {
       const std::size_t ndxi = models[t]->get_state()->get_ndx();
       const std::size_t nui = models[t]->get_nu();
       const std::size_t ndxi_next =
           t + 1 == T_ ? problem_->get_terminalModel()->get_state()->get_ndx() : models[t + 1]->get_state()->get_ndx();
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < (ndxi + nui + ndxi_next); idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < (ndxi + nui + ndxi_next); idx_col++) {
           iRow[idx_value] = ix + idx_row;
           jCol[idx_value] = ixu + idx_col;
           idx_value++;
@@ -373,8 +373,8 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
     // Initial condition
     {
       const std::size_t ndxi = problem_->get_runningModels()[0]->get_state()->get_ndx();
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           iRow[idx_value] = ix + idx_row;
           jCol[idx_value] = idx_col;
           idx_value++;
@@ -390,7 +390,7 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
     std::size_t ixu = 0;
     std::size_t ix = 0;
     // Dynamic constraints
-    for (size_t t = 0; t < T_; t++) {
+    for (std::size_t t = 0; t < T_; t++) {
       const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[t];
       const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
@@ -409,36 +409,32 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
       model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
       model_next->get_state()->integrate(xs_[t + 1], datas_[t + 1]->dx, datas_[t + 1]->x);
 
-      model->calc(data, datas_[t]->x, datas_[t]->u);
       model->calcDiff(data, datas_[t]->x, datas_[t]->u);
 
-      // x_next derivatives
-      model_next->get_state()->Jintegrate(xs_[t + 1], datas_[t + 1]->dx, datas_[t + 1]->Jsum_x, datas_[t + 1]->Jsum_dx,
+      model_next->get_state()->Jintegrate(xs_[t + 1], datas_[t + 1]->dx, datas_[t + 1]->Jsum_dx, datas_[t + 1]->Jsum_dx,
                                           second, setto);  // datas_[t]->Jsum_dxnext == eq. 81
       model->get_state()->Jdiff(data->xnext, datas_[t + 1]->x, datas_[t]->Jdiff_x, datas_[t + 1]->Jdiff_x,
                                 both);  // datas_[t+1]->Jdiff_x == eq. 83, datas_[t]->Jdiff_x == eq.82
-      datas_[t + 1]->Jg_dx.noalias() = datas_[t + 1]->Jdiff_x * datas_[t + 1]->Jsum_dx;  // chain rule
-
-      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_x, datas_[t]->Jsum_dx, second,
+      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_dx, datas_[t]->Jsum_dx, second,
                                      setto);  // datas_[t]->Jsum_dx == eq. 81
 
-      datas_[t]->Jg_dx = datas_[t]->Jdiff_x * data->Fx * datas_[t]->Jsum_dx;
+      datas_[t + 1]->Jg_dx.noalias() = datas_[t + 1]->Jdiff_x * datas_[t + 1]->Jsum_dx;  // chain rule
+      datas_[t]->Jg_dx.noalias() = datas_[t]->Jdiff_x * data->Fx * datas_[t]->Jsum_dx;
+      datas_[t]->Jg_u.noalias() = datas_[t]->Jdiff_x * data->Fu;
 
-      datas_[t]->Jg_u = datas_[t]->Jdiff_x * data->Fu;
-
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           values[idx_value] = datas_[t]->Jg_dx(idx_row, idx_col);
           idx_value++;
         }
 
-        for (size_t idx_col = 0; idx_col < nui; idx_col++) {
+        for (std::size_t idx_col = 0; idx_col < nui; idx_col++) {
           values[idx_value] = datas_[t]->Jg_u(idx_row, idx_col);
           idx_value++;
         }
 
         // This could be more optimized since there are a lot of zeros!
-        for (size_t idx_col = 0; idx_col < ndxi_next; idx_col++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi_next; idx_col++) {
           values[idx_value] = datas_[t + 1]->Jg_dx(idx_row, idx_col);
           idx_value++;
         }
@@ -456,13 +452,13 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
 
       datas_[0]->dx = Eigen::VectorXd::Map(x, ndxi);
       model->get_state()->integrate(xs_[0], datas_[0]->dx, datas_[0]->x);
-      model->get_state()->Jdiff(datas_[0]->x, problem_->get_x0(), datas_[0]->Jdiff_x, datas_[0]->Jdiff_xnext, first);
-      model->get_state()->Jintegrate(xs_[0], datas_[0]->dx, datas_[0]->Jsum_x, datas_[0]->Jsum_dx, second, setto);
+      model->get_state()->Jdiff(datas_[0]->x, problem_->get_x0(), datas_[0]->Jdiff_x, datas_[0]->Jdiff_x, first);
+      model->get_state()->Jintegrate(xs_[0], datas_[0]->dx, datas_[0]->Jsum_dx, datas_[0]->Jsum_dx, second, setto);
 
-      datas_[0]->Jg_ic = datas_[0]->Jdiff_x * datas_[0]->Jsum_dx;
+      datas_[0]->Jg_ic.noalias() = datas_[0]->Jdiff_x * datas_[0]->Jsum_dx;
 
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           values[idx_value] = datas_[0]->Jg_ic(idx_row, idx_col);
           idx_value++;
         }
@@ -487,11 +483,11 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
     std::size_t idx_value = 0;
     std::size_t ixu = 0;
-    for (size_t t = 0; t < T_; t++) {
+    for (std::size_t t = 0; t < T_; t++) {
       const std::size_t ndxi = models[t]->get_state()->get_ndx();
       const std::size_t nui = models[t]->get_nu();
-      for (size_t idx_row = 0; idx_row < ndxi + nui; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi + nui; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi + nui; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi + nui; idx_col++) {
           // We need the lower triangular matrix
           if (idx_col > idx_row) {
             break;
@@ -507,8 +503,8 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     {
       // Terminal costs
       const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           // We need the lower triangular matrix
           if (idx_col > idx_row) {
             break;
@@ -528,7 +524,7 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
     std::size_t idx_value = 0;
     std::size_t ixu = 0;
     // Running Costs
-    for (size_t t = 0; t < T_; t++) {
+    for (std::size_t t = 0; t < T_; t++) {
       const boost::shared_ptr<ActionModelAbstract> &model = problem_->get_runningModels()[t];
       const boost::shared_ptr<ActionDataAbstract> &data = problem_->get_runningDatas()[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
@@ -539,15 +535,14 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
 
       model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
 
-      model->calc(data, datas_[t]->x, datas_[t]->u);
-      model->calcDiff(data, datas_[t]->x, datas_[t]->u);
+      model->calcDiff(data, datas_[t]->x, datas_[t]->u); // this might be removed
 
-      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_x, datas_[t]->Jsum_dx, second, setto);
+      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_dx, datas_[t]->Jsum_dx, second, setto);
       datas_[t]->Ldxdx = datas_[t]->Jsum_dx.transpose() * problem_->get_runningDatas()[t]->Lxx * datas_[t]->Jsum_dx;
       datas_[t]->Ldxu = datas_[t]->Jsum_dx.transpose() * problem_->get_runningDatas()[t]->Lxu;
 
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           // We need the lower triangular matrix
           if (idx_col > idx_row) {
             break;
@@ -557,13 +552,13 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
         }
       }
 
-      for (size_t idx_row = 0; idx_row < nui; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < nui; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           values[idx_value] = obj_factor * datas_[t]->Ldxu(idx_col, idx_row);
           idx_value++;
         }
 
-        for (size_t idx_col = 0; idx_col < nui; idx_col++) {
+        for (std::size_t idx_col = 0; idx_col < nui; idx_col++) {
           if (idx_col > idx_row) {
             break;
           }
@@ -584,12 +579,12 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
       model->get_state()->integrate(xs_[T_], datas_[T_]->dx, datas_[T_]->x);
       model->calc(data, datas_[T_]->x);
       model->calcDiff(data, datas_[T_]->x);
-      model->get_state()->Jintegrate(xs_[T_], datas_[T_]->dx, datas_[T_]->Jsum_x, datas_[T_]->Jsum_dx, second, setto);
+      model->get_state()->Jintegrate(xs_[T_], datas_[T_]->dx, datas_[T_]->Jsum_dx, datas_[T_]->Jsum_dx, second, setto);
 
-      datas_[T_]->Ldxdx = datas_[T_]->Jsum_dx.transpose() * data->Lxx * datas_[T_]->Jsum_dx;
+      datas_[T_]->Ldxdx.noalias() = datas_[T_]->Jsum_dx.transpose() * data->Lxx * datas_[T_]->Jsum_dx;
 
-      for (size_t idx_row = 0; idx_row < ndxi; idx_row++) {
-        for (size_t idx_col = 0; idx_col < ndxi; idx_col++) {
+      for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
+        for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
           // We need the lower triangular matrix
           if (idx_col > idx_row) {
             break;
@@ -611,7 +606,7 @@ void IpoptInterface::finalize_solution(Ipopt::SolverReturn status, Ipopt::Index 
   // Copy the solution to vector once solver is finished
   const std::vector<boost::shared_ptr<ActionModelAbstract> > &models = problem_->get_runningModels();
   std::size_t ixu = 0;
-  for (size_t t = 0; t < T_; t++) {
+  for (std::size_t t = 0; t < T_; t++) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
     datas_[t]->dx = Eigen::VectorXd::Map(x + ixu, ndxi);

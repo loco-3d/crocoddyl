@@ -88,42 +88,28 @@ struct IpoptInterfaceData {
 
   IpoptInterfaceData(const std::size_t &nx, const std::size_t &ndx, const std::size_t &nu)
       : x(nx),
-        xnext(nx),
         dx(ndx),
-        dxnext(ndx),
         x_diff(ndx),
         u(nu),
-        Jsum_x(ndx, ndx),
         Jsum_dx(ndx, ndx),
-        Jsum_xnext(ndx, ndx),
-        Jsum_dxnext(ndx, ndx),
-        Jdiff_xnext(ndx, ndx),
         Jdiff_x(ndx, ndx),
         Jg_dx(ndx, ndx),
-        Jg_dxnext(ndx, ndx),
         Jg_u(ndx, ndx),
         Jg_ic(ndx, ndx),
         Ldx(ndx),
         Ldxdx(ndx, ndx),
         Ldxu(ndx, nu) {
     x.setZero();
-    xnext.setZero();
     dx.setZero();
-    dxnext.setZero();
     x_diff.setZero();
 
     u.setZero();
 
-    Jsum_x.setZero();
     Jsum_dx.setZero();
-    Jsum_xnext.setZero();
-    Jsum_dxnext.setZero();
 
-    Jdiff_xnext.setZero();
     Jdiff_x.setZero();
 
     Jg_dx.setZero();
-    Jg_dxnext.setZero();
     Jg_u.setZero();
     Jg_ic.setZero();
 
@@ -133,23 +119,15 @@ struct IpoptInterfaceData {
   }
 
   Eigen::VectorXd x;
-  Eigen::VectorXd xnext; // Mighnt not be using that
   Eigen::VectorXd dx;
-  Eigen::VectorXd dxnext; // Imight not be using that
   Eigen::VectorXd x_diff;
   Eigen::VectorXd u;
 
-  Eigen::MatrixXd Jsum_x;
   Eigen::MatrixXd Jsum_dx;
 
-  Eigen::MatrixXd Jsum_xnext; // might not be using that
-  Eigen::MatrixXd Jsum_dxnext; // might not be using that
-
-  Eigen::MatrixXd Jdiff_xnext; // might not be using that (if removed from initial condition)
   Eigen::MatrixXd Jdiff_x;
 
   Eigen::MatrixXd Jg_dx;
-  Eigen::MatrixXd Jg_dxnext; // might not be using that
   Eigen::MatrixXd Jg_u;
   Eigen::MatrixXd Jg_ic;
 
