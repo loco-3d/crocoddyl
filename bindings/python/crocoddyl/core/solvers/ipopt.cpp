@@ -28,7 +28,13 @@ void exposeSolverIpopt() {
                "False).\n"
                ":param regInit: initial guess for the regularization value. Very low values are typical\n"
                "                used with very good guess points (init_xs, init_us) (default None).\n"
-               ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."));
+               ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
+      .def("setStringIpoptOption", &SolverIpopt::setStringIpoptOption, bp::args("self", "param_name", "param_value"),
+           "Sets a string option for IPOPT\n\n")
+      .def("setNumericIpoptOption", &SolverIpopt::setNumericIpoptOption, bp::args("self", "param_name", "param_value"),
+           "Sets a numeric option for IPOPT\n\n")
+      .def("setConsiderControlBounds", &SolverIpopt::setConsiderControlBounds, bp::args("self", "consider"),
+           "Sets a numeric option for IPOPT\n\n");
 }
 
 }  // namespace python
