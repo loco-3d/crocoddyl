@@ -50,7 +50,8 @@ class IpoptInterface : public Ipopt::TNLP {
                              Ipopt::Index ls_trials, const Ipopt::IpoptData *ip_data,
                              Ipopt::IpoptCalculatedQuantities *ip_cq);
 
-  boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t &nx, const std::size_t &ndx, const std::size_t &nu);
+  boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t &nx, const std::size_t &ndx,
+                                                   const std::size_t &nu);
 
   const std::size_t &get_nvar() const;
 

@@ -411,8 +411,8 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new
 
       model->calcDiff(data, datas_[t]->x, datas_[t]->u);
 
-      model_next->get_state()->Jintegrate(xs_[t + 1], datas_[t + 1]->dx, datas_[t + 1]->Jsum_dx, datas_[t + 1]->Jsum_dx,
-                                          second, setto);  // datas_[t]->Jsum_dxnext == eq. 81
+      model_next->get_state()->Jintegrate(xs_[t + 1], datas_[t + 1]->dx, datas_[t + 1]->Jsum_dx,
+                                          datas_[t + 1]->Jsum_dx, second, setto);  // datas_[t]->Jsum_dxnext == eq. 81
       model->get_state()->Jdiff(data->xnext, datas_[t + 1]->x, datas_[t]->Jdiff_x, datas_[t + 1]->Jdiff_x,
                                 both);  // datas_[t+1]->Jdiff_x == eq. 83, datas_[t]->Jdiff_x == eq.82
       model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_dx, datas_[t]->Jsum_dx, second,
@@ -535,7 +535,7 @@ bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, 
 
       model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
 
-      model->calcDiff(data, datas_[t]->x, datas_[t]->u); // this might be removed
+      model->calcDiff(data, datas_[t]->x, datas_[t]->u);  // this might be removed
 
       model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jsum_dx, datas_[t]->Jsum_dx, second, setto);
       datas_[t]->Ldxdx = datas_[t]->Jsum_dx.transpose() * problem_->get_runningDatas()[t]->Lxx * datas_[t]->Jsum_dx;

@@ -21,6 +21,7 @@ class SolverIpopt : public SolverAbstract {
   void setStringIpoptOption(const std::string& tag, const std::string& value);
   void setNumericIpoptOption(const std::string& tag, Ipopt::Number value);
   void setConsiderControlBounds(const bool& consider);
+
  private:
   Ipopt::SmartPtr<IpoptInterface> ipopt_iface_;
   Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app_;
@@ -30,7 +31,6 @@ class SolverIpopt : public SolverAbstract {
   virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
-
 };
 }  // namespace crocoddyl
 
