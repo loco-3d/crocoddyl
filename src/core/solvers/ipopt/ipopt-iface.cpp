@@ -1,11 +1,10 @@
+#ifdef CROCODDYL_WITH_IPOPT
 #include <cmath>
+#endif
+
 #include <iostream>
 
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
-
-#ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
 
 namespace crocoddyl {
 
