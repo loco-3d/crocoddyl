@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,11 +113,17 @@ double SolverAbstract::computeEqualityFeasibility() {
         tmp_feas_ = std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
       }
     }
+    if (problem_->get_terminalModel()->get_nh()) {
+      tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->h.lpNorm<Eigen::Infinity>());
+    }
   } else {
     for (std::size_t t = 0; t < T; ++t) {
       if (models[t]->get_nh() > 0) {
         tmp_feas_ += datas[t]->h.lpNorm<1>();
       }
+    }
+    if (problem_->get_terminalModel()->get_nh()) {
+      tmp_feas_ += problem_->get_terminalData()->h.lpNorm<1>();
     }
   }
   return tmp_feas_;

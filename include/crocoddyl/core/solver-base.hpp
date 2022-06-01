@@ -196,7 +196,7 @@ class SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_us() const;
 
   /**
-   * @brief Return the gaps \f$\mathbf{f}_{s}\f$
+   * @brief Return the dynamic infeasibility \f$\mathbf{f}_{s}\f$
    */
   const std::vector<Eigen::VectorXd>& get_fs() const;
 
