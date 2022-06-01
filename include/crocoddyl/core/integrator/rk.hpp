@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Trento,
-//                          LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2022, University of Edinburgh, University of Trento,
+//                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,6 +158,8 @@ class IntegratedActionModelRKTpl : public IntegratedActionModelAbstractTpl<_Scal
  protected:
   using Base::control_;             //!< Control parametrization
   using Base::differential_;        //!< Differential action model
+  using Base::ng_;                  //!< Number of inequality constraints
+  using Base::nh_;                  //!< Number of equality constraints
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state
   using Base::time_step2_;          //!< Square of the time step used for integration
