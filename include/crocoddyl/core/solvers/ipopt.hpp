@@ -9,17 +9,45 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Ipopt solver
+ *
+ * This solver solves the optimal control problem by transcribing with the multiple shooting approach.
+ *
+ * \sa `solve()`
+ */
 class SolverIpopt : public SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  /**
+   * @brief Initialize the Ipopt solver
+   *
+   * @param[in]  problem solver to be diagnostic
+   */
   SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem);
   ~SolverIpopt();
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-             const bool is_feasible = false, const double regInit = 1e-9);
+             const bool is_feasible = false, const double reg_init = 1e-9);
 
+  /**
+   * @brief Set a string ipopt option
+   *
+   * @param[in]  tag name of the parameter
+   * @param[in]  value string value for the parameter
+   */
   void setStringIpoptOption(const std::string& tag, const std::string& value);
+  
+  /**
+   * @brief Set a string ipopt option
+   *
+   * @param[in]  tag name of the parameter
+   * @param[in]  value numeric value for the parameter
+   */
   void setNumericIpoptOption(const std::string& tag, Ipopt::Number value);
+  
   void setConsiderControlBounds(const bool& consider);
 
  private:
