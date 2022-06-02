@@ -399,6 +399,7 @@ class IpoptInterface : public Ipopt::TNLP {
   boost::shared_ptr<crocoddyl::ShootingProblem> problem_;     //!< Optimal control problem
   std::vector<Eigen::VectorXd> xs_;                           //!< Vector of states
   std::vector<Eigen::VectorXd> us_;                           //!< Vector of controls
+  std::vector<std::size_t> ixu_;                              //!< Index of at node i
   std::size_t nvar_;                                          //!< Number of NLP variables
   std::size_t nconst_;                                        //!< Number of the NLP constraints
   std::vector<boost::shared_ptr<IpoptInterfaceData>> datas_;  //!< Vector of Datas
@@ -414,43 +415,61 @@ struct IpoptInterfaceData {
 
   IpoptInterfaceData(const std::size_t nx, const std::size_t ndx, const std::size_t nu)
       : x(nx),
+        xnext(nx),
         dx(ndx),
+        dxnext(ndx),
         x_diff(ndx),
         u(nu),
         Jint_dx(ndx, ndx),
+        Jint_dxnext(ndx, ndx),
         Jdiff_x(ndx, ndx),
+        Jdiff_xnext(ndx, ndx),
         Jg_dx(ndx, ndx),
+        Jg_dxnext(ndx, ndx),
         Jg_u(ndx, ndx),
         Jg_ic(ndx, ndx),
+        FxJint_dx(ndx, ndx),
         Ldx(ndx),
         Ldxdx(ndx, ndx),
         Ldxu(ndx, nu) {
     x.setZero();
+    xnext.setZero();
     dx.setZero();
+    dxnext.setZero();
     x_diff.setZero();
     u.setZero();
     Jint_dx.setZero();
+    Jint_dxnext.setZero();
     Jdiff_x.setZero();
+    Jdiff_xnext.setZero();
     Jg_dx.setZero();
+    Jg_dxnext.setZero();
     Jg_u.setZero();
     Jg_ic.setZero();
+    FxJint_dx.setZero();
     Ldx.setZero();
     Ldxdx.setZero();
     Ldxu.setZero();
   }
 
-  Eigen::VectorXd x;        //!< Integrated state
-  Eigen::VectorXd dx;       //!< Increment in the tangent space
-  Eigen::VectorXd x_diff;   //!< State difference
-  Eigen::VectorXd u;        //!< Control
-  Eigen::MatrixXd Jint_dx;  //!< Jacobian of the sum operation w.r.t dx
-  Eigen::MatrixXd Jdiff_x;  //!< Jacobian of the diff operation w.r.t the first element
-  Eigen::MatrixXd Jg_dx;    //!< Jacobian of the dynamic constraint w.r.t dx
-  Eigen::MatrixXd Jg_u;     //!< Jacobian of the dynamic constraint w.r.t u
-  Eigen::MatrixXd Jg_ic;    //!< Jacobian of the initial condition constraint w.r.t dx
-  Eigen::VectorXd Ldx;      //!< Jacobian of the cost w.r.t dx
-  Eigen::MatrixXd Ldxdx;    //!< Hessian of the cost w.r.t dxdx
-  Eigen::MatrixXd Ldxu;     //!< Hessian of the cost w.r.t dxu
+  Eigen::VectorXd x;            //!< Integrated state
+  Eigen::VectorXd xnext;        //!< Integrated state at next node
+  Eigen::VectorXd dx;           //!< Increment in the tangent space
+  Eigen::VectorXd dxnext;       //!< Increment in the tangent space at next node
+  Eigen::VectorXd x_diff;       //!< State difference
+  Eigen::VectorXd u;            //!< Control
+  Eigen::MatrixXd Jint_dx;      //!< Jacobian of the sum operation w.r.t dx
+  Eigen::MatrixXd Jint_dxnext;  //!< Jacobian of the sum operation w.r.t dx at next node
+  Eigen::MatrixXd Jdiff_x;      //!< Jacobian of the diff operation w.r.t the first element
+  Eigen::MatrixXd Jdiff_xnext;  //!< Jacobian of the diff operation w.r.t the first element at the next node
+  Eigen::MatrixXd Jg_dx;        //!< Jacobian of the dynamic constraint w.r.t dx
+  Eigen::MatrixXd Jg_dxnext;    //!< Jacobian of the dynamic constraint w.r.t dxnext
+  Eigen::MatrixXd Jg_u;         //!< Jacobian of the dynamic constraint w.r.t u
+  Eigen::MatrixXd Jg_ic;        //!< Jacobian of the initial condition constraint w.r.t dx
+  Eigen::MatrixXd FxJint_dx;    //!< Intermediate computation needed for Jg_ic
+  Eigen::VectorXd Ldx;          //!< Jacobian of the cost w.r.t dx
+  Eigen::MatrixXd Ldxdx;        //!< Hessian of the cost w.r.t dxdx
+  Eigen::MatrixXd Ldxu;         //!< Hessian of the cost w.r.t dxu
 };
 
 }  // namespace crocoddyl
