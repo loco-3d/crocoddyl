@@ -70,27 +70,27 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    * %Ipopt uses this information when allocating the arrays that it will later ask you to fill with values. Be careful
    * in this method since incorrect values will cause memory bugs which may be very difficult to find.
-   * @param[out] n           Storage for the number of variables \f$x\f$
-   * @param[out] m           Storage for the number of constraints \f$g(x)\f$
-   * @param[out] nnz_jac_g   Storage for the number of nonzero entries in the Jacobian
-   * @param[out] nnz_h_lag   Storage for the number of nonzero entries in the Hessian
-   * @param[out] index_style Storage for the index style the numbering style used for row/col entries in the sparse
-   * matrix format
+   * @param[out] n            Storage for the number of variables \f$x\f$
+   * @param[out] m            Storage for the number of constraints \f$g(x)\f$
+   * @param[out] nnz_jac_g    Storage for the number of nonzero entries in the Jacobian
+   * @param[out] nnz_h_lag    Storage for the number of nonzero entries in the Hessian
+   * @param[out] index_style  Storage for the index style the numbering style used for row/col entries in the sparse
+   *                          matrix format
    */
   virtual bool get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index& nnz_jac_g, Ipopt::Index& nnz_h_lag,
                             IndexStyleEnum& index_style);
 
   /**
    * @brief Method to request bounds on the variables and constraints.
+   T
+   * @param[in]  n    Number of variables \f$x\f$ in the problem
+   * @param[out] x_l  Lower bounds \f$x^L\f$ for the variables \f$x\f$
+   * @param[out] x_u  Upper bounds \f$x^U\f$ for the variables \f$x\f$
+   * @param[in]  m    Number of constraints \f$g(x)\f$ in the problem
+   * @param[out] g_l  Lower bounds \f$g^L\f$ for the constraints \f$g(x)\f$
+   * @param[out] g_u  Upper bounds \f$g^U\f$ for the constraints \f$g(x)\f$
    *
-   *  @param[in]  n   the number of variables \f$x\f$ in the problem
-   *  @param[out] x_l the lower bounds \f$x^L\f$ for the variables \f$x\f$
-   *  @param[out] x_u the upper bounds \f$x^U\f$ for the variables \f$x\f$
-   *  @param[in]  m   the number of constraints \f$g(x)\f$ in the problem
-   *  @param[out] g_l the lower bounds \f$g^L\f$ for the constraints \f$g(x)\f$
-   *  @param[out] g_u the upper bounds \f$g^U\f$ for the constraints \f$g(x)\f$
-   *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    *
    * The values of `n` and `m` that were specified in IpoptInterface::get_nlp_info are passed
    * here for debug checking. Setting a lower bound to a value less than or
@@ -107,31 +107,29 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * \brief Method to request the starting point before iterating.
    *
-   *  @param[in]  n      the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in]  init_x if true, this method must provide an initial value for \f$x\f$
-   *  @param[out] x       the initial values for the primal variables \f$x\f$
-   *  @param[in]  init_z if true, this method must provide an initial value for the bound multipliers \f$z^L\f$ and
-   * \f$z^U\f$
-   *  @param[out] z_L     the initial values for the bound multipliers \f$z^L\f$
-   *  @param[out] z_U     the initial values for the bound multipliers \f$z^U\f$
-   *  @param[in]  m      the number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[in]  init_lambda if true, this method must provide an initial value for the constraint multipliers
-   * \f$\lambda\f$
-   *  @param[out] lambda  the initial values for the constraint multipliers, \f$\lambda\f$
+   * @param[in]  n            Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                          specified in `IpoptInterface::get_nlp_info`
+   * @param[in]  init_x       If true, this method must provide an initial value for \f$x\f$
+   * @param[out] x            Initial values for the primal variables \f$x\f$
+   * @param[in]  init_z       If true, this method must provide an initial value for the bound multipliers \f$z^L\f$
+   *                          and \f$z^U\f$
+   * @param[out] z_L          Initial values for the bound multipliers \f$z^L\f$
+   * @param[out] z_U          Initial values for the bound multipliers \f$z^U\f$
+   * @param[in]  m            Number of constraints \f$g(x)\f$ in the problem; it will have the same value that
+   *                          was specified in `IpoptInterface::get_nlp_info`
+   * @param[in]  init_lambda  If true, this method must provide an initial value for the constraint multipliers
+   *                          \f$\lambda\f$
+   * @param[out] lambda       Initial values for the constraint multipliers, \f$\lambda\f$
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    *
-   *  The boolean variables indicate whether the algorithm requires to
-   *  have x, z_L/z_u, and lambda initialized, respectively.  If, for some
-   *  reason, the algorithm requires initializations that cannot be
-   *  provided, false should be returned and %Ipopt will stop.
-   *  The default options only require initial values for the primal
-   *  variables \f$x\f$.
+   * The boolean variables indicate whether the algorithm requires to have x, z_L/z_u, and lambda initialized,
+   * respectively. If, for some reason, the algorithm requires initializations that cannot be provided, false should
+   * be returned and %Ipopt will stop. The default options only require initial values for the primal variables
+   * \f$x\f$.
    *
-   *  Note, that the initial values for bound multiplier components for
-   *  absent bounds (\f$x^L_i=-\infty\f$ or \f$x^U_i=\infty\f$) are ignored.
+   * Note, that the initial values for bound multiplier components for absent bounds (\f$x^L_i=-\infty\f$ or
+   * \f$x^U_i=\infty\f$) are ignored.
    */
   // [TNLP_get_starting_point]
   virtual bool get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Number* x, bool init_z, Ipopt::Number* z_L,
@@ -140,51 +138,52 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * @brief Method to request the value of the objective function.
    *
-   *  @param[in] n     the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x     the values for the primal variables \f$x\f$ at which the objective function \f$f(x)\f$ is to be
-   * evaluated
-   *  @param[in] new_x false if any evaluation method (`eval_*`) was previously called with the same values in x, true
-   * otherwise. This can be helpful when users have efficient implementations that calculate multiple outputs at once.
-   * %Ipopt internally caches results from the TNLP and generally, this flag can be ignored.
-   *  @param[out] obj_value storage for the value of the objective function \f$f(x)\f$
+   * @param[in] n           Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[in] x           Values for the primal variables \f$x\f$ at which the objective function \f$f(x)\f$ is
+   *                        to be evaluated
+   * @param[in] new_x       False if any evaluation method (`eval_*`) was previously called with the same values in x,
+   *                        true otherwise. This can be helpful when users have efficient implementations that
+   *                        calculate multiple outputs at once. %Ipopt internally caches results from the TNLP and
+   *                        generally, this flag can be ignored.
+   * @param[out] obj_value  Storage for the value of the objective function \f$f(x)\f$
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    */
   virtual bool eval_f(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number& obj_value);
 
   /**
    * @brief Method to request the gradient of the objective function.
    *
-   *  @param[in] n     the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x     the values for the primal variables \f$x\f$ at which the gradient \f$\nabla f(x)\f$ is to be
-   * evaluated
-   *  @param[in] new_x false if any evaluation method (`eval_*`) was previously called with the same values in x, true
-   * otherwise; see also IpoptInterface::eval_f
-   *  @param[out] grad_f array to store values of the gradient of the objective function \f$\nabla f(x)\f$.
-   *                      The gradient array is in the same order as the \f$x\f$ variables
-   *                      (i.e., the gradient of the objective with respect to `x[2]` should be put in `grad_f[2]`).
+   * @param[in] n        Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                     specified in `IpoptInterface::get_nlp_info`
+   * @param[in] x        Values for the primal variables \f$x\f$ at which the gradient \f$\nabla f(x)\f$ is to be
+   *                     evaluated
+   * @param[in] new_x    False if any evaluation method (`eval_*`) was previously called with the same values in x,
+   *                     true otherwise; see also `IpoptInterface::eval_f`
+   * @param[out] grad_f  Array to store values of the gradient of the objective function \f$\nabla f(x)\f$.
+   *                     The gradient array is in the same order as the \f$x\f$ variables
+   *                     (i.e., the gradient of the objective with respect to `x[2]` should be put in `grad_f[2]`).
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    */
   virtual bool eval_grad_f(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number* grad_f);
 
   /**
    * @brief Method to request the constraint values.
    *
-   *  @param[in] n     the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x     the values for the primal variables \f$x\f$ at which the constraint functions \f$g(x)\f$ are to
-   * be evaluated
-   *  @param[in] new_x false if any evaluation method (`eval_*`) was previously called with the same values in x, true
-   * otherwise; see also IpoptInterface::eval_f
-   *  @param[in] m     the number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[out] g    array to store constraint function values \f$g(x)\f$, do not add or subtract the bound values
-   * \f$g^L\f$ or \f$g^U\f$.
+   * @param[in] n      Number of variables \f$x\f$ in the problem; it will have the same value that was specified
+   *                   in `IpoptInterface::get_nlp_info`
+   * @param[in] x      Values for the primal variables \f$x\f$ at which the constraint functions \f$g(x)\f$ are to
+   *                   be evaluated
+   * @param[in] new_x  False if any evaluation method (`eval_*`) was previously called with the same values in x, true
+   *                   otherwise; see also `IpoptInterface::eval_f`
+   * @param[in] m      Number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
+   *                   specified in `IpoptInterface::get_nlp_info`
+   * @param[out] g     Array to store constraint function values \f$g(x)\f$, do not add or subtract the bound values
+   *                   \f$g^L\f$ or \f$g^U\f$.
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    */
   virtual bool eval_g(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Number* g);
 
@@ -196,35 +195,31 @@ class IpoptInterface : public Ipopt::TNLP {
    * \f$i\f$ and column \f$j\f$.
    * See \ref TRIPLET for a discussion of the sparse matrix format used in this method.
    *
-   *  @param[in] n     the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x     first call: NULL; later calls: the values for the primal variables \f$x\f$ at which the
-   * constraint Jacobian \f$\nabla g(x)^T\f$ is to be evaluated
-   *  @param[in] new_x false if any evaluation method (`eval_*`) was previously called with the same values in x, true
-   * otherwise; see also IpoptInterface::eval_f
-   *  @param[in] m     the number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[in] nele_jac the number of nonzero elements in the Jacobian; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[out] iRow   first call: array of length nele_jac to store the row indices of entries in the Jacobian of
-   * the constraints; later calls: NULL
-   *  @param[out] jCol   first call: array of length nele_jac to store the column indices of entries in the Jacobian of
-   * the constraints; later calls: NULL
-   *  @param[out] values first call: NULL; later calls: array of length nele_jac to store the values of the entries in
-   * the Jacobian of the constraints
+   * @param[in] n         Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                      specified in `IpoptInterface::get_nlp_info`
+   * @param[in] x         First call: NULL; later calls: the values for the primal variables \f$x\f$ at which the
+   *                      constraint Jacobian \f$\nabla g(x)^T\f$ is to be evaluated
+   * @param[in] new_x     False if any evaluation method (`eval_*`) was previously called with the same values in x,
+   *                      true otherwise; see also `IpoptInterface::eval_f`
+   * @param[in] m         Number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
+   *                      specified in `IpoptInterface::get_nlp_info`
+   * @param[in] nele_jac  Number of nonzero elements in the Jacobian; it will have the same value that was
+   *                      specified in `IpoptInterface::get_nlp_info`
+   * @param[out] iRow     First call: array of length `nele_jac` to store the row indices of entries in the Jacobian
+   * f the constraints; later calls: NULL
+   * @param[out] jCol     First call: array of length `nele_jac` to store the column indices of entries in the
+   * acobian of the constraints; later calls: NULL
+   * @param[out] values   First call: NULL; later calls: array of length nele_jac to store the values of the entries
+   *                      in the Jacobian of the constraints
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    *
-   * @note The arrays iRow and jCol only need to be filled once.
-   * If the iRow and jCol arguments are not NULL (first call to this function),
-   * then %Ipopt expects that the sparsity structure of the Jacobian
-   * (the row and column indices only) are written into iRow and jCol.
-   * At this call, the arguments `x` and `values` will be NULL.
-   * If the arguments `x` and `values` are not NULL, then %Ipopt
-   * expects that the value of the Jacobian as calculated from array `x`
-   * is stored in array `values` (using the same order as used when
-   * specifying the sparsity structure).
-   * At this call, the arguments `iRow` and `jCol` will be NULL.
+   * @note The arrays iRow and jCol only need to be filled once. If the iRow and jCol arguments are not NULL (first
+   * call to this function), then %Ipopt expects that the sparsity structure of the Jacobian (the row and column
+   * indices only) are written into iRow and jCol. At this call, the arguments `x` and `values` will be NULL. If the
+   * arguments `x` and `values` are not NULL, then %Ipopt expects that the value of the Jacobian as calculated from
+   * array `x` is stored in array `values` (using the same order as used when specifying the sparsity structure). At
+   * this call, the arguments `iRow` and `jCol` will be NULL.
    */
   virtual bool eval_jac_g(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Index nele_jac,
                           Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values);
@@ -237,46 +232,41 @@ class IpoptInterface : public Ipopt::TNLP {
    * for the given values for \f$x\f$, \f$\sigma_f\f$, and \f$\lambda\f$.
    * See \ref TRIPLET for a discussion of the sparse matrix format used in this method.
    *
-   *  @param[in] n      the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x      first call: NULL; later calls: the values for the primal variables \f$x\f$ at which the Hessian
-   * is to be evaluated
-   *  @param[in] new_x  false if any evaluation method (`eval_*`) was previously called with the same values in x, true
-   * otherwise; see also IpoptInterface::eval_f
-   *  @param[in] obj_factor  factor \f$\sigma_f\f$ in front of the objective term in the Hessian
-   *  @param[in] m      the number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[in] lambda  the values for the constraint multipliers \f$\lambda\f$ at which the Hessian is to be
-   * evaluated
-   *  @param[in] new_lambda  false if any evaluation method was previously called with the same values in lambda, true
-   * otherwise
-   *  @param[in] nele_hess  the number of nonzero elements in the Hessian; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[out] iRow  first call: array of length nele_hess to store the row indices of entries in the Hessian; later
-   * calls: NULL
-   *  @param[out] jCol  first call: array of length nele_hess to store the column indices of entries in the Hessian;
-   * later calls: NULL
-   *  @param[out] values first call: NULL; later calls: array of length nele_hess to store the values of the entries in
-   * the Hessian
+   * @param[in] n           Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[in] x           First call: NULL; later calls: the values for the primal variables \f$x\f$ at which the
+   *                        Hessian is to be evaluated
+   * @param[in] new_x       False if any evaluation method (`eval_*`) was previously called with the same values in x,
+   *                        true otherwise; see also IpoptInterface::eval_f
+   * @param[in] obj_factor  Factor \f$\sigma_f\f$ in front of the objective term in the Hessian
+   * @param[in] m           Number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[in] lambda      Values for the constraint multipliers \f$\lambda\f$ at which the Hessian is to be
+   *                        evaluated
+   * @param[in] new_lambda  False if any evaluation method was previously called with the same values in lambda, true
+   *                        otherwise
+   * @param[in] nele_hess   Number of nonzero elements in the Hessian; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[out] iRow       First call: array of length nele_hess to store the row indices of entries in the Hessian;
+   *                        later calls: NULL
+   * @param[out] jCol       First call: array of length nele_hess to store the column indices of entries in the
+   *                        Hessian; later calls: NULL
+   * @param[out] values     First call: NULL; later calls: array of length nele_hess to store the values of the
+   *                        entries in the Hessian
    *
-   *  @return true if success, false otherwise.
+   * @return true if success, false otherwise.
    *
-   * @note The arrays iRow and jCol only need to be filled once.
-   * If the iRow and jCol arguments are not NULL (first call to this function),
-   * then %Ipopt expects that the sparsity structure of the Hessian
-   * (the row and column indices only) are written into iRow and jCol.
-   * At this call, the arguments `x`, `lambda`, and `values` will be NULL.
-   * If the arguments `x`, `lambda`, and `values` are not NULL, then %Ipopt
-   * expects that the value of the Hessian as calculated from arrays `x`
-   * and `lambda` are stored in array `values` (using the same order as
-   * used when specifying the sparsity structure).
-   * At this call, the arguments `iRow` and `jCol` will be NULL.
+   * @note The arrays iRow and jCol only need to be filled once. If the iRow and jCol arguments are not NULL (first
+   * call to this function), then %Ipopt expects that the sparsity structure of the Hessian (the row and column indices
+   * only) are written into iRow and jCol. At this call, the arguments `x`, `lambda`, and `values` will be NULL. If the
+   * arguments `x`, `lambda`, and `values` are not NULL, then %Ipopt expects that the value of the Hessian as
+   * calculated from arrays `x` and `lambda` are stored in array `values` (using the same order as used when specifying
+   * the sparsity structure). At this call, the arguments `iRow` and `jCol` will be NULL.
    *
    * @attention As this matrix is symmetric, %Ipopt expects that only the lower diagonal entries are specified.
    *
-   * A default implementation is provided, in case the user
-   * wants to set quasi-Newton approximations to estimate the second
-   * derivatives and doesn't not need to implement this method.
+   * A default implementation is provided, in case the user wants to set quasi-Newton approximations to estimate the
+   * second derivatives and doesn't not need to implement this method.
    */
   virtual bool eval_h(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number obj_factor, Ipopt::Index m,
                       const Ipopt::Number* lambda, bool new_lambda, Ipopt::Index nele_hess, Ipopt::Index* iRow,
@@ -286,7 +276,7 @@ class IpoptInterface : public Ipopt::TNLP {
    * @brief This method is called when the algorithm has finished (successfully or not) so the TNLP can digest the
    * outcome, e.g., store/write the solution, if any.
    *
-   *  @param[in] status @parblock gives the status of the algorithm
+   * @param[in] status @parblock gives the status of the algorithm
    *   - SUCCESS: Algorithm terminated successfully at a locally optimal
    *     point, satisfying the convergence tolerances (can be specified
    *     by options).
@@ -294,29 +284,29 @@ class IpoptInterface : public Ipopt::TNLP {
    *   - CPUTIME_EXCEEDED: Maximum number of CPU seconds exceeded (can be specified by an option).
    *   - STOP_AT_TINY_STEP: Algorithm proceeds with very little progress.
    *   - STOP_AT_ACCEPTABLE_POINT: Algorithm stopped at a point that was converged, not to "desired" tolerances, but to
-   * "acceptable" tolerances (see the acceptable-... options).
+   *     "acceptable" tolerances (see the acceptable-... options).
    *   - LOCAL_INFEASIBILITY: Algorithm converged to a point of local infeasibility. Problem may be infeasible.
    *   - USER_REQUESTED_STOP: The user call-back function IpoptInterface::intermediate_callback returned false, i.e.,
-   * the user code requested a premature termination of the optimization.
+   *     the user code requested a premature termination of the optimization.
    *   - DIVERGING_ITERATES: It seems that the iterates diverge.
    *   - RESTORATION_FAILURE: Restoration phase failed, algorithm doesn't know how to proceed.
    *   - ERROR_IN_STEP_COMPUTATION: An unrecoverable error occurred while %Ipopt tried to compute the search direction.
    *   - INVALID_NUMBER_DETECTED: Algorithm received an invalid number (such as NaN or Inf) from the NLP; see also
-   * option check_derivatives_for_nan_inf).
+   *     option check_derivatives_for_nan_inf).
    *   - INTERNAL_ERROR: An unknown internal error occurred.
-   *   @endparblock
-   *  @param[in] n     the number of variables \f$x\f$ in the problem; it will have the same value that was specified
-   * in IpoptInterface::get_nlp_info
-   *  @param[in] x     the final values for the primal variables
-   *  @param[in] z_L   the final values for the lower bound multipliers
-   *  @param[in] z_U   the final values for the upper bound multipliers
-   *  @param[in] m     the number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
-   * specified in IpoptInterface::get_nlp_info
-   *  @param[in] g     the final values of the constraint functions
-   *  @param[in] lambda the final values of the constraint multipliers
-   *  @param[in] obj_value the final value of the objective function
-   *  @param[in] ip_data provided for expert users
-   *  @param[in] ip_cq provided for expert users
+   * @endparblock
+   * @param[in] n           Number of variables \f$x\f$ in the problem; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[in] x           Final values for the primal variables
+   * @param[in] z_L         Final values for the lower bound multipliers
+   * @param[in] z_U         Final values for the upper bound multipliers
+   * @param[in] m           Number of constraints \f$g(x)\f$ in the problem; it will have the same value that was
+   *                        specified in `IpoptInterface::get_nlp_info`
+   * @param[in] g           Final values of the constraint functions
+   * @param[in] lambda      Final values of the constraint multipliers
+   * @param[in] obj_value   Final value of the objective function
+   * @param[in] ip_data     Provided for expert users
+   * @param[in] ip_cq       Provided for expert users
    */
   virtual void finalize_solution(Ipopt::SolverReturn status, Ipopt::Index n, const Ipopt::Number* x,
                                  const Ipopt::Number* z_L, const Ipopt::Number* z_U, Ipopt::Index m,
@@ -326,24 +316,18 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * @brief Intermediate Callback method for the user.
    *
-   * This method is called once per iteration (during the convergence check),
-   * and can be used to obtain information about the optimization status while
-   * %Ipopt solves the problem, and also to request a premature termination.
+   * This method is called once per iteration (during the convergence check), and can be used to obtain information
+   * about the optimization status while %Ipopt solves the problem, and also to request a premature termination.
    *
-   * The information provided by the entities in the argument list correspond
-   * to what %Ipopt prints in the iteration summary (see also \ref OUTPUT).
-   * Further information can be obtained from the ip_data and ip_cq objects.
-   * The current iterate and violations of feasibility and optimality can be
-   * accessed via the methods IpoptInterface::get_curr_iterate() and
-   * IpoptInterface::get_curr_violations().
-   * These methods translate values for the *internal representation* of
-   * the problem from `ip_data` and `ip_cq` objects into the TNLP representation.
+   * The information provided by the entities in the argument list correspond to what %Ipopt prints in the iteration
+   * summary (see also \ref OUTPUT). Further information can be obtained from the ip_data and ip_cq objects. The
+   * current iterate and violations of feasibility and optimality can be accessed via the methods
+   * IpoptInterface::get_curr_iterate() and IpoptInterface::get_curr_violations(). These methods translate values for
+   * the *internal representation* of the problem from `ip_data` and `ip_cq` objects into the TNLP representation.
    *
-   * @return If this method returns false, %Ipopt will terminate with the
-   *   User_Requested_Stop status.
+   * @return If this method returns false, %Ipopt will terminate with the User_Requested_Stop status.
    *
-   * It is not required to implement (overload) this method.
-   * The default implementation always returns true.
+   * It is not required to implement (overload) this method. The default implementation always returns true.
    */
   bool intermediate_callback(Ipopt::AlgorithmMode mode, Ipopt::Index iter, Ipopt::Number obj_value,
                              Ipopt::Number inf_pr, Ipopt::Number inf_du, Ipopt::Number mu, Ipopt::Number d_norm,
