@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import os
 import sys
+import time
+import signal
 
 import crocoddyl
 from crocoddyl.utils.biped import plotSolution
@@ -11,6 +13,7 @@ import pinocchio
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Load robot
 robot = example_robot_data.load('talos')
@@ -43,11 +46,19 @@ refGripper = rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation
 comRef = (rfPos0 + lfPos0) / 2
 comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
-# Initialize Gepetto viewer
+# Initialize viewer
+display = None
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(robot, frameNames=[rightFoot, leftFoot])
-    display.robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
-    display.robot.viewer.gui.applyConfiguration('world/point', target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
+    if display is None:
+        try:
+            import gepetto
+            gepetto.corbaserver.Client()
+            display = crocoddyl.GepettoDisplay(robot, frameNames=[rightFoot, leftFoot])
+            display.robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
+            display.robot.viewer.gui.applyConfiguration('world/point',
+                                                        target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
+        except:
+            display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
 
 # Add contact to the model
 contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
@@ -123,19 +134,21 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverFDDP(problem)
-if WITHDISPLAY and WITHPLOT:
+if WITHDISPLAY and type(display) == crocoddyl.GepettoDisplay:
+    display.rate = 4
+    display.freq = 4
+    if WITHPLOT:
+        solver.setCallbacks(
+            [crocoddyl.CallbackVerbose(),
+             crocoddyl.CallbackLogger(),
+             crocoddyl.CallbackDisplay(display)])
+    else:
+        solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+elif WITHPLOT:
     solver.setCallbacks([
         crocoddyl.CallbackVerbose(),
         crocoddyl.CallbackLogger(),
-        crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
     ])
-elif WITHDISPLAY:
-    solver.setCallbacks([
-        crocoddyl.CallbackVerbose(),
-        crocoddyl.CallbackDisplay(crocoddyl.GepettoDisplay(robot, 4, 4, frameNames=[rightFoot, leftFoot]))
-    ])
-elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -148,7 +161,11 @@ solver.solve(xs, us, 500, False, 0.1)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
-    display.displayFromSolver(solver)
+    display.rate = -1
+    display.freq = 1
+    while True:
+        display.displayFromSolver(solver)
+        time.sleep(1.0)
 
 # Get final state and end effector position
 xT = solver.xs[-1]

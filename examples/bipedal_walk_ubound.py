@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import signal
 
 import numpy as np
 
@@ -10,6 +12,7 @@ from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.load('talos_legs')
@@ -40,6 +43,15 @@ GAITPHASES = \
 cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 solver = [None] * len(GAITPHASES)
+display = None
+if WITHDISPLAY:
+    if display is None:
+        try:
+            import gepetto
+            gepetto.corbaserver.Client()
+            display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
+        except:
+            display = crocoddyl.MeshcatDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
@@ -51,15 +63,14 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print('*** SOLVE ' + key + ' ***')
-    if WITHDISPLAY and WITHPLOT:
-        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
-        solver[i].setCallbacks(
-            [crocoddyl.CallbackVerbose(),
-             crocoddyl.CallbackLogger(),
-             crocoddyl.CallbackDisplay(display)])
-    elif WITHDISPLAY:
-        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
-        solver[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    if WITHDISPLAY and type(display) == crocoddyl.GepettoDisplay:
+        if WITHPLOT:
+            solver[i].setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            solver[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
     elif WITHPLOT:
         solver[i].setCallbacks([
             crocoddyl.CallbackVerbose(),
@@ -80,9 +91,12 @@ for i, phase in enumerate(GAITPHASES):
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
-    for i, phase in enumerate(GAITPHASES):
-        display.displayFromSolver(solver[i])
+    display.rate = -1
+    display.freq = 1
+    while True:
+        for i, phase in enumerate(GAITPHASES):
+            display.displayFromSolver(solver[i])
+        time.sleep(1.0)
 
 # Plotting the entire motion
 if WITHPLOT:

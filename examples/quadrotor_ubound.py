@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import signal
 
 import crocoddyl
 import pinocchio
@@ -8,6 +10,7 @@ import example_robot_data
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 hector = example_robot_data.load('hector')
 robot_model = hector.model
@@ -54,14 +57,29 @@ problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv
 solver = crocoddyl.SolverBoxDDP(problem)
 
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
-if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+if WITHDISPLAY:
+    try:
+        import gepetto
+        gepetto.corbaserver.Client()
+        display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF, floor=False)
+        hector.viewer.gui.addXYZaxis('world/wp', [1., 0., 0., 1.], .03, 0.5)
+        hector.viewer.gui.applyConfiguration(
+            'world/wp',
+            target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
+        if WITHPLOT:
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    except:
+        display = crocoddyl.MeshcatDisplay(hector)
+if WITHPLOT:
+    solver.setCallbacks([
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
+    ])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -78,10 +96,8 @@ if WITHPLOT:
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(hector)
-    hector.viewer.gui.addXYZaxis('world/wp', [1., 0., 0., 1.], .03, 0.5)
-    hector.viewer.gui.applyConfiguration(
-        'world/wp',
-        target_pos.tolist() + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]])
-
-    display.displayFromSolver(solver)
+    display.rate = -1
+    display.freq = 1
+    while True:
+        display.displayFromSolver(solver)
+        time.sleep(1.0)
