@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC
+// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,12 +25,12 @@ SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
 }
 
 bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                        const std::size_t maxiter, const bool is_feasible, const double regInit) {
+                        const std::size_t maxiter, const bool is_feasible, const double /*reg_init*/) {
   setCandidate(init_xs, init_us, is_feasible);
   ipopt_iface_->set_xs(xs_);
   ipopt_iface_->set_us(us_);
 
-  ipopt_app_->Options()->SetIntegerValue("max_iter", maxiter);
+  ipopt_app_->Options()->SetIntegerValue("max_iter", static_cast<Ipopt::Index>(maxiter));
   ipopt_status_ = ipopt_app_->OptimizeTNLP(ipopt_iface_);
 
   std::copy(ipopt_iface_->get_xs().begin(), ipopt_iface_->get_xs().end(), xs_.begin());
@@ -41,10 +41,13 @@ bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
 
 SolverIpopt::~SolverIpopt() {}
 
-void SolverIpopt::computeDirection(const bool recalc) {}
-double SolverIpopt::tryStep(const double steplength) { return 0.0; }
-double SolverIpopt::stoppingCriteria() { return 0.0; }
-const Eigen::Vector2d& SolverIpopt::expectedImprovement() { return Eigen::Vector2d::Zero(); }
+void SolverIpopt::computeDirection(const bool) {}
+
+double SolverIpopt::tryStep(const double) { return 0.; }
+
+double SolverIpopt::stoppingCriteria() { return 0.; }
+
+const Eigen::Vector2d& SolverIpopt::expectedImprovement() { return d_; }
 
 void SolverIpopt::setStringIpoptOption(const std::string& tag, const std::string& value) {
   ipopt_app_->Options()->SetStringValue(tag, value);
