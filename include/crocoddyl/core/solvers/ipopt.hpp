@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC
+// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #ifndef CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 #define CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 
-#include <coin-or/IpIpoptApplication.hpp>
+#include <IpIpoptApplication.hpp>
 
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
