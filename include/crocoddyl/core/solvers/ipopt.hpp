@@ -40,6 +40,7 @@ class SolverIpopt : public SolverAbstract {
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
              const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
              const bool is_feasible = false, const double reg_init = 1e-9);
+  virtual void resizeData();
 
   /**
    * @brief Set a string ipopt option

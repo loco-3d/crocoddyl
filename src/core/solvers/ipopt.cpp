@@ -41,6 +41,11 @@ bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
   return ipopt_status_ == Ipopt::Solve_Succeeded || ipopt_status_ == Ipopt::Solved_To_Acceptable_Level;
 }
 
+void SolverIpopt::resizeData() {
+  SolverAbstract::resizeData();
+  ipopt_iface_->resizeData();
+}
+
 SolverIpopt::~SolverIpopt() {}
 
 void SolverIpopt::computeDirection(const bool) {}

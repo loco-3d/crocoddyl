@@ -342,6 +342,8 @@ class IpoptInterface : public Ipopt::TNLP {
    */
   boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t nx, const std::size_t ndx, const std::size_t nu);
 
+  void resizeData();
+
   /**
    * @brief Return the total number of optimization variables (states and controls)
    */
@@ -434,6 +436,27 @@ struct IpoptInterfaceData {
     Ldx.setZero();
     Ldxdx.setZero();
     Ldxu.setZero();
+  }
+
+  void resize(const std::size_t nx, const std::size_t ndx, const std::size_t nu) {
+    x.conservativeResize(nx);
+    xnext.conservativeResize(nx);
+    dx.conservativeResize(ndx);
+    dxnext.conservativeResize(ndx);
+    x_diff.conservativeResize(ndx);
+    u.conservativeResize(nu);
+    Jint_dx.conservativeResize(ndx, ndx);
+    Jint_dxnext.conservativeResize(ndx, ndx);
+    Jdiff_x.conservativeResize(ndx, ndx);
+    Jdiff_xnext.conservativeResize(ndx, ndx);
+    Jg_dx.conservativeResize(ndx, ndx);
+    Jg_dxnext.conservativeResize(ndx, ndx);
+    Jg_u.conservativeResize(ndx, ndx);
+    Jg_ic.conservativeResize(ndx, ndx);
+    FxJint_dx.conservativeResize(ndx, ndx);
+    Ldx.conservativeResize(ndx);
+    Ldxdx.conservativeResize(ndx, ndx);
+    Ldxu.conservativeResize(ndx, nu);
   }
 
   Eigen::VectorXd x;            //!< Integrated state

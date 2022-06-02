@@ -53,6 +53,35 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem>& problem
   datas_[T] = createData(nxi, ndxi, 0);
 }
 
+void IpoptInterface::resizeData() {
+  const std::size_t T = problem_->get_T();
+  nvar_ = 0;
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::size_t nxi = models[t]->get_state()->get_nx();
+    const std::size_t ndxi = models[t]->get_state()->get_ndx();
+    const std::size_t nui = models[t]->get_nu();
+
+    xs_[t].conservativeResize(nxi);
+    us_[t].conservativeResize(nui);
+    datas_[t]->resize(nxi, ndxi, nui);
+    ixu_[t] = nvar_;
+    nconst_ += ndxi;      // T*ndx eq. constraints for dynamics
+    nvar_ += ndxi + nui;  // Multiple shooting, states and controls
+  }
+  ixu_[T] = nvar_;
+
+  // Initial condition
+  nconst_ += models[0]->get_state()->get_ndx();
+
+  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
+  const std::size_t nxi = model->get_state()->get_nx();
+  const std::size_t ndxi = model->get_state()->get_ndx();
+  nvar_ += ndxi;  // final node
+  xs_[T].conservativeResize(nxi);
+  datas_[T]->resize(nxi, ndxi, 0);
+}
+
 IpoptInterface::~IpoptInterface() {}
 
 bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index& nnz_jac_g, Ipopt::Index& nnz_h_lag,
