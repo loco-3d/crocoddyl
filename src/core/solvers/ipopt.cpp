@@ -35,8 +35,10 @@ bool SolverIpopt::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
 
   std::copy(ipopt_iface_->get_xs().begin(), ipopt_iface_->get_xs().end(), xs_.begin());
   std::copy(ipopt_iface_->get_us().begin(), ipopt_iface_->get_us().end(), us_.begin());
+  cost_ = ipopt_iface_->get_cost();
+  iter_ = ipopt_app_->Statistics()->IterationCount();
 
-  return ipopt_status_ == Ipopt::Solve_Succeeded;
+  return ipopt_status_ == Ipopt::Solve_Succeeded || ipopt_status_ == Ipopt::Solved_To_Acceptable_Level;
 }
 
 SolverIpopt::~SolverIpopt() {}

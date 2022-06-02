@@ -11,6 +11,7 @@
 #define CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 
 #include <IpIpoptApplication.hpp>
+#include <IpSolveStatistics.hpp>
 
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"

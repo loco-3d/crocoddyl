@@ -61,7 +61,7 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    * @param[in] problem  Crocoddyl shooting problem
    */
-  IpoptInterface(const boost::shared_ptr<crocoddyl::ShootingProblem> &problem);
+  IpoptInterface(const boost::shared_ptr<crocoddyl::ShootingProblem>& problem);
 
   virtual ~IpoptInterface();
 
@@ -77,8 +77,8 @@ class IpoptInterface : public Ipopt::TNLP {
    * @param[out] index_style Storage for the index style the numbering style used for row/col entries in the sparse
    * matrix format
    */
-  virtual bool get_nlp_info(Ipopt::Index &n, Ipopt::Index &m, Ipopt::Index &nnz_jac_g, Ipopt::Index &nnz_h_lag,
-                            IndexStyleEnum &index_style);
+  virtual bool get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index& nnz_jac_g, Ipopt::Index& nnz_h_lag,
+                            IndexStyleEnum& index_style);
 
   /**
    * @brief Method to request bounds on the variables and constraints.
@@ -101,8 +101,8 @@ class IpoptInterface : public Ipopt::TNLP {
    * 10<sup>19</sup>, respectively, by default, but may be modified by changing these
    * options.
    */
-  virtual bool get_bounds_info(Ipopt::Index n, Ipopt::Number *x_l, Ipopt::Number *x_u, Ipopt::Index m,
-                               Ipopt::Number *g_l, Ipopt::Number *g_u);
+  virtual bool get_bounds_info(Ipopt::Index n, Ipopt::Number* x_l, Ipopt::Number* x_u, Ipopt::Index m,
+                               Ipopt::Number* g_l, Ipopt::Number* g_u);
 
   /**
    * \brief Method to request the starting point before iterating.
@@ -134,8 +134,8 @@ class IpoptInterface : public Ipopt::TNLP {
    *  absent bounds (\f$x^L_i=-\infty\f$ or \f$x^U_i=\infty\f$) are ignored.
    */
   // [TNLP_get_starting_point]
-  virtual bool get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Number *x, bool init_z, Ipopt::Number *z_L,
-                                  Ipopt::Number *z_U, Ipopt::Index m, bool init_lambda, Ipopt::Number *lambda);
+  virtual bool get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Number* x, bool init_z, Ipopt::Number* z_L,
+                                  Ipopt::Number* z_U, Ipopt::Index m, bool init_lambda, Ipopt::Number* lambda);
 
   /**
    * @brief Method to request the value of the objective function.
@@ -151,7 +151,7 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    *  @return true if success, false otherwise.
    */
-  virtual bool eval_f(Ipopt::Index n, const Ipopt::Number *x, bool new_x, Ipopt::Number &obj_value);
+  virtual bool eval_f(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number& obj_value);
 
   /**
    * @brief Method to request the gradient of the objective function.
@@ -168,7 +168,7 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    *  @return true if success, false otherwise.
    */
-  virtual bool eval_grad_f(Ipopt::Index n, const Ipopt::Number *x, bool new_x, Ipopt::Number *grad_f);
+  virtual bool eval_grad_f(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number* grad_f);
 
   /**
    * @brief Method to request the constraint values.
@@ -186,7 +186,7 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    *  @return true if success, false otherwise.
    */
-  virtual bool eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, Ipopt::Index m, Ipopt::Number *g);
+  virtual bool eval_g(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Number* g);
 
   /**
    * @brief Method to request either the sparsity structure or the values of the Jacobian of the constraints.
@@ -226,8 +226,8 @@ class IpoptInterface : public Ipopt::TNLP {
    * specifying the sparsity structure).
    * At this call, the arguments `iRow` and `jCol` will be NULL.
    */
-  virtual bool eval_jac_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x, Ipopt::Index m, Ipopt::Index nele_jac,
-                          Ipopt::Index *iRow, Ipopt::Index *jCol, Ipopt::Number *values);
+  virtual bool eval_jac_g(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Index nele_jac,
+                          Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values);
 
   /**
    * @brief Method to request either the sparsity structure or the values of the Hessian of the Lagrangian.
@@ -278,9 +278,9 @@ class IpoptInterface : public Ipopt::TNLP {
    * wants to set quasi-Newton approximations to estimate the second
    * derivatives and doesn't not need to implement this method.
    */
-  virtual bool eval_h(Ipopt::Index n, const Ipopt::Number *x, bool new_x, Ipopt::Number obj_factor, Ipopt::Index m,
-                      const Ipopt::Number *lambda, bool new_lambda, Ipopt::Index nele_hess, Ipopt::Index *iRow,
-                      Ipopt::Index *jCol, Ipopt::Number *values);
+  virtual bool eval_h(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number obj_factor, Ipopt::Index m,
+                      const Ipopt::Number* lambda, bool new_lambda, Ipopt::Index nele_hess, Ipopt::Index* iRow,
+                      Ipopt::Index* jCol, Ipopt::Number* values);
 
   /**
    * @brief This method is called when the algorithm has finished (successfully or not) so the TNLP can digest the
@@ -318,10 +318,10 @@ class IpoptInterface : public Ipopt::TNLP {
    *  @param[in] ip_data provided for expert users
    *  @param[in] ip_cq provided for expert users
    */
-  virtual void finalize_solution(Ipopt::SolverReturn status, Ipopt::Index n, const Ipopt::Number *x,
-                                 const Ipopt::Number *z_L, const Ipopt::Number *z_U, Ipopt::Index m,
-                                 const Ipopt::Number *g, const Ipopt::Number *lambda, Ipopt::Number obj_value,
-                                 const Ipopt::IpoptData *ip_data, Ipopt::IpoptCalculatedQuantities *ip_cq);
+  virtual void finalize_solution(Ipopt::SolverReturn status, Ipopt::Index n, const Ipopt::Number* x,
+                                 const Ipopt::Number* z_L, const Ipopt::Number* z_U, Ipopt::Index m,
+                                 const Ipopt::Number* g, const Ipopt::Number* lambda, Ipopt::Number obj_value,
+                                 const Ipopt::IpoptData* ip_data, Ipopt::IpoptCalculatedQuantities* ip_cq);
 
   /**
    * @brief Intermediate Callback method for the user.
@@ -348,8 +348,8 @@ class IpoptInterface : public Ipopt::TNLP {
   bool intermediate_callback(Ipopt::AlgorithmMode mode, Ipopt::Index iter, Ipopt::Number obj_value,
                              Ipopt::Number inf_pr, Ipopt::Number inf_du, Ipopt::Number mu, Ipopt::Number d_norm,
                              Ipopt::Number regularization_size, Ipopt::Number alpha_du, Ipopt::Number alpha_pr,
-                             Ipopt::Index ls_trials, const Ipopt::IpoptData *ip_data,
-                             Ipopt::IpoptCalculatedQuantities *ip_cq);
+                             Ipopt::Index ls_trials, const Ipopt::IpoptData* ip_data,
+                             Ipopt::IpoptCalculatedQuantities* ip_cq);
 
   /**
    * @brief Create the data structure to store temporary computations
@@ -371,46 +371,42 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * @brief Return the state vector
    */
-  const std::vector<Eigen::VectorXd> &get_xs() const;
+  const std::vector<Eigen::VectorXd>& get_xs() const;
 
   /**
    * @brief Return the control vector
    */
-  const std::vector<Eigen::VectorXd> &get_us() const;
+  const std::vector<Eigen::VectorXd>& get_us() const;
 
   /**
    * @brief Return the crocoddyl::ShootingProblem to be solved
    */
-  const boost::shared_ptr<crocoddyl::ShootingProblem> &get_problem() const;
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& get_problem() const;
+
+  double get_cost() const;
 
   /**
    * @brief Modify the state vector
    */
-  void set_xs(const std::vector<Eigen::VectorXd> &xs);
+  void set_xs(const std::vector<Eigen::VectorXd>& xs);
 
   /**
    * @brief Modify the control vector
    */
-  void set_us(const std::vector<Eigen::VectorXd> &us);
+  void set_us(const std::vector<Eigen::VectorXd>& us);
 
  private:
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem_;  //!< optimal control problem
+  boost::shared_ptr<crocoddyl::ShootingProblem> problem_;     //!< Optimal control problem
+  std::vector<Eigen::VectorXd> xs_;                           //!< Vector of states
+  std::vector<Eigen::VectorXd> us_;                           //!< Vector of controls
+  std::size_t nvar_;                                          //!< Number of NLP variables
+  std::size_t nconst_;                                        //!< Number of the NLP constraints
+  std::vector<boost::shared_ptr<IpoptInterfaceData>> datas_;  //!< Vector of Datas
+  double cost_;                                               //!< Total cost
 
-  // before solve: store initial; after solve: store solution
-  std::vector<Eigen::VectorXd> xs_;  //!< vector of states
-  // before solve: store initial; after solve: store solution
-  std::vector<Eigen::VectorXd> us_;  //!< vector of controls
+  IpoptInterface(const IpoptInterface&);
 
-  std::size_t T_;  //!< number of running nodes
-
-  std::size_t nvar_;    //!< number of NLP variables
-  std::size_t nconst_;  //!< number of the NLP constraints
-
-  std::vector<boost::shared_ptr<IpoptInterfaceData>> datas_;  //!< vector of Datas
-
-  IpoptInterface(const IpoptInterface &);
-
-  IpoptInterface &operator=(const IpoptInterface &);
+  IpoptInterface& operator=(const IpoptInterface&);
 };
 
 struct IpoptInterfaceData {
@@ -432,38 +428,29 @@ struct IpoptInterfaceData {
     x.setZero();
     dx.setZero();
     x_diff.setZero();
-
     u.setZero();
-
     Jint_dx.setZero();
-
     Jdiff_x.setZero();
-
     Jg_dx.setZero();
     Jg_u.setZero();
     Jg_ic.setZero();
-
     Ldx.setZero();
     Ldxdx.setZero();
     Ldxu.setZero();
   }
 
-  Eigen::VectorXd x;       //!< Integrated state
-  Eigen::VectorXd dx;      //!< Increment in the tangent space
-  Eigen::VectorXd x_diff;  //!< State difference
-  Eigen::VectorXd u;       //!< Control
-
+  Eigen::VectorXd x;        //!< Integrated state
+  Eigen::VectorXd dx;       //!< Increment in the tangent space
+  Eigen::VectorXd x_diff;   //!< State difference
+  Eigen::VectorXd u;        //!< Control
   Eigen::MatrixXd Jint_dx;  //!< Jacobian of the sum operation w.r.t dx
-
   Eigen::MatrixXd Jdiff_x;  //!< Jacobian of the diff operation w.r.t the first element
-
-  Eigen::MatrixXd Jg_dx;  //!< Jacobian of the dynamic constraint w.r.t dx
-  Eigen::MatrixXd Jg_u;   //!< Jacobian of the dynamic constraint w.r.t u
-  Eigen::MatrixXd Jg_ic;  //!< Jacobian of the initial condition constraint w.r.t dx
-
-  Eigen::VectorXd Ldx;    //!< Jacobian of the cost w.r.t dx
-  Eigen::MatrixXd Ldxdx;  //!< Hessian of the cost w.r.t dxdx
-  Eigen::MatrixXd Ldxu;   //!< Hessian of the cost w.r.t dxu
+  Eigen::MatrixXd Jg_dx;    //!< Jacobian of the dynamic constraint w.r.t dx
+  Eigen::MatrixXd Jg_u;     //!< Jacobian of the dynamic constraint w.r.t u
+  Eigen::MatrixXd Jg_ic;    //!< Jacobian of the initial condition constraint w.r.t dx
+  Eigen::VectorXd Ldx;      //!< Jacobian of the cost w.r.t dx
+  Eigen::MatrixXd Ldxdx;    //!< Hessian of the cost w.r.t dxdx
+  Eigen::MatrixXd Ldxu;     //!< Hessian of the cost w.r.t dxu
 };
 
 }  // namespace crocoddyl
