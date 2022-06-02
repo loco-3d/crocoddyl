@@ -356,17 +356,17 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    * @return the IpoptInterface Data
    */
-  boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t &nx, const std::size_t &ndx,
-                                                   const std::size_t &nu);
+  boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t nx, const std::size_t ndx, const std::size_t nu);
+
   /**
    * @brief Return the total number of optimization variables (states and controls)
    */
-  const std::size_t &get_nvar() const;
+  std::size_t get_nvar() const;
 
   /**
    * @brief Return the total number of constraints in the NLP
    */
-  const std::size_t &get_nconst() const;
+  std::size_t get_nconst() const;
 
   /**
    * @brief Return the state vector
@@ -393,8 +393,6 @@ class IpoptInterface : public Ipopt::TNLP {
    */
   void set_us(const std::vector<Eigen::VectorXd> &us);
 
-  void set_consider_control_bounds(const bool &consider_bounds);
-
  private:
   boost::shared_ptr<crocoddyl::ShootingProblem> problem_;  //!< optimal control problem
 
@@ -410,8 +408,6 @@ class IpoptInterface : public Ipopt::TNLP {
 
   std::vector<boost::shared_ptr<IpoptInterfaceData>> datas_;  //!< vector of Datas
 
-  bool consider_control_bounds_;
-
   IpoptInterface(const IpoptInterface &);
 
   IpoptInterface &operator=(const IpoptInterface &);
@@ -420,12 +416,12 @@ class IpoptInterface : public Ipopt::TNLP {
 struct IpoptInterfaceData {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  IpoptInterfaceData(const std::size_t &nx, const std::size_t &ndx, const std::size_t &nu)
+  IpoptInterfaceData(const std::size_t nx, const std::size_t ndx, const std::size_t nu)
       : x(nx),
         dx(ndx),
         x_diff(ndx),
         u(nu),
-        Jsum_dx(ndx, ndx),
+        Jint_dx(ndx, ndx),
         Jdiff_x(ndx, ndx),
         Jg_dx(ndx, ndx),
         Jg_u(ndx, ndx),
@@ -439,7 +435,7 @@ struct IpoptInterfaceData {
 
     u.setZero();
 
-    Jsum_dx.setZero();
+    Jint_dx.setZero();
 
     Jdiff_x.setZero();
 
@@ -457,7 +453,7 @@ struct IpoptInterfaceData {
   Eigen::VectorXd x_diff;  //!< State difference
   Eigen::VectorXd u;       //!< Control
 
-  Eigen::MatrixXd Jsum_dx;  //!< Jacobian of the sum operation w.r.t dx
+  Eigen::MatrixXd Jint_dx;  //!< Jacobian of the sum operation w.r.t dx
 
   Eigen::MatrixXd Jdiff_x;  //!< Jacobian of the diff operation w.r.t the first element
 

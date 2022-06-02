@@ -1,16 +1,26 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2022, IRI: CSIC-UPC
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef CROCODDYL_WITH_IPOPT
+
 #include "crocoddyl/core/solvers/ipopt.hpp"
 
 namespace crocoddyl {
 
 SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
     : SolverAbstract(problem), ipopt_iface_(new IpoptInterface(problem)), ipopt_app_(IpoptApplicationFactory()) {
-  ipopt_app_->Options()->SetNumericValue("tol", 3.82e-6);
+  ipopt_app_->Options()->SetNumericValue("tol", th_stop_);
   ipopt_app_->Options()->SetStringValue("mu_strategy", "adaptive");
 
   ipopt_status_ = ipopt_app_->Initialize();
 
   if (ipopt_status_ != Ipopt::Solve_Succeeded) {
-    std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
+    std::cerr << "Error during IPOPT initialization!" << std::endl;
   }
 }
 
@@ -44,8 +54,15 @@ void SolverIpopt::setNumericIpoptOption(const std::string& tag, Ipopt::Number va
   ipopt_app_->Options()->SetNumericValue(tag, value);
 }
 
-void SolverIpopt::setConsiderControlBounds(const bool& consider) {
-  ipopt_iface_->set_consider_control_bounds(consider);
+void SolverIpopt::set_th_stop(const double th_stop) {
+  if (th_stop <= 0.) {
+    throw_pretty("Invalid argument: "
+                 << "th_stop value has to higher than 0.");
+  }
+  th_stop_ = th_stop;
+  ipopt_app_->Options()->SetNumericValue("tol", th_stop_);
 }
 
 }  // namespace crocoddyl
+
+#endif

@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2022, IRI: CSIC-UPC
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
 #ifdef CROCODDYL_WITH_IPOPT
 #ifndef CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 #define CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
@@ -39,7 +47,7 @@ class SolverIpopt : public SolverAbstract {
    * @param[in]  value string value for the parameter
    */
   void setStringIpoptOption(const std::string& tag, const std::string& value);
-  
+
   /**
    * @brief Set a string ipopt option
    *
@@ -47,8 +55,8 @@ class SolverIpopt : public SolverAbstract {
    * @param[in]  value numeric value for the parameter
    */
   void setNumericIpoptOption(const std::string& tag, Ipopt::Number value);
-  
-  void setConsiderControlBounds(const bool& consider);
+
+  void set_th_stop(const double th_stop);
 
  private:
   Ipopt::SmartPtr<IpoptInterface> ipopt_iface_;

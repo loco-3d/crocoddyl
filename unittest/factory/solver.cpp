@@ -12,7 +12,9 @@
 #include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
+#ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
+#endif
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -37,9 +39,11 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverBoxFDDP:
       os << "SolverBoxFDDP";
       break;
+#ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
       os << "SolverIpopt";
       break;
+#endif
     case SolverTypes::NbSolverTypes:
       os << "NbSolverTypes";
       break;
@@ -87,9 +91,11 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::
     case SolverTypes::SolverBoxFDDP:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(problem);
       break;
+#ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
       solver = boost::make_shared<crocoddyl::SolverIpopt>(problem);
       break;
+#endif
     default:
       throw_pretty(__FILE__ ": Wrong SolverTypes::Type given");
       break;

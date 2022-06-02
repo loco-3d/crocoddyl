@@ -23,6 +23,11 @@ struct SolverTypes {
     std::vector<Type> v;
     v.clear();
     for (int i = 0; i < NbSolverTypes; ++i) {
+#ifndef CROCODDYL_WITH_IPOPT
+      if ((Type)i == SolverIpopt) {
+        continue;
+      }
+#endif
       v.push_back((Type)i);
     }
     return v;

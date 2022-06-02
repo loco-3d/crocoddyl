@@ -33,8 +33,8 @@ void exposeSolverIpopt() {
            "Sets a string option for IPOPT\n\n")
       .def("setNumericIpoptOption", &SolverIpopt::setNumericIpoptOption, bp::args("self", "param_name", "param_value"),
            "Sets a numeric option for IPOPT\n\n")
-      .def("setConsiderControlBounds", &SolverIpopt::setConsiderControlBounds, bp::args("self", "consider"),
-           "Sets a numeric option for IPOPT\n\n");
+      .add_property("th_stop", bp::make_function(&SolverIpopt::get_th_stop),
+                    bp::make_function(&SolverIpopt::set_th_stop), "threshold for stopping criteria");
 }
 
 }  // namespace python
