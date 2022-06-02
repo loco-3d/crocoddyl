@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import signal
 
 import crocoddyl
 import numpy as np
@@ -8,6 +10,7 @@ from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoub
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the double pendulum model
 pendulum = example_robot_data.load('double_pendulum')
@@ -45,14 +48,25 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverIntro(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
-if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, False)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+if WITHDISPLAY:
+    try:
+        import gepetto
+        gepetto.corbaserver.Client()
+        display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, floor=False)
+        if WITHPLOT:
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    except:
+        display = crocoddyl.MeshcatDisplay(pendulum)
+if WITHPLOT:
+    solver.setCallbacks([
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
+    ])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -69,5 +83,8 @@ if WITHPLOT:
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(pendulum, floor=False)
-    display.displayFromSolver(solver)
+    display.rate = -1
+    display.freq = 1
+    while True:
+        display.displayFromSolver(solver)
+        time.sleep(1.0)

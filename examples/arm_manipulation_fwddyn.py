@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import os
 import sys
+import time
+import signal
 
 import crocoddyl
 import pinocchio
@@ -10,6 +12,7 @@ import example_robot_data
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # In this example test, we will solve the reaching-goal task with the Kinova arm.
 # For that, we use the forward dynamics (with its analytical derivatives)
@@ -51,7 +54,7 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 # Next, we need to create an action model for running and terminal knots. The
 # forward dynamics (computed using ABA) are implemented
 # inside DifferentialActionModelFreeFwdDynamics.
-dt = 1e-3
+dt = 1e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
@@ -65,13 +68,21 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverFDDP(problem)
 cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
-if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(kinova, 4, 4, cameraTF, False)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(kinova, 4, 4, cameraTF, False)
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-elif WITHPLOT:
+if WITHDISPLAY:
+    try:
+        import gepetto
+        gepetto.corbaserver.Client()
+        display = crocoddyl.GepettoDisplay(kinova, 4, 4, cameraTF, floor=False)
+        if WITHPLOT:
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    except:
+        display = crocoddyl.MeshcatDisplay(kinova)
+if WITHPLOT:
     solver.setCallbacks([
         crocoddyl.CallbackVerbose(),
         crocoddyl.CallbackLogger(),
@@ -96,5 +107,8 @@ if WITHPLOT:
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(kinova, floor=False)
-    display.displayFromSolver(solver)
+    display.rate = -1
+    display.freq = 1
+    while True:
+        display.displayFromSolver(solver)
+        time.sleep(1.0)

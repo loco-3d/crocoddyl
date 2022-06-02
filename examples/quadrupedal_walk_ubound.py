@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import signal
 
 import example_robot_data
 import numpy as np
@@ -11,6 +12,7 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the anymal model
 anymal = example_robot_data.load("anymal")
@@ -39,14 +41,25 @@ solver = crocoddyl.SolverBoxDDP(
 # Add the callback functions
 print('*** SOLVE ***')
 cameraTF = [2., 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-elif WITHPLOT:
-    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+if WITHDISPLAY:
+    try:
+        import gepetto
+        gepetto.corbaserver.Client()
+        display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+        if WITHPLOT:
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    except:
+        display = crocoddyl.MeshcatDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+if WITHPLOT:
+    solver.setCallbacks([
+        crocoddyl.CallbackVerbose(),
+        crocoddyl.CallbackLogger(),
+    ])
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -75,7 +88,8 @@ if WITHPLOT:
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+    display.rate = -1
+    display.freq = 1
     while True:
         display.displayFromSolver(solver)
-        time.sleep(2.0)
+        time.sleep(1.0)

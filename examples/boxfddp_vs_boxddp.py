@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import signal
 
 import numpy as np
 
@@ -10,6 +12,7 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the anymal model
 anymal = example_robot_data.load('anymal')
@@ -49,15 +52,26 @@ boxddp = crocoddyl.SolverBoxDDP(
                               jumping_gait['groundKnots'], jumping_gait['flyingKnots']))
 
 # Added the callback functions
-if WITHDISPLAY and WITHPLOT:
-    display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger(), crocoddyl.CallbackDisplay(display)])
-elif WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-    boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-    boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-elif WITHPLOT:
+if WITHDISPLAY:
+    try:
+        import gepetto
+        gepetto.corbaserver.Client()
+        display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+        if WITHPLOT:
+            boxfddp.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+            boxddp.setCallbacks(
+                [crocoddyl.CallbackVerbose(),
+                 crocoddyl.CallbackLogger(),
+                 crocoddyl.CallbackDisplay(display)])
+        else:
+            boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+            boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+    except:
+        display = crocoddyl.MeshcatDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+if WITHPLOT:
     boxfddp.setCallbacks([
         crocoddyl.CallbackVerbose(),
         crocoddyl.CallbackLogger(),
@@ -84,8 +98,10 @@ boxfddp.solve(xs, us, 50, False)
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
+    display.rate = -1
+    display.freq = 1
     display.displayFromSolver(boxfddp)
+    time.sleep(1.0)
 
 print('*** SOLVE with Box-DDP ***')
 boxddp.th_stop = 1e-7
@@ -93,8 +109,8 @@ boxddp.solve(xs, us, 30, False)
 
 # Display the entire motion
 if WITHDISPLAY:
-    display = crocoddyl.GepettoDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
     display.displayFromSolver(boxddp)
+    time.sleep(1.0)
 
 # Plotting the entire motion
 if WITHPLOT:
