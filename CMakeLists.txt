@@ -68,7 +68,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_M
 # Add the different required and optional dependencies
 ADD_PROJECT_DEPENDENCY(pinocchio 2.6.3 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.6.3")
 IF(BUILD_EXAMPLES OR BUILD_TESTING OR BUILD_BENCHMARK)
-  ADD_PROJECT_DEPENDENCY(example-robot-data 3.7.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.7.0")
+  ADD_PROJECT_DEPENDENCY(example-robot-data 4.0.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 4.0.0")
 ELSE()
   ADD_OPTIONAL_DEPENDENCY(example-robot-data)
 ENDIF()
