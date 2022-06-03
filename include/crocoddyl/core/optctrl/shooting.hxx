@@ -489,7 +489,7 @@ void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
   } else {
     nthreads_ = static_cast<std::size_t>(nthreads);
   }
-  if (enableMultithreading()) {
+  if (!enableMultithreading()) {
     std::cerr << "Warning: the number of threads won't affect the computational performance as multithreading "
                  "support is not enabled."
               << std::endl;
