@@ -367,7 +367,7 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x, bool /*new_x*/
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Index,
+bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Index m,
                                 Ipopt::Index nele_jac, Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values) {
 #else
 bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::Index, Ipopt::Index,
@@ -497,8 +497,8 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
                             const Ipopt::Number*, bool, Ipopt::Index, Ipopt::Index* iRow, Ipopt::Index* jCol,
                             Ipopt::Number* values) {
 #endif
-  assert_pretty(n == static_cat<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cat<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
