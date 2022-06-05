@@ -59,7 +59,7 @@ pip install --user crocoddyl
 
 **Crocoddyl** is versatible:
 
- * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
+ * various optimal control solvers (DDP, FDDP, BoxFDDP, Ipopt, etc) - single and multi-shooting methods
  * analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
@@ -132,8 +132,10 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 * [eigenpy](https://github.com/stack-of-tasks/eigenpy)
 * [Boost](https://www.boost.org/)
 * [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
-* [OpenMP](https://www.openmp.org/) (optional for multi-threading installation)
+* [OpenMP](https://www.openmp.org/) (optional for multi-threading support)
+* [Ipopt](https://github.com/coin-or/Ipopt) (optional for Ipopt support)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
+* [meshcat-python](https://github.com/rdeits/meshcat-python) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for examples)
 
@@ -249,4 +251,4 @@ The following people have been involved in the development of **Crocoddyl**:
 ## Acknowledgments
 
 The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
-It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/), and the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](https://www.inria.fr/fr/centre-inria-de-paris).
+It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), the [Robot Motor Intelligence (RoMI) Lab](https://www.romilab.org) [@Heriot-Watt University](https://www.edinburgh-robotics.org/), and the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](https://www.inria.fr/fr/centre-inria-de-paris).
