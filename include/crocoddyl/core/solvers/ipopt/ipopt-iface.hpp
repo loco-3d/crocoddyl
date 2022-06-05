@@ -10,7 +10,9 @@
 #ifndef __CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_IFACE_HPP__
 #define __CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_IFACE_HPP__
 
+#define HAVE_CSTDDEF
 #include <IpTNLP.hpp>
+#undef HAVE_CSTDDEF
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/mathbase.hpp"

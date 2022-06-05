@@ -10,8 +10,10 @@
 #ifndef CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 #define CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 
+#define HAVE_CSTDDEF
 #include <IpIpoptApplication.hpp>
 #include <IpSolveStatistics.hpp>
+#undef HAVE_CSTDDEF
 
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
