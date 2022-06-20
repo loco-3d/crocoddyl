@@ -79,6 +79,8 @@ void exposeSolverIntro() {
                     "Quz")
       .add_property("Qz", make_function(&SolverIntro::get_Qz, bp::return_value_policy<bp::copy_const_reference>()),
                     "Qz")
+      .add_property("Hy", make_function(&SolverIntro::get_Hy, bp::return_value_policy<bp::copy_const_reference>()),
+                    "Hy")
       .add_property("Kz", make_function(&SolverIntro::get_Kz, bp::return_value_policy<bp::copy_const_reference>()),
                     "Kz")
       .add_property("kz", make_function(&SolverIntro::get_kz, bp::return_value_policy<bp::copy_const_reference>()),
