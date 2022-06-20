@@ -15,12 +15,19 @@
 namespace crocoddyl {
 
 SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
-    : SolverFDDP(problem), eq_solver_(LuNull), th_feas_(1e-4), rho_(0.3), dPhi_(0.), hfeas_try_(0.), upsilon_(0.), zero_upsilon_(false) {
+    : SolverFDDP(problem),
+      eq_solver_(LuNull),
+      th_feas_(1e-4),
+      rho_(0.3),
+      dPhi_(0.),
+      hfeas_try_(0.),
+      upsilon_(0.),
+      zero_upsilon_(false) {
   const std::size_t T = problem_->get_T();
   Hu_rank_.resize(T);
   KQuu_tmp_.resize(T);
   YZ_.resize(T);
-  HuY_.resize(T);
+  Hy_.resize(T);
   Qz_.resize(T);
   Qzz_.resize(T);
   Qxz_.resize(T);
@@ -33,7 +40,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   Qzz_llt_.resize(T);
   Hu_lu_.resize(T);
   Hu_qr_.resize(T);
-  HuY_lu_.resize(T);
+  Hy_lu_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
@@ -44,7 +51,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     Hu_rank_[t] = nh;
     KQuu_tmp_[t] = Eigen::MatrixXd::Zero(ndx, nu);
     YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
-    HuY_[t] = Eigen::MatrixXd::Zero(nh, nh);
+    Hy_[t] = Eigen::MatrixXd::Zero(nh, nh);
     Qz_[t] = Eigen::VectorXd::Zero(nh);
     Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
     Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
@@ -57,7 +64,7 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
     Qzz_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
     Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
     Hu_qr_[t] = Eigen::ColPivHouseholderQR<Eigen::MatrixXd>(nu, nh);
-    HuY_lu_[t] = Eigen::PartialPivLU<Eigen::MatrixXd>(nh);
+    Hy_lu_[t] = Eigen::PartialPivLU<Eigen::MatrixXd>(nh);
   }
 }
 
@@ -191,7 +198,7 @@ void SolverIntro::resizeData() {
     const std::size_t nh = model->get_nh();
     KQuu_tmp_[t].conservativeResize(ndx, nu);
     YZ_[t].conservativeResize(nu, nu);
-    HuY_[t].conservativeResize(nh, nh);
+    Hy_[t].conservativeResize(nh, nh);
     Qz_[t].conservativeResize(nh);
     Qzz_[t].conservativeResize(nh, nh);
     Qxz_[t].conservativeResize(ndx, nh);
@@ -225,11 +232,11 @@ double SolverIntro::calcDiff() {
           Hu_rank_[t] = Hu_lu_[t].rank();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
               YZ_[t].leftCols(Hu_lu_[t].rank());
-          HuY_[t].noalias() = data->Hu * Y;
-          HuY_lu_[t].compute(HuY_[t]);
-          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
-          ks_[t].noalias() = HuYinv * data->h;
-          Ks_[t].noalias() = HuYinv * data->Hx;
+          Hy_[t].noalias() = data->Hu * Y;
+          Hy_lu_[t].compute(Hy_[t]);
+          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv = Hy_lu_[t].inverse();
+          ks_[t].noalias() = Hy_inv * data->h;
+          Ks_[t].noalias() = Hy_inv * data->Hx;
           kz_[t].noalias() = Y * ks_[t];
           Kz_[t].noalias() = Y * Ks_[t];
         }
@@ -248,11 +255,11 @@ double SolverIntro::calcDiff() {
           Hu_rank_[t] = Hu_qr_[t].rank();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
               YZ_[t].leftCols(Hu_qr_[t].rank());
-          HuY_[t].noalias() = data->Hu * Y;
-          HuY_lu_[t].compute(HuY_[t]);
-          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > HuYinv = HuY_lu_[t].inverse();
-          ks_[t].noalias() = HuYinv * data->h;
-          Ks_[t].noalias() = HuYinv * data->Hx;
+          Hy_[t].noalias() = data->Hu * Y;
+          Hy_lu_[t].compute(Hy_[t]);
+          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv = Hy_lu_[t].inverse();
+          ks_[t].noalias() = Hy_inv * data->h;
+          Ks_[t].noalias() = Hy_inv * data->Hx;
           kz_[t].noalias() = Y * ks_[t];
           Kz_[t].noalias() = Y * Ks_[t];
         }
@@ -392,6 +399,8 @@ const std::vector<Eigen::MatrixXd>& SolverIntro::get_Quz() const { return Quz_; 
 
 const std::vector<Eigen::VectorXd>& SolverIntro::get_Qz() const { return Qz_; }
 
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Hy() const { return Hy_; }
+
 const std::vector<Eigen::VectorXd>& SolverIntro::get_kz() const { return kz_; }
 
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_Kz() const { return Kz_; }
@@ -412,8 +421,6 @@ void SolverIntro::set_rho(const double rho) {
   rho_ = rho;
 }
 
-void SolverIntro::set_zero_upsilon(const bool zero_upsilon) {
-  zero_upsilon_ = zero_upsilon;
-}
+void SolverIntro::set_zero_upsilon(const bool zero_upsilon) { zero_upsilon_ = zero_upsilon; }
 
 }  // namespace crocoddyl

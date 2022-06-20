@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +100,11 @@ class SolverIntro : public SolverFDDP {
   const std::vector<Eigen::VectorXd>& get_Qz() const;
 
   /**
+   * @brief Return span-projected Jacobian of the equality-constraint with respect to the control
+   */
+  const std::vector<Eigen::MatrixXd>& get_Hy() const;
+
+  /**
    * @brief Return feedforward term related to the nullspace of \f$\mathbf{H_u}\f$
    */
   const std::vector<Eigen::VectorXd>& get_kz() const;
@@ -168,7 +173,7 @@ class SolverIntro : public SolverFDDP {
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
             //!< control-equality constraints \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd>
-      HuY_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
+      Hy_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
   std::vector<Eigen::VectorXd> Qz_;   //!< Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
   std::vector<Eigen::MatrixXd> Qzz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
   std::vector<Eigen::MatrixXd> Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
@@ -184,8 +189,8 @@ class SolverIntro : public SolverFDDP {
   std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
       Hu_qr_;  //!< Column-pivot QR solvers used for computing the span and nullspace matrices
   std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
-      HuY_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward and feedback gain related to the
-                //!< equality constraint
+      Hy_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward and feedback gain related to the
+               //!< equality constraint
 };
 
 }  // namespace crocoddyl
