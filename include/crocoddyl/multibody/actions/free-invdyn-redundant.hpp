@@ -98,6 +98,13 @@ class DifferentialActionModelFreeInvDynamicsRedundantTpl : public DifferentialAc
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the dynamics, cost and constraint functions
    *
    * It computes the partial derivatives of the dynamical system and the cost and contraint functions.
@@ -110,6 +117,13 @@ class DifferentialActionModelFreeInvDynamicsRedundantTpl : public DifferentialAc
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the free inverse-dynamics data
@@ -259,6 +273,14 @@ class DifferentialActionModelFreeInvDynamicsRedundantTpl : public DifferentialAc
     }
 
     /**
+     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->r.setZero();
+    }
+
+    /**
      * @brief Compute the derivatives of the RNEA residual
      *
      * @param[in] data  RNEA residual data
@@ -274,6 +296,15 @@ class DifferentialActionModelFreeInvDynamicsRedundantTpl : public DifferentialAc
       data->Rx -= d->actuation->dtau_dx;
       data->Ru.leftCols(nv) = d->pinocchio->M;
       data->Ru.rightCols(na_) = -d->actuation->dtau_du;
+    }
+
+    /**
+     * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->Rx.setZero();
+      data->Ru.setZero();
     }
 
     /**

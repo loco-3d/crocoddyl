@@ -95,6 +95,13 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the dynamics, cost and constraint functions
    *
    * It computes the partial derivatives of the dynamical system and the cost and contraint functions.
@@ -107,6 +114,13 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the free inverse-dynamics data
@@ -234,6 +248,14 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     }
 
     /**
+     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->r.setZero();
+    }
+
+    /**
      * @brief Compute the derivatives of the actuation residual
      *
      * @param[in] data  Actuation residual data
@@ -255,6 +277,15 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
           nrow += 1;
         }
       }
+    }
+
+    /**
+     * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->Rx.setZero();
+      data->Ru.setZero();
     }
 
     /**

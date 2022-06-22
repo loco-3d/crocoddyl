@@ -100,6 +100,13 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the dynamics, cost and constraint functions
    *
    * It computes the partial derivatives of the dynamical system and the cost and contraint functions.
@@ -112,6 +119,13 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the contact inverse-dynamics data
@@ -272,6 +286,14 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     }
 
     /**
+     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->r.setZero();
+    }
+
+    /**
      * @brief Compute the derivatives of the actuation residual
      *
      * @param[in] data  Actuation residual data
@@ -295,6 +317,15 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
           nrow += 1;
         }
       }
+    }
+
+    /**
+     * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->Rx.setZero();
+      data->Ru.setZero();
     }
 
     /**
@@ -382,6 +413,14 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
     }
 
     /**
+     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->r.setZero();
+    }
+
+    /**
      * @brief Compute the derivatives of the contact-acceleration residual
      *
      * @param[in] data  Contact-acceleration residual data
@@ -393,6 +432,15 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
       typename Data::ResidualDataContact* d = static_cast<typename Data::ResidualDataContact*>(data.get());
       d->Rx = d->contact->da0_dx;
       d->Ru.leftCols(state_->get_nv()) = d->contact->Jc;
+    }
+
+    /**
+     * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * VectorXs>& x)
+     */
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+      data->Rx.setZero();
+      data->Ru.setZero();
     }
 
     /**
@@ -411,7 +459,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
      * @param[out] os  Output stream object
      */
     virtual void print(std::ostream& os) const {
-      os << "ResidualModelContact {frame=" << frame_name_  << ", nr=" << nr_ << "}";
+      os << "ResidualModelContact {frame=" << frame_name_ << ", nr=" << nr_ << "}";
     }
 
    protected:

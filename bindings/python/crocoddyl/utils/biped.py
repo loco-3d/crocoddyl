@@ -80,11 +80,6 @@ class SimpleBipedGaitProblem:
         loco3dModel += doubleSupport + rStep
         loco3dModel += doubleSupport + lStep
 
-        # Rescaling the terminal weights
-        costs = loco3dModel[-1].differential.costs.costs.todict()
-        for c in costs.values():
-            c.weight *= timeStep
-
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
