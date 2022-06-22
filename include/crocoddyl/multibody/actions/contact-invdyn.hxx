@@ -17,6 +17,7 @@
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
 
 namespace crocoddyl {
 
@@ -138,7 +139,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   contacts_->calc(d->multibody.contacts, x);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
-  d->constraints->resize(this, d);
   for (std::string name : contacts_->get_active_set()) {
     constraints_->changeConstraintStatus(name + "_acc", true);
     constraints_->changeConstraintStatus(name + "_force", false);
@@ -147,7 +147,28 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
     constraints_->changeConstraintStatus(name + "_acc", false);
     constraints_->changeConstraintStatus(name + "_force", true);
   }
+  d->constraints->resize(this, d);
   constraints_->calc(d->constraints, x, u);
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+
+  Data* d = static_cast<Data*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(state_->get_nv());
+
+  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
+  costs_->calc(d->costs, x);
+  d->cost = d->costs->cost;
+  d->constraints->resize(this, d);
+  constraints_->calc(d->constraints, x);
 }
 
 template <typename Scalar>
@@ -182,7 +203,42 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
       -d->multibody.actuation->Mtau * d->multibody.contacts->Jc.topRows(nc).transpose();
   contacts_->calcDiff(d->multibody.contacts, x);
   costs_->calcDiff(d->costs, x, u);
+  for (std::string name : contacts_->get_active_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", true);
+    constraints_->changeConstraintStatus(name + "_force", false);
+  }
+  for (std::string name : contacts_->get_inactive_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", false);
+    constraints_->changeConstraintStatus(name + "_force", true);
+  }
+  d->constraints->resize(this, d);
   constraints_->calcDiff(d->constraints, x, u);
+}
+
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+  costs_->calcDiff(d->costs, x);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x);
+  }
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+  costs_->calcDiff(d->costs, x);
+  d->constraints->resize(this, d);
+  constraints_->calcDiff(d->constraints, x);
 }
 
 template <typename Scalar>
