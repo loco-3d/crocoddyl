@@ -52,11 +52,6 @@ template <typename Scalar>
 struct DifferentialActionDataFreeInvDynamicsTpl;
 
 template <typename Scalar>
-class DifferentialActionModelFreeInvDynamicsRedundantTpl;
-template <typename Scalar>
-struct DifferentialActionDataFreeInvDynamicsRedundantTpl;
-
-template <typename Scalar>
 class DifferentialActionModelContactFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
@@ -65,11 +60,6 @@ template <typename Scalar>
 class DifferentialActionModelContactInvDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl;
-
-template <typename Scalar>
-class DifferentialActionModelContactInvDynamicsRedundantTpl;
-template <typename Scalar>
-struct DifferentialActionDataContactInvDynamicsRedundantTpl;
 
 // numdiff
 template <typename Scalar>
@@ -388,15 +378,10 @@ typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionMode
 typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
 typedef DifferentialActionModelFreeInvDynamicsTpl<double> DifferentialActionModelFreeInvDynamics;
 typedef DifferentialActionDataFreeInvDynamicsTpl<double> DifferentialActionDataFreeInvDynamics;
-typedef DifferentialActionModelFreeInvDynamicsRedundantTpl<double> DifferentialActionModelFreeInvDynamicsRedundant;
-typedef DifferentialActionDataFreeInvDynamicsRedundantTpl<double> DifferentialActionDataFreeInvDynamicsRedundant;
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
 typedef DifferentialActionModelContactInvDynamicsTpl<double> DifferentialActionModelContactInvDynamics;
 typedef DifferentialActionDataContactInvDynamicsTpl<double> DifferentialActionDataContactInvDynamics;
-typedef DifferentialActionModelContactInvDynamicsRedundantTpl<double>
-    DifferentialActionModelContactInvDynamicsRedundant;
-typedef DifferentialActionDataContactInvDynamicsRedundantTpl<double> DifferentialActionDataContactInvDynamicsRedundant;
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
