@@ -30,10 +30,8 @@ void exposeMultibody() {
   exposeDataCollectorImpulses();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionFreeInvDynamics();
-  exposeDifferentialActionFreeInvDynamicsRedundant();
   exposeDifferentialActionContactFwdDynamics();
   exposeDifferentialActionContactInvDynamics();
-  exposeDifferentialActionContactInvDynamicsRedundant();
   exposeActionImpulseFwdDynamics();
   exposeResidualState();
   exposeResidualCentroidalMomentum();
