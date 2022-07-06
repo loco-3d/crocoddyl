@@ -206,11 +206,11 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyByFu(const Eigen::Ref<const 
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
 
-  differential_->multiplyByFu(Fu.topRows(nv), A.leftCols(nv), out.leftCols(nw), op);
+  differential_->multiplyByFu(Fu.topLeftCorner(nv, nw), A.leftCols(nv), out.leftCols(nw), op);
   if (op == setto) {
-    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), addto);
+    differential_->multiplyByFu(Fu.bottomLeftCorner(nv, nw), A.rightCols(nv), out.leftCols(nw), addto);
   } else {
-    differential_->multiplyByFu(Fu.bottomRows(nv), A.rightCols(nv), out.leftCols(nw), op);
+    differential_->multiplyByFu(Fu.bottomLeftCorner(nv, nw), A.rightCols(nv), out.leftCols(nw), op);
   }
 }
 
@@ -229,11 +229,11 @@ void IntegratedActionModelEulerTpl<Scalar>::multiplyFuTransposeBy(const Eigen::R
   const std::size_t nv = state_->get_nv();
   const std::size_t nw = control_->get_nw();
 
-  differential_->multiplyFuTransposeBy(Fu.topRows(nv), A.topRows(nv), out.topRows(nw), op);
+  differential_->multiplyFuTransposeBy(Fu.topLeftCorner(nv, nw), A.topRows(nv), out.topRows(nw), op);
   if (op == setto) {
-    differential_->multiplyFuTransposeBy(Fu.bottomRows(nv), A.bottomRows(nv), out.topRows(nw), addto);
+    differential_->multiplyFuTransposeBy(Fu.bottomLeftCorner(nv, nw), A.bottomRows(nv), out.topRows(nw), addto);
   } else {
-    differential_->multiplyFuTransposeBy(Fu.bottomRows(nv), A.bottomRows(nv), out.topRows(nw), op);
+    differential_->multiplyFuTransposeBy(Fu.bottomLeftCorner(nv, nw), A.bottomRows(nv), out.topRows(nw), op);
   }
 }
 
