@@ -53,7 +53,7 @@ if WITHDISPLAY:
                  crocoddyl.CallbackDisplay(display)])
         else:
             solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-    except:
+    except Exception:
         display = crocoddyl.MeshcatDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
 if WITHPLOT:
     solver.setCallbacks([

@@ -69,7 +69,7 @@ if WITHDISPLAY:
         else:
             boxfddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
             boxddp.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-    except:
+    except Exception:
         display = crocoddyl.MeshcatDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
 if WITHPLOT:
     boxfddp.setCallbacks([
