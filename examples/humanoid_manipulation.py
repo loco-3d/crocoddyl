@@ -57,7 +57,7 @@ if WITHDISPLAY:
             display.robot.viewer.gui.addSphere('world/point', .05, [1., 0., 0., 1.])  # radius = .1, RGBA=1001
             display.robot.viewer.gui.applyConfiguration('world/point',
                                                         target.tolist() + [0., 0., 0., 1.])  # xyz+quaternion
-        except:
+        except Exception:
             display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
 
 # Add contact to the model

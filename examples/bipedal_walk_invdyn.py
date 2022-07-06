@@ -47,7 +47,7 @@ if WITHDISPLAY:
             import gepetto
             gepetto.corbaserver.Client()
             display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
-        except:
+        except Exception:
             display = crocoddyl.MeshcatDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():

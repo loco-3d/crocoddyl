@@ -78,7 +78,7 @@ if WITHDISPLAY:
             import gepetto
             gepetto.corbaserver.Client()
             display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
-        except:
+        except Exception:
             display = crocoddyl.MeshcatDisplay(anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot])
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():

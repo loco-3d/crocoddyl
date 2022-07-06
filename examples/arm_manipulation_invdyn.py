@@ -80,7 +80,7 @@ if WITHDISPLAY:
                  crocoddyl.CallbackDisplay(display)])
         else:
             solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
-    except:
+    except Exception:
         display = crocoddyl.MeshcatDisplay(kinova)
 if WITHPLOT:
     solver.setCallbacks([
