@@ -329,6 +329,12 @@ void test_shareMemory(StateModelTypes::Type state_type) {
   crocoddyl::ActionModelLQR action_model(ndx, nu);
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data = action_model.createData();
 
+  action_data->h.resize(nh);
+  action_data->g.resize(ng);
+  action_data->Gx.resize(ng, ndx);
+  action_data->Gu.resize(ng, nu);
+  action_data->Hx.resize(nh, ndx);
+  action_data->Hu.resize(nh, nu);
   constraint_data->shareMemory(action_data.get());
   constraint_data->h = Eigen::VectorXd::Random(nh);
   constraint_data->g = Eigen::VectorXd::Random(ng);
@@ -346,8 +352,6 @@ void test_shareMemory(StateModelTypes::Type state_type) {
   BOOST_CHECK(action_data->Hu.isApprox(constraint_data->Hu, 1e-9));
 
   // let's now resize the data
-  ng /= 2;
-  nh /= 2;
   constraint_data->resize(&action_model, action_data.get());
 
   // check that the shared data has been resized
