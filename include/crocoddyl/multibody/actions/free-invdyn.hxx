@@ -116,10 +116,11 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
-    constraints_->calc(d->constraints, x);
+  if (state_->get_nv() - actuation_->get_nu() > 0) {
+    constraints_->changeConstraintStatus("tau", false);
   }
+  d->constraints->resize(this, d);
+  constraints_->calc(d->constraints, x);
 }
 
 template <typename Scalar>
