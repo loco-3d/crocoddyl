@@ -162,9 +162,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
   Data* d = static_cast<Data*>(data.get());
 
   costs_->calcDiff(d->costs, x);
-  if (constraints_ != nullptr) {
-    constraints_->calcDiff(d->constraints, x);
-  }
+  constraints_->calcDiff(d->constraints, x);
 }
 
 template <typename Scalar>

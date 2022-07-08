@@ -139,7 +139,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   contacts_->calc(d->multibody.contacts, x);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
-  d->constraints->resize(this, d);
   for (std::string name : contacts_->get_active_set()) {
     constraints_->changeConstraintStatus(name + "_acc", true);
     constraints_->changeConstraintStatus(name + "_force", false);
@@ -148,6 +147,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
     constraints_->changeConstraintStatus(name + "_acc", false);
     constraints_->changeConstraintStatus(name + "_force", true);
   }
+  d->constraints->resize(this, d);
   constraints_->calc(d->constraints, x, u);
 }
 
@@ -167,18 +167,18 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
-    for (std::string name : contacts_->get_active_set()) {
-      constraints_->changeConstraintStatus(name + "_acc", true);
-      constraints_->changeConstraintStatus(name + "_force", false);
-    }
-    for (std::string name : contacts_->get_inactive_set()) {
-      constraints_->changeConstraintStatus(name + "_acc", false);
-      constraints_->changeConstraintStatus(name + "_force", true);
-    }
-    constraints_->calc(d->constraints, x);
+  // disable inverse-dynamics and contact-acceleration/force constraints in the terminal node
+  constraints_->changeConstraintStatus("tau", false);
+  for (std::string name : contacts_->get_active_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", false);
+    constraints_->changeConstraintStatus(name + "_force", false);
   }
+  for (std::string name : contacts_->get_inactive_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", false);
+    constraints_->changeConstraintStatus(name + "_force", false);
+  }
+  d->constraints->resize(this, d);
+  constraints_->calc(d->constraints, x);
 }
 
 template <typename Scalar>
