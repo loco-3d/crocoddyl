@@ -11,6 +11,7 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
@@ -147,13 +148,13 @@ void exposeConstraintManager() {
       .add_property("nhx", bp::make_function(&ConstraintModelManager::get_nhx),
                     "number of active state-only equality constraints")
       .add_property(
-          "active",
-          bp::make_function(&ConstraintModelManager::get_active, bp::return_value_policy<bp::return_by_value>()),
-          "name of active constraint items")
+          "active_set",
+          bp::make_function(&ConstraintModelManager::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+          "name of the active set of constraint items")
       .add_property(
-          "inactive",
-          bp::make_function(&ConstraintModelManager::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-          "name of inactive constraint items")
+          "inactive_set",
+          bp::make_function(&ConstraintModelManager::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+          "name of the inactive set of constraint items")
       .def("getConstraintStatus", &ConstraintModelManager::getConstraintStatus, bp::args("self", "name"),
            "Return the constraint status of a given constraint name.\n\n"
            ":param name: constraint name")

@@ -212,14 +212,14 @@ class ConstraintModelManagerTpl {
   std::size_t get_nhx() const;
 
   /**
-   * @brief Return the names of the active constraints
+   * @brief Return the names of the set of active constraints
    */
-  const std::vector<std::string>& get_active() const;
+  const std::set<std::string>& get_active_set() const;
 
   /**
-   * @brief Return the names of the inactive constraints
+   * @brief Return the names of the set of inactive constraints
    */
-  const std::vector<std::string>& get_inactive() const;
+  const std::set<std::string>& get_inactive_set() const;
 
   /**
    * @brief Return the status of a given constraint name
@@ -264,8 +264,8 @@ class ConstraintModelManagerTpl {
   std::size_t* nh_;                         //!< Number of the active equality constraints
   std::size_t* ngx_;                        //!< Number of the active state-only inequality constraints
   std::size_t* nhx_;                        //!< Number of the active state-only equality constraints
-  std::vector<std::string> active_;         //!< Names of the active constraint items
-  std::vector<std::string> inactive_;       //!< Names of the inactive constraint items
+  std::set<std::string> active_set_;        //!< Names of the active constraint items
+  std::set<std::string> inactive_set_;      //!< Names of the inactive constraint items
   VectorXs unone_;                          //!< No control vector
 };
 
