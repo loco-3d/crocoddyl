@@ -130,12 +130,14 @@ void exposeConstraintManager() {
           bp::make_function(&ConstraintModelManager::get_constraints, bp::return_value_policy<bp::return_by_value>()),
           "stack of constraints")
       .def<void (ConstraintModelManager::*)(ActionModelAbstract* const)>(
-          "shareDimension", &ConstraintModelManager::shareDimensions, bp::args("self", "model"),
+          "shareDimension", &ConstraintModelManager::shareDimensions, bp::with_custodian_and_ward_postcall<0, 2>(),
+          bp::args("self", "model"),
           "Share the constraint dimensions with an action model.\n\n"
           "It allows us to update dimensions when we change the constraint status.\n"
           ":param model: action model")
       .def<void (ConstraintModelManager::*)(DifferentialActionModelAbstract* const)>(
-          "shareDimension", &ConstraintModelManager::shareDimensions, bp::args("self", "model"),
+          "shareDimension", &ConstraintModelManager::shareDimensions, bp::with_custodian_and_ward_postcall<0, 2>(),
+          bp::args("self", "model"),
           "Share the constraint dimensions with a differential action model.\n\n"
           "It allows us to update dimensions when we change the constraint status.\n"
           ":param model: differential action model")
