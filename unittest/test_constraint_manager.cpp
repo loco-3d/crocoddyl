@@ -43,28 +43,42 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   model.addConstraint("random_constraint_1", rand_constraint_1);
   std::size_t ng = rand_constraint_1->get_ng();
   std::size_t nh = rand_constraint_1->get_nh();
+  std::size_t ngx = rand_constraint_1->is_state_only() ? rand_constraint_1->get_ng() : 0;
+  std::size_t nhx = rand_constraint_1->is_state_only() ? rand_constraint_1->get_nh() : 0;
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ngx() == ngx);
+  BOOST_CHECK(model.get_nhx() == nhx);
 
   // add an inactive constraint
   boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 = create_random_constraint(state_type);
   model.addConstraint("random_constraint_2", rand_constraint_2, false);
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ngx() == ngx);
+  BOOST_CHECK(model.get_nhx() == nhx);
 
   // change the random constraint 2 status
   model.changeConstraintStatus("random_constraint_2", true);
   ng += rand_constraint_2->get_ng();
   nh += rand_constraint_2->get_nh();
+  ngx += rand_constraint_2->is_state_only() ? rand_constraint_2->get_ng() : 0;
+  nhx += rand_constraint_2->is_state_only() ? rand_constraint_2->get_nh() : 0;
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ngx() == ngx);
+  BOOST_CHECK(model.get_nhx() == nhx);
 
   // change the random constraint 1 status
   model.changeConstraintStatus("random_constraint_1", false);
   ng -= rand_constraint_1->get_ng();
   nh -= rand_constraint_1->get_nh();
+  ngx -= rand_constraint_1->is_state_only() ? rand_constraint_1->get_ng() : 0;
+  nhx -= rand_constraint_1->is_state_only() ? rand_constraint_1->get_nh() : 0;
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ngx() == ngx);
+  BOOST_CHECK(model.get_nhx() == nhx);
 }
 
 void test_addConstraint_error_message(StateModelTypes::Type state_type) {
@@ -253,30 +267,38 @@ void test_calcDiff(StateModelTypes::Type state_type) {
 
   x1 = state->rand();
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  const std::size_t ngx = model.get_ngx();
+  const std::size_t nhx = model.get_nhx();
+  data->g_internal.resize(ngx);
+  data->h_internal.resize(nhx);
+  data->Gx_internal.resize(ngx, ndx);
+  data->Hx_internal.resize(nhx, ndx);
+  new (&data->g) Eigen::Map<Eigen::VectorXd>(data->g_internal.data(), ngx);
+  new (&data->h) Eigen::Map<Eigen::VectorXd>(data->h_internal.data(), nhx);
+  new (&data->Gx) Eigen::Map<Eigen::MatrixXd>(data->Gx_internal.data(), ngx, ndx);
+  new (&data->Hx) Eigen::Map<Eigen::MatrixXd>(data->Hx_internal.data(), nhx, ndx);
   model.calc(data, x1);
   model.calcDiff(data, x1);
 
   ng_i = 0;
   nh_i = 0;
-  g.setZero();
-  h.setZero();
-  Gx.setZero();
-  Gu.setZero();
-  Hx.setZero();
-  Hu.setZero();
+  g.resize(ngx);
+  h.resize(nhx);
+  Gx.resize(ngx, ndx);
+  Hx.resize(nhx, ndx);
   for (std::size_t i = 0; i < 5; ++i) {
-    models[i]->calc(datas[i], x1);
-    models[i]->calcDiff(datas[i], x1);
-    const std::size_t ng = models[i]->get_ng();
-    const std::size_t nh = models[i]->get_nh();
-    g.segment(ng_i, ng) = datas[i]->g;
-    h.segment(nh_i, nh) = datas[i]->h;
-    Gx.block(ng_i, 0, ng, ndx) = datas[i]->Gx;
-    Gu.block(ng_i, 0, ng, nu) = datas[i]->Gu;
-    Hx.block(nh_i, 0, nh, ndx) = datas[i]->Hx;
-    Hu.block(nh_i, 0, nh, nu) = datas[i]->Hu;
-    ng_i += ng;
-    nh_i += nh;
+    if (models[i]->is_state_only()) {
+      models[i]->calc(datas[i], x1);
+      models[i]->calcDiff(datas[i], x1);
+      const std::size_t ng = models[i]->get_ng();
+      const std::size_t nh = models[i]->get_nh();
+      g.segment(ng_i, ng) = datas[i]->g;
+      h.segment(nh_i, nh) = datas[i]->h;
+      Gx.block(ng_i, 0, ng, ndx) = datas[i]->Gx;
+      Hx.block(nh_i, 0, nh, ndx) = datas[i]->Hx;
+      ng_i += ng;
+      nh_i += nh;
+    }
   }
   BOOST_CHECK(data->g.isApprox(g, 1e-9));
   BOOST_CHECK(data->h.isApprox(h, 1e-9));
