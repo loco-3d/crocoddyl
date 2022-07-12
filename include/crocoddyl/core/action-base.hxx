@@ -63,9 +63,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 
   const std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
-  if (nu_ == 0) {
-    // TODO(cmastalli): create a method for autonomous systems
-  } else {
+  if (nu_ != 0) {
     VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
       calc(data, x, u);
