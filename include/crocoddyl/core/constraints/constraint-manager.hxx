@@ -54,15 +54,9 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(const std::string& name,
     *nh_ += constraint->get_nh();
     ng_total_ += constraint->get_ng();
     nh_total_ += constraint->get_nh();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-    active_.insert(it, name);
+    active_set_.insert(name);
   } else if (!active) {
-    ng_total_ += constraint->get_ng();
-    nh_total_ += constraint->get_nh();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-    inactive_.insert(it, name);
+    inactive_set_.insert(name);
   }
 }
 
@@ -75,8 +69,8 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(const std::string& name
     ng_total_ -= it->second->constraint->get_ng();
     nh_total_ -= it->second->constraint->get_nh();
     constraints_.erase(it);
-    active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+    active_set_.erase(name);
+    inactive_set_.erase(name);
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " constraint item, it doesn't exist." << std::endl;
   }
@@ -89,18 +83,14 @@ void ConstraintModelManagerTpl<Scalar>::changeConstraintStatus(const std::string
     if (active && !it->second->active) {
       *ng_ += it->second->constraint->get_ng();
       *nh_ += it->second->constraint->get_nh();
-      std::vector<std::string>::iterator it_a =
-          std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-      active_.insert(it_a, name);
-      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+      active_set_.insert(name);
+      inactive_set_.erase(name);
       it->second->active = active;
     } else if (!active && it->second->active) {
       *ng_ -= it->second->constraint->get_ng();
       *nh_ -= it->second->constraint->get_nh();
-      active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-      std::vector<std::string>::iterator it_a =
-          std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-      inactive_.insert(it_a, name);
+      active_set_.erase(name);
+      inactive_set_.insert(name);
       it->second->active = active;
     }
   } else {
@@ -326,13 +316,13 @@ std::size_t ConstraintModelManagerTpl<Scalar>::get_nh_total() const {
 }
 
 template <typename Scalar>
-const std::vector<std::string>& ConstraintModelManagerTpl<Scalar>::get_active() const {
-  return active_;
+const std::set<std::string>& ConstraintModelManagerTpl<Scalar>::get_active_set() const {
+  return active_set_;
 }
 
 template <typename Scalar>
-const std::vector<std::string>& ConstraintModelManagerTpl<Scalar>::get_inactive() const {
-  return inactive_;
+const std::set<std::string>& ConstraintModelManagerTpl<Scalar>::get_inactive_set() const {
+  return inactive_set_;
 }
 
 template <typename Scalar>
@@ -361,11 +351,11 @@ bool ConstraintModelManagerTpl<Scalar>::getConstraintStatus(const std::string& n
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model) {
-  const std::vector<std::string>& active = model.get_active();
-  const std::vector<std::string>& inactive = model.get_inactive();
+  const std::set<std::string>& active = model.get_active_set();
+  const std::set<std::string>& inactive = model.get_inactive_set();
   os << "ConstraintModelManagerTpl:" << std::endl;
   os << "  Active:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
     const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
         model.get_constraints().find(*it)->second;
     if (it != --active.end()) {
@@ -375,7 +365,7 @@ std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scala
     }
   }
   os << "  Inactive:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
     const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
         model.get_constraints().find(*it)->second;
     if (it != --inactive.end()) {
