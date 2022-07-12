@@ -89,19 +89,20 @@ void ConstraintModelManagerTpl<Scalar>::changeConstraintStatus(const std::string
     if (active && !it->second->active) {
       *ng_ += it->second->constraint->get_ng();
       *nh_ += it->second->constraint->get_nh();
-      std::vector<std::string>::iterator it =
+      std::vector<std::string>::iterator it_a =
           std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-      active_.insert(it, name);
+      active_.insert(it_a, name);
       inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+      it->second->active = active;
     } else if (!active && it->second->active) {
       *ng_ -= it->second->constraint->get_ng();
       *nh_ -= it->second->constraint->get_nh();
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-      std::vector<std::string>::iterator it =
+      std::vector<std::string>::iterator it_a =
           std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-      inactive_.insert(it, name);
+      inactive_.insert(it_a, name);
+      it->second->active = active;
     }
-    it->second->active = active;
   } else {
     std::cout << "Warning: we couldn't change the status of the " << name << " constraint item, it doesn't exist."
               << std::endl;
