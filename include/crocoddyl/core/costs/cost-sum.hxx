@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,14 +37,10 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name, boost::shared_ptr
   } else if (active) {
     nr_ += cost->get_activation()->get_nr();
     nr_total_ += cost->get_activation()->get_nr();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-    active_.insert(it, name);
+    active_set_.insert(name);
   } else if (!active) {
     nr_total_ += cost->get_activation()->get_nr();
-    std::vector<std::string>::iterator it =
-        std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-    inactive_.insert(it, name);
+    inactive_set_.insert(name);
   }
 }
 
@@ -54,8 +51,8 @@ void CostModelSumTpl<Scalar>::removeCost(const std::string& name) {
     nr_ -= it->second->cost->get_activation()->get_nr();
     nr_total_ -= it->second->cost->get_activation()->get_nr();
     costs_.erase(it);
-    active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-    inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+    active_set_.erase(name);
+    inactive_set_.erase(name);
   } else {
     std::cerr << "Warning: we couldn't remove the " << name << " cost item, it doesn't exist." << std::endl;
   }
@@ -67,18 +64,15 @@ void CostModelSumTpl<Scalar>::changeCostStatus(const std::string& name, const bo
   if (it != costs_.end()) {
     if (active && !it->second->active) {
       nr_ += it->second->cost->get_activation()->get_nr();
-      std::vector<std::string>::iterator it =
-          std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
-      active_.insert(it, name);
-      inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
+      active_set_.insert(name);
+      inactive_set_.erase(name);
+      it->second->active = active;
     } else if (!active && it->second->active) {
       nr_ -= it->second->cost->get_activation()->get_nr();
-      active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
-      std::vector<std::string>::iterator it =
-          std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
-      inactive_.insert(it, name);
+      active_set_.erase(name);
+      inactive_set_.insert(name);
+      it->second->active = active;
     }
-    it->second->active = active;
   } else {
     std::cerr << "Warning: we couldn't change the status of the " << name << " cost item, it doesn't exist."
               << std::endl;
@@ -249,13 +243,13 @@ std::size_t CostModelSumTpl<Scalar>::get_nr_total() const {
 }
 
 template <typename Scalar>
-const std::vector<std::string>& CostModelSumTpl<Scalar>::get_active() const {
-  return active_;
+const std::set<std::string>& CostModelSumTpl<Scalar>::get_active_set() const {
+  return active_set_;
 }
 
 template <typename Scalar>
-const std::vector<std::string>& CostModelSumTpl<Scalar>::get_inactive() const {
-  return inactive_;
+const std::set<std::string>& CostModelSumTpl<Scalar>::get_inactive_set() const {
+  return inactive_set_;
 }
 
 template <typename Scalar>
@@ -271,11 +265,11 @@ bool CostModelSumTpl<Scalar>::getCostStatus(const std::string& name) const {
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model) {
-  const std::vector<std::string>& active = model.get_active();
-  const std::vector<std::string>& inactive = model.get_inactive();
+  const std::set<std::string>& active = model.get_active_set();
+  const std::set<std::string>& inactive = model.get_inactive_set();
   os << "CostModelSum:" << std::endl;
   os << "  Active:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = active.begin(); it != active.end(); ++it) {
     const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
         model.get_costs().find(*it)->second;
     if (it != --active.end()) {
@@ -285,7 +279,7 @@ std::ostream& operator<<(std::ostream& os, const CostModelSumTpl<Scalar>& model)
     }
   }
   os << "  Inactive:" << std::endl;
-  for (std::vector<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
+  for (std::set<std::string>::const_iterator it = inactive.begin(); it != inactive.end(); ++it) {
     const boost::shared_ptr<typename CostModelSumTpl<Scalar>::CostItem>& cost_item =
         model.get_costs().find(*it)->second;
     if (it != --inactive.end()) {
