@@ -16,13 +16,9 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                                               const std::size_t nu,
-                                                                               const std::size_t nr,
-                                                                               const std::size_t ng,
-                                                                               const std::size_t nh,
-                                                                               const std::size_t ngx,
-                                                                               const std::size_t nhx)
+DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
+    boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr, const std::size_t ng,
+    const std::size_t nh, const std::size_t ngx, const std::size_t nhx)
     : ng_internal_(ng),
       nh_internal_(nh),
       ngx_internal_(ngx),
