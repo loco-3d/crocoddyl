@@ -43,6 +43,8 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
   if (constraints_ != nullptr) {
     *ng_ = constraints_->get_ng();
     *nh_ = constraints_->get_nh();
+    *ngx_ = constraints_->get_ngx();
+    *nhx_ = constraints_->get_nhx();
     constraints_->shareDimensions(this);
   }
 }
@@ -109,7 +111,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
+    d->constraints->resize(this, d, true);
     constraints_->calc(d->constraints, x);
   }
 }

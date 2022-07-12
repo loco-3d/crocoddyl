@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          New York University, Heriot-Watt University
 // Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -79,6 +80,9 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   data->cost = d->data_0->cost;
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
+  const std::size_t ndx = model_->get_state()->get_ndx();
+  d->Gx.resize(model_->get_ng(), ndx);
+  d->Hx.resize(model_->get_nh(), ndx);
 
   assertStableStateFD(x);
 
@@ -144,6 +148,9 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   data->cost = d->data_0->cost;
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
+  const std::size_t ndx = model_->get_state()->get_ndx();
+  d->Gx.resize(model_->get_ngx(), ndx);
+  d->Hx.resize(model_->get_nhx(), ndx);
 
   assertStableStateFD(x);
 

@@ -165,7 +165,9 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
 
  protected:
   using Base::ng_;     //!< Number of inequality constraints
+  using Base::ngx_;    //!< Number of state-only inequality constraints
   using Base::nh_;     //!< Number of equality constraints
+  using Base::nhx_;    //!< Number of state-only equality constraints
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

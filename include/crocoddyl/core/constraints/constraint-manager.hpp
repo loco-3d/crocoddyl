@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <utility>
 
 #include "crocoddyl/core/fwd.hpp"
@@ -201,14 +202,14 @@ class ConstraintModelManagerTpl {
   std::size_t get_nh() const;
 
   /**
-   * @brief Return the number of total inequality constraints
+   * @brief Return the number of active state-only inequality constraints
    */
-  std::size_t get_ng_total() const;
+  std::size_t get_ngx() const;
 
   /**
-   * @brief Return the number of total equality constraints
+   * @brief Return the number of active state-only equality constraints
    */
-  std::size_t get_nh_total() const;
+  std::size_t get_nhx() const;
 
   /**
    * @brief Return the names of the active constraints
@@ -257,10 +258,12 @@ class ConstraintModelManagerTpl {
   std::size_t nu_;                          //!< Dimension of the control input
   std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
   std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
+  std::size_t ngx_internal_;                //!< Internal object for storing the number of inequatility constraints
+  std::size_t nhx_internal_;                //!< Internal object for storing the number of equatility constraints
   std::size_t* ng_;                         //!< Number of the active inequality constraints
-  std::size_t ng_total_;                    //!< Number of the total inequality constraints
   std::size_t* nh_;                         //!< Number of the active equality constraints
-  std::size_t nh_total_;                    //!< Number of the total equality constraints
+  std::size_t* ngx_;                        //!< Number of the active state-only inequality constraints
+  std::size_t* nhx_;                        //!< Number of the active state-only equality constraints
   std::vector<std::string> active_;         //!< Names of the active constraint items
   std::vector<std::string> inactive_;       //!< Names of the inactive constraint items
   VectorXs unone_;                          //!< No control vector
@@ -325,11 +328,11 @@ struct ConstraintDataManagerTpl {
   }
 
   template <class ActionModel, class ActionData>
-  void resize(ActionModel* const model, ActionData* const data) {
+  void resize(ActionModel* const model, ActionData* const data, const bool terminal_node = false) {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nu = model->get_nu();
-    const std::size_t ng = model->get_ng();
-    const std::size_t nh = model->get_nh();
+    const std::size_t ng = terminal_node ? model->get_ngx() : model->get_ng();
+    const std::size_t nh = terminal_node ? model->get_nhx() : model->get_nh();
     data->g.conservativeResize(ng);
     data->Gx.conservativeResize(ng, ndx);
     data->Gu.conservativeResize(ng, nu);

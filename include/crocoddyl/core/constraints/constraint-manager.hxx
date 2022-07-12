@@ -18,10 +18,12 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<S
       nu_(nu),
       ng_internal_(0),
       nh_internal_(0),
+      ngx_internal_(0),
+      nhx_internal_(0),
       ng_(&ng_internal_),
-      ng_total_(0),
       nh_(&nh_internal_),
-      nh_total_(0) {}
+      ngx_(&ngx_internal_),
+      nhx_(&nhx_internal_) {}
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state)
@@ -29,10 +31,12 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<S
       nu_(state->get_nv()),
       ng_internal_(0),
       nh_internal_(0),
+      ngx_internal_(0),
+      nhx_internal_(0),
       ng_(&ng_internal_),
-      ng_total_(0),
       nh_(&nh_internal_),
-      nh_total_(0) {}
+      ngx_(&ngx_internal_),
+      nhx_(&nhx_internal_) {}
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::~ConstraintModelManagerTpl() {}
@@ -52,14 +56,14 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(const std::string& name,
   } else if (active) {
     *ng_ += constraint->get_ng();
     *nh_ += constraint->get_nh();
-    ng_total_ += constraint->get_ng();
-    nh_total_ += constraint->get_nh();
+    if (constraint->is_state_only()) {
+      *ngx_ += constraint->get_ng();
+      *nhx_ += constraint->get_nh();
+    }
     std::vector<std::string>::iterator it =
         std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
     active_.insert(it, name);
   } else if (!active) {
-    ng_total_ += constraint->get_ng();
-    nh_total_ += constraint->get_nh();
     std::vector<std::string>::iterator it =
         std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
     inactive_.insert(it, name);
@@ -72,8 +76,10 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(const std::string& name
   if (it != constraints_.end()) {
     *ng_ -= it->second->constraint->get_ng();
     *nh_ -= it->second->constraint->get_nh();
-    ng_total_ -= it->second->constraint->get_ng();
-    nh_total_ -= it->second->constraint->get_nh();
+    if (it->second->constraint->is_state_only()) {
+      *ngx_ -= it->second->constraint->get_ng();
+      *nhx_ -= it->second->constraint->get_nh();
+    }
     constraints_.erase(it);
     active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
     inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
@@ -89,13 +95,20 @@ void ConstraintModelManagerTpl<Scalar>::changeConstraintStatus(const std::string
     if (active && !it->second->active) {
       *ng_ += it->second->constraint->get_ng();
       *nh_ += it->second->constraint->get_nh();
-      std::vector<std::string>::iterator it =
+      if (it->second->constraint->is_state_only()) {
+        *ngx_ += it->second->constraint->get_ng();
+        *nhx_ += it->second->constraint->get_nh();
+      }
           std::lower_bound(active_.begin(), active_.end(), name, std::less<std::string>());
       active_.insert(it, name);
       inactive_.erase(std::remove(inactive_.begin(), inactive_.end(), name), inactive_.end());
     } else if (!active && it->second->active) {
       *ng_ -= it->second->constraint->get_ng();
       *nh_ -= it->second->constraint->get_nh();
+      if (it->second->constraint->is_state_only()) {
+        *ngx_ -= it->second->constraint->get_ng();
+        *nhx_ -= it->second->constraint->get_nh();
+      }
       active_.erase(std::remove(active_.begin(), active_.end(), name), active_.end());
       std::vector<std::string>::iterator it =
           std::lower_bound(inactive_.begin(), inactive_.end(), name, std::less<std::string>());
@@ -164,10 +177,10 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of constraint datas and models");
   }
-  assert_pretty(static_cast<std::size_t>(data->g.size()) == *ng_,
-                "the dimension of data.g doesn't correspond with ng=" << *ng_);
-  assert_pretty(static_cast<std::size_t>(data->h.size()) == *nh_,
-                "the dimension of data.h doesn't correspond with nh=" << *nh_);
+  assert_pretty(static_cast<std::size_t>(data->g.size()) == *ngx_,
+                "the dimension of data.g doesn't correspond with ng=" << *ngx_);
+  assert_pretty(static_cast<std::size_t>(data->h.size()) == *nhx_,
+                "the dimension of data.h doesn't correspond with nh=" << *nhx_);
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
 
@@ -177,7 +190,7 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
       end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
-    if (m_i->active) {
+    if (m_i->active && m_i->constraint->is_state_only()) {
       const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first, "it doesn't match the constraint name between model and data ("
                                                     << it_m->first << " != " << it_d->first << ")");
@@ -210,9 +223,13 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
                  << "it doesn't match the number of constraint datas and models");
   }
   assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
-                "the dimension of data.Gx,u doesn't correspond with ng=" << *ng_);
+                "the dimension of data.Gx doesn't correspond with ng=" << *ng_);
+  assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
+                "the dimension of data.Gu doesn't correspond with ng=" << *ng_);
   assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
-                "the dimension of data.Hx,u doesn't correspond with nh=" << *nh_);
+                "the dimension of data.Hx doesn't correspond with nh=" << *nh_);
+  assert_pretty(static_cast<std::size_t>(data->Hu.rows()) == *nh_,
+                "the dimension of data.Hu doesn't correspond with nh=" << *nh_);
   const std::size_t ndx = state_->get_ndx();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
@@ -252,10 +269,10 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of constraint datas and models");
   }
-  assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
-                "the dimension of data.Gx,u doesn't correspond with ng=" << *ng_);
-  assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
-                "the dimension of data.Hx,u doesn't correspond with nh=" << *nh_);
+  assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ngx_,
+                "the dimension of data.Gx doesn't correspond with ng=" << *ngx_);
+  assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nhx_,
+                "the dimension of data.Hx doesn't correspond with nh=" << *nhx_);
   const std::size_t ndx = state_->get_ndx();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
@@ -266,7 +283,7 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
       end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
     const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
-    if (m_i->active) {
+    if (m_i->active && m_i->constraint->is_state_only()) {
       const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first, "it doesn't match the constraint name between model and data ("
                                                     << it_m->first << " != " << it_d->first << ")");
@@ -310,18 +327,18 @@ std::size_t ConstraintModelManagerTpl<Scalar>::get_ng() const {
 }
 
 template <typename Scalar>
-std::size_t ConstraintModelManagerTpl<Scalar>::get_ng_total() const {
-  return ng_total_;
-}
-
-template <typename Scalar>
 std::size_t ConstraintModelManagerTpl<Scalar>::get_nh() const {
   return *nh_;
 }
 
 template <typename Scalar>
-std::size_t ConstraintModelManagerTpl<Scalar>::get_nh_total() const {
-  return nh_total_;
+std::size_t ConstraintModelManagerTpl<Scalar>::get_ngx() const {
+  return *ngx_;
+}
+
+template <typename Scalar>
+std::size_t ConstraintModelManagerTpl<Scalar>::get_nhx() const {
+  return *nhx_;
 }
 
 template <typename Scalar>
@@ -338,12 +355,16 @@ template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::shareDimensions(ActionModelAbstractTpl<Scalar>* const model) {
   ng_ = model->ng_;
   nh_ = model->nh_;
+  ngx_ = model->ngx_;
+  nhx_ = model->nhx_;
 }
 
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::shareDimensions(DifferentialActionModelAbstractTpl<Scalar>* const model) {
   ng_ = model->ng_;
   nh_ = model->nh_;
+  ngx_ = model->ngx_;
+  nhx_ = model->nhx_;
 }
 
 template <typename Scalar>
@@ -368,9 +389,11 @@ std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scala
     const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
         model.get_constraints().find(*it)->second;
     if (it != --active.end()) {
-      os << "    " << *it << ": " << *constraint_item << std::endl;
+      os << "    " << *it << ": " << *constraint_item
+         << ", {state_only: " << constraint_item->constraint->is_state_only() << "}" << std::endl;
     } else {
-      os << "    " << *it << ": " << *constraint_item << std::endl;
+      os << "    " << *it << ": " << *constraint_item
+         << ", {state_only: " << constraint_item->constraint->is_state_only() << "}" << std::endl;
     }
   }
   os << "  Inactive:" << std::endl;
@@ -378,9 +401,11 @@ std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scala
     const boost::shared_ptr<typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>& constraint_item =
         model.get_constraints().find(*it)->second;
     if (it != --inactive.end()) {
-      os << "    " << *it << ": " << *constraint_item << std::endl;
+      os << "    " << *it << ": " << *constraint_item << ", {state_only "
+         << constraint_item->constraint->is_state_only() << "}" << std::endl;
     } else {
-      os << "    " << *it << ": " << *constraint_item;
+      os << "    " << *it << ": " << *constraint_item << ", {state_only "
+         << constraint_item->constraint->is_state_only() << "}";
     }
   }
   return os;

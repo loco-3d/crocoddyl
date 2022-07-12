@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,24 +65,27 @@ class ConstraintModelAbstractTpl {
   /**
    * @copybrief Initialize the constraint model
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] nu     Dimension of control vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state        State of the multibody system
+   * @param[in] nu           Dimension of control vector
+   * @param[in] ng           Number of inequality constraints
+   * @param[in] nh           Number of equality constraints
+   * @param[in] u_dependent  Define if the residual function depends on u (default true)
    */
   ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
-                             const std::size_t nh);
+                             const std::size_t nh, const bool u_dependent);
 
   /**
    * @copybrief ConstraintModelAbstractTpl()
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state        State of the multibody system
+   * @param[in] ng           Number of inequality constraints
+   * @param[in] nh           Number of equality constraints
+   * @param[in] u_dependent  Define if the residual function depends on u (default true)
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh);
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh,
+                             const bool u_dependent);
   virtual ~ConstraintModelAbstractTpl();
 
   /**
@@ -168,6 +171,11 @@ class ConstraintModelAbstractTpl {
   std::size_t get_nh() const;
 
   /**
+   * @brief Return the type of constraint: state-only (true) or state-control (false)
+   */
+  bool is_state_only() const;
+
+  /**
    * @brief Print information on the constraint model
    */
   template <class Scalar>
@@ -186,7 +194,8 @@ class ConstraintModelAbstractTpl {
   std::size_t nu_;                                     //!< Control dimension
   std::size_t ng_;                                     //!< Number of inequality constraints
   std::size_t nh_;                                     //!< Number of equality constraints
-  VectorXs unone_;                                     //!< No control vector
+  bool is_state_only_;  //!< True if the constraints depends on the state only, otherwise false
+  VectorXs unone_;      //!< No control vector
 };
 
 template <typename _Scalar>

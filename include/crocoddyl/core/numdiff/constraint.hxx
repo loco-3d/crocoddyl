@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_nu(), model->get_ng(), model->get_nh()), model_(model) {
+    : Base(model->get_state(), model->get_nu(), model->get_ng(), model->get_nh(), !model->is_state_only()),
+      model_(model) {
   disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
 }
 
@@ -72,6 +73,10 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
 
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
+  const std::size_t ndx = model_->get_state()->get_ndx();
+  d->Gx.resize(model_->get_ng(), ndx);
+  d->Hx.resize(model_->get_nh(), ndx);
+
   assertStableStateFD(x);
 
   // Computing the d constraint(x,u) / dx
@@ -119,9 +124,12 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
-
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
+  const std::size_t ndx = model_->get_state()->get_ndx();
+  d->Gx.resize(model_->get_ng(), ndx);
+  d->Hx.resize(model_->get_nh(), ndx);
+
   assertStableStateFD(x);
 
   // Computing the d constraint(x) / dx

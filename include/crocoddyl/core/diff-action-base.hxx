@@ -20,13 +20,19 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(b
                                                                                const std::size_t nu,
                                                                                const std::size_t nr,
                                                                                const std::size_t ng,
-                                                                               const std::size_t nh)
-    : nu_(nu),
-      nr_(nr),
-      ng_internal_(ng),
+                                                                               const std::size_t nh,
+                                                                               const std::size_t ngx,
+                                                                               const std::size_t nhx)
+    : ng_internal_(ng),
       nh_internal_(nh),
+      ngx_internal_(ngx),
+      nhx_internal_(nhx),
+      nu_(nu),
+      nr_(nr),
       ng_(&ng_internal_),
       nh_(&nh_internal_),
+      ngx_(&ngx_internal_),
+      nhx_(&nhx_internal_),
       state_(state),
       unone_(VectorXs::Zero(nu)),
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
@@ -304,6 +310,16 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
   return *nh_;
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_ngx() const {
+  return *ngx_;
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nhx() const {
+  return *nhx_;
 }
 
 template <typename Scalar>

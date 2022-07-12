@@ -94,9 +94,12 @@ class ActionModelAbstractTpl {
    * @param[in] nr     Dimension of cost-residual vector
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
+   * @param[in] ngx    Number of state-only inequality constraints, which are used for terminal node computation
+   * @param[in] nhx    Number of state-only equality constraints, which are used for terminal node computation
    */
   ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 0,
-                         const std::size_t ng = 0, const std::size_t nh = 0);
+                         const std::size_t ng = 0, const std::size_t nh = 0, const std::size_t ngx = 0,
+                         const std::size_t nhx = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -315,6 +318,16 @@ class ActionModelAbstractTpl {
   std::size_t get_nh() const;
 
   /**
+   * @brief Return the number of state-only inequality constraints, which are used for terminal node computation
+   */
+  std::size_t get_ngx() const;
+
+  /**
+   * @brief Return the number of state-only equality constraints, which are used for terminal node computation
+   */
+  std::size_t get_nhx() const;
+
+  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
@@ -358,14 +371,18 @@ class ActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  private:
-  std::size_t ng_internal_;  //!< Internal object for storing the number of inequatility constraints
-  std::size_t nh_internal_;  //!< Internal object for storing the number of equatility constraints
+  std::size_t ng_internal_;   //!< Internal object for storing the number of inequatility constraints
+  std::size_t nh_internal_;   //!< Internal object for storing the number of equatility constraints
+  std::size_t ngx_internal_;  //!< Internal object for storing the number of state-only inequatility constraints
+  std::size_t nhx_internal_;  //!< Internal object for storing the number of state-only equatility constraints
 
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
   std::size_t* ng_;                         //!< Number of inequality constraints
   std::size_t* nh_;                         //!< Number of equality constraints
+  std::size_t* ngx_;                        //!< Number of state-only inequality constraints
+  std::size_t* nhx_;                        //!< Number of state-only equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs u_lb_;                           //!< Lower control limits

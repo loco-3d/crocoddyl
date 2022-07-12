@@ -33,7 +33,8 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::DifferentialActionModelFreeIn
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
     boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, state->get_nv(), costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh() + state->get_nv() - actuation->get_nu()),
+           constraints->get_nh() + state->get_nv() - actuation->get_nu(), constraints->get_ngx(),
+           constraints->get_nhx()),
       actuation_(actuation),
       costs_(costs),
       constraints_(constraints),
@@ -116,10 +117,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  if (state_->get_nv() - actuation_->get_nu() > 0) {
-    constraints_->changeConstraintStatus("tau", false);
-  }
-  d->constraints->resize(this, d);
+  d->constraints->resize(this, d, true);
   constraints_->calc(d->constraints, x);
 }
 
@@ -139,7 +137,6 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
   const std::size_t nv = state_->get_nv();
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
-  d->constraints->resize(this, d);
 
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, u);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =

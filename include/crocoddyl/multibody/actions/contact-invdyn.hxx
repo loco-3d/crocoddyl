@@ -41,7 +41,8 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::DifferentialActionModelCon
     boost::shared_ptr<ContactModelMultiple> contacts, boost::shared_ptr<CostModelSum> costs,
     boost::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(), constraints->get_ng(),
-           state->get_nv() - actuation->get_nu() + contacts->get_nc_total() + constraints->get_nh()),
+           state->get_nv() - actuation->get_nu() + contacts->get_nc_total() + constraints->get_nh(),
+           constraints->get_ngx(), constraints->get_nhx()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -167,17 +168,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  // disable inverse-dynamics and contact-acceleration/force constraints in the terminal node
-  constraints_->changeConstraintStatus("tau", false);
-  for (std::string name : contacts_->get_active_set()) {
-    constraints_->changeConstraintStatus(name + "_acc", false);
-    constraints_->changeConstraintStatus(name + "_force", false);
-  }
-  for (std::string name : contacts_->get_inactive_set()) {
-    constraints_->changeConstraintStatus(name + "_acc", false);
-    constraints_->changeConstraintStatus(name + "_force", false);
-  }
-  d->constraints->resize(this, d);
+  d->constraints->resize(this, d, true);
   constraints_->calc(d->constraints, x);
 }
 
@@ -213,7 +204,29 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
       -d->multibody.actuation->Mtau * d->multibody.contacts->Jc.topRows(nc).transpose();
   contacts_->calcDiff(d->multibody.contacts, x);
   costs_->calcDiff(d->costs, x, u);
+  for (std::string name : contacts_->get_active_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", true);
+    constraints_->changeConstraintStatus(name + "_force", false);
+  }
+  for (std::string name : contacts_->get_inactive_set()) {
+    constraints_->changeConstraintStatus(name + "_acc", false);
+    constraints_->changeConstraintStatus(name + "_force", true);
+  }
+  d->constraints->resize(this, d);
   constraints_->calcDiff(d->constraints, x, u);
+}
+
+template <typename Scalar>
+void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+  costs_->calcDiff(d->costs, x);
+  d->constraints->resize(this, d, true);
+  constraints_->calcDiff(d->constraints, x);
 }
 
 template <typename Scalar>
@@ -274,20 +287,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
     }
   }
   d->pinocchio.tau.setZero();
-}
-
-template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
-  Data* d = static_cast<Data*>(data.get());
-  costs_->calcDiff(d->costs, x);
-  if (constraints_ != nullptr) {
-    constraints_->calcDiff(d->constraints, x);
-  }
 }
 
 template <typename Scalar>

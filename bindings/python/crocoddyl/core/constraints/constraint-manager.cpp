@@ -7,10 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <functional>
-#include <map>
 #include <memory>
-#include <utility>
-#include <string>
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
@@ -143,10 +140,10 @@ void exposeConstraintManager() {
       .add_property("ng", bp::make_function(&ConstraintModelManager::get_ng),
                     "number of active inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelManager::get_nh), "number of active equality constraints")
-      .add_property("ng_total", bp::make_function(&ConstraintModelManager::get_ng_total),
-                    "number of the total inequality constraints")
-      .add_property("nh_total", bp::make_function(&ConstraintModelManager::get_nh_total),
-                    "number of the total equality constraints")
+      .add_property("ngx", bp::make_function(&ConstraintModelManager::get_ngx),
+                    "number of active state-only inequality constraints")
+      .add_property("nhx", bp::make_function(&ConstraintModelManager::get_nhx),
+                    "number of active state-only equality constraints")
       .add_property(
           "active",
           bp::make_function(&ConstraintModelManager::get_active, bp::return_value_policy<bp::return_by_value>()),
@@ -176,15 +173,19 @@ void exposeConstraintManager() {
            "Share memory with a given action data\n\n"
            ":param model: action data that we want to share memory")
       .def("resize", &ConstraintDataManager::resize<DifferentialActionModelAbstract, DifferentialActionDataAbstract>,
-           bp::args("self", "model", "data"),
+           bp::with_custodian_and_ward_postcall<0, 3>(), bp::args("self", "model", "data", "terminal_node"),
            "Resize the data given differential action data\n\n"
            ":param model: differential action model that defines how to resize the data\n"
-           ":param data: differential action data that we want to resize")
+           ":param data: differential action data that we want to resize\n"
+           ":param terminal_node: True if we wish to resize the date during a terminal node computation,\n"
+           "otherwise False")
       .def("resize", &ConstraintDataManager::resize<ActionModelAbstract, ActionDataAbstract>,
-           bp::args("self", "model", "data"),
+           bp::with_custodian_and_ward_postcall<0, 3>(), bp::args("self", "model", "data", "terminal_node"),
            "Resize the data given action data\n\n"
            ":param model: action model that defines how to resize the data\n"
-           ":param data: action data that we want to resize")
+           ":param data: action data that we want to resize\n"
+           ":param terminal_node: True if we wish to resize the date during a terminal node computation,\n"
+           "otherwise False")
       .add_property(
           "constraints",
           bp::make_getter(&ConstraintDataManager::constraints, bp::return_value_policy<bp::return_by_value>()),

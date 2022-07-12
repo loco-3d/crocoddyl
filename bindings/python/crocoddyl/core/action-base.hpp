@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,8 +21,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract, public bp::wrapper<
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   ActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 1,
-                           const std::size_t ng = 0, const std::size_t nh = 0)
-      : ActionModelAbstract(state, nu, nr, ng, nh), bp::wrapper<ActionModelAbstract>() {}
+                           const std::size_t ng = 0, const std::size_t nh = 0, const std::size_t ngx = 0,
+                           const std::size_t nhx = 0)
+      : ActionModelAbstract(state, nu, nr, ng, nh, ngx, nhx), bp::wrapper<ActionModelAbstract>() {}
 
   void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {

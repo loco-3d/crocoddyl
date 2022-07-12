@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,11 +23,12 @@ class ConstraintModelAbstract_wrap : public ConstraintModelAbstract, public bp::
       : ConstraintModelAbstract(state, residual, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
 
   ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
-                               const std::size_t nh)
-      : ConstraintModelAbstract(state, nu, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
+                               const std::size_t nh, const bool u_dependent)
+      : ConstraintModelAbstract(state, nu, ng, nh, u_dependent), bp::wrapper<ConstraintModelAbstract>() {}
 
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh)
-      : ConstraintModelAbstract(state, ng, nh) {}
+  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh,
+                               const bool u_dependent)
+      : ConstraintModelAbstract(state, ng, nh, u_dependent) {}
 
   void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {

@@ -62,6 +62,8 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
   DifferentialActionModelAbstract* action = static_cast<DifferentialActionModelAbstract*>(differential_.get());
   ng_ = action->ng_;
   nh_ = action->nh_;
+  ngx_ = action->ngx_;
+  nhx_ = action->nhx_;
 }
 
 template <typename Scalar>

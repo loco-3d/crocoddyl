@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr
       nu_(residual->get_nu()),
       ng_(ng),
       nh_(nh),
+      is_state_only_(!residual->get_u_dependent()),
       unone_(VectorXs::Zero(residual->get_nu())) {
   if (nh_ > residual_->get_nr()) {
     throw_pretty("Invalid argument: "
@@ -35,22 +36,25 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                                const std::size_t nu, const std::size_t ng,
-                                                               const std::size_t nh)
+                                                               const std::size_t nh, const bool u_dependent)
     : state_(state),
       residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh, nu)),
       nu_(nu),
       ng_(ng),
       nh_(nh),
+      is_state_only_(!u_dependent),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                               const std::size_t ng, const std::size_t nh)
+                                                               const std::size_t ng, const std::size_t nh,
+                                                               const bool u_dependent)
     : state_(state),
       residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh)),
       nu_(state->get_nv()),
       ng_(ng),
       nh_(nh),
+      is_state_only_(!u_dependent),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -103,6 +107,11 @@ std::size_t ConstraintModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
+}
+
+template <typename Scalar>
+bool ConstraintModelAbstractTpl<Scalar>::is_state_only() const {
+  return is_state_only_;
 }
 
 template <class Scalar>

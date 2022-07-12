@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,19 +30,21 @@ void exposeConstraintAbstract() {
           ":param residual: residual model\n"
           ":param ng: number of inequality constraints\n"
           ":param nh: number of equality constraints"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, std::size_t>(
-          bp::args("self", "state", "nu", "ng", "nh"),
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, std::size_t, bool>(
+          bp::args("self", "state", "nu", "ng", "nh", "u_dependent"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector (default state.nv)\n"
           ":param ng: number of inequality constraints\n"
-          ":param nh: number of equality constraints"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
-          bp::args("self", "state", "ng", "nh"),
+          ":param nh: number of equality constraints\n"
+          ":param u_dependent: define if the residual function depends on u (default true)"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, bool>(
+          bp::args("self", "state", "ng", "nh", "u_dependent"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
           ":param ng: number of inequality constraints\n"
-          ":param nh: number of equality constraints"))
+          ":param nh: number of equality constraints\n"
+          ":param u_dependent: define if the residual function depends on u (default true)"))
       .def("calc", pure_virtual(&ConstraintModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
            "Compute the constraint value.\n\n"
            ":param data: constraint data\n"
@@ -91,6 +93,8 @@ void exposeConstraintAbstract() {
       .add_property("nu", bp::make_function(&ConstraintModelAbstract_wrap::get_nu), "dimension of control vector")
       .add_property("ng", bp::make_function(&ConstraintModelAbstract_wrap::get_ng), "number of inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelAbstract_wrap::get_nh), "number of equality constraints")
+      .add_property("is_state_only", bp::make_function(&ConstraintModelAbstract_wrap::is_state_only),
+                    "type of constraint: state-only or state-control")
       .def(PrintableVisitor<ConstraintModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();

@@ -150,7 +150,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
+    d->constraints->resize(this, d, true);
     constraints_->calc(d->constraints, x);
   }
 }
