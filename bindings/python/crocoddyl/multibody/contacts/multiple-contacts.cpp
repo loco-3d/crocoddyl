@@ -9,8 +9,6 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <utility>
-#include <string>
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
@@ -132,11 +130,11 @@ void exposeContactMultiple() {
       .add_property(
           "active_set",
           bp::make_function(&ContactModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
-          "set of names of active contact items")
+          "names of the active set of contact items")
       .add_property(
           "inactive_set",
           bp::make_function(&ContactModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
-          "set of names of inactive contact items")
+          "names of the inactive set of contact items")
       .def("getContactStatus", &ContactModelMultiple::getContactStatus, bp::args("self", "name"),
            "Return the contact status of a given contact name.\n\n"
            ":param name: contact name")
