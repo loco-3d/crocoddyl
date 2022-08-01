@@ -14,7 +14,6 @@ ENDIF()
 # Include important cmake modules
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/boost.cmake)
-INCLUDE(cmake/python.cmake)
 INCLUDE(cmake/apple.cmake)
 
 # Print initial message
@@ -147,9 +146,7 @@ IF(Boost_VERSION GREATER 107299)
 ENDIF()
 
 IF(BUILD_PYTHON_INTERFACE)
-  FINDPYTHON()
-  SEARCH_FOR_BOOST_PYTHON(REQUIRED)
-  ADD_PROJECT_DEPENDENCY(eigenpy 2.5.0 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 2.5.0")
+  ADD_PROJECT_DEPENDENCY(eigenpy 2.7.10 REQUIRED PKG_CONFIG_REQUIRES "eigenpy >= 2.7.10")
 ENDIF(BUILD_PYTHON_INTERFACE)
 
 # Main library
