@@ -952,10 +952,9 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
         data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio,
                                                     self.xref.id).linear + np.cross(data.vw, data.vv)
         if self.gains[0] != 0.:
-            data.a0[:] += np.asscalar(
-                self.gains[0]) * (data.pinocchio.oMf[self.xref.id].translation - self.xref.translation)
+            data.a0[:] += self.gains[0] * (data.pinocchio.oMf[self.xref.id].translation - self.xref.translation)
         if self.gains[1] != 0.:
-            data.a0[:] += np.asscalar(self.gains[1]) * data.vv
+            data.a0[:] += self.gains[1] * data.vv
 
     def calcDiff(self, data, x):
         v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
@@ -971,15 +970,15 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
         da0_dv += np.dot(data.vw_skew, data.Jc)
         da0_dv -= np.dot(data.vv_skew, data.Jw)
 
-        if np.asscalar(self.gains[0]) != 0.:
+        if self.gains[0] != 0.:
             R = data.pinocchio.oMf[self.xref.id].rotation
-            da0_dq += np.asscalar(self.gains[0]) * np.dot(
+            da0_dq += self.gains[0] * np.dot(
                 R,
                 pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.xref.id,
                                            pinocchio.ReferenceFrame.LOCAL)[:3, :])
-        if np.asscalar(self.gains[1]) != 0.:
-            da0_dq += np.asscalar(self.gains[1]) * np.dot(data.fXj[:3, :], v_partial_dq)
-            da0_dv += np.asscalar(self.gains[1]) * np.dot(data.fXj[:3, :], a_partial_da)
+        if self.gains[1] != 0.:
+            da0_dq += self.gains[1] * np.dot(data.fXj[:3, :], v_partial_dq)
+            da0_dv += self.gains[1] * np.dot(data.fXj[:3, :], a_partial_da)
         data.da0_dx[:, :] = np.hstack([da0_dq, da0_dv])
 
     def createData(self, data):
@@ -1013,10 +1012,10 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
         data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio, self.Mref.id).vector
         if self.gains[0] != 0.:
             data.rMf = self.Mref.placement.inverse() * data.pinocchio.oMf[self.Mref.id]
-            data.a0[:] += np.asscalar(self.gains[0]) * pinocchio.log6(data.rMf).vector
+            data.a0[:] += self.gains[0] * pinocchio.log6(data.rMf).vector
         if self.gains[1] != 0.:
             v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.Mref.id).vector
-            data.a0[:] += np.asscalar(self.gains[1]) * v
+            data.a0[:] += self.gains[1] * v
 
     def calcDiff(self, data, x):
         v_partial_dq, a_partial_dq, a_partial_dv, a_partial_da = pinocchio.getJointAccelerationDerivatives(
@@ -1025,11 +1024,11 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
         data.da0_dq[:, :] = np.dot(data.fXj, a_partial_dq)
         data.da0_dv[:, :] = np.dot(data.fXj, a_partial_dv)
 
-        if np.asscalar(self.gains[0]) != 0.:
-            data.da0_dq += np.asscalar(self.gains[0]) * np.dot(pinocchio.Jlog6(data.rMf), data.Jc)
-        if np.asscalar(self.gains[1]) != 0.:
-            data.da0_dq += np.asscalar(self.gains[1]) * np.dot(data.fXj, v_partial_dq)
-            data.da0_dv += np.asscalar(self.gains[1]) * np.dot(data.fXj, a_partial_da)
+        if self.gains[0] != 0.:
+            data.da0_dq += self.gains[0] * np.dot(pinocchio.Jlog6(data.rMf), data.Jc)
+        if self.gains[1] != 0.:
+            data.da0_dq += self.gains[1] * np.dot(data.fXj, v_partial_dq)
+            data.da0_dv += self.gains[1] * np.dot(data.fXj, a_partial_da)
         data.da0_dx = np.hstack([data.da0_dq, data.da0_dv])
 
     def createData(self, data):
@@ -1142,7 +1141,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                         continue
                 break
             self.d = self.expectedImprovement()
-            d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
+            d1, d2 = self.d[0], self.d[1]
 
             for a in self.alphas:
                 try:
@@ -1343,7 +1342,7 @@ class FDDPDerived(DDPDerived):
                 except ArithmeticError:
                     continue
                 self.d = self.expectedImprovement()
-                d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
+                d1, d2 = self.d[0], self.d[1]
 
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 if self.dV_exp >= 0.:  # descend direction
