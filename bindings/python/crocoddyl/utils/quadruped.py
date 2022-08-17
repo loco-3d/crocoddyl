@@ -675,15 +675,15 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         X_LB = [0.] * nx
         X_UB = [0.] * nx
     for i in range(nx):
-        X[i] = [np.asscalar(x[i]) for x in xs]
+        X[i] = [x[i] for x in xs]
         if bounds:
-            X_LB[i] = [np.asscalar(x[i]) for x in xs_lb]
-            X_UB[i] = [np.asscalar(x[i]) for x in xs_ub]
+            X_LB[i] = [x[i] for x in xs_lb]
+            X_UB[i] = [x[i] for x in xs_ub]
     for i in range(nu):
-        U[i] = [np.asscalar(u[i]) for u in us]
+        U[i] = [u[i] for u in us]
         if bounds:
-            U_LB[i] = [np.asscalar(u[i]) for u in us_lb]
-            U_UB[i] = [np.asscalar(u[i]) for u in us_ub]
+            U_LB[i] = [u[i] for u in us_lb]
+            U_UB[i] = [u[i] for u in us_ub]
 
     # Plotting the joint positions, velocities and torques
     plt.figure(figIndex)
@@ -789,8 +789,8 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
 
     plt.figure(figIndex + 1)
     plt.suptitle(figTitle)
-    Cx = [np.asscalar(c[0]) for c in cs]
-    Cy = [np.asscalar(c[1]) for c in cs]
+    Cx = [c[0] for c in cs]
+    Cy = [c[1] for c in cs]
     plt.plot(Cx, Cy)
     plt.title('CoM position')
     plt.xlabel('x [m]')

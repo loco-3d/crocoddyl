@@ -59,7 +59,7 @@ class SimpleBipedGaitProblem:
         rfPos0 = self.rdata.oMf[self.rfId].translation
         lfPos0 = self.rdata.oMf[self.lfId].translation
         comRef = (rfPos0 + lfPos0) / 2
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2]
 
         # Defining the action models along the time instances
         loco3dModel = []
@@ -93,7 +93,7 @@ class SimpleBipedGaitProblem:
         rfFootPos0[2] = 0.
         lfFootPos0[2] = 0.
         comRef = (rfFootPos0 + lfFootPos0) / 2
-        comRef[2] = np.asscalar(pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2])
+        comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2]
 
         self.rWeight = 1e1
         loco3dModel = []
@@ -431,15 +431,15 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         X_LB = [0.] * nx
         X_UB = [0.] * nx
     for i in range(nx):
-        X[i] = [np.asscalar(x[i]) for x in xs]
+        X[i] = [x[i] for x in xs]
         if bounds:
-            X_LB[i] = [np.asscalar(x[i]) for x in xs_lb]
-            X_UB[i] = [np.asscalar(x[i]) for x in xs_ub]
+            X_LB[i] = [x[i] for x in xs_lb]
+            X_UB[i] = [x[i] for x in xs_ub]
     for i in range(nu):
-        U[i] = [np.asscalar(u[i]) for u in us]
+        U[i] = [u[i] for u in us]
         if bounds:
-            U_LB[i] = [np.asscalar(u[i]) for u in us_lb]
-            U_UB[i] = [np.asscalar(u[i]) for u in us_ub]
+            U_LB[i] = [u[i] for u in us_lb]
+            U_UB[i] = [u[i] for u in us_ub]
 
     # Plotting the joint positions, velocities and torques
     plt.figure(figIndex)
@@ -504,8 +504,8 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
     for x in xs:
         q = x[:rmodel.nq]
         c = pinocchio.centerOfMass(rmodel, rdata, q)
-        Cx.append(np.asscalar(c[0]))
-        Cy.append(np.asscalar(c[1]))
+        Cx.append(c[0])
+        Cy.append(c[1])
     plt.plot(Cx, Cy)
     plt.title('CoM position')
     plt.xlabel('x [m]')
