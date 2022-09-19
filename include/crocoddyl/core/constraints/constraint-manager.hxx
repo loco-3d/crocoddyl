@@ -218,7 +218,7 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   }
   assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
                 "the dimension of data.Gx doesn't correspond with ng=" << *ng_);
-  assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
+  assert_pretty(static_cast<std::size_t>(data->Gu.rows()) == *ng_,
                 "the dimension of data.Gu doesn't correspond with ng=" << *ng_);
   assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
                 "the dimension of data.Hx doesn't correspond with nh=" << *nh_);

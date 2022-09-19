@@ -290,6 +290,8 @@ void SolverDDP::forwardPass(const double steplength) {
 
 void SolverDDP::computeHamiltonianFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
                                            const boost::shared_ptr<ActionDataAbstract>& data) {
+  assert_pretty(t > problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
   const Eigen::VectorXd& Vx_p = Vx_[t + 1];
@@ -325,6 +327,8 @@ void SolverDDP::computeHamiltonianFunction(const std::size_t t, const boost::sha
 }
 
 void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+  assert_pretty(t > problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   Vx_[t] = Qx_[t];
   Vxx_[t] = Qxx_[t];
@@ -351,6 +355,8 @@ void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_pt
 }
 
 void SolverDDP::computeGains(const std::size_t t) {
+  assert_pretty(t > problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
   START_PROFILER("SolverDDP::computeGains");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
