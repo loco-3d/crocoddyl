@@ -21,7 +21,7 @@ struct ControlTypes {
   enum Type { PolyZero, PolyOne, PolyTwoRK3, PolyTwoRK4, NbControlTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbControlTypes);
     for (int i = 0; i < NbControlTypes; ++i) {
       v.push_back((Type)i);
     }

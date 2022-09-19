@@ -24,7 +24,7 @@ struct ContactModelTypes {
   enum Type { ContactModel1D, ContactModel2D, ContactModel3D, ContactModel6D, NbContactModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbContactModelTypes);
     for (int i = 0; i < NbContactModelTypes; ++i) {
       v.push_back((Type)i);
     }

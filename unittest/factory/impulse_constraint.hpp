@@ -29,7 +29,7 @@ struct ImpulseConstraintModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbImpulseConstraintModelTypes);
     for (int i = 0; i < NbImpulseConstraintModelTypes; ++i) {
       v.push_back((Type)i);
     }

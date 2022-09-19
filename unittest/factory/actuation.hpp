@@ -26,7 +26,7 @@ struct ActuationModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbActuationModelTypes);
     for (int i = 0; i < NbActuationModelTypes; ++i) {
       v.push_back((Type)i);
     }

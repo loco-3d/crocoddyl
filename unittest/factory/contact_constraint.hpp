@@ -29,7 +29,7 @@ struct ContactConstraintModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbContactConstraintModelTypes);
     for (int i = 0; i < NbContactConstraintModelTypes; ++i) {
       v.push_back((Type)i);
     }
