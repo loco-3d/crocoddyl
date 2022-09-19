@@ -126,17 +126,17 @@ PinocchioModelFactory::~PinocchioModelFactory() {}
 void PinocchioModelFactory::construct_model(const std::string& urdf_file, const std::string& srdf_file,
                                             bool free_flyer) {
   model_ = boost::make_shared<pinocchio::Model>();
-  if (urdf_file.size() != 0) {
+  if (!urdf_file.empty()) {
     if (free_flyer) {
       pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *model_.get());
       model_->lowerPositionLimit.segment<7>(0).fill(-1.);
       model_->upperPositionLimit.segment<7>(0).fill(1.);
-      if (srdf_file.size() != 0) {
+      if (!srdf_file.empty()) {
         pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
       }
     } else {
       pinocchio::urdf::buildModel(urdf_file, *model_.get());
-      if (srdf_file.size() != 0) {
+      if (!srdf_file.empty()) {
         pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
       }
     }
