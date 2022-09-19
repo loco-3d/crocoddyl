@@ -29,7 +29,7 @@ struct ContactCostModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbContactCostModelTypes);
     for (int i = 0; i < NbContactCostModelTypes; ++i) {
       v.push_back((Type)i);
     }

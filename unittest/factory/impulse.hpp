@@ -20,7 +20,7 @@ struct ImpulseModelTypes {
   enum Type { ImpulseModel3D, ImpulseModel6D, NbImpulseModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbImpulseModelTypes);
     for (int i = 0; i < NbImpulseModelTypes; ++i) {
       v.push_back((Type)i);
     }

@@ -28,7 +28,7 @@ struct ImpulseCostModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbImpulseCostModelTypes);
     for (int i = 0; i < NbImpulseCostModelTypes; ++i) {
       v.push_back((Type)i);
     }

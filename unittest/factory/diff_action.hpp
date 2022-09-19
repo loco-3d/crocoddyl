@@ -53,7 +53,7 @@ struct DifferentialActionModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbDifferentialActionModelTypes);
     for (int i = 0; i < NbDifferentialActionModelTypes; ++i) {
       v.push_back((Type)i);
     }

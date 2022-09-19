@@ -38,7 +38,7 @@ struct ConstraintModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbConstraintModelTypes);
     for (int i = 0; i < NbConstraintModelTypes; ++i) {
       v.push_back((Type)i);
     }
