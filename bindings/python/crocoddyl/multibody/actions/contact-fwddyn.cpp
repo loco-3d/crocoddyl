@@ -102,7 +102,7 @@ void exposeDifferentialActionContactFwdDynamics() {
       .add_property("constraints",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_constraints,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "entire constraint model")
+                    "constraint model manager")
       .add_property("armature",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_armature,
                                       bp::return_value_policy<bp::return_by_value>()),

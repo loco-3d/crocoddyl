@@ -41,7 +41,7 @@ void exposeSolverIntro() {
                ":param maxiter: maximum allowed number of iterations (default 100).\n"
                ":param is_feasible: true if the init_xs are obtained from integrating the init_us (rollout)\n"
                "(default False).\n"
-               ":param init_reg: initial guess for the regularization value. Very low values are typical\n"
+               ":param init_reg: initial guess for the regularization value. Very low values are typically\n"
                "                 used with very good guess points (default 1e-9).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
       .def("tryStep", &SolverIntro::tryStep,
@@ -62,7 +62,7 @@ void exposeSolverIntro() {
           "estimated penalty parameter that balances relative contribution of the cost function and equality "
           "constraints.")
       .add_property("th_feas", bp::make_function(&SolverIntro::get_th_feas),
-                    bp::make_function(&SolverIntro::set_th_feas), "criteria to define optimality, then.")
+                    bp::make_function(&SolverIntro::set_th_feas), "threshold to define feasibility.")
       .add_property("zero_upsilon", bp::make_function(&SolverIntro::get_zero_upsilon),
                     bp::make_function(&SolverIntro::set_zero_upsilon),
                     "True if we set estimated penalty parameter (upsilon) to zero when solve is called.")

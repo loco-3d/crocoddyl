@@ -26,7 +26,7 @@ namespace crocoddyl {
  * The trajectory depends on the control parameters u, whose size may be larger than the
  * size of the control inputs w.
  *
- * The main computations are carrying out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
+ * The main computations are carried out in `calc`, `multiplyByJacobian` and `multiplyJacobianTransposeBy`,
  * where the former computes control input \f$\mathbf{w}\in\mathbb{R}^{nw}\f$ from a set of control parameters
  * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ where `nw` and `nu` represent the dimension of the control inputs and parameters,
  * respectively, and the latter defines useful operations across the Jacobian of the control-parametrization model.

@@ -29,7 +29,7 @@ namespace crocoddyl {
  * `nv`, `nu`, and `ndx` are the number of joints, dimension of the joint torque input and state manifold,
  * respectively. Additionally, the generalized torques are also named as the actuation signals of our system.
  *
- * The main computations are carrying out in `calc()`, and `calcDiff()`, where the former computes actuation signal,
+ * The main computations are carried out in `calc()`, and `calcDiff()`, where the former computes actuation signal,
  * and the latter computes the Jacobians of the actuation-mapping function, i.e.,
  * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{x}}\f$ and
  * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{u}}\f$. Note that `calcDiff()` requires to run `calc()` first.

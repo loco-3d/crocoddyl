@@ -60,7 +60,7 @@ void exposeSolverAbstract() {
       .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", "stepLength"),
            "Try a predefined step length and compute its cost improvement.\n\n"
            "It uses the search direction found by computeDirection to try a\n"
-           "determined step length; so you need to run first computeDirection.\n"
+           "determined step length; so you need to first run computeDirection.\n"
            "Additionally it returns the cost improvement along the predefined\n"
            "step length.\n"
            ":param stepLength: step length\n"

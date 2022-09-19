@@ -23,7 +23,7 @@ class SolverIntro : public SolverFDDP {
    * @brief Initialize the INTRO solver
    *
    * @param[in] problem  Shooting problem
-   * @param[in] reduced  Used reduced Schur complement approach (default true)
+   * @param[in] reduced  Use the reduced Schur-complement approach (default true)
    */
   explicit SolverIntro(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverIntro();
@@ -134,7 +134,7 @@ class SolverIntro : public SolverFDDP {
   /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
-   * Note that the default solver is nullspace LU. When we enable parallelization, this strategy is is generally faster
+   * Note that the default solver is nullspace LU. When we enable parallelization, this strategy is generally faster
    * than others for medium to large systems.
    */
   void set_equality_solver(const EqualitySolverType type);

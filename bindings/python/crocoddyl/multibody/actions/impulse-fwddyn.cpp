@@ -99,7 +99,7 @@ void exposeActionImpulseFwdDynamics() {
       .add_property("constraints",
                     bp::make_function(&ActionModelImpulseFwdDynamics::get_constraints,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "entire constraint model")
+                    "constraint model manager")
       .add_property("armature",
                     bp::make_function(&ActionModelImpulseFwdDynamics::get_armature, bp::return_internal_reference<>()),
                     bp::make_function(&ActionModelImpulseFwdDynamics::set_armature),

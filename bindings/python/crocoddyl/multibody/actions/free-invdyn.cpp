@@ -41,7 +41,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                 const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &DifferentialActionModelFreeInvDynamics::calc,
                                                            bp::args("self", "data", "x", "u"),
                                                            "Compute the next state and cost value.\n\n"
-                                                           ":param data: free inverse-dynamics action data\n"
+                                                           ":param data: free inverse-dynamics data\n"
                                                            ":param x: state point (dim. state.nx)\n"
                                                            ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
@@ -57,7 +57,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                 "cost function. It assumes that calc has been run first.\n"
                 "This function builds a quadratic approximation of the\n"
                 "action model (i.e. dynamical system and cost function).\n"
-                ":param data: free inverse-dynamics action data\n"
+                ":param data: free inverse-dynamics data\n"
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
@@ -76,7 +76,7 @@ void exposeDifferentialActionFreeInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelFreeInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "entire constraint model");
+                          "constraint model manager");
 
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics::ResidualModelActuation>>();
 

@@ -21,7 +21,7 @@ void exposeActuationAbstract() {
       "Abstract class for actuation-mapping models.\n\n"
       "An actuation model is a function that maps state x and joint-torque inputs u into generalized\n"
       "torques tau, where tau is also named as the actuation signal of our system.\n"
-      "The computation of the actuation signal and its partial derivatives are mainly carry on\n"
+      "The computation of the actuation signal and its partial derivatives are mainly carried out\n"
       "inside calc() and calcDiff(), respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, int>(bp::args("self", "state", "nu"),
                                                       "Initialize the actuation model.\n\n"

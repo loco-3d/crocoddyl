@@ -22,7 +22,7 @@ void exposeDifferentialActionContactInvDynamics() {
         bp::class_<DifferentialActionModelContactInvDynamics, bp::bases<DifferentialActionModelAbstract> >(
             "DifferentialActionModelContactInvDynamics",
             "Differential action model for inverse dynamics in multibody systems with contacts.\n\n"
-            "This class implements forward kinematic with contact holonomic constraints (defined at the acceleration\n"
+            "This class implements forward kinematic with holonomic contact constraints (defined at the acceleration\n"
             "level) and inverse-dynamics computation using the Recursive Newton Euler Algorithm (RNEA)\n"
             "On the other hand, the stack of cost and constraint functions are implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
@@ -43,7 +43,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 const Eigen::Ref<const Eigen::VectorXd>&)>("calc", &DifferentialActionModelContactInvDynamics::calc,
                                                            bp::args("self", "data", "x", "u"),
                                                            "Compute the next state, cost value and constraints.\n\n"
-                                                           ":param data: inverse-dynamics action data\n"
+                                                           ":param data: contact inverse-dynamics data\n"
                                                            ":param x: state point (dim. state.nx)\n"
                                                            ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
@@ -58,7 +58,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 "It computes the partial derivatives of the differential multibody system, the cost and constraint\n"
                 "functions. It assumes that calc has been run first. This function builds a quadratic approximation\n"
                 "of the action model (i.e., dynamical system, cost and constraint functions).\n"
-                ":param data: inverse-dynamics action data\n"
+                ":param data: contact inverse-dynamics data\n"
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
@@ -81,7 +81,7 @@ void exposeDifferentialActionContactInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "entire constraint model");
+                          "constraint model manager");
 
     bp::register_ptr_to_python<
         boost::shared_ptr<DifferentialActionModelContactInvDynamics::ResidualModelActuation> >();
