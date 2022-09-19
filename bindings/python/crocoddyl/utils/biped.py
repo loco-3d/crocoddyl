@@ -237,10 +237,9 @@ class SimpleBipedGaitProblem:
         stateReg = crocoddyl.CostModelResidual(self.state, stateActivation, stateResidual)
         if self._fwddyn:
             ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         else:
             ctrlResidual = crocoddyl.ResidualModelJointTorque(self.state, self.actuation, nu)
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
 
