@@ -152,6 +152,7 @@ void register_impulse_model_unit_tests(ImpulseModelTypes::Type impulse_type, Pin
 
 bool init_function() {
   for (size_t impulse_type = 0; impulse_type < ImpulseModelTypes::all.size(); ++impulse_type) {
+    // we do not want to test the impulses with Hector -- a quadrotor.
     for (size_t model_type = 1; model_type < PinocchioModelTypes::all.size(); ++model_type) {
       register_impulse_model_unit_tests(ImpulseModelTypes::all[impulse_type], PinocchioModelTypes::all[model_type]);
     }
