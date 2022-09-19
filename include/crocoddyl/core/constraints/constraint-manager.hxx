@@ -201,7 +201,9 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
                  << "it doesn't match the number of constraint datas and models");
   }
   assert_pretty(static_cast<std::size_t>(data->Gx.rows()) == *ng_,
-                "the dimension of data.Gx,u doesn't correspond with ng=" << *ng_);
+                "the dimension of data.Gx doesn't correspond with ng=" << *ng_);
+  assert_pretty(static_cast<std::size_t>(data->Gu.rows()) == *ng_,
+                "the dimension of data.Gu doesn't correspond with ng=" << *ng_);
   assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
                 "the dimension of data.Hx,u doesn't correspond with nh=" << *nh_);
   const std::size_t ndx = state_->get_ndx();

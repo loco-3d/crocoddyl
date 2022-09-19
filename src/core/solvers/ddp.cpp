@@ -336,6 +336,8 @@ void SolverDDP::forwardPass(const double steplength) {
 }
 
 void SolverDDP::computeGains(const std::size_t t) {
+  assert_pretty(t < problem_->get_T(),
+                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()));
   START_PROFILER("SolverDDP::computeGains");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
