@@ -40,8 +40,8 @@ namespace crocoddyl {
  * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
  * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians, respectively. Additionally, it is
- * important remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
- * need to run first `calc()`.
+ * important to note that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
+ * need to first run `calc()`.
  *
  * \sa `ActivationModelAbstractTpl`, `ResidualModelAbstractTpl` `calc()`, `calcDiff()`, `createData()`
  */
@@ -173,7 +173,7 @@ class CostModelAbstractTpl {
    * @brief Create the cost data
    *
    * The default data contains objects to store the values of the cost, residual vector and their derivatives (first
-   * and second order derivatives). However, it is possible to specialized this function if we need to create
+   * and second order derivatives). However, it is possible to specialize this function if we need to create
    * additional data, for instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector

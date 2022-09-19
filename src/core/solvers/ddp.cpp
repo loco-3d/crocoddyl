@@ -143,6 +143,9 @@ double SolverDDP::tryStep(const double steplength) {
 }
 
 double SolverDDP::stoppingCriteria() {
+  // This stopping criteria represents the expected reduction in the value function.
+  // If this reduction is less than a certain threshold, then the algorithm reaches the local minimum.
+  // For more details, see C. Mastalli et al. "Inverse-dynamics MPC via Nullspace Resolution".
   stop_ = abs(d_[0] + 0.5 * d_[1]);
   return stop_;
 }

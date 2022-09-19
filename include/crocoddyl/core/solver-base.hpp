@@ -145,7 +145,7 @@ class SolverAbstract {
   /**
    * @brief Compute the feasibility of the equality constraints for the current guess
    *
-   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
+   * The feasibility can be computed using the l-1 and l-inf norms.
    * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
    */
   double computeEqualityFeasibility();
@@ -342,7 +342,7 @@ class SolverAbstract {
   std::size_t iter_;      //!< Number of iteration performed by the solver
   double th_gaptol_;      //!< Threshold limit to check non-zero gaps
   double ffeas_;          //!< Feasibility of the dynamic constraints
-  double hfeas_;          //!< Feasibility of the equality contraints
+  double hfeas_;          //!< Feasibility of the equality constraints
   bool inffeas_;     //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
                      //!< the l-1 norm
   double tmp_feas_;  //!< Temporal variables used for computed the feasibility

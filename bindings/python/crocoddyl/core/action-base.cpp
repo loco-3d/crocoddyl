@@ -30,7 +30,7 @@ void exposeActionAbstract() {
       "An action model combines dynamics and cost data. Each node, in our optimal control\n"
       "problem, is described through an action model. Every time that we want to describe\n"
       "a problem, we need to provide ways of computing the dynamics, cost functions and their\n"
-      "derivatives. These computations are mainly carrying on inside calc() and calcDiff(),\n"
+      "derivatives. These computations are mainly carried out inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, std::size_t,
                bp::optional<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t> >(
@@ -207,31 +207,33 @@ void exposeActionAbstract() {
       .add_property("r", bp::make_getter(&ActionDataAbstract::r, bp::return_internal_reference<>()),
                     bp::make_setter(&ActionDataAbstract::r), "cost residual")
       .add_property("Fx", bp::make_getter(&ActionDataAbstract::Fx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Fx), "Jacobian of the dynamics")
+                    bp::make_setter(&ActionDataAbstract::Fx), "Jacobian of the dynamics w.r.t. the state")
       .add_property("Fu", bp::make_getter(&ActionDataAbstract::Fu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Fu), "Jacobian of the dynamics")
+                    bp::make_setter(&ActionDataAbstract::Fu), "Jacobian of the dynamics w.r.t. the control")
       .add_property("Lx", bp::make_getter(&ActionDataAbstract::Lx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Lx), "Jacobian of the cost")
+                    bp::make_setter(&ActionDataAbstract::Lx), "Jacobian of the cost w.r.t. the state")
       .add_property("Lu", bp::make_getter(&ActionDataAbstract::Lu, bp::return_internal_reference<>()),
                     bp::make_setter(&ActionDataAbstract::Lu), "Jacobian of the cost")
       .add_property("Lxx", bp::make_getter(&ActionDataAbstract::Lxx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Lxx), "Hessian of the cost")
+                    bp::make_setter(&ActionDataAbstract::Lxx), "Hessian of the cost w.r.t. the state")
       .add_property("Lxu", bp::make_getter(&ActionDataAbstract::Lxu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost")
+                    bp::make_setter(&ActionDataAbstract::Lxu), "Hessian of the cost w.r.t. the state and control")
       .add_property("Luu", bp::make_getter(&ActionDataAbstract::Luu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost")
+                    bp::make_setter(&ActionDataAbstract::Luu), "Hessian of the cost w.r.t. the control")
       .add_property("g", bp::make_getter(&ActionDataAbstract::g, bp::return_internal_reference<>()),
                     bp::make_setter(&ActionDataAbstract::g), "inequality constraint values")
       .add_property("Gx", bp::make_getter(&ActionDataAbstract::Gx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Gx), "Jacobian of the inequality constraint")
+                    bp::make_setter(&ActionDataAbstract::Gx), "Jacobian of the inequality constraint w.r.t. the state")
       .add_property("Gu", bp::make_getter(&ActionDataAbstract::Gu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Gu), "Jacobian of the inequality constraint")
+                    bp::make_setter(&ActionDataAbstract::Gu),
+                    "Jacobian of the inequality constraint w.r.t. the control")
       .add_property("h", bp::make_getter(&ActionDataAbstract::h, bp::return_internal_reference<>()),
                     bp::make_setter(&ActionDataAbstract::h), "equality constraint values")
       .add_property("Hx", bp::make_getter(&ActionDataAbstract::Hx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Hx), "Jacobian of the equality constraint")
+                    bp::make_setter(&ActionDataAbstract::Hx), "Jacobian of the equality constraint w.r.t. the state")
       .add_property("Hu", bp::make_getter(&ActionDataAbstract::Hu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Hu), "Jacobian of the equality constraint");
+                    bp::make_setter(&ActionDataAbstract::Hu),
+                    "Jacobian of the equality constraint w.r.t. the control");
 }
 
 }  // namespace python

@@ -23,14 +23,14 @@ namespace crocoddyl {
 /**
  * @brief Differential action model for contact inverse dynamics in multibody systems.
  *
- * This class implements forward kinematic with contact holonomic constraints (defined at the acceleration level) and
+ * This class implements forward kinematic with holonomic contact constraints (defined at the acceleration level) and
  * inverse-dynamics computation using the Recursive Newton Euler Algorithm (RNEA). The stack of cost and constraint
  * functions are implemented in `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively.
  * The acceleration and contact forces are decision variables defined as the control inputs, and the under-actuation
  * and contact constraint are under the name `tau` and its frame name, thus the user is not allow to use it.
  *
- * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * Additionally, it is important to note that `calcDiff()` computes the derivatives using the latest stored values by
+ * `calc()`. Thus, we need to first run `calc()`.
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -199,7 +199,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
-   * @brief Return the constraint model
+   * @brief Return the constraint model manager
    */
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 

@@ -28,13 +28,13 @@ namespace crocoddyl {
  * described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to
  * the tangent space with `ndx` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
  *
- * The main computations are carrying out in `calc()` and `calcDiff()` routines. `calc()` computes the
+ * The main computations are carried out in `calc()` and `calcDiff()` routines. `calc()` computes the
  * constraint residual and `calcDiff()` computes the Jacobians of the constraint function. Concretely speaking,
  * `calcDiff()` builds a linear approximation of the constraint function with the form:
  * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$, \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
  * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$. Additionally, it is
- * important remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
- * need to run first `calc()`.
+ * important to note that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
+ * need to first run `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -137,7 +137,7 @@ class ConstraintModelAbstractTpl {
    * @brief Create the constraint data
    *
    * The default data contains objects to store the values of the constraint, residual vector and their first
-   * derivatives. However, it is possible to specialized this function is we need to create additional data, for
+   * derivatives. However, it is possible to specialize this function is we need to create additional data, for
    * instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector

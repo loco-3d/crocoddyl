@@ -97,7 +97,7 @@ For the running models, we also include regularization terms that are important 
 
 We create a trajectory with 250 nodes using the `ShootingProblem` class.
 We decouple problem formulation and resoltion through this class.
-Note that in Crocoddyl we have the freedom to specialized each node with different cost functions, dynamics and constraints.
+Note that in Crocoddyl we have the freedom to specialize each node with different cost functions, dynamics and constraints.
 
 After that, we create our DDP solver and define a set of callbacks for analysis: display of iteration in Gepetto viewer, and print of iteration values.
 Finally, we have created custom plot functions for easily check of results.

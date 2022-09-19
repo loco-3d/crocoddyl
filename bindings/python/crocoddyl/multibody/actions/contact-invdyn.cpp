@@ -22,7 +22,7 @@ void exposeDifferentialActionContactInvDynamics() {
         bp::class_<DifferentialActionModelContactInvDynamics, bp::bases<DifferentialActionModelAbstract> >(
             "DifferentialActionModelContactInvDynamics",
             "Differential action model for inverse dynamics in multibody systems with contacts.\n\n"
-            "This class implements forward kinematic with contact holonomic constraints (defined at the acceleration\n"
+            "This class implements forward kinematic with holonomic contact constraints (defined at the acceleration\n"
             "level) and inverse-dynamics computation using the Recursive Newton Euler Algorithm (RNEA)\n"
             "On the other hand, the stack of cost and constraint functions are implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
@@ -97,7 +97,7 @@ void exposeDifferentialActionContactInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "entire constraint model");
+                          "constraint model manager");
 
     bp::register_ptr_to_python<
         boost::shared_ptr<DifferentialActionModelContactInvDynamics::ResidualModelActuation> >();

@@ -25,7 +25,7 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
       if (lb_(i) - ub_(i) > 0) {
-        throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
+        throw_pretty("Invalid argument: the upper bound is not equal to / higher than the lower bound.")
       }
     }
   }
@@ -256,13 +256,13 @@ const typename MathBaseTpl<Scalar>::VectorXs& ConstraintModelResidualTpl<Scalar>
 template <typename Scalar>
 void ConstraintModelResidualTpl<Scalar>::update_bounds(const VectorXs& lower, const VectorXs& upper) {
   if (((upper - lower).array() < 0.).any()) {
-    throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
+    throw_pretty("Invalid argument: the upper bound is not equal to / higher than the lower bound.")
   }
   if ((lower.array() == std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot containt a positive infinity value");
+    throw_pretty("Invalid argument: the lower bound cannot contain a positive infinity value");
   }
   if ((upper.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot containt a negative infinity value");
+    throw_pretty("Invalid argument: the lower bound cannot contain a negative infinity value");
   }
 
   // Update the information related to the bounds

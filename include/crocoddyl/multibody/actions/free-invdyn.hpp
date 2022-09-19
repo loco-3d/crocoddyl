@@ -161,7 +161,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
-   * @brief Return the constraint model
+   * @brief Return the constraint model manager
    */
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 

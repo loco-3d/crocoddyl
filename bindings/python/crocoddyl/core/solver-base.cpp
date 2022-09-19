@@ -57,7 +57,7 @@ void exposeSolverAbstract() {
       .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", "stepLength"),
            "Try a predefined step length and compute its cost improvement.\n\n"
            "It uses the search direction found by computeDirection to try a\n"
-           "determined step length; so you need to run first computeDirection.\n"
+           "determined step length; so you need to first run computeDirection.\n"
            "Additionally it returns the cost improvement along the predefined\n"
            "step length.\n"
            ":param stepLength: step length\n"
@@ -90,7 +90,7 @@ void exposeSolverAbstract() {
            "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
            "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
       .def("computeEqualityFeasibility", &SolverAbstract_wrap::computeEqualityFeasibility, bp::args("self"),
-           "Compute the feasibility of the inequality constraint for the current guess.\n\n"
+           "Compute the feasibility of the equality constraint for the current guess.\n\n"
            "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
            "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self", "callbacks"),

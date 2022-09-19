@@ -86,7 +86,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Register functions that take a pinocchio model, a pinocchio data, a state and a control.
-   * The updated data is used to evaluate of the gradient and hessian.
+   * The updated data is used to evaluate of the gradient and Hessian.
    *
    * @param reevals are the registered functions.
    */

@@ -21,7 +21,7 @@ void exposeResidualAbstract() {
       "Abstract class for residual models.\n\n"
       "A residual model defines a vector function r(x,u) in R^nr, where nr describes its dimension in the\n"
       "the Euclidean space. For each residual model, we need to provide ways of computing the residual\n"
-      "vector and its Jacobians. These computations are mainly carry on inside calc() and calcDiff(),\n"
+      "vector and its Jacobians. These computations are mainly carried out inside calc() and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t, bp::optional<bool, bool, bool> >(
           bp::args("self", "state", "nr", "nu", "q_dependent", "v_dependent", "u_dependent"),

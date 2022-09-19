@@ -76,7 +76,7 @@ void exposeDifferentialActionFreeInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelFreeInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "entire constraint model");
+                          "constraint model manager");
 
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics::ResidualModelActuation>>();
 

@@ -18,7 +18,7 @@ namespace crocoddyl {
 /**
  * @brief This class computes the numerical differentiation of a residual model.
  *
- * It computes Jacobian of the residual model via numerical differentiation, i.e., \f$\mathbf{R_x}\f$
+ * It computes the Jacobian of the residual model via numerical differentiation, i.e., \f$\mathbf{R_x}\f$
  * and \f$\mathbf{R_u}\f$ which denote the Jacobians of the residual function
  * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$.
  *
@@ -97,7 +97,7 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and hessian.
+   * The updated data is used to evaluate of the gradient and Hessian.
    *
    * @param reevals are the registered functions.
    */

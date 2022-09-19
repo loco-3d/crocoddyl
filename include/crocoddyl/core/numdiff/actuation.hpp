@@ -20,7 +20,7 @@ namespace crocoddyl {
 /**
  * @brief This class computes the numerical differentiation of an actuation model.
  *
- * It computes Jacobian of the residual model via numerical differentiation, i.e.,
+ * It computes the Jacobian of the residual model via numerical differentiation, i.e.,
  * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{x}}\f$ and
  * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{u}}\f$ which denote the Jacobians of the actuation function
  * \f$\boldsymbol{\tau}(\mathbf{x},\mathbf{u})\f$.

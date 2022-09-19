@@ -173,7 +173,7 @@ class CostModelSumTpl {
    * @brief Create the cost data
    *
    * The default data contains objects to store the values of the cost, residual vector and their derivatives (first
-   * and second order derivatives). However, it is possible to specialized this function is we need to create
+   * and second order derivatives). However, it is possible to specialize this function is we need to create
    * additional data, for instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector

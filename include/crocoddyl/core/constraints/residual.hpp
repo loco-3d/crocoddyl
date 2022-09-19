@@ -30,7 +30,7 @@ namespace crocoddyl {
  * a linear approximation of the constraint function with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
  * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
- * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
+ * Additionally, it is important to note that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `ConstraintModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -152,7 +152,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   using Base::unone_;
   VectorXs lb_;              //!< Lower bound of the constraint
   VectorXs ub_;              //!< Upper bound of the constraint
-  ArrayXi constraint_type_;  //!< Define the type of contraint: equality=0, inequality=1, lower_inequality=2,
+  ArrayXi constraint_type_;  //!< Define the type of constraint: equality=0, inequality=1, lower_inequality=2,
                              //!< upper_inequality=3, no_constraint=4
 };
 
