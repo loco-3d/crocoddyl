@@ -268,7 +268,8 @@ class ActionModelAbstractTpl {
    */
   void update_has_control_limits();
 
-  template <class Scalar> friend class ConstraintModelManagerTpl;
+  template <class Scalar>
+  friend class ConstraintModelManagerTpl;
 };
 
 template <typename _Scalar>
