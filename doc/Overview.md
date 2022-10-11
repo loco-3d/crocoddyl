@@ -3,14 +3,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Author: Carlos Mastalli, Rohan Budhiraja, Nicolas Mansard
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 -->
 
-\section OverviewIntro What is Crocoddyl?
+## What is Crocoddyl?
 
 <img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="250" padding="10"/>
 
@@ -24,10 +25,10 @@ It is one of the most efficient libraries for computing the optimal control with
 
 **Crocoddyl** is versatible:
 
- * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
+ * various optimal control solvers (DDP, FDDP, Box-FDDP, etc) - single and multi-shooting methods
  * analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * Euclidian and non-Euclidian geometry friendly (handle geometrical systems)
- * handle autonomous and nonautomous dynamical systems
+ * enables model predictive control in robots
  * numerical differentiation support
  * automatic differentiation support
 
@@ -36,7 +37,7 @@ It is one of the most efficient libraries for computing the optimal control with
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions)
- * C++ 98/11/14/17/20 compliant
+ * C++ 11/14/17/20 compliant
  * extensively tested
  * automatic code generation support
 
@@ -47,21 +48,17 @@ It is one of the most efficient libraries for computing the optimal control with
   </tr>
 </table>
 
-
 In this documentation, you will find the usual description of the library functionalities, a quick tutorial to catch over the mathematics behind the implementation, a bunch of examples about how to implement optimal control problems and a set of practical exercices for beginners.
 
 
-\section OverviewInstall How to install Crocoddyl?
+## Install How to install Crocoddyl?
 
-Crocoddyl is best installed from APT packaging on Ubuntu 16.04 and 18.04, from our repository.
-<-- On Mac OS X, we support the installation of Pinocchio through the Homebrew package manager. -->
+Crocoddyl can be installed using a number of different options: APT packaging on Ubuntu 18.04 and 20.04, conda, Pip and from source.
 On systems for which binaries are not provided, installation from source should be straightforward.
 Every release is validated in the main Linux distributions and Mac OS X.
 
-<!--The full installation procedure can be found on the Github Pages of the project:
-http://stack-of-tasks.github.io/pinocchio/download.html.-->
 
-\section OverviewSimple Simplest example with compilation command
+## Simplest example with compilation command
 
 We start with a simple optimal control formulation to reach a goal position give the end-effector.
 
@@ -103,7 +100,7 @@ After that, we create our DDP solver and define a set of callbacks for analysis:
 Finally, we have created custom plot functions for easily check of results.
 
 
-\section OverviewPython About Python wrappings
+## About Python wrappings
 
 Crocoddyl is written in C++, with a full template-based C++ API, for code generation and automatic differentiation purposes. All the functionalities are available in C++. Extension of the library should be preferably in C++.
 
@@ -119,14 +116,12 @@ Currently, the codegen and autodiff are only available in C++ interface. However
 
 Happy with Crocoddyl? Please cite us with the following format.
 
-### Easy solution: cite our open access paper
-The following is the preferred way to cite Crocoddyl or the feasibility-drive DDP solver.
-The paper is publicly available in ([ArXiv](https://arxiv.org/abs/1909.04947 "Carlos Mastalli et al - Crocoddyl paper")).
-
 \include mastalli-icra20.bib
 
+This paper is publicly available in ([ArXiv](https://arxiv.org/abs/1909.04947 "Carlos Mastalli et al - Crocoddyl paper")).
 
-\section OverviewConclu Where to go from here?
+
+## Where to go from here?
 
 This documentation is mostly composed of several examples and tutorials for newcomers, along with a technical documentation and a reference guide. If you want to make sure Crocoddyl matches your needs, you may first want to check the list of features. Several examples in Python will then directly give you the keys to implement the most classical applications based on a Crocoddyl library. For nonexperts, we also provide the main mathematical fundamentals of optimal control. A long tutorial in Python contains everything you need if you are not a Python expert and want to start with Crocoddyl. This tutorial was first written as course material for the MEMMO winter school.
 
