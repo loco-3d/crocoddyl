@@ -324,6 +324,26 @@ struct ConstraintDataManagerTpl {
     new (&Hu) Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
   }
 
+  template <class ActionModel, class ActionData>
+  void resize(ActionModel* const model, ActionData* const data) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t ng = model->get_ng();
+    const std::size_t nh = model->get_nh();
+    data->g.conservativeResize(ng);
+    data->Gx.conservativeResize(ng, ndx);
+    data->Gu.conservativeResize(ng, nu);
+    data->h.conservativeResize(nh);
+    data->Hx.conservativeResize(nh, ndx);
+    data->Hu.conservativeResize(nh, nu);
+    new (&g) Eigen::Map<VectorXs>(data->g.data(), ng);
+    new (&Gx) Eigen::Map<MatrixXs>(data->Gx.data(), ng, ndx);
+    new (&Gu) Eigen::Map<MatrixXs>(data->Gu.data(), ng, nu);
+    new (&h) Eigen::Map<VectorXs>(data->h.data(), nh);
+    new (&Hx) Eigen::Map<MatrixXs>(data->Hx.data(), nh, ndx);
+    new (&Hu) Eigen::Map<MatrixXs>(data->Hu.data(), nh, nu);
+  }
+
   VectorXs get_g() const { return g; }
   MatrixXs get_Gx() const { return Gx; }
   MatrixXs get_Gu() const { return Gu; }

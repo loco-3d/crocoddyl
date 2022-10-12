@@ -128,8 +128,6 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
                 "the dimension of data.g doesn't correspond with ng=" << *ng_);
   assert_pretty(static_cast<std::size_t>(data->h.size()) == *nh_,
                 "the dimension of data.h doesn't correspond with nh=" << *nh_);
-  data->g.setZero();
-  data->h.setZero();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
 
@@ -170,8 +168,6 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
                 "the dimension of data.g doesn't correspond with ng=" << *ng_);
   assert_pretty(static_cast<std::size_t>(data->h.size()) == *nh_,
                 "the dimension of data.h doesn't correspond with nh=" << *nh_);
-  data->g.setZero();
-  data->h.setZero();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
 
@@ -218,10 +214,6 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
                 "the dimension of data.Hx,u doesn't correspond with nh=" << *nh_);
   const std::size_t ndx = state_->get_ndx();
-  data->Gx.setZero();
-  data->Gu.setZero();
-  data->Hx.setZero();
-  data->Hu.setZero();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
 
@@ -265,10 +257,6 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   assert_pretty(static_cast<std::size_t>(data->Hx.rows()) == *nh_,
                 "the dimension of data.Hx,u doesn't correspond with nh=" << *nh_);
   const std::size_t ndx = state_->get_ndx();
-  data->Gx.setZero();
-  data->Gu.setZero();
-  data->Hx.setZero();
-  data->Hu.setZero();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
 

@@ -171,12 +171,22 @@ void exposeConstraintManager() {
                                         ":param model: total constraint model\n"
                                         ":param data: shared data")[bp::with_custodian_and_ward<1, 3>()])
       .def("shareMemory", &ConstraintDataManager::shareMemory<DifferentialActionDataAbstract>,
-           bp::args("self", "model"),
+           bp::args("self", "data"),
            "Share memory with a given differential action data\n\n"
            ":param model: differential action data that we want to share memory")
-      .def("shareMemory", &ConstraintDataManager::shareMemory<ActionDataAbstract>, bp::args("self", "model"),
+      .def("shareMemory", &ConstraintDataManager::shareMemory<ActionDataAbstract>, bp::args("self", "data"),
            "Share memory with a given action data\n\n"
            ":param model: action data that we want to share memory")
+      .def("resize", &ConstraintDataManager::resize<DifferentialActionModelAbstract, DifferentialActionDataAbstract>,
+           bp::args("self", "model", "data"),
+           "Resize the data given differential action data\n\n"
+           ":param model: differential action model that defines how to resize the data\n"
+           ":param data: differential action data that we want to resize")
+      .def("resize", &ConstraintDataManager::resize<ActionModelAbstract, ActionDataAbstract>,
+           bp::args("self", "model", "data"),
+           "Resize the data given action data\n\n"
+           ":param model: action model that defines how to resize the data\n"
+           ":param data: action data that we want to resize")
       .add_property(
           "constraints",
           bp::make_getter(&ConstraintDataManager::constraints, bp::return_value_policy<bp::return_by_value>()),
