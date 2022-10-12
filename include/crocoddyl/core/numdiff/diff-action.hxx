@@ -97,17 +97,56 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     d->dx(ix) = disturbance_;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
-    // dynamics
-    const VectorXs& xn = d->data_x[ix]->xout;
-    const Scalar c = d->data_x[ix]->cost;
-    data->Fx.col(ix) = (xn - xn0) / disturbance_;
-    // cost
-    data->Lx(ix) = (c - c0) / disturbance_;
+
+    const VectorXs& xp = d->data_x[ix]->xout;
+    const Scalar cp = d->data_x[ix]->cost;
+    data->Fx.col(ix) = (xp - xn0) / disturbance_;
+
+    data->Lx(ix) = (cp - c0) / disturbance_;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / disturbance_;
-    // constraint
-    data->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
-    data->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
+    
+    // The finite difference of the partial derivatives 
+    //
+    //  First order derivatives
+    //  Lx[i] = (L(x+ \delta x) - L(x))/disturbance                   # this formula has a higher order terms of O(\delta x)
+    //  Lx[i] = (L(x+ \delta x) - L(x- \delta x)) / disturbance       # this formula has a higher order terms of O(\delta x^2)
+
+    //  Lxx[i,i] = (Lx(x_i+\delta x_i)-2*Lx(x_i)+Lx(x_i-\delta x_i))/disturbance**2
+    //  Lxx[i,j] = (Lx(x_i+\delta x_i, x_j+\delta x_j) - Lx(x_i+\delta x_i, x_j) - Lx(x_i, x_j+\delta x_j) + Lx(x_i, x_j)) /  (delta x_i *delta x_j)      #this formula has a higher order terms of O(\delta x)
+    //  One can write a similar formula for the finite difference with O(delta x**2) but from computation time perspective the above formula is more efficient as we can reuse 2 terms
+
+    // d->dx(ix) = -disturbance_;
+    model_->get_state()->integrate(x, -d->dx, d->xp); 
+    model_->calc(d->data_x[ix], d->xp, u);
+    data->Lxx(ix,ix) = (d->data_x[ix]->cost + cp - 2*c0)/ (disturbance_*disturbance_);    
+    std::cout<<"Here is the value of ix :"<<ix<<"\n";
+
+    for (std::size_t jx = ix+1; jx < state_->get_ndx(); ++jx) {
+      
+      std::cout<<"Here is the value of jx :"<<jx<<"\n";
+
+      d->dx(jx) = disturbance_;
+      model_->get_state()->integrate(x, d->dx, d->xp); 
+      model_->calc(d->data_x[ix], d->xp, u);
+      const Scalar c_pp = d->data_x[ix]->cost;  //cost due to positive disturbance in both directions
+      std::cout<<"Here is the value of dx :"<<d->dx(jx)<<"\n";
+
+      d->dx(ix) = 0.0;
+      model_->get_state()->integrate(x, d->dx, d->xp); 
+      model_->calc(d->data_x[ix], d->xp, u);
+      const Scalar c_zp = d->data_x[ix]->cost;  //cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+      std::cout<<"Here is the value of dx :"<<d->dx(jx)<<"\n";
+      std::cout<<"Here is the value of c,  c_pp, c_zp :"<<cp << c_pp << c_zp<<"\n";
+    
+      data->Lxx(ix,jx) = (c_pp - c_zp - cp + c0)/ (disturbance_*disturbance_);
+      
+      data->Lxx(jx,ix) = data->Lxx(ix,jx); // can also be implemented at the end by Lxx = Lxx.T
+      d->dx(ix) = disturbance_;
+      d->dx(jx) = 0.0;
+    }
+
     d->dx(ix) = 0.0;
+
   }
 
   // Computing the d action(x,u) / du
@@ -117,25 +156,55 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->calc(d->data_u[iu], x, u + d->du);
     // dynamics
     const VectorXs& xn = d->data_u[iu]->xout;
-    const Scalar c = d->data_u[iu]->cost;
+    const Scalar cp = d->data_u[iu]->cost;
     data->Fu.col(iu) = (xn - xn0) / disturbance_;
-    // cost
-    data->Lu(iu) = (c - c0) / disturbance_;
+
+    data->Lu(iu) = (cp - c0) / disturbance_;
     d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / disturbance_;
-    // constraint
-    data->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
-    data->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
+
+    // We can apply the same formulas for finite difference as above
+
+    // d->du(iu) = -disturbance_; 
+    model_->calc(d->data_u[iu], d->xp, u- d->du);
+    data->Luu(iu,iu) = (d->data_u[iu]->cost + cp - 2*c0)/ (disturbance_*disturbance_);    
+    std::cout<<"Here is the value of iu :"<<iu<<"\n";
+
+    for (std::size_t ju = iu+1; ju < model_->get_nu(); ++ju) {
+      
+      std::cout<<"Here is the value of ju :"<<ju<<"\n";
+
+      d->du(ju) = disturbance_;
+
+      model_->calc(d->data_u[iu], d->xp, u + d->du);
+      const Scalar c_pp = d->data_u[iu]->cost;  //cost due to positive disturbance in both directions
+      std::cout<<"Here is the value of du :"<<d->du<<"\n";
+
+      d->du(iu) = 0.0;
+
+      model_->calc(d->data_u[iu], d->xp, u + d->du);
+      const Scalar c_zp = d->data_u[iu]->cost;  //cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+      std::cout<<"Here is the value of du :"<<d->du<<"\n";
+      std::cout<<"Here is the value of c,  c_pp, c_zp :"<<cp << c_pp << c_zp<<"\n";
+    
+      data->Luu(iu,ju) = (c_pp - c_zp - cp + c0)/ (disturbance_*disturbance_);
+      
+      data->Luu(ju,iu) = data->Luu(iu,ju); // can also be implemented at the end by Luu = Luu.T
+      d->du(iu) = disturbance_;
+      d->du(ju) = 0.0;
+    }
+
     d->du(iu) = 0.0;
+
   }
 
   if (with_gauss_approx_) {
-    data->Lxx = d->Rx.transpose() * d->Rx;
+    // data->Lxx = d->Rx.transpose() * d->Rx;
     data->Lxu = d->Rx.transpose() * d->Ru;
-    data->Luu = d->Ru.transpose() * d->Ru;
+    // data->Luu = d->Ru.transpose() * d->Ru;
   } else {
-    data->Lxx.setZero();
+    // data->Lxx.setZero();
     data->Lxu.setZero();
-    data->Luu.setZero();
+    // data->Luu.setZero();
   }
 }
 
