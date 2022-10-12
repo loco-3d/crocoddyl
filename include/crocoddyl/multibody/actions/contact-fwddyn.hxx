@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,6 +128,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
+    d->constraints->resize(this, d);
     constraints_->calc(d->constraints, x, u);
   }
 }
@@ -150,6 +152,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
+    d->constraints->resize(this, d);
     constraints_->calc(d->constraints, x);
   }
 }
