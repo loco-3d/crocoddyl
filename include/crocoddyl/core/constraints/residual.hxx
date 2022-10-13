@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,9 @@ template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                                boost::shared_ptr<ResidualModelAbstract> residual,
                                                                const VectorXs& lower, const VectorXs& upper)
-    : Base(state, residual,
-           2 * ((upper - lower).array() != 0.).count() -
-               (upper.array() == std::numeric_limits<Scalar>::infinity()).count() -
-               (lower.array() == -std::numeric_limits<Scalar>::infinity()).count(),
-           ((upper - lower).array() == 0.).count()),
-      lb_(lower),
-      ub_(upper),
-      constraint_type_(residual->get_nr()) {
+    : Base(state, residual, residual->get_nr(), 0) {
+  lb_ = lower;
+  ub_ = upper;
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
       if (lb_(i) - ub_(i) > 0) {
@@ -29,24 +24,20 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr
       }
     }
   }
-  if ((lb_.array() == std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot contain a positive infinity value");
+  if ((lb_.array() == std::numeric_limits<Scalar>::infinity()).any() ||
+      (lb_.array() == std::numeric_limits<Scalar>::max()).any()) {
+    throw_pretty("Invalid argument: the lower bound cannot contain a positive infinity/max value");
   }
-  if ((ub_.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot contain a negative infinity value");
+  if ((ub_.array() == -std::numeric_limits<Scalar>::infinity()).any() ||
+      (ub_.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
+    throw_pretty("Invalid argument: the lower bound cannot contain a negative infinity/max value");
   }
-  updateConstraintType();
 }
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                                boost::shared_ptr<ResidualModelAbstract> residual)
-    : Base(state, residual, 0, residual->get_nr()),
-      lb_(VectorXs::Zero(nh_)),
-      ub_(VectorXs::Zero(nh_)),
-      constraint_type_(residual->get_nr()) {
-  constraint_type_ = 0;
-}
+    : Base(state, residual, 0, residual->get_nr()) {}
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::~ConstraintModelResidualTpl() {}
@@ -59,25 +50,7 @@ void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<Constraint
   residual_->calc(data->residual, x, u);
 
   // Fill the residual values for its corresponding type of constraint
-  std::size_t nh_i = 0;
-  std::size_t ng_i = 0;
-  const std::size_t nr = residual_->get_nr();
-  for (std::size_t i = 0; i < nr; ++i) {
-    if (constraint_type_(i) == 0) {  // equality constraint
-      data->h(nh_i) = data->residual->r(i) - ub_(i);
-      ++nh_i;
-    } else if (constraint_type_(i) == 1) {  // inequality constraint
-      data->g(ng_i) = data->residual->r(i) - ub_(i);
-      data->g(ng_i + 1) = lb_(i) - data->residual->r(i);
-      ng_i += 2;
-    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
-      data->g(ng_i) = lb_(i) - data->residual->r(i);
-      ++ng_i;
-    } else if (constraint_type_(i) == 3) {
-      data->g(ng_i) = data->residual->r(i) - ub_(i);
-      ++ng_i;
-    }
-  }
+  updateCalc(data);
 }
 
 template <typename Scalar>
@@ -87,25 +60,7 @@ void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<Constraint
   residual_->calc(data->residual, x);
 
   // Fill the residual values for its corresponding type of constraint
-  std::size_t nh_i = 0;
-  std::size_t ng_i = 0;
-  const std::size_t nr = residual_->get_nr();
-  for (std::size_t i = 0; i < nr; ++i) {
-    if (constraint_type_(i) == 0) {  // equality constraint
-      data->h(nh_i) = data->residual->r(i) - ub_(i);
-      ++nh_i;
-    } else if (constraint_type_(i) == 1) {  // inequality constraint
-      data->g(ng_i) = data->residual->r(i) - ub_(i);
-      data->g(ng_i + 1) = lb_(i) - data->residual->r(i);
-      ng_i += 2;
-    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
-      data->g(ng_i) = lb_(i) - data->residual->r(i);
-      ++ng_i;
-    } else if (constraint_type_(i) == 3) {
-      data->g(ng_i) = data->residual->r(i) - ub_(i);
-      ++ng_i;
-    }
-  }
+  updateCalc(data);
 }
 
 template <typename Scalar>
@@ -116,68 +71,7 @@ void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<Constr
   residual_->calcDiff(data->residual, x, u);
 
   // Fill the residual values for its corresponding type of constraint
-  std::size_t nh_i = 0;
-  std::size_t ng_i = 0;
-  const std::size_t nv = state_->get_nv();
-  const std::size_t nr = residual_->get_nr();
-  const bool is_rq = residual_->get_q_dependent();
-  const bool is_rv = residual_->get_v_dependent();
-  const bool is_ru = residual_->get_u_dependent() || nu_ == 0;
-  for (std::size_t i = 0; i < nr; ++i) {
-    if (constraint_type_(i) == 0) {  // equality constraint
-      if (is_rq && is_rv) {
-        data->Hx.row(nh_i) = data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Hx.row(nh_i).head(nv) = data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Hx.row(nh_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-      }
-      if (is_ru) {
-        data->Hu.row(nh_i) = data->residual->Ru.row(i);
-      }
-      ++nh_i;
-    } else if (constraint_type_(i) == 1) {  // inequality constraint
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = data->residual->Rx.row(i);
-        data->Gx.row(ng_i + 1) = -data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
-        data->Gx.row(ng_i + 1).head(nv) = -data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-        data->Gx.row(ng_i + 1).tail(nv) = -data->residual->Rx.row(i).tail(nv);
-      }
-      if (is_ru) {
-        data->Gu.row(ng_i) = data->residual->Ru.row(i);
-        data->Gu.row(ng_i + 1) = -data->residual->Ru.row(i);
-      }
-      ng_i += 2;
-    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = -data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = -data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = -data->residual->Rx.row(i).tail(nv);
-      }
-      if (is_ru) {
-        data->Gu.row(ng_i) = -data->residual->Ru.row(i);
-      }
-      ++ng_i;
-    } else if (constraint_type_(i) == 3) {
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-      }
-      if (is_ru) {
-        data->Gu.row(ng_i) = data->residual->Ru.row(i);
-      }
-      ++ng_i;
-    }
-  }
+  updateCalcDiff(data);
 }
 
 template <typename Scalar>
@@ -187,54 +81,7 @@ void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<Constr
   residual_->calcDiff(data->residual, x);
 
   // Fill the residual values for its corresponding type of constraint
-  std::size_t nh_i = 0;
-  std::size_t ng_i = 0;
-  const std::size_t nv = state_->get_nv();
-  const std::size_t nr = residual_->get_nr();
-  const bool is_rq = residual_->get_q_dependent();
-  const bool is_rv = residual_->get_v_dependent();
-  for (std::size_t i = 0; i < nr; ++i) {
-    if (constraint_type_(i) == 0) {  // equality constraint
-      if (is_rq && is_rv) {
-        data->Hx.row(nh_i) = data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Hx.row(nh_i).head(nv) = data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Hx.row(nh_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-      }
-      ++nh_i;
-    } else if (constraint_type_(i) == 1) {  // inequality constraint
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = data->residual->Rx.row(i);
-        data->Gx.row(ng_i + 1) = -data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
-        data->Gx.row(ng_i + 1).head(nv) = -data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-        data->Gx.row(ng_i + 1).tail(nv) = -data->residual->Rx.row(i).tail(nv);
-      }
-      ng_i += 2;
-    } else if (constraint_type_(i) == 2) {  // lower inequality constraint
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = -data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = -data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = -data->residual->Rx.row(i).tail(nv);
-      }
-      ++ng_i;
-    } else if (constraint_type_(i) == 3) {
-      if (is_rq && is_rv) {
-        data->Gx.row(ng_i) = data->residual->Rx.row(i);
-      } else if (is_rq) {
-        data->Gx.row(ng_i).head(nv) = data->residual->Rx.row(i).head(nv);
-      } else if (is_rv) {
-        data->Gx.row(ng_i).tail(nv) = data->residual->Rx.row(i).tail(nv);
-      }
-      ++ng_i;
-    }
-  }
+  updateCalcDiff(data);
 }
 
 template <typename Scalar>
@@ -244,52 +91,59 @@ boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> > ConstraintModelResidualTpl
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ConstraintModelResidualTpl<Scalar>::get_ub() const {
-  return ub_;
+void ConstraintModelResidualTpl<Scalar>::updateCalc(const boost::shared_ptr<ConstraintDataAbstract>& data) {
+  switch (type_) {
+    case ConstraintType::Inequality:
+      data->g = data->residual->r;
+      break;
+    case ConstraintType::Equality:
+      data->h = data->residual->r;
+      break;
+    case ConstraintType::Both:  // this condition is not supported and possible
+      break;
+  }
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ConstraintModelResidualTpl<Scalar>::get_lb() const {
-  return lb_;
-}
-
-template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::update_bounds(const VectorXs& lower, const VectorXs& upper) {
-  if (((upper - lower).array() < 0.).any()) {
-    throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
-  }
-  if ((lower.array() == std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot containt a positive infinity value");
-  }
-  if ((upper.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot containt a negative infinity value");
-  }
-
-  // Update the information related to the bounds
-  ng_ = 2 * ((upper - lower).array() != 0.).count() -
-        (upper.array() == std::numeric_limits<Scalar>::infinity()).count() -
-        (lower.array() == -std::numeric_limits<Scalar>::infinity()).count();
-  nh_ = ((upper - lower).array() == 0.).count();
-  lb_ = lower;
-  ub_ = upper;
-  updateConstraintType();
-}
-
-template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::updateConstraintType() {
-  const std::size_t nr = residual_->get_nr();
-  for (std::size_t i = 0; i < nr; ++i) {
-    if (ub_(i) - lb_(i) == 0.) {
-      constraint_type_(i) = 0;
-    } else if (!std::isinf(lb_(i)) && !std::isinf(ub_(i))) {
-      constraint_type_(i) = 1;
-    } else if (std::isinf(lb_(i)) && std::isinf(ub_(i))) {
-      constraint_type_(i) = 4;
-    } else if (std::isinf(ub_(i))) {
-      constraint_type_(i) = 2;
-    } else {
-      constraint_type_(i) = 3;
-    }
+void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data) {
+  const bool is_rq = residual_->get_q_dependent();
+  const bool is_rv = residual_->get_v_dependent();
+  const bool is_ru = residual_->get_u_dependent() || nu_ == 0;
+  switch (type_) {
+    case ConstraintType::Inequality:
+      if (is_rq && is_rv) {
+        data->Gx = data->residual->Rx;
+      } else if (is_rq) {
+        const std::size_t nv = state_->get_nv();
+        data->Gx.leftCols(nv) = data->residual->Rx.leftCols(nv);
+        data->Gx.rightCols(nv).setZero();
+      } else if (is_rv) {
+        const std::size_t nv = state_->get_nv();
+        data->Gx.leftCols(nv).setZero();
+        data->Gx.rightCols(nv) = data->residual->Rx.rightCols(nv);
+      }
+      if (is_ru) {
+        data->Gu = data->residual->Ru;
+      }
+      break;
+    case ConstraintType::Equality:
+      if (is_rq && is_rv) {
+        data->Hx = data->residual->Rx;
+      } else if (is_rq) {
+        const std::size_t nv = state_->get_nv();
+        data->Hx.leftCols(nv) = data->residual->Rx.leftCols(nv);
+        data->Hx.rightCols(nv).setZero();
+      } else if (is_rv) {
+        const std::size_t nv = state_->get_nv();
+        data->Hx.leftCols(nv).setZero();
+        data->Hx.rightCols(nv) = data->residual->Rx.rightCols(nv);
+      }
+      if (is_ru) {
+        data->Hu = data->residual->Ru;
+      }
+      break;
+    case ConstraintType::Both:  // this condition is not supported and possible
+      break;
   }
 }
 

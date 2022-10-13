@@ -154,6 +154,16 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the impulse model
    */
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
@@ -211,6 +221,8 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::g_lb_;   //!< Lower bound of the inequality constraints
+  using Base::g_ub_;   //!< Upper bound of the inequality constraints
   using Base::state_;  //!< Model of the state
 
  private:

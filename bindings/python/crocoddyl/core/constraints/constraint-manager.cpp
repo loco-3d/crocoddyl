@@ -158,6 +158,10 @@ void exposeConstraintManager() {
           "inactive_set",
           bp::make_function(&ConstraintModelManager::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
           "name of the inactive set of constraint items")
+      .add_property("g_lb", bp::make_function(&ConstraintModelManager::get_lb, bp::return_internal_reference<>()),
+                    "lower bound of the inequality constraints")
+      .add_property("g_ub", bp::make_function(&ConstraintModelManager::get_ub, bp::return_internal_reference<>()),
+                    "upper bound of the inequality constraints")
       .def("getConstraintStatus", &ConstraintModelManager::getConstraintStatus, bp::args("self", "name"),
            "Return the constraint status of a given constraint name.\n\n"
            ":param name: constraint name")

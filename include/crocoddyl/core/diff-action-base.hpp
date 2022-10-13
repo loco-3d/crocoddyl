@@ -235,6 +235,16 @@ class DifferentialActionModelAbstractTpl {
   const boost::shared_ptr<StateAbstract>& get_state() const;
 
   /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the control lower bound
    */
   const VectorXs& get_u_lb() const;
@@ -281,6 +291,8 @@ class DifferentialActionModelAbstractTpl {
   std::size_t* nh_;                         //!< Number of equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
+  VectorXs g_lb_;                           //!< Lower bound of the inequality constraints
+  VectorXs g_ub_;                           //!< Lower bound of the inequality constraints
   VectorXs u_lb_;                           //!< Lower control limits
   VectorXs u_ub_;                           //!< Upper control limits
   bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite

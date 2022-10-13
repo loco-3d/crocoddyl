@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,10 +47,9 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
   typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBaseTpl<std::size_t>::ArrayXs ArrayXi;
 
   /**
-   * @brief Initialize the residual constraint model
+   * @brief Initialize the residual constraint model as an inequality constraint
    *
    * @param[in] state       State of the multibody system
    * @param[in] residual    Residual model
@@ -62,7 +61,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
                              const VectorXs& upper);
 
   /**
-   * @brief Initialize the residual constraint model as equality one
+   * @brief Initialize the residual constraint model as an equality constraint
    *
    * @param[in] state       State of the multibody system
    * @param[in] residual    Residual model
@@ -119,21 +118,6 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the upper bound of the friction cone
-   */
-  const VectorXs& get_ub() const;
-
-  /**
-   * @brief Return the lower bound of the friction cone
-   */
-  const VectorXs& get_lb() const;
-
-  /**
-   * @brief Update the lower and upper bounds the upper bound of the friction cone
-   */
-  void update_bounds(const VectorXs& lower, const VectorXs& upper);
-
-  /**
    * @brief Print relevant information of the cost-residual model
    *
    * @param[out] os  Output stream object
@@ -141,19 +125,19 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  private:
-  void updateConstraintType();
+  void updateCalc(const boost::shared_ptr<ConstraintDataAbstract>& data);
+  void updateCalcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data);
 
  protected:
+  using Base::lb_;
   using Base::ng_;
   using Base::nh_;
   using Base::nu_;
   using Base::residual_;
   using Base::state_;
+  using Base::type_;
+  using Base::ub_;
   using Base::unone_;
-  VectorXs lb_;              //!< Lower bound of the constraint
-  VectorXs ub_;              //!< Upper bound of the constraint
-  ArrayXi constraint_type_;  //!< Define the type of contraint: equality=0, inequality=1, lower_inequality=2,
-                             //!< upper_inequality=3, no_constraint=4
 };
 
 template <typename _Scalar>

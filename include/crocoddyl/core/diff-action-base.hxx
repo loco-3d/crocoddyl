@@ -29,6 +29,8 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(b
       nh_(&nh_internal_),
       state_(state),
       unone_(VectorXs::Zero(nu)),
+      g_lb_(VectorXs::Constant(ng, -std::numeric_limits<Scalar>::infinity())),
+      g_ub_(VectorXs::Constant(ng, std::numeric_limits<Scalar>::infinity())),
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
@@ -129,6 +131,16 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
 template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
   return state_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_lb() const {
+  return g_lb_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_ub() const {
+  return g_ub_;
 }
 
 template <typename Scalar>

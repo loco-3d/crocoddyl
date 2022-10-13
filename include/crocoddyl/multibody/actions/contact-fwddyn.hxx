@@ -296,6 +296,24 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::print(std::ostream& o
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
 pinocchio::ModelTpl<Scalar>& DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }

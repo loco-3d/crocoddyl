@@ -70,6 +70,8 @@ class ConstraintModelManagerTpl {
   typedef ConstraintModelAbstractTpl<Scalar> ConstraintModelAbstract;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
+  typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
   typedef ConstraintItemTpl<Scalar> ConstraintItem;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -221,6 +223,16 @@ class ConstraintModelManagerTpl {
   const std::set<std::string>& get_inactive_set() const;
 
   /**
+   * @brief Return the state lower bound
+   */
+  const VectorXs& get_lb() const;
+
+  /**
+   * @brief Return the state upper bound
+   */
+  const VectorXs& get_ub() const;
+
+  /**
    * @brief Return the status of a given constraint name
    *
    * @param[in] name  Constraint name
@@ -234,7 +246,7 @@ class ConstraintModelManagerTpl {
    *
    * @param model  Action model
    */
-  void shareDimensions(ActionModelAbstractTpl<Scalar>* const model);
+  void shareDimensions(ActionModelAbstract* const model);
 
   /**
    * @brief Share the dimensions with a differential action model
@@ -243,7 +255,7 @@ class ConstraintModelManagerTpl {
    *
    * @param model  Action model
    */
-  void shareDimensions(DifferentialActionModelAbstractTpl<Scalar>* const model);
+  void shareDimensions(DifferentialActionModelAbstract* const model);
 
   /**
    * @brief Print information on the stack of constraints
@@ -254,6 +266,8 @@ class ConstraintModelManagerTpl {
  private:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
   ConstraintModelContainer constraints_;    //!< Stack of constraint items
+  VectorXs lb_;                             //!< Lower bound of the constraint
+  VectorXs ub_;                             //!< Upper bound of the constraint
   std::size_t nu_;                          //!< Dimension of the control input
   std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
   std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints

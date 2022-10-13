@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,12 @@ namespace python {
 
 void exposeConstraintAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelAbstract> >();
+
+  bp::enum_<ConstraintType>("ConstraintType")
+      .value("Inequality", Inequality)
+      .value("Equality", Equality)
+      .value("Both", Both)
+      .export_values();
 
   bp::class_<ConstraintModelAbstract_wrap, boost::noncopyable>(
       "ConstraintModelAbstract",
@@ -80,6 +86,11 @@ void exposeConstraintAbstract() {
            ":return constraint data.")
       .def("createData", &ConstraintModelAbstract_wrap::default_createData,
            bp::with_custodian_and_ward_postcall<0, 2>())
+      .def("updateBounds", &ConstraintModelAbstract_wrap::update_bounds, bp::args("self", "lower", "upper"),
+           "Update the lower and upper bounds.\n\n"
+           ":param lower: lower bound\n"
+           ":param upper: upper bound")
+      .def("removeBounds", &ConstraintModelAbstract_wrap::remove_bounds, bp::args("self"), "Remove the bounds.")
       .add_property(
           "state",
           bp::make_function(&ConstraintModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -88,6 +99,11 @@ void exposeConstraintAbstract() {
                     bp::make_function(&ConstraintModelAbstract_wrap::get_residual,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "residual model")
+      .add_property("type", bp::make_function(&ConstraintModelAbstract_wrap::get_type), "type of constraint")
+      .add_property("lb", bp::make_function(&ConstraintModelAbstract_wrap::get_lb, bp::return_internal_reference<>()),
+                    "lower bound of constraint")
+      .add_property("ub", bp::make_function(&ConstraintModelAbstract_wrap::get_ub, bp::return_internal_reference<>()),
+                    "upper bound of constraint")
       .add_property("nu", bp::make_function(&ConstraintModelAbstract_wrap::get_nu), "dimension of control vector")
       .add_property("ng", bp::make_function(&ConstraintModelAbstract_wrap::get_ng), "number of inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelAbstract_wrap::get_nh), "number of equality constraints")

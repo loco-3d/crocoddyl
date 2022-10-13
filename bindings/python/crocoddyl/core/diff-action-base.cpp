@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +108,14 @@ void exposeDifferentialActionAbstract() {
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_state,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "state")
+      .add_property(
+          "g_lb",
+          bp::make_function(&DifferentialActionModelAbstract_wrap::get_g_lb, bp::return_internal_reference<>()),
+          "lower bound of the inequality constraints")
+      .add_property(
+          "g_ub",
+          bp::make_function(&DifferentialActionModelAbstract_wrap::get_g_ub, bp::return_internal_reference<>()),
+          "upper bound of the inequality constraints")
       .add_property("has_control_limits",
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_has_control_limits),
                     "indicates whether problem has finite control limits")

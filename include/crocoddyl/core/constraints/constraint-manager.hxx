@@ -15,6 +15,8 @@ template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state,
                                                              const std::size_t nu)
     : state_(state),
+      lb_(0),
+      ub_(0),
       nu_(nu),
       ng_internal_(0),
       nh_internal_(0),
@@ -26,6 +28,8 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<S
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state)
     : state_(state),
+      lb_(0),
+      ub_(0),
       nu_(state->get_nv()),
       ng_internal_(0),
       nh_internal_(0),
@@ -55,6 +59,8 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(const std::string& name,
     ng_total_ += constraint->get_ng();
     nh_total_ += constraint->get_nh();
     active_set_.insert(name);
+    lb_.resize(*ng_);
+    ub_.resize(*ng_);
   } else if (!active) {
     inactive_set_.insert(name);
   }
@@ -71,6 +77,8 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(const std::string& name
     constraints_.erase(it);
     active_set_.erase(name);
     inactive_set_.erase(name);
+    lb_.resize(*ng_);
+    ub_.resize(*ng_);
   } else {
     std::cout << "Warning: we couldn't remove the " << name << " constraint item, it doesn't exist." << std::endl;
   }
@@ -86,12 +94,16 @@ void ConstraintModelManagerTpl<Scalar>::changeConstraintStatus(const std::string
       active_set_.insert(name);
       inactive_set_.erase(name);
       it->second->active = active;
+      lb_.resize(*ng_);
+      ub_.resize(*ng_);
     } else if (!active && it->second->active) {
       *ng_ -= it->second->constraint->get_ng();
       *nh_ -= it->second->constraint->get_nh();
       active_set_.erase(name);
       inactive_set_.insert(name);
       it->second->active = active;
+      lb_.resize(*ng_);
+      ub_.resize(*ng_);
     }
   } else {
     std::cout << "Warning: we couldn't change the status of the " << name << " constraint item, it doesn't exist."
@@ -138,6 +150,8 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
       const std::size_t nh = m_i->constraint->get_nh();
       data->g.segment(ng_i, ng) = d_i->g;
       data->h.segment(nh_i, nh) = d_i->h;
+      lb_.segment(ng_i, ng) = m_i->constraint->get_lb();
+      ub_.segment(ng_i, ng) = m_i->constraint->get_ub();
       ng_i += ng;
       nh_i += nh;
     }
@@ -178,6 +192,8 @@ void ConstraintModelManagerTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
       const std::size_t nh = m_i->constraint->get_nh();
       data->g.segment(ng_i, ng) = d_i->g;
       data->h.segment(nh_i, nh) = d_i->h;
+      lb_.segment(ng_i, ng) = m_i->constraint->get_lb();
+      ub_.segment(ng_i, ng) = m_i->constraint->get_ub();
       ng_i += ng;
       nh_i += nh;
     }
@@ -328,15 +344,25 @@ const std::set<std::string>& ConstraintModelManagerTpl<Scalar>::get_inactive_set
 }
 
 template <typename Scalar>
-void ConstraintModelManagerTpl<Scalar>::shareDimensions(ActionModelAbstractTpl<Scalar>* const model) {
+void ConstraintModelManagerTpl<Scalar>::shareDimensions(ActionModelAbstract* const model) {
   ng_ = model->ng_;
   nh_ = model->nh_;
 }
 
 template <typename Scalar>
-void ConstraintModelManagerTpl<Scalar>::shareDimensions(DifferentialActionModelAbstractTpl<Scalar>* const model) {
+void ConstraintModelManagerTpl<Scalar>::shareDimensions(DifferentialActionModelAbstract* const model) {
   ng_ = model->ng_;
   nh_ = model->nh_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ConstraintModelManagerTpl<Scalar>::get_lb() const {
+  return lb_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ConstraintModelManagerTpl<Scalar>::get_ub() const {
+  return ub_;
 }
 
 template <typename Scalar>

@@ -186,6 +186,24 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "ActionModelImpulseFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nc=" << impulses_->get_nc() << "}";

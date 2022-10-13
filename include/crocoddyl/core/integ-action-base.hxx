@@ -77,6 +77,16 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelAbstractT
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& IntegratedActionModelAbstractTpl<Scalar>::get_g_lb() const {
+  return differential_->get_g_lb();
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& IntegratedActionModelAbstractTpl<Scalar>::get_g_ub() const {
+  return differential_->get_g_ub();
+}
+
+template <typename Scalar>
 const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 IntegratedActionModelAbstractTpl<Scalar>::get_differential() const {
   return differential_;

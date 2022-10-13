@@ -187,6 +187,7 @@ bool DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::checkData(
     return false;
   }
 }
+
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
@@ -219,6 +220,24 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
 
   u.noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
 }
 
 template <typename Scalar>

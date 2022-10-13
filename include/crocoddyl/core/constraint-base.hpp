@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,8 @@
 #include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {
+
+enum ConstraintType { Inequality = 0, Equality, Both };
 
 /**
  * @brief Abstract class for constraint models
@@ -143,6 +145,16 @@ class ConstraintModelAbstractTpl {
   virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
+   * @brief Update the lower and upper bounds the upper bound of constraint
+   */
+  void update_bounds(const VectorXs& lower, const VectorXs& upper);
+
+  /**
+   * @brief Remove the bounds of the constraint
+   */
+  void remove_bounds();
+
+  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
@@ -151,6 +163,21 @@ class ConstraintModelAbstractTpl {
    * @brief Return the residual model
    */
   const boost::shared_ptr<ResidualModelAbstract>& get_residual() const;
+
+  /**
+   * @brief Return the type of constraint
+   */
+  ConstraintType get_type() const;
+
+  /**
+   * @brief Return the lower bound of the constraint
+   */
+  const VectorXs& get_lb() const;
+
+  /**
+   * @brief Return the upper bound of the constraint
+   */
+  const VectorXs& get_ub() const;
 
   /**
    * @brief Return the dimension of the control input
@@ -180,9 +207,16 @@ class ConstraintModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
+ private:
+  std::size_t ng_internal_;  //!< Number of inequality constraints defined at construction time
+  std::size_t nh_internal_;  //!< Number of equality constraints defined at construction time
+
  protected:
   boost::shared_ptr<StateAbstract> state_;             //!< State description
   boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
+  ConstraintType type_;                                //!< Type of constraint: inequality=0, equality=1, both=2
+  VectorXs lb_;                                        //!< Lower bound of the constraint
+  VectorXs ub_;                                        //!< Upper bound of the constraint
   std::size_t nu_;                                     //!< Control dimension
   std::size_t ng_;                                     //!< Number of inequality constraints
   std::size_t nh_;                                     //!< Number of equality constraints

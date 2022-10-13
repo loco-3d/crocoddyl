@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,14 +20,14 @@ void exposeConstraintResidual() {
       "This defines equality / inequality constraints based on a residual vector and its bounds.",
       bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
                Eigen::VectorXd>(bp::args("self", "state", "residual", "lower", "upper"),
-                                "Initialize the residual constraint model given its bounds.\n\n"
+                                "Initialize the residual constraint model as an inequality constraint.\n\n"
                                 ":param state: state description\n"
                                 ":param residual: residual model\n"
                                 ":param lower: lower bound\n"
                                 ":param upper: upper bound"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
-          "Initialize the residual constraint model as equality constraint equals to zero.\n\n"
+          "Initialize the residual constraint model as an equality constraint.\n\n"
           ":param state: state description\n"
           ":param residual: residual model"))
       .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
@@ -69,13 +69,7 @@ void exposeConstraintResidual() {
            "Each constraint model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined constraint.\n"
            ":param data: shared data\n"
-           ":return constraint data.")
-      .def("updateBounds", &ConstraintModelResidual::update_bounds, bp::args("self", "lower", "upper"),
-           "Update the lower and upper bounds.\n\n"
-           ":param lower: lower bound\n"
-           ":param upper: lower bound")
-      .add_property("lb", bp::make_function(&ConstraintModelResidual::get_lb, bp::return_internal_reference<>()))
-      .add_property("ub", bp::make_function(&ConstraintModelResidual::get_ub, bp::return_internal_reference<>()));
+           ":return constraint data.");
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataResidual> >();
 

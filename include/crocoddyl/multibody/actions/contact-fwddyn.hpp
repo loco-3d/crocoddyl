@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,6 +186,16 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the actuation model
    */
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
@@ -237,6 +248,8 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::g_lb_;   //!< Lower bound of the inequality constraints
+  using Base::g_ub_;   //!< Upper bound of the inequality constraints
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

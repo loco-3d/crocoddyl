@@ -82,6 +82,16 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the differential action model associated to this integrated action model
    */
   const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential() const;
