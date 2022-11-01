@@ -94,6 +94,7 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   differential_->calc(k0_data, x);
   d->dx.setZero();
+  d->xnext = x;
   d->cost = k0_data->cost;
   d->g = k0_data->g;
   d->h = k0_data->h;

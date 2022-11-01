@@ -46,6 +46,11 @@ void test_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
 
   // Checking that calc returns a cost value
   BOOST_CHECK(!std::isnan(data->cost));
+
+  // Checking the termninal state
+  double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  model->calc(data, x);
+  BOOST_CHECK((data->xnext - x).isZero(tol));
 }
 
 void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {

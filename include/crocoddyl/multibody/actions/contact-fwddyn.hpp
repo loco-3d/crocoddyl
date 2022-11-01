@@ -160,7 +160,7 @@ class DifferentialActionModelContactFwdDynamicsTpl : public DifferentialActionMo
    * update the contact forces derivatives. This function is used in the terminal nodes of an optimal control
    * problem.
    *
-   * @param[in] data  Action data
+   * @param[in] data  Contact forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,

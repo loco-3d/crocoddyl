@@ -132,6 +132,18 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost and the system acceleration is not updated as it is expected to be zero. Additionally,
+   * it does not update the contact forces. This function is used in the terminal nodes of an optimal control
+   * problem.
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the impulse dynamics, and cost function
    *
    * @param[in] data  Impulse forward-dynamics data
@@ -140,6 +152,18 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the cost functions with respect to the state only
+   *
+   * It updates the derivatives of the cost function with respect to the state only. Additionally, it does not
+   * update the contact forces derivatives. This function is used in the terminal nodes of an optimal control
+   * problem.
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the impulse forward-dynamics data
