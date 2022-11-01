@@ -21,28 +21,20 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_check_data(ActionModelTypes::Type action_model_type) {
-  // create the model
-  ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
-
+void test_check_data(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // Run the print function
   std::ostringstream tmp;
   tmp << *model;
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
-
   BOOST_CHECK(model->checkData(data));
 }
 
-void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
-  // create the model
-  ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
-
+void test_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
+  data->cost = nan("");
 
   // Generating random state and control vectors
   const Eigen::VectorXd& x = model->get_state()->rand();
@@ -50,23 +42,7 @@ void test_calc_returns_state(ActionModelTypes::Type action_model_type) {
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
-
   BOOST_CHECK(static_cast<std::size_t>(data->xnext.size()) == model->get_state()->get_nx());
-}
-
-void test_calc_returns_a_cost(ActionModelTypes::Type action_model_type) {
-  // create the model
-  ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
-
-  // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = model->createData();
-  data->cost = nan("");
-
-  // Getting the cost value computed by calc()
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
-  model->calc(data, x, u);
 
   // Checking that calc returns a cost value
   BOOST_CHECK(!std::isnan(data->cost));
@@ -127,6 +103,52 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+}
+
+void test_check_action_data(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
+  test_check_data(model);
+}
+
+void test_check_integrated_action_data(DifferentialActionModelTypes::Type dam_type,
+                                       IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
+  // create the differential action model
+  DifferentialActionModelFactory factory_dam;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
+  // create the control discretization
+  ControlFactory factory_ctrl;
+  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
+  // create the integrator
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+      factory_int.create(integrator_type, dam, ctrl);
+  test_check_data(model);
+}
+
+void test_calc_action_model(ActionModelTypes::Type action_model_type) {
+  // create the model
+  ActionModelFactory factory;
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = factory.create(action_model_type);
+  test_calc(model);
+}
+
+void test_calc_integrated_action_model(DifferentialActionModelTypes::Type dam_type,
+                                       IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
+  // create the differential action model
+  DifferentialActionModelFactory factory_dam;
+  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam = factory_dam.create(dam_type);
+  // create the control discretization
+  ControlFactory factory_ctrl;
+  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
+  // create the integrator
+  IntegratorFactory factory_int;
+  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+      factory_int.create(integrator_type, dam, ctrl);
+  test_calc(model);
 }
 
 void test_partial_derivatives_action_model(ActionModelTypes::Type action_model_type) {
@@ -218,9 +240,8 @@ void register_action_model_unit_tests(ActionModelTypes::Type action_model_type) 
   test_name << "test_" << action_model_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_check_data, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_state, action_model_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_cost, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_check_action_data, action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_action_model, action_model_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_action_model, action_model_type)));
   framework::master_test_suite().add(ts);
 }
@@ -232,6 +253,8 @@ void register_integrated_action_model_unit_tests(DifferentialActionModelTypes::T
   test_name << "test_" << dam_type << "_" << integrator_type << "_" << control_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_check_integrated_action_data, dam_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_integrated_action_model, dam_type, integrator_type, control_type)));
   ts->add(BOOST_TEST_CASE(
       boost::bind(&test_partial_derivatives_integrated_action_model, dam_type, integrator_type, control_type)));
   framework::master_test_suite().add(ts);
