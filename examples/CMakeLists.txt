@@ -29,8 +29,10 @@ ENDFOREACH(examples ${${PROJECT_NAME}_EXAMPLES_PYTHON})
 
 IF(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   IF(UNIX)
-  ADD_TEST("test_logfiles"
-    ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH} PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/update_logfiles.sh && /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
+    ADD_TEST("update_logfiles"
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH} PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/update_logfiles.sh)
+    ADD_TEST("test_logfiles"
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH} PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
 
     ADD_CUSTOM_TARGET("test_logfiles"
       ${CMAKE_COMMAND} -E env PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH} PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} /bin/bash ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
