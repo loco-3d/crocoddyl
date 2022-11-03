@@ -146,10 +146,6 @@ void exposeConstraintManager() {
       .add_property("ng", bp::make_function(&ConstraintModelManager::get_ng),
                     "number of active inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelManager::get_nh), "number of active equality constraints")
-      .add_property("ng_total", bp::make_function(&ConstraintModelManager::get_ng_total),
-                    "number of the total inequality constraints")
-      .add_property("nh_total", bp::make_function(&ConstraintModelManager::get_nh_total),
-                    "number of the total equality constraints")
       .add_property(
           "active_set",
           bp::make_function(&ConstraintModelManager::get_active_set, bp::return_value_policy<bp::return_by_value>()),

@@ -203,16 +203,6 @@ class ConstraintModelManagerTpl {
   std::size_t get_nh() const;
 
   /**
-   * @brief Return the number of total inequality constraints
-   */
-  std::size_t get_ng_total() const;
-
-  /**
-   * @brief Return the number of total equality constraints
-   */
-  std::size_t get_nh_total() const;
-
-  /**
    * @brief Return the names of the set of active constraints
    */
   const std::set<std::string>& get_active_set() const;
@@ -272,9 +262,7 @@ class ConstraintModelManagerTpl {
   std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
   std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
   std::size_t* ng_;                         //!< Number of the active inequality constraints
-  std::size_t ng_total_;                    //!< Number of the total inequality constraints
   std::size_t* nh_;                         //!< Number of the active equality constraints
-  std::size_t nh_total_;                    //!< Number of the total equality constraints
   std::set<std::string> active_set_;        //!< Names of the active constraint items
   std::set<std::string> inactive_set_;      //!< Names of the inactive constraint items
   VectorXs unone_;                          //!< No control vector

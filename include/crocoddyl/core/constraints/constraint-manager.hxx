@@ -21,9 +21,7 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<S
       ng_internal_(0),
       nh_internal_(0),
       ng_(&ng_internal_),
-      ng_total_(0),
-      nh_(&nh_internal_),
-      nh_total_(0) {}
+      nh_(&nh_internal_) {}
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state)
@@ -34,9 +32,7 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(boost::shared_ptr<S
       ng_internal_(0),
       nh_internal_(0),
       ng_(&ng_internal_),
-      ng_total_(0),
-      nh_(&nh_internal_),
-      nh_total_(0) {}
+      nh_(&nh_internal_) {}
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::~ConstraintModelManagerTpl() {}
@@ -56,8 +52,6 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(const std::string& name,
   } else if (active) {
     *ng_ += constraint->get_ng();
     *nh_ += constraint->get_nh();
-    ng_total_ += constraint->get_ng();
-    nh_total_ += constraint->get_nh();
     active_set_.insert(name);
     lb_.resize(*ng_);
     ub_.resize(*ng_);
@@ -72,8 +66,6 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(const std::string& name
   if (it != constraints_.end()) {
     *ng_ -= it->second->constraint->get_ng();
     *nh_ -= it->second->constraint->get_nh();
-    ng_total_ -= it->second->constraint->get_ng();
-    nh_total_ -= it->second->constraint->get_nh();
     constraints_.erase(it);
     active_set_.erase(name);
     inactive_set_.erase(name);
@@ -319,18 +311,8 @@ std::size_t ConstraintModelManagerTpl<Scalar>::get_ng() const {
 }
 
 template <typename Scalar>
-std::size_t ConstraintModelManagerTpl<Scalar>::get_ng_total() const {
-  return ng_total_;
-}
-
-template <typename Scalar>
 std::size_t ConstraintModelManagerTpl<Scalar>::get_nh() const {
   return *nh_;
-}
-
-template <typename Scalar>
-std::size_t ConstraintModelManagerTpl<Scalar>::get_nh_total() const {
-  return nh_total_;
 }
 
 template <typename Scalar>
