@@ -1,15 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -74,7 +75,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   state_->integrate(x, d->dx, d->xnext);
   d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] + Scalar(2.) * d->integral[2] + d->integral[3]) *
             time_step_ / Scalar(6.);
-
+  d->g = k0_data->g;
+  d->h = k0_data->h;
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -92,7 +94,10 @@ void IntegratedActionModelRK4Tpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   differential_->calc(k0_data, x);
   d->dx.setZero();
+  d->xnext = x;
   d->cost = k0_data->cost;
+  d->g = k0_data->g;
+  d->h = k0_data->h;
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -224,6 +229,12 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
                      (d->ddli_ddu[0] + Scalar(2.) * d->ddli_ddu[1] + Scalar(2.) * d->ddli_ddu[2] + d->ddli_ddu[3]);
   d->Lxu.noalias() = time_step_ / Scalar(6.) *
                      (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
+  d->Gu.resize(differential_->get_ng(), nu_);
+  d->Hu.resize(differential_->get_nh(), nu_);
+  control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
+  control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 }
 
 template <typename Scalar>
@@ -239,6 +250,8 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
   d->Lxx = k0_data->Lxx;
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
 }
 
 template <typename Scalar>

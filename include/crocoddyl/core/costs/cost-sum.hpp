@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +12,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <utility>
 
 #include "crocoddyl/core/fwd.hpp"
@@ -205,14 +207,34 @@ class CostModelSumTpl {
   std::size_t get_nr_total() const;
 
   /**
-   * @brief Return the names of the active costs
+   * @brief Return the names of the set of active costs
    */
-  const std::vector<std::string>& get_active() const;
+  const std::set<std::string>& get_active_set() const;
 
   /**
-   * @brief Return the names of the inactive costs
+   * @brief Return the names of the set of inactive costs
    */
-  const std::vector<std::string>& get_inactive() const;
+  const std::set<std::string>& get_inactive_set() const;
+
+  DEPRECATED("get_active() is deprecated and will be replaced with get_active_set()",
+             const std::vector<std::string>& get_active() {
+               active_.clear();
+               active_.reserve(active_set_.size());
+               for (const auto& contact : active_set_) {
+                 active_.push_back(contact);
+               }
+               return active_;
+             };)
+
+  DEPRECATED("get_inactive() is deprecated and will be replaced with get_inactive_set()",
+             const std::vector<std::string>& get_inactive() {
+               inactive_.clear();
+               inactive_.reserve(inactive_set_.size());
+               for (const auto& contact : inactive_set_) {
+                 inactive_.push_back(contact);
+               }
+               return inactive_;
+             };)
 
   /**
    * @brief Return the status of a given cost name
@@ -233,8 +255,13 @@ class CostModelSumTpl {
   std::size_t nu_;                          //!< Dimension of the control input
   std::size_t nr_;                          //!< Dimension of the active residual vector
   std::size_t nr_total_;                    //!< Dimension of the total residual vector
-  std::vector<std::string> active_;         //!< Names of the active cost items
-  std::vector<std::string> inactive_;       //!< Names of the inactive cost items
+  std::set<std::string> active_set_;        //!< Names of the active set of cost items
+  std::set<std::string> inactive_set_;      //!< Names of the inactive set of cost items
+
+  // Vector variants. These are to maintain the API compatibility for the deprecated syntax.
+  // These will be removed in future versions along with get_active() / get_inactive()
+  std::vector<std::string> active_;
+  std::vector<std::string> inactive_;
 };
 
 template <typename _Scalar>
@@ -276,6 +303,12 @@ struct CostDataSumTpl {
 
   template <class ActionData>
   void shareMemory(ActionData* const data) {
+    // Save memory by setting the internal variables with null dimension
+    Lx_internal.resize(0);
+    Lu_internal.resize(0);
+    Lxx_internal.resize(0, 0);
+    Lxu_internal.resize(0, 0);
+    Luu_internal.resize(0, 0);
     // Share memory with the differential action data
     new (&Lx) Eigen::Map<VectorXs>(data->Lx.data(), data->Lx.size());
     new (&Lu) Eigen::Map<VectorXs>(data->Lu.data(), data->Lu.size());

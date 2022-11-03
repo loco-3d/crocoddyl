@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,10 +25,11 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFwdDynamicsTpl(
     boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ActuationModelAbstract> actuation,
-    boost::shared_ptr<CostModelSum> costs)
+    boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, actuation->get_nu(), costs->get_nr()),
       actuation_(actuation),
       costs_(costs),
+      constraints_(constraints),
       pinocchio_(*state->get_pinocchio().get()),
       without_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())) {
@@ -78,6 +80,10 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
   // Computing the cost value and residuals
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
+  if (constraints_ != nullptr) {
+    d->constraints->resize(this, d);
+    constraints_->calc(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -96,6 +102,10 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
+  if (constraints_ != nullptr) {
+    d->constraints->resize(this, d);
+    constraints_->calc(d->constraints, x);
+  }
 }
 
 template <typename Scalar>
@@ -135,6 +145,9 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
 
   // Computing the cost derivatives
   costs_->calcDiff(d->costs, x, u);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x, u);
+  }
 }
 
 template <typename Scalar>
@@ -147,6 +160,9 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
   Data* d = static_cast<Data*>(data.get());
 
   costs_->calcDiff(d->costs, x);
+  if (constraints_ != nullptr) {
+    constraints_->calcDiff(d->constraints, x);
+  }
 }
 
 template <typename Scalar>
@@ -165,6 +181,7 @@ bool DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::checkData(
     return false;
   }
 }
+
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
@@ -200,6 +217,42 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
+std::size_t DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelFreeFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << "}";
@@ -220,6 +273,12 @@ template <typename Scalar>
 const boost::shared_ptr<CostModelSumTpl<Scalar> >& DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_costs()
     const {
   return costs_;
+}
+
+template <typename Scalar>
+const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_constraints() const {
+  return constraints_;
 }
 
 template <typename Scalar>

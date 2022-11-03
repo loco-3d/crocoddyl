@@ -1,7 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, University of Pisa,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +53,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
   d->dx.tail(nv).noalias() = a * time_step_;
   differential_->get_state()->integrate(x, d->dx, d->xnext);
   d->cost = time_step_ * d->differential->cost;
+  d->g = d->differential->g;
+  d->h = d->differential->h;
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
@@ -67,7 +71,10 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(const boost::shared_ptr<ActionD
 
   differential_->calc(d->differential, x);
   d->dx.setZero();
+  d->xnext = x;
   d->cost = d->differential->cost;
+  d->g = d->differential->g;
+  d->h = d->differential->h;
   if (with_cost_residual_) {
     d->r = d->differential->r;
   }
@@ -112,6 +119,12 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   control_->multiplyByJacobian(d->control, d->differential->Luu, d->Lwu);
   control_->multiplyJacobianTransposeBy(d->control, d->Lwu, d->Luu);
   d->Luu *= time_step_;
+  d->Gx = d->differential->Gx;
+  d->Hx = d->differential->Hx;
+  d->Gu.resize(differential_->get_ng(), nu_);
+  d->Hu.resize(differential_->get_nh(), nu_);
+  control_->multiplyByJacobian(d->control, d->differential->Gu, d->Gu);
+  control_->multiplyByJacobian(d->control, d->differential->Hu, d->Hu);
 }
 
 template <typename Scalar>
@@ -127,6 +140,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
   d->Lx = d->differential->Lx;
   d->Lxx = d->differential->Lxx;
+  d->Gx = d->differential->Gx;
+  d->Hx = d->differential->Hx;
 }
 
 template <typename Scalar>

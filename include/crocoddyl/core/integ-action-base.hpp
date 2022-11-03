@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                     University of Trento
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,6 +80,26 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
    * @return the sympletic integrator data
    */
   virtual boost::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
 
   /**
    * @brief Return the differential action model associated to this integrated action model

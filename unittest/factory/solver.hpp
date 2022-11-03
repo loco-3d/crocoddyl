@@ -21,7 +21,7 @@ struct SolverTypes {
   enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, SolverIpopt, NbSolverTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbSolverTypes);
     for (int i = 0; i < NbSolverTypes; ++i) {
 #ifndef CROCODDYL_WITH_IPOPT
       if ((Type)i == SolverIpopt) {

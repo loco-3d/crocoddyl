@@ -29,7 +29,7 @@ struct StateModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbStateModelTypes);
     for (int i = 0; i < NbStateModelTypes; ++i) {
       v.push_back((Type)i);
     }

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,12 +162,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
 #pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::size_t nu = running_models_[i]->get_nu();
-    if (nu != 0) {
-      running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
-    } else {
-      running_models_[i]->calc(running_datas_[i], xs[i]);
-    }
+    running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
   }
   terminal_model_->calc(terminal_data_, xs.back());
 
@@ -198,11 +194,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
 #pragma omp parallel for num_threads(nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
-    if (running_models_[i]->get_nu() != 0) {
-      running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
-    } else {
-      running_models_[i]->calcDiff(running_datas_[i], xs[i]);
-    }
+    running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
   }
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
@@ -233,14 +225,8 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us, std::v
 
   xs[0] = x0_;
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
-    const VectorXs& x = xs[i];
-    if (model->get_nu() != 0) {
-      model->calc(data, x, us[i]);
-    } else {
-      model->calc(data, x);
-    }
+    running_models_[i]->calc(data, xs[i], us[i]);
     xs[i + 1] = data->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());

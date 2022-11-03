@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Trento,
-//                          LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2022, University of Edinburgh, University of Trento,
+//                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,8 @@ void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionData
               time_step_ / Scalar(6.);
   }
   state_->integrate(x, d->dx, d->xnext);
-
+  d->g = k0_data->g;
+  d->h = k0_data->h;
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -99,7 +100,10 @@ void IntegratedActionModelRKTpl<Scalar>::calc(const boost::shared_ptr<ActionData
   const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data = d->differential[0];
   differential_->calc(k0_data, x);
   d->dx.setZero();
+  d->xnext = x;
   d->cost = k0_data->cost;
+  d->g = k0_data->g;
+  d->h = k0_data->h;
   if (with_cost_residual_) {
     d->r = k0_data->r;
   }
@@ -244,6 +248,12 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<Action
         time_step_ / Scalar(6.) *
         (d->ddli_dxdu[0] + Scalar(2.) * d->ddli_dxdu[1] + Scalar(2.) * d->ddli_dxdu[2] + d->ddli_dxdu[3]);
   }
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
+  d->Gu.resize(differential_->get_ng(), nu_);
+  d->Hu.resize(differential_->get_nh(), nu_);
+  control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
+  control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 
   state_->JintegrateTransport(x, d->dx, d->Fx, second);
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx, first, addto);
@@ -263,6 +273,8 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<Action
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
   d->Lxx = k0_data->Lxx;
+  d->Gx = k0_data->Gx;
+  d->Hx = k0_data->Hx;
 }
 
 template <typename Scalar>

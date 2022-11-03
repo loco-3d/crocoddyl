@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, The University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,11 +18,17 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                                                const std::size_t nu,
-                                                                               const std::size_t nr)
+                                                                               const std::size_t nr,
+                                                                               const std::size_t ng,
+                                                                               const std::size_t nh)
     : nu_(nu),
       nr_(nr),
+      ng_(ng),
+      nh_(nh),
       state_(state),
       unone_(VectorXs::Zero(nu)),
+      g_lb_(VectorXs::Constant(ng, -std::numeric_limits<Scalar>::infinity())),
+      g_ub_(VectorXs::Constant(ng, std::numeric_limits<Scalar>::infinity())),
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
@@ -36,6 +43,12 @@ void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<Di
 }
 
 template <typename Scalar>
+void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+  calcDiff(data, x, unone_);
+}
+
+template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter, const Scalar tol) {
@@ -47,12 +60,12 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  // Check the velocity input is zero
+  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
 
   const std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
-  if (nu_ == 0) {
-    // TODO(cmastalli): create a method for autonomous systems
-  } else {
+  if (nu_ != 0) {
     VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
       calc(data, x, u);
@@ -74,12 +87,6 @@ typename MathBaseTpl<Scalar>::VectorXs DifferentialActionModelAbstractTpl<Scalar
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);
   return u;
-}
-
-template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
-  calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
@@ -110,8 +117,28 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nr() const {
 }
 
 template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_ng() const {
+  return ng_;
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
+  return nh_;
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
   return state_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_lb() const {
+  return g_lb_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_ub() const {
+  return g_ub_;
 }
 
 template <typename Scalar>

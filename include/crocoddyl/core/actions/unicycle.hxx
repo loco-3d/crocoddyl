@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +49,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbst
   }
   Data* d = static_cast<Data*>(data.get());
 
+  d->xnext = x;
   d->r.template head<3>() = cost_weights_[0] * x;
   d->r.template tail<2>().setZero();
   d->cost = Scalar(0.5) * d->r.template head<3>().dot(d->r.template head<3>());

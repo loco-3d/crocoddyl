@@ -33,7 +33,7 @@ struct CostModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbCostModelTypes);
     for (int i = 0; i < NbCostModelTypes; ++i) {
       v.push_back((Type)i);
     }

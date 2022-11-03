@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                     University of Trento
+// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, University of Oxford,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model,
     boost::shared_ptr<ControlParametrizationModelAbstract> control, const Scalar time_step,
     const bool with_cost_residual)
-    : Base(model->get_state(), control->get_nu(), model->get_nr()),
+    : Base(model->get_state(), control->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()),
       differential_(model),
       control_(control),
       time_step_(time_step),
@@ -38,7 +38,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
 template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar time_step, const bool with_cost_residual)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()),
+    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()),
       differential_(model),
       control_(new ControlParametrizationModelPolyZeroTpl<Scalar>(model->get_nu())),
       time_step_(time_step),
@@ -70,6 +70,26 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelAbstractT
         << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero"
         << std::endl;
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng() const {
+  return differential_->get_ng();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh() const {
+  return differential_->get_nh();
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& IntegratedActionModelAbstractTpl<Scalar>::get_g_lb() const {
+  return differential_->get_g_lb();
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& IntegratedActionModelAbstractTpl<Scalar>::get_g_ub() const {
+  return differential_->get_g_ub();
 }
 
 template <typename Scalar>

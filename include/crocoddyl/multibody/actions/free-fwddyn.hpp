@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,6 +19,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -54,17 +56,19 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataFreeFwdDynamicsTpl<Scalar> Data;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef CostModelSumTpl<Scalar> CostModelSum;
-  typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   DifferentialActionModelFreeFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
                                             boost::shared_ptr<ActuationModelAbstract> actuation,
-                                            boost::shared_ptr<CostModelSum> costs);
+                                            boost::shared_ptr<CostModelSum> costs,
+                                            boost::shared_ptr<ConstraintModelManager> constraints = nullptr);
   virtual ~DifferentialActionModelFreeFwdDynamicsTpl();
 
   /**
@@ -123,6 +127,26 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the actuation model
    */
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
@@ -131,6 +155,11 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
    * @brief Return the cost model
    */
   const boost::shared_ptr<CostModelSum>& get_costs() const;
+
+  /**
+   * @brief Return the constraint model
+   */
+  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -155,15 +184,18 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::g_lb_;   //!< Lower bound of the inequality constraints
+  using Base::g_ub_;   //!< Upper bound of the inequality constraints
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ActuationModelAbstract> actuation_;  //!< Actuation model
-  boost::shared_ptr<CostModelSum> costs_;                //!< Cost model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
-  bool without_armature_;                                //!< Indicate if we have defined an armature
-  VectorXs armature_;                                    //!< Armature vector
+  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  bool without_armature_;                                  //!< Indicate if we have defined an armature
+  VectorXs armature_;                                      //!< Armature vector
 };
 
 template <typename _Scalar>
@@ -186,6 +218,10 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
         dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
         tmp_xstatic(model->get_state()->get_nx()) {
     costs->shareMemory(this);
+    if (model->get_constraints() != nullptr) {
+      constraints = model->get_constraints()->createData(&multibody);
+      constraints->shareMemory(this);
+    }
     Minv.setZero();
     u_drift.setZero();
     dtau_dx.setZero();
@@ -195,6 +231,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorActMultibodyTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Minv;
   VectorXs u_drift;
   MatrixXs dtau_dx;

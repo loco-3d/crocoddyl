@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,14 +10,13 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <utility>
-#include <string>
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -28,14 +28,14 @@ void exposeCostSum() {
   typedef boost::shared_ptr<CostItem> CostItemPtr;
   typedef boost::shared_ptr<CostDataAbstract> CostDataPtr;
   StdMapPythonVisitor<std::string, CostItemPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, CostItemPtr> >, true>::expose("StdMap_CostItem");
+                      std::allocator<std::pair<const std::string, CostItemPtr>>, true>::expose("StdMap_CostItem");
   StdMapPythonVisitor<std::string, CostDataPtr, std::less<std::string>,
-                      std::allocator<std::pair<const std::string, CostDataPtr> >, true>::expose("StdMap_CostData");
+                      std::allocator<std::pair<const std::string, CostDataPtr>>, true>::expose("StdMap_CostData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostItem> >();
+  bp::register_ptr_to_python<boost::shared_ptr<CostItem>>();
 
   bp::class_<CostItem>("CostItem", "Describe a cost item.\n\n",
-                       bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double, bp::optional<bool> >(
+                       bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double, bp::optional<bool>>(
                            bp::args("self", "name", "cost", "weight", "active"),
                            "Initialize the cost item.\n\n"
                            ":param name: cost name\n"
@@ -49,7 +49,7 @@ void exposeCostSum() {
       .def_readwrite("active", &CostItem::active, "cost status")
       .def(PrintableVisitor<CostItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostModelSum> >();
+  bp::register_ptr_to_python<boost::shared_ptr<CostModelSum>>();
 
   bp::class_<CostModelSum>("CostModelSum", bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
                                                bp::args("self", "state", "nu"),
@@ -62,10 +62,10 @@ void exposeCostSum() {
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract> >(bp::args("self", "state"),
-                                                       "Initialize the total cost model.\n\n"
-                                                       "For this case the default nu is equals to model.nv.\n"
-                                                       ":param state: state description"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>>(bp::args("self", "state"),
+                                                      "Initialize the total cost model.\n\n"
+                                                      "For this case the default nu is equals to model.nv.\n"
+                                                      ":param state: state description"))
       .def("addCost", &CostModelSum::addCost,
            CostModelSum_addCost_wrap(bp::args("self", "name", "cost", "weight", "active"),
                                      "Add a cost item.\n\n"
@@ -124,18 +124,28 @@ void exposeCostSum() {
       .add_property("nr", bp::make_function(&CostModelSum::get_nr), "dimension of the residual vector of active cost")
       .add_property("nr_total", bp::make_function(&CostModelSum::get_nr_total),
                     "dimension of the total residual vector")
-      .add_property("active",
-                    bp::make_function(&CostModelSum::get_active, bp::return_value_policy<bp::return_by_value>()),
-                    "name of active cost items")
-      .add_property("inactive",
-                    bp::make_function(&CostModelSum::get_inactive, bp::return_value_policy<bp::return_by_value>()),
-                    "name of inactive cost items")
+      .add_property(
+          "active",
+          bp::make_function(&CostModelSum::get_active, deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                                           "Deprecated. Use property active_set")),
+          "list of names of active contact items")
+      .add_property(
+          "inactive",
+          bp::make_function(&CostModelSum::get_inactive, deprecated<bp::return_value_policy<bp::return_by_value>>(
+                                                             "Deprecated. Use property inactive_set")),
+          "list of names of inactive contact items")
+      .add_property("active_set",
+                    bp::make_function(&CostModelSum::get_active_set, bp::return_value_policy<bp::return_by_value>()),
+                    "name of the active set of cost items")
+      .add_property("inactive_set",
+                    bp::make_function(&CostModelSum::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
+                    "name of the inactive set of cost items")
       .def("getCostStatus", &CostModelSum::getCostStatus, bp::args("self", "name"),
            "Return the cost status of a given cost name.\n\n"
            ":param name: cost name")
       .def(PrintableVisitor<CostModelSum>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataSum> >();
+  bp::register_ptr_to_python<boost::shared_ptr<CostDataSum>>();
 
   bp::class_<CostDataSum>(
       "CostDataSum", "Class for total cost data.\n\n",

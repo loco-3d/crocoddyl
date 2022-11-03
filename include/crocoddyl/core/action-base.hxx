@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,11 +17,16 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(boost::shared_ptr<StateAbstractTpl<Scalar> > state,
-                                                       const std::size_t nu, const std::size_t nr)
+                                                       const std::size_t nu, const std::size_t nr,
+                                                       const std::size_t ng, const std::size_t nh)
     : nu_(nu),
       nr_(nr),
+      ng_(ng),
+      nh_(nh),
       state_(state),
       unone_(MathBase::VectorXs::Zero(nu)),
+      g_lb_(VectorXs::Constant(ng, -std::numeric_limits<Scalar>::infinity())),
+      g_ub_(VectorXs::Constant(ng, std::numeric_limits<Scalar>::infinity())),
       u_lb_(MathBase::VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(MathBase::VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
@@ -57,9 +63,7 @@ void ActionModelAbstractTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionD
 
   const std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
-  if (nu_ == 0) {
-    // TODO(cmastalli): create a method for autonomous systems
-  } else {
+  if (nu_ != 0) {
     VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
       calc(data, x, u);
@@ -110,8 +114,28 @@ std::size_t ActionModelAbstractTpl<Scalar>::get_nr() const {
 }
 
 template <typename Scalar>
+std::size_t ActionModelAbstractTpl<Scalar>::get_ng() const {
+  return ng_;
+}
+
+template <typename Scalar>
+std::size_t ActionModelAbstractTpl<Scalar>::get_nh() const {
+  return nh_;
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >& ActionModelAbstractTpl<Scalar>::get_state() const {
   return state_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_g_lb() const {
+  return g_lb_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelAbstractTpl<Scalar>::get_g_ub() const {
+  return g_ub_;
 }
 
 template <typename Scalar>

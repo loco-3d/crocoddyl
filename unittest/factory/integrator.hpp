@@ -21,7 +21,7 @@ struct IntegratorTypes {
   enum Type { IntegratorEuler, IntegratorRK2, IntegratorRK3, IntegratorRK4, NbIntegratorTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbIntegratorTypes);
     for (int i = 0; i < NbIntegratorTypes; ++i) {
       v.push_back((Type)i);
     }

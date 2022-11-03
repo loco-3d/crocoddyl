@@ -11,6 +11,9 @@
 
 #include "state.hpp"
 #include "actuation.hpp"
+#include "cost.hpp"
+#include "constraint.hpp"
+#include "contact.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
@@ -37,7 +40,7 @@ struct DifferentialActionModelTypes {
   };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
-    v.clear();
+    v.reserve(NbDifferentialActionModelTypes);
     for (int i = 0; i < NbDifferentialActionModelTypes; ++i) {
       v.push_back((Type)i);
     }

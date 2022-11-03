@@ -206,6 +206,24 @@ struct CostDataResidualTpl;
 template <typename Scalar>
 class CostModelControlTpl;
 
+// constraint
+template <typename Scalar>
+class ConstraintModelAbstractTpl;
+template <typename Scalar>
+struct ConstraintDataAbstractTpl;
+
+template <typename Scalar>
+struct ConstraintItemTpl;
+template <typename Scalar>
+class ConstraintModelManagerTpl;
+template <typename Scalar>
+struct ConstraintDataManagerTpl;
+
+template <typename Scalar>
+class ConstraintModelResidualTpl;
+template <typename Scalar>
+struct ConstraintDataResidualTpl;
+
 // shooting
 template <typename Scalar>
 class ShootingProblemTpl;
@@ -230,6 +248,11 @@ template <typename Scalar>
 class ResidualModelNumDiffTpl;
 template <typename Scalar>
 struct ResidualDataNumDiffTpl;
+
+template <typename Scalar>
+class ConstraintModelNumDiffTpl;
+template <typename Scalar>
+struct ConstraintDataNumDiffTpl;
 
 template <typename Scalar>
 class StateNumDiffTpl;
@@ -331,6 +354,14 @@ typedef CostModelResidualTpl<double> CostModelResidual;
 typedef CostDataResidualTpl<double> CostDataResidual;
 DEPRECATED("Use ResidualModelControl with CostModelResidual", typedef CostModelControlTpl<double> CostModelControl;)
 
+typedef ConstraintModelAbstractTpl<double> ConstraintModelAbstract;
+typedef ConstraintDataAbstractTpl<double> ConstraintDataAbstract;
+typedef ConstraintItemTpl<double> ConstraintItem;
+typedef ConstraintModelManagerTpl<double> ConstraintModelManager;
+typedef ConstraintDataManagerTpl<double> ConstraintDataManager;
+typedef ConstraintModelResidualTpl<double> ConstraintModelResidual;
+typedef ConstraintDataResidualTpl<double> ConstraintDataResidual;
+
 typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
@@ -343,6 +374,8 @@ typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
 typedef ResidualModelNumDiffTpl<double> ResidualModelNumDiff;
 typedef ResidualDataNumDiffTpl<double> ResidualDataNumDiff;
+typedef ConstraintModelNumDiffTpl<double> ConstraintModelNumDiff;
+typedef ConstraintDataNumDiffTpl<double> ConstraintDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;

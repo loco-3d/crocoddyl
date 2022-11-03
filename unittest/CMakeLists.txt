@@ -27,6 +27,8 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_costs_noFF
   test_costs_collision
   test_cost_sum
+  test_constraints
+  test_constraint_manager
   test_contacts
   test_controls
   test_impulses
@@ -34,8 +36,9 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_multiple_impulses
   test_contact_costs
   test_impulse_costs
+  test_contact_constraints
+  test_impulse_constraints
   test_actions
-  # test_integrators
   test_diff_actions
   test_problem
   test_cop_support

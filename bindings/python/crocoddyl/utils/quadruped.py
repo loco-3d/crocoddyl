@@ -179,7 +179,7 @@ class SimpleQuadrupedalGaitProblem:
         lfStep = self.createFootstepModels(comRef, [lfFootPos0], stepLength, stepHeight, timeStep, stepKnots,
                                            [self.rfFootId, self.lhFootId, self.rhFootId], [self.lfFootId])
         loco3dModel += doubleSupport + rhStep + rfStep
-        loco3dModel += doubleSupport + lhStep + lfStep
+        loco3dModel += doubleSupport + lhStep + lfStep + [doubleSupport[0]]
 
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
@@ -227,7 +227,7 @@ class SimpleQuadrupedalGaitProblem:
                                              stepKnots, [self.rfFootId, self.lhFootId], [self.lfFootId, self.rhFootId])
 
         loco3dModel += doubleSupport + rflhStep
-        loco3dModel += doubleSupport + lfrhStep
+        loco3dModel += doubleSupport + lfrhStep + [doubleSupport[0]]
 
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
@@ -276,7 +276,7 @@ class SimpleQuadrupedalGaitProblem:
                                               [self.lfFootId, self.lhFootId])
 
         loco3dModel += doubleSupport + rightSteps
-        loco3dModel += doubleSupport + leftSteps
+        loco3dModel += doubleSupport + leftSteps + [doubleSupport[0]]
 
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
@@ -317,7 +317,7 @@ class SimpleQuadrupedalGaitProblem:
                                                [self.lhFootId, self.rhFootId])
 
         loco3dModel += doubleSupport + hindSteps
-        loco3dModel += doubleSupport + frontSteps
+        loco3dModel += doubleSupport + frontSteps + [doubleSupport[0]]
 
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem

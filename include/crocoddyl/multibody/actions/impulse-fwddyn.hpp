@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,6 +23,7 @@
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
@@ -51,10 +53,10 @@ namespace crocoddyl {
  * \cite mastalli-icra20. Note that the algorithm for computing the RNEA derivatives is described in
  * \cite carpentier-rss18.
  *
- * The stack of cost functions is implemented in `CostModelSumTpl`. The computation of the impulse dynamics and its
- * derivatives are carrying out inside `calc()` and `calcDiff()` functions, respectively. It is also important to
- * remark that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we need to run
- * `calc()` first.
+ * The stack of cost and constraint functions are implemented in `CostModelSumTpl` and `ConstraintModelAbstractTpl`,
+ * respectively. The computation of the impulse dynamics and its derivatives are carrying out inside `calc()` and
+ * `calcDiff()` functions, respectively. It is also important to remark that `calcDiff()` computes the derivatives
+ * using the latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
  * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -68,6 +70,7 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   typedef ActionDataImpulseFwdDynamicsTpl<Scalar> Data;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
@@ -92,6 +95,28 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                                    boost::shared_ptr<ImpulseModelMultiple> impulses,
                                    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
                                    const Scalar JMinvJt_damping = Scalar(0.), const bool enable_force = false);
+
+  /**
+   * @brief Initialize the impulse forward-dynamics action model
+   *
+   * It describes the impulse dynamics of a multibody system under rigid-contact constraints defined by
+   * `ImpulseModelMultipleTpl`. It computes the cost described in `CostModelSumTpl`.
+   *
+   * @param[in] state            State of the multibody system
+   * @param[in] actuation        Actuation model
+   * @param[in] impulses         Stack of rigid impulses
+   * @param[in] costs            Stack of cost functions
+   * @param[in] constraints      Stack of constraints
+   * @param[in] r_coeff          Restitution coefficient (default 0.)
+   * @param[in] JMinvJt_damping  Damping term used in operational space inertia matrix (default 0.)
+   * @param[in] enable_force     Enable the computation of the contact force derivatives (default false)
+   */
+  ActionModelImpulseFwdDynamicsTpl(boost::shared_ptr<StateMultibody> state,
+                                   boost::shared_ptr<ImpulseModelMultiple> impulses,
+                                   boost::shared_ptr<CostModelSum> costs,
+                                   boost::shared_ptr<ConstraintModelManager> constraints,
+                                   const Scalar r_coeff = Scalar(0.), const Scalar JMinvJt_damping = Scalar(0.),
+                                   const bool enable_force = false);
   virtual ~ActionModelImpulseFwdDynamicsTpl();
 
   /**
@@ -107,6 +132,18 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the total cost value for nodes that depends only on the state
+   *
+   * It updates the total cost and the system acceleration is not updated as it is expected to be zero. Additionally,
+   * it does not update the contact forces. This function is used in the terminal nodes of an optimal control
+   * problem.
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Compute the derivatives of the impulse dynamics, and cost function
    *
    * @param[in] data  Impulse forward-dynamics data
@@ -115,6 +152,18 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
    */
   virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief Compute the derivatives of the cost functions with respect to the state only
+   *
+   * It updates the derivatives of the cost function with respect to the state only. Additionally, it does not
+   * update the contact forces derivatives. This function is used in the terminal nodes of an optimal control
+   * problem.
+   *
+   * @param[in] data  Impulse forward-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the impulse forward-dynamics data
@@ -129,6 +178,26 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the impulse model
    */
   const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
@@ -137,6 +206,11 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
    * @brief Return the cost model
    */
   const boost::shared_ptr<CostModelSum>& get_costs() const;
+
+  /**
+   * @brief Return the constraint model
+   */
+  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -181,16 +255,20 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::g_lb_;   //!< Lower bound of the inequality constraints
+  using Base::g_ub_;   //!< Upper bound of the inequality constraints
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ImpulseModelMultiple> impulses_;  //!< Impulse model
-  boost::shared_ptr<CostModelSum> costs_;             //!< Cost model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;            //!< Pinocchio model
-  bool with_armature_;                                //!< Indicate if we have defined an armature
-  VectorXs armature_;                                 //!< Armature vector
-  Scalar r_coeff_;                                    //!< Restitution coefficient
-  Scalar JMinvJt_damping_;                            //!< Damping factor used in operational space inertia matrix
+  void init();
+  boost::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
+  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  bool with_armature_;                                     //!< Indicate if we have defined an armature
+  VectorXs armature_;                                      //!< Armature vector
+  Scalar r_coeff_;                                         //!< Restitution coefficient
+  Scalar JMinvJt_damping_;                                 //!< Damping factor used in operational space inertia matrix
   bool enable_force_;  //!< Indicate if we have enabled the computation of the contact-forces derivatives
   pinocchio::MotionTpl<Scalar> gravity_;  //! Gravity acceleration
 };
@@ -216,6 +294,10 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
         df_dx(model->get_impulses()->get_nc_total(), model->get_state()->get_ndx()),
         dgrav_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     costs->shareMemory(this);
+    if (model->get_constraints() != nullptr) {
+      constraints = model->get_constraints()->createData(&multibody);
+      constraints->shareMemory(this);
+    }
     vnone.setZero();
     Kinv.setZero();
     df_dx.setZero();
@@ -225,6 +307,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorMultibodyInImpulseTpl<Scalar> multibody;
   boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   VectorXs vnone;
   MatrixXs Kinv;
   MatrixXs df_dx;

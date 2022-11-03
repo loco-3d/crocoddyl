@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,7 @@ void ActionModelLQRTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>
   }
   Data* d = static_cast<Data*>(data.get());
 
+  d->xnext = x;
   // cost = 0.5 * x^T*Lxx*x + lx^T*x
   d->Lxx_x_tmp.noalias() = Lxx_ * x;
   data->cost = Scalar(0.5) * x.dot(d->Lxx_x_tmp);
