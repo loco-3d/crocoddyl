@@ -82,6 +82,16 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
    * @brief Return the lower bound of the inequality constraints
    */
   virtual const VectorXs& get_g_lb() const;
@@ -116,8 +126,6 @@ class IntegratedActionModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> 
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits are active
-  using Base::ng_;                  //!< Number of inequality constraints
-  using Base::nh_;                  //!< Number of equality constraints
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Dimension of the control
   using Base::state_;               //!< Model of the state

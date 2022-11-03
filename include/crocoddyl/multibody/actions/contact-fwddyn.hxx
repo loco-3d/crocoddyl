@@ -55,7 +55,6 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::DifferentialActionModelCon
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
   init();
-  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
@@ -293,6 +292,24 @@ template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelContactFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << ", nc=" << contacts_->get_nc() << "}";
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
+  }
 }
 
 template <typename Scalar>

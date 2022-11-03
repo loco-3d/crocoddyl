@@ -127,6 +127,16 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
    * @brief Return the lower bound of the inequality constraints
    */
   virtual const VectorXs& get_g_lb() const;
@@ -176,8 +186,6 @@ class DifferentialActionModelFreeFwdDynamicsTpl : public DifferentialActionModel
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
   using Base::g_ub_;   //!< Upper bound of the inequality constraints
-  using Base::ng_;     //!< Number of inequality constraints
-  using Base::nh_;     //!< Number of equality constraints
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 

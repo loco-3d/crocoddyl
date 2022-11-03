@@ -58,10 +58,6 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
     time_step2_ = time_step_ * time_step_;
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
-  // Share the dimension with the differential action
-  DifferentialActionModelAbstract* action = static_cast<DifferentialActionModelAbstract*>(differential_.get());
-  ng_ = action->ng_;
-  nh_ = action->nh_;
 }
 
 template <typename Scalar>
@@ -74,6 +70,16 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > IntegratedActionModelAbstractT
         << "Warning: It is useless to use an Euler integrator with a control parametrization larger than PolyZero"
         << std::endl;
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng() const {
+  return differential_->get_ng();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh() const {
+  return differential_->get_nh();
 }
 
 template <typename Scalar>

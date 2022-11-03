@@ -198,12 +198,12 @@ class ActionModelAbstractTpl {
   /**
    * @brief Return the number of inequality constraints
    */
-  std::size_t get_ng() const;
+  virtual std::size_t get_ng() const;
 
   /**
    * @brief Return the number of equality constraints
    */
-  std::size_t get_nh() const;
+  virtual std::size_t get_nh() const;
 
   /**
    * @brief Return the state
@@ -258,15 +258,11 @@ class ActionModelAbstractTpl {
    */
   virtual void print(std::ostream& os) const;
 
- private:
-  std::size_t ng_internal_;  //!< Internal object for storing the number of inequatility constraints
-  std::size_t nh_internal_;  //!< Internal object for storing the number of equatility constraints
-
  protected:
   std::size_t nu_;                          //!< Control dimension
   std::size_t nr_;                          //!< Dimension of the cost residual
-  std::size_t* ng_;                         //!< Number of inequality constraints
-  std::size_t* nh_;                         //!< Number of equality constraints
+  std::size_t ng_;                          //!< Number of inequality constraints
+  std::size_t nh_;                          //!< Number of equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs g_lb_;                           //!< Lower bound of the inequality constraints

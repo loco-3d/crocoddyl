@@ -250,8 +250,8 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(const boost::shared_ptr<Action
   }
   d->Gx = k0_data->Gx;
   d->Hx = k0_data->Hx;
-  d->Gu.resize(*ng_, nu_);
-  d->Hu.resize(*nh_, nu_);
+  d->Gu.resize(differential_->get_ng(), nu_);
+  d->Hu.resize(differential_->get_nh(), nu_);
   control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
   control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 

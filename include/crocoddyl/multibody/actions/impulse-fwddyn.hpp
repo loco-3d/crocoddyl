@@ -178,6 +178,16 @@ class ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> 
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
    * @brief Return the lower bound of the inequality constraints
    */
   virtual const VectorXs& get_g_lb() const;

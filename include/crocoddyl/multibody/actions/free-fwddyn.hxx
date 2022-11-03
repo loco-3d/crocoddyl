@@ -39,12 +39,6 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::DifferentialActionModelFreeFw
   }
   Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
   Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
-
-  if (constraints_ != nullptr) {
-    *ng_ = constraints_->get_ng();
-    *nh_ = constraints_->get_nh();
-    constraints_->shareDimensions(this);
-  }
 }
 
 template <typename Scalar>
@@ -220,6 +214,24 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
 
   u.noalias() = pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
   d->pinocchio.tau.setZero();
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
+  }
 }
 
 template <typename Scalar>

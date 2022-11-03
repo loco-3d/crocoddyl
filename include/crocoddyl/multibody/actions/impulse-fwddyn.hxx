@@ -44,7 +44,6 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       enable_force_(enable_force),
       gravity_(state->get_pinocchio()->gravity) {
   init();
-  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
@@ -222,6 +221,24 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
     return true;
   } else {
     return false;
+  }
+}
+
+template <typename Scalar>
+std::size_t ActionModelImpulseFwdDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t ActionModelImpulseFwdDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
   }
 }
 

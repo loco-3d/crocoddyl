@@ -70,8 +70,6 @@ class ConstraintModelManagerTpl {
   typedef ConstraintModelAbstractTpl<Scalar> ConstraintModelAbstract;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
-  typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModelAbstract;
   typedef ConstraintItemTpl<Scalar> ConstraintItem;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -230,24 +228,6 @@ class ConstraintModelManagerTpl {
   bool getConstraintStatus(const std::string& name) const;
 
   /**
-   * @brief Share the dimensions with an action model
-   *
-   * It allows us to update dimensions when we change the constraint status.
-   *
-   * @param model  Action model
-   */
-  void shareDimensions(ActionModelAbstract* const model);
-
-  /**
-   * @brief Share the dimensions with a differential action model
-   *
-   * It allows us to update dimensions when we change the constraint status.
-   *
-   * @param model  Action model
-   */
-  void shareDimensions(DifferentialActionModelAbstract* const model);
-
-  /**
    * @brief Print information on the stack of constraints
    */
   template <class Scalar>
@@ -259,10 +239,8 @@ class ConstraintModelManagerTpl {
   VectorXs lb_;                             //!< Lower bound of the constraint
   VectorXs ub_;                             //!< Upper bound of the constraint
   std::size_t nu_;                          //!< Dimension of the control input
-  std::size_t ng_internal_;                 //!< Internal object for storing the number of inequatility constraints
-  std::size_t nh_internal_;                 //!< Internal object for storing the number of equatility constraints
-  std::size_t* ng_;                         //!< Number of the active inequality constraints
-  std::size_t* nh_;                         //!< Number of the active equality constraints
+  std::size_t ng_;                          //!< Number of the active inequality constraints
+  std::size_t nh_;                          //!< Number of the active equality constraints
   std::set<std::string> active_set_;        //!< Names of the active constraint items
   std::set<std::string> inactive_set_;      //!< Names of the inactive constraint items
   VectorXs unone_;                          //!< No control vector

@@ -121,8 +121,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(const boost::shared_ptr<Act
   d->Luu *= time_step_;
   d->Gx = d->differential->Gx;
   d->Hx = d->differential->Hx;
-  d->Gu.resize(*ng_, nu_);
-  d->Hu.resize(*nh_, nu_);
+  d->Gu.resize(differential_->get_ng(), nu_);
+  d->Hu.resize(differential_->get_nh(), nu_);
   control_->multiplyByJacobian(d->control, d->differential->Gu, d->Gu);
   control_->multiplyByJacobian(d->control, d->differential->Hu, d->Hu);
 }
