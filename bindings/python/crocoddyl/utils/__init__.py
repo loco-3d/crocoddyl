@@ -1082,7 +1082,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                         continue
                 break
             self.d = self.expectedImprovement()
-            d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
+            d1, d2 = self.d[0], self.d[1]
 
             for a in self.alphas:
                 try:
@@ -1283,7 +1283,7 @@ class FDDPDerived(DDPDerived):
                 except ArithmeticError:
                     continue
                 self.d = self.expectedImprovement()
-                d1, d2 = np.asscalar(self.d[0]), np.asscalar(self.d[1])
+                d1, d2 = self.d[0], self.d[1]
 
                 self.dV_exp = a * (d1 + .5 * d2 * a)
                 if self.dV_exp >= 0.:  # descend direction
