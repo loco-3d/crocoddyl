@@ -155,6 +155,26 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
                            const Scalar tol = Scalar(1e-9));
 
   /**
+   * @brief Return the number of inequality constraints
+   */
+  virtual std::size_t get_ng() const;
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  virtual std::size_t get_nh() const;
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_lb() const;
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  virtual const VectorXs& get_g_ub() const;
+
+  /**
    * @brief Return the actuation model
    */
   const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
@@ -181,12 +201,13 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
 
   /**
    * @brief Print relevant information of the contact inverse-dynamics model
-   *
    * @param[out] os  Output stream object
    */
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::g_lb_;   //!< Lower bound of the inequality constraints
+  using Base::g_ub_;   //!< Upper bound of the inequality constraints
   using Base::ng_;     //!< Number of inequality constraints
   using Base::nh_;     //!< Number of equality constraints
   using Base::nu_;     //!< Control dimension

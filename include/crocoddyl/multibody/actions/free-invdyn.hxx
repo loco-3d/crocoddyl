@@ -64,7 +64,6 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(const boost::shared
             boost::make_shared<typename DifferentialActionModelFreeInvDynamicsTpl<Scalar>::ResidualModelActuation>(
                 state, actuation_->get_nu())));
   }
-  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
@@ -190,6 +189,42 @@ template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelFreeInvDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << "}";
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
 }
 
 template <typename Scalar>

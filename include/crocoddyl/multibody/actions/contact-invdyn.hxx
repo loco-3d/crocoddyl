@@ -103,7 +103,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(const boost::sha
                                   !active);
     }
   }
-  constraints_->shareDimensions(this);
 }
 
 template <typename Scalar>
@@ -215,6 +214,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
   constraints_->calcDiff(d->constraints, x, u);
 }
 
+template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
     const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -226,19 +226,6 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
   if (constraints_ != nullptr) {
     constraints_->calcDiff(d->constraints, x);
   }
-}
-
-template <typename Scalar>
-void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
-  }
-  Data* d = static_cast<Data*>(data.get());
-  costs_->calcDiff(d->costs, x);
-  d->constraints->resize(this, d);
-  constraints_->calcDiff(d->constraints, x);
 }
 
 template <typename Scalar>
@@ -316,6 +303,42 @@ template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::print(std::ostream& os) const {
   os << "DifferentialActionModelContactInvDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
      << ", nu=" << nu_ << ", nc=" << contacts_->get_nc_total() << "}";
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_ng() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng();
+  } else {
+    return Base::get_ng();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_nh() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh();
+  } else {
+    return Base::get_nh();
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_g_lb() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_lb();
+  } else {
+    return g_lb_;
+  }
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_g_ub() const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ub();
+  } else {
+    return g_lb_;
+  }
 }
 
 template <typename Scalar>
