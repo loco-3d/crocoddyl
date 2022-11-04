@@ -9,74 +9,37 @@ import warnings
 
 
 def rotationMatrixFromTwoVectors(a, b):
-    a_copy = a / np.linalg.norm(a)
-    b_copy = b / np.linalg.norm(b)
+    a_norm = np.linalg.norm(a)
+    b_norm = np.linalg.norm(b)
+    if a_norm == 0 or b_norm == 0:
+        return np.eye(3)
+    a_copy = a / a_norm
+    b_copy = b / b_norm
     a_cross_b = np.cross(a_copy, b_copy, axis=0)
     s = np.linalg.norm(a_cross_b)
-    if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
-        warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
-        if s == 0:
-            return np.matrix(np.eye(3))
-        c = np.asscalar(a_copy.T * b_copy)
-        ab_skew = pinocchio.skew(a_cross_b)
-        return np.matrix(np.eye(3)) + ab_skew + ab_skew * ab_skew * (1 - c) / s**2
-    else:
-        if s == 0:
-            return np.eye(3)
-        c = np.dot(a_copy, b_copy)
-        ab_skew = pinocchio.skew(a_cross_b)
-        return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
+    if s == 0:
+        return np.eye(3)
+    c = np.dot(a_copy, b_copy)
+    ab_skew = pinocchio.skew(a_cross_b)
+    return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
 class DisplayAbstract:
 
-    def __init__(self, rate=-1, freq=1):
+    def __init__(self, robot, rate=-1, freq=1, frameNames=[]):
+        self.robot = robot
         self.rate = rate
         self.freq = freq
 
-    def displayFromSolver(self, solver, factor=1.):
-        fs = self.getForceTrajectoryFromSolver(solver)
-        ps = self.getFrameTrajectoryFromSolver(solver)
-
-        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
-        dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
-        self.display(solver.xs, fs, ps, dts, factor)
-
-    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
-        """ Display the state, force and frame trajectories"""
-        raise NotImplementedError("Not implemented yet.")
-
-    def getForceTrajectoryFromSolver(self, solver):
-        """ Get the force trajectory from the solver"""
-        return None
-
-    def getFrameTrajectoryFromSolver(self, solver):
-        """ Get the frame trajectory from the solver"""
-        return None
-
-
-class GepettoDisplay(DisplayAbstract):
-
-    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
-        DisplayAbstract.__init__(self, rate, freq)
-        self.robot = robot
-
-        # Visuals properties
-        self.fullVisibility = visibility
-        self.floorGroup = "world/floor"
+        # Visual properties
+        self.frameTrajGroup = "world/robot/frame_trajectory"
         self.forceGroup = "world/robot/contact_forces"
         self.frictionGroup = "world/robot/friction_cone"
-        self.frameTrajGroup = "world/robot/frame_trajectory"
-        self.backgroundColor = [1., 1., 1., 1.]
-        self.floorScale = [0.5, 0.5, 0.5]
-        self.floorColor = [0.7, 0.7, 0.7, 1.]
         self.forceRadius = 0.015
         self.forceLength = 0.5
         self.forceColor = [1., 0., 1., 1.]
         self.frictionConeScale = 0.2
-        self.frictionConeRays = True
-        self.frictionConeColor1 = [0., 0.4, 0.79, 0.5]
-        self.frictionConeColor2 = [0., 0.4, 0.79, 0.5]
+        self.frictionConeColor = [0., 0.4, 0.79, 0.5]
         self.activeContacts = {}
         self.frictionMu = {}
         for n in frameNames:
@@ -90,71 +53,23 @@ class GepettoDisplay(DisplayAbstract):
         self.frameTrajLineWidth = 10
         for fr in self.frameTrajNames:
             self.frameTrajColor[fr] = list(np.hstack([np.random.choice(range(256), size=3) / 256., 1.]))
-
-        self._addRobot()
-        self._setBackground()
-        if cameraTF is not None:
-            self.robot.viewer.gui.setCameraTransform(self.robot.viz.windowID, cameraTF)
-        if floor:
-            self._addFloor()
+        self.x_axis = np.array([1., 0., 0.])
+        self.y_axis = np.array([0., 1., 0.])
+        self.z_axis = np.array([0., 0., 1.])
         self.totalWeight = sum(m.mass
                                for m in self.robot.model.inertias) * np.linalg.norm(self.robot.model.gravity.linear)
-        self.x_axis = np.array([1., 0., 0.])
-        self.z_axis = np.array([0., 0., 1.])
-        self.robot.viewer.gui.createGroup(self.forceGroup)
-        self.robot.viewer.gui.createGroup(self.frictionGroup)
-        self.robot.viewer.gui.createGroup(self.frameTrajGroup)
-        self._addForceArrows()
-        self._addFrameCurves()
-        self._addFrictionCones()
+
+    def displayFromSolver(self, solver, factor=1.):
+        fs = self.getForceTrajectoryFromSolver(solver)
+        ps = self.getFrameTrajectoryFromSolver(solver)
+
+        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
+        dts = [m.dt if hasattr(m, "differential") else 0. for m in models]
+        self.display(solver.xs, fs, ps, dts, factor)
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
-        numpy_conversion = False
-        if libcrocoddyl_pywrap.getNumpyType() == np.matrix:
-            numpy_conversion = True
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
-            warnings.warn("Numpy matrix supports will be removed in future release", DeprecationWarning, stacklevel=2)
-        if ps:
-            for key, p in ps.items():
-                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
-        if not dts:
-            dts = [0.] * len(xs)
-
-        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
-        for i, x in enumerate(xs):
-            if not i % S:
-                if fs:
-                    self.activeContacts = {k: False for k, c in self.activeContacts.items()}
-                    for f in fs[i]:
-                        key = f["key"]
-                        pose = f["oMf"]
-                        wrench = f["f"]
-                        # Display the contact forces
-                        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
-                        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
-                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
-                        forceName = self.forceGroup + "/" + key
-                        self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
-                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
-                        self.robot.viewer.gui.setVisibility(forceName, "ON")
-                        # Display the friction cones
-                        position = pose
-                        position.rotation = f["R"]
-                        frictionName = self.frictionGroup + "/" + key
-                        self._setConeMu(key, f["mu"])
-                        self.robot.viewer.gui.applyConfiguration(
-                            frictionName, list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()))
-                        self.robot.viewer.gui.setVisibility(frictionName, "ON")
-                        self.activeContacts[key] = True
-                for key, c in self.activeContacts.items():
-                    if c == False:
-                        self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "OFF")
-                        self.robot.viewer.gui.setVisibility(self.frictionGroup + "/" + key, "OFF")
-                self.robot.display(x[:self.robot.nq])
-                time.sleep(dts[i] * factor)
-        if numpy_conversion:
-            numpy_conversion = False
-            libcrocoddyl_pywrap.switchToNumpyMatrix()
+        """ Display the state, force and frame trajectories"""
+        raise NotImplementedError("Not implemented yet.")
 
     def getForceTrajectoryFromSolver(self, solver):
         if len(self.frameTrajNames) == 0:
@@ -248,6 +163,70 @@ class GepettoDisplay(DisplayAbstract):
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
 
+
+class GepettoDisplay(DisplayAbstract):
+
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=False):
+        DisplayAbstract.__init__(self, robot, rate, freq, frameNames)
+
+        # Visuals properties
+        self.fullVisibility = visibility
+        self.floorGroup = "world/floor"
+        self.backgroundColor = [1., 1., 1., 1.]
+        self.floorScale = [0.5, 0.5, 0.5]
+        self.floorColor = [0.7, 0.7, 0.7, 1.]
+        self.frictionConeRays = True
+        self._addRobot()
+        self._setBackground()
+        if cameraTF is not None:
+            self.robot.viewer.gui.setCameraTransform(self.robot.viz.windowID, cameraTF)
+        if floor:
+            self._addFloor()
+        self.robot.viewer.gui.createGroup(self.forceGroup)
+        self.robot.viewer.gui.createGroup(self.frictionGroup)
+        self.robot.viewer.gui.createGroup(self.frameTrajGroup)
+        self._addForceArrows()
+        self._addFrameCurves()
+        self._addFrictionCones()
+
+    def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        if ps:
+            for key, p in ps.items():
+                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
+        if not dts:
+            dts = [0.] * len(xs)
+
+        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        for i, x in enumerate(xs):
+            if not i % S:
+                if fs:
+                    self.activeContacts = {k: False for k, c in self.activeContacts.items()}
+                    for f in fs[i]:
+                        key, pose, wrench = f["key"], f["oMf"], f["f"]
+                        # Display the contact forces
+                        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
+                        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+                        forceName = self.forceGroup + "/" + key
+                        self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
+                        self.robot.viewer.gui.setVector3Property(forceName, "Scale", [1. * forceMagnitud, 1., 1.])
+                        self.robot.viewer.gui.setVisibility(forceName, "ON")
+                        # Display the friction cones
+                        position = pose
+                        position.rotation = f["R"]
+                        frictionName = self.frictionGroup + "/" + key
+                        self._setConeMu(key, f["mu"])
+                        self.robot.viewer.gui.applyConfiguration(
+                            frictionName, list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()))
+                        self.robot.viewer.gui.setVisibility(frictionName, "ON")
+                        self.activeContacts[key] = True
+                for key, c in self.activeContacts.items():
+                    if c == False:
+                        self.robot.viewer.gui.setVisibility(self.forceGroup + "/" + key, "OFF")
+                        self.robot.viewer.gui.setVisibility(self.frictionGroup + "/" + key, "OFF")
+                self.robot.display(x[:self.robot.nq])
+                time.sleep(dts[i] * factor)
+
     def _addRobot(self):
         # Spawn robot model
         self.robot.initViewer(windowName="crocoddyl", loadModel=False)
@@ -306,14 +285,14 @@ class GepettoDisplay(DisplayAbstract):
         self.robot.viewer.gui.createGroup(coneGroup)
 
         meshGroup = coneGroup + "/cone"
-        result = self.robot.viewer.gui.addCurve(meshGroup, v, self.frictionConeColor1)
+        result = self.robot.viewer.gui.addCurve(meshGroup, v, self.frictionConeColor)
         self.robot.viewer.gui.setCurveMode(meshGroup, 'TRIANGLE_FAN')
         if self.frictionConeRays:
             lineGroup = coneGroup + "/lines"
             self.robot.viewer.gui.createGroup(lineGroup)
             for k in range(m_generatrices.shape[1]):
                 l = self.robot.viewer.gui.addLine(lineGroup + "/" + str(k), [0., 0., 0.],
-                                                  m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor2)
+                                                  m_generatrices[:3, k].T.tolist()[0], self.frictionConeColor)
         self.robot.viewer.gui.setScale(coneGroup, [scale, scale, scale])
         if self.fullVisibility:
             self.robot.viewer.gui.setVisibility(meshGroup, "ALWAYS_ON_TOP")
@@ -331,29 +310,94 @@ class GepettoDisplay(DisplayAbstract):
 
 class MeshcatDisplay(DisplayAbstract):
 
-    def __init__(self, robot, rate=-1, freq=1, openWindow=True):
-        DisplayAbstract.__init__(self, rate, freq)
-        self.robot = robot
+    def __init__(self, robot, rate=-1, freq=1, cameraTF=None, floor=True, frameNames=[], visibility=True):
+        DisplayAbstract.__init__(self, robot, rate, freq, frameNames)
         robot.setVisualizer(
             pinocchio.visualize.MeshcatVisualizer(model=self.robot.model,
                                                   collision_model=self.robot.collision_model,
                                                   visual_model=self.robot.visual_model))
-        self._addRobot(openWindow)
+        if cameraTF is not None:
+            self.robot.viewer["/Cameras/default"].set_transform(pinocchio.XYZQUATToSE3(cameraTF).homogeneous)
+        self._addRobot(visibility)
+        self._addForceArrows()
+        self._addFrictionCones()
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.):
+        if ps:
+            for key in ps.keys():
+                vertices = np.array(ps[key]).T
+                self._addFrameCurves(key, vertices)
         if not dts:
             dts = [0.] * len(xs)
 
-        S = 1 if self.rate <= 0 else max(len(xs) // self.rate, 1)
+        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
         for i, x in enumerate(xs):
             if not i % S:
+                if fs:
+                    self.activeContacts = {k: False for k, c in self.activeContacts.items()}
+                    for f in fs[i]:
+                        key, pose, wrench, mu = f["key"], f["oMf"], f["f"], f["mu"]
+                        # Display the contact forces
+                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+                        R = rotationMatrixFromTwoVectors(self.y_axis, wrench.linear)
+                        forcePose = pinocchio.SE3(
+                            R, pose.translation +
+                            np.dot(R, np.array([0., forceMagnitud * self.forceLength / 2, 0.]))).homogeneous
+                        forceName = self.forceGroup + "/" + key
+                        self.robot.viewer[forceName].set_property("visible", False)
+                        self.robot.viewer[forceName].set_transform(forcePose)
+                        self.robot.viewer[forceName].set_property("scale", [1., forceMagnitud, 1.])
+                        self.robot.viewer[forceName].set_property("visible", True)
+                        # Display the friction cones
+                        R = pinocchio.utils.rpyToMatrix(-np.pi / 2, 0., 0.)  #f["R"]
+                        conePose = pinocchio.SE3(
+                            R,
+                            pose.translation + np.dot(R, np.array([0., -self.frictionConeScale / 2, 0.]))).homogeneous
+                        coneName = self.frictionGroup + "/" + key
+                        self.robot.viewer[coneName].set_property("radiusBottom", mu)
+                        self.robot.viewer[coneName].set_transform(conePose)
+                        self.robot.viewer[coneName].set_property("visible", True)
+                        self.activeContacts[key] = True
+                for key, c in self.activeContacts.items():
+                    if c == False:
+                        forceName = self.forceGroup + "/" + key
+                        coneName = self.frictionGroup + "/" + key
+                        self.robot.viewer[forceName].set_property("visible", False)
+                        self.robot.viewer[coneName].set_property("visible", False)
                 self.robot.display(x[:self.robot.nq])
                 time.sleep(dts[i] * factor)
 
     def _addRobot(self, openWindow):
-        # Spawn robot model
         self.robot.initViewer(open=openWindow)
         self.robot.loadViewerModel(rootNodeName="robot")
+
+    def _addForceArrows(self):
+        import meshcat.geometry as g
+        meshColor = g.MeshLambertMaterial(color=self._rgbToHexColor(self.forceColor[:3]), reflectivity=0.8)
+        for key in self.activeContacts:
+            forceName = self.forceGroup + "/" + key
+            self.robot.viewer[forceName].set_object(g.Cylinder(self.forceLength, self.forceRadius), meshColor)
+
+    def _addFrictionCones(self):
+        import meshcat.geometry as g
+        meshColor = g.MeshLambertMaterial(color=self._rgbToHexColor(self.frictionConeColor[:3]),
+                                          reflectivity=0.8,
+                                          opacity=0.2,
+                                          transparent=True)
+        for key in self.activeContacts:
+            coneName = self.frictionGroup + "/" + key
+            mu = self.frictionMu[key]
+            self.robot.viewer[coneName].set_object(
+                g.Cylinder(self.frictionConeScale, None, 0., mu * self.frictionConeScale), meshColor)
+
+    def _addFrameCurves(self, key, vertices):
+        import meshcat.geometry as g
+        frameName = self.frameTrajGroup + "/" + key
+        meshColor = g.LineBasicMaterial(color=self._rgbToHexColor(self.frameTrajColor[key][:3]), linewidth=3.)
+        self.robot.viewer[frameName].set_object(g.Line(g.PointsGeometry(vertices), meshColor))
+
+    def _rgbToHexColor(self, rgbColor):
+        return '0x%02x%02x%02x' % tuple(np.rint(255 * np.array(rgbColor)).astype(int))
 
 
 class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):

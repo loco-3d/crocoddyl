@@ -271,8 +271,9 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   contacts_->calc(d->multibody.contacts, d->tmp_xstatic);
 
   // Allocates memory
-  d->tmp_Jstatic.resize(nv, nu_ + nc);
-  d->tmp_Jstatic << d->multibody.actuation->dtau_du, d->multibody.contacts->Jc.topRows(nc).transpose();
+  d->tmp_Jstatic.conservativeResize(nv, nu_ + nc);
+  d->tmp_Jstatic.leftCols(nu_) = d->multibody.actuation->dtau_du;
+  d->tmp_Jstatic.rightCols(nc) = d->multibody.contacts->Jc.topRows(nc).transpose();
   u.noalias() = (pseudoInverse(d->tmp_Jstatic) * d->pinocchio.tau).head(nu_);
   d->pinocchio.tau.setZero();
 }
