@@ -143,6 +143,14 @@ class SolverAbstract {
   double computeDynamicFeasibility();
 
   /**
+   * @brief Compute the feasibility of the inequality constraints for the current guess
+   *
+   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
+   * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
+   */
+  double computeInequalityFeasibility();
+
+  /**
    * @brief Compute the feasibility of the equality constraints for the current guess
    *
    * The feasibility can be computed using the computed using the l-1 and l-inf norms.
@@ -272,7 +280,14 @@ class SolverAbstract {
   double get_ffeas() const;
 
   /**
-   * @brief Return the norm used for the computing the feasibility (true for \f$\ell_\infty\f$, false for \f$\ell_1\f$)
+   * @brief Return the norm used for the computing the inequality feasibility (true for \f$\ell_\infty\f$, false for
+   * \f$\ell_1\f$)
+   */
+  double get_gfeas() const;
+
+  /**
+   * @brief Return the norm used for the computing the equality feasibility (true for \f$\ell_\infty\f$, false for
+   * \f$\ell_1\f$)
    */
   double get_hfeas() const;
 
@@ -342,6 +357,7 @@ class SolverAbstract {
   std::size_t iter_;      //!< Number of iteration performed by the solver
   double th_gaptol_;      //!< Threshold limit to check non-zero gaps
   double ffeas_;          //!< Feasibility of the dynamic constraints
+  double gfeas_;          //!< Feasibility of the inequality constraints
   double hfeas_;          //!< Feasibility of the equality constraints
   bool inffeas_;     //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
                      //!< the l-1 norm

@@ -32,6 +32,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       iter_(0),
       th_gaptol_(1e-16),
       ffeas_(NAN),
+      gfeas_(NAN),
       hfeas_(NAN),
       inffeas_(true),
       tmp_feas_(0.) {
@@ -97,6 +98,33 @@ double SolverAbstract::computeDynamicFeasibility() {
   } else if (!was_feasible_) {  // closing the gaps
     for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
       it->setZero();
+    }
+  }
+  return tmp_feas_;
+}
+
+double SolverAbstract::computeInequalityFeasibility() {
+  tmp_feas_ = 0.;
+  const std::size_t T = problem_->get_T();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  if (inffeas_) {
+    for (std::size_t t = 0; t < T; ++t) {
+      if (models[t]->get_ng() > 0) {
+        tmp_feas_ = std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
+      }
+    }
+    if (problem_->get_terminalModel()->get_ng()) {
+      tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
+    }
+  } else {
+    for (std::size_t t = 0; t < T; ++t) {
+      if (models[t]->get_ng() > 0) {
+        tmp_feas_ += datas[t]->g.lpNorm<1>();
+      }
+    }
+    if (problem_->get_terminalModel()->get_ng()) {
+      tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
     }
   }
   return tmp_feas_;
@@ -227,6 +255,8 @@ std::size_t SolverAbstract::get_iter() const { return iter_; }
 double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
 
 double SolverAbstract::get_ffeas() const { return ffeas_; }
+
+double SolverAbstract::get_gfeas() const { return gfeas_; }
 
 double SolverAbstract::get_hfeas() const { return hfeas_; }
 
