@@ -167,12 +167,12 @@ void exposeConstraintManager() {
            "Share memory with a given action data\n\n"
            ":param model: action data that we want to share memory")
       .def("resize", &ConstraintDataManager::resize<DifferentialActionModelAbstract, DifferentialActionDataAbstract>,
-           bp::args("self", "model", "data"),
+           bp::with_custodian_and_ward_postcall<0, 2>(), bp::args("self", "model", "data"),
            "Resize the data given differential action data\n\n"
            ":param model: differential action model that defines how to resize the data\n"
            ":param data: differential action data that we want to resize")
       .def("resize", &ConstraintDataManager::resize<ActionModelAbstract, ActionDataAbstract>,
-           bp::args("self", "model", "data"),
+           bp::with_custodian_and_ward_postcall<0, 2>(), bp::args("self", "model", "data"),
            "Resize the data given action data\n\n"
            ":param model: action model that defines how to resize the data\n"
            ":param data: action data that we want to resize")
