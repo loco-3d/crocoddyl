@@ -201,9 +201,6 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
   const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
 
-  // Check the velocity input is zero
-  assert_pretty(x.tail(nv).isZero(), "The velocity input should be zero for quasi-static to work.");
-
   d->tmp_xstatic.head(nq) = q;
   d->tmp_xstatic.tail(nv).setZero();
   u.setZero();
