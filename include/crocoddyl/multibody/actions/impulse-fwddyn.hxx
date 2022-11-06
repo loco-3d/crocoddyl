@@ -225,6 +225,13 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
 }
 
 template <typename Scalar>
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>&,
+                                                           Eigen::Ref<VectorXs>, const Eigen::Ref<const VectorXs>&,
+                                                           const std::size_t, const Scalar) {
+  // do nothing
+}
+
+template <typename Scalar>
 std::size_t ActionModelImpulseFwdDynamicsTpl<Scalar>::get_ng() const {
   if (constraints_ != nullptr) {
     return constraints_->get_ng();
