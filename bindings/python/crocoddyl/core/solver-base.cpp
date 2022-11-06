@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,6 +18,8 @@ void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
   StdVectorPythonVisitor<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
+
+  bp::enum_<FeasibilityNorm>("FeasibilityNorm").value("LInf", LInf).value("L1", L1).export_values();
 
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
@@ -89,6 +92,14 @@ void exposeSolverAbstract() {
            "Compute the dynamic feasibility for the current guess.\n\n"
            "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
            "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
+      .def("computeInequalityFeasibility", &SolverAbstract_wrap::computeInequalityFeasibility, bp::args("self"),
+           "Compute the feasibility of the inequality constraint for the current guess.\n\n"
+           "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
+           "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
+      .def("computeEqualityFeasibility", &SolverAbstract_wrap::computeEqualityFeasibility, bp::args("self"),
+           "Compute the feasibility of the equality constraint for the current guess.\n\n"
+           "The feasibility can be computed using the computed using the l-1 and l-inf norms.\n"
+           "By default we use the l-inf norm, however, we can use the l-1 norm by defining inffeas as False.")
       .def("setCallbacks", &SolverAbstract_wrap::setCallbacks, bp::args("self", "callbacks"),
            "Set a list of callback functions using for diagnostic.\n\n"
            "Each iteration, the solver calls these set of functions in order to\n"
@@ -124,11 +135,15 @@ void exposeSolverAbstract() {
       .add_property("th_gapTol", bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
                     bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
                     "threshold for accepting a gap as non-zero")
-      .def_readwrite("ffeas", &SolverAbstract_wrap::ffeas_, "feasibility of the dynamic constraint of current guess")
-      .add_property("inffeas", bp::make_function(&SolverAbstract_wrap::get_inffeas),
-                    bp::make_function(&SolverAbstract_wrap::set_inffeas),
-                    "true indicates if we use l-inf norm for computing the feasibility, otherwise false represents "
-                    "the l-1 norm");
+      .def_readwrite("ffeas", &SolverAbstract_wrap::ffeas_,
+                     "feasibility of the dynamic constraint for the current guess")
+      .def_readwrite("gfeas", &SolverAbstract_wrap::gfeas_,
+                     "feasibility of the inequality constraint for the current guess")
+      .def_readwrite("hfeas", &SolverAbstract_wrap::hfeas_,
+                     "feasibility of the equality constraint for the current guess")
+      .add_property("feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
+                    bp::make_function(&SolverAbstract_wrap::set_feasnorm),
+                    "norm used to compute the dynamic and constraints feasibility");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",

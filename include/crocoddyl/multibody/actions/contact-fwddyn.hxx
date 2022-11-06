@@ -256,9 +256,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   const std::size_t nv = state_->get_nv();
   const std::size_t nc = contacts_->get_nc();
 
-  // Check the velocity input is zero
-  assert_pretty(x.tail(nv).isZero(), "The velocity input should be zero for quasi-static to work.");
-
   d->tmp_xstatic.head(nq) = q;
   d->tmp_xstatic.tail(nv).setZero();
   u.setZero();
