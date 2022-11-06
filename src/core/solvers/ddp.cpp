@@ -288,7 +288,7 @@ void SolverDDP::forwardPass(const double steplength) {
 
 void SolverDDP::computeActionValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
                                            const boost::shared_ptr<ActionDataAbstract>& data) {
-  assert_pretty(t > problem_->get_T(),
+  assert_pretty(t < problem_->get_T(),
                 "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
@@ -324,7 +324,7 @@ void SolverDDP::computeActionValueFunction(const std::size_t t, const boost::sha
 }
 
 void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
-  assert_pretty(t > problem_->get_T(),
+  assert_pretty(t < problem_->get_T(),
                 "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   Vx_[t] = Qx_[t];
