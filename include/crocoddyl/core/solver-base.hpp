@@ -20,6 +20,8 @@ namespace crocoddyl {
 class CallbackAbstract;  // forward declaration
 static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
 
+enum FeasibilityNorm { LInf = 0, L1 };
+
 /**
  * @brief Abstract class for optimal control solvers
  *
@@ -135,9 +137,9 @@ class SolverAbstract {
    * @brief Compute the dynamic feasibility \f$\|\mathbf{f}_{\mathbf{s}}\|_{\infty,1}\f$ for
    * the current guess \f$(\mathbf{x}^k,\mathbf{u}^k)\f$
    *
-   * The feasibility can be computed using the computed using the \f$\ell_\infty\f$ and \f$\ell_1\f$ norms.
-   * By default we use the \f$\ell_\infty\f$ norm; however, we can use the \f$\ell_1\f$ norm via `set_inffeas()`.
-   * Note that \f$\mathbf{f}_{\mathbf{s}}\f$ are the gaps on the dynamics, which are computed at each node as
+   * The feasibility can be computed using different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm using `set_feasnorm`. Note that
+   * \f$\mathbf{f}_{\mathbf{s}}\f$ are the gaps on the dynamics, which are computed at each node as
    * \f$\mathbf{x}^{'}-\mathbf{f}(\mathbf{x},\mathbf{u})\f$.
    */
   double computeDynamicFeasibility();
@@ -145,16 +147,16 @@ class SolverAbstract {
   /**
    * @brief Compute the feasibility of the inequality constraints for the current guess
    *
-   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
-   * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
+   * The feasibility can be computed using different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm using `set_feasnorm`.
    */
   double computeInequalityFeasibility();
 
   /**
    * @brief Compute the feasibility of the equality constraints for the current guess
    *
-   * The feasibility can be computed using the computed using the l-1 and l-inf norms.
-   * By default we use the l-inf norm, however, we can use the l-1 norm by doing set_inffeas(false).
+   * The feasibility can be computed using different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm using `set_feasnorm`.
    */
   double computeEqualityFeasibility();
 
@@ -274,27 +276,24 @@ class SolverAbstract {
   double get_th_gaptol() const;
 
   /**
-   * @brief Return the feasibility of the dynamic constraints \f$\|\mathbf{f}_{\mathbf{s}}\|_{\infty,1}\f$ of the
-   * current guess
+   * @brief Return the dynamic feasibility for the current guess
    */
   double get_ffeas() const;
 
   /**
-   * @brief Return the norm used for the computing the inequality feasibility (true for \f$\ell_\infty\f$, false for
-   * \f$\ell_1\f$)
+   * @brief Return the inequality feasibility for the current guess
    */
   double get_gfeas() const;
 
   /**
-   * @brief Return the norm used for the computing the equality feasibility (true for \f$\ell_\infty\f$, false for
-   * \f$\ell_1\f$)
+   * @brief Return the equality feasibility for the current guess
    */
   double get_hfeas() const;
 
   /**
-   * @brief Return the norm used for the computing the feasibility (true for l-inf, false for l-1)
+   * @brief Return the type of norm used to evaluate the dynamic and constraints feasibility
    */
-  bool get_inffeas() const;
+  FeasibilityNorm get_feasnorm() const;
 
   /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
@@ -332,9 +331,9 @@ class SolverAbstract {
   void set_th_gaptol(const double th_gaptol);
 
   /**
-   * @brief Modify the current norm used for computed the feasibility
+   * @brief Modify the current norm used for computed the dynamic and constraint feasibility
    */
-  void set_inffeas(const bool inffeas);
+  void set_feasnorm(const FeasibilityNorm feas_norm);
 
  protected:
   boost::shared_ptr<ShootingProblem> problem_;                   //!< optimal control problem
@@ -343,25 +342,24 @@ class SolverAbstract {
   std::vector<Eigen::VectorXd> fs_;                              //!< Gaps/defects between shooting nodes
   std::vector<boost::shared_ptr<CallbackAbstract> > callbacks_;  //!< Callback functions
   bool is_feasible_;                                             //!< Label that indicates is the iteration is feasible
-  bool was_feasible_;     //!< Label that indicates in the previous iterate was feasible
-  double cost_;           //!< Total cost
-  double stop_;           //!< Value computed by `stoppingCriteria()`
-  Eigen::Vector2d d_;     //!< LQ approximation of the expected improvement
-  double xreg_;           //!< Current state regularization value
-  double ureg_;           //!< Current control regularization values
-  double steplength_;     //!< Current applied step-length
-  double dV_;             //!< Cost reduction obtained by `tryStep()`
-  double dVexp_;          //!< Expected cost reduction
-  double th_acceptstep_;  //!< Threshold used for accepting step
-  double th_stop_;        //!< Tolerance for stopping the algorithm
-  std::size_t iter_;      //!< Number of iteration performed by the solver
-  double th_gaptol_;      //!< Threshold limit to check non-zero gaps
-  double ffeas_;          //!< Feasibility of the dynamic constraints
-  double gfeas_;          //!< Feasibility of the inequality constraints
-  double hfeas_;          //!< Feasibility of the equality constraints
-  bool inffeas_;     //!< True indicates if we use l-inf norm for computing the feasibility, otherwise false represents
-                     //!< the l-1 norm
-  double tmp_feas_;  //!< Temporal variables used for computed the feasibility
+  bool was_feasible_;              //!< Label that indicates in the previous iterate was feasible
+  double cost_;                    //!< Total cost
+  double stop_;                    //!< Value computed by `stoppingCriteria()`
+  Eigen::Vector2d d_;              //!< LQ approximation of the expected improvement
+  double xreg_;                    //!< Current state regularization value
+  double ureg_;                    //!< Current control regularization values
+  double steplength_;              //!< Current applied step-length
+  double dV_;                      //!< Cost reduction obtained by `tryStep()`
+  double dVexp_;                   //!< Expected cost reduction
+  double th_acceptstep_;           //!< Threshold used for accepting step
+  double th_stop_;                 //!< Tolerance for stopping the algorithm
+  std::size_t iter_;               //!< Number of iteration performed by the solver
+  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
+  double ffeas_;                   //!< Feasibility of the dynamic constraints
+  double gfeas_;                   //!< Feasibility of the inequality constraints
+  double hfeas_;                   //!< Feasibility of the equality constraints
+  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the dynamics and constraints feasibility
+  double tmp_feas_;                //!< Temporal variables used for computed the feasibility
 };
 
 /**

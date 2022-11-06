@@ -34,7 +34,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       ffeas_(NAN),
       gfeas_(NAN),
       hfeas_(NAN),
-      inffeas_(true),
+      feasnorm_(LInf),
       tmp_feas_(0.) {
   // Allocate common data
   const std::size_t ndx = problem_->get_ndx();
@@ -83,17 +83,19 @@ double SolverAbstract::computeDynamicFeasibility() {
       const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
       m->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
     }
-
-    if (inffeas_) {
-      tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
-      for (std::size_t t = 0; t < T; ++t) {
-        tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
-      }
-    } else {
-      tmp_feas_ = fs_[0].lpNorm<1>();
-      for (std::size_t t = 0; t < T; ++t) {
-        tmp_feas_ += fs_[t + 1].lpNorm<1>();
-      }
+    switch (feasnorm_) {
+      case LInf:
+        tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
+        for (std::size_t t = 0; t < T; ++t) {
+          tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
+        }
+        break;
+      case L1:
+        tmp_feas_ = fs_[0].lpNorm<1>();
+        for (std::size_t t = 0; t < T; ++t) {
+          tmp_feas_ += fs_[t + 1].lpNorm<1>();
+        }
+        break;
     }
   } else if (!was_feasible_) {  // closing the gaps
     for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin(); it != fs_.end(); ++it) {
@@ -108,24 +110,27 @@ double SolverAbstract::computeInequalityFeasibility() {
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-  if (inffeas_) {
-    for (std::size_t t = 0; t < T; ++t) {
-      if (models[t]->get_ng() > 0) {
-        tmp_feas_ = std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
+  switch (feasnorm_) {
+    case LInf:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_ng() > 0) {
+          tmp_feas_ = std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
+        }
       }
-    }
-    if (problem_->get_terminalModel()->get_ng()) {
-      tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
-    }
-  } else {
-    for (std::size_t t = 0; t < T; ++t) {
-      if (models[t]->get_ng() > 0) {
-        tmp_feas_ += datas[t]->g.lpNorm<1>();
+      if (problem_->get_terminalModel()->get_ng() > 0) {
+        tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
       }
-    }
-    if (problem_->get_terminalModel()->get_ng()) {
-      tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
-    }
+      break;
+    case L1:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_ng() > 0) {
+          tmp_feas_ += datas[t]->g.lpNorm<1>();
+        }
+      }
+      if (problem_->get_terminalModel()->get_ng() > 0) {
+        tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
+      }
+      break;
   }
   return tmp_feas_;
 }
@@ -135,24 +140,27 @@ double SolverAbstract::computeEqualityFeasibility() {
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
-  if (inffeas_) {
-    for (std::size_t t = 0; t < T; ++t) {
-      if (models[t]->get_nh() > 0) {
-        tmp_feas_ = std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
+  switch (feasnorm_) {
+    case LInf:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_nh() > 0) {
+          tmp_feas_ = std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
+        }
       }
-    }
-    if (problem_->get_terminalModel()->get_nh()) {
-      tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->h.lpNorm<Eigen::Infinity>());
-    }
-  } else {
-    for (std::size_t t = 0; t < T; ++t) {
-      if (models[t]->get_nh() > 0) {
-        tmp_feas_ += datas[t]->h.lpNorm<1>();
+      if (problem_->get_terminalModel()->get_nh() > 0) {
+        tmp_feas_ = std::max(tmp_feas_, problem_->get_terminalData()->h.lpNorm<Eigen::Infinity>());
       }
-    }
-    if (problem_->get_terminalModel()->get_nh()) {
-      tmp_feas_ += problem_->get_terminalData()->h.lpNorm<1>();
-    }
+      break;
+    case L1:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_nh() > 0) {
+          tmp_feas_ += datas[t]->h.lpNorm<1>();
+        }
+      }
+      if (problem_->get_terminalModel()->get_nh() > 0) {
+        tmp_feas_ += problem_->get_terminalData()->h.lpNorm<1>();
+      }
+      break;
   }
   return tmp_feas_;
 }
@@ -260,7 +268,7 @@ double SolverAbstract::get_gfeas() const { return gfeas_; }
 
 double SolverAbstract::get_hfeas() const { return hfeas_; }
 
-bool SolverAbstract::get_inffeas() const { return inffeas_; }
+FeasibilityNorm SolverAbstract::get_feasnorm() const { return feasnorm_; }
 
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
@@ -345,7 +353,7 @@ void SolverAbstract::set_th_gaptol(const double th_gaptol) {
   th_gaptol_ = th_gaptol;
 }
 
-void SolverAbstract::set_inffeas(const bool inffeas) { inffeas_ = inffeas; }
+void SolverAbstract::set_feasnorm(const FeasibilityNorm feasnorm) { feasnorm_ = feasnorm; }
 
 bool raiseIfNaN(const double value) {
   if (std::isnan(value) || std::isinf(value) || value >= 1e30) {

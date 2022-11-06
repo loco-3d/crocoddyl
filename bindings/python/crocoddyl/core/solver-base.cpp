@@ -19,6 +19,8 @@ void exposeSolverAbstract() {
   typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
   StdVectorPythonVisitor<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
 
+  bp::enum_<FeasibilityNorm>("FeasibilityNorm").value("LInf", LInf).value("L1", L1).export_values();
+
   bp::class_<SolverAbstract_wrap, boost::noncopyable>(
       "SolverAbstract",
       "Abstract class for optimal control solvers.\n\n"
@@ -133,14 +135,15 @@ void exposeSolverAbstract() {
       .add_property("th_gapTol", bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
                     bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
                     "threshold for accepting a gap as non-zero")
-      .def_readwrite("ffeas", &SolverAbstract_wrap::ffeas_, "feasibility of the dynamic constraint of current guess")
+      .def_readwrite("ffeas", &SolverAbstract_wrap::ffeas_,
+                     "feasibility of the dynamic constraint for the current guess")
       .def_readwrite("gfeas", &SolverAbstract_wrap::gfeas_,
-                     "feasibility of the inequality constraint of current guess")
-      .def_readwrite("hfeas", &SolverAbstract_wrap::hfeas_, "feasibility of the equality constraint of current guess")
-      .add_property("inffeas", bp::make_function(&SolverAbstract_wrap::get_inffeas),
-                    bp::make_function(&SolverAbstract_wrap::set_inffeas),
-                    "true indicates if we use l-inf norm for computing the feasibility, otherwise false represents "
-                    "the l-1 norm");
+                     "feasibility of the inequality constraint for the current guess")
+      .def_readwrite("hfeas", &SolverAbstract_wrap::hfeas_,
+                     "feasibility of the equality constraint for the current guess")
+      .add_property("feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
+                    bp::make_function(&SolverAbstract_wrap::set_feasnorm),
+                    "norm used to compute the dynamic and constraints feasibility");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",
