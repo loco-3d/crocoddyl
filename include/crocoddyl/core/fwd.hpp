@@ -200,6 +200,12 @@ class ResidualModelJointTorqueTpl;
 template <typename Scalar>
 struct ResidualDataJointTorqueTpl;
 
+template <typename Scalar>
+class ResidualModelJointAccelerationTpl;
+template <typename Scalar>
+struct ResidualDataJointAccelerationTpl;
+
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -316,6 +322,8 @@ typedef ResidualModelControlTpl<double> ResidualModelControl;
 typedef ResidualDataControlTpl<double> ResidualDataControl;
 typedef ResidualModelJointTorqueTpl<double> ResidualModelJointTorque;
 typedef ResidualDataJointTorqueTpl<double> ResidualDataJointTorque;
+typedef ResidualModelJointAccelerationTpl<double> ResidualModelJointAcceleration;
+typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;

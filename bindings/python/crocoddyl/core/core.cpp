@@ -32,6 +32,7 @@ void exposeCore() {
   exposeCostAbstract();
   exposeResidualControl();
   exposeResidualJointTorque();
+  exposeResidualJointAcceleration();
   exposeCostSum();
   exposeCostResidual();
   exposeCostControl();
