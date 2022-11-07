@@ -205,7 +205,6 @@ class ResidualModelJointAccelerationTpl;
 template <typename Scalar>
 struct ResidualDataJointAccelerationTpl;
 
-
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
