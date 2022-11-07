@@ -370,10 +370,6 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::CostModelResidual>(
           state, boost::make_shared<crocoddyl::ResidualModelJointTorque>(state, actuation, actuation->get_nu())),
       0.1);
-  cost->addCost("joint_acc",
-                boost::make_shared<crocoddyl::CostModelResidual>(
-                    state, boost::make_shared<crocoddyl::ResidualModelJointAcceleration>(state, actuation->get_nu())),
-                0.01);
   action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
                                                                                     0., true);
   return action;
