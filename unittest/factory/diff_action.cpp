@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, CTU, INRIA
+// Copyright (C) 2019-2022, University of Edinburgh, CTU, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +15,7 @@
 #include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
-#include "crocoddyl/multibody/residuals/state.hpp"
+#include "crocoddyl/core/residuals/joint-torque.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
@@ -157,6 +158,11 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
                 CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad),
                 1.);
+  cost->addCost(
+      "joint_torque",
+      boost::make_shared<crocoddyl::CostModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelJointTorque>(state, actuation, actuation->get_nu())),
+      1.);
   cost->addCost("frame",
                 CostModelFactory().create(CostModelTypes::CostModelResidualFramePlacement, state_type,
                                           ActivationModelTypes::ActivationModelQuad),
@@ -355,6 +361,11 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
                 CostModelFactory().create(CostModelTypes::CostModelResidualControl, state_type,
                                           ActivationModelTypes::ActivationModelQuad, actuation->get_nu()),
                 0.1);
+  cost->addCost(
+      "joint_torque",
+      boost::make_shared<crocoddyl::CostModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelJointTorque>(state, actuation, actuation->get_nu())),
+      0.1);
   action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
                                                                                     0., true);
   return action;
