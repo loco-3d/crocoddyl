@@ -16,7 +16,7 @@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/residuals/joint-torque.hpp"
-#include "crocoddyl/core/residuals/control.hpp"
+#include "crocoddyl/core/residuals/joint-acceleration.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
@@ -163,6 +163,10 @@ DifferentialActionModelFactory::create_freeFwdDynamics(StateModelTypes::Type sta
       boost::make_shared<crocoddyl::CostModelResidual>(
           state, boost::make_shared<crocoddyl::ResidualModelJointTorque>(state, actuation, actuation->get_nu())),
       1.);
+  cost->addCost("joint_acc",
+                boost::make_shared<crocoddyl::CostModelResidual>(
+                    state, boost::make_shared<crocoddyl::ResidualModelJointAcceleration>(state, actuation->get_nu())),
+                0.01);
   cost->addCost("frame",
                 CostModelFactory().create(CostModelTypes::CostModelResidualFramePlacement, state_type,
                                           ActivationModelTypes::ActivationModelQuad),
@@ -366,6 +370,10 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::CostModelResidual>(
           state, boost::make_shared<crocoddyl::ResidualModelJointTorque>(state, actuation, actuation->get_nu())),
       0.1);
+  cost->addCost("joint_acc",
+                boost::make_shared<crocoddyl::CostModelResidual>(
+                    state, boost::make_shared<crocoddyl::ResidualModelJointAcceleration>(state, actuation->get_nu())),
+                0.01);
   action = boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(state, actuation, contact, cost,
                                                                                     0., true);
   return action;
