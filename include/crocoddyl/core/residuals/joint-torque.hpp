@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh
+// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,8 +146,9 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  protected:
   using Base::nu_;
+  using Base::q_dependent_;
   using Base::state_;
-  using Base::unone_;
+  using Base::v_dependent_;
 
  private:
   VectorXs uref_;  //!< Reference joint-torque input
@@ -169,7 +170,6 @@ struct ResidualDataJointTorqueTpl : public ResidualDataAbstractTpl<_Scalar> {
     if (d == NULL) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorJoint");
     }
-
     joint = d->joint;
   }
 
