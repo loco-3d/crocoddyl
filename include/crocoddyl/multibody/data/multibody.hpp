@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2022, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
+#include "crocoddyl/core/data/joint.hpp"
 
 namespace crocoddyl {
 
@@ -35,6 +36,17 @@ struct DataCollectorActMultibodyTpl : DataCollectorMultibodyTpl<Scalar>, DataCol
                                boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio), DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyTpl() {}
+};
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyTpl : DataCollectorActMultibodyTpl<Scalar>, DataCollectorJointTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  DataCollectorJointActMultibodyTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                    boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+                                    boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint)
+      : DataCollectorActMultibodyTpl<Scalar>(pinocchio, actuation), DataCollectorJointTpl<Scalar>(joint) {}
+  virtual ~DataCollectorJointActMultibodyTpl() {}
 };
 
 }  // namespace crocoddyl

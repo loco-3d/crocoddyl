@@ -38,6 +38,18 @@ void exposeDataCollectorContacts() {
           ":param pinocchio: Pinocchio data\n"
           ":param actuation: actuation data\n"
           ":param contacts: contacts data")[bp::with_custodian_and_ward<1, 2>()]);
+
+  bp::class_<DataCollectorJointActMultibodyInContact,
+             bp::bases<DataCollectorActMultibodyInContact, DataCollectorJoint> >(
+      "DataCollectorJointActMultibodyInContact", "Data collector for actuated-joint multibody systems in contact.\n\n",
+      bp::init<pinocchio::Data*, boost::shared_ptr<ActuationDataAbstract>, boost::shared_ptr<JointDataAbstract>,
+               boost::shared_ptr<ContactDataMultiple> >(
+          bp::args("self", "pinocchio", "actuation", "joint", "contacts"),
+          "Create multibody data collection.\n\n"
+          ":param pinocchio: Pinocchio data\n"
+          ":param actuation: actuation data\n"
+          ":param joint: joint data\n"
+          ":param contacts: contacts data")[bp::with_custodian_and_ward<1, 2>()]);
 }
 
 }  // namespace python

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,11 +27,14 @@ void exposeSquashingAbstract();
 void exposeSquashingSmoothSat();
 void exposeActuationSquashing();
 void exposeDataCollectorActuation();
+void exposeDataCollectorJoint();
 void exposeIntegratedActionEuler();
 void exposeIntegratedActionRK();
 void exposeIntegratedActionRK4();
 void exposeCostAbstract();
 void exposeResidualControl();
+void exposeResidualJointTorque();
+void exposeResidualJointAcceleration();
 void exposeCostSum();
 void exposeCostResidual();
 void exposeCostControl();

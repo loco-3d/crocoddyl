@@ -172,6 +172,10 @@ struct SquashingDataAbstractTpl;
 template <typename Scalar>
 class SquashingModelSmoothSatTpl;
 
+// joint
+template <typename Scalar>
+struct JointDataAbstractTpl;
+
 // data collector
 template <typename Scalar>
 struct DataCollectorAbstractTpl;
@@ -179,11 +183,27 @@ struct DataCollectorAbstractTpl;
 template <typename Scalar>
 struct DataCollectorActuationTpl;
 
+template <typename Scalar>
+struct DataCollectorJointTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActuationTpl;
+
 // residual
 template <typename Scalar>
 class ResidualModelControlTpl;
 template <typename Scalar>
 struct ResidualDataControlTpl;
+
+template <typename Scalar>
+class ResidualModelJointTorqueTpl;
+template <typename Scalar>
+struct ResidualDataJointTorqueTpl;
+
+template <typename Scalar>
+class ResidualModelJointAccelerationTpl;
+template <typename Scalar>
+struct ResidualDataJointAccelerationTpl;
 
 // cost
 template <typename Scalar>
@@ -299,6 +319,10 @@ typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
 typedef ResidualModelControlTpl<double> ResidualModelControl;
 typedef ResidualDataControlTpl<double> ResidualDataControl;
+typedef ResidualModelJointTorqueTpl<double> ResidualModelJointTorque;
+typedef ResidualDataJointTorqueTpl<double> ResidualDataJointTorque;
+typedef ResidualModelJointAccelerationTpl<double> ResidualModelJointAcceleration;
+typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
 
 typedef ActivationDataQuadraticBarrierTpl<double> ActivationDataQuadraticBarrier;
 typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarrier;
@@ -342,8 +366,12 @@ typedef SquashingDataAbstractTpl<double> SquashingDataAbstract;
 typedef SquashingModelAbstractTpl<double> SquashingModelAbstract;
 typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 
+typedef JointDataAbstractTpl<double> JointDataAbstract;
+
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
+typedef DataCollectorJointTpl<double> DataCollectorJoint;
+typedef DataCollectorJointActuationTpl<double> DataCollectorJointActuation;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
