@@ -17,10 +17,10 @@
 namespace crocoddyl {
 
 /**
- * @brief Define a joint-torque residual
+ * @brief Define a joint-effort residual
  *
  * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference joint torque inputs, respectively.
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference joint effort inputs, respectively.
  * Note that the dimension of the residual vector is obtained from `ActuationModelAbstract::nu`.
  *
  * Both residual and residual Jacobians are computed analytically.
@@ -31,7 +31,7 @@ namespace crocoddyl {
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
+class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -47,59 +47,59 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the joint-torque residual model
+   * @brief Initialize the joint-effort residual model
    *
    * @param[in] state       State description
    * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint torque
+   * @param[in] uref        Reference joint effort
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
+  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
                               const std::size_t nu);
 
   /**
-   * @brief Initialize the joint-torque residual model
+   * @brief Initialize the joint-effort residual model
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State description
    * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint torque
+   * @param[in] uref        Reference joint effort
    */
-  ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
+  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref);
 
   /**
-   * @brief Initialize the joint-torque residual model
+   * @brief Initialize the joint-effort residual model
    *
-   * The default reference joint torque is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
+   * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    *
    * @param[in] state       State description
    * @param[in] actuation   Actuation model
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
+  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const std::size_t nu);
 
   /**
-   * @brief Initialize the joint-torque residual model
+   * @brief Initialize the joint-effort residual model
    *
-   * The default reference joint torque is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
+   * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State description
    * @param[in] actuation   Actuation model
    */
-  ResidualModelJointTorqueTpl(boost::shared_ptr<StateAbstract> state,
+  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation);
 
-  virtual ~ResidualModelJointTorqueTpl();
+  virtual ~ResidualModelJointEffortTpl();
 
   /**
-   * @brief Compute the joint-torque residual
+   * @brief Compute the joint-effort residual
    *
-   * @param[in] data  Joint-torque residual data
+   * @param[in] data  Joint-effort residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -113,9 +113,9 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
   virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
-   * @brief Compute the derivatives of the joint-torque residual
+   * @brief Compute the derivatives of the joint-effort residual
    *
-   * @param[in] data  Joint-torque residual data
+   * @param[in] data  Joint-effort residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -123,22 +123,22 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Create the joint-torque residual data
+   * @brief Create the joint-effort residual data
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
-   * @brief Return the reference joint-torque vector
+   * @brief Return the reference joint-effort vector
    */
   const VectorXs& get_reference() const;
 
   /**
-   * @brief Modify the reference joint-torque vector
+   * @brief Modify the reference joint-effort vector
    */
   void set_reference(const VectorXs& reference);
 
   /**
-   * @brief Print relevant information of the joint-torque residual
+   * @brief Print relevant information of the joint-effort residual
    *
    * @param[out] os  Output stream object
    */
@@ -152,7 +152,7 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::v_dependent_;
 
  private:
-  VectorXs uref_;  //!< Reference joint-torque input
+  VectorXs uref_;  //!< Reference joint-effort input
 };
 
 template <typename _Scalar>
@@ -186,6 +186,6 @@ struct ResidualDataJointTorqueTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
-#include "crocoddyl/core/residuals/joint-torque.hxx"
+#include "crocoddyl/core/residuals/joint-effort.hxx"
 
 #endif  // CROCODDYL_CORE_RESIDUALS_JOINT_TORQUE_HPP_

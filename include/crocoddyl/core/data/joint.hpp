@@ -30,7 +30,7 @@ struct JointDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize a joint data structure containing generalized accelerations and joint torques, and their
+   * @brief Initialize a joint data structure containing generalized accelerations and joint efforts, and their
    * derivatives.
    *
    * @param state      State description
@@ -54,10 +54,10 @@ struct JointDataAbstractTpl {
   }
   virtual ~JointDataAbstractTpl() {}
 
-  VectorXs tau;      //!< Joint torques
+  VectorXs tau;      //!< Joint efforts
   VectorXs a;        //!< Generalized joint acceleration
-  MatrixXs dtau_dx;  //!< Partial derivatives of the joint torques w.r.t. the state point
-  MatrixXs dtau_du;  //!< Partial derivatives of the joint torques w.r.t. the control input
+  MatrixXs dtau_dx;  //!< Partial derivatives of the joint efforts w.r.t. the state point
+  MatrixXs dtau_du;  //!< Partial derivatives of the joint efforts w.r.t. the control input
   MatrixXs da_dx;    //!< Partial derivatives of the generalized joint accelerations w.r.t. the state point
   MatrixXs da_du;    //!< Partial derivatives of the generalized joint accelerations w.r.t. the control input
 };

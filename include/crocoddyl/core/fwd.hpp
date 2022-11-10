@@ -196,7 +196,7 @@ template <typename Scalar>
 struct ResidualDataControlTpl;
 
 template <typename Scalar>
-class ResidualModelJointTorqueTpl;
+class ResidualModelJointEffortTpl;
 template <typename Scalar>
 struct ResidualDataJointTorqueTpl;
 
@@ -319,7 +319,7 @@ typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
 typedef ResidualModelControlTpl<double> ResidualModelControl;
 typedef ResidualDataControlTpl<double> ResidualDataControl;
-typedef ResidualModelJointTorqueTpl<double> ResidualModelJointTorque;
+typedef ResidualModelJointEffortTpl<double> ResidualModelJointEffort;
 typedef ResidualDataJointTorqueTpl<double> ResidualDataJointTorque;
 typedef ResidualModelJointAccelerationTpl<double> ResidualModelJointAcceleration;
 typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
