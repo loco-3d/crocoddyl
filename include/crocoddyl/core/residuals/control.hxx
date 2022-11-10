@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,6 +88,11 @@ const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelControlTpl<Scalar>::g
 
 template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::set_reference(const VectorXs& reference) {
+  if (static_cast<std::size_t>(reference.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "the control reference has wrong dimension (" << reference.size()
+                 << " provided - it should be " + std::to_string(nu_) + ")")
+  }
   uref_ = reference;
 }
 

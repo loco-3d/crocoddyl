@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2022, LAAS-CNRS, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,6 +126,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::nr_;
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;

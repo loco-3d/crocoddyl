@@ -90,6 +90,11 @@ const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelJointTorqueTpl<Scalar
 
 template <typename Scalar>
 void ResidualModelJointTorqueTpl<Scalar>::set_reference(const VectorXs& reference) {
+  if (static_cast<std::size_t>(reference.size()) != nr_) {
+    throw_pretty("Invalid argument: "
+                 << "the joint-torque reference has wrong dimension (" << reference.size()
+                 << " provided - it should be " + std::to_string(nr_) + ")")
+  }
   uref_ = reference;
 }
 

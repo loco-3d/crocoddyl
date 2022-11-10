@@ -92,7 +92,7 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Compute the joint-acceleration residual
    *
-   * @param[in] data  Joint-torque residual data
+   * @param[in] data  Joint-acceleration residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -108,7 +108,7 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
   /**
    * @brief Compute the derivatives of the joint-acceleration residual
    *
-   * @param[in] data  Joint-torque residual data
+   * @param[in] data  Joint-acceleration residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -138,6 +138,7 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::nr_;
   using Base::nu_;
   using Base::state_;
 
@@ -158,7 +159,7 @@ struct ResidualDataJointAccelerationTpl : public ResidualDataAbstractTpl<_Scalar
   ResidualDataJointAccelerationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
     // Check that proper shared data has been passed
     DataCollectorJointTpl<Scalar>* d = dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
-    if (d == NULL) {
+    if (d == nullptr) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorJoint");
     }
     joint = d->joint;

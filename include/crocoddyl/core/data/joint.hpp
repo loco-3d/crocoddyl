@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh
+// Copyright (C) 2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,8 @@ struct JointDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize a joint data structure
+   * @brief Initialize a joint data structure containing generalized accelerations and joint torques, and their
+   * derivatives.
    *
    * @param state      State description
    * @param actuation  Actuation model
@@ -53,7 +54,7 @@ struct JointDataAbstractTpl {
   }
   virtual ~JointDataAbstractTpl() {}
 
-  VectorXs tau;      //!< Joint torque commands
+  VectorXs tau;      //!< Joint torques
   VectorXs a;        //!< Generalized joint acceleration
   MatrixXs dtau_dx;  //!< Partial derivatives of the joint torques w.r.t. the state point
   MatrixXs dtau_du;  //!< Partial derivatives of the joint torques w.r.t. the control input

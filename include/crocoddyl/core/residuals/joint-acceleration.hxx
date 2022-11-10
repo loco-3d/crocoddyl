@@ -75,6 +75,11 @@ const typename MathBaseTpl<Scalar>::VectorXs& ResidualModelJointAccelerationTpl<
 
 template <typename Scalar>
 void ResidualModelJointAccelerationTpl<Scalar>::set_reference(const VectorXs& reference) {
+  if (static_cast<std::size_t>(reference.size()) != nr_) {
+    throw_pretty("Invalid argument: "
+                 << "the generalized-acceleration reference has wrong dimension (" << reference.size()
+                 << " provided - it should be " + std::to_string(nr_) + ")")
+  }
   aref_ = reference;
 }
 

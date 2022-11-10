@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh
+// Copyright (C) 2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ void exposeDataCollectorJoint() {
       "JointDataAbstract",
       "Abstract class for joint datas.\n\n"
       "A joint data contains all the required information about joint torques and accelerations.\n"
-      "The joint data typically is allocated onces by running model.createData().",
+      "The joint data typically is allocated once by running model.createData().",
       bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActuationModelAbstract>, std::size_t>(
           bp::args("self", "state", "actuation", "nu"),
           "Create the joint data.\n\n"

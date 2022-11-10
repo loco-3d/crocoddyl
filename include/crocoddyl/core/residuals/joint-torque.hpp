@@ -145,6 +145,7 @@ class ResidualModelJointTorqueTpl : public ResidualModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::nr_;
   using Base::nu_;
   using Base::q_dependent_;
   using Base::state_;
@@ -167,7 +168,7 @@ struct ResidualDataJointTorqueTpl : public ResidualDataAbstractTpl<_Scalar> {
   ResidualDataJointTorqueTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
     // Check that proper shared data has been passed
     DataCollectorJointTpl<Scalar>* d = dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
-    if (d == NULL) {
+    if (d == nullptr) {
       throw_pretty("Invalid argument: the shared data should be derived from DataCollectorJoint");
     }
     joint = d->joint;
