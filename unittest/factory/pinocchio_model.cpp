@@ -61,7 +61,11 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
   switch (type) {
     case PinocchioModelTypes::Hector:
       construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hector_description/robots/quadrotor_base.urdf");
-      contact_nc_ = 0;
+      frame_name_.resize(1);
+      frame_id_.resize(1);
+      frame_name_[0] = "base_link";
+      frame_id_[0] = model_->getFrameId(frame_name_[0]);
+      contact_nc_ = 6;
       break;
     case PinocchioModelTypes::TalosArm:
       construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",

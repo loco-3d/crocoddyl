@@ -62,7 +62,9 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type, PinocchioMo
 
   // Check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
-  BOOST_CHECK(!data->a0.isZero());
+  if (model_type != PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid body system.
+    BOOST_CHECK(!data->a0.isZero());
+  }
   BOOST_CHECK(data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
@@ -89,8 +91,10 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type, Pino
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
-  BOOST_CHECK(!data->a0.isZero());
-  BOOST_CHECK(!data->da0_dx.isZero());
+  if (model_type != PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid body system.
+    BOOST_CHECK(!data->a0.isZero());
+    BOOST_CHECK(!data->da0_dx.isZero());
+  }
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
@@ -203,11 +207,13 @@ void register_contact_model_unit_tests(ContactModelTypes::Type contact_type, Pin
 }
 
 bool init_function() {
-  for (size_t contact_type = 0; contact_type < ContactModelTypes::all.size(); ++contact_type) {
-    for (size_t model_type = 1; model_type < PinocchioModelTypes::all.size(); ++model_type) {
-      register_contact_model_unit_tests(ContactModelTypes::all[contact_type], PinocchioModelTypes::all[model_type]);
-    }
-  }
+  // for (size_t contact_type = 0; contact_type < ContactModelTypes::all.size(); ++contact_type) {
+  //   for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
+  //     register_contact_model_unit_tests(ContactModelTypes::all[contact_type], PinocchioModelTypes::all[model_type]);
+  //   }
+  // }
+  register_contact_model_unit_tests(ContactModelTypes::ContactModel3D, PinocchioModelTypes::Hector);
+  register_contact_model_unit_tests(ContactModelTypes::ContactModel6D, PinocchioModelTypes::Hector);
   return true;
 }
 
