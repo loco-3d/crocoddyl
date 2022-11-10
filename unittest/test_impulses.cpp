@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
-//                          INRIA, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+//                          INRIA, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,11 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, Pino
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
-  BOOST_CHECK(!data->dv0_dq.isZero());
+  if (model_type == PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid body system.
+    BOOST_CHECK(data->dv0_dq.isZero());
+  } else {
+    BOOST_CHECK(!data->dv0_dq.isZero());
+  }
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
 }
@@ -152,7 +156,7 @@ void register_impulse_model_unit_tests(ImpulseModelTypes::Type impulse_type, Pin
 
 bool init_function() {
   for (size_t impulse_type = 0; impulse_type < ImpulseModelTypes::all.size(); ++impulse_type) {
-    for (size_t model_type = 1; model_type < PinocchioModelTypes::all.size(); ++model_type) {
+    for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size(); ++model_type) {
       register_impulse_model_unit_tests(ImpulseModelTypes::all[impulse_type], PinocchioModelTypes::all[model_type]);
     }
   }
