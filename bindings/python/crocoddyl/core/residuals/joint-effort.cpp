@@ -12,7 +12,7 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeResidualJointTorque() {
+void exposeResidualJointEffort() {
   bp::register_ptr_to_python<boost::shared_ptr<ResidualModelJointEffort> >();
 
   bp::class_<ResidualModelJointEffort, bp::bases<ResidualModelAbstract> >(

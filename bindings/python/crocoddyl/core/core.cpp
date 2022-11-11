@@ -31,7 +31,7 @@ void exposeCore() {
   exposeIntegratedActionRK4();
   exposeCostAbstract();
   exposeResidualControl();
-  exposeResidualJointTorque();
+  exposeResidualJointEffort();
   exposeResidualJointAcceleration();
   exposeCostSum();
   exposeCostResidual();

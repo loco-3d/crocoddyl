@@ -51,7 +51,7 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * @brief Initialize the joint-acceleration residual model
    *
    * @param[in] state       State description
-   * @param[in] uref        Reference joint torque
+   * @param[in] uref        Reference joint acceleration
    * @param[in] nu          Dimension of the control vector
    */
   ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state, const VectorXs& uref,
@@ -63,7 +63,7 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State description
-   * @param[in] uref        Reference joint torque
+   * @param[in] uref        Reference joint acceleration
    */
   ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state, const VectorXs& uref);
 

@@ -80,7 +80,7 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelJointEffortTpl<
 
 template <typename Scalar>
 void ResidualModelJointEffortTpl<Scalar>::print(std::ostream& os) const {
-  os << "ResidualModelJointTorque";
+  os << "ResidualModelJointEffort";
 }
 
 template <typename Scalar>
