@@ -38,7 +38,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualModelAbstractTpl<Scalar> Base;
-  typedef ResidualDataJointTorqueTpl<Scalar> Data;
+  typedef ResidualDataJointEffortTpl<Scalar> Data;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
@@ -156,7 +156,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ResidualDataJointTorqueTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataJointEffortTpl : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -165,7 +165,7 @@ struct ResidualDataJointTorqueTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
   template <template <typename Scalar> class Model>
-  ResidualDataJointTorqueTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+  ResidualDataJointEffortTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
     // Check that proper shared data has been passed
     DataCollectorJointTpl<Scalar>* d = dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
     if (d == nullptr) {
