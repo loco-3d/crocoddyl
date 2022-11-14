@@ -15,8 +15,8 @@ WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # In this example test, we will solve the reaching-goal task with the Kinova arm.
-# For that, we use the forward dynamics (with its analytical derivatives)
-# developed inside crocoddyl; it describes inside DifferentialActionModelFreeInvDynamicsCondensed class.
+# For that, we use the inverse dynamics (with its analytical derivatives)
+# developed inside crocoddyl; it is described inside DifferentialActionModelFreeInvDynamics class.
 # Finally, we use an Euler sympletic integration scheme.
 
 # First, let's load create the state and actuation models
@@ -53,12 +53,12 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 
 # Next, we need to create an action model for running and terminal knots. The
 # forward dynamics (computed using RNEA) are implemented
-# inside DifferentialActionModelFreeInvDynamicsCondensed.
-dt = 1e-3
+# inside DifferentialActionModelFreeInvDynamics.
+dt = 1e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCostModel), dt)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamicsCondensed(state, actuation, terminalCostModel), 0.)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, terminalCostModel), 0.)
 
 # For this optimal control problem, we define 100 knots (or running action
 # models) plus a terminal knot
