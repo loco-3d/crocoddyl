@@ -558,15 +558,15 @@ struct DifferentialActionDataContactInvDynamicsTpl : public DifferentialActionDa
       }
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
-      actuation = d->actuation.get();
-      contact = d->contacts.get();
+      actuation = d->actuation;
+      contact = d->contacts;
       dtau_dx.setZero();
       dtau_du.setZero();
     }
 
-    pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-    ActuationDataAbstract* actuation;       //!< Actuation data
-    ContactDataMultiple* contact;           //!< Contact data
+    pinocchio::DataTpl<Scalar>* pinocchio;               //!< Pinocchio data
+    boost::shared_ptr<ActuationDataAbstract> actuation;  //!< Actuation data
+    boost::shared_ptr<ContactDataMultiple> contact;      //!< Contact data
     MatrixXs dtau_dx;
     MatrixXs dtau_du;
     using Base::r;

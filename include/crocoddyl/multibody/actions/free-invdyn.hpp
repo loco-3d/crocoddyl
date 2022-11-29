@@ -403,11 +403,11 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
 
       // Avoids data casting at runtime
       pinocchio = d->pinocchio;
-      actuation = d->actuation.get();
+      actuation = d->actuation;
     }
 
-    pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-    ActuationDataAbstract* actuation;       //!< Actuation data
+    pinocchio::DataTpl<Scalar>* pinocchio;               //!< Pinocchio data
+    boost::shared_ptr<ActuationDataAbstract> actuation;  //!< Actuation data
     MatrixXs dtau_dx;
     using Base::r;
     using Base::Ru;
