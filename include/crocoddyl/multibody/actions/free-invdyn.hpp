@@ -30,7 +30,7 @@ namespace crocoddyl {
  * Algorithm (RNEA). The stack of cost and constraint functions are implemented in
  * `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively. The accelerations are the decision
  * variables defined as the control inputs, and the under-actuation constraint is under the name `tau`, thus the
- *  user is not allow to use it.
+ *  user is not allowed to use it.
  *
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -135,11 +135,11 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   /**
    * @brief Computes the quasic static commands
    *
-   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point with zero
+   * The quasic static commands are the ones produced for a reference posture as an equilibrium point with zero
    * acceleration, i.e., for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
    * @param[in] data     Action data
-   * @param[out] u       Quasic static commands
+   * @param[out] u       Quasic-static commands
    * @param[in] x        State point (velocity has to be zero)
    * @param[in] maxiter  Maximum allowed number of iterations (default 100)
    * @param[in] tol      Tolerance (default 1e-9)

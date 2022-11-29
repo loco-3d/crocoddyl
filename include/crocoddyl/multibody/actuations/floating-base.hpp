@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ namespace crocoddyl {
  * Then, this joint (that might have various DoFs) is unactuated.
  *
  * The main computations are carrying out in `calc`, and `calcDiff`, where the former computes actuation signal
- * \f$\mathbf{a}\f$ from a given control input \f$\mathbf{u}\f$ and state point \f$\mathbf{x}\f$, and the latter
+ * \f$\mathbf{a}\f$ from a given joint-torque input \f$\mathbf{u}\f$ and state point \f$\mathbf{x}\f$, and the latter
  * computes the Jacobians of the actuation-mapping function. Note that `calcDiff` requires to run `calc` first.
  *
  * \sa `ActuationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -43,18 +44,18 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
    * @brief Initialize the floating-base actuation model
    *
    * @param[in] state  State of a multibody system
-   * @param[in] nu     Dimension of control vector
+   * @param[in] nu     Dimension of joint-torque vector
    */
   explicit ActuationModelFloatingBaseTpl(boost::shared_ptr<StateMultibody> state)
       : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()){};
   virtual ~ActuationModelFloatingBaseTpl(){};
 
   /**
-   * @brief Compute the floating-base actuation signal from the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @brief Compute the floating-base actuation signal from the joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
@@ -70,7 +71,7 @@ class ActuationModelFloatingBaseTpl : public ActuationModelAbstractTpl<_Scalar> 
      *
      * @param[in] data  Actuation data
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-     * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+     * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,

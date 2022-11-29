@@ -2,6 +2,7 @@
 // BSD 3-Clause License
 //
 // Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,7 @@ void exposeActuationFloatingBase() {
            "It describes the time-continuos evolution of the floating-base actuation model.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state point (dim. state.nx)\n"
-           ":param u: joint torque input (dim. nu)")
+           ":param u: joint-torque input (dim. nu)")
       .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the Jacobians of the floating-base actuation model.\n\n"
            "It computes the partial derivatives of the floating-base actuation. It assumes that calc\n"
@@ -36,15 +37,15 @@ void exposeActuationFloatingBase() {
            "defined in createData. The derivatives are constant, so we don't write again these values.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state point (dim. state.nx)\n"
-           ":param u: joint torque input (dim. nu)")
+           ":param u: joint-torque input (dim. nu)")
       .def("commands", &ActuationModelFloatingBase::commands, bp::args("self", "data", "x", "tau"),
-           "Compute the joint torque commands from the generalized torques.\n\n"
+           "Compute the joint-torque commands from the generalized torques.\n\n"
            "It stores the results in data.u.\n"
            ":param data: actuation data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param tau: generalized torques (dim state.nv)")
       .def("torqueTransform", &ActuationModelFloatingBase::torqueTransform, bp::args("self", "data", "x", "tau"),
-           "Compute the torque transform from generalized torques to joint torque inputs.\n\n"
+           "Compute the torque transform from generalized torques to joint-torque inputs.\n\n"
            "It stores the results in data.Mtau.\n"
            ":param data: actuation data\n"
            ":param x: state point (dim. state.nx)\n"

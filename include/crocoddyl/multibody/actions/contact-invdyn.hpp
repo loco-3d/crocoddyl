@@ -27,7 +27,7 @@ namespace crocoddyl {
  * inverse-dynamics computation using the Recursive Newton Euler Algorithm (RNEA). The stack of cost and constraint
  * functions are implemented in `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively.
  * The acceleration and contact forces are decision variables defined as the control inputs, and the under-actuation
- * and contact constraint are under the name `tau` and its frame name, thus the user is not allow to use it.
+ * and contact constraint are under the name `tau` and its frame name, thus the user is not allowed to use it.
  *
  * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to run first `calc()`.
@@ -75,7 +75,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    *
    * @param[in] state        State of the multibody system
    * @param[in] actuation    Actuation model
-   * @param[in] contacts   Multiple contacts
+   * @param[in] contacts     Multiple contacts
    * @param[in] costs        Cost model
    * @param[in] constraints  Constraints model
    */
@@ -91,7 +91,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    *
    * It extracts the acceleration value from control vector and also computes the cost and constraints.
    *
-   * @param[in] data  Free inverse-dynamics data
+   * @param[in] data  Contact inverse-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -112,7 +112,7 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
    * It assumes that `calc()` has been run first. This function builds a quadratic approximation of the
    * time-continuous action model (i.e., dynamical system, cost and constraint functions).
    *
-   * @param[in] data  Free inverse-dynamics data
+   * @param[in] data  Contact inverse-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -141,11 +141,11 @@ class DifferentialActionModelContactInvDynamicsTpl : public DifferentialActionMo
   /**
    * @brief Computes the quasic static commands
    *
-   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point with zero
+   * The quasic static commands are the ones produced for a reference posture as an equilibrium point with zero
    * acceleration, i.e., for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
    * @param[in] data     Action data
-   * @param[out] u       Quasic static commands
+   * @param[out] u       Quasic-static commands
    * @param[in] x        State point (velocity has to be zero)
    * @param[in] maxiter  Maximum allowed number of iterations (default 100)
    * @param[in] tol      Tolerance (default 1e-9)

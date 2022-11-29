@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@ namespace crocoddyl {
  * @brief Abstract class for the actuation-mapping model
  *
  * The generalized torques \f$\boldsymbol{\tau}\in\mathbb{R}^{nv}\f$ can by any nonlinear function of the
- * control inputs \f$\mathbf{u}\in\mathbb{R}^{nu}\f$, and state point \f$\mathbf{x}\in\mathbb{R}^{nx}\f$, where
+ * joint-torque inputs \f$\mathbf{u}\in\mathbb{R}^{nu}\f$, and state point \f$\mathbf{x}\in\mathbb{R}^{nx}\f$, where
  * `nv`, `nu`, and `ndx` are the number of joints, dimension of the joint torque input and state manifold,
  * respectively. Additionally, the generalized torques are also named as the actuation signals of our system.
  *
@@ -51,7 +52,7 @@ class ActuationModelAbstractTpl {
    * @brief Initialize the actuation model
    *
    * @param[in] state  State description
-   * @param[in] nu     Dimension of joint torque input
+   * @param[in] nu     Dimension of joint-torque input
    */
   ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
   virtual ~ActuationModelAbstractTpl();
@@ -62,7 +63,7 @@ class ActuationModelAbstractTpl {
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
@@ -83,7 +84,7 @@ class ActuationModelAbstractTpl {
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
@@ -118,7 +119,7 @@ class ActuationModelAbstractTpl {
    *
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] tau   Joint torque inputs \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @param[in] tau   Joint-torque inputs \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void torqueTransform(const boost::shared_ptr<ActuationDataAbstract>& data,
                                const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
@@ -130,7 +131,7 @@ class ActuationModelAbstractTpl {
   virtual boost::shared_ptr<ActuationDataAbstract> createData();
 
   /**
-   * @brief Return the dimension of the control input
+   * @brief Return the dimension of the joint-torque input
    */
   std::size_t get_nu() const;
 
