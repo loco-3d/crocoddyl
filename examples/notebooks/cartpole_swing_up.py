@@ -19,8 +19,8 @@ class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract)
     def calc(self, data, x, u=None):
         if u is None: u = model.unone
         # Getting the state and control variables
-        y, th, ydot, thdot = np.asscalar(x[0]), np.asscalar(x[1]), np.asscalar(x[2]), np.asscalar(x[3])
-        f = np.asscalar(u[0])
+        y, th, ydot, thdot = (x[0].item(), (x[1].item(), (x[2].item(), (x[3].item()
+        f = u[0].item()
 
         # Shortname for system parameters
         m1, m2, l, g = self.m1, self.m2, self.l, self.g
@@ -35,7 +35,7 @@ class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract)
 
         # Computing the cost residual and value
         data.r = np.matrix(self.costWeights * np.array([s, 1 - c, y, ydot, thdot, f])).T
-        data.cost = .5 * np.asscalar(sum(np.asarray(data.r)**2))
+        data.cost = .5 * sum(np.asarray(data.r)**2).item()
 
     def calcDiff(self, data, x, u=None):
         # Advance user might implement the derivatives

@@ -4,7 +4,7 @@ import numpy as np
 
 def plotUnicycle(x):
     sc, delta = .1, .1
-    a, b, th = np.asscalar(x[0]), np.asscalar(x[1]), np.asscalar(x[2])
+    a, b, th = x[0].item(), x[1].item(), x[2].item()
     c, s = np.cos(th), np.sin(th)
     refs = [
         plt.arrow(a - sc / 2 * c - delta * s, b - sc / 2 * s + delta * c, c * sc, s * sc, head_width=.05),

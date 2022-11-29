@@ -453,13 +453,13 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
         nx = xs[0].shape[0]
         X = [0.] * nx
         for i in range(nx):
-            X[i] = [np.asscalar(x[i]) for x in xs]
+            X[i] = [x[i].item() for x in xs]
     if us is not None:
         usPlotIdx = 111
         nu = us[0].shape[0]
         U = [0.] * nu
         for i in range(nu):
-            U[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else 0 for u in us]
+            U[i] = [u[i].item() if u.shape[0] != 0 else 0 for u in us]
     if xs is not None and us is not None:
         xsPlotIdx = 211
         usPlotIdx = 212
