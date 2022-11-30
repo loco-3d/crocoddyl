@@ -39,7 +39,7 @@ terminalCostModel = crocoddyl.CostModelSum(state, nu)
 # goal cost. First, let's create the common cost functions.
 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("j2s6s200_end_effector"),
                                                                pinocchio.SE3(np.eye(3), np.array([.6, .2, .5])), nu)
-uResidual = crocoddyl.ResidualModelJointTorque(state, actuation, nu)
+uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
 xResidual = crocoddyl.ResidualModelState(state, x0, nu)
 goalTrackingCost = crocoddyl.CostModelResidual(state, framePlacementResidual)
 xRegCost = crocoddyl.CostModelResidual(state, xResidual)

@@ -25,7 +25,7 @@ terminalCostModel = crocoddyl.CostModelSum(state, nu)
 
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelQuad(state.ndx)
-uResidual = crocoddyl.ResidualModelJointTorque(state, actuation, np.zeros(actuation.nu), nu, False)
+uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, np.zeros(actuation.nu), nu, False)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(np.array([1.] * 4 + [0.1] * 2)), nu)

@@ -32,7 +32,7 @@ terminalCostModel = crocoddyl.CostModelSum(state, nu)
 # Costs
 xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
 xActivation = crocoddyl.ActivationModelWeightedQuad(np.array([0.1] * 3 + [1000.] * 3 + [1000.] * robot_model.nv))
-uResidual = crocoddyl.ResidualModelJointTorque(state, actuation, nu)
+uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("base_link"),
