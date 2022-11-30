@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -239,6 +240,20 @@ class ContactModelMultipleTpl {
   bool getContactStatus(const std::string& name) const;
 
   /**
+   * @brief Return the type of contact computation
+   *
+   * True for all contacts, otherwise false for active contacts
+   */
+  bool getComputeAllContacts() const;
+
+  /**
+   * @brief Set the tyoe of contact computation: all or active contacts
+   *
+   * @param status  Type of contact computation (true for all contacts and false for active contacts)
+   */
+  void setComputeAllContacts(const bool status);
+
+  /**
    * @brief Print information on the contact models
    */
   template <class Scalar>
@@ -252,6 +267,7 @@ class ContactModelMultipleTpl {
   std::size_t nu_;
   std::set<std::string> active_set_;
   std::set<std::string> inactive_set_;
+  bool compute_all_contacts_;
 
   // Vector variants. These are to maintain the API compatibility for the deprecated syntax.
   // These will be removed in future versions along with get_active() / get_inactive()

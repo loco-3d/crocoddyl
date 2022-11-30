@@ -49,23 +49,24 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the joint-effort residual model
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint effort
-   * @param[in] nu          Dimension of the control vector
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] uref       Reference joint effort
+   * @param[in] nu         Dimension of the control vector
+   * @param[in] fwddyn     Indicates that we have a forward dynamics problem (true) or inverse dynamics (false)
    */
   ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
-                              const std::size_t nu);
+                              const std::size_t nu, const bool fwddyn = false);
 
   /**
    * @brief Initialize the joint-effort residual model
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] uref        Reference joint effort
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] uref       Reference joint effort
    */
   ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref);
@@ -75,9 +76,9 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
-   * @param[in] nu          Dimension of the control vector
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
+   * @param[in] nu         Dimension of the control vector
    */
   ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const std::size_t nu);
@@ -88,8 +89,8 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state       State description
-   * @param[in] actuation   Actuation model
+   * @param[in] state      State description
+   * @param[in] actuation  Actuation model
    */
   ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation);
@@ -123,6 +124,12 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
+   */
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
    * @brief Create the joint-effort residual data
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
@@ -153,6 +160,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   VectorXs uref_;  //!< Reference joint-effort input
+  bool fwddyn_;    //!< True for forward dynamics, False for inverse dynamics
 };
 
 template <typename _Scalar>

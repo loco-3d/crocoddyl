@@ -14,8 +14,13 @@ namespace crocoddyl {
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const pinocchio::FrameIndex id, const Force& fref,
-                                                                   const std::size_t nc, const std::size_t nu)
-    : Base(state, nc, nu, true, true, true), id_(id), fref_(fref) {
+                                                                   const std::size_t nc, const std::size_t nu,
+                                                                   const bool fwddyn)
+    : Base(state, nc, nu, fwddyn ? true : false, fwddyn ? true : false, true),
+      fwddyn_(fwddyn),
+      update_jacobians_(true),
+      id_(id),
+      fref_(fref) {
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
@@ -29,7 +34,7 @@ template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
                                                                    const pinocchio::FrameIndex id, const Force& fref,
                                                                    const std::size_t nc)
-    : Base(state, nc), id_(id), fref_(fref) {
+    : Base(state, nc), fwddyn_(true), update_jacobians_(true), id_(id), fref_(fref) {
   if (nc > 6) {
     throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
   }
@@ -73,6 +78,30 @@ template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
                                                     const Eigen::Ref<const VectorXs>&,
                                                     const Eigen::Ref<const VectorXs>&) {
+  if (fwddyn_ || update_jacobians_) {
+    updateJacobians(data);
+  }
+}
+
+template <typename Scalar>
+void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                    const Eigen::Ref<const VectorXs>&) {
+  data->Rx.setZero();
+}
+
+template <typename Scalar>
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactForceTpl<Scalar>::createData(
+    DataCollectorAbstract* const data) {
+  boost::shared_ptr<ResidualDataAbstract> d =
+      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  if (!fwddyn_) {
+    updateJacobians(d);
+  }
+  return d;
+}
+
+template <typename Scalar>
+void ResidualModelContactForceTpl<Scalar>::updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -93,18 +122,7 @@ void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<Resi
     default:
       break;
   }
-}
-
-template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>&) {
-  data->Rx.setZero();
-}
-
-template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactForceTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  update_jacobians_ = false;
 }
 
 template <typename Scalar>
@@ -113,6 +131,11 @@ void ResidualModelContactForceTpl<Scalar>::print(std::ostream& os) const {
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
   os << "ResidualModelContactForce {frame=" << s->get_pinocchio()->frames[id_].name
      << ", fref=" << fref_.toVector().head(nr_).transpose().format(fmt) << "}";
+}
+
+template <typename Scalar>
+bool ResidualModelContactForceTpl<Scalar>::is_fwddyn() const {
+  return fwddyn_;
 }
 
 template <typename Scalar>
@@ -133,6 +156,7 @@ void ResidualModelContactForceTpl<Scalar>::set_id(const pinocchio::FrameIndex id
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::set_reference(const Force& reference) {
   fref_ = reference;
+  update_jacobians_ = true;
 }
 
 }  // namespace crocoddyl

@@ -84,9 +84,6 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   model->quasiStatic(data, u, x);
   model->calc(data, x, u);
 
-  // Checking that the acceleration is zero as supposed to be in a quasi static condition
-  BOOST_CHECK(data->xout.norm() <= 1e-8);
-
   // Check for inactive contacts
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ ||
       action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||

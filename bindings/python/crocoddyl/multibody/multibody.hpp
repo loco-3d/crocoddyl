@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,9 @@ void exposeDataCollectorMultibody();
 void exposeDataCollectorContacts();
 void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
+void exposeDifferentialActionFreeInvDynamics();
 void exposeDifferentialActionContactFwdDynamics();
+void exposeDifferentialActionContactInvDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeResidualState();
 void exposeResidualCentroidalMomentum();

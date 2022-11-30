@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    *
    * @param[in] data  Full actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
@@ -64,7 +64,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
      *
      * @param[in] data  Full actuation data
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-     * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+     * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
 #ifndef NDEBUG
   virtual void calcDiff(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>& /*x*/,
@@ -79,6 +79,26 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
                   "dtau_du has wrong value");
   };
 
+  virtual void commands(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&,
+                        const Eigen::Ref<const VectorXs>& tau) {
+    if (static_cast<std::size_t>(tau.size()) != nu_) {
+      throw_pretty("Invalid argument: "
+                   << "tau has wrong dimension (it should be " + std::to_string(nu_) + ")");
+    }
+    data->u = tau;
+  }
+
+#ifndef NDEBUG
+  virtual void torqueTransform(const boost::shared_ptr<Data>& data, const Eigen::Ref<const VectorXs>&,
+                               const Eigen::Ref<const VectorXs>&) {
+#else
+  virtual void torqueTransform(const boost::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                               const Eigen::Ref<const VectorXs>&) {
+#endif
+    // The torque transform has constant values which were set in createData.
+    assert_pretty(MatrixXs(data->Mtau).isApprox(MatrixXs::Identity(nu_, nu_)), "Mtau has wrong value");
+  }
+
   /**
    * @brief Create the full actuation data
    *
@@ -88,6 +108,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<Data> createData() {
     boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal().setOnes();
+    data->Mtau.setIdentity();
     return data;
   };
 

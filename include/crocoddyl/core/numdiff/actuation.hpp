@@ -75,6 +75,12 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
+   * @brief @copydoc Base::commands()
+   */
+  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& tau);
+
+  /**
    * @brief @copydoc Base::createData()
    */
   virtual boost::shared_ptr<ActuationDataAbstract> createData();

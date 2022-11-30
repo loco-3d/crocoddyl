@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/core/demangle.hpp>
+#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 
@@ -35,6 +36,23 @@ void ActuationModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<ActuationDa
 template <typename Scalar>
 void ActuationModelAbstractTpl<Scalar>::calcDiff(const boost::shared_ptr<ActuationDataAbstract>&,
                                                  const Eigen::Ref<const VectorXs>&) {}
+
+template <typename Scalar>
+void ActuationModelAbstractTpl<Scalar>::torqueTransform(const boost::shared_ptr<ActuationDataAbstract>& data,
+                                                        const Eigen::Ref<const VectorXs>& x,
+                                                        const Eigen::Ref<const VectorXs>& u) {
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+  }
+  calc(data, x, u);
+  calcDiff(data, x, u);
+  data->Mtau = pseudoInverse(data->dtau_du);
+}
 
 template <typename Scalar>
 std::size_t ActuationModelAbstractTpl<Scalar>::get_nu() const {

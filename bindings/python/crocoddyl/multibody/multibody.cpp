@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,9 @@ void exposeMultibody() {
   exposeDataCollectorContacts();
   exposeDataCollectorImpulses();
   exposeDifferentialActionFreeFwdDynamics();
+  exposeDifferentialActionFreeInvDynamics();
   exposeDifferentialActionContactFwdDynamics();
+  exposeDifferentialActionContactInvDynamics();
   exposeActionImpulseFwdDynamics();
   exposeResidualState();
   exposeResidualCentroidalMomentum();
