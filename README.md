@@ -199,7 +199,7 @@ and the following one to reference this website:
 **Crocoddyl** contributions go beyond efficient software implementation as well. Please also consider to cite the algorithm contributions of our different solvers and formulations:
  - Feasibility-driven DDP (FDDP): [[1]](#1)
  - Control-limited feasibility-driven DDP (Box-FDDP): [[2]](#2)
- - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [3](#3)
+ - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [[3]](#3)
 
 
 Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
