@@ -283,8 +283,8 @@ class DifferentialActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  private:
-  std::size_t ng_internal_;   //!< Internal object for storing the number of inequality constraints
-  std::size_t nh_internal_;   //!< Internal object for storing the number of equality constraints
+  std::size_t ng_internal_;  //!< Internal object for storing the number of inequality constraints
+  std::size_t nh_internal_;  //!< Internal object for storing the number of equality constraints
 
  protected:
   std::size_t nu_;                          //!< Control dimension
