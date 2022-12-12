@@ -77,7 +77,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
       .add_property("constraints",
                     bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_constraints,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "entire constraint model")
+                    "constraint model manager")
       .add_property(
           "armature",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature, bp::return_internal_reference<>()),

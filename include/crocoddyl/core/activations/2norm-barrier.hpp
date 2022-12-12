@@ -136,13 +136,13 @@ class ActivationModel2NormBarrierTpl : public ActivationModelAbstractTpl<_Scalar
    * @param[out] os  Output stream object
    */
   virtual void print(std::ostream& os) const {
-    os << "ActivationModel2NormBarrier {nr=" << nr_ << ", alpha=" << alpha_ << ", hessian=" << true_hessian_ << "}";
+    os << "ActivationModel2NormBarrier {nr=" << nr_ << ", alpha=" << alpha_ << ", Hessian=" << true_hessian_ << "}";
   }
 
  protected:
   using Base::nr_;     //!< Dimension of the residual vector
   Scalar alpha_;       //!< Threshold factor
-  bool true_hessian_;  //!< Use true hessian in calcDiff if true, Gauss-Newton approximation if false
+  bool true_hessian_;  //!< Use true Hessian in calcDiff if true, Gauss-Newton approximation if false
 };
 
 template <typename _Scalar>

@@ -167,7 +167,7 @@ class ConstraintModelManagerTpl {
    * @brief Create the constraint data
    *
    * The default data contains objects to store the values of the constraint and their derivatives (i.e. Jacobians).
-   * However, it is possible to specialized this function is we need to create additional data, for instance, to avoid
+   * However, it is possible to specialize this function is we need to create additional data, for instance, to avoid
    * dynamic memory allocation.
    *
    * @param data  Data collector

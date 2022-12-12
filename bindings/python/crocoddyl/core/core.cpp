@@ -67,6 +67,7 @@ void exposeCore() {
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
   exposeSolverBoxFDDP();
+  exposeSolverIntro();
 #ifdef CROCODDYL_WITH_IPOPT
   exposeSolverIpopt();
 #endif

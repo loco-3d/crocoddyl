@@ -29,7 +29,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
       with_cost_residual_(with_cost_residual) {
   if (control->get_nw() != model->get_nu()) {
     throw_pretty("Invalid argument: "
-                 << "control.nw (" + std::to_string(control->get_nw()) + ") is not equals to model.nu (" +
+                 << "control.nw (" + std::to_string(control->get_nw()) + ") is not equal to model.nu (" +
                         std::to_string(model->get_nu()) + ")");
   }
   init();
@@ -124,7 +124,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
     boost::shared_ptr<DifferentialActionModelAbstract> model) {
   if (control_->get_nw() != model->get_nu()) {
     throw_pretty("Invalid argument: "
-                 << "control.nw (" + std::to_string(control_->get_nw()) + ") is not equals to model.nu (" +
+                 << "control.nw (" + std::to_string(control_->get_nw()) + ") is not equal to model.nu (" +
                         std::to_string(model->get_nu()) + ")");
   }
 

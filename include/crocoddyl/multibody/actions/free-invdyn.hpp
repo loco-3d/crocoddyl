@@ -138,7 +138,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
    * The quasic static commands are the ones produced for a reference posture as an equilibrium point with zero
    * acceleration, i.e., for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
-   * @param[in] data     Action data
+   * @param[in] data     Free inverse-dynamics data
    * @param[out] u       Quasic-static commands
    * @param[in] x        State point (velocity has to be zero)
    * @param[in] maxiter  Maximum allowed number of iterations (default 100)
@@ -179,7 +179,7 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   const boost::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
-   * @brief Return the constraint model
+   * @brief Return the constraint model manager
    */
   const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
 

@@ -20,7 +20,7 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
       if (lb_(i) - ub_(i) > 0) {
-        throw_pretty("Invalid argument: the upper bound is not equals / higher than the lower bound.")
+        throw_pretty("Invalid argument: the upper bound is not equal to / higher than the lower bound.")
       }
     }
   }

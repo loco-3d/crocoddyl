@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ namespace crocoddyl {
 /**
  * @brief This class computes the numerical differentiation of a constraint model.
  *
- * It computes Jacobian of the constraint model via numerical differentiation, i.e., \f$\mathbf{g_x}\f$,
+ * It computes the Jacobian of the constraint model via numerical differentiation, i.e., \f$\mathbf{g_x}\f$,
  * \f$\mathbf{g_u}\f$ and \f$\mathbf{h_x}\f$, \f$\mathbf{h_u}\f$, which denote the Jacobians of the
  * inequality and equality constraints, respectively.
  *
@@ -95,7 +95,7 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and hessian.
+   * The updated data is used to evaluate of the gradient and Hessian.
    *
    * @param reevals are the registered functions.
    */

@@ -199,7 +199,7 @@ and the following one to reference this website:
 **Crocoddyl** contributions go beyond efficient software implementation as well. Please also consider to cite the algorithm contributions of our different solvers and formulations:
  - Feasibility-driven DDP (FDDP): [[1]](#1)
  - Control-limited feasibility-driven DDP (Box-FDDP): [[2]](#2)
- - Multi-phase rigid optimal control: [[3]](#3)
+ - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [[3]](#3)
 
 
 Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
@@ -212,10 +212,11 @@ Below, there is list of the selected publications that describe different compon
 C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 <a id="2">[2]</a>
-C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard, S. Vijayakumar. [A Direct-Indirect Hybridization Approach to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), 2021
+C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard, S. Vijayakumar. [A Feasibility-Driven Approach
+to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), Autonomous Robots, 2022
 
 <a id="3">[3]</a>
-R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
+C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonnea and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), 2022
 
 
 ## Questions and Issues

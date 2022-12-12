@@ -38,12 +38,12 @@ namespace crocoddyl {
  *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
  * equality vector functions, respectively.
  *
- * The computation of these equations are carrying out inside `calc()` function. In short, this function computes the
- * system acceleration, cost and constraints values (also called constraints violations). This procedure is equivalent
- * to running a forward pass of the action model.
+ * The computation of these equations are carried out out inside `calc()` function. In short, this function computes
+ * the system acceleration, cost and constraints values (also called constraints violations). This procedure is
+ * equivalent to running a forward pass of the action model.
  *
  * However, during numerical optimization, we also need to run backward passes of the action model. These calculations
- * are performed by `calcDiff()`. In short, this function builds a linear-quadratic approximation of the action model,
+ * are performed by `calcDiff()`. In short, this method builds a linear-quadratic approximation of the action model,
  * i.e.: \f[ \begin{aligned}
  * &\delta\mathbf{x}_{k+1} = \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k, &\textrm{(dynamics)}\\
  * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
@@ -68,8 +68,8 @@ namespace crocoddyl {
  *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the
  * Jacobians of the equality constraints.
  *
- * Additionally, it is important remark that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * Additionally, it is important to note that `calcDiff()` computes the derivatives using the latest stored values by
+ * `calc()`. Thus, we need to first run `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -327,20 +327,20 @@ struct ActionDataAbstractTpl {
 
   Scalar cost;     //!< cost value
   VectorXs xnext;  //!< evolution state
-  MatrixXs Fx;     //!< Jacobian of the dynamics
-  MatrixXs Fu;     //!< Jacobian of the dynamics
+  MatrixXs Fx;     //!< Jacobian of the dynamics w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs Fu;     //!< Jacobian of the dynamics w.r.t. the control \f$\mathbf{u}\f$
   VectorXs r;      //!< Cost residual
-  VectorXs Lx;     //!< Jacobian of the cost
-  VectorXs Lu;     //!< Jacobian of the cost
-  MatrixXs Lxx;    //!< Hessian of the cost
-  MatrixXs Lxu;    //!< Hessian of the cost
-  MatrixXs Luu;    //!< Hessian of the cost
+  VectorXs Lx;     //!< Jacobian of the cost w.r.t. the state \f$\mathbf{x}\f$
+  VectorXs Lu;     //!< Jacobian of the cost w.r.t. the control \f$\mathbf{u}\f$
+  MatrixXs Lxx;    //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs Lxu;    //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$ and control \f$\mathbf{u}\f$
+  MatrixXs Luu;    //!< Hessian of the cost w.r.t. the control \f$\mathbf{u}\f$
   VectorXs g;      //!< Inequality constraint values
-  MatrixXs Gx;     //!< Jacobian of the inequality constraint
-  MatrixXs Gu;     //!< Jacobian of the inequality constraint
+  MatrixXs Gx;     //!< Jacobian of the inequality constraint w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs Gu;     //!< Jacobian of the inequality constraint w.r.t. the control \f$\mathbf{u}\f$
   VectorXs h;      //!< Equality constraint values
-  MatrixXs Hx;     //!< Jacobian of the equality constraint
-  MatrixXs Hu;     //!< Jacobian of the equality constraint
+  MatrixXs Hx;     //!< Jacobian of the equality constraint w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs Hu;     //!< Jacobian of the equality constraint w.r.t. the control \f$\mathbf{u}\f$
 };
 
 }  // namespace crocoddyl

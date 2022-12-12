@@ -19,7 +19,7 @@ namespace crocoddyl {
 /**
  * @brief This class computes the numerical differentiation of a cost model.
  *
- * It computes Jacobian and Hessian of the cost model via numerical differentiation, i.e., \f$\mathbf{\ell_x}\f$,
+ * It computes the Jacobian and Hessian of the cost model via numerical differentiation, i.e., \f$\mathbf{\ell_x}\f$,
  * \f$\mathbf{\ell_u}\f$, \f$\mathbf{\ell_{xx}}\f$, \f$\mathbf{\ell_{uu}}\f$, and \f$\mathbf{\ell_{xu}}\f$ which denote
  * the Jacobians and Hessians of the cost function, respectively.
  *
@@ -108,7 +108,7 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
 
   /**
    * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and hessian.
+   * The updated data is used to evaluate of the gradient and Hessian.
    *
    * @param reevals are the registered functions.
    */

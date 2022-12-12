@@ -20,7 +20,7 @@ namespace crocoddyl {
 /**
  * @brief This class computes the numerical differentiation of an action model.
  *
- * It computes Jacobian of the cost, its residual and dynamics via numerical differentiation.
+ * It computes the Jacobian of the cost, its residual and dynamics via numerical differentiation.
  * It considers that the action model owns a cost residual and the cost is the square of this residual, i.e.,
  * \f$\ell(\mathbf{x},\mathbf{u})=\frac{1}{2}\|\mathbf{r}(\mathbf{x},\mathbf{u})\|^2\f$, where
  * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$ is the residual vector.  The Hessian is computed only through the

@@ -16,9 +16,6 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.load('talos_legs')
-lims = talos_legs.model.effortLimit
-lims *= 0.5  # reduced artificially the torque limits
-talos_legs.model.effortLimit = lims
 
 # Defining the initial state of the robot
 q0 = talos_legs.model.referenceConfigurations['half_sitting'].copy()
@@ -28,7 +25,7 @@ x0 = np.concatenate([q0, v0])
 # Setting up the 3d walking problem
 rightFoot = 'right_sole_link'
 leftFoot = 'left_sole_link'
-gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
+gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot, fwddyn=False)
 
 # Setting up all tasks
 GAITPHASES = \
@@ -56,7 +53,7 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == 'walking':
             # Creating a walking problem
-            solver[i] = crocoddyl.SolverBoxFDDP(
+            solver[i] = crocoddyl.SolverIntro(
                 gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
                                           value['stepKnots'], value['supportKnots']))
             solver[i].th_stop = 1e-7
@@ -81,10 +78,10 @@ for i, phase in enumerate(GAITPHASES):
     solver[i].getCallbacks()[0].precision = 3
     solver[i].getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
-    # Solving the problem with the DDP solver
+    # Solving the problem with the solver
     xs = [x0] * (solver[i].problem.T + 1)
     us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
-    solver[i].solve(xs, us, 100, False, 0.1)
+    solver[i].solve(xs, us, 100, False)
 
     # Defining the final state as initial one for the next phase
     x0 = solver[i].xs[-1]

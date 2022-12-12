@@ -95,11 +95,9 @@ class SolverFDDP : public SolverDDP {
   void set_th_acceptnegstep(const double th_acceptnegstep);
 
  protected:
-  double dg_;  //!< Internal data for computing the expected improvement
-  double dq_;  //!< Internal data for computing the expected improvement
-  double dv_;  //!< Internal data for computing the expected improvement
-
- private:
+  double dg_;                //!< Internal data for computing the expected improvement
+  double dq_;                //!< Internal data for computing the expected improvement
+  double dv_;                //!< Internal data for computing the expected improvement
   double th_acceptnegstep_;  //!< Threshold used for accepting step along ascent direction
 };
 

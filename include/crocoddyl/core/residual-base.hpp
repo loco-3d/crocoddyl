@@ -29,8 +29,8 @@ namespace crocoddyl {
  *
  * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the residual vector
  * and `calcDiff` computes the Jacobians of the residual function.
- * Additionally, it is important remark that `calcDiff()` computes the Jacobians using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * Additionally, it is important to note that `calcDiff()` computes the Jacobians using the latest stored values by
+ * `calc()`. Thus, we need to first run `calc()`.
  *
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -124,7 +124,7 @@ class ResidualModelAbstractTpl {
    * @brief Create the residual data
    *
    * The default data contains objects to store the values of the residual vector and their Jacobians.
-   * However, it is possible to specialized this function if we need to create additional data, for instance, to avoid
+   * However, it is possible to specialize this function if we need to create additional data, for instance, to avoid
    * dynamic memory allocation.
    *
    * @param data  Data collector
