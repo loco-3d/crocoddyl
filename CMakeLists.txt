@@ -15,6 +15,7 @@ ENDIF()
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/apple.cmake)
+INCLUDE(cmake/stubs.cmake)
 
 # Print initial message
 MESSAGE(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
@@ -42,6 +43,7 @@ OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related 
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
 IF(DEFINED BUILD_UNIT_TESTS)
   MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
