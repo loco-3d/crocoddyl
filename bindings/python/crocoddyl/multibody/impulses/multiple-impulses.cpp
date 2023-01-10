@@ -86,7 +86,7 @@ void exposeImpulseMultiple() {
            "Update the system velocity after impulse.\n\n"
            ":param data: impulse data\n"
            ":param vnext: velocity after impulse (dimension nv)")
-      .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args("self", "data", "lambda"),
+      .def("updateForce", &ImpulseModelMultiple::updateForce, bp::args("self", "data", "force"),
            "Update the spatial impulse defined in frame coordinate.\n\n"
            ":param data: impulse data\n"
            ":param force: force vector (dimension ni)")
