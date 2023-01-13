@@ -82,6 +82,7 @@ class CostModelFactory {
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
+  typedef pinocchio::GeometryObject::CollisionGeometryPtr CollisionGeometryPtr;
 
   explicit CostModelFactory();
   ~CostModelFactory();
