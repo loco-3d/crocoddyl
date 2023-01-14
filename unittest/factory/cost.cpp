@@ -212,13 +212,13 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
 
   boost::shared_ptr<pinocchio::GeometryModel> geometry =
       boost::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-  pinocchio::GeomIndex ig_frame = geometry->addGeometryObject(pinocchio::GeometryObject(
-      "frame", frame_index, state->get_pinocchio()->frames[frame_index].parent,
-      boost::shared_ptr<hpp::fcl::CollisionGeometry>(new hpp::fcl::Capsule(0, alpha)), frame_SE3));
-  pinocchio::GeomIndex ig_obs = geometry->addGeometryObject(pinocchio::GeometryObject(
-      "obs", state->get_pinocchio()->getFrameId("universe"),
-      state->get_pinocchio()->frames[state->get_pinocchio()->getFrameId("universe")].parent,
-      boost::shared_ptr<hpp::fcl::CollisionGeometry>(new hpp::fcl::Capsule(0, beta)), frame_SE3_obstacle));
+  pinocchio::GeomIndex ig_frame = geometry->addGeometryObject(
+      pinocchio::GeometryObject("frame", frame_index, state->get_pinocchio()->frames[frame_index].parent,
+                                CollisionGeometryPtr(new hpp::fcl::Capsule(0, alpha)), frame_SE3));
+  pinocchio::GeomIndex ig_obs = geometry->addGeometryObject(
+      pinocchio::GeometryObject("obs", state->get_pinocchio()->getFrameId("universe"),
+                                state->get_pinocchio()->frames[state->get_pinocchio()->getFrameId("universe")].parent,
+                                CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)), frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
 
   switch (cost_type) {

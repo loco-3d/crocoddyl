@@ -10,7 +10,6 @@
 #define CROCODDYL_RESIDUAL_FACTORY_HPP_
 
 #include "state.hpp"
-#include "residual.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/numdiff/residual.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -52,6 +51,7 @@ class ResidualModelFactory {
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
+  typedef pinocchio::GeometryObject::CollisionGeometryPtr CollisionGeometryPtr;
 
   explicit ResidualModelFactory();
   ~ResidualModelFactory();

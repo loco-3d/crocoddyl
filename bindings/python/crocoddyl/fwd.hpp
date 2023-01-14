@@ -10,9 +10,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_FWD_HPP_
 
 #include <eigenpy/eigenpy.hpp>
-#include <boost/python.hpp>
-#include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 
 namespace crocoddyl {
 namespace python {
