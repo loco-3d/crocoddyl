@@ -416,7 +416,7 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
         acc = data.differential.xout
         if self.withCostResiduals:
             data.r = data.differential.r
-        if u.all() == None:
+        if u is None:
             data.cost = data.differential.cost
         else:
             data.cost = dt * data.differential.cost
@@ -440,18 +440,18 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
         if self.nu == 1:
             data.Fu[:] = (dt * np.dot(dxnext_ddx, ddx_du)).reshape(self.state.nx)
         else:
-            data.Fu[:,:] = (dt * np.dot(dxnext_ddx, ddx_du)).reshape(self.state.nx,self.nu)
-        if u.all() == None:
+            data.Fu[:, :] = dt * np.dot(dxnext_ddx, ddx_du)
+        if u is None:
             data.Lx[:] = data.differential.Lx
             data.Lu[:] = data.differential.Lu
             data.Lxx[:, :] = data.differential.Lxx
-            data.Lxu[:] = data.differential.Lxu
+            data.Lxu[:, :] = data.differential.Lxu
             data.Luu[:, :] = data.differential.Luu
         else:
             data.Lx[:] = data.differential.Lx * dt
             data.Lu[:] = data.differential.Lu * dt
             data.Lxx[:, :] = data.differential.Lxx * dt
-            data.Lxu[:] = data.differential.Lxu * dt
+            data.Lxu[:, :] = data.differential.Lxu * dt
             data.Luu[:, :] = data.differential.Luu * dt
 
     def createData(self):

@@ -131,6 +131,7 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
 
+
 class TalosArmIntegratedEulerTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('talos_arm').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
@@ -147,6 +148,7 @@ class TalosArmIntegratedEulerTest(ActionModelAbstractTestCase):
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFFERENTIAL, 1e-3)
     MODEL_DER = IntegratedActionModelEulerDerived(DIFFERENTIAL, 1e-3)
+
 
 class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('talos_arm').model
@@ -165,6 +167,7 @@ class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
     MODEL = crocoddyl.IntegratedActionModelRK(DIFFERENTIAL, crocoddyl.RKType.four, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
 
+
 class AnymalIntegratedEulerTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('anymal').model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
@@ -177,6 +180,7 @@ class AnymalIntegratedEulerTest(ActionModelAbstractTestCase):
     DIFFERENTIAL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelRK(DIFFERENTIAL, crocoddyl.RKType.four, 1e-3)
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
+
 
 class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('anymal').model
