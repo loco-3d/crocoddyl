@@ -405,17 +405,21 @@ class DifferentialFreeFwdDynamicsDataDerived(crocoddyl.DifferentialActionDataAbs
 class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
 
     def __init__(self, diffModel, timeStep=1e-3, withCostResiduals=True):
-        crocoddyl.ActionModelAbstract.__init__(self, diffModel.state, diffModel.nv, diffModel.nr)
+        crocoddyl.ActionModelAbstract.__init__(self, diffModel.state, diffModel.nu, diffModel.nr)
         self.differential = diffModel
         self.withCostResiduals = withCostResiduals
         self.timeStep = timeStep
 
     def calc(self, data, x, u=None):
         nq, dt = self.state.nq, self.timeStep
-        acc, cost = self.differential.calc(data.differential, x, u)
+        self.differential.calc(data.differential, x, u)
+        acc = data.differential.xout
         if self.withCostResiduals:
             data.r = data.differential.r
-        data.cost = cost
+        if u is None:
+            data.cost = data.differential.cost
+        else:
+            data.cost = dt * data.differential.cost
         # data.xnext[nq:] = x[nq:] + acc*dt
         # data.xnext[:nq] = pinocchio.integrate(self.differential.pinocchio,
         #                                       a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
@@ -433,12 +437,22 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
         ddx_dx[range(nv), range(nv, 2 * nv)] += 1
         data.Fx[:, :] = dxnext_dx + dt * np.dot(dxnext_ddx, ddx_dx)
         ddx_du = np.vstack([da_du * dt, da_du])
-        data.Fu[:, :] = dt * np.dot(dxnext_ddx, ddx_du)
-        data.Lx[:] = data.differential.Lx
-        data.Lu[:] = data.differential.Lu
-        data.Lxx[:, :] = data.differential.Lxx
-        data.Lxu[:, :] = data.differential.Lxu
-        data.Luu[:, :] = data.differential.Luu
+        if self.nu == 1:
+            data.Fu[:] = (dt * np.dot(dxnext_ddx, ddx_du)).reshape(self.state.nx)
+        else:
+            data.Fu[:, :] = dt * np.dot(dxnext_ddx, ddx_du)
+        if u is None:
+            data.Lx[:] = data.differential.Lx
+            data.Lu[:] = data.differential.Lu
+            data.Lxx[:, :] = data.differential.Lxx
+            data.Lxu[:, :] = data.differential.Lxu
+            data.Luu[:, :] = data.differential.Luu
+        else:
+            data.Lx[:] = data.differential.Lx * dt
+            data.Lu[:] = data.differential.Lu * dt
+            data.Lxx[:, :] = data.differential.Lxx * dt
+            data.Lxu[:, :] = data.differential.Lxu * dt
+            data.Luu[:, :] = data.differential.Luu * dt
 
     def createData(self):
         data = IntegratedActionDataEulerDerived(self)
@@ -449,7 +463,7 @@ class IntegratedActionDataEulerDerived(crocoddyl.ActionDataAbstract):
 
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
-        self.differential = model.differential.createData(self)
+        self.differential = model.differential.createData()
 
 
 class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
