@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, INRIA
+// Copyright (C) 2021-2023, University of Edinburgh, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,6 +38,14 @@ void CostModelResidualTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract
 template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
                                         const Eigen::Ref<const VectorXs>& x) {
+  const bool is_rq = residual_->get_q_dependent();
+  const bool is_rv = residual_->get_v_dependent();
+  if (!is_rq && !is_rv) {
+    data->activation->a_value = 0.;
+    data->cost = 0.;
+    return; // do nothing
+  }
+
   // Compute the cost residual
   residual_->calc(data->residual, x);
 
@@ -93,13 +102,19 @@ template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
                                             const Eigen::Ref<const VectorXs>& x) {
   // Compute the derivatives of the activation and contact wrench cone residual models
+  const bool is_rq = residual_->get_q_dependent();
+  const bool is_rv = residual_->get_v_dependent();
+  if (!is_rq && !is_rv) {
+    data->activation->Arr.setZero();
+    data->Lx.setZero();
+    data->Lxx.setZero();
+    return; // do nothing
+  }
   Data* d = static_cast<Data*>(data.get());
   residual_->calcDiff(data->residual, x);
   activation_->calcDiff(data->activation, data->residual->r);
 
   // Compute the derivatives of the cost function based on a Gauss-Newton approximation
-  const bool is_rq = residual_->get_q_dependent();
-  const bool is_rv = residual_->get_v_dependent();
   const std::size_t nv = state_->get_nv();
   if (is_rq && is_rv) {
     data->Lx.noalias() = data->residual->Rx.transpose() * data->activation->Ar;
