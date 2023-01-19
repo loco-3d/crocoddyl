@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2022-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] uref       Reference joint effort
    * @param[in] nu         Dimension of the control vector
    * @param[in] fwddyn     Indicates that we have a forward dynamics problem (true) or inverse dynamics (false)
+   * (default false)
    */
   ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
                               boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
