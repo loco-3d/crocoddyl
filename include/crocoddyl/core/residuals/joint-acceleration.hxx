@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University
+// Copyright (C) 2023, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,8 +43,10 @@ void ResidualModelJointAccelerationTpl<Scalar>::calc(const boost::shared_ptr<Res
 }
 
 template <typename Scalar>
-void ResidualModelJointAccelerationTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>&,
-                                                     const Eigen::Ref<const VectorXs>&) {}
+void ResidualModelJointAccelerationTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                                     const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
 
 template <typename Scalar>
 void ResidualModelJointAccelerationTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
