@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,7 +125,8 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
   boost::shared_ptr<Base> model_;
   bool with_gauss_approx_;
-  Scalar disturbance_;
+  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian calculation
+  Scalar e_hess_;  //!< Constant used for computing disturbances in Hessian calculation
 };
 
 template <typename _Scalar>

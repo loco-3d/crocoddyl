@@ -1,7 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft, INRIA, University of Oxford
+// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, INRIA, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,24 +121,18 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
   // Computing the action derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
-
-  // Checking the partial derivatives against NumDiff
-  double tol = sqrt(model_num_diff.get_disturbance());
-  BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(NUMDIFF_MODIFIER * tol));
-  BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(NUMDIFF_MODIFIER * tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(NUMDIFF_MODIFIER * tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(NUMDIFF_MODIFIER * tol));
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(tol));
+  BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(NUMDIFF_MODIFIER * tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(NUMDIFF_MODIFIER * tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(NUMDIFF_MODIFIER * tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
@@ -147,16 +143,11 @@ void test_partial_derivatives_against_numdiff(DifferentialActionModelTypes::Type
   x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
-
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
-
-  // Checking the partial derivatives against NumDiff
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(NUMDIFF_MODIFIER * tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
@@ -181,6 +172,7 @@ bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
   }
+  // register_action_model_unit_tests(DifferentialActionModelTypes::all[2]);
   return true;
 }
 
