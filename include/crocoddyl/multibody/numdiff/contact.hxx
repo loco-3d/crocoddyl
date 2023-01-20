@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,9 +14,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_nc(), model->get_nu()), model_(model) {
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-}
+    : Base(model->get_state(), model->get_nc(), model->get_nu()),
+      model_(model),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
@@ -34,22 +35,21 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDat
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
   const VectorXs& a0 = data_nd->a0;
+  data_nd->dx.setZero();
 
   assertStableStateFD(x);
 
   // Computing the d contact(x,u) / dx
-  data_nd->dx.setZero();
+  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    // x + dx
-    data_nd->dx(ix) = disturbance_;
+    data_nd->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](data_nd->xp, VectorXs::Zero(model_->get_nu()));
     }
-    // contact(x+dx, u)
     model_->calc(data_nd->data_x[ix], data_nd->xp);
-    data_nd->da0_dx.col(ix) = (data_nd->data_x[ix]->a0 - a0) / disturbance_;
+    data_nd->da0_dx.col(ix) = (data_nd->data_x[ix]->a0 - a0) / xh_jac;
     data_nd->dx(ix) = 0.0;
   }
 }
@@ -80,12 +80,16 @@ const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >& ContactModelNumDiffTp
 
 template <typename Scalar>
 const Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  disturbance_ = disturbance;
+  if (disturbance < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "Disturbance constant is positive");
+  }
+  e_jac_ = disturbance;
 }
 
 template <typename Scalar>

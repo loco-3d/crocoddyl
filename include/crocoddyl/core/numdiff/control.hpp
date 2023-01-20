@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
-//                     University of Edinburgh, University of Trento
+// Copyright (C) 2021-2023, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+//                          University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,30 +124,18 @@ class ControlParametrizationModelNumDiffTpl : public ControlParametrizationModel
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return Scalar
+   * @brief Return the disturbance constant used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance constant used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  /**
-   * @brief This is the control we need to compute the numerical differentiation
-   * from.
-   */
-  boost::shared_ptr<Base> model_;
-
-  /**
-   * @brief This the increment used in the finite differentiation and integration.
-   */
-  Scalar disturbance_;
+  boost::shared_ptr<Base> model_;  //!< model we need to compute the numerical differentiation
+  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
 
  protected:
   using Base::nu_;

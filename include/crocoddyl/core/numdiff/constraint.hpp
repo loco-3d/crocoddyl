@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,12 +84,12 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance value used by the numdiff routine
+   * @brief Return the disturbance constant used by the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance value used by the numdiff routine
+   * @brief Modify the disturbance constant used by the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
@@ -118,7 +118,7 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
   boost::shared_ptr<Base> model_;              //!< Constraint model hat we want to apply the numerical differentiation
-  Scalar disturbance_;                         //!< Disturbance used in the numerical differentiation routine
+  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
   std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 

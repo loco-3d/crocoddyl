@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
-//                          University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+//                          University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,19 +77,19 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond = both) const;
 
+  /**
+   * @brief Return the disturbance constant used in the numerical differentiation routine
+   */
   const Scalar get_disturbance() const;
+
+  /**
+   * @brief Modify the disturbance constant used by the numerical differentiation routine
+   */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  /**
-   * @brief This is the state we need to compute the numerical differentiation
-   * from.
-   */
-  boost::shared_ptr<Base> state_;
-  /**
-   * @brief This the increment used in the finite differentiation and integration.
-   */
-  Scalar disturbance_;
+  boost::shared_ptr<Base> state_;  //!< state we need to compute the numerical differentiation
+  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
 
  protected:
   using Base::has_limits_;

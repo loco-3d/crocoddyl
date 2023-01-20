@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,9 +12,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_nu(), model->get_ng(), model->get_nh()), model_(model) {
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-}
+    : Base(model->get_state(), model->get_nu(), model->get_ng(), model->get_nh()),
+      model_(model),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ConstraintModelNumDiffTpl<Scalar>::~ConstraintModelNumDiffTpl() {}
@@ -80,43 +80,39 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   d->Gu.resize(ng, nu);
   d->Hx.resize(nh, ndx);
   d->Hu.resize(nh, nu);
+  d->dx.setZero();
+  d->du.setZero();
 
   assertStableStateFD(x);
 
   // Computing the d constraint(x,u) / dx
-  d->dx.setZero();
+  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    // x + dx
-    d->dx(ix) = disturbance_;
+    d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, u);
     }
-    // constraints(x+dx, u)
     model_->calc(d->data_x[ix], d->xp, u);
-    // Gx, Hx
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
-    d->dx(ix) = 0.0;
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / xh_jac;
+    d->dx(ix) = 0.;
   }
 
   // Computing the d constraint(x,u) / du
-  d->du.setZero();
+  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
-    // up = u + du
-    d->du(iu) = disturbance_;
+    d->du(iu) = uh_jac;
     d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](x, d->up);
     }
-    // constraint(x, u+du)
     model_->calc(d->data_u[iu], x, d->up);
-    // Gu, Hu
-    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / disturbance_;
-    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / disturbance_;
-    d->du(iu) = 0.0;
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / uh_jac;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / uh_jac;
+    d->du(iu) = 0.;
   }
 }
 
@@ -134,25 +130,24 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   const std::size_t ndx = model_->get_state()->get_ndx();
   d->Gx.resize(model_->get_ng(), ndx);
   d->Hx.resize(model_->get_nh(), ndx);
+  d->dx.setZero();
 
   assertStableStateFD(x);
 
   // Computing the d constraint(x) / dx
-  d->dx.setZero();
+  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     // x + dx
-    d->dx(ix) = disturbance_;
+    d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, unone_);
     }
-    // constraints(x+dx)
     model_->calc(d->data_x[ix], d->xp);
-    // Gx, Hx
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / disturbance_;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / disturbance_;
-    d->dx(ix) = 0.0;
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / xh_jac;
+    d->dx(ix) = 0.;
   }
 }
 
@@ -169,12 +164,16 @@ const boost::shared_ptr<ConstraintModelAbstractTpl<Scalar> >& ConstraintModelNum
 
 template <typename Scalar>
 const Scalar ConstraintModelNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  disturbance_ = disturbance;
+  if (disturbance < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "Disturbance constant is positive");
+  }
+  e_jac_ = disturbance;
 }
 
 template <typename Scalar>

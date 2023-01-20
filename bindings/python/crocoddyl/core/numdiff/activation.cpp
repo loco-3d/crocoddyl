@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ void exposeActivationNumDiff() {
           bp::make_function(&ActivationModelNumDiff::get_model, bp::return_value_policy<bp::return_by_value>()),
           "action model")
       .add_property("disturbance", bp::make_function(&ActivationModelNumDiff::get_disturbance),
-                    "disturbance value used in the numerical differentiation");
+                    "disturbance constant used in the numerical differentiation");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataNumDiff> >();
 

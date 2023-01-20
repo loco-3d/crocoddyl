@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, University of Pisa
+// Copyright (C) 2021-2023, University of Edinburgh, University of Pisa,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +78,7 @@ void exposeStateNumDiff() {
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")
       .add_property("disturbance", bp::make_function(&StateNumDiff::get_disturbance), &StateNumDiff::set_disturbance,
-                    "disturbance value used in the numerical differentiation");
+                    "disturbance constant used in the numerical differentiation");
 }
 
 }  // namespace python

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -68,30 +68,18 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return Scalar
+   * @brief Return the disturbance constant used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance constant used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  /**
-   * @brief This is the model to compute the finite differentiation from
-   */
-  boost::shared_ptr<Base> model_;
-
-  /**
-   * @brief This is the numerical disturbance value used during the numerical
-   * differentiation
-   */
-  Scalar disturbance_;
+  boost::shared_ptr<Base> model_;  //!< model to compute the finite differentiation from
+  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
 
  protected:
   using Base::nr_;
