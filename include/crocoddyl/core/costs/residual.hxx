@@ -43,7 +43,7 @@ void CostModelResidualTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract
   if (!is_rq && !is_rv) {
     data->activation->a_value = 0.;
     data->cost = 0.;
-    return; // do nothing
+    return;  // do nothing
   }
 
   // Compute the cost residual
@@ -108,7 +108,7 @@ void CostModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbst
     data->activation->Arr.setZero();
     data->Lx.setZero();
     data->Lxx.setZero();
-    return; // do nothing
+    return;  // do nothing
   }
   Data* d = static_cast<Data*>(data.get());
   residual_->calcDiff(data->residual, x);
