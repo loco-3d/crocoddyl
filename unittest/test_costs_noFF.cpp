@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
@@ -139,17 +139,13 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
   actuation_model->calcDiff(actuation_data, x, u);
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
-  // Computing the cost derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
-
-  // Checking the partial derivatives against NumDiff
-  double tol = sqrt(model_num_diff.get_disturbance());
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    // The num diff is not precise enough to be tested here.
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
@@ -166,15 +162,12 @@ void test_partial_derivatives_against_numdiff(CostModelNoFFTypes::Type cost_type
   actuation_model->calcDiff(actuation_data, x);
   model->calc(data, x);
   model->calcDiff(data, x);
-
-  // Computing the cost derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against numdiff
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    // The num diff is not precise enough to be tested here.
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
@@ -248,8 +241,6 @@ void test_partial_derivatives_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   // Computing the cost derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
-  // Computing the cost-sum derivatives
   cost_sum.calc(data_sum, x, u);
   cost_sum.calcDiff(data_sum, x, u);
 

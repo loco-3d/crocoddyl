@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,13 +180,10 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   // Computing the contact derivatives
   model->calc(data, x);
   model->calcDiff(data, x);
-
-  // Computing the contact derivatives via numerical differentiation
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
-
-  // Checking the partial derivatives against NumDiff
-  double tol = sqrt(model_num_diff.get_disturbance());
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
 }
 

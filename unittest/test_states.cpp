@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2019-2023, LAAS-CNRS, New York University, Max Planck Gesellschaft,
 //                          University of Edinburgh, INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -184,9 +184,9 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jdiff_num_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jdiff(x1, x2, Jdiff_num_1, Jdiff_num_2);
 
-  // Checking the partial derivatives against NumDiff
-  // The previous tolerance was 10*disturbance
-  double tol = NUMDIFF_MODIFIER * sqrt(state_num_diff.get_disturbance());
+  // Checking the partial derivatives against numerical differentiation
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(std::sqrt(2.0 * std::numeric_limits<double>::epsilon()), 1. / 3.);
   BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isZero(tol));
   BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isZero(tol));
 }
@@ -209,9 +209,9 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   Eigen::MatrixXd Jint_num_2(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state_num_diff.Jintegrate(x, dx, Jint_num_1, Jint_num_2);
 
-  // Checking the partial derivatives against NumDiff
-  // The previous tolerance was 10*disturbance
-  double tol = sqrt(state_num_diff.get_disturbance());
+  // Checking the partial derivatives against numerical differentiation
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(std::sqrt(2.0 * std::numeric_limits<double>::epsilon()), 1. / 3.);
   BOOST_CHECK((Jint_1 - Jint_num_1).isZero(tol));
   BOOST_CHECK((Jint_2 - Jint_num_2).isZero(tol));
 }
