@@ -79,10 +79,6 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
@@ -98,8 +94,6 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));

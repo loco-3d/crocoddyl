@@ -133,6 +133,7 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
 
   boost::shared_ptr<Base> model_;  //!< Action model hat we want to apply the numerical differentiation
   Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
+  Scalar e_hess_;                  //!< Constant used for computing disturbances in Hessian calculation
   bool with_gauss_approx_;         //!< True if we want to use the Gauss approximation for computing the Hessians
 };
 

@@ -19,6 +19,7 @@ ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> mod
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
+  e_hess_ = std::sqrt(2.0 * e_jac_);
   this->set_u_lb(model_->get_u_lb());
   this->set_u_ub(model_->get_u_ub());
 }
@@ -132,14 +133,88 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   }
   data->Fu /= uh_jac;
 
+  // Computing the d^2 cost(x,u) / dx^2
+  const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
+  const Scalar xh_hess_pow2 = xh_hess * xh_hess;
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
+    d->dx(ix) = xh_hess;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp, u);
+    const Scalar cp = d->data_x[ix]->cost;
+    model_->get_state()->integrate(x, -d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp, u);
+    const Scalar cm = d->data_x[ix]->cost;
+    data->Lxx(ix, ix) = (cp - 2 * c0 + cm) / xh_hess_pow2;
+    for (std::size_t jx = ix + 1; jx < ndx; ++jx) {
+      d->dx(jx) = xh_hess;
+      model_->get_state()->integrate(x, d->dx, d->xp);
+      model_->calc(d->data_x[ix], d->xp, u);
+      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      d->dx(ix) = 0.;
+      model_->get_state()->integrate(x, d->dx, d->xp);
+      model_->calc(d->data_x[ix], d->xp, u);
+      const Scalar czp =
+          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+      data->Lxx(ix, jx) = (cpp - czp - cp + c0) / xh_hess_pow2;
+      data->Lxx(jx, ix) = data->Lxx(ix, jx);
+      d->dx(ix) = xh_hess;
+      d->dx(jx) = 0.;
+    }
+    d->dx(ix) = 0.;
+  }
+
+  // Computing the d^2 cost(x,u) / du^2
+  const Scalar uh_hess = e_hess_ * std::max(1., u.norm());
+  const Scalar uh_hess_pow2 = uh_hess * uh_hess;
+  for (std::size_t iu = 0; iu < nu; ++iu) {
+    d->du(iu) = uh_hess;
+    model_->calc(d->data_u[iu], x, u + d->du);
+    const Scalar cp = d->data_u[iu]->cost;
+    model_->calc(d->data_u[iu], x, u - d->du);
+    const Scalar cm = d->data_u[iu]->cost;
+    data->Luu(iu, iu) = (cp - 2 * c0 + cm) / uh_hess_pow2;
+    for (std::size_t ju = iu + 1; ju < nu; ++ju) {
+      d->du(ju) = uh_hess;
+      model_->calc(d->data_u[iu], x, u + d->du);
+      const Scalar cpp = d->data_u[iu]->cost;  // cost due to positive disturbance in both directions
+      d->du(iu) = 0.;
+      model_->calc(d->data_u[iu], x, u + d->du);
+      const Scalar czp =
+          d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+      data->Luu(iu, ju) = (cpp - czp - cp + c0) / uh_hess_pow2;
+      data->Luu(ju, iu) = data->Luu(iu, ju);
+      d->du(iu) = uh_hess;
+      d->du(ju) = 0.;
+    }
+    d->du(iu) = 0.;
+  }
+
+  // Computing the d^2 cost(x,u) / dxu
+  const Scalar xuh_hess_pow2 = 4. * xh_hess * uh_hess;
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
+    for (std::size_t ju = 0; ju < nu; ++ju) {
+      d->dx(ix) = xh_hess;
+      model_->get_state()->integrate(x, d->dx, d->xp);
+      d->du(ju) = uh_hess;
+      model_->calc(d->data_x[ix], d->xp, u + d->du);
+      const Scalar cpp = d->data_x[ix]->cost;
+      model_->calc(d->data_x[ix], d->xp, u - d->du);
+      const Scalar cpm = d->data_x[ix]->cost;
+      model_->get_state()->integrate(x, -d->dx, d->xp);
+      model_->calc(d->data_x[ix], d->xp, u + d->du);
+      const Scalar cmp = d->data_x[ix]->cost;
+      model_->calc(d->data_x[ix], d->xp, u - d->du);
+      const Scalar cmm = d->data_x[ix]->cost;
+      data->Lxu(ix, ju) = (cpp - cpm - cmp + cmm) / xuh_hess_pow2;
+      d->dx(ix) = 0.;
+      d->du(ju) = 0.;
+    }
+  }
+
   if (get_with_gauss_approx() > 0) {
     data->Lxx = d->Rx.transpose() * d->Rx;
     data->Lxu = d->Rx.transpose() * d->Ru;
     data->Luu = d->Ru.transpose() * d->Ru;
-  } else {
-    data->Lxx.setZero();
-    data->Lxu.setZero();
-    data->Luu.setZero();
   }
 }
 
@@ -181,10 +256,39 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     d->dx(ix) = 0.;
   }
 
+  // Computing the d^2 cost(x,u) / dx^2
+  const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
+  const Scalar xh_hess_pow2 = xh_hess * xh_hess;
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
+    // We can apply the same formulas for finite difference as above
+    d->dx(ix) = xh_hess;
+    model_->get_state()->integrate(x, d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp);
+    const Scalar cp = d->data_x[ix]->cost;
+    model_->get_state()->integrate(x, -d->dx, d->xp);
+    model_->calc(d->data_x[ix], d->xp);
+    const Scalar cm = d->data_x[ix]->cost;
+    data->Lxx(ix, ix) = (cp - 2 * c0 + cm) / xh_hess_pow2;
+    for (std::size_t jx = ix + 1; jx < ndx; ++jx) {
+      d->dx(jx) = xh_hess;
+      model_->get_state()->integrate(x, d->dx, d->xp);
+      model_->calc(d->data_x[ix], d->xp);
+      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      d->dx(ix) = 0.;
+      model_->get_state()->integrate(x, d->dx, d->xp);
+      model_->calc(d->data_x[ix], d->xp);
+      const Scalar czp =
+          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+      data->Lxx(ix, jx) = (cpp - czp - cp + c0) / xh_hess_pow2;
+      data->Lxx(jx, ix) = data->Lxx(ix, jx);
+      d->dx(ix) = xh_hess;
+      d->dx(jx) = 0.;
+    }
+    d->dx(ix) = 0.;
+  }
+
   if (get_with_gauss_approx() > 0) {
     data->Lxx = d->Rx.transpose() * d->Rx;
-  } else {
-    data->Lxx.setZero();
   }
 }
 
@@ -210,6 +314,7 @@ void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
                  << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
+  e_hess_ = std::sqrt(2.0 * e_jac_);
 }
 
 template <typename Scalar>
