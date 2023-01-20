@@ -98,12 +98,12 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance used in the numerical differentiation routine
+   * @brief Return the disturbance constant used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance used in the numerical differentiation routine
+   * @brief Modify the disturbance constant used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 

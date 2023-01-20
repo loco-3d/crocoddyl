@@ -16,9 +16,10 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model,
                                                                              const bool with_gauss_approx)
-    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()), model_(model) {
-  with_gauss_approx_ = with_gauss_approx;
-  e_jac_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
+    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()),
+      model_(model),
+      with_gauss_approx_(with_gauss_approx),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {
   e_hess_ = std::sqrt(2.0 * e_jac_);
   if (with_gauss_approx_ && nr_ == 1) throw_pretty("No Gauss approximation possible with nr = 1");
 }
@@ -65,6 +66,8 @@ template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const VectorXs>& x,
                                                          const Eigen::Ref<const VectorXs>& u) {
+  // For details about the finite difference formulas see
+  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -75,11 +78,11 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const VectorXs& xn0 = d->data_0->xout;
+  const VectorXs& x0 = d->data_0->xout;
   const Scalar c0 = d->data_0->cost;
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
-  const std::size_t ndx = model_->get_state()->get_ndx();
+  const std::size_t ndx = state_->get_ndx();
   const std::size_t nu = model_->get_nu();
   const std::size_t ng = model_->get_ng();
   const std::size_t nh = model_->get_nh();
@@ -94,59 +97,41 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
 
   // Computing the d action(x,u) / dx
   const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
-  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
     // dynamics
-    const VectorXs& xp = d->data_x[ix]->xout;
-    const Scalar cp = d->data_x[ix]->cost;
-    data->Fx.col(ix) = (xp - xn0) / xh_jac;
+    data->Fx.col(ix) = (d->data_x[ix]->xout - x0) / xh_jac;
     // constraint
     data->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
     data->Hx.col(ix) = (d->data_x[ix]->h - h0) / xh_jac;
     // cost
-    data->Lx(ix) = (cp - c0) / xh_jac;
+    data->Lx(ix) = (d->data_x[ix]->cost - c0) / xh_jac;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / xh_jac;
     d->dx(ix) = 0.;
   }
 
   // Computing the d action(x,u) / du
   const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
-  for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
+  for (std::size_t iu = 0; iu < nu; ++iu) {
     d->du(iu) = uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
     // dynamics
-    const VectorXs& xn = d->data_u[iu]->xout;
-    const Scalar cp = d->data_u[iu]->cost;
-    data->Fu.col(iu) = (xn - xn0) / uh_jac;
+    data->Fu.col(iu) = (d->data_u[iu]->xout - x0) / uh_jac;
     // constraint
     data->Gu.col(iu) = (d->data_u[iu]->g - g0) / uh_jac;
     data->Hu.col(iu) = (d->data_u[iu]->h - h0) / uh_jac;
     // cost
-    data->Lu(iu) = (cp - c0) / uh_jac;
+    data->Lu(iu) = (d->data_u[iu]->cost - c0) / uh_jac;
     d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / uh_jac;
     d->du(iu) = 0.;
   }
 
-  // The finite difference of the partial derivatives
-  //
-  //  First order derivatives
-  //  Lx[i] = (L(x+ \delta x) - L(x))/disturbance                   # this formula has a higher order terms of
-  //  O(\delta x) Lx[i] = (L(x+ \delta x) - L(x- \delta x)) / disturbance       # this formula has a higher order
-  //  terms of O(\delta x^2)
-
-  //  Lxx[i,i] = (Lx(x_i+\delta x_i)-2*Lx(x_i)+Lx(x_i-\delta x_i))/disturbance**2
-  //  Lxx[i,j] = (Lx(x_i+\delta x_i, x_j+\delta x_j) - Lx(x_i+\delta x_i, x_j) - Lx(x_i, x_j+\delta x_j) + Lx(x_i,
-  //  x_j)) /  (delta x_i *delta x_j)      #this formula has a higher order terms of O(\delta x) One can write a
-  //  similar formula for the finite difference with O(delta x**2) but from computation time perspective the above
-  //  formula is more efficient as we can reuse 2 terms
-
-  // Computing the d^2 action(x,u) / dx^2
+  // Computing the d^2 cost(x,u) / dx^2
   const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
   const Scalar xh_hess_pow2 = xh_hess * xh_hess;
-  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    // We can apply the same formulas for finite difference as above
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = xh_hess;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
@@ -155,17 +140,17 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->calc(d->data_x[ix], d->xp, u);
     const Scalar cm = d->data_x[ix]->cost;
     data->Lxx(ix, ix) = (cp - 2 * c0 + cm) / xh_hess_pow2;
-    for (std::size_t jx = ix + 1; jx < state_->get_ndx(); ++jx) {
+    for (std::size_t jx = ix + 1; jx < ndx; ++jx) {
       d->dx(jx) = xh_hess;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
-      const Scalar c_pp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
       d->dx(ix) = 0.;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
-      const Scalar c_zp =
+      const Scalar czp =
           d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
-      data->Lxx(ix, jx) = (c_pp - c_zp - cp + c0) / xh_hess_pow2;
+      data->Lxx(ix, jx) = (cpp - czp - cp + c0) / xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = xh_hess;
       d->dx(jx) = 0.;
@@ -173,26 +158,25 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     d->dx(ix) = 0.;
   }
 
-  // Computing the d^2 action(x,u) / du^2
+  // Computing the d^2 cost(x,u) / du^2
   const Scalar uh_hess = e_hess_ * std::max(1., u.norm());
   const Scalar uh_hess_pow2 = uh_hess * uh_hess;
-  for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
-    // We can apply the same formulas for finite difference as above
+  for (std::size_t iu = 0; iu < nu; ++iu) {
     d->du(iu) = uh_hess;
     model_->calc(d->data_u[iu], x, u + d->du);
     const Scalar cp = d->data_u[iu]->cost;
     model_->calc(d->data_u[iu], x, u - d->du);
     const Scalar cm = d->data_u[iu]->cost;
     data->Luu(iu, iu) = (cp - 2 * c0 + cm) / uh_hess_pow2;
-    for (std::size_t ju = iu + 1; ju < model_->get_nu(); ++ju) {
+    for (std::size_t ju = iu + 1; ju < nu; ++ju) {
       d->du(ju) = uh_hess;
       model_->calc(d->data_u[iu], x, u + d->du);
-      const Scalar c_pp = d->data_u[iu]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp = d->data_u[iu]->cost;  // cost due to positive disturbance in both directions
       d->du(iu) = 0.;
       model_->calc(d->data_u[iu], x, u + d->du);
-      const Scalar c_zp =
+      const Scalar czp =
           d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
-      data->Luu(iu, ju) = (c_pp - c_zp - cp + c0) / uh_hess_pow2;
+      data->Luu(iu, ju) = (cpp - czp - cp + c0) / uh_hess_pow2;
       data->Luu(ju, iu) = data->Luu(iu, ju);
       d->du(iu) = uh_hess;
       d->du(ju) = 0.;
@@ -200,23 +184,23 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     d->du(iu) = 0.;
   }
 
-  // Computing the d^2 action(x,u) / dxu
+  // Computing the d^2 cost(x,u) / dxu
   const Scalar xuh_hess_pow2 = 4. * xh_hess * uh_hess;
-  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    for (std::size_t ju = 0; ju < model_->get_nu(); ++ju) {
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
+    for (std::size_t ju = 0; ju < nu; ++ju) {
       d->dx(ix) = xh_hess;
       model_->get_state()->integrate(x, d->dx, d->xp);
       d->du(ju) = uh_hess;
       model_->calc(d->data_x[ix], d->xp, u + d->du);
-      const Scalar c_pp = d->data_x[ix]->cost;
+      const Scalar cpp = d->data_x[ix]->cost;
       model_->calc(d->data_x[ix], d->xp, u - d->du);
-      const Scalar c_pm = d->data_x[ix]->cost;
+      const Scalar cpm = d->data_x[ix]->cost;
       model_->get_state()->integrate(x, -d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u + d->du);
-      const Scalar c_mp = d->data_x[ix]->cost;
+      const Scalar cmp = d->data_x[ix]->cost;
       model_->calc(d->data_x[ix], d->xp, u - d->du);
-      const Scalar c_mm = d->data_x[ix]->cost;
-      data->Lxu(ix, ju) = (c_pp - c_pm - c_mp + c_mm) / xuh_hess_pow2;
+      const Scalar cmm = d->data_x[ix]->cost;
+      data->Lxu(ix, ju) = (cpp - cpm - cmp + cmm) / xuh_hess_pow2;
       d->dx(ix) = 0.;
       d->du(ju) = 0.;
     }
@@ -232,6 +216,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
                                                          const Eigen::Ref<const VectorXs>& x) {
+  // For details about the finite difference formulas see
+  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -241,7 +227,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
   const Scalar c0 = d->data_0->cost;
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
-  const std::size_t ndx = model_->get_state()->get_ndx();
+  const std::size_t ndx = state_->get_ndx();
   d->Gx.resize(model_->get_ng(), ndx);
   d->Hx.resize(model_->get_nh(), ndx);
   d->dx.setZero();
@@ -250,13 +236,12 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
 
   // Computing the d action(x,u) / dx
   const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
-  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
-    const Scalar c = d->data_x[ix]->cost;
     // cost
-    data->Lx(ix) = (c - c0) / xh_jac;
+    data->Lx(ix) = (d->data_x[ix]->cost - c0) / xh_jac;
     d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / xh_jac;
     // constraint
     data->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
@@ -264,10 +249,10 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     d->dx(ix) = 0.;
   }
 
-  // Computing the d^2 action(x,u) / dx^2
+  // Computing the d^2 cost(x,u) / dx^2
   const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
   const Scalar xh_hess_pow2 = xh_hess * xh_hess;
-  for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
+  for (std::size_t ix = 0; ix < ndx; ++ix) {
     // We can apply the same formulas for finite difference as above
     d->dx(ix) = xh_hess;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -277,17 +262,17 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr
     model_->calc(d->data_x[ix], d->xp);
     const Scalar cm = d->data_x[ix]->cost;
     data->Lxx(ix, ix) = (cp - 2 * c0 + cm) / xh_hess_pow2;
-    for (std::size_t jx = ix + 1; jx < state_->get_ndx(); ++jx) {
+    for (std::size_t jx = ix + 1; jx < ndx; ++jx) {
       d->dx(jx) = xh_hess;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
-      const Scalar c_pp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
       d->dx(ix) = 0.;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
-      const Scalar c_zp =
+      const Scalar czp =
           d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
-      data->Lxx(ix, jx) = (c_pp - c_zp - cp + c0) / xh_hess_pow2;
+      data->Lxx(ix, jx) = (cpp - czp - cp + c0) / xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = xh_hess;
       d->dx(jx) = 0.;
@@ -320,7 +305,7 @@ template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
-                 << "Disturbance value is positive");
+                 << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
   e_hess_ = std::sqrt(2.0 * e_jac_);
