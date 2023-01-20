@@ -105,7 +105,6 @@ void CostModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbst
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
   if (!is_rq && !is_rv) {
-    data->activation->Arr.setZero();
     data->Lx.setZero();
     data->Lxx.setZero();
     return;  // do nothing
