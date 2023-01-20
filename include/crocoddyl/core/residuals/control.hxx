@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -52,8 +52,10 @@ void ResidualModelControlTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataA
 }
 
 template <typename Scalar>
-void ResidualModelControlTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>&,
-                                           const Eigen::Ref<const VectorXs>&) {}
+void ResidualModelControlTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                                           const Eigen::Ref<const VectorXs>&) {
+  data->r.setZero();
+}
 
 template <typename Scalar>
 #ifndef NDEBUG
