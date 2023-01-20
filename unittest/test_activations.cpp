@@ -41,7 +41,7 @@ void test_calc_returns_a_value(ActivationModelTypes::Type activation_type) {
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
   // Generating random input vector
-  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd r = Eigen::VectorXd::Random(model->get_nr());
   data->a_value = nan("");
 
   // Getting the state dimension from calc() call
@@ -63,7 +63,7 @@ void test_partial_derivatives_against_numdiff(ActivationModelTypes::Type activat
   boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& r = Eigen::VectorXd::Random(model->get_nr());
+  const Eigen::VectorXd r = Eigen::VectorXd::Random(model->get_nr());
 
   // Computing the activation derivatives
   model->calc(data, r);

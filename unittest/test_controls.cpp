@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2021-2023, LAAS-CNRS, New York University, Max Planck Gesellschaft,
 //                     University of Edinburgh, INRIA, University of Trento
 // Copyright note valid unless otherwise controld in individual files.
 // All rights reserved.
@@ -24,7 +24,7 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters
-  const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_nu());
+  const Eigen::VectorXd p = Eigen::VectorXd::Random(control->get_nu());
   double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
 
   // Get the num diff control
@@ -47,9 +47,9 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters, the time, and the matrix to multiply
-  const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_nu());
+  const Eigen::VectorXd p = Eigen::VectorXd::Random(control->get_nu());
   double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
-  const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(5, control->get_nw());
+  const Eigen::MatrixXd A = Eigen::MatrixXd::Random(5, control->get_nw());
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
@@ -75,9 +75,9 @@ void test_multiplyJacobianTransposeBy_num_diff(ControlTypes::Type control_type) 
   const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters, the time, and the matrix to multiply
-  const Eigen::VectorXd& p = Eigen::VectorXd::Random(control->get_nu());
+  const Eigen::VectorXd p = Eigen::VectorXd::Random(control->get_nu());
   double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
-  const Eigen::MatrixXd& A = Eigen::MatrixXd::Random(control->get_nw(), 5);
+  const Eigen::MatrixXd A = Eigen::MatrixXd::Random(control->get_nw(), 5);
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);

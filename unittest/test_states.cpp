@@ -34,8 +34,8 @@ void test_integrate_against_difference(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random states
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& x2 = state->rand();
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd x2 = state->rand();
 
   // Computing x2 by integrating its difference
   Eigen::VectorXd dx(state->get_ndx());
@@ -54,8 +54,8 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random states
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing dx by differentiation of its integrate
   Eigen::VectorXd xidx(state->get_nx());
@@ -71,8 +71,8 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial and terminal states
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& x2 = state->rand();
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd x2 = state->rand();
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jdiff_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
@@ -94,8 +94,8 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial and terminal states
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function separately
   Eigen::MatrixXd Jint_tmp(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
@@ -117,8 +117,8 @@ void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial and terminal states
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& x2 = state->rand();
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd x2 = state->rand();
 
   // Get the num diff state
   crocoddyl::StateNumDiff state_num_diff(state);
@@ -143,8 +143,8 @@ void test_Jint_num_diff_firstsecond(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial and terminal states
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Get the num diff state
   crocoddyl::StateNumDiff state_num_diff(state);
@@ -169,8 +169,8 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial and terminal states
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& x2 = state->rand();
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd x2 = state->rand();
 
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jdiff_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
@@ -195,8 +195,8 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial state and its rate of change
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jint_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
@@ -220,8 +220,8 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random values for the initial state and its rate of change
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
 
   // Computing the partial derivatives of the difference function analytically
   Eigen::MatrixXd Jint_1(Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
@@ -243,8 +243,8 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random states
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& dx = Eigen::VectorXd::Random(state->get_ndx());
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
   Eigen::VectorXd x2(state->get_nx());
   state->integrate(x1, dx, x2);
 
@@ -266,7 +266,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   StateModelFactory factory;
   const boost::shared_ptr<crocoddyl::StateAbstract>& state = factory.create(state_type);
   // Generating random states
-  const Eigen::VectorXd& x1 = state->rand();
+  const Eigen::VectorXd x1 = state->rand();
   Eigen::VectorXd dx = Eigen::VectorXd::Random(state->get_ndx());
   Eigen::VectorXd x2(state->get_nx());
   state->integrate(x1, dx, x2);
@@ -290,7 +290,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   BOOST_CHECK((dX_dDX * eps - x2_eps / h).isZero(1e-3));
 
   // Checking the velocity computed from Jdiff
-  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd x = state->rand();
   dx.setZero();
   state->diff(x1, x, dx);
   Eigen::VectorXd x2i(state->get_nx());

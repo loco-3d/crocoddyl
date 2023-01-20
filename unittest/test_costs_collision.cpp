@@ -39,8 +39,8 @@ void test_calc_returns_a_cost(CostModelCollisionTypes::Type cost_type, StateMode
   data->cost = nan("");
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -70,15 +70,14 @@ void test_calc_against_numdiff(CostModelCollisionTypes::Type cost_type, StateMod
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
   // Computing the cost derivatives
   model->calc(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
 
   // Checking the partial derivatives against NumDiff
@@ -107,8 +106,8 @@ void test_partial_derivatives_against_numdiff(CostModelCollisionTypes::Type cost
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -156,7 +155,7 @@ void test_dimensions_in_cost_sum(CostModelCollisionTypes::Type cost_type, StateM
   cost_sum.addCost("myCost", model, 1.);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd x = state->rand();
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -188,8 +187,8 @@ void test_partial_derivatives_in_cost_sum(CostModelCollisionTypes::Type cost_typ
   const boost::shared_ptr<crocoddyl::CostDataSum>& data_sum = cost_sum.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);

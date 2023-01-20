@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
 
   // compute the constraint sum data for the case when all constraints are defined as active
   Eigen::VectorXd x1 = state->rand();
-  const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd u1 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
   model.calc(data, x1, u1);
   model.calcDiff(data, x1, u1);

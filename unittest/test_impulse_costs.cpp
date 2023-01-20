@@ -32,7 +32,7 @@ void test_partial_derivatives_against_impulse_numdiff(ImpulseCostModelTypes::Typ
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);

@@ -30,8 +30,8 @@ void test_partial_derivatives_against_impulse_numdiff(ImpulseConstraintModelType
   const boost::shared_ptr<crocoddyl::ActionDataAbstract> &data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd &x = model->get_state()->rand();
-  const Eigen::VectorXd &u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);

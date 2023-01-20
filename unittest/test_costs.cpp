@@ -42,8 +42,8 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::T
   data->cost = nan("");
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -75,8 +75,8 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -114,7 +114,7 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -137,7 +137,7 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
     // The num diff is not precise enough to be tested here.
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(NUMDIFF_MODIFIER * tol));
+    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
@@ -181,7 +181,7 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
   cost_sum.addCost("myCost", model, 1.);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd x = state->rand();
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -215,8 +215,8 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
   const boost::shared_ptr<crocoddyl::CostDataSum>& data_sum = cost_sum.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);

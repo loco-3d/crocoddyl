@@ -37,8 +37,8 @@ void test_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   data->cost = nan("");
 
   // Generating random state and control vectors
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
@@ -62,12 +62,11 @@ void test_partial_derivatives_against_numdiff(const boost::shared_ptr<crocoddyl:
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
   // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
@@ -191,7 +190,7 @@ void test_calc_against_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstra
   const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data2 = model2->createData();
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model1->get_state()->rand();
+  const Eigen::VectorXd x = model1->get_state()->rand();
   Eigen::VectorXd u1 = Eigen::VectorXd::Random(model1->get_nu());
   Eigen::VectorXd u2 = Eigen::VectorXd::Random(model2->get_nu());
   // copy u1 to the first part of u2 (assuming u2 is larger than u1)

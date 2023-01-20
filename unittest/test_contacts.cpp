@@ -167,7 +167,7 @@ void test_partial_derivatives_against_numdiff(ContactModelTypes::Type contact_ty
   const boost::shared_ptr<crocoddyl::ContactDataAbstract>& data_num_diff = model_num_diff.createData(&pinocchio_data);
 
   // Generating random values for the state
-  const Eigen::VectorXd& x = model->get_state()->rand();
+  const Eigen::VectorXd x = model->get_state()->rand();
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);

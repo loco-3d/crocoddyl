@@ -36,8 +36,8 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type, StateModelT
   const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
 
   // Generating random state and control vectors
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
@@ -58,7 +58,7 @@ void test_actuationSet(ActuationModelTypes::Type actuation_type, StateModelTypes
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the selection matrix
   model->calc(data, x, u);
@@ -90,7 +90,7 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the actuation derivatives
   model->calc(data, x, u);
@@ -126,7 +126,7 @@ void test_commands(ActuationModelTypes::Type actuation_type, StateModelTypes::Ty
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& tau = Eigen::VectorXd::Random(model->get_state()->get_nv());
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model->get_state()->get_nv());
 
   // Computing the actuation commands
   model->commands(data, x, tau);
@@ -150,7 +150,7 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type, StateModelTy
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the torque transform
   model->torqueTransform(data, x, u);
