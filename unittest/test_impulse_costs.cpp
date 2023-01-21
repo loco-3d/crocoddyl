@@ -53,11 +53,10 @@ void test_partial_derivatives_against_impulse_numdiff(ImpulseCostModelTypes::Typ
   x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
-
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 
-  // Checking the partial derivatives against numdiff
+  // Checking the partial derivatives against numerical differentiation
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
