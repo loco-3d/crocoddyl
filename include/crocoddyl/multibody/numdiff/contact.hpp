@@ -92,9 +92,9 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
 
-  boost::shared_ptr<Base> model_; //!<  contact model to differentiate
-  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian calculation
-  std::vector<ReevaluationFunction> reevals_; //!< functions that need execution before calc or calcDiff
+  boost::shared_ptr<Base> model_;              //!<  contact model to differentiate
+  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
+  std::vector<ReevaluationFunction> reevals_;  //!< functions that need execution before calc or calcDiff
 
  private:
   /**
