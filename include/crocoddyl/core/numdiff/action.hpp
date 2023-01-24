@@ -108,6 +108,13 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   bool get_with_gauss_approx();
 
+  /**
+   * @brief Print relevant information of the diff-action numdiff model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
   using Base::nr_;                  //!< Dimension of the cost residual

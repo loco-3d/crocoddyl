@@ -323,6 +323,11 @@ bool ActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
 }
 
 template <typename Scalar>
+void ActionModelNumDiffTpl<Scalar>::print(std::ostream& os) const {
+  os << "ActionModelNumDiffTpl {action=" << *model_ << "}";
+}
+
+template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
   // do nothing in the general case
 }

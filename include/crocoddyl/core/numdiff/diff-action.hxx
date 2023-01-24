@@ -317,6 +317,11 @@ bool DifferentialActionModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
 }
 
 template <typename Scalar>
+void DifferentialActionModelNumDiffTpl<Scalar>::print(std::ostream& os) const {
+  os << "DifferentialActionModelNumDiffTpl {action=" << *model_ << "}";
+}
+
+template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
   // TODO(cmastalli): First we need to do it AMNumDiff and then to replicate it.
 }
