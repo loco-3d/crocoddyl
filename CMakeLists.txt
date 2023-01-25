@@ -21,7 +21,7 @@ INCLUDE(cmake/stubs.cmake)
 
 # Print initial message
 MESSAGE(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-MESSAGE(STATUS "Copyright (C) 2018-2022 CNRS-LAAS, University of Edinburgh, INRIA")
+MESSAGE(STATUS "Copyright (C) 2018-2023 CNRS-LAAS, University of Edinburgh, INRIA")
 MESSAGE(STATUS "                        Heriot-Watt University")
 MESSAGE(STATUS "All rights reserved.")
 MESSAGE(STATUS "Released under the BSD 3-Clause License.")
@@ -45,6 +45,7 @@ OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related 
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
 OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_WITH_FINITE_DIFF_HESSIANS "Build with support of finite difference for computing cost Hessians." ON)
 OPTION(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 OPTION(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
@@ -135,6 +136,11 @@ IF(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
   ADD_DEFINITIONS(-DCROCODDYL_WITH_NTHREADS=${BUILD_WITH_NTHREADS})
   SET(PACKAGE_EXTRA_MACROS "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_MULTITHREADING -DCROCODDYL_WITH_NTHREADS=${BUILD_WITH_NTHREADS})")
   SET(OMP_NUM_THREADS ${BUILD_WITH_NTHREADS})
+ENDIF()
+
+# Add finite difference for cost Hessians
+IF(NOT BUILD_WITH_FINITE_DIFF_HESSIANS)
+  ADD_DEFINITIONS(-DCROCODDYL_WITHOUT_FINITE_DIFFERENCE_HESSIANS)
 ENDIF()
 
 # Add Ipopt
