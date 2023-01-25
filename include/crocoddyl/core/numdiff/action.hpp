@@ -89,6 +89,13 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
 
   /**
+   * @brief @copydoc Base::quasiStatic()
+   */
+  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
+
+  /**
    * @brief Return the acton model that we use to numerical differentiate
    */
   const boost::shared_ptr<Base>& get_model() const;

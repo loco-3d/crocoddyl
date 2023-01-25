@@ -298,6 +298,14 @@ boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelNumDiffTpl<Scalar>:
 }
 
 template <typename Scalar>
+void ActionModelNumDiffTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+                                                Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                                                const std::size_t maxiter, const Scalar tol) {
+  Data* d = static_cast<Data*>(data.get());
+  model_->quasiStatic(d->data_0, u, x, maxiter, tol);
+}
+
+template <typename Scalar>
 const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >& ActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
