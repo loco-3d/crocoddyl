@@ -49,30 +49,33 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualD
   assertStableStateFD(x);
 
   // Computing the d residual(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    d->dx(ix) = xh_jac;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, u);
     }
     model_->calc(d->data_x[ix], d->xp, u);
-    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / xh_jac;
-    d->dx(ix) = 0.0;
+    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
+    d->dx(ix) = 0.;
   }
 
   // Computing the d residual(x,u) / du
-  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(1., u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
-    d->du(iu) = uh_jac;
+    d->du(iu) = d->uh_jac;
     d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](x, d->up);
     }
     model_->calc(d->data_u[iu], x, d->up);
-    d->Ru.col(iu) = (d->data_u[iu]->r - r0) / uh_jac;
+    d->Ru.col(iu) = (d->data_u[iu]->r - r0) / d->uh_jac;
     d->du(iu) = 0.;
   }
 }
@@ -88,14 +91,14 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualD
   // Computing the d residual(x,u) / dx
   d->dx.setZero();
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    d->dx(ix) = e_jac_;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, unone_);
     }
     model_->calc(d->data_x[ix], d->xp);
-    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / e_jac_;
+    d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
     d->dx(ix) = 0.;
   }
 }

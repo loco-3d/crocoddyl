@@ -140,6 +140,8 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::f;
   using Base::pinocchio;
 
+  Scalar x_norm;                   //!< Norm of the state vector
+  Scalar xh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
   VectorXs dx;                     //!< State disturbance.
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
   boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.

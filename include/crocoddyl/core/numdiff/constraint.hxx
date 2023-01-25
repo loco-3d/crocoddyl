@@ -80,38 +80,40 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   d->Gu.resize(ng, nu);
   d->Hx.resize(nh, ndx);
   d->Hu.resize(nh, nu);
-  d->dx.setZero();
   d->du.setZero();
 
   assertStableStateFD(x);
 
   // Computing the d constraint(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    d->dx(ix) = xh_jac;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, u);
     }
     model_->calc(d->data_x[ix], d->xp, u);
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / xh_jac;
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
     d->dx(ix) = 0.;
   }
 
   // Computing the d constraint(x,u) / du
-  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(1., u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
-    d->du(iu) = uh_jac;
+    d->du(iu) = d->uh_jac;
     d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](x, d->up);
     }
     model_->calc(d->data_u[iu], x, d->up);
-    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / uh_jac;
-    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / uh_jac;
+    d->Gu.col(iu) = (d->data_u[iu]->g - g0) / d->uh_jac;
+    d->Hu.col(iu) = (d->data_u[iu]->h - h0) / d->uh_jac;
     d->du(iu) = 0.;
   }
 }
@@ -130,23 +132,25 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
   const std::size_t ndx = model_->get_state()->get_ndx();
   d->Gx.resize(model_->get_ng(), ndx);
   d->Hx.resize(model_->get_nh(), ndx);
-  d->dx.setZero();
 
   assertStableStateFD(x);
 
   // Computing the d constraint(x) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     // x + dx
-    d->dx(ix) = xh_jac;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, unone_);
     }
     model_->calc(d->data_x[ix], d->xp);
-    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / xh_jac;
-    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / xh_jac;
+    d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
+    d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
     d->dx(ix) = 0.;
   }
 }

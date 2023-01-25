@@ -62,25 +62,27 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
   }
   Data* d = static_cast<Data*>(data.get());
   const VectorXs& tau0 = d->data_0->tau;
-  d->dx.setZero();
   d->du.setZero();
 
-  // Computing the d Actuation(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  // Computing the d actuation(x,u) / dx
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < model_->get_state()->get_ndx(); ++ix) {
-    d->dx(ix) = xh_jac;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
-    d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / xh_jac;
+    d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / d->xh_jac;
     d->dx(ix) = 0.;
   }
 
-  // Computing the d Actuation(x,u) / du
-  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
+  // Computing the d actuation(x,u) / du
+  d->uh_jac = e_jac_ * std::max(1., u.norm());
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
-    d->du(iu) = uh_jac;
+    d->du(iu) = d->uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
-    d->dtau_du.col(iu) = (d->data_u[iu]->tau - tau0) / uh_jac;
+    d->dtau_du.col(iu) = (d->data_u[iu]->tau - tau0) / d->uh_jac;
     d->du(iu) = 0.;
   }
 }
@@ -96,13 +98,16 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Actuatio
   const VectorXs& tau0 = d->data_0->tau;
   d->dx.setZero();
 
-  // Computing the d Actuation(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  // Computing the d actuation(x,u) / dx
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < model_->get_state()->get_ndx(); ++ix) {
-    d->dx(ix) = xh_jac;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
-    d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / xh_jac;
+    d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / d->xh_jac;
     d->dx(ix) = 0.;
   }
 }

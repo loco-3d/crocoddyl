@@ -164,10 +164,13 @@ struct ConstraintDataNumDiffTpl : public ConstraintDataAbstractTpl<_Scalar> {
   using Base::Hx;
   using Base::shared;
 
-  VectorXs dx;  //!< State disturbance.
-  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  VectorXs du;  //!< Control disturbance.
-  VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
+  Scalar x_norm;  //!< Norm of the state vector
+  Scalar xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  VectorXs dx;    //!< State disturbance.
+  VectorXs xp;    //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
+  VectorXs du;    //!< Control disturbance.
+  VectorXs up;    //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
   boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
   std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
   std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation.

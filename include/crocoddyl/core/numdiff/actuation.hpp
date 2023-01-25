@@ -144,6 +144,9 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
     }
   }
 
+  Scalar x_norm;                   //!< Norm of the state vector
+  Scalar xh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar uh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
   VectorXs dx;                     //!< State disturbance
   VectorXs du;                     //!< Control disturbance
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"

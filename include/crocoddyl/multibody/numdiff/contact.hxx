@@ -24,33 +24,35 @@ ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
                                           const Eigen::Ref<const VectorXs>& x) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
-  model_->calc(data_nd->data_0, x);
-  data_nd->a0 = data_nd->data_0->a0;
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  model_->calc(d->data_0, x);
+  d->a0 = d->data_0->a0;
 }
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
                                               const Eigen::Ref<const VectorXs>& x) {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  const VectorXs& a0 = data_nd->a0;
-  data_nd->dx.setZero();
+  const VectorXs& a0 = d->a0;
 
   assertStableStateFD(x);
 
   // Computing the d contact(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
+  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    data_nd->dx(ix) = xh_jac;
-    model_->get_state()->integrate(x, data_nd->dx, data_nd->xp);
+    d->dx(ix) = d->xh_jac;
+    model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
-      reevals_[i](data_nd->xp, VectorXs::Zero(model_->get_nu()));
+      reevals_[i](d->xp, VectorXs::Zero(model_->get_nu()));
     }
-    model_->calc(data_nd->data_x[ix], data_nd->xp);
-    data_nd->da0_dx.col(ix) = (data_nd->data_x[ix]->a0 - a0) / xh_jac;
-    data_nd->dx(ix) = 0.0;
+    model_->calc(d->data_x[ix], d->xp);
+    d->da0_dx.col(ix) = (d->data_x[ix]->a0 - a0) / d->xh_jac;
+    d->dx(ix) = 0.0;
   }
 }
 
@@ -62,9 +64,9 @@ void ContactModelNumDiffTpl<Scalar>::updateForce(const boost::shared_ptr<Contact
                  << "lambda has wrong dimension (it should be " << model_->get_nc() << ")");
   }
 
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  model_->updateForce(data_nd->data_0, force);
+  model_->updateForce(d->data_0, force);
 }
 
 template <typename Scalar>
