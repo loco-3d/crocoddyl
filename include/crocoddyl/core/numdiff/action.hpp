@@ -203,6 +203,14 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::r;
   using Base::xnext;
 
+  Scalar x_norm;   //!< Norm of the state vector
+  Scalar xh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar uh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  Scalar xh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{xx} \f$
+  Scalar uh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{uu} \f$
+  Scalar xh_hess_pow2;
+  Scalar uh_hess_pow2;
+  Scalar xuh_hess_pow2;
   MatrixXs Rx;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{dx} \f$
   MatrixXs Ru;                     //!< Cost residual jacobian: \f$ \frac{d r(x,u)}{du} \f$
   VectorXs dx;                     //!< State disturbance
