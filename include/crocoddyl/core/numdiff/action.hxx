@@ -95,7 +95,10 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  const Scalar x_norm = d->dx.norm();
+  d->dx.setZero();
+  const Scalar xh_jac = e_jac_ * std::max(1., x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -134,7 +137,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   data->Fu /= uh_jac;
 
   // Computing the d^2 cost(x,u) / dx^2
-  const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
+  const Scalar xh_hess = e_hess_ * std::max(1., x_norm);
   const Scalar xh_hess_pow2 = xh_hess * xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = xh_hess;
@@ -240,7 +243,10 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   assertStableStateFD(x);
 
   // Computing the d action(x,u) / dx
-  const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  const Scalar x_norm = d->dx.norm();
+  d->dx.setZero();
+  const Scalar xh_jac = e_jac_ * std::max(1., x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -257,7 +263,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   }
 
   // Computing the d^2 cost(x,u) / dx^2
-  const Scalar xh_hess = e_hess_ * std::max(1., x.norm());
+  const Scalar xh_hess = e_hess_ * std::max(1., x_norm);
   const Scalar xh_hess_pow2 = xh_hess * xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     // We can apply the same formulas for finite difference as above
