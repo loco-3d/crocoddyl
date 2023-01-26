@@ -135,7 +135,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
   }
   data->Fu /= d->uh_jac;
 
-#ifndef CROCODDYL_WITHOUT_FINITE_DIFFERENCE_HESSIANS
+#ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
   d->xh_hess = e_hess_ * std::max(1., d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
@@ -262,7 +262,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     d->dx(ix) = 0.;
   }
 
-#ifndef CROCODDYL_WITHOUT_FINITE_DIFFERENCE_HESSIANS
+#ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
   std::cout << "-----------------------------finite diff" << std::endl;
   d->xh_hess = e_hess_ * std::max(1., d->x_norm);
