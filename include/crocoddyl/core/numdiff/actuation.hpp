@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,18 +92,18 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance value used by the numdiff routine
+   * @brief Return the disturbance constant used by the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance value used by the numdiff routine
+   * @brief Modify the disturbance constant used by the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
   boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the numerical differentiation
-  Scalar disturbance_;             //!< Disturbance used in the numerical differentiation routine
+  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
 
  protected:
   using Base::nu_;
@@ -143,6 +144,9 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
     }
   }
 
+  Scalar x_norm;                   //!< Norm of the state vector
+  Scalar xh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar uh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
   VectorXs dx;                     //!< State disturbance
   VectorXs du;                     //!< Control disturbance
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"

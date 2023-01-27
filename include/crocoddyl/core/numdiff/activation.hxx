@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -13,9 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActivationModelNumDiffTpl<Scalar>::ActivationModelNumDiffTpl(boost::shared_ptr<Base> model)
-    : Base(model->get_nr()), model_(model) {
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-}
+    : Base(model->get_nr()), model_(model), e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ActivationModelNumDiffTpl<Scalar>::~ActivationModelNumDiffTpl() {}
@@ -46,12 +44,13 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Activat
   const std::size_t nr = model_->get_nr();
 
   // Computing the d activation(r) / dr
+  const Scalar rh_jac = e_jac_ * std::max(1., r.norm());
   data_nd->rp = r;
   for (unsigned int i_r = 0; i_r < nr; ++i_r) {
-    data_nd->rp(i_r) += disturbance_;
+    data_nd->rp(i_r) += rh_jac;
     model_->calc(data_nd->data_rp[i_r], data_nd->rp);
-    data_nd->rp(i_r) -= disturbance_;
-    data->Ar(i_r) = (data_nd->data_rp[i_r]->a_value - a_value0) / disturbance_;
+    data_nd->rp(i_r) -= rh_jac;
+    data->Ar(i_r) = (data_nd->data_rp[i_r]->a_value - a_value0) / rh_jac;
   }
 
   // Computing the d^2 action(r) / dr^2
@@ -71,16 +70,16 @@ const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& ActivationModelNum
 
 template <typename Scalar>
 const Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void ActivationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
-                 << "Disturbance value is positive");
+                 << "Disturbance constant is positive");
   }
-  disturbance_ = disturbance;
+  e_jac_ = disturbance;
 }
 
 }  // namespace crocoddyl

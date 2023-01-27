@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2022-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ void exposeResidualJointEffort() {
           ":param uref: reference joint effort\n"
           ":param nu: dimension of the control vector\n"
           ":param fwddyn: indicate if we have a forward dynamics problem (True) or inverse "
-          "dynamics problem (False) (default True)"))
+          "dynamics problem (False) (default False)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "actuation", "uref"),
           "Initialize the joint-effort residual model.\n\n"

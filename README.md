@@ -27,7 +27,7 @@ The source code is released under the [BSD 3-Clause license](LICENSE).
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
 [![conda version](https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg)](https://anaconda.org/conda-forge/crocoddyl)
 [![PyPI](https://badge.fury.io/py/crocoddyl.svg)](https://pypi.org/project/crocoddyl/)
-[![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/installer/conda.svg)](https://anaconda.org/conda-forge/crocoddyl)
+[![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/platforms.svg)](https://anaconda.org/conda-forge/crocoddyl)
 [![conda download](https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg)](https://anaconda.org/conda-forge/crocoddyl)
 [![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)

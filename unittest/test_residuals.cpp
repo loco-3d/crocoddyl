@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,8 +46,8 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type, StateM
   const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data = model->createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -90,8 +90,8 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type, StateMode
   const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the residual
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -139,7 +139,7 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the residual derivatives
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -157,8 +157,9 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
   model_num_diff.calcDiff(data_num_diff, x, u);
 
   // Checking the partial derivatives against numdiff
-  double tol = sqrt(model_num_diff.get_disturbance());
-  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(NUMDIFF_MODIFIER * tol));
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(tol));
   BOOST_CHECK((data->Ru - data_num_diff->Ru).isZero(tol));
 
   // Computing the residual derivatives
@@ -174,7 +175,7 @@ void test_partial_derivatives_against_numdiff(ResidualModelTypes::Type residual_
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against numdiff
-  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(NUMDIFF_MODIFIER * tol));
+  BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//

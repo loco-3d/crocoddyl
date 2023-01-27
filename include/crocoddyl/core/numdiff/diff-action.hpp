@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,17 +93,24 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   /**
+   * @brief @copydoc Base::quasiStatic()
+   */
+  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
+
+  /**
    * @brief Return the differential acton model that we use to numerical differentiate
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance used in the numerical differentiation routine
+   * @brief Return the disturbance constant used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance used in the numerical differentiation routine
+   * @brief Modify the disturbance constant used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
@@ -110,6 +118,13 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
    * @brief Identify if the Gauss approximation is going to be used or not.
    */
   bool get_with_gauss_approx();
+
+  /**
+   * @brief Print relevant information of the action numdiff model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
@@ -124,7 +139,8 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
   boost::shared_ptr<Base> model_;
   bool with_gauss_approx_;
-  Scalar disturbance_;
+  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian calculation
+  Scalar e_hess_;  //!< Constant used for computing disturbances in Hessian calculation
 };
 
 template <typename _Scalar>
@@ -168,6 +184,14 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
     }
   }
 
+  Scalar x_norm;   //!< Norm of the state vector
+  Scalar xh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar uh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  Scalar xh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{xx} \f$
+  Scalar uh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{uu} \f$
+  Scalar xh_hess_pow2;
+  Scalar uh_hess_pow2;
+  Scalar xuh_hess_pow2;
   MatrixXs Rx;
   MatrixXs Ru;
   VectorXs dx;

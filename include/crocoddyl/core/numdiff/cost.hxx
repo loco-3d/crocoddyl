@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,9 +14,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_activation(), model->get_nu()), model_(model) {
-  disturbance_ = std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon());
-}
+    : Base(model->get_state(), model->get_activation(), model->get_nu()),
+      model_(model),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
@@ -51,48 +52,45 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
     model_->get_activation()->calc(d->data_0->activation, r0);
     model_->get_activation()->calcDiff(d->data_0->activation, r0);
   }
+  d->du.setZero();
+
   assertStableStateFD(x);
 
   // Computing the d cost(x,u) / dx
+  model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
+  d->x_norm = d->dx.norm();
   d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    // x + dx
-    d->dx(ix) = disturbance_;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, u);
     }
-    // cost(x+dx, u)
     model_->calc(d->data_x[ix], d->xp, u);
-    // Lx
-    d->Lx(ix) = (d->data_x[ix]->cost - c0) / disturbance_;
-    // Check if we need to/can compute the Gauss approximation of the Hessian.
+    d->Lx(ix) = (d->data_x[ix]->cost - c0) / d->xh_jac;
     if (get_with_gauss_approx()) {
-      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / disturbance_;
+      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / d->xh_jac;
     }
-    d->dx(ix) = 0.0;
+    d->dx(ix) = 0.;
   }
 
   // Computing the d cost(x,u) / du
-  d->du.setZero();
+  d->uh_jac = e_jac_ * std::max(1., u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
-    // up = u + du
-    d->du(iu) = disturbance_;
+    d->du(iu) = d->uh_jac;
     d->up = u + d->du;
     // call the update function
     for (std::size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](x, d->up);
     }
-    // cost(x, u+du)
     model_->calc(d->data_u[iu], x, d->up);
-    // Lu
-    d->Lu(iu) = (d->data_u[iu]->cost - c0) / disturbance_;
-    // Check if we need to/can compute the Gauss approximation of the Hessian.
+    d->Lu(iu) = (d->data_u[iu]->cost - c0) / d->uh_jac;
     if (get_with_gauss_approx()) {
-      d->residual->Ru.col(iu) = (d->data_u[iu]->residual->r - r0) / disturbance_;
+      d->residual->Ru.col(iu) = (d->data_u[iu]->residual->r - r0) / d->uh_jac;
     }
-    d->du(iu) = 0.0;
+    d->du(iu) = 0.;
   }
 
   if (get_with_gauss_approx()) {
@@ -118,27 +116,25 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
     model_->get_activation()->calc(d->data_0->activation, r0);
     model_->get_activation()->calcDiff(d->data_0->activation, r0);
   }
+  d->dx.setZero();
+
   assertStableStateFD(x);
 
   // Computing the d cost(x,u) / dx
-  d->dx.setZero();
+  d->xh_jac = e_jac_ * std::max(1., x.norm());
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
-    // x + dx
-    d->dx(ix) = disturbance_;
+    d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
     // call the update function on the pinocchio data
     for (size_t i = 0; i < reevals_.size(); ++i) {
       reevals_[i](d->xp, unone_);
     }
-    // cost(x+dx, u)
     model_->calc(d->data_x[ix], d->xp);
-    // Lx
-    d->Lx(ix) = (d->data_x[ix]->cost - c0) / disturbance_;
-    // Check if we need to/can compute the Gauss approximation of the Hessian.
+    d->Lx(ix) = (d->data_x[ix]->cost - c0) / d->xh_jac;
     if (get_with_gauss_approx()) {
-      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / disturbance_;
+      d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / d->xh_jac;
     }
-    d->dx(ix) = 0.0;
+    d->dx(ix) = 0.;
   }
 
   if (get_with_gauss_approx()) {
@@ -162,12 +158,16 @@ const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scal
 
 template <typename Scalar>
 const Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  disturbance_ = disturbance;
+  if (disturbance < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "Disturbance constant is positive");
+  }
+  e_jac_ = disturbance;
 }
 
 template <typename Scalar>

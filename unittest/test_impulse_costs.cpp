@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,43 +32,34 @@ void test_partial_derivatives_against_impulse_numdiff(ImpulseCostModelTypes::Typ
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the action derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
-
-  // Checking the partial derivatives against numdiff
-  double tol = sqrt(model_num_diff.get_disturbance());
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
     BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data_num_diff->Luu).isZero(tol));
   }
 
   // Computing the action derivatives
   x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
-
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 
-  // Checking the partial derivatives against numdiff
+  // Checking the partial derivatives against numerical differentiation
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-  } else {
-    BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
 }
 

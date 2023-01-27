@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,8 +154,8 @@ void test_calc(StateModelTypes::Type state_type) {
   const boost::shared_ptr<crocoddyl::CostDataSum>& data = model.createData(&shared_data);
 
   // compute the cost sum data for the case when all costs are defined as active
-  const Eigen::VectorXd& x1 = state->rand();
-  const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd x1 = state->rand();
+  const Eigen::VectorXd u1 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
   model.calc(data, x1, u1);
 
@@ -173,8 +173,8 @@ void test_calc(StateModelTypes::Type state_type) {
   // compute the cost sum data for the case when the first three costs are defined as active
   model.changeCostStatus("random_cost_3", false);
   model.changeCostStatus("random_cost_4", false);
-  const Eigen::VectorXd& x2 = state->rand();
-  const Eigen::VectorXd& u2 = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd x2 = state->rand();
+  const Eigen::VectorXd u2 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
   model.calc(data, x2, u2);
   cost = 0;
@@ -213,7 +213,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
 
   // compute the cost sum data for the case when all costs are defined as active
   Eigen::VectorXd x1 = state->rand();
-  const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd u1 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
   model.calc(data, x1, u1);
   model.calcDiff(data, x1, u1);
@@ -267,7 +267,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   model.changeCostStatus("random_cost_3", false);
   model.changeCostStatus("random_cost_4", false);
   Eigen::VectorXd x2 = state->rand();
-  const Eigen::VectorXd& u2 = Eigen::VectorXd::Random(model.get_nu());
+  const Eigen::VectorXd u2 = Eigen::VectorXd::Random(model.get_nu());
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x2);
   model.calc(data, x2, u2);
   model.calcDiff(data, x2, u2);

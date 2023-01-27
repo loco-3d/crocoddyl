@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, New York University,
-// Max Planck Gesellschaft
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York University,
+//                          Max Planck Gesellschaft, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateNumDiffTpl<Scalar>::StateNumDiffTpl(boost::shared_ptr<Base> state)
-    : Base(state->get_nx(), state->get_ndx()), state_(state), disturbance_(1e-6) {}
+    : Base(state->get_nx(), state->get_ndx()),
+      state_(state),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 StateNumDiffTpl<Scalar>::~StateNumDiffTpl() {}
@@ -84,6 +86,7 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const 
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
+    const Scalar x0h_jac = e_jac_ * std::max(1., x0.norm());
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
@@ -91,19 +94,16 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const 
     }
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
-      dx_(i) = disturbance_;
-      // tmp_x = int(x0, dx)
+      dx_(i) = x0h_jac;
       integrate(x0, dx_, tmp_x_);
-      // Jfirst[:,k] = diff(tmp_x, x1) = diff(int(x0 + dx), x1)
       diff(tmp_x_, x1, Jfirst.col(i));
-      // Jfirst[:,k] = Jfirst[:,k] - tmp_dx_, or
-      // Jfirst[:,k] = Jfirst[:,k] - diff(x0, x1)
       Jfirst.col(i) -= dx0_;
       dx_(i) = 0.0;
     }
-    Jfirst /= disturbance_;
+    Jfirst /= x0h_jac;
   }
   if (firstsecond == second || firstsecond == both) {
+    const Scalar x1h_jac = e_jac_ * std::max(1., x1.norm());
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
@@ -112,17 +112,13 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const 
 
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
-      dx_(i) = disturbance_;
-      // tmp_x = int(x1 + dx)
+      dx_(i) = x1h_jac;
       integrate(x1, dx_, tmp_x_);
-      // Jsecond[:,k] = diff(x0, tmp_x) = diff(x0, int(x1 + dx))
       diff(x0, tmp_x_, Jsecond.col(i));
-      // Jsecond[:,k] = J[:,k] - tmp_dx_
-      // Jsecond[:,k] = Jsecond[:,k] - diff(x0, x1)
       Jsecond.col(i) -= dx0_;
       dx_(i) = 0.0;
     }
-    Jsecond /= disturbance_;
+    Jsecond /= x1h_jac;
   }
 }
 
@@ -147,6 +143,7 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, co
   integrate(x, dx, x0_);
 
   if (firstsecond == first || firstsecond == both) {
+    const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
@@ -154,19 +151,16 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, co
     }
     Jfirst.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
-      dx_(i) = disturbance_;
-      // tmp_x_ = integrate(x, dx_) = integrate(x, disturbance_vector)
+      dx_(i) = xh_jac;
       integrate(x, dx_, tmp_x_);
-      // tmp_x_ = integrate(tmp_x_, dx) = integrate(integrate(x, dx_), dx)
       integrate(tmp_x_, dx, tmp_x_);
-      // Jfirst[:,i] = diff(x0_, tmp_x_)
-      // Jfirst[:,i] = diff( integrate(x, dx), integrate(integrate(x, dx_), dx))
       diff(x0_, tmp_x_, Jfirst.col(i));
-      dx_(i) = 0.0;
+      dx_(i) = 0.;
     }
-    Jfirst /= disturbance_;
+    Jfirst /= xh_jac;
   }
   if (firstsecond == second || firstsecond == both) {
+    const Scalar dxh_jac = e_jac_ * std::max(1., dx.norm());
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty("Invalid argument: "
                    << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
@@ -174,15 +168,12 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, co
     }
     Jsecond.setZero();
     for (std::size_t i = 0; i < ndx_; ++i) {
-      dx_(i) = disturbance_;
-      // tmp_x_ = integrate(x, dx + dx_) = integrate(x, dx + disturbance_vector)
+      dx_(i) = dxh_jac;
       integrate(x, dx + dx_, tmp_x_);
-      // Jsecond[:,i] = diff(x0_, tmp_x_)
-      // Jsecond[:,i] = diff( integrate(x, dx), integrate(x, dx_ + dx) )
       diff(x0_, tmp_x_, Jsecond.col(i));
-      dx_(i) = 0.0;
+      dx_(i) = 0.;
     }
-    Jsecond /= disturbance_;
+    Jsecond /= dxh_jac;
   }
 }
 
@@ -192,16 +183,16 @@ void StateNumDiffTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorX
 
 template <typename Scalar>
 const Scalar StateNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void StateNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
-                 << "Disturbance value is positive");
+                 << "Disturbance constant is positive");
   }
-  disturbance_ = disturbance;
+  e_jac_ = disturbance;
 }
 
 }  // namespace crocoddyl

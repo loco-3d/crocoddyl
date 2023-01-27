@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,23 +65,17 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   /**
-   * @brief Get the model_ object
-   *
-   * @return ContactModelAbstract&
+   * @brief Return the acton model that we use to numerical differentiate
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Get the disturbance_ object
-   *
-   * @return Scalar
+   * @brief Return the disturbance constant used in the numerical differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Set the disturbance_ object
-   *
-   * @param disturbance is the value used to find the numerical derivative
+   * @brief Modify the disturbance constant used in the numerical differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
@@ -97,14 +92,9 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
 
-  /** @brief Model of the Contact. */
-  boost::shared_ptr<Base> model_;
-
-  /** @brief Numerical disturbance used in the numerical differentiation. */
-  Scalar disturbance_;
-
-  /** @brief Functions that needs execution before calc or calcDiff. */
-  std::vector<ReevaluationFunction> reevals_;
+  boost::shared_ptr<Base> model_;              //!<  contact model to differentiate
+  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
+  std::vector<ReevaluationFunction> reevals_;  //!< functions that need execution before calc or calcDiff
 
  private:
   /**
@@ -150,6 +140,8 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::f;
   using Base::pinocchio;
 
+  Scalar x_norm;                   //!< Norm of the state vector
+  Scalar xh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
   VectorXs dx;                     //!< State disturbance.
   VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
   boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.

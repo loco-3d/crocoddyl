@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,8 +35,8 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type, St
   data->h *= nan("");
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -67,8 +67,8 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, State
   const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -102,7 +102,7 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -163,7 +163,7 @@ void test_dimensions_in_constraint_manager(ConstraintModelTypes::Type constraint
   constraint_man.addConstraint("myConstraint", model);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
+  const Eigen::VectorXd x = state->rand();
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
@@ -197,8 +197,8 @@ void test_partial_derivatives_in_constraint_manager(ConstraintModelTypes::Type c
   const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data_man = constraint_man.createData(&shared_data);
 
   // Generating random values for the state and control
-  const Eigen::VectorXd& x = state->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);

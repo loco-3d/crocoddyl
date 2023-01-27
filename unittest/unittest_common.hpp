@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,6 @@
 
 #ifndef CROCODDYL_UNITTEST_COMMON_HPP_
 #define CROCODDYL_UNITTEST_COMMON_HPP_
-
-#define NUMDIFF_MODIFIER 20.
 
 #include <iterator>
 #include <boost/test/included/unit_test.hpp>

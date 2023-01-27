@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh, New York University,
+//                          Heriot-Watt University
 // Max Planck Gesellschaft, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -13,7 +14,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model)
-    : Base(model->get_nw(), model->get_nu()), model_(model), disturbance_(1e-6) {}
+    : Base(model->get_nw(), model->get_nu()),
+      model_(model),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
@@ -34,13 +37,14 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
   data->w = data_nd->data_0->w;
 
   data_nd->du.setZero();
+  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
   for (std::size_t i = 0; i < model_->get_nu(); ++i) {
-    data_nd->du(i) += disturbance_;
+    data_nd->du(i) += uh_jac;
     model_->calc(data_nd->data_u[i], t, u + data_nd->du);
     data->dw_du.col(i) = data_nd->data_u[i]->w - data->w;
     data_nd->du(i) = 0.;
   }
-  data->dw_du /= disturbance_;
+  data->dw_du /= uh_jac;
 }
 
 template <typename Scalar>
@@ -116,16 +120,16 @@ ControlParametrizationModelNumDiffTpl<Scalar>::get_model() const {
 
 template <typename Scalar>
 const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance() const {
-  return disturbance_;
+  return e_jac_;
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
-                 << "Disturbance value is positive");
+                 << "Disturbance constant is positive");
   }
-  disturbance_ = disturbance;
+  e_jac_ = disturbance;
 }
 
 }  // namespace crocoddyl

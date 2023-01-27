@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,8 +36,8 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type, StateModelT
   const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data = model->createData();
 
   // Generating random state and control vectors
-  const Eigen::VectorXd& x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = model->get_state()->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
@@ -58,7 +58,7 @@ void test_actuationSet(ActuationModelTypes::Type actuation_type, StateModelTypes
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the selection matrix
   model->calc(data, x, u);
@@ -90,17 +90,15 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the actuation derivatives
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-
   model_num_diff.calc(data_num_diff, x, u);
   model_num_diff.calcDiff(data_num_diff, x, u);
-
-  // Checking the partial derivatives against NumDiff
-  double tol = sqrt(model_num_diff.get_disturbance());
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
   BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
 
@@ -108,7 +106,6 @@ void test_partial_derivatives_against_numdiff(ActuationModelTypes::Type actuatio
   x = model->get_state()->rand();
   model->calc(data, x);
   model->calcDiff(data, x);
-
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
 
@@ -129,7 +126,7 @@ void test_commands(ActuationModelTypes::Type actuation_type, StateModelTypes::Ty
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& tau = Eigen::VectorXd::Random(model->get_state()->get_nv());
+  const Eigen::VectorXd tau = Eigen::VectorXd::Random(model->get_state()->get_nv());
 
   // Computing the actuation commands
   model->commands(data, x, tau);
@@ -153,14 +150,15 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type, StateModelTy
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd& u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
 
   // Computing the torque transform
   model->torqueTransform(data, x, u);
   model_num_diff.torqueTransform(data_num_diff, x, u);
 
   // Checking the torque transform
-  double tol = sqrt(model_num_diff.get_disturbance());
+  // Tolerance defined as in http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->Mtau - data_num_diff->Mtau).isZero(tol));
 }
 

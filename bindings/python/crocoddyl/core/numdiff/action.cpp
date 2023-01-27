@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +58,7 @@ void exposeActionNumDiff() {
                     bp::make_function(&ActionModelNumDiff::get_model, bp::return_value_policy<bp::return_by_value>()),
                     "action model")
       .add_property("disturbance", bp::make_function(&ActionModelNumDiff::get_disturbance),
-                    &ActionModelNumDiff::set_disturbance, "disturbance value used in the numerical differentiation")
+                    &ActionModelNumDiff::set_disturbance, "disturbance constant used in the numerical differentiation")
       .add_property("withGaussApprox",
                     bp::make_function(&ActionModelNumDiff::get_with_gauss_approx,
                                       bp::return_value_policy<bp::return_by_value>()),
