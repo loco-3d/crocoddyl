@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,8 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
+#include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
@@ -42,10 +44,13 @@ class ResidualModelAbstractTpl {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   /**
    * @brief Initialize the residual model
@@ -133,6 +138,20 @@ class ResidualModelAbstractTpl {
   virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
 
   /**
+   * @brief Compute the derivative of the cost function
+   *
+   * This function assumes that the derivatives of the activation and residual are computed via calcDiff functions.
+   *
+   * @param cdata     Cost data
+   * @param rdata     Residual data
+   * @param adata     Activation data
+   * @param update_u  Update the derivative of the cost function w.r.t. to the control if True.
+   */
+  virtual void calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
+                            const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                            const boost::shared_ptr<ActivationDataAbstract>& adata, const bool update_u = true);
+
+  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
@@ -200,10 +219,14 @@ struct ResidualDataAbstractTpl {
       : shared(data),
         r(model->get_nr()),
         Rx(model->get_nr(), model->get_state()->get_ndx()),
-        Ru(model->get_nr(), model->get_nu()) {
+        Ru(model->get_nr(), model->get_nu()),
+        Arr_Rx(model->get_nr(), model->get_state()->get_ndx()),
+        Arr_Ru(model->get_nr(), model->get_nu()) {
     r.setZero();
     Rx.setZero();
     Ru.setZero();
+    Arr_Rx.setZero();
+    Arr_Ru.setZero();
   }
   virtual ~ResidualDataAbstractTpl() {}
 
@@ -211,6 +234,8 @@ struct ResidualDataAbstractTpl {
   VectorXs r;                     //!< Residual vector
   MatrixXs Rx;                    //!< Jacobian of the residual vector with respect the state
   MatrixXs Ru;                    //!< Jacobian of the residual vector with respect the control
+  MatrixXs Arr_Rx;
+  MatrixXs Arr_Ru;
 };
 
 }  // namespace crocoddyl

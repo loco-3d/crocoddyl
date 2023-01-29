@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,16 @@ void exposeResidualAbstract() {
            bp::args("self"),
            "Create the residual data.\n\n"
            "Each residual model might has its own data that needs to be allocated.")
+      .def("calcCostDiff", &ResidualModelAbstract_wrap::calcCostDiff,
+           &ResidualModelAbstract_wrap::default_calcCostDiff, bp::args("self", "cdata", "rdata", "adata", "update_u"),
+           "Compute the derivative of the cost function.\n\n"
+           "This function assumes that the derivatives of the activation and residual are\n"
+           "computed via calcDiff functions.\n"
+           ":param cdata: cost data\n"
+           ":param rdata: residual data\n"
+           ":param adata: activation data\n"
+           ":param update_u: update the derivative of the cost function w.r.t. to the control if True.")
+      .def("calcCostDiff", &ResidualModelAbstract_wrap::default_calcCostDiff_noupdate_u)
       .add_property(
           "state",
           bp::make_function(&ResidualModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
@@ -104,7 +114,11 @@ void exposeResidualAbstract() {
       .add_property("Rx", bp::make_getter(&ResidualDataAbstract::Rx, bp::return_internal_reference<>()),
                     bp::make_setter(&ResidualDataAbstract::Rx), "Jacobian of the residual")
       .add_property("Ru", bp::make_getter(&ResidualDataAbstract::Ru, bp::return_internal_reference<>()),
-                    bp::make_setter(&ResidualDataAbstract::Ru), "Jacobian of the residual");
+                    bp::make_setter(&ResidualDataAbstract::Ru), "Jacobian of the residual")
+      .add_property("Arr_Rx", bp::make_getter(&ResidualDataAbstract::Arr_Rx, bp::return_internal_reference<>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
+      .add_property("Arr_Ru", bp::make_getter(&ResidualDataAbstract::Arr_Ru, bp::return_internal_reference<>()),
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
 }
 
 }  // namespace python

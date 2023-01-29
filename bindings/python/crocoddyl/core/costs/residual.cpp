@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,11 +78,7 @@ void exposeCostResidual() {
           bp::args("self", "model", "data"),
           "Create residual cost data.\n\n"
           ":param model: residual cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("Arr_Rx", bp::make_getter(&CostDataResidual::Arr_Rx, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
-      .add_property("Arr_Ru", bp::make_getter(&CostDataResidual::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 }
 
 }  // namespace python

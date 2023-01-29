@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, LAAS-CNRS, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2022-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +20,11 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename 
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
@@ -29,16 +35,33 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename 
     throw_pretty("Invalid argument: "
                  << "xref has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
   }
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
 }
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
                                                      const std::size_t nu)
-    : Base(state, state->get_ndx(), nu, true, true, false), xref_(state->zero()) {}
+    : Base(state, state->get_ndx(), nu, true, true, false), xref_(state->zero()) {
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
+}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state)
-    : Base(state, state->get_ndx(), true, true, false), xref_(state->zero()) {}
+    : Base(state, state->get_ndx(), true, true, false), xref_(state->zero()) {
+  // Define the pinocchio model for the multibody state case
+  const boost::shared_ptr<StateMultibody>& s = boost::dynamic_pointer_cast<StateMultibody>(state);
+  if (s) {
+    pin_model_ = s->get_pinocchio();
+  }
+}
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::~ResidualModelStateTpl() {}
@@ -63,6 +86,31 @@ void ResidualModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDat
   }
 
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
+}
+
+template <typename Scalar>
+void ResidualModelStateTpl<Scalar>::calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
+                                                 const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                                                 const boost::shared_ptr<ActivationDataAbstract>& adata,
+                                                 const bool) {
+  const std::size_t nv = state_->get_nv();
+  if (pin_model_) {
+    typedef Eigen::Block<MatrixXs> MatrixBlock;
+    for (pinocchio::JointIndex i = 1; i < (pinocchio::JointIndex)pin_model_->njoints; ++i) {
+      const MatrixBlock& RxBlock =
+          rdata->Rx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i]);
+      cdata->Lx.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]).noalias() =
+          RxBlock.transpose() * adata->Ar.segment(pin_model_->idx_vs[i], pin_model_->nvs[i]);
+      cdata->Lxx.block(pin_model_->idx_vs[i], pin_model_->idx_vs[i], pin_model_->nvs[i], pin_model_->nvs[i])
+          .noalias() = RxBlock.transpose() *
+                       adata->Arr.diagonal().segment(pin_model_->idx_vs[i], pin_model_->nvs[i]).asDiagonal() * RxBlock;
+    }
+    cdata->Lx.tail(nv) = adata->Ar.tail(nv);
+    cdata->Lxx.diagonal().tail(nv) = adata->Arr.diagonal().tail(nv);
+  } else {
+    cdata->Lx = adata->Ar;
+    cdata->Lxx.diagonal() = adata->Arr.diagonal();
+  }
 }
 
 template <typename Scalar>
