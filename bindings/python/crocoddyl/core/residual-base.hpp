@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,27 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract, public bp::wrap
 
   boost::shared_ptr<ResidualDataAbstract> default_createData(DataCollectorAbstract* const data) {
     return this->ResidualModelAbstract::createData(data);
+  }
+
+  void calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
+                    const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                    const boost::shared_ptr<ActivationDataAbstract>& adata, const bool update_u = true) {
+    if (boost::python::override calcCostDiff = this->get_override("calcCostDiff")) {
+      return bp::call<void>(calcCostDiff.ptr(), boost::ref(cdata), boost::ref(rdata), boost::ref(adata), update_u);
+    }
+    return ResidualModelAbstract::calcCostDiff(cdata, rdata, adata, update_u);
+  }
+
+  void default_calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
+                            const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                            const boost::shared_ptr<ActivationDataAbstract>& adata, const bool update_u) {
+    return this->ResidualModelAbstract::calcCostDiff(cdata, rdata, adata, update_u);
+  }
+
+  void default_calcCostDiff_noupdate_u(const boost::shared_ptr<CostDataAbstract>& cdata,
+                                       const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                                       const boost::shared_ptr<ActivationDataAbstract>& adata) {
+    return this->ResidualModelAbstract::calcCostDiff(cdata, rdata, adata);
   }
 };
 

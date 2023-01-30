@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, LAAS-CNRS, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2022-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,6 +110,20 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
+   * @brief Compute the derivative of the state-cost function and store it in cost data
+   *
+   * This function assumes that the derivatives of the activation and residual are computed via calcDiff functions.
+   *
+   * @param cdata     Cost data
+   * @param rdata     Residual data
+   * @param adata     Activation data
+   * @param update_u  Update the derivative of the cost function w.r.t. to the control if True.
+   */
+  virtual void calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
+                            const boost::shared_ptr<ResidualDataAbstract>& rdata,
+                            const boost::shared_ptr<ActivationDataAbstract>& adata, const bool update_u = true);
+
+  /**
    * @brief Return the reference state
    */
   const VectorXs& get_reference() const;
@@ -133,7 +148,8 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  VectorXs xref_;  //!< Reference state
+  VectorXs xref_;                                                         //!< Reference state
+  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 
 }  // namespace crocoddyl

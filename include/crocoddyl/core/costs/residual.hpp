@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,19 +140,10 @@ struct CostDataResidualTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  CostDataResidualTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
-      : Base(model, data),
-        Arr_Rx(model->get_residual()->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_residual()->get_nr(), model->get_nu()) {
-    Arr_Rx.setZero();
-    Arr_Ru.setZero();
-  }
+  CostDataResidualTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {}
 
-  MatrixXs Arr_Rx;
-  MatrixXs Arr_Ru;
   using Base::activation;
   using Base::cost;
   using Base::Lu;
