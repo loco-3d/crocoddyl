@@ -148,7 +148,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  VectorXs xref_;  //!< Reference state
+  VectorXs xref_;                                                         //!< Reference state
   boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
 };
 

@@ -91,8 +91,7 @@ void ResidualModelStateTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDat
 template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
                                                  const boost::shared_ptr<ResidualDataAbstract>& rdata,
-                                                 const boost::shared_ptr<ActivationDataAbstract>& adata,
-                                                 const bool) {
+                                                 const boost::shared_ptr<ActivationDataAbstract>& adata, const bool) {
   const std::size_t nv = state_->get_nv();
   if (pin_model_) {
     typedef Eigen::Block<MatrixXs> MatrixBlock;
