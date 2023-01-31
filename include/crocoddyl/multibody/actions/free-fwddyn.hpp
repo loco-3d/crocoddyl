@@ -217,8 +217,8 @@ struct DifferentialActionDataFreeFwdDynamicsTpl : public DifferentialActionDataA
                   boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        u_drift(model->get_nu()),
-        dtau_dx(model->get_nu(), model->get_state()->get_ndx()),
+        u_drift(model->get_state()->get_nv()),
+        dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
         tmp_xstatic(model->get_state()->get_nx()) {
     multibody.joint->dtau_du.diagonal().setOnes();
     costs->shareMemory(this);
