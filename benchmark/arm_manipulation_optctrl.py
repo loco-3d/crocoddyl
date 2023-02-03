@@ -29,11 +29,12 @@ def createProblem(model):
     # goal-tracking cost, state and control regularization; and one terminal-cost:
     # goal cost. First, let's create the common cost functions.
     state = crocoddyl.StateMultibody(robot_model)
-    Mref = crocoddyl.FramePlacement(robot_model.getFrameId("gripper_left_joint"),
-                                    pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]])))
-    goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref)
-    xRegCost = crocoddyl.CostModelState(state)
-    uRegCost = crocoddyl.CostModelControl(state)
+    goalTrackingCost = crocoddyl.CostModelResidual(
+        state,
+        crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("gripper_left_joint"),
+                                              pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]]))))
+    xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
+    uRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelControl(state))
 
     # Create a cost model per the running and terminal action model.
     runningCostModel = crocoddyl.CostModelSum(state)
