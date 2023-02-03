@@ -125,8 +125,8 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Make sure that when we finite difference the Cost Model, the user
    * does not face unknown behaviour because of the finite differencing of a
-   * quaternion around pi. This behaviour might occur if CostModelState and
-   * FloatingInContact differential model are used together.
+   * quaternion around pi. This behaviour might occur if state cost in and
+   * floating systems.
    *
    * For full discussions see issue
    * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139

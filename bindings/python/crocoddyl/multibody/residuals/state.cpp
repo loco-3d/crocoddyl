@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/costs/state.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {

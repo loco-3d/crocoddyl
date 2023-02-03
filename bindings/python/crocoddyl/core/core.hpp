@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +38,6 @@ void exposeResidualJointEffort();
 void exposeResidualJointAcceleration();
 void exposeCostSum();
 void exposeCostResidual();
-void exposeCostControl();
 void exposeConstraintAbstract();
 void exposeConstraintManager();
 void exposeConstraintResidual();
