@@ -223,9 +223,6 @@ class CostModelResidualTpl;
 template <typename Scalar>
 struct CostDataResidualTpl;
 
-template <typename Scalar>
-class CostModelControlTpl;
-
 // constraint
 template <typename Scalar>
 class ConstraintModelAbstractTpl;
@@ -380,7 +377,6 @@ typedef CostModelSumTpl<double> CostModelSum;
 typedef CostDataSumTpl<double> CostDataSum;
 typedef CostModelResidualTpl<double> CostModelResidual;
 typedef CostDataResidualTpl<double> CostDataResidual;
-DEPRECATED("Use ResidualModelControl with CostModelResidual", typedef CostModelControlTpl<double> CostModelControl;)
 
 typedef ConstraintModelAbstractTpl<double> ConstraintModelAbstract;
 typedef ConstraintDataAbstractTpl<double> ConstraintDataAbstract;

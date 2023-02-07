@@ -56,24 +56,6 @@ void exposeResidualImpulseCoM();
 void exposeResidualPairCollision();
 #endif
 
-void exposeCostState();
-void exposeCostCoMPosition();
-void exposeCostControlGrav();
-void exposeCostControlGravContact();
-void exposeCostCentroidalMomentum();
-void exposeCostFramePlacement();
-void exposeCostFrameTranslation();
-void exposeCostFrameRotation();
-void exposeCostFrameVelocity();
-void exposeCostContactForce();
-void exposeCostContactWrenchCone();
-void exposeCostContactCoPPosition();
-void exposeCostContactFrictionCone();
-void exposeCostContactImpulse();
-void exposeCostImpulseFrictionCone();
-void exposeCostImpulseWrenchCone();
-void exposeCostImpulseCoPPosition();
-void exposeCostImpulseCoM();
 void exposeContact1D();
 void exposeContact2D();
 void exposeContact3D();

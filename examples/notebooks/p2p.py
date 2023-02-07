@@ -34,8 +34,8 @@ for i, p in enumerate(ps):
 gv.refresh()
 
 # State and control regularization costs
-xRegCost = crocoddyl.CostModelState(state)
-uRegCost = crocoddyl.CostModelControl(state)
+xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
+uRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelControl(state))
 
 # Then let's added the running and terminal cost functions per each action
 # model
@@ -43,7 +43,8 @@ runningModels = []
 terminalModels = []
 for p in ps:
     # Create the tracking cost
-    goalTrackingCost = crocoddyl.CostModelFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), p)
+    goalTrackingCost = crocoddyl.CostModelResidual(
+        state, crocoddyl.ResidualFrameTranslation(state, robot_model.getFrameId("gripper_left_joint"), p))
 
     actuation = crocoddyl.ActuationModelFull(state)
 
