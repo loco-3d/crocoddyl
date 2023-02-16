@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <set>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/constraint-base.hpp"
