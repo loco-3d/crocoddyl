@@ -61,8 +61,7 @@ bool Stopwatch::performance_exists(string perf_name) { return (records_of->find(
 long double Stopwatch::take_time() {
   if (mode == CPU_TIME) {
     // Use ctime
-    return clock();
-
+    return (long double)clock();
   } else if (mode == REAL_TIME) {
     // Query operating system
 
@@ -88,9 +87,8 @@ long double Stopwatch::take_time() {
     gettimeofday(&tv, NULL);
 
     long double measure = tv.tv_usec;
-    measure /= 1000000.0;  // Convert to seconds
-    measure += tv.tv_sec;  // Add seconds part
-
+    measure /= 1000000.0;               // Convert to seconds
+    measure += (long double)tv.tv_sec;  // Add seconds part
     return measure;
 #endif
 
@@ -150,7 +148,7 @@ void Stopwatch::stop(const string& perf_name) {
 void Stopwatch::pause(const string& perf_name) {
   if (!active) return;
 
-  long double clock_end = clock();
+  long double clock_end = (long double)clock();
 
   // Try to recover performance data
   if (!performance_exists(perf_name)) throw StopwatchException("Performance not initialized.");
