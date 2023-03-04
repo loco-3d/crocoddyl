@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
@@ -182,7 +183,8 @@ void exposeDifferentialActionAbstract() {
                     "Jacobian of the equality constraint w.r.t. the state")
       .add_property("Hu", bp::make_getter(&DifferentialActionDataAbstract::Hu, bp::return_internal_reference<>()),
                     bp::make_setter(&DifferentialActionDataAbstract::Hu),
-                    "Jacobian of the equality constraint w.r.t. the control");
+                    "Jacobian of the equality constraint w.r.t. the control")
+      .def(CopyableVisitor<DifferentialActionDataAbstract>());
 }
 
 }  // namespace python

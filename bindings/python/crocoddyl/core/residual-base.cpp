@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/residual-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -118,7 +119,8 @@ void exposeResidualAbstract() {
       .add_property("Arr_Rx", bp::make_getter(&ResidualDataAbstract::Arr_Rx, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
       .add_property("Arr_Ru", bp::make_getter(&ResidualDataAbstract::Arr_Ru, bp::return_internal_reference<>()),
-                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)");
+                    "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
+      .def(CopyableVisitor<ResidualModelAbstract>());
 }
 
 }  // namespace python

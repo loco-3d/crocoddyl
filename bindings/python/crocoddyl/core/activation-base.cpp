@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -54,7 +56,8 @@ void exposeActivationAbstract() {
       .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
                     bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
       .add_property("Arr", &ActivationDataAbstract::getHessianMatrix, &ActivationDataAbstract::setHessianMatrix,
-                    "Hessian of the residual");
+                    "Hessian of the residual")
+      .def(CopyableVisitor<ActivationDataAbstract>());
 }
 
 }  // namespace python

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
 #include "python/crocoddyl/multibody/impulse-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -40,7 +41,8 @@ void exposeForceAbstract() {
       .def_readwrite("frame", &ForceDataAbstract::frame, "frame index of the contact frame")
       .def_readwrite("f", &ForceDataAbstract::f,
                      "external spatial force at the parent joint level. Note that we could compute the force at the "
-                     "contact frame by using jMf (i.e. data.jMf.actInv(data.f)");
+                     "contact frame by using jMf (i.e. data.jMf.actInv(data.f)")
+      .def(CopyableVisitor<ForceDataAbstract>());
 }
 
 }  // namespace python

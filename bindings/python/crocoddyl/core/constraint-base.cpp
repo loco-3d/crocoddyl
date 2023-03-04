@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/constraint-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -134,7 +135,8 @@ void exposeConstraintAbstract() {
       .add_property("Hx", bp::make_getter(&ConstraintDataAbstract::Hx, bp::return_internal_reference<>()),
                     bp::make_setter(&ConstraintDataAbstract::Hx), "Jacobian of the equality constraint")
       .add_property("Hu", bp::make_getter(&ConstraintDataAbstract::Hu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ConstraintDataAbstract::Hu), "Jacobian of the equality constraint");
+                    bp::make_setter(&ConstraintDataAbstract::Hu), "Jacobian of the equality constraint")
+      .def(CopyableVisitor<ConstraintDataAbstract>());
 }
 
 }  // namespace python

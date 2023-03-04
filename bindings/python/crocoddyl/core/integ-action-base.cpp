@@ -1,14 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                     University of Trento
+// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh,
+//                     University of Oxford, University of Trento,
+//                     Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -94,7 +96,8 @@ void exposeIntegratedActionAbstract() {
           bp::args("self", "model"),
           "Create common data shared between integrated-action models.\n\n"
           "The integrated-action data uses its model in order to first process it.\n"
-          ":param model: integrated-action model"));
+          ":param model: integrated-action model"))
+      .def(CopyableVisitor<IntegratedActionDataAbstract>());
 }
 
 }  // namespace python

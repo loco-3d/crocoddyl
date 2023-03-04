@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
@@ -158,8 +159,8 @@ void exposeActionAbstract() {
       .add_property("Hx", bp::make_getter(&ActionDataAbstract::Hx, bp::return_internal_reference<>()),
                     bp::make_setter(&ActionDataAbstract::Hx), "Jacobian of the equality constraint w.r.t. the state")
       .add_property("Hu", bp::make_getter(&ActionDataAbstract::Hu, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActionDataAbstract::Hu),
-                    "Jacobian of the equality constraint w.r.t. the control");
+                    bp::make_setter(&ActionDataAbstract::Hu), "Jacobian of the equality constraint w.r.t. the control")
+      .def(CopyableVisitor<ActionDataAbstract>());
 }
 
 }  // namespace python

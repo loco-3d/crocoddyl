@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -87,7 +89,8 @@ void exposeContactAbstract() {
       .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
       .add_property("da0_dx", bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration");
+                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
+      .def(CopyableVisitor<ContactDataAbstract>());
 }
 
 }  // namespace python

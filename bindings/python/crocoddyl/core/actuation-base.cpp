@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/actuation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -107,7 +108,8 @@ void exposeActuationAbstract() {
                     "torque transform from generalized torques to joint-torque input")
       .add_property("tau_set",
                     bp::make_getter(&ActuationDataAbstract::tau_set, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActuationDataAbstract::tau_set), "actuation set");
+                    bp::make_setter(&ActuationDataAbstract::tau_set), "actuation set")
+      .def(CopyableVisitor<ActuationDataAbstract>());
 }
 
 }  // namespace python
