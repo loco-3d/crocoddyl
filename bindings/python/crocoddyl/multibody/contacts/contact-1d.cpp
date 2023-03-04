@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 
 namespace crocoddyl {
@@ -68,7 +70,8 @@ void exposeContact1D() {
                     &ContactModel1D::set_reference, "reference contact translation")
       .add_property("gains",
                     bp::make_function(&ContactModel1D::get_gains, bp::return_value_policy<bp::return_by_value>()),
-                    "contact gains");
+                    "contact gains")
+      .def(CopyableVisitor<ContactModel1D>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactData1D> >();
 
@@ -94,7 +97,8 @@ void exposeContact1D() {
       .add_property("a_partial_da", bp::make_getter(&ContactData1D::a_partial_da, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration")
       .add_property("oRf", bp::make_getter(&ContactData1D::oRf, bp::return_internal_reference<>()),
-                    "Rotation matrix of the contact body expressed in the world frame");
+                    "Rotation matrix of the contact body expressed in the world frame")
+      .def(CopyableVisitor<ContactData1D>());
 }
 
 }  // namespace python

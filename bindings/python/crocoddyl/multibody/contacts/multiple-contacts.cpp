@@ -14,6 +14,7 @@
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -49,6 +50,7 @@ void exposeContactMultiple() {
       .add_property("contact", bp::make_getter(&ContactItem::contact, bp::return_value_policy<bp::return_by_value>()),
                     "contact model")
       .def_readwrite("active", &ContactItem::active, "contact status")
+      .def(CopyableVisitor<ContactItem>())
       .def(PrintableVisitor<ContactItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple>>();
@@ -142,6 +144,7 @@ void exposeContactMultiple() {
       .add_property("computeAllContacts", bp::make_function(&ContactModelMultiple::getComputeAllContacts),
                     bp::make_function(&ContactModelMultiple::setComputeAllContacts),
                     "type of contact computation (True for all contacts and False for active contacts)")
+      .def(CopyableVisitor<ContactModelMultiple>())
       .def(PrintableVisitor<ContactModelMultiple>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple>>();
@@ -174,7 +177,8 @@ void exposeContactMultiple() {
       .add_property("contacts",
                     bp::make_getter(&ContactDataMultiple::contacts, bp::return_value_policy<bp::return_by_value>()),
                     "stack of contacts data")
-      .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates");
+      .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates")
+      .def(CopyableVisitor<ContactDataMultiple>());
 
 #pragma GCC diagnostic pop
 }

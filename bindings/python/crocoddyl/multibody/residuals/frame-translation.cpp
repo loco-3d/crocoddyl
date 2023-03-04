@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -68,7 +69,8 @@ void exposeResidualFrameTranslation() {
       .add_property(
           "reference",
           bp::make_function(&ResidualModelFrameTranslation::get_reference, bp::return_internal_reference<>()),
-          &ResidualModelFrameTranslation::set_reference, "reference frame translation");
+          &ResidualModelFrameTranslation::set_reference, "reference frame translation")
+      .def(CopyableVisitor<ResidualModelFrameTranslation>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFrameTranslation> >();
 
@@ -83,7 +85,8 @@ void exposeResidualFrameTranslation() {
                     bp::make_getter(&ResidualDataFrameTranslation::pinocchio, bp::return_internal_reference<>()),
                     "pinocchio data")
       .add_property("fJf", bp::make_getter(&ResidualDataFrameTranslation::fJf, bp::return_internal_reference<>()),
-                    "local Jacobian of the frame");
+                    "local Jacobian of the frame")
+      .def(CopyableVisitor<ResidualDataFrameTranslation>());
 }
 
 }  // namespace python

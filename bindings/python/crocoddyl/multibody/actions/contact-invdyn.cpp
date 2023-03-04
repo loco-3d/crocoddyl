@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/actions/contact-invdyn.hpp"
 
 namespace crocoddyl {
@@ -81,7 +82,8 @@ void exposeDifferentialActionContactInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelContactInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "constraint model manager");
+                          "constraint model manager")
+            .def(CopyableVisitor<DifferentialActionModelContactInvDynamics>());
 
     bp::register_ptr_to_python<
         boost::shared_ptr<DifferentialActionModelContactInvDynamics::ResidualModelActuation> >();
@@ -127,7 +129,8 @@ void exposeDifferentialActionContactInvDynamics() {
              "Each residual model has its own data that needs to be allocated. This function\n"
              "returns the allocated data for the actuation residual.\n"
              ":param data: shared data\n"
-             ":return residual data.");
+             ":return residual data.")
+        .def(CopyableVisitor<DifferentialActionModelContactInvDynamics::ResidualModelActuation>());
 
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelContactInvDynamics::ResidualModelContact> >();
 
@@ -172,7 +175,8 @@ void exposeDifferentialActionContactInvDynamics() {
              "Each residual model has its own data that needs to be allocated. This function\n"
              "returns the allocated data for the contact-acceleration residual.\n"
              ":param data: shared data\n"
-             ":return residual data.");
+             ":return residual data.")
+        .def(CopyableVisitor<DifferentialActionModelContactInvDynamics::ResidualModelContact>());
   }
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactInvDynamics> >();
@@ -200,7 +204,8 @@ void exposeDifferentialActionContactInvDynamics() {
           .add_property("constraints",
                         bp::make_getter(&DifferentialActionDataContactInvDynamics::constraints,
                                         bp::return_value_policy<bp::return_by_value>()),
-                        "constraint data");
+                        "constraint data")
+          .def(CopyableVisitor<DifferentialActionDataContactInvDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactInvDynamics::ResidualDataActuation> >();
 
@@ -225,7 +230,8 @@ void exposeDifferentialActionContactInvDynamics() {
       .add_property("contact",
                     bp::make_getter(&DifferentialActionDataContactInvDynamics::ResidualDataContact::contact,
                                     bp::return_value_policy<bp::return_by_value>()),
-                    "contact data associated with the current residual");
+                    "contact data associated with the current residual")
+      .def(CopyableVisitor<DifferentialActionDataContactInvDynamics::ResidualDataContact>());
 }
 
 }  // namespace python

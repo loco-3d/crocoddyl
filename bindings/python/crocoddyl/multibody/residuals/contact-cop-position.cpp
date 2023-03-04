@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Duisburg-Essen, University of Edinburgh,
+// Copyright (C) 2020-2023, University of Duisburg-Essen, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -67,7 +68,8 @@ void exposeResidualContactCoPPosition() {
       .add_property(
           "reference",
           bp::make_function(&ResidualModelContactCoPPosition::get_reference, bp::return_internal_reference<>()),
-          &ResidualModelContactCoPPosition::set_reference, "reference support region of the CoP");
+          &ResidualModelContactCoPPosition::set_reference, "reference support region of the CoP")
+      .def(CopyableVisitor<ResidualModelContactCoPPosition>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataContactCoPPosition> >();
 
@@ -85,7 +87,8 @@ void exposeResidualContactCoPPosition() {
           "contact",
           bp::make_getter(&ResidualDataContactCoPPosition::contact, bp::return_value_policy<bp::return_by_value>()),
           bp::make_setter(&ResidualDataContactCoPPosition::contact),
-          "contact data associated with the current residual");
+          "contact data associated with the current residual")
+      .def(CopyableVisitor<ResidualDataContactCoPPosition>());
 }
 
 }  // namespace python

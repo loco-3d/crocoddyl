@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -63,7 +64,8 @@ void exposeResidualCoMPosition() {
            ":return residual data.")
       .add_property("reference",
                     bp::make_function(&ResidualModelCoMPosition::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelCoMPosition::set_reference, "reference CoM position");
+                    &ResidualModelCoMPosition::set_reference, "reference CoM position")
+      .def(CopyableVisitor<ResidualModelCoMPosition>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataCoMPosition> >();
 
@@ -76,7 +78,8 @@ void exposeResidualCoMPosition() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio",
                     bp::make_getter(&ResidualDataCoMPosition::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data");
+                    "pinocchio data")
+      .def(CopyableVisitor<ResidualDataCoMPosition>());
 }
 
 }  // namespace python

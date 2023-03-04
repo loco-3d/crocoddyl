@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -74,7 +75,8 @@ void exposeResidualContactFrictionCone() {
       .add_property(
           "reference",
           bp::make_function(&ResidualModelContactFrictionCone::get_reference, bp::return_internal_reference<>()),
-          &ResidualModelContactFrictionCone::set_reference, "reference contact friction cone");
+          &ResidualModelContactFrictionCone::set_reference, "reference contact friction cone")
+      .def(CopyableVisitor<ResidualModelContactFrictionCone>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataContactFrictionCone> >();
 
@@ -89,7 +91,8 @@ void exposeResidualContactFrictionCone() {
           "contact",
           bp::make_getter(&ResidualDataContactFrictionCone::contact, bp::return_value_policy<bp::return_by_value>()),
           bp::make_setter(&ResidualDataContactFrictionCone::contact),
-          "contact data associated with the current residual");
+          "contact data associated with the current residual")
+      .def(CopyableVisitor<ResidualDataContactFrictionCone>());
 }
 
 }  // namespace python

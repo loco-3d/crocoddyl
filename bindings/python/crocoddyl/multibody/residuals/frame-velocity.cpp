@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -72,7 +73,8 @@ void exposeResidualFrameVelocity() {
                     bp::make_function(&ResidualModelFrameVelocity::get_reference, bp::return_internal_reference<>()),
                     &ResidualModelFrameVelocity::set_reference, "reference velocity")
       .add_property("type", &ResidualModelFrameVelocity::get_type, &ResidualModelFrameVelocity::set_type,
-                    "reference type of velocity");
+                    "reference type of velocity")
+      .def(CopyableVisitor<ResidualModelFrameVelocity>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFrameVelocity> >();
 
@@ -85,7 +87,8 @@ void exposeResidualFrameVelocity() {
           ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("pinocchio",
                     bp::make_getter(&ResidualDataFrameVelocity::pinocchio, bp::return_internal_reference<>()),
-                    "pinocchio data");
+                    "pinocchio data")
+      .def(CopyableVisitor<ResidualDataFrameVelocity>());
 }
 
 }  // namespace python

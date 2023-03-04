@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -86,7 +88,8 @@ void exposeContact3D() {
                     "reference frame translation")
       .add_property("gains",
                     bp::make_function(&ContactModel3D::get_gains, bp::return_value_policy<bp::return_by_value>()),
-                    "contact gains");
+                    "contact gains")
+      .def(CopyableVisitor<ContactModel3D>());
 
 #pragma GCC diagnostic pop
 
@@ -114,7 +117,8 @@ void exposeContact3D() {
       .add_property("a_partial_da", bp::make_getter(&ContactData3D::a_partial_da, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration")
       .add_property("oRf", bp::make_getter(&ContactData3D::oRf, bp::return_internal_reference<>()),
-                    "Rotation matrix of the contact body expressed in the world frame");
+                    "Rotation matrix of the contact body expressed in the world frame")
+      .def(CopyableVisitor<ContactData3D>());
 }
 
 }  // namespace python

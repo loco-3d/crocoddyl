@@ -8,6 +8,7 @@
 
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -67,7 +68,8 @@ void exposeResidualState() {
           "calcDiff", &ResidualModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .add_property("reference",
                     bp::make_function(&ResidualModelState::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelState::set_reference, "reference state");
+                    &ResidualModelState::set_reference, "reference state")
+      .def(CopyableVisitor<ResidualModelState>());
 }
 
 }  // namespace python

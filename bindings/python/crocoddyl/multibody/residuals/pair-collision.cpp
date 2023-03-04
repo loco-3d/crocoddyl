@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, LAAS-CNRS, INRIA
+// Copyright (C) 2021-2023, University of Edinburgh, LAAS-CNRS, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
 
 namespace crocoddyl {
@@ -55,7 +57,8 @@ void exposeResidualPairCollision() {
            bp::args("self", "data"),
            "Create the pair collision residual data.\n\n"
            ":param data: shared data\n"
-           ":return residual data.");
+           ":return residual data.")
+      .def(CopyableVisitor<ResidualModelPairCollision>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataPairCollision> >();
 
@@ -75,7 +78,8 @@ void exposeResidualPairCollision() {
       .add_property("J", bp::make_getter(&ResidualDataPairCollision::J, bp::return_internal_reference<>()),
                     "Jacobian of the collision joint")
       .add_property("d", bp::make_getter(&ResidualDataPairCollision::d, bp::return_internal_reference<>()),
-                    "vector from joint to collision point in world frame");
+                    "vector from joint to collision point in world frame")
+      .def(CopyableVisitor<ResidualDataPairCollision>());
 }
 
 }  // namespace python

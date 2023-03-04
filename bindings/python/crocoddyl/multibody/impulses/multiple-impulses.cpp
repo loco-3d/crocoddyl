@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,8 +16,9 @@
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -47,6 +49,7 @@ void exposeImpulseMultiple() {
       .add_property("impulse", bp::make_getter(&ImpulseItem::impulse, bp::return_value_policy<bp::return_by_value>()),
                     "impulse model")
       .def_readwrite("active", &ImpulseItem::active, "impulse status")
+      .def(CopyableVisitor<ImpulseItem>())
       .def(PrintableVisitor<ImpulseItem>());
   ;
 
@@ -139,6 +142,7 @@ void exposeImpulseMultiple() {
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
            ":param name: impulse name")
+      .def(CopyableVisitor<ImpulseModelMultiple>())
       .def(PrintableVisitor<ImpulseModelMultiple>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple>>();
@@ -162,7 +166,8 @@ void exposeImpulseMultiple() {
       .add_property("impulses",
                     bp::make_getter(&ImpulseDataMultiple::impulses, bp::return_value_policy<bp::return_by_value>()),
                     "stack of impulses data")
-      .def_readwrite("fext", &ImpulseDataMultiple::fext, "external spatial forces");
+      .def_readwrite("fext", &ImpulseDataMultiple::fext, "external spatial forces")
+      .def(CopyableVisitor<ImpulseDataMultiple>());
 }
 
 }  // namespace python

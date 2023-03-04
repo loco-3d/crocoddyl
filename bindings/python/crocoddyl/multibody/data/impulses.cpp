@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 
 namespace crocoddyl {
@@ -20,7 +21,8 @@ void exposeDataCollectorImpulses() {
                                                         ":param impulses: impulses data"))
       .add_property("impulses",
                     bp::make_getter(&DataCollectorImpulse::impulses, bp::return_value_policy<bp::return_by_value>()),
-                    "impulses data");
+                    "impulses data")
+      .def(CopyableVisitor<DataCollectorImpulse>());
 
   bp::class_<DataCollectorMultibodyInImpulse, bp::bases<DataCollectorMultibody, DataCollectorImpulse> >(
       "DataCollectorMultibodyInImpulse", "Data collector for multibody systems in impulse.\n\n",
@@ -28,7 +30,8 @@ void exposeDataCollectorImpulses() {
           bp::args("self", "pinocchio", "impulses"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"
-          ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2>()]);
+          ":param impulses: impulses data")[bp::with_custodian_and_ward<1, 2>()])
+      .def(CopyableVisitor<DataCollectorMultibodyInImpulse>());
 }
 
 }  // namespace python

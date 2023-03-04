@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, CTU, INRIA, University of Oxford
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -111,7 +113,8 @@ void exposeDifferentialActionContactFwdDynamics() {
       .add_property("JMinvJt_damping",
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::get_damping_factor),
                     bp::make_function(&DifferentialActionModelContactFwdDynamics::set_damping_factor),
-                    "Damping factor for cholesky decomposition of JMinvJt");
+                    "Damping factor for cholesky decomposition of JMinvJt")
+      .def(CopyableVisitor<DifferentialActionModelContactFwdDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
 
@@ -146,7 +149,8 @@ void exposeDifferentialActionContactFwdDynamics() {
       .add_property(
           "df_du",
           bp::make_getter(&DifferentialActionDataContactFwdDynamics::df_du, bp::return_internal_reference<>()),
-          "Jacobian of the contact force");
+          "Jacobian of the contact force")
+      .def(CopyableVisitor<DifferentialActionDataContactFwdDynamics>());
 }
 
 }  // namespace python

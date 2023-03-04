@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -57,7 +59,8 @@ void exposeResidualControlGrav() {
            "function\n"
            "returns the allocated data for the control gravity residual.\n"
            ":param data: shared data\n"
-           ":return residual data.");
+           ":return residual data.")
+      .def(CopyableVisitor<ResidualModelControlGrav>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataControlGrav> >();
 
@@ -72,7 +75,8 @@ void exposeResidualControlGrav() {
                     "Pinocchio data used for internal computations")
       .add_property("actuation",
                     bp::make_getter(&ResidualDataControlGrav::actuation, bp::return_internal_reference<>()),
-                    "actuation model");
+                    "actuation model")
+      .def(CopyableVisitor<ResidualDataControlGrav>());
 }
 
 }  // namespace python

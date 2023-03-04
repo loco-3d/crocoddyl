@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -67,7 +68,8 @@ void exposeResidualCentroidalMomentum() {
       .add_property(
           "reference",
           bp::make_function(&ResidualModelCentroidalMomentum::get_reference, bp::return_internal_reference<>()),
-          &ResidualModelCentroidalMomentum::set_reference, "reference centroidal momentum");
+          &ResidualModelCentroidalMomentum::set_reference, "reference centroidal momentum")
+      .def(CopyableVisitor<ResidualModelCentroidalMomentum>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataCentroidalMomentum> >();
 
@@ -86,7 +88,8 @@ void exposeResidualCentroidalMomentum() {
                     "Jacobian of the centroidal momentum")
       .add_property("dhd_dv",
                     bp::make_getter(&ResidualDataCentroidalMomentum::dhd_dv, bp::return_internal_reference<>()),
-                    "Jacobian of the centroidal momentum");
+                    "Jacobian of the centroidal momentum")
+      .def(CopyableVisitor<ResidualDataCentroidalMomentum>());
 }
 
 }  // namespace python
