@@ -1,14 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC,
-//                          University of Trento
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/integrator/rk4.hpp"
 
 #pragma GCC diagnostic push
@@ -70,7 +71,8 @@ void exposeIntegratedActionRK4() {
       .def<void (IntegratedActionModelRK4::*)(const boost::shared_ptr<ActionDataAbstract>&,
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
-      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.");
+      .def("createData", &IntegratedActionModelRK4::createData, bp::args("self"), "Create the RK4 integrator data.")
+      .def(CopyableVisitor<IntegratedActionModelRK4>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 
@@ -136,7 +138,8 @@ void exposeIntegratedActionRK4() {
       .add_property("ddli_dwdu",
                     bp::make_getter(&IntegratedActionDataRK4::ddli_dwdu, bp::return_internal_reference<>()),
                     "list of second partial derivatives of the cost with respect to the control parameters and "
-                    "inputs control of the RK4 integration. ddli_dxdu");
+                    "inputs control of the RK4 integration. ddli_dxdu")
+      .def(CopyableVisitor<IntegratedActionDataRK4>());
 }
 
 }  // namespace python

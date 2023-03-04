@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/activations/smooth-1norm.hpp"
 
 namespace crocoddyl {
@@ -36,7 +38,8 @@ void exposeActivationSmooth1Norm() {
            ":param data: activation data\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelSmooth1Norm::createData, bp::args("self"),
-           "Create the smooth-abs activation data.\n\n");
+           "Create the smooth-abs activation data.\n\n")
+      .def(CopyableVisitor<ActivationModelSmooth1Norm>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataSmooth1Norm> >();
 
@@ -46,7 +49,8 @@ void exposeActivationSmooth1Norm() {
                                             "Create smooth-abs activation data.\n\n"
                                             ":param model: smooth-abs activation model"))
       .add_property("a", bp::make_getter(&ActivationDataSmooth1Norm::a, bp::return_internal_reference<>()),
-                    "sqrt{eps + ||ri||^2} value");
+                    "sqrt{eps + ||ri||^2} value")
+      .def(CopyableVisitor<ActivationDataSmooth1Norm>());
 }
 
 }  // namespace python

@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
 
 namespace crocoddyl {
@@ -38,7 +40,8 @@ void exposeActivationWeightedQuad() {
            "Create the weighted quadratic action data.")
       .add_property("weights",
                     bp::make_function(&ActivationModelWeightedQuad::get_weights, bp::return_internal_reference<>()),
-                    &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term");
+                    &ActivationModelWeightedQuad::set_weights, "weights of the quadratic term")
+      .def(CopyableVisitor<ActivationModelWeightedQuad>());
 }
 
 }  // namespace python

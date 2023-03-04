@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/actions/unicycle.hpp"
 
 namespace crocoddyl {
@@ -60,7 +62,8 @@ void exposeActionUnicycle() {
                     bp::make_function(&ActionModelUnicycle::set_dt), "integration time")
       .add_property("costWeights",
                     bp::make_function(&ActionModelUnicycle::get_cost_weights, bp::return_internal_reference<>()),
-                    bp::make_function(&ActionModelUnicycle::set_cost_weights), "cost weights");
+                    bp::make_function(&ActionModelUnicycle::set_cost_weights), "cost weights")
+      .def(CopyableVisitor<ActionModelUnicycle>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataUnicycle> >();
 
@@ -71,7 +74,8 @@ void exposeActionUnicycle() {
       "for the computation of calc and calcDiff.",
       bp::init<ActionModelUnicycle*>(bp::args("self", "model"),
                                      "Create unicycle data.\n\n"
-                                     ":param model: unicycle action model"));
+                                     ":param model: unicycle action model"))
+      .def(CopyableVisitor<ActionDataUnicycle>());
 }
 
 }  // namespace python

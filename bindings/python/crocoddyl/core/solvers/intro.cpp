@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/intro.hpp"
 
 namespace crocoddyl {
@@ -88,7 +89,8 @@ void exposeSolverIntro() {
       .add_property("Ks", make_function(&SolverIntro::get_Ks, bp::return_value_policy<bp::copy_const_reference>()),
                     "Ks")
       .add_property("ks", make_function(&SolverIntro::get_ks, bp::return_value_policy<bp::copy_const_reference>()),
-                    "ks");
+                    "ks")
+      .def(CopyableVisitor<SolverIntro>());
 }
 
 }  // namespace python

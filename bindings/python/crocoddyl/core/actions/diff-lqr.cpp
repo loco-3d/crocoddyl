@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/actions/diff-lqr.hpp"
 
 namespace crocoddyl {
@@ -83,7 +85,8 @@ void exposeDifferentialActionLQR() {
       .add_property(
           "Luu",
           bp::make_function(&DifferentialActionModelLQR::get_Luu, bp::return_value_policy<bp::return_by_value>()),
-          &DifferentialActionModelLQR::set_Luu, "Hessian of the cost");
+          &DifferentialActionModelLQR::set_Luu, "Hessian of the cost")
+      .def(CopyableVisitor<DifferentialActionModelLQR>());
 
   boost::python::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataLQR> >();
 
@@ -91,7 +94,8 @@ void exposeDifferentialActionLQR() {
       "DifferentialActionDataLQR", "Action data for the differential LQR system.",
       bp::init<DifferentialActionModelLQR*>(bp::args("self", "model"),
                                             "Create differential LQR data.\n\n"
-                                            ":param model: differential LQR action model"));
+                                            ":param model: differential LQR action model"))
+      .def(CopyableVisitor<DifferentialActionDataLQR>());
 }
 
 }  // namespace python

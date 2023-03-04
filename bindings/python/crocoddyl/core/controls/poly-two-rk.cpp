@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2023, University of Edinburgh, University of Trento
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/control-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/controls/poly-two-rk.hpp"
 
 namespace crocoddyl {
@@ -74,7 +76,8 @@ void exposeControlParametrizationPolyTwoRK() {
           ":param data: poly-two-rk data\n"
           ":param A: matrix to multiply (dim control.nw x na)\n"
           ":return Product between the partial derivative of the control (transposed) and A (dim control.nu x "
-          "na)");
+          "na)")
+      .def(CopyableVisitor<ControlParametrizationModelPolyTwoRK>());
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataPolyTwoRK> >();
 
@@ -84,7 +87,8 @@ void exposeControlParametrizationPolyTwoRK() {
                                                       "Create control-parametrization data.\n\n"
                                                       ":param model: second-order polynomial control model"))
       .add_property("c", bp::make_getter(&ControlParametrizationDataPolyTwoRK::c, bp::return_internal_reference<>()),
-                    "polynomial coefficients of the second-order control model");
+                    "polynomial coefficients of the second-order control model")
+      .def(CopyableVisitor<ControlParametrizationDataPolyTwoRK>());
 }
 
 }  // namespace python

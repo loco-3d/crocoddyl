@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 
 namespace crocoddyl {
@@ -73,7 +75,8 @@ void exposeActionLQR() {
       .add_property("Lxu", bp::make_function(&ActionModelLQR::get_Lxu, bp::return_internal_reference<>()),
                     &ActionModelLQR::set_Lxu, "Hessian of the cost")
       .add_property("Luu", bp::make_function(&ActionModelLQR::get_Luu, bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Luu, "Hessian of the cost");
+                    &ActionModelLQR::set_Luu, "Hessian of the cost")
+      .def(CopyableVisitor<ActionModelLQR>());
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ActionDataLQR> >();
 
@@ -81,7 +84,8 @@ void exposeActionLQR() {
       "ActionDataLQR", "Action data for the LQR system.",
       bp::init<ActionModelLQR*>(bp::args("self", "model"),
                                 "Create LQR data.\n\n"
-                                ":param model: LQR action model"));
+                                ":param model: LQR action model"))
+      .def(CopyableVisitor<ActionDataLQR>());
 }
 
 }  // namespace python

@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 #include "crocoddyl/core/activations/quadratic-flat-log.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
@@ -38,7 +40,8 @@ void exposeActivationQuadFlatLog() {
       .def("createData", &ActivationModelQuadFlatLog::createData, bp::args("self"),
            "Create the quadratic flat activation data.\n")
       .add_property("alpha", bp::make_function(&ActivationModelQuadFlatLog::get_alpha),
-                    bp::make_function(&ActivationModelQuadFlatLog::set_alpha), "alpha");
+                    bp::make_function(&ActivationModelQuadFlatLog::set_alpha), "alpha")
+      .def(CopyableVisitor<ActivationModelQuadFlatLog>());
 }
 
 }  // namespace python

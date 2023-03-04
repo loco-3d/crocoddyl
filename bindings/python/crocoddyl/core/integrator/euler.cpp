@@ -1,14 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford,
-//                          University of Trento
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, University of Oxford,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 
 namespace crocoddyl {
@@ -64,7 +65,8 @@ void exposeIntegratedActionEuler() {
                                                 const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelEuler::createData, bp::args("self"),
-           "Create the Euler integrator data.");
+           "Create the Euler integrator data.")
+      .def(CopyableVisitor<IntegratedActionModelEuler>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
 
@@ -84,7 +86,8 @@ void exposeIntegratedActionEuler() {
       .add_property("dx", bp::make_getter(&IntegratedActionDataEuler::dx, bp::return_internal_reference<>()),
                     "state rate.")
       .add_property("Lwu", bp::make_getter(&IntegratedActionDataEuler::Lwu, bp::return_internal_reference<>()),
-                    "Hessian of the cost wrt the differential control (w) and the control parameters (u).");
+                    "Hessian of the cost wrt the differential control (w) and the control parameters (u).")
+      .def(CopyableVisitor<IntegratedActionDataEuler>());
 }
 
 }  // namespace python

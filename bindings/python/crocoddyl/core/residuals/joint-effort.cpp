@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/residuals/joint-effort.hpp"
 
 namespace crocoddyl {
@@ -82,7 +83,8 @@ void exposeResidualJointEffort() {
            ":return residual data.")
       .add_property("reference",
                     bp::make_function(&ResidualModelJointEffort::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelJointEffort::set_reference, "reference joint effort");
+                    &ResidualModelJointEffort::set_reference, "reference joint effort")
+      .def(CopyableVisitor<ResidualModelJointEffort>());
 }
 
 }  // namespace python

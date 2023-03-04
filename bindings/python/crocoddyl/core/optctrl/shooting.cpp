@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
@@ -122,6 +124,7 @@ void exposeShootingProblem() {
                     "dimension of the maximum control vector")
       .add_property("is_updated", bp::make_function(&ShootingProblem::is_updated),
                     "Returns True if the shooting problem has been updated, otherwise False")
+      .def(CopyableVisitor<ShootingProblem>())
       .def(PrintableVisitor<ShootingProblem>());
 
 #pragma GCC diagnostic pop

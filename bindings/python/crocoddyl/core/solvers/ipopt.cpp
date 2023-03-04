@@ -1,6 +1,7 @@
 #ifdef CROCODDYL_WITH_IPOPT
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/ipopt.hpp"
 
 namespace crocoddyl {
@@ -34,7 +35,8 @@ void exposeSolverIpopt() {
       .def("setNumericIpoptOption", &SolverIpopt::setNumericIpoptOption, bp::args("self", "param_name", "param_value"),
            "Sets a numeric option for IPOPT\n\n")
       .add_property("th_stop", bp::make_function(&SolverIpopt::get_th_stop),
-                    bp::make_function(&SolverIpopt::set_th_stop), "threshold for stopping criteria");
+                    bp::make_function(&SolverIpopt::set_th_stop), "threshold for stopping criteria")
+      .def(CopyableVisitor<SolverIpopt>());
 }
 
 }  // namespace python

@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {
@@ -69,7 +70,8 @@ void exposeConstraintResidual() {
            "Each constraint model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined constraint.\n"
            ":param data: shared data\n"
-           ":return constraint data.");
+           ":return constraint data.")
+      .def(CopyableVisitor<ConstraintModelResidual>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataResidual> >();
 
@@ -79,7 +81,8 @@ void exposeConstraintResidual() {
           bp::args("self", "model", "data"),
           "Create residual constraint data.\n\n"
           ":param model: residual constraint model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .def(CopyableVisitor<ConstraintDataResidual>());
 }
 
 }  // namespace python

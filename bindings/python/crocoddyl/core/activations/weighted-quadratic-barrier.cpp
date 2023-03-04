@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -49,7 +50,8 @@ void exposeActivationWeightedQuadraticBarrier() {
       .add_property(
           "weights",
           bp::make_function(&ActivationModelWeightedQuadraticBarrier::get_weights, bp::return_internal_reference<>()),
-          bp::make_function(&ActivationModelWeightedQuadraticBarrier::set_weights), "vector of weights");
+          bp::make_function(&ActivationModelWeightedQuadraticBarrier::set_weights), "vector of weights")
+      .def(CopyableVisitor<ActivationModelWeightedQuadraticBarrier>());
 }
 
 }  // namespace python

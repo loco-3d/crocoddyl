@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -14,6 +14,7 @@
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
@@ -47,6 +48,7 @@ void exposeCostSum() {
                     "cost model")
       .def_readwrite("weight", &CostItem::weight, "cost weight")
       .def_readwrite("active", &CostItem::active, "cost status")
+      .def(CopyableVisitor<CostItem>())
       .def(PrintableVisitor<CostItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostModelSum>>();
@@ -143,6 +145,7 @@ void exposeCostSum() {
       .def("getCostStatus", &CostModelSum::getCostStatus, bp::args("self", "name"),
            "Return the cost status of a given cost name.\n\n"
            ":param name: cost name")
+      .def(CopyableVisitor<CostModelSum>())
       .def(PrintableVisitor<CostModelSum>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataSum>>();
@@ -173,7 +176,8 @@ void exposeCostSum() {
       .add_property("Lxu", bp::make_function(&CostDataSum::get_Lxu, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&CostDataSum::set_Lxu), "Hessian of the cost")
       .add_property("Luu", bp::make_function(&CostDataSum::get_Luu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&CostDataSum::set_Luu), "Hessian of the cost");
+                    bp::make_function(&CostDataSum::set_Luu), "Hessian of the cost")
+      .def(CopyableVisitor<CostDataSum>());
 }
 
 }  // namespace python
