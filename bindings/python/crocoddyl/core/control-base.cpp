@@ -85,7 +85,8 @@ void exposeControlParametrizationAbstract() {
       .add_property("nw", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nw),
                     "dimension of control inputs")
       .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu),
-                    "dimension of the control parameters");
+                    "dimension of the control parameters")
+      .def(CopyableVisitor<ControlParametrizationModelAbstract_wrap>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataAbstract> >();
 

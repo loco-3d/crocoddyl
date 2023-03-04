@@ -108,6 +108,7 @@ void exposeConstraintAbstract() {
       .add_property("nu", bp::make_function(&ConstraintModelAbstract_wrap::get_nu), "dimension of control vector")
       .add_property("ng", bp::make_function(&ConstraintModelAbstract_wrap::get_ng), "number of inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelAbstract_wrap::get_nh), "number of equality constraints")
+      .def(CopyableVisitor<ConstraintModelAbstract_wrap>())
       .def(PrintableVisitor<ConstraintModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();

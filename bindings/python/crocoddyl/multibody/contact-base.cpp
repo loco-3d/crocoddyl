@@ -73,6 +73,7 @@ void exposeContactAbstract() {
       .add_property("nc", bp::make_function(&ContactModelAbstract_wrap::get_nc), "dimension of contact")
       .add_property("nu", bp::make_function(&ContactModelAbstract_wrap::get_nu), "dimension of control")
       .add_property("id", &ContactModelAbstract_wrap::get_id, &ContactModelAbstract_wrap::set_id, "reference frame id")
+      .def(CopyableVisitor<ContactModelAbstract_wrap>())
       .def(PrintableVisitor<ContactModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ContactDataAbstract> >();

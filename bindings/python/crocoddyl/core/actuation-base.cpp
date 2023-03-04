@@ -80,7 +80,8 @@ void exposeActuationAbstract() {
       .add_property(
           "state",
           bp::make_function(&ActuationModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
-          "state");
+          "state")
+      .def(CopyableVisitor<ActuationModelAbstract_wrap>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActuationDataAbstract> >();
 

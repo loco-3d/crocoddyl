@@ -128,6 +128,7 @@ void exposeDifferentialActionAbstract() {
                     bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_ub,
                                       bp::return_value_policy<bp::return_by_value>()),
                     &DifferentialActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .def(CopyableVisitor<DifferentialActionModelAbstract_wrap>())
       .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataAbstract> >();

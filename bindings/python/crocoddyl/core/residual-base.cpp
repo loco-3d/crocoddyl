@@ -93,6 +93,7 @@ void exposeResidualAbstract() {
                     "flag that indicates if the residual function depends on v")
       .add_property("u_dependent", bp::make_function(&ResidualModelAbstract_wrap::get_u_dependent),
                     "flag that indicates if the residual function depends on u")
+      .def(CopyableVisitor<ResidualModelAbstract_wrap>())
       .def(PrintableVisitor<ResidualModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();

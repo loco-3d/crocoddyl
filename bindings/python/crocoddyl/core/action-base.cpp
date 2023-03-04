@@ -112,6 +112,7 @@ void exposeActionAbstract() {
                     &ActionModelAbstract_wrap::set_u_lb, "lower control limits")
       .add_property("u_ub", bp::make_function(&ActionModelAbstract_wrap::get_u_ub, bp::return_internal_reference<>()),
                     &ActionModelAbstract_wrap::set_u_ub, "upper control limits")
+      .def(CopyableVisitor<ActionModelAbstract_wrap>())
       .def(PrintableVisitor<ActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();

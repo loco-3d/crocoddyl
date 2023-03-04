@@ -40,6 +40,7 @@ void exposeActivationAbstract() {
            bp::args("self"), "Create the activation data.\n\n")
       .add_property("nr", bp::make_function(&ActivationModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
+      .def(CopyableVisitor<ActivationModelAbstract_wrap>())
       .def(PrintableVisitor<ActivationModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,6 +10,7 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -143,7 +144,8 @@ void exposeSolverAbstract() {
                      "feasibility of the equality constraint for the current guess")
       .add_property("feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
                     bp::make_function(&SolverAbstract_wrap::set_feasnorm),
-                    "norm used to compute the dynamic and constraints feasibility");
+                    "norm used to compute the dynamic and constraints feasibility")
+      .def(CopyableVisitor<SolverAbstract_wrap>());
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
       "CallbackAbstract",
@@ -152,7 +154,8 @@ void exposeSolverAbstract() {
       "For instance, it can be used to print values, record data or display motions")
       .def("__call__", pure_virtual(&CallbackAbstract_wrap::operator()), bp::args("self", "solver"),
            "Run the callback function given a solver.\n\n"
-           ":param solver: solver to be diagnostic");
+           ":param solver: solver to be diagnostic")
+      .def(CopyableVisitor<CallbackAbstract_wrap>());
 }
 
 }  // namespace python
