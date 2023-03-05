@@ -121,7 +121,7 @@ void exposeResidualAbstract() {
                     "Intermediate product of Arr (2nd deriv of Activation) with Rx (deriv of residue)")
       .add_property("Arr_Ru", bp::make_getter(&ResidualDataAbstract::Arr_Ru, bp::return_internal_reference<>()),
                     "Intermediate product of Arr (2nd deriv of Activation) with Ru (deriv of residue)")
-      .def(CopyableVisitor<ResidualModelAbstract>());
+      .def(CopyableVisitor<ResidualDataAbstract>());
 }
 
 }  // namespace python

@@ -8,6 +8,7 @@ SET(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
   contacts
   impulses
   squashing
+  copy
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})

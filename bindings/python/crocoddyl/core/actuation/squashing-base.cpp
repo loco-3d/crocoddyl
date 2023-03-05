@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/actuation/squashing-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -48,7 +50,8 @@ void exposeSquashingAbstract() {
           "s_ub",
           bp::make_function(&SquashingModelAbstract_wrap::get_s_ub, bp::return_value_policy<bp::return_by_value>()),
           bp::make_function(&SquashingModelAbstract_wrap::set_s_ub),
-          "upper bound for the active zone of the squashing function");
+          "upper bound for the active zone of the squashing function")
+      .def(CopyableVisitor<SquashingModelAbstract_wrap>());
 
   bp::register_ptr_to_python<boost::shared_ptr<SquashingDataAbstract> >();
 
@@ -65,7 +68,8 @@ void exposeSquashingAbstract() {
       .add_property("u", bp::make_getter(&SquashingDataAbstract::u, bp::return_internal_reference<>()),
                     bp::make_setter(&SquashingDataAbstract::u), "squashing-output")
       .add_property("du_ds", bp::make_getter(&SquashingDataAbstract::du_ds, bp::return_internal_reference<>()),
-                    bp::make_setter(&SquashingDataAbstract::du_ds), "Jacobian of the squashing function");
+                    bp::make_setter(&SquashingDataAbstract::du_ds), "Jacobian of the squashing function")
+      .def(CopyableVisitor<SquashingDataAbstract>());
 }
 
 }  // namespace python
