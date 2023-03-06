@@ -290,17 +290,18 @@ class ProblemAndSolversTest(CopyModelTestCase):
         MODEL.append(crocoddyl.SolverIpopt(problem))
 
 
-# test to be run
-test_classes_to_run = [
-    ActionsTest, StatesTest, ResidualsTest, ActivationsTest, CostsTest, ConstraintsTest, ControlsTest,
-    DataCollectorsTest, ActuationsTest, ContactsTest, ConesTest, ProblemAndSolversTest
-]
-loader = unittest.TestLoader()
-suites_list = []
-for test_class in test_classes_to_run:
-    suite = loader.loadTestsFromTestCase(test_class)
-    suites_list.append(suite)
-big_suite = unittest.TestSuite(suites_list)
-runner = unittest.TextTestRunner()
-results = runner.run(big_suite)
-sys.exit(not results.wasSuccessful())
+if __name__ == '__main__':
+    # test to be run
+    test_classes_to_run = [
+        ActionsTest, StatesTest, ResidualsTest, ActivationsTest, CostsTest, ConstraintsTest, ControlsTest,
+        DataCollectorsTest, ActuationsTest, ContactsTest, ConesTest, ProblemAndSolversTest
+    ]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

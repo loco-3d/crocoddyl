@@ -89,14 +89,15 @@ class TalosArmShootingTest(ShootingProblemTestCase):
     MODEL_DER = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL_DER, 1e-3)
 
 
-# test to be run
-test_classes_to_run = [UnicycleShootingTest, TalosArmShootingTest]
-loader = unittest.TestLoader()
-suites_list = []
-for test_class in test_classes_to_run:
-    suite = loader.loadTestsFromTestCase(test_class)
-    suites_list.append(suite)
-big_suite = unittest.TestSuite(suites_list)
-runner = unittest.TextTestRunner()
-results = runner.run(big_suite)
-sys.exit(not results.wasSuccessful())
+if __name__ == '__main__':
+    # test to be run
+    test_classes_to_run = [UnicycleShootingTest, TalosArmShootingTest]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())

@@ -196,25 +196,26 @@ class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
     MODEL_DER = IntegratedActionModelRK4Derived(DIFFERENTIAL, 1e-3)
 
 
-# test to be run
-test_classes_to_run = [
-    UnicycleTest,
-    LQRTest,
-    DifferentialLQRTest,
-    TalosArmFreeFwdDynamicsTest,
-    TalosArmFreeFwdDynamicsWithArmatureTest,
-    AnymalFreeFwdDynamicsTest,
-    AnymalIntegratedEulerTest,
-    AnymalIntegratedRK4Test,
-    TalosArmIntegratedRK4Test,
-    TalosArmIntegratedEulerTest,
-]
-loader = unittest.TestLoader()
-suites_list = []
-for test_class in test_classes_to_run:
-    suite = loader.loadTestsFromTestCase(test_class)
-    suites_list.append(suite)
-big_suite = unittest.TestSuite(suites_list)
-runner = unittest.TextTestRunner()
-results = runner.run(big_suite)
-sys.exit(not results.wasSuccessful())
+if __name__ == '__main__':
+    # test to be run
+    test_classes_to_run = [
+        UnicycleTest,
+        LQRTest,
+        DifferentialLQRTest,
+        TalosArmFreeFwdDynamicsTest,
+        TalosArmFreeFwdDynamicsWithArmatureTest,
+        AnymalFreeFwdDynamicsTest,
+        AnymalIntegratedEulerTest,
+        AnymalIntegratedRK4Test,
+        TalosArmIntegratedRK4Test,
+        TalosArmIntegratedEulerTest,
+    ]
+    loader = unittest.TestLoader()
+    suites_list = []
+    for test_class in test_classes_to_run:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+    big_suite = unittest.TestSuite(suites_list)
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)
+    sys.exit(not results.wasSuccessful())
