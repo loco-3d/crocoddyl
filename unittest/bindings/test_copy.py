@@ -13,23 +13,23 @@ class CopyModelTestCase(unittest.TestCase):
 
     def test_copy(self):
         for i, m in enumerate(self.MODEL):
-            model = copy.copy(m)
+            copy.copy(m)
             if self.DATA:
                 if not self.COLLECTOR:
                     d = m.createData()
                 else:
                     d = m.createData(self.COLLECTOR[i])
-                data = copy.copy(d)
+                copy.copy(d)
 
     def test_deepcopy(self):
         for i, m in enumerate(self.MODEL):
-            model = copy.deepcopy(m)
+            copy.deepcopy(m)
             if self.DATA:
                 if not self.COLLECTOR:
                     d = m.createData()
                 else:
                     d = m.createData(self.COLLECTOR[i])
-                data = copy.deepcopy(d)
+                copy.deepcopy(d)
 
 
 class ActionsTest(CopyModelTestCase):
