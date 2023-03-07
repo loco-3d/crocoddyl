@@ -162,6 +162,7 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [Contact3DTest, Contact3DMultipleTest, Contact6DTest, Contact6DMultipleTest]
     loader = unittest.TestLoader()
     suites_list = []

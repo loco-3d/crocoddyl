@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/actuation/actuation-squashing.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -55,7 +57,8 @@ void exposeActuationSquashing() {
       .add_property(
           "actuation",
           bp::make_function(&ActuationSquashingModel::get_actuation, bp::return_value_policy<bp::return_by_value>()),
-          "actuation");
+          "actuation")
+      .def(CopyableVisitor<ActuationSquashingModel>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActuationSquashingData> >();
 
@@ -76,7 +79,8 @@ void exposeActuationSquashing() {
       .add_property(
           "actuation",
           bp::make_getter(&ActuationSquashingData::actuation, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ActuationSquashingData::actuation), "Data of the associated actuation model");
+          bp::make_setter(&ActuationSquashingData::actuation), "Data of the associated actuation model")
+      .def(CopyableVisitor<ActuationSquashingData>());
 }
 
 }  // namespace python

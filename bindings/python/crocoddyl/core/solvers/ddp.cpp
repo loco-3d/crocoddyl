@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -147,7 +148,8 @@ void exposeSolverDDP() {
                     "threshold for accepting a gap as non-zero")
       .add_property("alphas",
                     bp::make_function(&SolverDDP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values");
+                    bp::make_function(&SolverDDP::set_alphas), "list of step length (alpha) values")
+      .def(CopyableVisitor<SolverDDP>());
 }
 
 }  // namespace python

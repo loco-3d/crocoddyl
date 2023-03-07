@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -56,7 +58,8 @@ void exposeResidualContactControlGrav() {
            "Each residual model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined residual.\n"
            ":param data: shared data\n"
-           ":return residual data.");
+           ":return residual data.")
+      .def(CopyableVisitor<ResidualModelContactControlGrav>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataContactControlGrav> >();
 
@@ -73,7 +76,8 @@ void exposeResidualContactControlGrav() {
                     bp::make_getter(&ResidualDataContactControlGrav::actuation, bp::return_internal_reference<>()),
                     "actuation model")
       .add_property("fext", bp::make_getter(&ResidualDataContactControlGrav::fext, bp::return_internal_reference<>()),
-                    "external spatial forces");
+                    "external spatial forces")
+      .def(CopyableVisitor<ResidualDataContactControlGrav>());
 }
 
 }  // namespace python

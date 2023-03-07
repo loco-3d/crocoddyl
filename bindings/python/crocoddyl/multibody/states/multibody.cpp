@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -87,7 +89,8 @@ void exposeStateMultibody() {
            ":param firstsecond: derivative w.r.t x or dx")
       .add_property("pinocchio",
                     bp::make_function(&StateMultibody::get_pinocchio, bp::return_value_policy<bp::return_by_value>()),
-                    "pinocchio model");
+                    "pinocchio model")
+      .def(CopyableVisitor<StateMultibody>());
 }
 
 }  // namespace python

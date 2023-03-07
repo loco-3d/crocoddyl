@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University
+// Copyright (C) 2022-2023, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/residuals/joint-acceleration.hpp"
 
 namespace crocoddyl {
@@ -76,7 +77,8 @@ void exposeResidualJointAcceleration() {
       .add_property(
           "reference",
           bp::make_function(&ResidualModelJointAcceleration::get_reference, bp::return_internal_reference<>()),
-          &ResidualModelJointAcceleration::set_reference, "reference joint acceleration");
+          &ResidualModelJointAcceleration::set_reference, "reference joint acceleration")
+      .def(CopyableVisitor<ResidualModelJointAcceleration>());
 }
 
 }  // namespace python

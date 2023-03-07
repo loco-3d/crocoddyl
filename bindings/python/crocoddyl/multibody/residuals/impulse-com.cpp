@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/impulse-com.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -50,7 +51,8 @@ void exposeResidualImpulseCoM() {
            "Each residual model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for the impulse CoM residual.\n"
            ":param data: shared data\n"
-           ":return residual data.");
+           ":return residual data.")
+      .def(CopyableVisitor<ResidualModelImpulseCoM>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataImpulseCoM> >();
 
@@ -74,7 +76,8 @@ void exposeResidualImpulseCoM() {
                     "Jacobian of the impulse velocity")
       .add_property("pinocchio_internal",
                     bp::make_getter(&ResidualDataImpulseCoM::pinocchio_internal, bp::return_internal_reference<>()),
-                    "internal pinocchio data used for extra computations");
+                    "internal pinocchio data used for extra computations")
+      .def(CopyableVisitor<ResidualDataImpulseCoM>());
 }
 
 }  // namespace python

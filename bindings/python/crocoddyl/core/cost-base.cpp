@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/cost-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -117,6 +119,7 @@ void exposeCostAbstract() {
           bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
           "residual model")
       .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector")
+      .def(CopyableVisitor<CostModelAbstract_wrap>())
       .def(PrintableVisitor<CostModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
@@ -162,7 +165,8 @@ void exposeCostAbstract() {
                     bp::make_function(&CostDataAbstract::get_Ru,
                                       deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
                     bp::make_function(&CostDataAbstract::set_Ru, deprecated<>("Deprecated. Use residual.Ru.")),
-                    "Jacobian of the cost residual");
+                    "Jacobian of the cost residual")
+      .def(CopyableVisitor<CostDataAbstract>());
 
 #pragma GCC diagnostic pop
 }

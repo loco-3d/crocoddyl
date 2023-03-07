@@ -261,6 +261,7 @@ class FrameVelocityCostSumTest(CostModelSumTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [
         StateCostTest, StateCostSumTest, ControlCostTest, ControlCostSumTest, CoMPositionCostTest,
         CoMPositionCostSumTest, FramePlacementCostTest, FramePlacementCostSumTest, FrameTranslationCostTest,

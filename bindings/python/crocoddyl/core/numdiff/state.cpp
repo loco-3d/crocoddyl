@@ -9,6 +9,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/numdiff/state.hpp"
 
 namespace crocoddyl {
@@ -78,7 +79,8 @@ void exposeStateNumDiff() {
            ":param Jin: input matrix (number of rows = state.nv).\n"
            ":param firstsecond: derivative w.r.t x or dx")
       .add_property("disturbance", bp::make_function(&StateNumDiff::get_disturbance), &StateNumDiff::set_disturbance,
-                    "disturbance constant used in the numerical differentiation");
+                    "disturbance constant used in the numerical differentiation")
+      .def(CopyableVisitor<StateNumDiff>());
 }
 
 }  // namespace python

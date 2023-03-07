@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/actuations/multicopter-base.hpp"
 
 namespace crocoddyl {
@@ -67,7 +69,8 @@ void exposeActuationModelMultiCopterBase() {
       .add_property(
           "tauf",
           bp::make_function(&ActuationModelMultiCopterBase::get_tauf, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_function(&ActuationModelMultiCopterBase::set_tauf), "Matrix mapping from thrusts to body torque");
+          bp::make_function(&ActuationModelMultiCopterBase::set_tauf), "Matrix mapping from thrusts to body torque")
+      .def(CopyableVisitor<ActuationModelMultiCopterBase>());
 }
 
 }  // namespace python

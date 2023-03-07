@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -68,7 +69,8 @@ void exposeResidualFramePlacement() {
                     "reference frame id")
       .add_property("reference",
                     bp::make_function(&ResidualModelFramePlacement::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelFramePlacement::set_reference, "reference frame placement");
+                    &ResidualModelFramePlacement::set_reference, "reference frame placement")
+      .def(CopyableVisitor<ResidualModelFramePlacement>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFramePlacement> >();
 
@@ -88,7 +90,8 @@ void exposeResidualFramePlacement() {
       .add_property("rJf", bp::make_getter(&ResidualDataFramePlacement::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
       .add_property("fJf", bp::make_getter(&ResidualDataFramePlacement::fJf, bp::return_internal_reference<>()),
-                    "local Jacobian of the frame");
+                    "local Jacobian of the frame")
+      .def(CopyableVisitor<ResidualDataFramePlacement>());
 }
 
 }  // namespace python

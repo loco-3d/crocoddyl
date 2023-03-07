@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -76,7 +77,8 @@ void exposeResidualContactForce() {
                     "reference frame id")
       .add_property("reference",
                     bp::make_function(&ResidualModelContactForce::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelContactForce::set_reference, "reference spatial force");
+                    &ResidualModelContactForce::set_reference, "reference spatial force")
+      .def(CopyableVisitor<ResidualModelContactForce>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataContactForce> >();
 
@@ -90,7 +92,8 @@ void exposeResidualContactForce() {
       .add_property(
           "contact",
           bp::make_getter(&ResidualDataContactForce::contact, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ResidualDataContactForce::contact), "contact data associated with the current residual");
+          bp::make_setter(&ResidualDataContactForce::contact), "contact data associated with the current residual")
+      .def(CopyableVisitor<ResidualDataContactForce>());
 }
 
 }  // namespace python

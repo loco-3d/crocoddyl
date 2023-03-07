@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 
 namespace crocoddyl {
@@ -66,7 +67,8 @@ void exposeResidualControl() {
            ":return residual data.")
       .add_property("reference",
                     bp::make_function(&ResidualModelControl::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelControl::set_reference, "reference control vector");
+                    &ResidualModelControl::set_reference, "reference control vector")
+      .def(CopyableVisitor<ResidualModelControl>());
 }
 
 }  // namespace python

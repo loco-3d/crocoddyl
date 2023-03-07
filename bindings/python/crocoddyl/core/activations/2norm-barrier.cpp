@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, Airbus
+// Copyright (C) 2021-2023, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/activations/2norm-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
@@ -39,7 +40,8 @@ void exposeActivation2NormBarrier() {
       .add_property(
           "alpha",
           bp::make_function(&ActivationModel2NormBarrier::get_alpha, bp::return_value_policy<bp::return_by_value>()),
-          bp::make_function(&ActivationModel2NormBarrier::set_alpha), "alpha");
+          bp::make_function(&ActivationModel2NormBarrier::set_alpha), "alpha")
+      .def(CopyableVisitor<ActivationModel2NormBarrier>());
 }
 
 }  // namespace python

@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
@@ -78,7 +80,8 @@ void exposeStateEuclidean() {
            ":param x: state point (dim. state.nx).\n"
            ":param dx: velocity vector (dim state.ndx).\n"
            ":param Jin: input matrix (number of rows = state.nv).\n"
-           ":param firstsecond: derivative w.r.t x or dx");
+           ":param firstsecond: derivative w.r.t x or dx")
+      .def(CopyableVisitor<StateVector>());
 }
 
 }  // namespace python

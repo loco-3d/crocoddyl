@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 
 namespace crocoddyl {
@@ -68,7 +69,8 @@ void exposeCostResidual() {
            "Each cost model has its own data that needs to be allocated. This function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
-           ":return cost data.");
+           ":return cost data.")
+      .def(CopyableVisitor<CostModelResidual>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataResidual> >();
 
@@ -78,7 +80,8 @@ void exposeCostResidual() {
           bp::args("self", "model", "data"),
           "Create residual cost data.\n\n"
           ":param model: residual cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()]);
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .def(CopyableVisitor<CostDataResidual>());
 }
 
 }  // namespace python

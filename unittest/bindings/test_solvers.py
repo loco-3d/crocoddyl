@@ -151,6 +151,7 @@ class TalosArmFDDPTest(SolverAbstractTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [UnicycleDDPTest, UnicycleFDDPTest, TalosArmDDPTest, TalosArmFDDPTest]
     loader = unittest.TestLoader()
     suites_list = []

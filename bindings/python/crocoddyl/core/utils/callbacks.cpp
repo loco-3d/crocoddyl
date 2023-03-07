@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
@@ -27,7 +29,8 @@ void exposeCallbacks() {
            "Run the callback function given a solver.\n\n"
            ":param solver: solver to be diagnostic")
       .add_property("level", &CallbackVerbose::get_level, &CallbackVerbose::set_level, "verbose level")
-      .add_property("precision", &CallbackVerbose::get_precision, &CallbackVerbose::set_precision, "precision");
+      .add_property("precision", &CallbackVerbose::get_precision, &CallbackVerbose::set_precision, "precision")
+      .def(CopyableVisitor<CallbackVerbose>());
 }
 
 }  // namespace python

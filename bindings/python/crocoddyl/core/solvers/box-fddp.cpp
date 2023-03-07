@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
 
 namespace crocoddyl {
@@ -23,7 +24,8 @@ void exposeSolverBoxFDDP() {
                                                     "Initialize the vector dimension.\n\n"
                                                     ":param problem: shooting problem."))
       .add_property("Quu_inv", make_function(&SolverBoxFDDP::get_Quu_inv, bp::return_internal_reference<>()),
-                    "inverse of the Quu computed by the box QP");
+                    "inverse of the Quu computed by the box QP")
+      .def(CopyableVisitor<SolverBoxFDDP>());
 }
 
 }  // namespace python

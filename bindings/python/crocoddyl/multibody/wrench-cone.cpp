@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2020-2023, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #include "crocoddyl/multibody/wrench-cone.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -68,6 +70,7 @@ void exposeWrenchCone() {
       .add_property("max_nforce",
                     bp::make_function(&WrenchCone::get_max_nforce, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_function(&WrenchCone::set_max_nforce), "maximum normal force")
+      .def(CopyableVisitor<WrenchCone>())
       .def(PrintableVisitor<WrenchCone>());
 
 #pragma GCC diagnostic pop

@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -82,7 +84,8 @@ void exposeDifferentialActionFreeFwdDynamics() {
           "armature",
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::get_armature, bp::return_internal_reference<>()),
           bp::make_function(&DifferentialActionModelFreeFwdDynamics::set_armature),
-          "set an armature mechanism in the joints");
+          "set an armature mechanism in the joints")
+      .def(CopyableVisitor<DifferentialActionModelFreeFwdDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
@@ -113,7 +116,8 @@ void exposeDifferentialActionFreeFwdDynamics() {
       .add_property(
           "u_drift",
           bp::make_getter(&DifferentialActionDataFreeFwdDynamics::u_drift, bp::return_internal_reference<>()),
-          "force-bias vector that accounts for control, Coriolis and gravitational effects");
+          "force-bias vector that accounts for control, Coriolis and gravitational effects")
+      .def(CopyableVisitor<DifferentialActionDataFreeFwdDynamics>());
 }
 
 }  // namespace python

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #include "crocoddyl/multibody/cop-support.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
@@ -39,6 +40,7 @@ void exposeCoPSupport() {
                     bp::make_function(&CoPSupport::set_R), "rotation matrix")
       .add_property("box", bp::make_function(&CoPSupport::get_box, bp::return_internal_reference<>()),
                     bp::make_function(&CoPSupport::set_box), "box size used to define the sole")
+      .def(CopyableVisitor<CoPSupport>())
       .def(PrintableVisitor<CoPSupport>());
 
 #pragma GCC diagnostic pop

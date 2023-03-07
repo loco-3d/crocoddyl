@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/state-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -110,7 +112,8 @@ void exposeStateAbstract() {
       .add_property("lb", bp::make_getter(&StateAbstract_wrap::lb_, bp::return_internal_reference<>()),
                     &StateAbstract_wrap::set_lb, "lower state limits")
       .add_property("ub", bp::make_getter(&StateAbstract_wrap::ub_, bp::return_internal_reference<>()),
-                    &StateAbstract_wrap::set_ub, "upper state limits");
+                    &StateAbstract_wrap::set_ub, "upper state limits")
+      .def(CopyableVisitor<StateAbstract_wrap>());
 }
 
 }  // namespace python

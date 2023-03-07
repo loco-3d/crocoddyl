@@ -8,6 +8,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/numdiff/activation.hpp"
 
 namespace crocoddyl {
@@ -43,7 +44,8 @@ void exposeActivationNumDiff() {
           bp::make_function(&ActivationModelNumDiff::get_model, bp::return_value_policy<bp::return_by_value>()),
           "action model")
       .add_property("disturbance", bp::make_function(&ActivationModelNumDiff::get_disturbance),
-                    "disturbance constant used in the numerical differentiation");
+                    "disturbance constant used in the numerical differentiation")
+      .def(CopyableVisitor<ActivationModelNumDiff>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActivationDataNumDiff> >();
 
@@ -64,7 +66,8 @@ void exposeActivationNumDiff() {
                     "temporary data associated with the input variation")
       .add_property("data_r2p",
                     bp::make_getter(&ActivationDataNumDiff::data_r2p, bp::return_value_policy<bp::return_by_value>()),
-                    "temporary data associated with the input variation");
+                    "temporary data associated with the input variation")
+      .def(CopyableVisitor<ActivationDataNumDiff>());
 }
 
 }  // namespace python

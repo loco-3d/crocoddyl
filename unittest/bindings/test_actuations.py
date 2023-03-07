@@ -58,6 +58,7 @@ class TalosFloatingBaseActuationTest(ActuationModelAbstractTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [TalosArmFullActuationTest, HyQFloatingBaseActuationTest, TalosFloatingBaseActuationTest]
     loader = unittest.TestLoader()
     suites_list = []

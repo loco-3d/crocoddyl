@@ -9,6 +9,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
 
 namespace crocoddyl {
@@ -62,7 +63,8 @@ void exposeActionNumDiff() {
       .add_property("withGaussApprox",
                     bp::make_function(&ActionModelNumDiff::get_with_gauss_approx,
                                       bp::return_value_policy<bp::return_by_value>()),
-                    "Gauss approximation for computing the Hessians");
+                    "Gauss approximation for computing the Hessians")
+      .def(CopyableVisitor<ActionModelNumDiff>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataNumDiff> >();
 
@@ -87,7 +89,8 @@ void exposeActionNumDiff() {
                     "temporary data associated with the state variation")
       .add_property("data_u",
                     bp::make_getter(&ActionDataNumDiff::data_u, bp::return_value_policy<bp::return_by_value>()),
-                    "temporary data associated with the control variation");
+                    "temporary data associated with the control variation")
+      .def(CopyableVisitor<ActionDataNumDiff>());
 }
 
 }  // namespace python

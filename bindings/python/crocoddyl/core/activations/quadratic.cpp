@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
@@ -35,7 +37,8 @@ void exposeActivationQuad() {
            ":param data: activation data\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuad::createData, bp::args("self"),
-           "Create the quadratic activation data.\n\n");
+           "Create the quadratic activation data.\n\n")
+      .def(CopyableVisitor<ActivationModelQuad>());
 }
 
 }  // namespace python

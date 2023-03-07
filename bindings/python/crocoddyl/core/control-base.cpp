@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise controld in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/control-base.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -83,7 +85,8 @@ void exposeControlParametrizationAbstract() {
       .add_property("nw", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nw),
                     "dimension of control inputs")
       .add_property("nu", bp::make_function(&ControlParametrizationModelAbstract_wrap::get_nu),
-                    "dimension of the control parameters");
+                    "dimension of the control parameters")
+      .def(CopyableVisitor<ControlParametrizationModelAbstract_wrap>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationDataAbstract> >();
 
@@ -100,7 +103,8 @@ void exposeControlParametrizationAbstract() {
       .add_property("dw_du",
                     bp::make_getter(&ControlParametrizationDataAbstract::dw_du, bp::return_internal_reference<>()),
                     bp::make_setter(&ControlParametrizationDataAbstract::dw_du),
-                    "Jacobian of the differential control wrt the control parameters");
+                    "Jacobian of the differential control wrt the control parameters")
+      .def(CopyableVisitor<ControlParametrizationDataAbstract>());
 }
 
 }  // namespace python

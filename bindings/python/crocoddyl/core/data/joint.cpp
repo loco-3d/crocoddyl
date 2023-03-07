@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2022-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/data/joint.hpp"
 
 namespace crocoddyl {
@@ -42,7 +43,8 @@ void exposeDataCollectorJoint() {
                     "partial derivatives of the generalized joint accelerations w.r.t. the state point")
       .add_property("da_du", bp::make_getter(&JointDataAbstract::da_du, bp::return_internal_reference<>()),
                     bp::make_setter(&JointDataAbstract::da_du),
-                    "partial derivatives of the generalized joint accelerations w.r.t. the control input");
+                    "partial derivatives of the generalized joint accelerations w.r.t. the control input")
+      .def(CopyableVisitor<JointDataAbstract>());
 
   bp::class_<DataCollectorJoint, bp::bases<DataCollectorAbstract> >(
       "DataCollectorJoint", "Joint data collector.\n\n",
@@ -59,7 +61,8 @@ void exposeDataCollectorJoint() {
           bp::args("self", "actuation", "joint"),
           "Create joint-actuation data collection.\n\n"
           ":param actuation: actuation data"
-          ":param joint: joint data"));
+          ":param joint: joint data"))
+      .def(CopyableVisitor<DataCollectorJointActuation>());
 }
 
 }  // namespace python

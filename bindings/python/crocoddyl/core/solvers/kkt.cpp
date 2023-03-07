@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS
+// Copyright (C) 2020-2023, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
 
 namespace crocoddyl {
@@ -76,7 +77,8 @@ void exposeSolverKKT() {
       .add_property("dxs", make_function(&SolverKKT::get_dxs, bp::return_value_policy<bp::copy_const_reference>()),
                     "dxs")
       .add_property("dus", make_function(&SolverKKT::get_dus, bp::return_value_policy<bp::copy_const_reference>()),
-                    "dus");
+                    "dus")
+      .def(CopyableVisitor<SolverKKT>());
 }
 
 }  // namespace python

@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
 
 namespace crocoddyl {
@@ -21,7 +22,8 @@ void exposeDataCollectorActuation() {
       .add_property(
           "actuation",
           bp::make_getter(&DataCollectorActuation::actuation, bp::return_value_policy<bp::return_by_value>()),
-          "actuation data");
+          "actuation data")
+      .def(CopyableVisitor<DataCollectorActuation>());
 }
 
 }  // namespace python

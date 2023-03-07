@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -68,7 +69,8 @@ void exposeResidualFrameRotation() {
                     "reference frame id")
       .add_property("reference",
                     bp::make_function(&ResidualModelFrameRotation::get_reference, bp::return_internal_reference<>()),
-                    &ResidualModelFrameRotation::set_reference, "reference frame rotation");
+                    &ResidualModelFrameRotation::set_reference, "reference frame rotation")
+      .def(CopyableVisitor<ResidualModelFrameRotation>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFrameRotation> >();
 
@@ -89,7 +91,8 @@ void exposeResidualFrameRotation() {
       .add_property("rJf", bp::make_getter(&ResidualDataFrameRotation::rJf, bp::return_internal_reference<>()),
                     "error Jacobian of the frame")
       .add_property("fJf", bp::make_getter(&ResidualDataFrameRotation::fJf, bp::return_internal_reference<>()),
-                    "local Jacobian of the frame");
+                    "local Jacobian of the frame")
+      .def(CopyableVisitor<ResidualDataFrameRotation>());
 }
 
 }  // namespace python

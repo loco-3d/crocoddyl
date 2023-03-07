@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
 
 namespace crocoddyl {
@@ -76,7 +77,8 @@ void exposeDifferentialActionFreeInvDynamics() {
             .add_property("constraints",
                           bp::make_function(&DifferentialActionModelFreeInvDynamics::get_constraints,
                                             bp::return_value_policy<bp::return_by_value>()),
-                          "constraint model manager");
+                          "constraint model manager")
+            .def(CopyableVisitor<DifferentialActionModelFreeInvDynamics>());
 
     bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelFreeInvDynamics::ResidualModelActuation>>();
 
@@ -120,7 +122,8 @@ void exposeDifferentialActionFreeInvDynamics() {
              "Each residual model has its own data that needs to be allocated. This function\n"
              "returns the allocated data for the actuation residual.\n"
              ":param data: shared data\n"
-             ":return residual data.");
+             ":return residual data.")
+        .def(CopyableVisitor<DifferentialActionModelFreeInvDynamics::ResidualModelActuation>());
   }
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeInvDynamics>>();
@@ -146,7 +149,8 @@ void exposeDifferentialActionFreeInvDynamics() {
           .add_property("constraints",
                         bp::make_getter(&DifferentialActionDataFreeInvDynamics::constraints,
                                         bp::return_value_policy<bp::return_by_value>()),
-                        "constraint data");
+                        "constraint data")
+          .def(CopyableVisitor<DifferentialActionDataFreeInvDynamics>());
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataFreeInvDynamics::ResidualDataActuation>>();
 
@@ -156,7 +160,8 @@ void exposeDifferentialActionFreeInvDynamics() {
           bp::args("self", "model", "data"),
           "Create actuation residual data.\n\n"
           ":param model: actuation residual model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()]);
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3>>()])
+      .def(CopyableVisitor<DifferentialActionDataFreeInvDynamics::ResidualDataActuation>());
 }
 
 }  // namespace python

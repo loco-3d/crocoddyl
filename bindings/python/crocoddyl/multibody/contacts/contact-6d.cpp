@@ -1,12 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -86,7 +88,8 @@ void exposeContact6D() {
                     "reference frame placement")
       .add_property("gains",
                     bp::make_function(&ContactModel6D::get_gains, bp::return_value_policy<bp::return_by_value>()),
-                    "contact gains");
+                    "contact gains")
+      .def(CopyableVisitor<ContactModel6D>());
 
 #pragma GCC diagnostic pop
 
@@ -112,7 +115,8 @@ void exposeContact6D() {
       .add_property("a_partial_dv", bp::make_getter(&ContactData6D::a_partial_dv, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body acceleration")
       .add_property("a_partial_da", bp::make_getter(&ContactData6D::a_partial_da, bp::return_internal_reference<>()),
-                    "Jacobian of the spatial body acceleration");
+                    "Jacobian of the spatial body acceleration")
+      .def(CopyableVisitor<ContactData6D>());
 }
 
 }  // namespace python

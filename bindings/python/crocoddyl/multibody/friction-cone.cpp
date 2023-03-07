@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2023, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #include "crocoddyl/multibody/friction-cone.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -68,6 +70,7 @@ void exposeFrictionCone() {
       .add_property("max_nforce", bp::make_function(&FrictionCone::get_max_nforce),
                     bp::make_function(&FrictionCone::set_max_nforce),
                     "maximum normal force (run update() if you have changed the value)")
+      .def(CopyableVisitor<FrictionCone>())
       .def(PrintableVisitor<FrictionCone>());
 
 #pragma GCC diagnostic pop

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 
@@ -50,6 +51,7 @@ void exposeConstraintManager() {
                     bp::make_getter(&ConstraintItem::constraint, bp::return_value_policy<bp::return_by_value>()),
                     "constraint model")
       .def_readwrite("active", &ConstraintItem::active, "constraint status")
+      .def(CopyableVisitor<ConstraintItem>())
       .def(PrintableVisitor<ConstraintItem>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelManager> >();
@@ -149,6 +151,7 @@ void exposeConstraintManager() {
       .def("getConstraintStatus", &ConstraintModelManager::getConstraintStatus, bp::args("self", "name"),
            "Return the constraint status of a given constraint name.\n\n"
            ":param name: constraint name")
+      .def(CopyableVisitor<ConstraintModelManager>())
       .def(PrintableVisitor<ConstraintModelManager>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataManager> >();
@@ -199,7 +202,8 @@ void exposeConstraintManager() {
                     bp::make_function(&ConstraintDataManager::set_Hx), "Jacobian of the equality constraint")
       .add_property("Hu",
                     bp::make_function(&ConstraintDataManager::get_Hu, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_function(&ConstraintDataManager::set_Hu), "Jacobian of the equality constraint");
+                    bp::make_function(&ConstraintDataManager::set_Hu), "Jacobian of the equality constraint")
+      .def(CopyableVisitor<ConstraintDataManager>());
 }
 
 }  // namespace python

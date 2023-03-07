@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 
 namespace crocoddyl {
@@ -52,7 +53,8 @@ void exposeSolverFDDP() {
            "Update the expected improvement model\n\n")
       .add_property("th_acceptNegStep", bp::make_function(&SolverFDDP::get_th_acceptnegstep),
                     bp::make_function(&SolverFDDP::set_th_acceptnegstep),
-                    "threshold for step acceptance in ascent direction");
+                    "threshold for step acceptance in ascent direction")
+      .def(CopyableVisitor<SolverFDDP>());
 }
 
 }  // namespace python

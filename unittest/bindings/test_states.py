@@ -115,6 +115,7 @@ class StateMultibodyTalosTest(StateAbstractTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [StateVectorTest, StateMultibodyTalosArmTest, StateMultibodyHyQTest, StateMultibodyTalosTest]
     loader = unittest.TestLoader()
     suites_list = []

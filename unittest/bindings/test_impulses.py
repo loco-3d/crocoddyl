@@ -146,6 +146,7 @@ class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [Impulse3DTest, Impulse3DMultipleTest, Impulse6DTest, Impulse6DMultipleTest]
     loader = unittest.TestLoader()
     suites_list = []

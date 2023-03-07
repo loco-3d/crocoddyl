@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -33,7 +34,8 @@ void exposeSolverBoxQP() {
                     bp::make_setter(&BoxQPSolution::free_idx), "free indexes")
       .add_property("clamped_idx",
                     bp::make_getter(&BoxQPSolution::clamped_idx, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes");
+                    bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes")
+      .def(CopyableVisitor<BoxQPSolution>());
 
   bp::register_ptr_to_python<boost::shared_ptr<BoxQP> >();
 
@@ -77,7 +79,8 @@ void exposeSolverBoxQP() {
                     "regularization value.")
       .add_property("alphas",
                     bp::make_function(&BoxQP::get_alphas, bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&BoxQP::set_alphas), "list of step length (alpha) values");
+                    bp::make_function(&BoxQP::set_alphas), "list of step length (alpha) values")
+      .def(CopyableVisitor<BoxQP>());
 }
 
 }  // namespace python

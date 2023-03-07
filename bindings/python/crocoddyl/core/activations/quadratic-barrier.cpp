@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
@@ -29,7 +31,8 @@ void exposeActivationQuadraticBarrier() {
                     bp::make_setter(&ActivationBounds::lb, bp::return_internal_reference<>()), "lower bounds")
       .add_property("ub", bp::make_getter(&ActivationBounds::ub),
                     bp::make_setter(&ActivationBounds::lb, bp::return_internal_reference<>()), "upper bounds")
-      .add_property("beta", &ActivationBounds::beta, "beta");
+      .add_property("beta", &ActivationBounds::beta, "beta")
+      .def(CopyableVisitor<ActivationBounds>());
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ActivationModelQuadraticBarrier> >();
 
@@ -58,7 +61,8 @@ void exposeActivationQuadraticBarrier() {
            "Create the weighted quadratic action data.")
       .add_property(
           "bounds", bp::make_function(&ActivationModelQuadraticBarrier::get_bounds, bp::return_internal_reference<>()),
-          bp::make_function(&ActivationModelQuadraticBarrier::set_bounds), "bounds (beta, lower and upper bounds)");
+          bp::make_function(&ActivationModelQuadraticBarrier::set_bounds), "bounds (beta, lower and upper bounds)")
+      .def(CopyableVisitor<ActivationModelQuadraticBarrier>());
 }
 
 }  // namespace python

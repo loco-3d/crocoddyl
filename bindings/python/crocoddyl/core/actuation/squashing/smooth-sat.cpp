@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/actuation/squashing-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/actuation/squashing/smooth-sat.hpp"
 
 namespace crocoddyl {
@@ -34,7 +36,8 @@ void exposeSquashingSmoothSat() {
       .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"), "Create the squashing data.\n\n")
       .add_property("smooth", bp::make_function(&SquashingModelSmoothSat::get_smooth),
                     bp::make_function(&SquashingModelSmoothSat::set_smooth),
-                    "Smoothness parameter of the smooth sat. function");
+                    "Smoothness parameter of the smooth sat. function")
+      .def(CopyableVisitor<SquashingModelSmoothSat>());
 }
 
 }  // namespace python

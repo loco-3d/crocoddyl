@@ -90,6 +90,7 @@ class TalosArmShootingTest(ShootingProblemTestCase):
 
 
 if __name__ == '__main__':
+    # test to be run
     test_classes_to_run = [UnicycleShootingTest, TalosArmShootingTest]
     loader = unittest.TestLoader()
     suites_list = []

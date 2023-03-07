@@ -1,14 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Trento,
-//                          LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2023, University of Edinburgh, University of Trento,
+//                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/core/integrator/rk.hpp"
 
 namespace crocoddyl {
@@ -69,7 +70,8 @@ void exposeIntegratedActionRK() {
       .def("createData", &IntegratedActionModelRK::createData, bp::args("self"), "Create the RK integrator data.")
       .add_property(
           "ni", bp::make_function(&IntegratedActionModelRK::get_ni, bp::return_value_policy<bp::return_by_value>()),
-          "number of nodes to be integrated");
+          "number of nodes to be integrated")
+      .def(CopyableVisitor<IntegratedActionModelRK>());
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK> >();
 
@@ -134,7 +136,8 @@ void exposeIntegratedActionRK() {
       .add_property(
           "ddli_dwdu", bp::make_getter(&IntegratedActionDataRK::ddli_dwdu, bp::return_internal_reference<>()),
           "list of second partial derivatives of the cost with respect to the control of the differential action"
-          "model and the control inputs of the RK integration. ddli_dwdu");
+          "model and the control inputs of the RK integration. ddli_dwdu")
+      .def(CopyableVisitor<IntegratedActionDataRK>());
 }
 
 }  // namespace python
