@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,8 +15,10 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModel6DTpl<Scalar>::ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t frame)
-    : Base(state, 6), frame_(frame) {}
+ImpulseModel6DTpl<Scalar>::ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id)
+    : Base(state, 6) {
+  id_ = id;
+}
 
 template <typename Scalar>
 ImpulseModel6DTpl<Scalar>::~ImpulseModel6DTpl() {}
@@ -25,7 +28,7 @@ void ImpulseModel6DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract
                                      const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, frame_, pinocchio::LOCAL, d->Jc);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->Jc);
 }
 
 template <typename Scalar>
@@ -56,12 +59,7 @@ boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel6DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ImpulseModel6DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ImpulseModel6D {frame=" << state_->get_pinocchio()->frames[frame_].name << "}";
-}
-
-template <typename Scalar>
-std::size_t ImpulseModel6DTpl<Scalar>::get_frame() const {
-  return frame_;
+  os << "ImpulseModel6D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
 }
 
 }  // namespace crocoddyl

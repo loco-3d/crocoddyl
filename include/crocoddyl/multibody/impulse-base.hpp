@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,26 @@ class ImpulseModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the reference frame id
+   */
+  pinocchio::FrameIndex get_id() const;
+
+  /**
+   * @brief Modify the reference frame id
+   */
+  void set_id(const pinocchio::FrameIndex id);
+
+  /**
+   * @brief Modify the type of contact
+   */
+  void set_type(const pinocchio::ReferenceFrame type);
+
+  /**
+   * @brief Return the type of contact
+   */
+  pinocchio::ReferenceFrame get_type() const;
+
+  /**
    * @brief Print information on the impulse model
    */
   template <class Scalar>
@@ -62,6 +83,8 @@ class ImpulseModelAbstractTpl {
  protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
+  pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
+  pinocchio::ReferenceFrame type_;  //!< Type of contact
 };
 
 template <typename _Scalar>

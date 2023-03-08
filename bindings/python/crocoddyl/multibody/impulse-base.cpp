@@ -67,6 +67,9 @@ void exposeImpulseAbstract() {
       .add_property("ni", bp::make_function(&ImpulseModelAbstract_wrap::get_nc, deprecated<>("Deprecated. Use nc")),
                     "dimension of impulse")
       .add_property("nc", bp::make_function(&ImpulseModelAbstract_wrap::get_nc), "dimension of impulse")
+      .add_property("id", &ImpulseModelAbstract_wrap::get_id, &ImpulseModelAbstract_wrap::set_id, "reference frame id")
+      .add_property("type", bp::make_function(&ImpulseModelAbstract_wrap::get_type),
+                    &ImpulseModelAbstract_wrap::set_type, "type of impulse")
       .def(CopyableVisitor<ImpulseModelAbstract_wrap>())
       .def(PrintableVisitor<ImpulseModelAbstract>());
 

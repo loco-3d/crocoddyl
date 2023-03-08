@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
-    : state_(state), nc_(nc) {}
+    : state_(state), nc_(nc), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {}
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
@@ -66,6 +67,26 @@ std::size_t ImpulseModelAbstractTpl<Scalar>::get_ni() const {
 template <typename Scalar>
 std::size_t ImpulseModelAbstractTpl<Scalar>::get_nu() const {
   return 0;
+}
+
+template <typename Scalar>
+pinocchio::FrameIndex ImpulseModelAbstractTpl<Scalar>::get_id() const {
+  return id_;
+}
+
+template <typename Scalar>
+pinocchio::ReferenceFrame ImpulseModelAbstractTpl<Scalar>::get_type() const {
+  return type_;
+}
+
+template <typename Scalar>
+void ImpulseModelAbstractTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+  id_ = id;
+}
+
+template <typename Scalar>
+void ImpulseModelAbstractTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
+  type_ = type;
 }
 
 template <class Scalar>
