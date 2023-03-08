@@ -147,7 +147,7 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       pinocchio::SE3::ConstAngularRef oRf = d->pinocchio->oMf[id_].rotation();
-      d->f_world.noalias() = oRf * force;
+      d->f_world.noalias() = oRf.transpose() * force;
       data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(d->f_world, Vector3s::Zero()));
       pinocchio::skew(d->f_world, d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
@@ -164,7 +164,7 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
+  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << ", type=" << type_ << "}";
 }
 
 template <typename Scalar>
