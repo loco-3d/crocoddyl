@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -104,6 +104,11 @@ void exposeContactMultiple() {
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state (dimension nc*ndx)\n"
            ":param df_du: Jacobian of the force with respect to the control (dimension nc*nu)")
+      .def("updateRneaDiff", &ContactModelMultiple::updateRneaDiff, bp::args("self", "data", "pinocchio"),
+           "Update the RNEA derivative dtau_dq by by adding the skew term (necessary for contacts expressed in\n"
+           "LOCAL_WORLD_ALIGNED / WORLD).\n\n"
+           ":param data: contact data\n"
+           ":param pinocchio: Pinocchio data")
       .def("createData", &ContactModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total contact data.\n\n"

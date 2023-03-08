@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -170,6 +170,17 @@ class ContactModelMultipleTpl {
    */
   void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data, const MatrixXs& df_dx,
                        const MatrixXs& df_du) const;
+
+  /**
+   * @brief Update the RNEA derivatives dtau_dq by adding the skew term
+   * (necessary for contacts expressed in LOCAL_WORLD_ALIGNED / WORLD)
+   * @brief as explained in this document :
+   * https://www.overleaf.com/read/tzvrrxxtntwk
+   *
+   * @param[in] data       Multi-contact data
+   * @param[in] pinocchio  Pinocchio data
+   */
+  void updateRneaDiff(const boost::shared_ptr<ContactDataMultiple>& data, pinocchio::DataTpl<Scalar>& pinocchio) const;
 
   /**
    * @brief Create the multi-contact data

@@ -24,7 +24,20 @@ void exposeContactAbstract() {
       "It defines a template for rigid contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<int> >(
+      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, pinocchio::ReferenceFrame, std::size_t>(
+          bp::args("self", "state", "nc", "type", "nu"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param nc: dimension of contact model\n"
+          ":param type: type of contact\n"
+          ":param nu: dimension of the control vector"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t, pinocchio::ReferenceFrame>(
+          bp::args("self", "state", "nc", "type"),
+          "Initialize the contact model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param nc: dimension of contact model\n"
+          ":param type: type of contact"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bp::optional<std::size_t> >(
           bp::args("self", "state", "nc", "nu"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
@@ -73,6 +86,8 @@ void exposeContactAbstract() {
       .add_property("nc", bp::make_function(&ContactModelAbstract_wrap::get_nc), "dimension of contact")
       .add_property("nu", bp::make_function(&ContactModelAbstract_wrap::get_nu), "dimension of control")
       .add_property("id", &ContactModelAbstract_wrap::get_id, &ContactModelAbstract_wrap::set_id, "reference frame id")
+      .add_property("type", bp::make_function(&ContactModelAbstract_wrap::get_type),
+                    &ContactModelAbstract_wrap::set_type, "type of contact")
       .def(CopyableVisitor<ContactModelAbstract_wrap>())
       .def(PrintableVisitor<ContactModelAbstract>());
 
@@ -91,6 +106,8 @@ void exposeContactAbstract() {
                     bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
       .add_property("da0_dx", bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
+      .add_property("dtau_dq", bp::make_getter(&ContactDataAbstract::dtau_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::dtau_dq), "Force contribution to dtau_dq")
       .def(CopyableVisitor<ContactDataAbstract>());
 }
 

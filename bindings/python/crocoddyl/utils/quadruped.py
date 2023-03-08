@@ -440,7 +440,7 @@ class SimpleQuadrupedalGaitProblem:
             nu = self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), nu,
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), pinocchio.LOCAL, nu,
                                                            np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
@@ -535,7 +535,7 @@ class SimpleQuadrupedalGaitProblem:
             nu = self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), nu,
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), pinocchio.LOCAL, nu,
                                                            np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 

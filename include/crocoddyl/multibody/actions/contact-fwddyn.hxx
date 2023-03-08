@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -185,6 +185,11 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
   contacts_->calcDiff(d->multibody.contacts, x);
+
+  // Add skew term to rnea derivative for contacs expressed in
+  // LOCAL_WORLD_ALIGNED / WORLD see https://www.overleaf.com/read/tzvrrxxtntwk for
+  // detailed calculations
+  contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
 
   const Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   const Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, nc);

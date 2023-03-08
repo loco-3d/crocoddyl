@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -314,6 +314,33 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
         nc += nc_i;
       } else {
         m_i->contact->setZeroForceDiff(d_i);
+      }
+    }
+  }
+}
+
+template <typename Scalar>
+void ContactModelMultipleTpl<Scalar>::updateRneaDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+                                                     pinocchio::DataTpl<Scalar>& pinocchio) const {
+  if (static_cast<std::size_t>(data->contacts.size()) != this->get_contacts().size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of contact datas and models");
+  }
+  typename ContactModelContainer::const_iterator it_m, end_m;
+  typename ContactDataContainer::const_iterator it_d, end_d;
+  for (it_m = contacts_.begin(), end_m = contacts_.end(), it_d = data->contacts.begin(), end_d = data->contacts.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the contact name between data and model");
+    if (m_i->active) {
+      switch (m_i->contact->get_type()) {
+        case pinocchio::ReferenceFrame::LOCAL:
+          break;
+        case pinocchio::ReferenceFrame::WORLD:
+        case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+          pinocchio.dtau_dq += d_i->dtau_dq;
+          break;
       }
     }
   }
