@@ -71,8 +71,8 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
-    frame = model->get_frame();
-    jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
+    frame = model->get_id();
+    jMf = model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
     fXj = jMf.inverse().toActionMatrix();
     fJf.setZero();
     v_partial_dq.setZero();
