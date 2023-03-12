@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,8 +26,14 @@ std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type) 
     case ContactModelTypes::ContactModel2D:
       os << "ContactModel2D";
       break;
-    case ContactModelTypes::ContactModel3D:
-      os << "ContactModel3D";
+    case ContactModelTypes::ContactModel3D_LOCAL:
+      os << "ContactModel3D_LOCAL";
+      break;
+    case ContactModelTypes::ContactModel3D_WORLD:
+      os << "ContactModel3D_WORLD";
+      break;
+    case ContactModelTypes::ContactModel3D_LWA:
+      os << "ContactModel3D_LWA";
       break;
     case ContactModelTypes::ContactModel6D:
       os << "ContactModel6D";
@@ -69,9 +75,17 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
     case ContactModelTypes::ContactModel2D:
       contact = boost::make_shared<crocoddyl::ContactModel2D>(state, frame_id, Eigen::Vector2d::Zero(), nu);
       break;
-    case ContactModelTypes::ContactModel3D:
+    case ContactModelTypes::ContactModel3D_LOCAL:
       contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(),
                                                               pinocchio::ReferenceFrame::LOCAL, nu);
+      break;
+    case ContactModelTypes::ContactModel3D_WORLD:
+      contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(),
+                                                              pinocchio::ReferenceFrame::WORLD, nu);
+      break;
+    case ContactModelTypes::ContactModel3D_LWA:
+      contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(),
+                                                              pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, nu);
       break;
     case ContactModelTypes::ContactModel6D:
       contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(), nu);
@@ -96,7 +110,7 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact() {
   } else if (rand() % 4 == 1) {
     contact = factory.create(ContactModelTypes::ContactModel2D, PinocchioModelTypes::RandomHumanoid);
   } else if (rand() % 4 == 2) {
-    contact = factory.create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::RandomHumanoid);
+    contact = factory.create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::RandomHumanoid);
   } else {
     contact = factory.create(ContactModelTypes::ContactModel6D, PinocchioModelTypes::RandomHumanoid);
   }

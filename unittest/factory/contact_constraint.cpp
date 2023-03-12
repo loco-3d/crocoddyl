@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
       break;
     case StateModelTypes::StateMultibody_HyQ:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel3D, model_type,
+        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, model_type,
                                                                          frame_names[i], actuation->get_nu()));
       }
       break;

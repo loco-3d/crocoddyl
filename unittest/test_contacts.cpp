@@ -120,6 +120,7 @@ void test_update_force(ContactModelTypes::Type contact_type, PinocchioModelTypes
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
   BOOST_CHECK(!data->f.toVector().isZero());
+  BOOST_CHECK(!data->fext.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
 }
@@ -144,6 +145,7 @@ void test_update_force_diff(ContactModelTypes::Type contact_type, PinocchioModel
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
   BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->fext.toVector().isZero());
   BOOST_CHECK(!data->df_dx.isZero());
   BOOST_CHECK(!data->df_du.isZero());
 }

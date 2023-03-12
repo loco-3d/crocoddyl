@@ -327,7 +327,7 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
       contact->addContact(
-          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::TalosArm,
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::TalosArm,
                                              "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
@@ -364,13 +364,13 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "lh_foot", nu));
-      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "rh_foot", nu));
       if (with_friction) {
         // friction cone
@@ -504,7 +504,7 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
       contact->addContact(
-          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::TalosArm,
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::TalosArm,
                                              "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
@@ -528,13 +528,13 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       nu += 12;  // it includes nc
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "lh_foot", nu));
-      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
+      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, "rh_foot", nu));
       if (with_friction) {
         // friction cone
