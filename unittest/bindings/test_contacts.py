@@ -104,14 +104,36 @@ class ContactModelMultipleAbstractTestCase(unittest.TestCase):
                         "Wrong derivatives of the desired contact acceleration (da0_dx).")
 
 
-class Contact3DTest(ContactModelAbstractTestCase):
+class Contact3DLocalTest(ContactModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
     xref = pinocchio.SE3.Random().translation
-    CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, gains)
-    CONTACT_DER = Contact3DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, gains)
+    CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, pinocchio.LOCAL, gains)
+    CONTACT_DER = Contact3DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, pinocchio.LOCAL, gains)
+
+
+class Contact3DWorldTest(ContactModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('hyq').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    xref = pinocchio.SE3.Random().translation
+    CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, pinocchio.WORLD, gains)
+    CONTACT_DER = Contact3DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref, pinocchio.WORLD, gains)
+
+
+class Contact3DLocalWorldAlignedTest(ContactModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('hyq').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    xref = pinocchio.SE3.Random().translation
+    CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref,
+                                       pinocchio.LOCAL_WORLD_ALIGNED, gains)
+    CONTACT_DER = Contact3DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), xref,
+                                        pinocchio.LOCAL_WORLD_ALIGNED, gains)
 
 
 class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
@@ -123,10 +145,10 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
         sorted({
             'lf_foot':
             crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'),
-                                     pinocchio.SE3.Random().translation, gains),
+                                     pinocchio.SE3.Random().translation, pinocchio.LOCAL, gains),
             'rh_foot':
             crocoddyl.ContactModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'),
-                                     pinocchio.SE3.Random().translation, gains)
+                                     pinocchio.SE3.Random().translation, pinocchio.LOCAL, gains)
         }.items()))
 
 
@@ -156,7 +178,10 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
 
 if __name__ == '__main__':
     # test to be run
-    test_classes_to_run = [Contact3DTest, Contact3DMultipleTest, Contact6DTest, Contact6DMultipleTest]
+    test_classes_to_run = [
+        Contact3DLocalTest, Contact3DWorldTest, Contact3DLocalWorldAlignedTest, Contact3DMultipleTest, Contact6DTest,
+        Contact6DMultipleTest
+    ]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

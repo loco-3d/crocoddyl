@@ -70,7 +70,8 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
       contact = boost::make_shared<crocoddyl::ContactModel2D>(state, frame_id, Eigen::Vector2d::Zero(), nu);
       break;
     case ContactModelTypes::ContactModel3D:
-      contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(), nu);
+      contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(),
+                                                              pinocchio::ReferenceFrame::LOCAL, nu);
       break;
     case ContactModelTypes::ContactModel6D:
       contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(), nu);
