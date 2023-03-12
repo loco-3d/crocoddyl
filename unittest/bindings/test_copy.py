@@ -213,7 +213,7 @@ class DataCollectorsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.DataCollectorMultibodyInContact(pdata, cdata))
     MODEL.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
     MODEL.append(crocoddyl.DataCollectorJointActMultibodyInContact(pdata, adata, jdata, cdata))
-    cmodel = crocoddyl.ContactModelAbstract(state, 3, actuation.nu)
+    cmodel = crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu)
     MODEL.append(crocoddyl.ForceDataAbstract(cmodel, pdata))
 
 
@@ -244,13 +244,13 @@ class ContactsTest(CopyModelTestCase):
     # contact models
     MODEL.append(crocoddyl.ContactModelMultiple(state, actuation.nu))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModelAbstract(state, 3, actuation.nu))
+    MODEL.append(crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel1D(state, frame_id, 1., actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel2D(state, frame_id, np.ones(2), actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModel3D(state, frame_id, np.ones(3), actuation.nu, np.zeros(2)))
+    MODEL.append(crocoddyl.ContactModel3D(state, frame_id, np.ones(3), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
