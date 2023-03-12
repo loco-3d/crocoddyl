@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,14 +12,14 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 2, nu), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, nu), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const Vector2s& gains)
-    : Base(state, 2), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
@@ -29,7 +30,9 @@ template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 2, nu), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, nu),
+      xref_(Vector2s(xref.translation[0], xref.translation[2])),
+      gains_(gains) {
   id_ = xref.id;
   std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
 }
@@ -37,7 +40,9 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> s
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
-    : Base(state, 2), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2),
+      xref_(Vector2s(xref.translation[0], xref.translation[2])),
+      gains_(gains) {
   id_ = xref.id;
   std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
 }

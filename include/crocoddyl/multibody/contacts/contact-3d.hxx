@@ -13,7 +13,7 @@ template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector3s& xref, const pinocchio::ReferenceFrame type,
                                              const std::size_t nu, const Vector2s& gains)
-    : Base(state, 3, type, nu), xref_(xref), gains_(gains) {
+    : Base(state, type, 3, nu), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
@@ -21,7 +21,7 @@ template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector3s& xref, const pinocchio::ReferenceFrame type,
                                              const Vector2s& gains)
-    : Base(state, 3, type), xref_(xref), gains_(gains) {
+    : Base(state, type, 3), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
@@ -31,7 +31,7 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> s
 template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector3s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 3, pinocchio::ReferenceFrame::LOCAL, nu), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3, nu), xref_(xref), gains_(gains) {
   id_ = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
             << std::endl;
@@ -40,7 +40,7 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> s
 template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector3s& xref, const Vector2s& gains)
-    : Base(state, 3, pinocchio::ReferenceFrame::LOCAL), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3), xref_(xref), gains_(gains) {
   id_ = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
             << std::endl;

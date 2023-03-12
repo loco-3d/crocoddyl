@@ -20,17 +20,12 @@ namespace python {
 
 class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrapper<ContactModelAbstract> {
  public:
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc,
-                            const pinocchio::ReferenceFrame type, std::size_t nu)
-      : ContactModelAbstract(state, nc, type, nu) {}
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc,
-                            const pinocchio::ReferenceFrame type)
-      : ContactModelAbstract(state, nc, type) {}
-
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc, std::size_t nu)
-      : ContactModelAbstract(state, nc, pinocchio::ReferenceFrame::LOCAL, nu) {}
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc)
-      : ContactModelAbstract(state, nc, pinocchio::ReferenceFrame::LOCAL) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                            std::size_t nc, std::size_t nu)
+      : ContactModelAbstract(state, type, nc, nu) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                            std::size_t nc)
+      : ContactModelAbstract(state, type, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");

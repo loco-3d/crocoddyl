@@ -35,14 +35,14 @@ class ContactModelAbstractTpl {
    * @brief Initialize the contact abstraction
    *
    * @param[in] state  State of the multibody system
-   * @param[in] nc     Dimension of the contact model
    * @param[in] type   Type of contact
+   * @param[in] nc     Dimension of the contact model
    * @param[in] nu     Dimension of the control vector
    */
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
-                          const pinocchio::ReferenceFrame type, const std::size_t nu);
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
-                          const pinocchio::ReferenceFrame type);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                          const std::size_t nc, const std::size_t nu);
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                          const std::size_t nc);
 
   DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
              ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,

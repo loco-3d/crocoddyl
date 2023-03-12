@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,14 +19,14 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const SE3& pref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 6, nu), pref_(pref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu), pref_(pref), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const SE3& pref, const Vector2s& gains)
-    : Base(state, 6), pref_(pref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6), pref_(pref), gains_(gains) {
   id_ = id;
 }
 
@@ -36,7 +37,7 @@ template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FramePlacementTpl<Scalar>& Mref, const std::size_t nu,
                                              const Vector2s& gains)
-    : Base(state, 6, nu), pref_(Mref.placement), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu), pref_(Mref.placement), gains_(gains) {
   id_ = Mref.id;
   std::cerr << "Deprecated: Use constructor which is not based on FramePlacement." << std::endl;
 }
@@ -44,7 +45,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> s
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
                                              const FramePlacementTpl<Scalar>& Mref, const Vector2s& gains)
-    : Base(state, 6), pref_(Mref.placement), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6), pref_(Mref.placement), gains_(gains) {
   id_ = Mref.id;
   std::cerr << "Deprecated: Use constructor which is not based on FramePlacement." << std::endl;
 }

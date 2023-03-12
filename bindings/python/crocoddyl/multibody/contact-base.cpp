@@ -24,25 +24,13 @@ void exposeContactAbstract() {
       "It defines a template for rigid contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, pinocchio::ReferenceFrame, std::size_t>(
-          bp::args("self", "state", "nc", "type", "nu"),
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame, std::size_t, bp::optional<std::size_t> >(
+          bp::args("self", "state", "type", "nc", "nu"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
-          ":param nc: dimension of contact model\n"
           ":param type: type of contact\n"
-          ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t, pinocchio::ReferenceFrame>(
-          bp::args("self", "state", "nc", "type"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
           ":param nc: dimension of contact model\n"
-          ":param type: type of contact"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bp::optional<std::size_t> >(
-          bp::args("self", "state", "nc", "nu"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param nc: dimension of contact model\n"
-          ":param nu: dimension of the control vector"))
+          ":param nu: dimension of the control vector (default state.nv)"))
       .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"

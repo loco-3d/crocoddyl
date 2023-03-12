@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,14 +12,14 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Scalar xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 1, nu), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, nu), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Scalar xref, const Vector2s& gains)
-    : Base(state, 1), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
