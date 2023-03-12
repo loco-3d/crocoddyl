@@ -886,8 +886,8 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
 
-    def __init__(self, state, id, xref, gains=[0., 0.]):
-        crocoddyl.ContactModelAbstract.__init__(self, state, 3)
+    def __init__(self, state, id, xref, type=pinocchio.LOCAL, gains=[0., 0.]):
+        crocoddyl.ContactModelAbstract.__init__(self, state, 3, type)
         self.id = id
         self.xref = xref
         self.gains = gains

@@ -27,15 +27,15 @@ void exposeContact3D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector3d, pinocchio::ReferenceFrame,
-               std::size_t, bp::optional<Eigen::Vector2d> >(
+               bp::optional<std::size_t, Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param type: type of contact\n"
-          ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+          ":param nu: dimension of control vector (default state.nv)\n"
+          ":param gains: gains of the contact model (default np.array([0.,0.]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector3d,
                     pinocchio::ReferenceFrame, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "gains"),
@@ -44,23 +44,6 @@ void exposeContact3D() {
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param type: type of contact\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector3d, std::size_t,
-                    bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "nu", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id of the contact\n"
-          ":param xref: contact position used for the Baumgarte stabilization\n"
-          ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, Eigen::Vector3d,
-                    bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id of the contact\n"
-          ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
       .def("calc", &ContactModel3D::calc, bp::args("self", "data", "x"),
            "Compute the 3d contact Jacobian and drift.\n\n"
