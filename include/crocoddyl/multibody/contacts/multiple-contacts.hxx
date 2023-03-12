@@ -219,7 +219,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
         const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
-        data->fext[joint] = d_i->f;
+        data->fext[joint] = d_i->fext;
       } else {
         m_i->contact->setZeroForce(d_i);
       }
@@ -237,7 +237,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Contac
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
         const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
-        data->fext[joint] = d_i->f;
+        data->fext[joint] = d_i->fext;
         nc += nc_i;
       } else {
         m_i->contact->setZeroForce(d_i);

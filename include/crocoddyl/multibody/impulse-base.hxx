@@ -31,6 +31,7 @@ void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
 template <typename Scalar>
 void ImpulseModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
   data->f.setZero();
+  data->fext.setZero();
 }
 
 template <typename Scalar>

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,7 +165,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
       m_i->impulse->updateForce(d_i, force_i);
       const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
-      data->fext[joint] = d_i->f;
+      data->fext[joint] = d_i->fext;
       nc += nc_i;
     } else {
       m_i->impulse->setZeroForce(d_i);

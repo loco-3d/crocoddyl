@@ -326,9 +326,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
 
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector3d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::TalosArm,
+                                             "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost(
@@ -348,9 +348,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibodyContact2D_TalosArm:
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel2D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector2d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel2D, PinocchioModelTypes::TalosArm,
+                                             "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost(
@@ -503,9 +503,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       nu += 3;
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector3d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D, PinocchioModelTypes::TalosArm,
+                                             "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost("lf_cone",

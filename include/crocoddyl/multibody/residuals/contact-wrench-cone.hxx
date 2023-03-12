@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ void ResidualModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<Res
 
   // Compute the residual of the wrench cone. Note that we need to transform the wrench
   // to the contact frame
-  data->r.noalias() = fref_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
+  data->r.noalias() = fref_.get_A() * d->contact->f.toVector();
 }
 
 template <typename Scalar>

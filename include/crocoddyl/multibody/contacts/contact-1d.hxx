@@ -92,8 +92,11 @@ void ContactModel1DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
   }
   Data* d = static_cast<Data*>(data.get());
   const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();
-  data->f.linear() = R.col(2) * force[0];
-  data->f.angular() = d->jMf.translation().cross(data->f.linear());
+  data->f.linear()[0] = force[0];
+  data->f.linear().template tail<2>().setZero();
+  data->f.angular().setZero();
+  data->fext.linear() = R.col(2) * force[0];
+  data->fext.angular() = d->jMf.translation().cross(data->fext.linear());
 }
 
 template <typename Scalar>

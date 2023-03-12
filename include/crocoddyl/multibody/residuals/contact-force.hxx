@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -55,13 +55,13 @@ void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<Residual
   // We transform the force to the contact frame
   switch (d->contact_type) {
     case Contact1D:
-      data->r = ((d->contact->jMf.actInv(d->contact->f) - fref_).linear()).row(2);
+      data->r = ((d->contact->f - fref_).linear()).row(2);
       break;
     case Contact3D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_).linear();
+      data->r = (d->contact->f - fref_).linear();
       break;
     case Contact6D:
-      data->r = (d->contact->jMf.actInv(d->contact->f) - fref_).toVector();
+      data->r = (d->contact->f - fref_).toVector();
       break;
     default:
       break;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,14 +25,19 @@ struct ForceDataAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename pinocchio::DataTpl<Scalar> PinocchioData;
+  typedef typename pinocchio::SE3Tpl<Scalar> SE3;
+  typedef typename pinocchio::ForceTpl<Scalar> Force;
 
   template <template <typename Scalar> class Model>
-  ForceDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+  ForceDataAbstractTpl(Model<Scalar>* const model, PinocchioData* const data)
       : pinocchio(data),
         frame(0),
-        jMf(pinocchio::SE3Tpl<Scalar>::Identity()),
+        type(model->get_type()),
+        jMf(SE3::Identity()),
         Jc(model->get_nc(), model->get_state()->get_nv()),
-        f(pinocchio::ForceTpl<Scalar>::Zero()),
+        f(Force::Zero()),
+        fext(Force::Zero()),
         df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()) {
     Jc.setZero();
@@ -41,14 +46,15 @@ struct ForceDataAbstractTpl {
   }
   virtual ~ForceDataAbstractTpl() {}
 
-  typename pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  pinocchio::FrameIndex frame;                     //!< Frame index of the contact frame
-  typename pinocchio::SE3Tpl<Scalar> jMf;          //!< Local frame placement of the contact frame
-  MatrixXs Jc;                                     //!< Contact Jacobian
-  pinocchio::ForceTpl<Scalar> f;  //!< External spatial force at the parent joint level. Note that we could compute the
-                                  //!< force at the contact frame by using jMf (i.e. data.jMf.actInv(data.f)
-  MatrixXs df_dx;                 //!< Jacobian of the contact forces
-  MatrixXs df_du;                 //!< Jacobian of the contact forces
+  PinocchioData* pinocchio;        //!< Pinocchio data
+  pinocchio::FrameIndex frame;     //!< Frame index of the contact frame
+  pinocchio::ReferenceFrame type;  //!< Type of contact
+  SE3 jMf;                         //!< Local frame placement of the contact frame
+  MatrixXs Jc;                     //!< Contact Jacobian
+  Force f;                         //!< Contact force expressed in the coordinate defined by type
+  Force fext;                      //!< External spatial force at the parent joint level
+  MatrixXs df_dx;                  //!< Jacobian of the contact forces expressed in the coordinate defined by type
+  MatrixXs df_du;                  //!< Jacobian of the contact forces expressed in the coordinate defined by type
 };
 
 }  // namespace crocoddyl

@@ -33,6 +33,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef ContactData3DTpl<Scalar> Data;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
+  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
@@ -149,10 +150,13 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename pinocchio::MotionTpl<Scalar> Motion;
+  typedef typename pinocchio::ForceTpl<Scalar> Force;
 
   template <template <typename Scalar> class Model>
   ContactData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
+        f_local(Force::Zero()),
         da0_local_dx(3, model->get_state()->get_ndx()),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
@@ -171,7 +175,6 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     vw.setZero();
     dp.setZero();
     dp_local.setZero();
-    f_world.setZero();
     da0_local_dx.setZero();
     fJf.setZero();
     v_partial_dq.setZero();
@@ -200,13 +203,13 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::jMf;
   using Base::pinocchio;
 
-  pinocchio::MotionTpl<Scalar> v;
+  Motion v;
   Vector3s a0_local;
   Vector3s vv;
   Vector3s vw;
   Vector3s dp;
   Vector3s dp_local;
-  Vector3s f_world;
+  Force f_local;
   Matrix3xs da0_local_dx;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;

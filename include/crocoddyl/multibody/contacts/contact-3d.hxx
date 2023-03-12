@@ -64,7 +64,7 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 
   d->vw = d->v.angular();
   d->vv = d->v.linear();
-  pinocchio::SE3::ConstAngularRef oRf = d->pinocchio->oMf[id_].rotation();
+  const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
   d->dp = d->pinocchio->oMf[id_].translation() - xref_;
   d->dp_local.noalias() = oRf.transpose() * d->dp;
 
@@ -107,7 +107,7 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->da0_local_dx.rightCols(nv) = d->fXjda_dv.template topRows<3>();
   d->da0_local_dx.rightCols(nv).noalias() += d->vw_skew * d->fJf.template topRows<3>();
   d->da0_local_dx.rightCols(nv).noalias() -= d->vv_skew * d->fJf.template bottomRows<3>();
-  pinocchio::SE3::ConstAngularRef oRf = d->pinocchio->oMf[id_].rotation();
+  const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
 
   if (gains_[0] != 0.) {
     d->da0_local_dx.leftCols(nv).noalias() += gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
@@ -139,17 +139,20 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
                  << "lambda has wrong dimension (it should be 3)");
   }
   Data* d = static_cast<Data*>(data.get());
+  data->f.linear() = force;
+  data->f.angular().setZero();
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(force, Vector3s::Zero()));
+      data->fext = d->jMf.act(data->f);
       data->dtau_dq.setZero();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      pinocchio::SE3::ConstAngularRef oRf = d->pinocchio->oMf[id_].rotation();
-      d->f_world.noalias() = oRf.transpose() * force;
-      data->f = d->jMf.act(pinocchio::ForceTpl<Scalar>(d->f_world, Vector3s::Zero()));
-      pinocchio::skew(d->f_world, d->f_skew);
+      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+      d->f_local.linear().noalias() = oRf.transpose() * force;
+      d->f_local.angular().setZero();
+      data->fext = d->jMf.act(d->f_local);
+      pinocchio::skew(d->f_local.linear(), d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
       data->dtau_dq.noalias() = -d->fJf.template topRows<3>().transpose() * d->fJf_df;
       break;

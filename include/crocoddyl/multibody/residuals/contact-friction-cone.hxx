@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,7 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<R
 
   // Compute the residual of the friction cone. Note that we need to transform the force
   // to the contact frame
-  data->r.noalias() = fref_.get_A() * d->contact->jMf.actInv(d->contact->f).linear();
+  data->r.noalias() = fref_.get_A() * d->contact->f.linear();
 }
 
 template <typename Scalar>

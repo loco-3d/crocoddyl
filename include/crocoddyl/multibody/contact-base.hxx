@@ -57,6 +57,7 @@ void ContactModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ContactDataAbstract>& data) const {
   data->f.setZero();
+  data->fext.setZero();
 }
 
 template <typename Scalar>

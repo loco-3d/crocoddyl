@@ -96,9 +96,9 @@ void exposeContact3D() {
                     "Translation error computed for the Baumgarte regularization term")
       .add_property("dp_local", bp::make_getter(&ContactData3D::dp_local, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactData3D::dp_local),
-                    "Local translation error computed for the Baumgarte regularization term")
-      .add_property("f_world", bp::make_getter(&ContactData3D::f_world, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactData3D::f_world), "Spatial contact force in world coordinates")
+                    "local translation error computed for the Baumgarte regularization term")
+      .add_property("f_local", bp::make_getter(&ContactData3D::f_local, bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData3D::f_local), "spatial contact force in local coordinates")
       .add_property("da0_local_dx", bp::make_getter(&ContactData3D::da0_local_dx, bp::return_internal_reference<>()),
                     bp::make_setter(&ContactData3D::da0_local_dx),
                     "Jacobian of the desired local contact acceleration")
