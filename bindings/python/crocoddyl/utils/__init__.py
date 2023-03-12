@@ -886,27 +886,27 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
 
-    def __init__(self, state, xref, gains=[0., 0.]):
+    def __init__(self, state, id, xref, gains=[0., 0.]):
         crocoddyl.ContactModelAbstract.__init__(self, state, 3)
+        self.id = id
         self.xref = xref
         self.gains = gains
-        self.joint = state.pinocchio.frames[xref.id].parent
+        self.joint = state.pinocchio.frames[id].parent
 
     def calc(self, data, x):
-        assert (self.xref.translation is not None or self.gains[0] == 0.)
-        v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.xref.id)
+        assert (self.xref is not None or self.gains[0] == 0.)
+        v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id)
         data.vw[:] = v.angular
         data.vv[:] = v.linear
 
-        fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.xref.id,
-                                         pinocchio.ReferenceFrame.LOCAL)
+        fJf = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.id, pinocchio.LOCAL)
         data.Jc = fJf[:3, :]
         data.Jw[:, :] = fJf[3:, :]
 
-        data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio,
-                                                    self.xref.id).linear + np.cross(data.vw, data.vv)
+        data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio, self.id).linear + np.cross(
+            data.vw, data.vv)
         if self.gains[0] != 0.:
-            data.a0[:] += self.gains[0] * (data.pinocchio.oMf[self.xref.id].translation - self.xref.translation)
+            data.a0[:] += self.gains[0] * (data.pinocchio.oMf[self.id].translation - self.xref)
         if self.gains[1] != 0.:
             data.a0[:] += self.gains[1] * data.vv
 
@@ -925,11 +925,10 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
         da0_dv -= np.dot(data.vv_skew, data.Jw)
 
         if self.gains[0] != 0.:
-            R = data.pinocchio.oMf[self.xref.id].rotation
+            R = data.pinocchio.oMf[self.id].rotation
             da0_dq += self.gains[0] * np.dot(
                 R,
-                pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.xref.id,
-                                           pinocchio.ReferenceFrame.LOCAL)[:3, :])
+                pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.id, pinocchio.LOCAL)[:3, :])
         if self.gains[1] != 0.:
             da0_dq += self.gains[1] * np.dot(data.fXj[:3, :], v_partial_dq)
             da0_dv += self.gains[1] * np.dot(data.fXj[:3, :], a_partial_da)
@@ -944,7 +943,7 @@ class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
 
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
-        self.fXj = model.state.pinocchio.frames[model.xref.id].placement.inverse().action
+        self.fXj = model.state.pinocchio.frames[model.id].placement.inverse().action
         self.vw = np.zeros(3)
         self.vv = np.zeros(3)
         self.Jw = np.zeros((3, model.state.nv))
@@ -954,21 +953,22 @@ class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
 
 class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
 
-    def __init__(self, state, Mref, gains=[0., 0.]):
+    def __init__(self, state, id, Mref, gains=[0., 0.]):
         crocoddyl.ContactModelAbstract.__init__(self, state, 6)
+        self.id = id
         self.Mref = Mref
         self.gains = gains
 
     def calc(self, data, x):
-        assert (self.Mref.placement is not None or self.gains[0] == 0.)
-        data.Jc[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.Mref.id,
+        assert (self.Mref is not None or self.gains[0] == 0.)
+        data.Jc[:, :] = pinocchio.getFrameJacobian(self.state.pinocchio, data.pinocchio, self.id,
                                                    pinocchio.ReferenceFrame.LOCAL)
-        data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio, self.Mref.id).vector
+        data.a0[:] = pinocchio.getFrameAcceleration(self.state.pinocchio, data.pinocchio, self.id).vector
         if self.gains[0] != 0.:
-            data.rMf = self.Mref.placement.inverse() * data.pinocchio.oMf[self.Mref.id]
+            data.rMf = self.Mref.inverse() * data.pinocchio.oMf[self.id]
             data.a0[:] += self.gains[0] * pinocchio.log6(data.rMf).vector
         if self.gains[1] != 0.:
-            v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.Mref.id).vector
+            v = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id).vector
             data.a0[:] += self.gains[1] * v
 
     def calcDiff(self, data, x):
@@ -994,11 +994,11 @@ class Contact6DDataDerived(crocoddyl.ContactDataAbstract):
 
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
-        self.fXj = model.state.pinocchio.frames[model.Mref.id].placement.inverse().action
+        self.fXj = model.state.pinocchio.frames[model.id].placement.inverse().action
         self.da0_dq = np.zeros((6, model.state.nv))
         self.da0_dv = np.zeros((6, model.state.nv))
         self.rMf = pinocchio.SE3.Identity()
-        self.joint = model.state.pinocchio.frames[model.Mref.id].parent
+        self.joint = model.state.pinocchio.frames[model.id].parent
 
 
 class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
