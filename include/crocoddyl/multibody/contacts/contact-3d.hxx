@@ -62,8 +62,6 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
       pinocchio::getFrameClassicalAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL)
           .linear();
 
-  d->vw = d->v.angular();
-  d->vv = d->v.linear();
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
   d->dp = d->pinocchio->oMf[id_].translation() - xref_;
   d->dp_local.noalias() = oRf.transpose() * d->dp;
@@ -72,7 +70,7 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
     d->a0_local += gains_[0] * d->dp_local;
   }
   if (gains_[1] != 0.) {
-    d->a0_local += gains_[1] * d->vv;
+    d->a0_local += gains_[1] * d->v.linear();
   }
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
@@ -95,8 +93,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
                                              d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t nv = state_->get_nv();
-  pinocchio::skew(d->vv, d->vv_skew);
-  pinocchio::skew(d->vw, d->vw_skew);
+  pinocchio::skew(d->v.linear(), d->vv_skew);
+  pinocchio::skew(d->v.angular(), d->vw_skew);
   pinocchio::skew(d->dp_local, d->dp_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
@@ -151,7 +149,7 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
       d->f_local.linear().noalias() = oRf.transpose() * force;
       d->f_local.angular().setZero();
-      data->fext = d->jMf.act(d->f_local);
+      data->fext = data->jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
       data->dtau_dq.noalias() = -d->fJf.template topRows<3>().transpose() * d->fJf_df;

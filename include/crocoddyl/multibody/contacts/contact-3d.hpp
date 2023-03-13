@@ -171,8 +171,6 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
     fXj = jMf.inverse().toActionMatrix();
     a0_local.setZero();
-    vv.setZero();
-    vw.setZero();
     dp.setZero();
     dp_local.setZero();
     da0_local_dx.setZero();
@@ -205,8 +203,6 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
 
   Motion v;
   Vector3s a0_local;
-  Vector3s vv;
-  Vector3s vw;
   Vector3s dp;
   Vector3s dp_local;
   Force f_local;
