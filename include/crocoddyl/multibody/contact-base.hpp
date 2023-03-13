@@ -170,6 +170,7 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   typedef ForceDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename pinocchio::SE3Tpl<Scalar> SE3;
 
   template <template <typename Scalar> class Model>
   ContactDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
@@ -191,7 +192,8 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   using Base::Jc;
   using Base::jMf;
   using Base::pinocchio;
-  typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
+
+  typename SE3::ActionMatrixType fXj;
   VectorXs a0;
   MatrixXs da0_dx;
   MatrixXs dtau_dq;

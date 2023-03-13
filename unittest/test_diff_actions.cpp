@@ -172,7 +172,6 @@ bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
   }
-  // register_action_model_unit_tests(DifferentialActionModelTypes::all[2]);
   return true;
 }
 
