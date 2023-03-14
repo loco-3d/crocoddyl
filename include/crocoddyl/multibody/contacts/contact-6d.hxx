@@ -67,7 +67,7 @@ void ContactModel6DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
   d->a0_local = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
 
   if (gains_[0] != 0.) {
-    d->rMf = pref_.inverse() * d->pinocchio->oMf[id_];
+    d->rMf = pref_.actInv(d->pinocchio->oMf[id_]);
     d->a0_local += gains_[0] * pinocchio::log6(d->rMf);
   }
   if (gains_[1] != 0.) {
@@ -105,7 +105,7 @@ void ContactModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   }
   if (gains_[1] != 0.) {
     d->da0_local_dx.leftCols(nv).noalias() += gains_[1] * d->fXj * d->v_partial_dq;
-    d->da0_local_dx.rightCols(nv).noalias() += gains_[1] * d->fXj * d->a_partial_da;
+    d->da0_local_dx.rightCols(nv).noalias() += gains_[1] * d->fJf;
   }
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
