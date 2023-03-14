@@ -63,10 +63,9 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
           .linear();
 
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-  d->dp = d->pinocchio->oMf[id_].translation() - xref_;
-  d->dp_local.noalias() = oRf.transpose() * d->dp;
-
   if (gains_[0] != 0.) {
+    d->dp = d->pinocchio->oMf[id_].translation() - xref_;
+    d->dp_local.noalias() = oRf.transpose() * d->dp;
     d->a0_local += gains_[0] * d->dp_local;
   }
   if (gains_[1] != 0.) {
@@ -95,7 +94,6 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->v.linear(), d->vv_skew);
   pinocchio::skew(d->v.angular(), d->vw_skew);
-  pinocchio::skew(d->dp_local, d->dp_skew);
   d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
@@ -108,6 +106,7 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
 
   if (gains_[0] != 0.) {
+    pinocchio::skew(d->dp_local, d->dp_skew);
     d->da0_local_dx.leftCols(nv).noalias() += gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
     d->da0_local_dx.leftCols(nv).noalias() += gains_[0] * d->fJf.template topRows<3>();
   }
