@@ -35,8 +35,14 @@ std::ostream& operator<<(std::ostream& os, const ContactModelTypes::Type& type) 
     case ContactModelTypes::ContactModel3D_LWA:
       os << "ContactModel3D_LWA";
       break;
-    case ContactModelTypes::ContactModel6D:
-      os << "ContactModel6D";
+    case ContactModelTypes::ContactModel6D_LOCAL:
+      os << "ContactModel6D_LOCAL";
+      break;
+    case ContactModelTypes::ContactModel6D_WORLD:
+      os << "ContactModel6D_WORLD";
+      break;
+    case ContactModelTypes::ContactModel6D_LWA:
+      os << "ContactModel6D_LWA";
       break;
     case ContactModelTypes::NbContactModelTypes:
       os << "NbContactModelTypes";
@@ -87,8 +93,17 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(C
       contact = boost::make_shared<crocoddyl::ContactModel3D>(state, frame_id, Eigen::Vector3d::Zero(),
                                                               pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, nu);
       break;
-    case ContactModelTypes::ContactModel6D:
-      contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(), nu);
+    case ContactModelTypes::ContactModel6D_LOCAL:
+      contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(),
+                                                              pinocchio::ReferenceFrame::LOCAL, nu);
+      break;
+    case ContactModelTypes::ContactModel6D_WORLD:
+      contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(),
+                                                              pinocchio::ReferenceFrame::WORLD, nu);
+      break;
+    case ContactModelTypes::ContactModel6D_LWA:
+      contact = boost::make_shared<crocoddyl::ContactModel6D>(state, frame_id, pinocchio::SE3(),
+                                                              pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ContactModelTypes::Type given");
@@ -112,7 +127,7 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact() {
   } else if (rand() % 4 == 2) {
     contact = factory.create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::RandomHumanoid);
   } else {
-    contact = factory.create(ContactModelTypes::ContactModel6D, PinocchioModelTypes::RandomHumanoid);
+    contact = factory.create(ContactModelTypes::ContactModel6D_LOCAL, PinocchioModelTypes::RandomHumanoid);
   }
   return contact;
 }

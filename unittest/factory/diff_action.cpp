@@ -422,9 +422,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_Talos:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "left_sole_link", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone
@@ -589,9 +589,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       nu += 12;  // it includes nc
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "left_sole_link", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone

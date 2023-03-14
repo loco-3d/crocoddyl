@@ -97,8 +97,9 @@ class ResidualsTest(CopyModelTestCase):
     # TODO(cmastalli): add pair-collision residual
     frame_id = state.pinocchio.getFrameId("rleg6_joint")
     contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
-    contact.addContact("rleg6_contact",
-                       crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), actuation.nu, np.zeros(2)))
+    contact.addContact(
+        "rleg6_contact",
+        crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     pdata = state.pinocchio.createData()
     adata = actuation.createData()
     cdata = contact.createData(pdata)
@@ -252,7 +253,8 @@ class ContactsTest(CopyModelTestCase):
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel3D(state, frame_id, np.ones(3), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), actuation.nu, np.zeros(2)))
+    MODEL.append(
+        crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
     # impulse models
     MODEL.append(crocoddyl.ImpulseModelMultiple(state))

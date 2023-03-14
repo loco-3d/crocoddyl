@@ -64,11 +64,11 @@ if WITHDISPLAY:
             display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
 # Add contact to the model
 contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
-supportContactModelLeft = crocoddyl.ContactModel6D(state, leftFootId, pinocchio.SE3.Identity(), actuation.nu,
-                                                   np.array([0, 0]))
+supportContactModelLeft = crocoddyl.ContactModel6D(state, leftFootId, pinocchio.SE3.Identity(), pinocchio.LOCAL,
+                                                   actuation.nu, np.array([0, 0]))
 contactModel.addContact(leftFoot + "_contact", supportContactModelLeft)
-supportContactModelRight = crocoddyl.ContactModel6D(state, rightFootId, pinocchio.SE3.Identity(), actuation.nu,
-                                                    np.array([0, 0]))
+supportContactModelRight = crocoddyl.ContactModel6D(state, rightFootId, pinocchio.SE3.Identity(), pinocchio.LOCAL,
+                                                    actuation.nu, np.array([0, 0]))
 contactModel.addContact(rightFoot + "_contact", supportContactModelRight)
 contactData = contactModel.createData(rdata)
 

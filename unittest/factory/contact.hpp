@@ -27,7 +27,9 @@ struct ContactModelTypes {
     ContactModel3D_LOCAL,
     ContactModel3D_WORLD,
     ContactModel3D_LWA,
-    ContactModel6D,
+    ContactModel6D_LOCAL,
+    ContactModel6D_WORLD,
+    ContactModel6D_LWA,
     NbContactModelTypes
   };
   static std::vector<Type> init_all() {

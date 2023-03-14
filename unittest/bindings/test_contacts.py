@@ -158,8 +158,8 @@ class Contact6DTest(ContactModelAbstractTestCase):
 
     gains = pinocchio.utils.rand(2)
     Mref = pinocchio.SE3.Random()
-    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, gains)
-    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, gains)
+    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
@@ -170,9 +170,11 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
     CONTACTS = collections.OrderedDict(
         sorted({
             'l_foot':
-            crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random(), gains),
+            crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('l_sole'), pinocchio.SE3.Random(),
+                                     pinocchio.LOCAL, gains),
             'r_foot':
-            crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random(), gains)
+            crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random(),
+                                     pinocchio.LOCAL, gains)
         }.items()))
 
 
