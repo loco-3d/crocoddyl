@@ -90,7 +90,11 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ ||
       action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||
       action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos ||
-      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos) {
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos) {
     boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> m =
         boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamics>(model);
     m->get_contacts()->changeContactStatus("lf", false);
