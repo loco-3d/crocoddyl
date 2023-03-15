@@ -33,11 +33,11 @@ void ImpulseModel3DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract
 
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      d->Jc = d->fJf.template topRows<3>();
+      data->Jc = d->fJf.template topRows<3>();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      d->Jc.noalias() = d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
+      data->Jc.noalias() = d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
       break;
   }
 }
@@ -60,8 +60,8 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbst
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
       d->v0_world = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_).linear();
       pinocchio::skew(d->v0_world, d->v0_world_skew);
-      d->dv0_dq.noalias() = oRf * d->dv0_local_dq;
-      d->dv0_dq.noalias() -= d->v0_world_skew * d->fJf.template bottomRows<3>();
+      data->dv0_dq.noalias() = oRf * d->dv0_local_dq;
+      data->dv0_dq.noalias() -= d->v0_world_skew * d->fJf.template bottomRows<3>();
       break;
   }
 }
