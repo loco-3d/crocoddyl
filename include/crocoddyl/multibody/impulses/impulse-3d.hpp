@@ -45,8 +45,6 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
-  DEPRECATED("Use get_id", pinocchio::FrameIndex get_frame() const { return id_; };)
-
   /**
    * @brief Print relevant information of the 3d impulse model
    *
