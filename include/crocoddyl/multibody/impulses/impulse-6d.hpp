@@ -83,11 +83,11 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::dv0_dq;
   using Base::f;
   using Base::frame;
+  using Base::fXj;
   using Base::Jc;
   using Base::jMf;
   using Base::pinocchio;
 
-  typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;

@@ -88,6 +88,8 @@ void exposeImpulseAbstract() {
           "Create common data shared between impulse models.\n\n"
           ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+      .add_property("fXj", bp::make_getter(&ImpulseDataAbstract::fXj, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataAbstract::fXj), "action matrix from contact to local frames")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
       .add_property("dtau_dq", bp::make_getter(&ImpulseDataAbstract::dtau_dq, bp::return_internal_reference<>()),

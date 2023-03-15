@@ -97,11 +97,11 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::dv0_dq;
   using Base::f;
   using Base::frame;
+  using Base::fXj;
   using Base::Jc;
   using Base::jMf;
   using Base::pinocchio;
 
-  typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
   Vector3s v0_world;
   Force f_local;
   Matrix3xs dv0_local_dq;
