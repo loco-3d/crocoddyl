@@ -103,8 +103,11 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
 
   template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data), dv0_dq(model->get_nc(), model->get_state()->get_nv()) {
+      : Base(model, data),
+        dv0_dq(model->get_nc(), model->get_state()->get_nv()),
+        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     dv0_dq.setZero();
+    dtau_dq.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 
@@ -114,7 +117,9 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   using Base::Jc;
   using Base::jMf;
   using Base::pinocchio;
+
   MatrixXs dv0_dq;
+  MatrixXs dtau_dq;
 };
 
 }  // namespace crocoddyl

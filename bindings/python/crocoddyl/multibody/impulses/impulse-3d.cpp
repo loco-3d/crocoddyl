@@ -66,6 +66,10 @@ void exposeImpulse3D() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
                     "action matrix from impulse to local frames")
+      .add_property("f_local", bp::make_getter(&ImpulseData3D::f_local, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseData3D::f_local), "spatial contact force in local coordinates")
+      .add_property("dv0_local_dq", bp::make_getter(&ImpulseData3D::dv0_local_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseData3D::dv0_local_dq), "Jacobian of the desired local contact velocity")
       .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the impulse frame")
       .add_property("v_partial_dq", bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_internal_reference<>()),
