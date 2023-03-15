@@ -35,13 +35,45 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+
+  /**
+   * @brief Initialize the 6d impulse model
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] id     Reference frame id of the impulse
+   * @param[in] type   Type of impulse (default LOCAL)
+   */
   ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                     const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
   virtual ~ImpulseModel6DTpl();
 
+  /**
+   * @brief Compute the 3d impulse Jacobian
+   *
+   * @param[in] data  3d impulse data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the derivatives of the 3d impulse holonomic constraint
+   *
+   * @param[in] data  3d impulse data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   */
   virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Convert the force into a stack of spatial forces
+   *
+   * @param[in] data   3d impulse data
+   * @param[in] force  3d impulse
+   */
   virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
+
+  /**
+   * @brief Create the 3d impulse data
+   */
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   DEPRECATED("Use get_id", pinocchio::FrameIndex get_frame() const { return id_; };)
