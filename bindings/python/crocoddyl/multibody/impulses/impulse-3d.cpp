@@ -23,7 +23,7 @@ void exposeImpulse3D() {
       "It defines a rigid 3D impulse models (point impulse) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the impulse Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int, bp::optional<pinocchio::ReferenceFrame> >(
+      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bp::optional<pinocchio::ReferenceFrame> >(
           bp::args("self", "state", "frame", "type"),
           "Initialize the 3D impulse model.\n\n"
           ":param state: state of the multibody system\n"
@@ -64,8 +64,6 @@ void exposeImpulse3D() {
           "Create 3D impulse data.\n\n"
           ":param model: 3D impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from impulse to local frames")
       .add_property("f_local", bp::make_getter(&ImpulseData3D::f_local, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseData3D::f_local), "spatial contact force in local coordinates")
       .add_property("dv0_local_dq", bp::make_getter(&ImpulseData3D::dv0_local_dq, bp::return_internal_reference<>()),

@@ -99,14 +99,14 @@ boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> ActionModelFactory::
 
   switch (state_type) {
     case StateModelTypes::StateMultibody_HyQ:
-      impulse->addImpulse(
-          "lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "lf_foot"));
-      impulse->addImpulse(
-          "rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "rf_foot"));
-      impulse->addImpulse(
-          "lh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "lh_foot"));
-      impulse->addImpulse(
-          "rh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "rh_foot"));
+      impulse->addImpulse("lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, "lf_foot"));
+      impulse->addImpulse("rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, "rf_foot"));
+      impulse->addImpulse("lh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, "lh_foot"));
+      impulse->addImpulse("rh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, "rh_foot"));
       break;
     case StateModelTypes::StateMultibody_Talos:
       impulse->addImpulse("lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D_LOCAL,
