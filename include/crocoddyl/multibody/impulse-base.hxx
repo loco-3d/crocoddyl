@@ -13,8 +13,16 @@
 namespace crocoddyl {
 
 template <typename Scalar>
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                                                         const pinocchio::ReferenceFrame type, const std::size_t nc)
+    : state_(state), nc_(nc), id_(0), type_(type) {}
+
+template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
-    : state_(state), nc_(nc), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {}
+    : state_(state), nc_(nc), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+            << std::endl;
+}
 
 template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}

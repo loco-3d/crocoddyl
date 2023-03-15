@@ -25,10 +25,16 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "nc"),
-                                                       "Initialize the impulse model.\n\n"
-                                                       ":param state: state of the multibody system\n"
-                                                       ":param nc: dimension of impulse model"))
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame, std::size_t>(
+          bp::args("self", "state", "type", "nc"),
+          "Initialize the impulse model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param type: type of impulse\n"
+          ":param nc: dimension of impulse model"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nc"),
+                                                            "Initialize the impulse model.\n\n"
+                                                            ":param state: state of the multibody system\n"
+                                                            ":param nc: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"

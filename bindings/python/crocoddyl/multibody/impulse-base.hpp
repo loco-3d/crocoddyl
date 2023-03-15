@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,8 +20,15 @@ namespace python {
 
 class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
  public:
+  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                            std::size_t nc)
+      : ImpulseModelAbstract(state, type, nc) {}
+
   ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc)
-      : ImpulseModelAbstract(state, nc) {}
+      : ImpulseModelAbstract(state, pinocchio::ReferenceFrame::LOCAL, nc) {
+    std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+              << std::endl;
+  }
 
   void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");

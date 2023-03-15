@@ -29,7 +29,11 @@ class ImpulseModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);
+  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                          const std::size_t nc);
+
+  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
+             ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);)
   virtual ~ImpulseModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
