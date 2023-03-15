@@ -17,8 +17,6 @@
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
-#include "crocoddyl/multibody/frames-deprecated.hpp"
-
 namespace crocoddyl {
 
 template <typename _Scalar>
@@ -109,7 +107,6 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @brief Return the reference frame placement
    */
   const SE3& get_reference() const;
-  DEPRECATED("Use get_reference() or get_id()", FramePlacementTpl<Scalar> get_Mref() const;)
 
   /**
    * @brief Return the Baumgarte stabilization gains

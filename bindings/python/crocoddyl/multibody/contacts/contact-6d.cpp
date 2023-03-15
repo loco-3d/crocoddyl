@@ -10,7 +10,6 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -72,9 +71,6 @@ void exposeContact6D() {
            ":return contact data.")
       .add_property("reference", bp::make_function(&ContactModel6D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel6D::set_reference, "reference contact placement")
-      .add_property("Mref",
-                    bp::make_function(&ContactModel6D::get_Mref, deprecated<>("Deprecated. Use id or reference.")),
-                    "reference frame placement")
       .add_property("gains",
                     bp::make_function(&ContactModel6D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains")

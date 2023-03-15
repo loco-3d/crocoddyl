@@ -10,7 +10,6 @@
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -54,8 +53,6 @@ void exposeImpulse6D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("frame", bp::make_function(&ImpulseModel6D::get_id, deprecated<>("Deprecated. Use contact.id.")),
-                    "reference frame id")
       .def(CopyableVisitor<ImpulseModel6D>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseData6D> >();

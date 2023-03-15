@@ -15,7 +15,6 @@
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -34,7 +33,6 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-
 
   /**
    * @brief Initialize the 6d impulse model
@@ -75,8 +73,6 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @brief Create the 3d impulse data
    */
   virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
-
-  DEPRECATED("Use get_id", pinocchio::FrameIndex get_frame() const { return id_; };)
 
   /**
    * @brief Print relevant information of the 6d impulse model

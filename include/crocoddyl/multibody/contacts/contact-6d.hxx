@@ -168,16 +168,6 @@ const pinocchio::SE3Tpl<Scalar>& ContactModel6DTpl<Scalar>::get_reference() cons
   return pref_;
 }
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-template <typename Scalar>
-FramePlacementTpl<Scalar> ContactModel6DTpl<Scalar>::get_Mref() const {
-  return FramePlacementTpl<Scalar>(id_, pref_);
-}
-
-#pragma GCC diagnostic pop
-
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel6DTpl<Scalar>::get_gains() const {
   return gains_;

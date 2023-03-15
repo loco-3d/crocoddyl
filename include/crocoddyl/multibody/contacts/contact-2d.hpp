@@ -17,9 +17,6 @@
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-
-#include "crocoddyl/multibody/frames-deprecated.hpp"
 
 namespace crocoddyl {
 
@@ -63,12 +60,6 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const Vector2s& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
-                               const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
-  DEPRECATED("Use constructor which is not based on FrameTranslation.",
-             ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const FrameTranslationTpl<Scalar>& xref,
-                               const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel2DTpl();
 
   /**
@@ -106,8 +97,6 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @brief Return the reference frame translation
    */
   const Vector2s& get_reference() const;
-
-  DEPRECATED("Use get_reference() or get_id()", FrameTranslationTpl<Scalar> get_xref() const;)
 
   /**
    * @brief Create the 2d contact data
