@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ImpulseModel6DTpl<Scalar>::ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id)
-    : Base(state, 6) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6) {
   id_ = id;
 }
 

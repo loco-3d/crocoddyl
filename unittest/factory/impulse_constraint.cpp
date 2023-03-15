@@ -98,8 +98,8 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseConstraintModelFactory:
       break;
     case StateModelTypes::StateMultibody_HyQ:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, model_type,
-                                                                         frame_names[i]));
+        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                                         model_type, frame_names[i]));
       }
       break;
     default:

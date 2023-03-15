@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -19,8 +19,14 @@ const std::vector<ImpulseModelTypes::Type> ImpulseModelTypes::all(ImpulseModelTy
 
 std::ostream& operator<<(std::ostream& os, const ImpulseModelTypes::Type& type) {
   switch (type) {
-    case ImpulseModelTypes::ImpulseModel3D:
-      os << "ImpulseModel3D";
+    case ImpulseModelTypes::ImpulseModel3D_LOCAL:
+      os << "ImpulseModel3D_LOCAL";
+      break;
+    case ImpulseModelTypes::ImpulseModel3D_WORLD:
+      os << "ImpulseModel3D_WORLD";
+      break;
+    case ImpulseModelTypes::ImpulseModel3D_LWA:
+      os << "ImpulseModel3D_LWA";
       break;
     case ImpulseModelTypes::ImpulseModel6D:
       os << "ImpulseModel6D";
@@ -53,8 +59,15 @@ boost::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(I
     frame_id = state->get_pinocchio()->getFrameId(frame_name);
   }
   switch (impulse_type) {
-    case ImpulseModelTypes::ImpulseModel3D:
-      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, frame_id);
+    case ImpulseModelTypes::ImpulseModel3D_LOCAL:
+      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, frame_id, pinocchio::ReferenceFrame::LOCAL);
+      break;
+    case ImpulseModelTypes::ImpulseModel3D_WORLD:
+      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, frame_id, pinocchio::ReferenceFrame::WORLD);
+      break;
+    case ImpulseModelTypes::ImpulseModel3D_LWA:
+      impulse = boost::make_shared<crocoddyl::ImpulseModel3D>(state, frame_id,
+                                                              pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED);
       break;
     case ImpulseModelTypes::ImpulseModel6D:
       impulse = boost::make_shared<crocoddyl::ImpulseModel6D>(state, frame_id);
@@ -75,7 +88,7 @@ boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse() {
   boost::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
   ImpulseModelFactory factory;
   if (rand() % 2 == 0) {
-    impulse = factory.create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::RandomHumanoid);
+    impulse = factory.create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::RandomHumanoid);
   } else {
     impulse = factory.create(ImpulseModelTypes::ImpulseModel6D, PinocchioModelTypes::RandomHumanoid);
   }

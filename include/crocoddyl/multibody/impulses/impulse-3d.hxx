@@ -16,8 +16,9 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id)
-    : Base(state, 3) {
+ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                                             const pinocchio::ReferenceFrame type)
+    : Base(state, type, 3) {
   id_ = id;
 }
 
@@ -28,9 +29,17 @@ template <typename Scalar>
 void ImpulseModel3DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
-  d->Jc = d->fJf.template topRows<3>();
+
+  switch (type_) {
+    case pinocchio::ReferenceFrame::LOCAL:
+      d->Jc = d->fJf.template topRows<3>();
+      break;
+    case pinocchio::ReferenceFrame::WORLD:
+    case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+      d->Jc.noalias() = d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
+      break;
+  }
 }
 
 template <typename Scalar>
@@ -40,7 +49,21 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbst
   const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d->frame].parent;
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
-  d->dv0_dq.noalias() = d->fXj.template topRows<3>() * d->v_partial_dq;
+  d->dv0_local_dq.noalias() = d->fXj.template topRows<3>() * d->v_partial_dq;
+
+  switch (type_) {
+    case pinocchio::ReferenceFrame::LOCAL:
+      data->dv0_dq = d->dv0_local_dq;
+      break;
+    case pinocchio::ReferenceFrame::WORLD:
+    case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+      d->v0_world = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_).linear();
+      pinocchio::skew(d->v0_world, d->v0_world_skew);
+      d->dv0_dq.noalias() = oRf * d->dv0_local_dq;
+      d->dv0_dq.noalias() -= d->v0_world_skew * d->fJf.template bottomRows<3>();
+      break;
+  }
 }
 
 template <typename Scalar>

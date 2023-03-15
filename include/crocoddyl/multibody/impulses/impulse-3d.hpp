@@ -33,9 +33,11 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs Matrix3s;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id);
+  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                    const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
   virtual ~ImpulseModel3DTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -55,6 +57,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
  protected:
   using Base::id_;
   using Base::state_;
+  using Base::type_;
 };
 
 template <typename _Scalar>
@@ -64,20 +67,27 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::Matrix3s Matrix3s;
+  typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
   ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
+        dv0_local_dq(3, model->get_state()->get_nv()),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
     frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
     fXj = jMf.inverse().toActionMatrix();
+    v0_world.setZero();
+    dv0_local_dq.setZero();
     fJf.setZero();
     v_partial_dq.setZero();
     v_partial_dv.setZero();
+    v0_world_skew.setZero();
   }
 
   using Base::df_dx;
@@ -89,9 +99,12 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::pinocchio;
 
   typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
+  Vector3s v0_world;
+  Matrix3xs dv0_local_dq;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
+  Matrix3s v0_world_skew;
 };
 
 }  // namespace crocoddyl

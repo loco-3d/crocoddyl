@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,13 +100,13 @@ boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> ActionModelFactory::
   switch (state_type) {
     case StateModelTypes::StateMultibody_HyQ:
       impulse->addImpulse(
-          "lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::HyQ, "lf_foot"));
+          "lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "lf_foot"));
       impulse->addImpulse(
-          "rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::HyQ, "rf_foot"));
+          "rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "rf_foot"));
       impulse->addImpulse(
-          "lh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::HyQ, "lh_foot"));
+          "lh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "lh_foot"));
       impulse->addImpulse(
-          "rh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, PinocchioModelTypes::HyQ, "rh_foot"));
+          "rh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "rh_foot"));
       break;
     case StateModelTypes::StateMultibody_Talos:
       impulse->addImpulse("lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D,

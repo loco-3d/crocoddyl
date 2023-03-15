@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +18,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ImpulseModelTypes {
-  enum Type { ImpulseModel3D, ImpulseModel6D, NbImpulseModelTypes };
+  enum Type { ImpulseModel3D_LOCAL, ImpulseModel3D_WORLD, ImpulseModel3D_LWA, ImpulseModel6D, NbImpulseModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.reserve(NbImpulseModelTypes);

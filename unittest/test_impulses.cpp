@@ -87,7 +87,9 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type, Pino
 
   // Check that nothing has been computed and that all value are initialized to 0
   BOOST_CHECK(!data->Jc.isZero());
-  if (model_type == PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid body system.
+  if (model_type == PinocchioModelTypes::Hector &&
+      (impulse_type == ImpulseModelTypes::ImpulseModel3D_LOCAL ||
+       impulse_type == ImpulseModelTypes::ImpulseModel6D)) {  // this is due to Hector is a single rigid body system.
     BOOST_CHECK(data->dv0_dq.isZero());
   } else {
     BOOST_CHECK(!data->dv0_dq.isZero());
