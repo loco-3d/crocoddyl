@@ -18,7 +18,15 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ImpulseModelTypes {
-  enum Type { ImpulseModel3D_LOCAL, ImpulseModel3D_WORLD, ImpulseModel3D_LWA, ImpulseModel6D, NbImpulseModelTypes };
+  enum Type {
+    ImpulseModel3D_LOCAL,
+    ImpulseModel3D_WORLD,
+    ImpulseModel3D_LWA,
+    ImpulseModel6D_LOCAL,
+    ImpulseModel6D_WORLD,
+    ImpulseModel6D_LWA,
+    NbImpulseModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.reserve(NbImpulseModelTypes);

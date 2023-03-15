@@ -109,9 +109,9 @@ boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> ActionModelFactory::
           "rh", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL, PinocchioModelTypes::HyQ, "rh_foot"));
       break;
     case StateModelTypes::StateMultibody_Talos:
-      impulse->addImpulse("lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D,
+      impulse->addImpulse("lf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "left_sole_link"));
-      impulse->addImpulse("rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D,
+      impulse->addImpulse("rf", ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, "right_sole_link"));
       break;
     default:

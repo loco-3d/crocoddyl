@@ -24,10 +24,12 @@ void exposeImpulse6D() {
       "It defines a rigid 6D impulse models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the impulse Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "frame"),
-                                                       "Initialize the impulse model.\n\n"
-                                                       ":param state: state of the multibody system\n"
-                                                       ":param frame: reference frame id"))
+      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bp::optional<pinocchio::ReferenceFrame> >(
+          bp::args("self", "state", "frame", "type"),
+          "Initialize the impulse model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param type: type of impulse\n"
+          ":param frame: reference frame id"))
       .def("calc", &ImpulseModel6D::calc, bp::args("self", "data", "x"),
            "Compute the 6D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
@@ -65,8 +67,8 @@ void exposeImpulse6D() {
           "Create 6D impulse data.\n\n"
           ":param model: 6D impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("fXj", bp::make_getter(&ImpulseData6D::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from impulse to local frames")
+      .add_property("dv0_local_dq", bp::make_getter(&ImpulseData6D::dv0_local_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseData6D::dv0_local_dq), "Jacobian of the desired local contact velocity")
       .add_property("fJf", bp::make_getter(&ImpulseData6D::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the impulse frame")
       .add_property("v_partial_dq", bp::make_getter(&ImpulseData6D::v_partial_dq, bp::return_internal_reference<>()),

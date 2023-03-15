@@ -35,7 +35,8 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id);
+  ImpulseModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+                    const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
   virtual ~ImpulseModel6DTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
@@ -55,6 +56,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
  protected:
   using Base::id_;
   using Base::state_;
+  using Base::type_;
 };
 
 template <typename _Scalar>
@@ -63,11 +65,17 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ImpulseDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6xs Matrix6xs;
+  typedef typename pinocchio::SE3Tpl<Scalar> SE3;
+  typedef typename pinocchio::MotionTpl<Scalar> Motion;
 
   template <template <typename Scalar> class Model>
   ImpulseData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
+        lwaMl(SE3::Identity()),
+        v0_world(Motion::Zero()),
+        dv0_local_dq(6, model->get_state()->get_nv()),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
@@ -77,6 +85,8 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     fJf.setZero();
     v_partial_dq.setZero();
     v_partial_dv.setZero();
+    vv_world_skew.setZero();
+    vw_world_skew.setZero();
   }
 
   using Base::df_dx;
@@ -88,9 +98,14 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::jMf;
   using Base::pinocchio;
 
+  SE3 lwaMl;
+  Motion v0_world;
+  Matrix6xs dv0_local_dq;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
+  Matrix3s vv_world_skew;
+  Matrix3s vw_world_skew;
 };
 
 }  // namespace crocoddyl
