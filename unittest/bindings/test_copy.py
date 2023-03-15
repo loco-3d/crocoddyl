@@ -259,9 +259,9 @@ class ContactsTest(CopyModelTestCase):
     # impulse models
     MODEL.append(crocoddyl.ImpulseModelMultiple(state))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModelAbstract(state, 3))
+    MODEL.append(crocoddyl.ImpulseModelAbstract(state, pinocchio.LOCAL, 3))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id))
+    MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id, pinocchio.LOCAL))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ImpulseModel6D(state, frame_id))
     COLLECTOR.append(pdata)

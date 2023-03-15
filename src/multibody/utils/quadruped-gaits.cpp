@@ -173,8 +173,9 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   for (std::vector<pinocchio::FrameIndex>::const_iterator it = support_foot_ids.begin(); it != support_foot_ids.end();
        ++it) {
     boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model =
-        boost::make_shared<crocoddyl::ContactModel3D>(state_, *it, Eigen::Vector3d::Zero(), actuation_->get_nu(),
-                                                      Eigen::Vector2d(0., 50.));
+        boost::make_shared<crocoddyl::ContactModel3D>(state_, *it, Eigen::Vector3d::Zero(),
+                                                      pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED,
+                                                      actuation_->get_nu(), Eigen::Vector2d(0., 50.));
     contact_model->addContact(rmodel_.frames[*it].name + "_contact", support_contact_model);
   }
 
@@ -239,8 +240,9 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   for (std::vector<pinocchio::FrameIndex>::const_iterator it = support_foot_ids.begin(); it != support_foot_ids.end();
        ++it) {
     boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model =
-        boost::make_shared<crocoddyl::ContactModel3D>(state_, *it, Eigen::Vector3d::Zero(), actuation_->get_nu(),
-                                                      Eigen::Vector2d(0., 50.));
+        boost::make_shared<crocoddyl::ContactModel3D>(state_, *it, Eigen::Vector3d::Zero(),
+                                                      pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED,
+                                                      actuation_->get_nu(), Eigen::Vector2d(0., 50.));
     contact_model->addContact(rmodel_.frames[*it].name + "_contact", support_contact_model);
   }
 
@@ -294,7 +296,7 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   for (std::vector<pinocchio::FrameIndex>::const_iterator it = support_foot_ids.begin(); it != support_foot_ids.end();
        ++it) {
     boost::shared_ptr<crocoddyl::ImpulseModelAbstract> support_contact_model =
-        boost::make_shared<crocoddyl::ImpulseModel3D>(state_, *it);
+        boost::make_shared<crocoddyl::ImpulseModel3D>(state_, *it, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED);
     impulse_model->addImpulse(rmodel_.frames[*it].name + "_impulse", support_contact_model);
   }
 

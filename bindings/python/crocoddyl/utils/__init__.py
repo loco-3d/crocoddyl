@@ -1034,7 +1034,7 @@ class Contact6DDataDerived(crocoddyl.ContactDataAbstract):
 class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
 
     def __init__(self, state, frame):
-        crocoddyl.ImpulseModelAbstract.__init__(self, state, 3)
+        crocoddyl.ImpulseModelAbstract.__init__(self, state, pinocchio.ReferenceFrame.LOCAL, 3)
         self.frame = frame
 
     def calc(self, data, x):
@@ -1062,7 +1062,7 @@ class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
 class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
 
     def __init__(self, state, frame):
-        crocoddyl.ImpulseModelAbstract.__init__(self, state, 6)
+        crocoddyl.ImpulseModelAbstract.__init__(self, state, pinocchio.ReferenceFrame.LOCAL, 6)
         self.frame = frame
 
     def calc(self, data, x):

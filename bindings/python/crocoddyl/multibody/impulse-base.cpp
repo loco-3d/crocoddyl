@@ -32,9 +32,9 @@ void exposeImpulseAbstract() {
           ":param type: type of impulse\n"
           ":param nc: dimension of impulse model"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nc"),
-                                                            "Initialize the impulse model.\n\n"
-                                                            ":param state: state of the multibody system\n"
-                                                            ":param nc: dimension of impulse model"))
+                                                                    "Initialize the impulse model.\n\n"
+                                                                    ":param state: state of the multibody system\n"
+                                                                    ":param nc: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -90,6 +90,8 @@ void exposeImpulseAbstract() {
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
+      .add_property("dtau_dq", bp::make_getter(&ImpulseDataAbstract::dtau_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataAbstract::dtau_dq), "force contribution to dtau_dq")
       .def(CopyableVisitor<ImpulseDataAbstract>());
 }
 
