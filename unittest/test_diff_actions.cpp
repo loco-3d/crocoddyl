@@ -74,7 +74,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed) return;
   // create the model
   DifferentialActionModelFactory factory;
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type, false);
 
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();

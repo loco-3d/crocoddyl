@@ -93,16 +93,16 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> ContactConstraintM
     case StateModelTypes::StateMultibody_Talos:
     case StateModelTypes::StateMultibody_RandomHumanoid:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        contact->addContact(frame_names[i],
-                            ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL, model_type,
-                                                         frame_names[i], actuation->get_nu()));
+        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
+                                                                         model_type, Eigen::Vector2d::Random(),
+                                                                         frame_names[i], actuation->get_nu()));
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        contact->addContact(frame_names[i],
-                            ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, model_type,
-                                                         frame_names[i], actuation->get_nu()));
+        contact->addContact(frame_names[i], ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+                                                                         model_type, Eigen::Vector2d::Random(),
+                                                                         frame_names[i], actuation->get_nu()));
       }
       break;
     default:

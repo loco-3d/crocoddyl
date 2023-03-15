@@ -159,7 +159,7 @@ class Contact6DTest(ContactModelAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     Mref = pinocchio.SE3.Random()
     CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
-    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, gains)
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2023, University of Edinburgh, CTU, INRIA,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -71,7 +71,8 @@ class DifferentialActionModelFactory {
   explicit DifferentialActionModelFactory();
   ~DifferentialActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(DifferentialActionModelTypes::Type type,
+                                                                       bool with_baumgarte = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> create_freeFwdDynamics(
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
@@ -80,10 +81,12 @@ class DifferentialActionModelFactory {
       StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool constraints = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> create_contactFwdDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true,
+      bool with_baumgarte = true) const;
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> create_contactInvDynamics(
-      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true) const;
+      StateModelTypes::Type state_type, ActuationModelTypes::Type actuation_type, bool with_friction = true,
+      bool with_baumgarte = true) const;
 };
 
 }  // namespace unittest
