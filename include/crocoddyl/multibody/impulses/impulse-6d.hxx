@@ -73,8 +73,24 @@ void ImpulseModel6DTpl<Scalar>::updateForce(const boost::shared_ptr<ImpulseDataA
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 6)");
   }
+  Data* d = static_cast<Data*>(data.get());
   data->f = pinocchio::ForceTpl<Scalar>(force);
-  data->fext = data->jMf.act(data->f);
+  switch (type_) {
+    case pinocchio::ReferenceFrame::LOCAL:
+      data->fext = data->jMf.act(data->f);
+      data->dtau_dq.setZero();
+      break;
+    case pinocchio::ReferenceFrame::WORLD:
+    case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+      d->f_local = d->lwaMl.actInv(data->f);
+      data->fext = data->jMf.act(d->f_local);
+      pinocchio::skew(d->f_local.linear(), d->fv_skew);
+      pinocchio::skew(d->f_local.angular(), d->fw_skew);
+      d->fJf_df.template topRows<3>().noalias() = d->fv_skew * d->fJf.template bottomRows<3>();
+      d->fJf_df.template bottomRows<3>().noalias() = d->fw_skew * d->fJf.template bottomRows<3>();
+      d->dtau_dq.noalias() = -d->fJf.template topRows<3>().transpose() * d->fJf_df;
+      break;
+  }
 }
 
 template <typename Scalar>
