@@ -216,6 +216,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(Data* data, const Ei
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, data->pinocchio, q, data->pinocchio.dq_after,
                                                  data->vnone);
   impulses_->calcDiff(data->multibody.impulses, x);
+  impulses_->updateRneaDiff(data->multibody.impulses, data->pinocchio);
 
   Eigen::Block<MatrixXs> a_partial_dtau = data->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<MatrixXs> a_partial_da = data->Kinv.topRightCorner(nv, nc);

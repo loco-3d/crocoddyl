@@ -219,6 +219,33 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
 }
 
 template <typename Scalar>
+void ImpulseModelMultipleTpl<Scalar>::updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                                     pinocchio::DataTpl<Scalar>& pinocchio) const {
+  if (static_cast<std::size_t>(data->impulses.size()) != this->get_impulses().size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
+  }
+  typename ImpulseModelContainer::const_iterator it_m, end_m;
+  typename ImpulseDataContainer::const_iterator it_d, end_d;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
+    if (m_i->active) {
+      switch (m_i->impulse->get_type()) {
+        case pinocchio::ReferenceFrame::LOCAL:
+          break;
+        case pinocchio::ReferenceFrame::WORLD:
+        case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+          pinocchio.dtau_dq += d_i->dtau_dq;
+          break;
+      }
+    }
+  }
+}
+
+template <typename Scalar>
 boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > ImpulseModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<ImpulseDataMultiple>(Eigen::aligned_allocator<ImpulseDataMultiple>(), this, data);

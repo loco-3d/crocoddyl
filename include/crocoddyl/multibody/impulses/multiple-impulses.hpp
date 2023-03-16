@@ -161,6 +161,17 @@ class ImpulseModelMultipleTpl {
   void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dx) const;
 
   /**
+   * @brief Update the RNEA derivatives dtau_dq by adding the skew term
+   * (necessary for impulses expressed in LOCAL_WORLD_ALIGNED / WORLD)
+   * @brief as explained in this document :
+   * https://www.overleaf.com/read/tzvrrxxtntwk
+   *
+   * @param[in] data       Multi-contact data
+   * @param[in] pinocchio  Pinocchio data
+   */
+  void updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, pinocchio::DataTpl<Scalar>& pinocchio) const;
+
+  /**
    * @brief Create the multi-impulse data
    *
    * @param[in] data  Pinocchio data
