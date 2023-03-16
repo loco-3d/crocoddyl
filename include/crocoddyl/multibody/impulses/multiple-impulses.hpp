@@ -89,7 +89,7 @@ class ImpulseModelMultipleTpl {
    * Note that the memory is allocated for inactive impulses as well.
    *
    * @param[in] name     Impulse name
-   * @param[in] contact  Impulse model
+   * @param[in] impulse  Impulse model
    * @param[in] active   Impulse status (active by default)
    */
   void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true);
@@ -110,7 +110,7 @@ class ImpulseModelMultipleTpl {
   void changeImpulseStatus(const std::string& name, const bool active);
 
   /**
-   * @brief Compute the total contact Jacobian and contact acceleration
+   * @brief Compute the total impulse Jacobian and impulse velocity
    *
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -118,7 +118,7 @@ class ImpulseModelMultipleTpl {
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
-   * @brief Compute the derivatives of the contact holonomic constraint
+   * @brief Compute the derivatives of the impulse holonomic constraint
    *
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -189,12 +189,12 @@ class ImpulseModelMultipleTpl {
   std::size_t get_nc_total() const;
 
   /**
-   * @brief Return the names of the set of active contacts
+   * @brief Return the names of the set of active impulses
    */
   const std::set<std::string>& get_active_set() const;
 
   /**
-   * @brief Return the names of the set of inactive contacts
+   * @brief Return the names of the set of inactive impulses
    */
   const std::set<std::string>& get_inactive_set() const;
 
