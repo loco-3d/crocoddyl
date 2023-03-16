@@ -16,7 +16,6 @@
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -24,9 +23,6 @@ namespace python {
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_addContact_wrap, ContactModelMultiple::addContact, 2, 3)
 
 void exposeContactMultiple() {
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated signature has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
   // Register custom converters between std::map and Python dict
   typedef boost::shared_ptr<ContactItem> ContactItemPtr;
   typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
@@ -125,16 +121,6 @@ void exposeContactMultiple() {
       .add_property("nc_total", bp::make_function(&ContactModelMultiple::get_nc_total),
                     "dimension of the total contact vector")
       .add_property("nu", bp::make_function(&ContactModelMultiple::get_nu), "dimension of control vector")
-      .add_property("active",
-                    bp::make_function(&ContactModelMultiple::get_active,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property active_set")),
-                    "list of names of active contact items")
-      .add_property("inactive",
-                    bp::make_function(&ContactModelMultiple::get_inactive,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property inactive_set")),
-                    "list of names of inactive contact items")
       .add_property(
           "active_set",
           bp::make_function(&ContactModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
@@ -184,8 +170,6 @@ void exposeContactMultiple() {
                     "stack of contacts data")
       .def_readwrite("fext", &ContactDataMultiple::fext, "external spatial forces in join coordinates")
       .def(CopyableVisitor<ContactDataMultiple>());
-
-#pragma GCC diagnostic pop
 }
 
 }  // namespace python

@@ -225,26 +225,6 @@ class ContactModelMultipleTpl {
    */
   const std::set<std::string>& get_inactive_set() const;
 
-  DEPRECATED("get_active() is deprecated and will be replaced with get_active_set()",
-             const std::vector<std::string>& get_active() {
-               active_.clear();
-               active_.reserve(active_set_.size());
-               for (const auto& contact : active_set_) {
-                 active_.push_back(contact);
-               }
-               return active_;
-             };)
-
-  DEPRECATED("get_inactive() is deprecated and will be replaced with get_inactive_set()",
-             const std::vector<std::string>& get_inactive() {
-               inactive_.clear();
-               inactive_.reserve(inactive_set_.size());
-               for (const auto& contact : inactive_set_) {
-                 inactive_.push_back(contact);
-               }
-               return inactive_;
-             };)
-
   /**
    * @brief Return the status of a given contact name
    */
@@ -279,11 +259,6 @@ class ContactModelMultipleTpl {
   std::set<std::string> active_set_;
   std::set<std::string> inactive_set_;
   bool compute_all_contacts_;
-
-  // Vector variants. These are to maintain the API compatibility for the deprecated syntax.
-  // These will be removed in future versions along with get_active() / get_inactive()
-  std::vector<std::string> active_;
-  std::vector<std::string> inactive_;
 };
 
 /**

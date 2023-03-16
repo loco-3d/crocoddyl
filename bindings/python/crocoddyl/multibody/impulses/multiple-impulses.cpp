@@ -18,7 +18,6 @@
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -116,21 +115,6 @@ void exposeImpulseMultiple() {
       .add_property("nc", bp::make_function(&ImpulseModelMultiple::get_nc), "dimension of the active impulse vector")
       .add_property("nc_total", bp::make_function(&ImpulseModelMultiple::get_nc_total),
                     "dimension of the total impulse vector")
-      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_nc, deprecated<>("Deprecated. Use nc.")),
-                    "dimension of the active impulse vector")
-      .add_property("ni_total",
-                    bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
-                    "dimension of the total impulse vector")
-      .add_property("active",
-                    bp::make_function(&ImpulseModelMultiple::get_active,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property active_set")),
-                    "list of names of active contact items")
-      .add_property("inactive",
-                    bp::make_function(&ImpulseModelMultiple::get_inactive,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property inactive_set")),
-                    "list of names of inactive contact items")
       .add_property(
           "active_set",
           bp::make_function(&ImpulseModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),

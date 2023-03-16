@@ -241,17 +241,7 @@ std::size_t ImpulseModelMultipleTpl<Scalar>::get_nc() const {
 }
 
 template <typename Scalar>
-std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni() const {
-  return nc_;
-}
-
-template <typename Scalar>
 std::size_t ImpulseModelMultipleTpl<Scalar>::get_nc_total() const {
-  return nc_total_;
-}
-
-template <typename Scalar>
-std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
   return nc_total_;
 }
 
