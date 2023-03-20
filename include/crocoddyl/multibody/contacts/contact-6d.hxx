@@ -147,7 +147,7 @@ void ContactModel6DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
       pinocchio::skew(d->f_local.angular(), d->fw_skew);
       d->fJf_df.template topRows<3>().noalias() = d->fv_skew * d->fJf.template bottomRows<3>();
       d->fJf_df.template bottomRows<3>().noalias() = d->fw_skew * d->fJf.template bottomRows<3>();
-      d->dtau_dq.noalias() = -d->fJf.template topRows<3>().transpose() * d->fJf_df;
+      d->dtau_dq.noalias() = -d->fJf.transpose() * d->fJf_df;
       break;
   }
 }
