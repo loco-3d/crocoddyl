@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,16 +126,17 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> f_ext = u.tail(nc);
 
   d->xout = a;
+  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v, a);
+  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
+  contacts_->calc(d->multibody.contacts, x);
   contacts_->updateForce(d->multibody.contacts, f_ext);
   pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a, d->multibody.contacts->fext);
   pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
   pinocchio::centerOfMass(pinocchio_, d->pinocchio, q, v, a);
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
   actuation_->commands(d->multibody.actuation, x, d->pinocchio.tau);
   d->multibody.joint->a = a;
   d->multibody.joint->tau = d->multibody.actuation->u;
   actuation_->calc(d->multibody.actuation, x, d->multibody.joint->tau);
-  contacts_->calc(d->multibody.contacts, x);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   for (std::string name : contacts_->get_active_set()) {
