@@ -209,7 +209,7 @@ class SimpleBipedGaitProblem:
             supportContactModel = \
                 crocoddyl.ContactModel6D(self.state, i,
                                          pinocchio.SE3.Identity(),
-                                         pinocchio.LOCAL,
+                                         pinocchio.LOCAL_WORLD_ALIGNED,
                                          nu, np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
@@ -295,8 +295,8 @@ class SimpleBipedGaitProblem:
             nu = self.state.nv + 6 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ContactModel6D(self.state, i, pinocchio.SE3.Identity(), pinocchio.LOCAL,
-                                                           nu, np.array([0., 50.]))
+            supportContactModel = crocoddyl.ContactModel6D(self.state, i, pinocchio.SE3.Identity(),
+                                                           pinocchio.LOCAL_WORLD_ALIGNED, nu, np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -312,7 +312,7 @@ class SimpleBipedGaitProblem:
             for i in swingFootTask:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(self.state, i[0], i[1], nu)
                 frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i[0], pinocchio.Motion.Zero(),
-                                                                             pinocchio.LOCAL, nu)
+                                                                             pinocchio.LOCAL_WORLD_ALIGNED, nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, framePlacementResidual)
                 impulseFootVelCost = crocoddyl.CostModelResidual(self.state, frameVelocityResidual)
                 costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8)
@@ -362,7 +362,7 @@ class SimpleBipedGaitProblem:
         # Creating a 6D multi-contact model, and then including the supporting foot
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ImpulseModel6D(self.state, i)
+            supportContactModel = crocoddyl.ImpulseModel6D(self.state, i, pinocchio.LOCAL_WORLD_ALIGNED)
             impulseModel.addImpulse(self.rmodel.frames[i].name + "_impulse", supportContactModel)
 
         # Creating the cost model for a contact phase

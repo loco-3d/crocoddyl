@@ -440,8 +440,8 @@ class SimpleQuadrupedalGaitProblem:
             nu = self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), pinocchio.LOCAL, nu,
-                                                           np.array([0., 50.]))
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]),
+                                                           pinocchio.LOCAL_WORLD_ALIGNED, nu, np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -535,8 +535,8 @@ class SimpleQuadrupedalGaitProblem:
             nu = self.state.nv + 3 * len(supportFootIds)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]), pinocchio.LOCAL, nu,
-                                                           np.array([0., 50.]))
+            supportContactModel = crocoddyl.ContactModel3D(self.state, i, np.array([0., 0., 0.]),
+                                                           pinocchio.LOCAL_WORLD_ALIGNED, nu, np.array([0., 50.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -552,7 +552,7 @@ class SimpleQuadrupedalGaitProblem:
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(self.state, i[0], i[1].translation,
                                                                                    nu)
                 frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(self.state, i[0], pinocchio.Motion.Zero(),
-                                                                             pinocchio.LOCAL, nu)
+                                                                             pinocchio.LOCAL_WORLD_ALIGNED, nu)
                 footTrack = crocoddyl.CostModelResidual(self.state, frameTranslationResidual)
                 impulseFootVelCost = crocoddyl.CostModelResidual(self.state, frameVelocityResidual)
                 costModel.addCost(self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7)
@@ -602,7 +602,7 @@ class SimpleQuadrupedalGaitProblem:
         # Creating a 3D multi-contact model, and then including the supporting foot
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
         for i in supportFootIds:
-            supportContactModel = crocoddyl.ImpulseModel3D(self.state, i)
+            supportContactModel = crocoddyl.ImpulseModel3D(self.state, i, pinocchio.LOCAL_WORLD_ALIGNED)
             impulseModel.addImpulse(self.rmodel.frames[i].name + "_impulse", supportContactModel)
 
         # Creating the cost model for a contact phase
