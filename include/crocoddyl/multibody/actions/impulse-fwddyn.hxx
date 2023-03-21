@@ -166,7 +166,6 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(Data* data, const Eigen:
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
   pinocchio::computeAllTerms(pinocchio_, data->pinocchio, q, v);
-  pinocchio::updateFramePlacements(pinocchio_, data->pinocchio);
   pinocchio::computeCentroidalMomentum(pinocchio_, data->pinocchio);
 
   if (!with_armature_) {

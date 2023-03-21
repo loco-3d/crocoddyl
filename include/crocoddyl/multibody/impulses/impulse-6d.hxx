@@ -28,6 +28,7 @@ template <typename Scalar>
 void ImpulseModel6DTpl<Scalar>::calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
                                      const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(), *d->pinocchio, id_);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
