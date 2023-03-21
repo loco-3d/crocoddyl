@@ -113,6 +113,17 @@ void ContactModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+      // Recalculate the constrained accelerations after imposing contact constraints.
+      // This is necessary for the forward-dynamics case.
+      d->a0_local = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+      if (gains_[0] != 0.) {
+        d->a0_local += gains_[0] * pinocchio::log6(d->rMf);
+      }
+      if (gains_[1] != 0.) {
+        d->a0_local += gains_[1] * d->v;
+      }
+      data->a0.noalias() = d->lwaMl.act(d->a0_local).toVector();
+
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
       pinocchio::skew(d->a0.template head<3>(), d->av_skew);
       pinocchio::skew(d->a0.template tail<3>(), d->aw_skew);
