@@ -180,16 +180,12 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
   d->Kinv.resize(nv + nc, nv + nc);
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
+  contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc),
                                                d->Kinv);
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
   contacts_->calcDiff(d->multibody.contacts, x);
-
-  // Add skew term to rnea derivative for contacs expressed in
-  // LOCAL_WORLD_ALIGNED / WORLD see https://www.overleaf.com/read/tzvrrxxtntwk for
-  // detailed calculations
-  contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
 
   const Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   const Eigen::Block<MatrixXs> a_partial_da = d->Kinv.topRightCorner(nv, nc);
