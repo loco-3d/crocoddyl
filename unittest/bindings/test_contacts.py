@@ -152,14 +152,36 @@ class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
         }.items()))
 
 
-class Contact6DTest(ContactModelAbstractTestCase):
+class Contact6DLocalTest(ContactModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     gains = pinocchio.utils.rand(2)
     Mref = pinocchio.SE3.Random()
     CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
-    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.LOCAL, gains)
+
+
+class Contact6DWorldTest(ContactModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    Mref = pinocchio.SE3.Random()
+    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.WORLD, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref, pinocchio.WORLD, gains)
+
+
+class Contact6DLocalWorldAlignedTest(ContactModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    gains = pinocchio.utils.rand(2)
+    Mref = pinocchio.SE3.Random()
+    CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref,
+                                       pinocchio.LOCAL_WORLD_ALIGNED, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, ROBOT_MODEL.getFrameId('r_sole'), Mref,
+                                        pinocchio.LOCAL_WORLD_ALIGNED, gains)
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
@@ -181,8 +203,8 @@ class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):
 if __name__ == '__main__':
     # test to be run
     test_classes_to_run = [
-        Contact3DLocalTest, Contact3DWorldTest, Contact3DLocalWorldAlignedTest, Contact3DMultipleTest, Contact6DTest,
-        Contact6DMultipleTest
+        Contact3DLocalTest, Contact3DWorldTest, Contact3DLocalWorldAlignedTest, Contact3DMultipleTest,
+        Contact6DLocalTest, Contact6DWorldTest, Contact6DLocalWorldAlignedTest, Contact6DMultipleTest
     ]
     loader = unittest.TestLoader()
     suites_list = []
