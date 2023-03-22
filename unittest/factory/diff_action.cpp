@@ -370,9 +370,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
     case StateModelTypes::StateMultibody_HyQ:
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, 0.25 * gains, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_WORLD,
                                                              PinocchioModelTypes::HyQ, 0.25 * gains, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LWA,
                                                              PinocchioModelTypes::HyQ, 0.25 * gains, "lh_foot", nu));
       contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, 0.25 * gains, "rh_foot", nu));
@@ -429,7 +429,7 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, gains, "left_sole_link", nu));
       contact->addContact(
-          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL, PinocchioModelTypes::Talos,
+          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_WORLD, PinocchioModelTypes::Talos,
                                              gains, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone
@@ -540,9 +540,9 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, gains, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_WORLD,
                                                              PinocchioModelTypes::HyQ, gains, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LWA,
                                                              PinocchioModelTypes::HyQ, gains, "lh_foot", nu));
       contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
                                                              PinocchioModelTypes::HyQ, gains, "rh_foot", nu));
@@ -602,7 +602,7 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
                                                              PinocchioModelTypes::Talos, gains, "left_sole_link", nu));
       contact->addContact(
-          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL, PinocchioModelTypes::Talos,
+          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_WORLD, PinocchioModelTypes::Talos,
                                              gains, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone
