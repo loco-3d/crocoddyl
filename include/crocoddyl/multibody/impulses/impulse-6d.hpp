@@ -33,6 +33,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::Matrix3s Matrix3s;
 
   /**
    * @brief Initialize the 6d impulse model
@@ -104,7 +105,7 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   ImpulseData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         lwaMl(SE3::Identity()),
-        v0_world(Motion::Zero()),
+        v0(Motion::Zero()),
         f_local(Force::Zero()),
         dv0_local_dq(6, model->get_state()->get_nv()),
         fJf(6, model->get_state()->get_nv()),
@@ -117,6 +118,8 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     fJf.setZero();
     v_partial_dq.setZero();
     v_partial_dv.setZero();
+    vv_skew.setZero();
+    vw_skew.setZero();
     vv_world_skew.setZero();
     vw_world_skew.setZero();
     fv_skew.setZero();
@@ -134,12 +137,14 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::pinocchio;
 
   SE3 lwaMl;
-  Motion v0_world;
+  Motion v0;
   Force f_local;
   Matrix6xs dv0_local_dq;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
+  Matrix3s vv_skew;
+  Matrix3s vw_skew;
   Matrix3s vv_world_skew;
   Matrix3s vw_world_skew;
   Matrix3s fv_skew;

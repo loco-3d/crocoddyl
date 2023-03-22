@@ -59,8 +59,11 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbst
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-      d->v0_world = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_).linear();
-      pinocchio::skew(d->v0_world, d->v0_world_skew);
+      d->v0 = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_,
+                                          pinocchio::LOCAL_WORLD_ALIGNED)
+                  .linear();
+      pinocchio::skew(d->v0, d->v0_skew);
+      d->v0_world_skew.noalias() = d->v0_skew * oRf;
       data->dv0_dq.noalias() = oRf * d->dv0_local_dq;
       data->dv0_dq.noalias() -= d->v0_world_skew * d->fJf.template bottomRows<3>();
       break;
@@ -103,7 +106,7 @@ boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModel3DTpl<Scalar>::cr
 
 template <typename Scalar>
 void ImpulseModel3DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ImpulseModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << "}";
+  os << "ImpulseModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << ", type=" << type_ << "}";
 }
 
 }  // namespace crocoddyl

@@ -113,11 +113,12 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     frame = model->get_id();
     jMf = model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
     fXj = jMf.inverse().toActionMatrix();
-    v0_world.setZero();
+    v0.setZero();
     dv0_local_dq.setZero();
     fJf.setZero();
     v_partial_dq.setZero();
     v_partial_dv.setZero();
+    v0_skew.setZero();
     v0_world_skew.setZero();
     f_skew.setZero();
     fJf_df.setZero();
@@ -132,12 +133,13 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   using Base::jMf;
   using Base::pinocchio;
 
-  Vector3s v0_world;
+  Vector3s v0;
   Force f_local;
   Matrix3xs dv0_local_dq;
   Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs v_partial_dv;
+  Matrix3s v0_skew;
   Matrix3s v0_world_skew;
   Matrix3s f_skew;
   Matrix3xs fJf_df;
