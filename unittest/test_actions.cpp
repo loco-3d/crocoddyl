@@ -260,12 +260,24 @@ bool init_function() {
   }
 
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    for (size_t j = 0; j < IntegratorTypes::all.size(); ++j) {
-      for (size_t k = 0; k < ControlTypes::all.size(); ++k) {
-        register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::all[j],
-                                                    ControlTypes::all[k]);
-      }
-    }
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
+                                                ControlTypes::PolyZero);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
+                                                ControlTypes::PolyZero);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
+                                                ControlTypes::PolyOne);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
+                                                ControlTypes::PolyZero);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
+                                                ControlTypes::PolyOne);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
+                                                ControlTypes::PolyTwoRK3);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
+                                                ControlTypes::PolyZero);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
+                                                ControlTypes::PolyOne);
+    register_integrated_action_model_unit_tests(DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
+                                                ControlTypes::PolyTwoRK4);
   }
 
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
