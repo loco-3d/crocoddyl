@@ -30,7 +30,7 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
                                                       pinocchio.utils.zero(nv))
 
-    def test_ni_dimension(self):
+    def test_nc_dimension(self):
         self.assertEqual(self.IMPULSE.nc, self.IMPULSE_DER.nc, "Wrong ni.")
 
     def test_calc(self):
@@ -50,6 +50,16 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.dv0_dq, self.data_der.dv0_dq, atol=1e-9),
                         "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
+
+    def test_updateForce(self):
+        # Run updateForce for both action models
+        self.IMPULSE.calc(self.data, self.x)
+        self.IMPULSE_DER.calc(self.data_der, self.x)
+        force = np.random.rand(self.IMPULSE.nc)
+        self.IMPULSE.updateForce(self.data, force)
+        self.IMPULSE_DER.updateForce(self.data_der, force)
+        self.assertTrue(np.allclose(self.data.fext.vector, self.data_der.fext.vector, atol=1e-9),
+                        "Wrong external spatial force.")
 
 
 class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):

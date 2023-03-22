@@ -1143,6 +1143,23 @@ class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
         data = Impulse3DDataDerived(self, data)
         return data
 
+    def updateForce(self, data, force):
+        assert (force.shape[0] == 3)
+        nv = self.state.nv
+        data.f.linear = force
+        data.f.angular = np.zeros(3)
+        if self.type == pinocchio.LOCAL:
+            data.fext = data.jMf.act(data.f)
+            data.dtau_dq[:, :] = np.zeros((nv, nv))
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            oRf = data.pinocchio.oMf[self.id].rotation
+            data.f_local.linear = np.dot(oRf.T, force)
+            data.f_local.angular = np.zeros(3)
+            data.fext = data.jMf.act(data.f_local)
+            data.f_skew[:, :] = pinocchio.skew(data.f_local.linear)
+            data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
+            data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
+
 
 class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
 
@@ -1151,9 +1168,12 @@ class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
         self.jMf = model.state.pinocchio.frames[model.id].placement
         self.fXj = self.jMf.inverse().action
         self.v0_world = np.zeros(3)
+        self.f_local = pinocchio.Force.Zero()
         self.dv0_local_dq = np.zeros((3, model.state.nv))
         self.fJf = np.zeros((6, model.state.nv))
         self.v0_world_skew = np.zeros((3, 3))
+        self.f_skew = np.zeros((3, 3))
+        self.fJf_df = np.zeros((3, model.state.nv))
 
 
 class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
@@ -1191,6 +1211,22 @@ class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
         data = Impulse6DDataDerived(self, data)
         return data
 
+    def updateForce(self, data, force):
+        assert (force.shape[0] == 6)
+        nv = self.state.nv
+        data.f = pinocchio.Force(force)
+        if self.type == pinocchio.LOCAL:
+            data.fext = data.jMf.act(data.f)
+            data.dtau_dq[:, :] = np.zeros((nv, nv))
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            data.f_local = data.lwaMl.actInv(data.f)
+            data.fext = data.jMf.act(data.f_local)
+            data.fv_skew[:, :] = pinocchio.skew(data.f_local.linear)
+            data.fw_skew[:, :] = pinocchio.skew(data.f_local.angular)
+            data.fJf_df[:3, :] = np.dot(data.fv_skew, data.fJf[3:, :])
+            data.fJf_df[3:, :] = np.dot(data.fw_skew, data.fJf[3:, :])
+            data.dtau_dq[:, :] = -np.dot(data.fJf.T, data.fJf_df)
+
 
 class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
 
@@ -1200,10 +1236,14 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
         self.fXj = self.jMf.inverse().action
         self.lwaMl = pinocchio.SE3.Identity()
         self.v0_world = pinocchio.Motion.Zero()
+        self.f_local = pinocchio.Force.Zero()
         self.dv0_local_dq = np.zeros((6, model.state.nv))
         self.fJf = np.zeros((6, model.state.nv))
         self.vv_world_skew = np.zeros((3, 3))
         self.vw_world_skew = np.zeros((3, 3))
+        self.fv_skew = np.zeros((3, 3))
+        self.fw_skew = np.zeros((3, 3))
+        self.fJf_df = np.zeros((6, model.state.nv))
 
 
 class DDPDerived(crocoddyl.SolverAbstract):
