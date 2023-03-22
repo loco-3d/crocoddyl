@@ -42,7 +42,7 @@ class ContactModelAbstractTestCase(unittest.TestCase):
         self.assertTrue(np.allclose(self.data.a0, self.data_der.a0, atol=1e-9), "Wrong drift acceleration (a0).")
 
     def test_calcDiff(self):
-        # Run calc for both action models
+        # Run calcDiff for both action models
         self.CONTACT.calc(self.data, self.x)
         self.CONTACT.calcDiff(self.data, self.x)
         self.CONTACT_DER.calc(self.data_der, self.x)
@@ -50,6 +50,16 @@ class ContactModelAbstractTestCase(unittest.TestCase):
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.da0_dx, self.data_der.da0_dx, atol=1e-9),
                         "Wrong derivatives of the desired contact acceleration (da0_dx).")
+
+    def test_updateForce(self):
+        # Run updateForce for both action models
+        self.CONTACT.calc(self.data, self.x)
+        self.CONTACT_DER.calc(self.data_der, self.x)
+        force = np.random.rand(self.CONTACT.nc)
+        self.CONTACT.updateForce(self.data, force)
+        self.CONTACT_DER.updateForce(self.data_der, force)
+        self.assertTrue(np.allclose(self.data.fext.vector, self.data_der.fext.vector, atol=1e-9),
+                        "Wrong external spatial force.")
 
 
 class ContactModelMultipleAbstractTestCase(unittest.TestCase):

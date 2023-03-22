@@ -955,12 +955,30 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
         data = Contact3DDataDerived(self, data)
         return data
 
+    def updateForce(self, data, force):
+        assert (force.shape[0] == 3)
+        nv = self.state.nv
+        data.f.linear = force
+        data.f.angular = np.zeros(3)
+        if self.type == pinocchio.LOCAL:
+            data.fext = data.jMf.act(data.f)
+            data.dtau_dq[:, :] = np.zeros((nv, nv))
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            oRf = data.pinocchio.oMf[self.id].rotation
+            data.f_local.linear = np.dot(oRf.T, force)
+            data.f_local.angular = np.zeros(3)
+            data.fext = data.jMf.act(data.f_local)
+            data.f_skew[:, :] = pinocchio.skew(data.f_local.linear)
+            data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
+            data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
+
 
 class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
 
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
-        self.fXj = model.state.pinocchio.frames[model.id].placement.inverse().action
+        self.jMf = model.state.pinocchio.frames[model.id].placement
+        self.fXj = self.jMf.inverse().action
         self.v = pinocchio.Motion.Zero()
         self.a0_local = np.zeros(3)
         self.vw = np.zeros(3)
@@ -980,6 +998,7 @@ class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
         self.fXjdv_dq = np.zeros((6, model.state.nv))
         self.fXjda_dq = np.zeros((6, model.state.nv))
         self.fXjda_dv = np.zeros((6, model.state.nv))
+        self.fJf_df = np.zeros((3, model.state.nv))
 
 
 class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
@@ -1051,22 +1070,43 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
         data = Contact6DDataDerived(self, data)
         return data
 
+    def updateForce(self, data, force):
+        assert (force.shape[0] == 6)
+        nv = self.state.nv
+        data.f = pinocchio.Force(force)
+        if self.type == pinocchio.LOCAL:
+            data.fext = data.jMf.act(data.f)
+            data.dtau_dq[:, :] = np.zeros((nv, nv))
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            data.f_local = data.lwaMl.actInv(data.f)
+            data.fext = data.jMf.act(data.f_local)
+            data.fv_skew[:, :] = pinocchio.skew(data.f_local.linear)
+            data.fw_skew[:, :] = pinocchio.skew(data.f_local.angular)
+            data.fJf_df[:3, :] = np.dot(data.fv_skew, data.fJf[3:, :])
+            data.fJf_df[3:, :] = np.dot(data.fw_skew, data.fJf[3:, :])
+            data.dtau_dq[:, :] = -np.dot(data.fJf.T, data.fJf_df)
+
 
 class Contact6DDataDerived(crocoddyl.ContactDataAbstract):
 
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
-        self.fXj = model.state.pinocchio.frames[model.id].placement.inverse().action
+        self.jMf = model.state.pinocchio.frames[model.id].placement
+        self.fXj = self.jMf.inverse().action
         self.fMf = pinocchio.SE3.Identity()
         self.lwaMl = pinocchio.SE3.Identity()
         self.v = pinocchio.Motion.Zero()
         self.a0_local = pinocchio.Motion.Zero()
+        self.f_local = pinocchio.Force.Zero()
         self.da0_local_dx = np.zeros((6, model.state.ndx))
         self.fJf = np.zeros((6, model.state.nv))
         self.av_world_skew = np.zeros((3, 3))
         self.aw_world_skew = np.zeros((3, 3))
         self.av_skew = np.zeros((3, 3))
         self.aw_skew = np.zeros((3, 3))
+        self.fv_skew = np.zeros((3, 3))
+        self.fw_skew = np.zeros((3, 3))
+        self.fJf_df = np.zeros((6, model.state.nv))
 
 
 class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
