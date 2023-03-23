@@ -1136,7 +1136,7 @@ class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
             data.v0[:] = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id,
                                                     pinocchio.LOCAL_WORLD_ALIGNED).linear
             data.v0_skew[:, :] = pinocchio.skew(data.v0)
-            data.v0_world_skew[:, :] = np.dot(data.v0, oRf)
+            data.v0_world_skew[:, :] = np.dot(data.v0_skew, oRf)
             data.dv0_dq[:, :] = np.dot(oRf, data.dv0_local_dq)
             data.dv0_dq[:, :] -= np.dot(data.v0_world_skew, data.fJf[3:, :])
 
