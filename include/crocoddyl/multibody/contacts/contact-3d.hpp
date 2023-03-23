@@ -156,6 +156,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ContactData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
+        v(Motion::Zero()),
         f_local(Force::Zero()),
         da0_local_dx(3, model->get_state()->get_ndx()),
         fJf(6, model->get_state()->get_nv()),
@@ -183,6 +184,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     vw_skew.setZero();
     a0_skew.setZero();
     a0_world_skew.setZero();
+    dp_skew.setZero();
     f_skew.setZero();
     fXjdv_dq.setZero();
     fXjda_dq.setZero();
