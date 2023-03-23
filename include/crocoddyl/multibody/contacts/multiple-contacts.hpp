@@ -174,8 +174,9 @@ class ContactModelMultipleTpl {
   /**
    * @brief Update the RNEA derivatives dtau_dq by adding the skew term
    * (necessary for contacts expressed in LOCAL_WORLD_ALIGNED / WORLD)
-   * @brief as explained in this document :
-   * https://www.overleaf.com/read/tzvrrxxtntwk
+   *
+   * To learn more about the computation of the contact derivatives in different frames see
+   * https://hal.science/hal-03758989/document.
    *
    * @param[in] data       Multi-contact data
    * @param[in] pinocchio  Pinocchio data

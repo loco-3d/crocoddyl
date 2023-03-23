@@ -196,6 +196,7 @@ and the following one to reference this website:
    year = {2019}
 }
 ```
+Please consider to cite our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
 
 **Crocoddyl** contributions go beyond efficient software implementation as well. Please also consider to cite the algorithm contributions of our different solvers and formulations:
  - Feasibility-driven DDP (FDDP): [[1]](#1)
@@ -205,31 +206,29 @@ and the following one to reference this website:
 
 Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
 
-Below, there is list of the selected publications that describe different components of **Crocoddyl**. For a complete list see [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
-
 
 ### Selected publications
 <a id="1">[1]</a>
 C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 <a id="2">[2]</a>
-C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard, S. Vijayakumar. [A Feasibility-Driven Approach
+C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard and S. Vijayakumar. [A Feasibility-Driven Approach
 to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), Autonomous Robots, 2022
 
 <a id="3">[3]</a>
-C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonnea and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), 2022
+C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonneau and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), IEEE Transactions on Robotics, 2023
 
 
 ## Questions and Issues
 
-You have a question or an issue? You may either directly open a [new issue](https://github.com/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
+You have a question or an issue? Please open a [new issue](https://github.com/loco-3d/crocoddyl/issues).
 
 
 ## Steering Committee
 
 **Crocoddyl** is being managed by a steering committee which meets every two weeks to discuss the ongoing developments.
 
-The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh) and [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS).
+The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/) (Heriot-Watt University),
 [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS) and [Justin Carpentier](https://jcarpent.github.io/) (INRIA) are other members of the committee.
 
 
@@ -238,7 +237,7 @@ The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/) (U
 The following people have been involved in the development of **Crocoddyl**:
 
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor and main developer
-- [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh): main developer
+- [Carlos Mastalli](https://cmastalli.github.io/) (Heriot-Watt University): main developer
 - [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): main developer
 - [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives, conda integration
 - [Andrea Del Prete](https://andreadelprete.github.io/) (UNITN): feature extension
@@ -252,5 +251,5 @@ The following people have been involved in the development of **Crocoddyl**:
 
 ## Acknowledgments
 
-The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
+The development of **Crocoddyl** was supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
 It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), the [Robot Motor Intelligence (RoMI) Lab](https://www.romilab.org) [@Heriot-Watt University](https://www.edinburgh-robotics.org/), and the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](https://www.inria.fr/fr/centre-inria-de-paris).

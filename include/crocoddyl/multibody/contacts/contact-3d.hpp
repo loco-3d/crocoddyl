@@ -41,6 +41,9 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the 3d contact model
    *
+   * To learn more about the computation of the contact derivatives in different frames see
+   * https://hal.science/hal-03758989/document.
+   *
    * @param[in] state  State of the multibody system
    * @param[in] id     Reference frame id of the contact
    * @param[in] xref   Contact position used for the Baumgarte stabilization
@@ -55,7 +58,8 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the 3d contact model
    *
-   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`.
+   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`. To learn more about the computation of the contact
+   * derivatives in different frames see https://hal.science/hal-03758989/document.
    *
    * @param[in] state  State of the multibody system
    * @param[in] id     Reference frame id of the contact
