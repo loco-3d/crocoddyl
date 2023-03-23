@@ -1133,9 +1133,10 @@ class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
             data.dv0_dq[:, :] = data.dv0_local_dq
         if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
             oRf = data.pinocchio.oMf[self.id].rotation
-            data.v0_world[:] = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id,
-                                                          self.type).linear
-            data.v0_world_skew[:, :] = pinocchio.skew(data.v0_world)
+            data.v0[:] = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id,
+                                                    pinocchio.LOCAL_WORLD_ALIGNED).linear
+            data.v0_skew[:, :] = pinocchio.skew(data.v0)
+            data.v0_world_skew[:, :] = np.dot(data.v0, oRf)
             data.dv0_dq[:, :] = np.dot(oRf, data.dv0_local_dq)
             data.dv0_dq[:, :] -= np.dot(data.v0_world_skew, data.fJf[3:, :])
 
@@ -1167,10 +1168,11 @@ class Impulse3DDataDerived(crocoddyl.ImpulseDataAbstract):
         crocoddyl.ImpulseDataAbstract.__init__(self, model, data)
         self.jMf = model.state.pinocchio.frames[model.id].placement
         self.fXj = self.jMf.inverse().action
-        self.v0_world = np.zeros(3)
+        self.v0 = np.zeros(3)
         self.f_local = pinocchio.Force.Zero()
         self.dv0_local_dq = np.zeros((3, model.state.nv))
         self.fJf = np.zeros((6, model.state.nv))
+        self.v0_skew = np.zeros((3, 3))
         self.v0_world_skew = np.zeros((3, 3))
         self.f_skew = np.zeros((3, 3))
         self.fJf_df = np.zeros((3, model.state.nv))
@@ -1200,9 +1202,12 @@ class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
         if self.type == pinocchio.LOCAL:
             data.dv0_dq[:, :] = data.dv0_local_dq
         if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
-            data.v0_world = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id, self.type)
-            data.vv_world_skew[:, :] = pinocchio.skew(data.v0_world.linear)
-            data.vw_world_skew[:, :] = pinocchio.skew(data.v0_world.angular)
+            oRf = data.pinocchio.oMf[self.id].rotation
+            data.v0 = pinocchio.getFrameVelocity(self.state.pinocchio, data.pinocchio, self.id, self.type)
+            data.vv_skew[:, :] = pinocchio.skew(data.v0.linear)
+            data.vw_skew[:, :] = pinocchio.skew(data.v0.angular)
+            data.vv_world_skew[:, :] = np.dot(data.vv_skew, oRf)
+            data.vw_world_skew[:, :] = np.dot(data.vw_skew, oRf)
             data.dv0_dq[:, :] = np.dot(data.lwaMl.toActionMatrix(), data.dv0_local_dq)
             data.dv0_dq[:3, :] -= np.dot(data.vv_world_skew, data.fJf[3:, :])
             data.dv0_dq[3:, :] -= np.dot(data.vw_world_skew, data.fJf[3:, :])
@@ -1235,10 +1240,12 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
         self.jMf = model.state.pinocchio.frames[model.id].placement
         self.fXj = self.jMf.inverse().action
         self.lwaMl = pinocchio.SE3.Identity()
-        self.v0_world = pinocchio.Motion.Zero()
+        self.v0 = pinocchio.Motion.Zero()
         self.f_local = pinocchio.Force.Zero()
         self.dv0_local_dq = np.zeros((6, model.state.nv))
         self.fJf = np.zeros((6, model.state.nv))
+        self.vv_skew = np.zeros((3, 3))
+        self.vw_skew = np.zeros((3, 3))
         self.vv_world_skew = np.zeros((3, 3))
         self.vw_world_skew = np.zeros((3, 3))
         self.fv_skew = np.zeros((3, 3))
