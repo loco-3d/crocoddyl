@@ -57,7 +57,7 @@ void ImpulseModel6DTpl<Scalar>::calcDiff(const boost::shared_ptr<ImpulseDataAbst
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-    const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
       d->v0 = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_, type_);
       pinocchio::skew(d->v0.linear(), d->vv_skew);
       pinocchio::skew(d->v0.angular(), d->vw_skew);
