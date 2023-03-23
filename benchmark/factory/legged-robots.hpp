@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,15 +105,15 @@ void build_contact_action_models(RobotEENames robotNames,
     switch (robotNames.contact_types[i]) {
       case Contact3D: {
         boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel3D>(
-            state, model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero(), actuation->get_nu(),
-            Vector2s(Scalar(0.), Scalar(50.)));
+            state, model.getFrameId(robotNames.contact_names[i]), Eigen::Vector3d::Zero(),
+            pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
         contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
         break;
       }
       case Contact6D: {
         boost::shared_ptr<ContactModelAbstract> support_contact = boost::make_shared<ContactModel6D>(
             state, model.getFrameId(robotNames.contact_names[i]), pinocchio::SE3Tpl<Scalar>::Identity(),
-            actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+            pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
         contact_models->addContact(model.frames[model.getFrameId(robotNames.contact_names[i])].name, support_contact);
         break;
       }
