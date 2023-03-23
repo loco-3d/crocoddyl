@@ -227,7 +227,6 @@ class ImpulseModelMultipleTpl {
   std::size_t nc_total_;
   std::set<std::string> active_set_;
   std::set<std::string> inactive_set_;
-
 };
 
 /**
