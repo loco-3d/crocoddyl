@@ -166,7 +166,6 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(Data* data, const Eigen:
 
   // Computing the forward dynamics with the holonomic constraints defined by the contact model
   pinocchio::computeAllTerms(pinocchio_, data->pinocchio, q, v);
-  pinocchio::updateFramePlacements(pinocchio_, data->pinocchio);
   pinocchio::computeCentroidalMomentum(pinocchio_, data->pinocchio);
 
   if (!with_armature_) {
@@ -216,6 +215,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(Data* data, const Ei
   pinocchio::computeForwardKinematicsDerivatives(pinocchio_, data->pinocchio, q, data->pinocchio.dq_after,
                                                  data->vnone);
   impulses_->calcDiff(data->multibody.impulses, x);
+  impulses_->updateRneaDiff(data->multibody.impulses, data->pinocchio);
 
   Eigen::Block<MatrixXs> a_partial_dtau = data->Kinv.topLeftCorner(nv, nv);
   Eigen::Block<MatrixXs> a_partial_da = data->Kinv.topRightCorner(nv, nc);

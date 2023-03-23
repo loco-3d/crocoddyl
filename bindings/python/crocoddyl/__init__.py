@@ -89,7 +89,7 @@ class DisplayAbstract:
                             joint = model.differential.state.pinocchio.frames[contact.frame].parent
                             oMf = contact.pinocchio.oMi[joint] * contact.jMf
                             fiMo = pinocchio.SE3(contact.pinocchio.oMi[joint].rotation.T, contact.jMf.translation)
-                            force = fiMo.actInv(contact.f)
+                            force = fiMo.actInv(contact.fext)
                             R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
@@ -107,7 +107,7 @@ class DisplayAbstract:
                             joint = model.differential.state.pinocchio.frames[contact.frame].parent
                             oMf = contact.pinocchio.oMi[joint] * contact.jMf
                             fiMo = pinocchio.SE3(contact.pinocchio.oMi[joint].rotation.T, contact.jMf.translation)
-                            force = fiMo.actInv(contact.f)
+                            force = fiMo.actInv(contact.fext)
                             R = np.eye(3)
                             mu = 0.7
                             for k, c in model.differential.costs.costs.todict().items():
@@ -116,7 +116,7 @@ class DisplayAbstract:
                                         R = c.cost.residual.reference.R
                                         mu = c.cost.residual.reference.mu
                                         continue
-                            fc.append({"key": str(joint), "oMf": oMf, "f": force, "R": R, "mu": mu})
+                            fc.append({"key": str(joint), "oMf": oMf, "f": contact.fext, "R": R, "mu": mu})
                     fs.append(fc)
             elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
                 fc = []

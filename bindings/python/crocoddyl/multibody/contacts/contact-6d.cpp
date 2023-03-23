@@ -10,7 +10,6 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -27,36 +26,25 @@ void exposeContact6D() {
       "It defines a rigid 6D contact models based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3, std::size_t,
-               bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "pref", "nu", "gains"),
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3, pinocchio::ReferenceFrame,
+               std::size_t, bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "pref", "type", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param pref: contact placement used for the Baumgarte stabilization\n"
+          ":param type: type of contact\n"
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, pinocchio::SE3,
-                    bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "pref", "gains"),
+                    pinocchio::ReferenceFrame, bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "pref", "type", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param pref: contact placement used for the Baumgarte stabilization\n"
+          ":param type: type of contact\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, std::size_t, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "Mref", "nu", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param Mref: reference frame placement\n"
-          ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FramePlacement, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "Mref", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param Mref: reference frame placement\n"
-          ":param gains = gains of the contact model"))
       .def("calc", &ContactModel6D::calc, bp::args("self", "data", "x"),
            "Compute the 6D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -83,9 +71,6 @@ void exposeContact6D() {
            ":return contact data.")
       .add_property("reference", bp::make_function(&ContactModel6D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel6D::set_reference, "reference contact placement")
-      .add_property("Mref",
-                    bp::make_function(&ContactModel6D::get_Mref, deprecated<>("Deprecated. Use id or reference.")),
-                    "reference frame placement")
       .add_property("gains",
                     bp::make_function(&ContactModel6D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains")
@@ -106,8 +91,9 @@ void exposeContact6D() {
                     "error frame placement of the contact frame")
       .add_property("v", bp::make_getter(&ContactData6D::v, bp::return_value_policy<bp::return_by_value>()),
                     "spatial velocity of the contact body")
-      .add_property("a", bp::make_getter(&ContactData6D::a, bp::return_value_policy<bp::return_by_value>()),
-                    "spatial acceleration of the contact body")
+      .add_property("a0_local",
+                    bp::make_getter(&ContactData6D::a0_local, bp::return_value_policy<bp::return_by_value>()),
+                    "desired local contact acceleration")
       .add_property("v_partial_dq", bp::make_getter(&ContactData6D::v_partial_dq, bp::return_internal_reference<>()),
                     "Jacobian of the spatial body velocity")
       .add_property("a_partial_dq", bp::make_getter(&ContactData6D::a_partial_dq, bp::return_internal_reference<>()),

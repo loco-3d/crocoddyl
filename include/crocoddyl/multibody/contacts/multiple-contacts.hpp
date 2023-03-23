@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -172,6 +172,18 @@ class ContactModelMultipleTpl {
                        const MatrixXs& df_du) const;
 
   /**
+   * @brief Update the RNEA derivatives dtau_dq by adding the skew term
+   * (necessary for contacts expressed in LOCAL_WORLD_ALIGNED / WORLD)
+   *
+   * To learn more about the computation of the contact derivatives in different frames see
+   * https://hal.science/hal-03758989/document.
+   *
+   * @param[in] data       Multi-contact data
+   * @param[in] pinocchio  Pinocchio data
+   */
+  void updateRneaDiff(const boost::shared_ptr<ContactDataMultiple>& data, pinocchio::DataTpl<Scalar>& pinocchio) const;
+
+  /**
    * @brief Create the multi-contact data
    *
    * @param[in] data  Pinocchio data
@@ -214,26 +226,6 @@ class ContactModelMultipleTpl {
    */
   const std::set<std::string>& get_inactive_set() const;
 
-  DEPRECATED("get_active() is deprecated and will be replaced with get_active_set()",
-             const std::vector<std::string>& get_active() {
-               active_.clear();
-               active_.reserve(active_set_.size());
-               for (const auto& contact : active_set_) {
-                 active_.push_back(contact);
-               }
-               return active_;
-             };)
-
-  DEPRECATED("get_inactive() is deprecated and will be replaced with get_inactive_set()",
-             const std::vector<std::string>& get_inactive() {
-               inactive_.clear();
-               inactive_.reserve(inactive_set_.size());
-               for (const auto& contact : inactive_set_) {
-                 inactive_.push_back(contact);
-               }
-               return inactive_;
-             };)
-
   /**
    * @brief Return the status of a given contact name
    */
@@ -268,11 +260,6 @@ class ContactModelMultipleTpl {
   std::set<std::string> active_set_;
   std::set<std::string> inactive_set_;
   bool compute_all_contacts_;
-
-  // Vector variants. These are to maintain the API compatibility for the deprecated syntax.
-  // These will be removed in future versions along with get_active() / get_inactive()
-  std::vector<std::string> active_;
-  std::vector<std::string> inactive_;
 };
 
 /**

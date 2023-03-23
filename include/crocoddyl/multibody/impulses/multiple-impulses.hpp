@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,7 +89,7 @@ class ImpulseModelMultipleTpl {
    * Note that the memory is allocated for inactive impulses as well.
    *
    * @param[in] name     Impulse name
-   * @param[in] contact  Impulse model
+   * @param[in] impulse  Impulse model
    * @param[in] active   Impulse status (active by default)
    */
   void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true);
@@ -109,7 +110,7 @@ class ImpulseModelMultipleTpl {
   void changeImpulseStatus(const std::string& name, const bool active);
 
   /**
-   * @brief Compute the total contact Jacobian and contact acceleration
+   * @brief Compute the total impulse Jacobian and impulse velocity
    *
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -117,7 +118,7 @@ class ImpulseModelMultipleTpl {
   void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
 
   /**
-   * @brief Compute the derivatives of the contact holonomic constraint
+   * @brief Compute the derivatives of the impulse holonomic constraint
    *
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -160,6 +161,17 @@ class ImpulseModelMultipleTpl {
   void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dx) const;
 
   /**
+   * @brief Update the RNEA derivatives dtau_dq by adding the skew term
+   * (necessary for impulses expressed in LOCAL_WORLD_ALIGNED / WORLD)
+   * @brief as explained in this document :
+   * https://www.overleaf.com/read/tzvrrxxtntwk
+   *
+   * @param[in] data       Multi-contact data
+   * @param[in] pinocchio  Pinocchio data
+   */
+  void updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, pinocchio::DataTpl<Scalar>& pinocchio) const;
+
+  /**
    * @brief Create the multi-impulse data
    *
    * @param[in] data  Pinocchio data
@@ -181,43 +193,21 @@ class ImpulseModelMultipleTpl {
    * @brief Return the dimension of active impulses
    */
   std::size_t get_nc() const;
-  DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
 
   /**
    * @brief Return the dimension of all impulses
    */
   std::size_t get_nc_total() const;
-  DEPRECATED("Use get_nc_total().", std::size_t get_ni_total() const;)
 
   /**
-   * @brief Return the names of the set of active contacts
+   * @brief Return the names of the set of active impulses
    */
   const std::set<std::string>& get_active_set() const;
 
   /**
-   * @brief Return the names of the set of inactive contacts
+   * @brief Return the names of the set of inactive impulses
    */
   const std::set<std::string>& get_inactive_set() const;
-
-  DEPRECATED("get_active() is deprecated and will be replaced with get_active_set()",
-             const std::vector<std::string>& get_active() {
-               active_.clear();
-               active_.reserve(active_set_.size());
-               for (const auto& contact : active_set_) {
-                 active_.push_back(contact);
-               }
-               return active_;
-             };)
-
-  DEPRECATED("get_inactive() is deprecated and will be replaced with get_inactive_set()",
-             const std::vector<std::string>& get_inactive() {
-               inactive_.clear();
-               inactive_.reserve(inactive_set_.size());
-               for (const auto& contact : inactive_set_) {
-                 inactive_.push_back(contact);
-               }
-               return inactive_;
-             };)
 
   /**
    * @brief Return the status of a given impulse name
@@ -237,11 +227,6 @@ class ImpulseModelMultipleTpl {
   std::size_t nc_total_;
   std::set<std::string> active_set_;
   std::set<std::string> inactive_set_;
-
-  // Vector variants. These are to maintain the API compatibility for the deprecated syntax.
-  // These will be removed in future versions along with get_active() / get_inactive()
-  std::vector<std::string> active_;
-  std::vector<std::string> inactive_;
 };
 
 /**

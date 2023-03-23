@@ -23,10 +23,12 @@ void exposeImpulse3D() {
       "It defines a rigid 3D impulse models (point impulse) based on acceleration-based holonomic constraints.\n"
       "The calc and calcDiff functions compute the impulse Jacobian and drift (holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "frame"),
-                                                       "Initialize the 3D impulse model.\n\n"
-                                                       ":param state: state of the multibody system\n"
-                                                       ":param frame: reference frame id"))
+      bp::init<boost::shared_ptr<StateMultibody>, std::size_t, bp::optional<pinocchio::ReferenceFrame> >(
+          bp::args("self", "state", "frame", "type"),
+          "Initialize the 3D impulse model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param type: type of impulse (default pinocchio.LOCAL)\n"
+          ":param frame: reference frame id"))
       .def("calc", &ImpulseModel3D::calc, bp::args("self", "data", "x"),
            "Compute the 3D impulse Jacobian and drift.\n\n"
            "The rigid impulse model throught acceleration-base holonomic constraint\n"
@@ -51,7 +53,6 @@ void exposeImpulse3D() {
            "returns the allocated data for a predefined cost.\n"
            ":param data: Pinocchio data\n"
            ":return impulse data.")
-      .add_property("frame", bp::make_function(&ImpulseModel3D::get_frame), "reference frame id")
       .def(CopyableVisitor<ImpulseModel3D>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ImpulseData3D> >();
@@ -63,8 +64,10 @@ void exposeImpulse3D() {
           "Create 3D impulse data.\n\n"
           ":param model: 3D impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("fXj", bp::make_getter(&ImpulseData3D::fXj, bp::return_value_policy<bp::return_by_value>()),
-                    "action matrix from impulse to local frames")
+      .add_property("f_local", bp::make_getter(&ImpulseData3D::f_local, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseData3D::f_local), "spatial contact force in local coordinates")
+      .add_property("dv0_local_dq", bp::make_getter(&ImpulseData3D::dv0_local_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseData3D::dv0_local_dq), "Jacobian of the desired local contact velocity")
       .add_property("fJf", bp::make_getter(&ImpulseData3D::fJf, bp::return_internal_reference<>()),
                     "local Jacobian of the impulse frame")
       .add_property("v_partial_dq", bp::make_getter(&ImpulseData3D::v_partial_dq, bp::return_internal_reference<>()),

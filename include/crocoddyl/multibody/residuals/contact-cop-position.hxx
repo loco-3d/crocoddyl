@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Duisburg-Essen, University of Edinburgh
+// Copyright (C) 2020-2023, University of Duisburg-Essen, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<Re
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the residual residual r =  A * f
-  data->r.noalias() = cref_.get_A() * d->contact->jMf.actInv(d->contact->f).toVector();
+  data->r.noalias() = cref_.get_A() * d->contact->f.toVector();
 }
 
 template <typename Scalar>

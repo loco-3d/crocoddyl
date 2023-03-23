@@ -10,7 +10,6 @@
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "crocoddyl/multibody/contacts/contact-2d.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -45,19 +44,6 @@ void exposeContact2D() {
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
           ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, std::size_t, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "xref", "nu", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param xref: reference frame translation\n"
-          ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, FrameTranslation, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "xref", "gains"),
-          "Initialize the contact model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param Mref: reference frame translation\n"
-          ":param gains: gains of the contact model (default np.matrix([ [0.],[0.] ]))"))
       .def("calc", &ContactModel2D::calc, bp::args("self", "data", "x"),
            "Compute the 2D contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
@@ -84,9 +70,6 @@ void exposeContact2D() {
            ":return contact data.")
       .add_property("reference", bp::make_function(&ContactModel2D::get_reference, bp::return_internal_reference<>()),
                     &ContactModel2D::set_reference, "reference contact translation")
-      .add_property("xref",
-                    bp::make_function(&ContactModel2D::get_xref, deprecated<>("Deprecated. Use id or reference.")),
-                    "reference frame translation")
       .add_property("gains",
                     bp::make_function(&ContactModel2D::get_gains, bp::return_value_policy<bp::return_by_value>()),
                     "contact gains")

@@ -18,7 +18,6 @@
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -101,6 +100,11 @@ void exposeImpulseMultiple() {
            "Update the Jacobian of the spatial impulse defined in frame coordinate.\n\n"
            ":param data: impulse data\n"
            ":param df_dx: Jacobian of the impulse force (dimension ni*ndx)")
+      .def("updateRneaDiff", &ImpulseModelMultiple::updateRneaDiff, bp::args("self", "data", "pinocchio"),
+           "Update the RNEA derivative dtau_dq by by adding the skew term (necessary for impulses expressed in\n"
+           "LOCAL_WORLD_ALIGNED / WORLD).\n\n"
+           ":param data: impulse data\n"
+           ":param pinocchio: Pinocchio data")
       .def("createData", &ImpulseModelMultiple::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the total impulse data.\n\n"
@@ -116,29 +120,14 @@ void exposeImpulseMultiple() {
       .add_property("nc", bp::make_function(&ImpulseModelMultiple::get_nc), "dimension of the active impulse vector")
       .add_property("nc_total", bp::make_function(&ImpulseModelMultiple::get_nc_total),
                     "dimension of the total impulse vector")
-      .add_property("ni", bp::make_function(&ImpulseModelMultiple::get_nc, deprecated<>("Deprecated. Use nc.")),
-                    "dimension of the active impulse vector")
-      .add_property("ni_total",
-                    bp::make_function(&ImpulseModelMultiple::get_nc_total, deprecated<>("Deprecated. Use nc_total.")),
-                    "dimension of the total impulse vector")
-      .add_property("active",
-                    bp::make_function(&ImpulseModelMultiple::get_active,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property active_set")),
-                    "list of names of active contact items")
-      .add_property("inactive",
-                    bp::make_function(&ImpulseModelMultiple::get_inactive,
-                                      deprecated<bp::return_value_policy<bp::return_by_value>>(
-                                          "Deprecated. Use property inactive_set")),
-                    "list of names of inactive contact items")
       .add_property(
           "active_set",
           bp::make_function(&ImpulseModelMultiple::get_active_set, bp::return_value_policy<bp::return_by_value>()),
-          "set of names of active contact items")
+          "set of names of active impulse items")
       .add_property(
           "inactive_set",
           bp::make_function(&ImpulseModelMultiple::get_inactive_set, bp::return_value_policy<bp::return_by_value>()),
-          "set of names of inactive contact items")
+          "set of names of inactive impulse items")
       .def("getImpulseStatus", &ImpulseModelMultiple::getImpulseStatus, bp::args("self", "name"),
            "Return the impulse status of a given impulse name.\n\n"
            ":param name: impulse name")

@@ -25,10 +25,16 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, int>(bp::args("self", "state", "nc"),
-                                                       "Initialize the impulse model.\n\n"
-                                                       ":param state: state of the multibody system\n"
-                                                       ":param nc: dimension of impulse model"))
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame, std::size_t>(
+          bp::args("self", "state", "type", "nc"),
+          "Initialize the impulse model.\n\n"
+          ":param state: state of the multibody system\n"
+          ":param type: type of impulse\n"
+          ":param nc: dimension of impulse model"))
+      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(bp::args("self", "state", "nc"),
+                                                                    "Initialize the impulse model.\n\n"
+                                                                    ":param state: state of the multibody system\n"
+                                                                    ":param nc: dimension of impulse model"))
       .def("calc", pure_virtual(&ImpulseModelAbstract_wrap::calc), bp::args("self", "data", "x"),
            "Compute the impulse Jacobian\n"
            ":param data: impulse data\n"
@@ -67,6 +73,9 @@ void exposeImpulseAbstract() {
       .add_property("ni", bp::make_function(&ImpulseModelAbstract_wrap::get_nc, deprecated<>("Deprecated. Use nc")),
                     "dimension of impulse")
       .add_property("nc", bp::make_function(&ImpulseModelAbstract_wrap::get_nc), "dimension of impulse")
+      .add_property("id", &ImpulseModelAbstract_wrap::get_id, &ImpulseModelAbstract_wrap::set_id, "reference frame id")
+      .add_property("type", bp::make_function(&ImpulseModelAbstract_wrap::get_type),
+                    &ImpulseModelAbstract_wrap::set_type, "type of impulse")
       .def(CopyableVisitor<ImpulseModelAbstract_wrap>())
       .def(PrintableVisitor<ImpulseModelAbstract>());
 
@@ -79,8 +88,12 @@ void exposeImpulseAbstract() {
           "Create common data shared between impulse models.\n\n"
           ":param model: impulse model\n"
           ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 3>()])
+      .add_property("fXj", bp::make_getter(&ImpulseDataAbstract::fXj, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataAbstract::fXj), "action matrix from contact to local frames")
       .add_property("dv0_dq", bp::make_getter(&ImpulseDataAbstract::dv0_dq, bp::return_internal_reference<>()),
                     bp::make_setter(&ImpulseDataAbstract::dv0_dq), "Jacobian of the previous impulse velocity")
+      .add_property("dtau_dq", bp::make_getter(&ImpulseDataAbstract::dtau_dq, bp::return_internal_reference<>()),
+                    bp::make_setter(&ImpulseDataAbstract::dtau_dq), "force contribution to dtau_dq")
       .def(CopyableVisitor<ImpulseDataAbstract>());
 }
 

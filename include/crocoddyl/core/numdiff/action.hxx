@@ -264,7 +264,6 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
 
 #ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
-  std::cout << "-----------------------------finite diff" << std::endl;
   d->xh_hess = e_hess_ * std::max(1., d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {

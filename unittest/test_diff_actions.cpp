@@ -74,7 +74,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed) return;
   // create the model
   DifferentialActionModelFactory factory;
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model = factory.create(action_type, false);
 
   // create the corresponding data object and set the cost to nan
   boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> data = model->createData();
@@ -90,7 +90,11 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   if (action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ ||
       action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||
       action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos ||
-      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos) {
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos ||
+      action_type == DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos) {
     boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> m =
         boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamics>(model);
     m->get_contacts()->changeContactStatus("lf", false);
@@ -172,7 +176,6 @@ bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
   }
-  // register_action_model_unit_tests(DifferentialActionModelTypes::all[2]);
   return true;
 }
 

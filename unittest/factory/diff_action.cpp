@@ -113,7 +113,7 @@ DifferentialActionModelFactory::DifferentialActionModelFactory() {}
 DifferentialActionModelFactory::~DifferentialActionModelFactory() {}
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialActionModelFactory::create(
-    DifferentialActionModelTypes::Type type) const {
+    DifferentialActionModelTypes::Type type, bool with_baumgarte) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> action;
   switch (type) {
     case DifferentialActionModelTypes::DifferentialActionModelLQR:
@@ -148,59 +148,59 @@ boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> DifferentialAction
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
-                                         ActuationModelTypes::ActuationModelFull, false);
+                                         ActuationModelTypes::ActuationModelFull, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibodyContact2D_TalosArm,
-                                         ActuationModelTypes::ActuationModelFull, false);
+                                         ActuationModelTypes::ActuationModelFull, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
-                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+                                         ActuationModelTypes::ActuationModelFloatingBase, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamics_Talos:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
-                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+                                         ActuationModelTypes::ActuationModelFloatingBase, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
-      action =
-          create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      action = create_contactFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                         ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibodyContact2D_TalosArm,
-                                         ActuationModelTypes::ActuationModelFull);
+                                         ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_HyQ,
-                                         ActuationModelTypes::ActuationModelFloatingBase);
+                                         ActuationModelTypes::ActuationModelFloatingBase, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactFwdDynamicsWithFriction_Talos:
       action = create_contactFwdDynamics(StateModelTypes::StateMultibody_Talos,
-                                         ActuationModelTypes::ActuationModelFloatingBase);
+                                         ActuationModelTypes::ActuationModelFloatingBase, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm,
-                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+                                         ActuationModelTypes::ActuationModelFloatingBase, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
-                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+                                         ActuationModelTypes::ActuationModelFloatingBase, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_Talos:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
-                                         ActuationModelTypes::ActuationModelFloatingBase, false);
+                                         ActuationModelTypes::ActuationModelFloatingBase, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
-      action =
-          create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm, ActuationModelTypes::ActuationModelFull);
+      action = create_contactInvDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                         ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_HyQ:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_HyQ,
-                                         ActuationModelTypes::ActuationModelFloatingBase);
+                                         ActuationModelTypes::ActuationModelFloatingBase, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos:
       action = create_contactInvDynamics(StateModelTypes::StateMultibody_Talos,
-                                         ActuationModelTypes::ActuationModelFloatingBase);
+                                         ActuationModelTypes::ActuationModelFloatingBase, true, with_baumgarte);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong DifferentialActionModelTypes::Type given");
@@ -300,8 +300,8 @@ DifferentialActionModelFactory::create_freeInvDynamics(StateModelTypes::Type sta
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
 DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type state_type,
-                                                          ActuationModelTypes::Type actuation_type,
-                                                          bool with_friction) const {
+                                                          ActuationModelTypes::Type actuation_type, bool with_friction,
+                                                          bool with_baumgarte) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
@@ -323,12 +323,16 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(friction_bounds);
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> wrench_activation =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(wrench_bounds);
+  Eigen::Vector2d gains = Eigen::Vector2d::Random();
+  if (!with_baumgarte) {
+    gains.setZero();
+  }
 
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector3d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::TalosArm,
+                                             gains, "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost(
@@ -348,9 +352,9 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibodyContact2D_TalosArm:
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel2D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector2d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel2D, PinocchioModelTypes::TalosArm, gains,
+                                             "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost(
@@ -364,14 +368,14 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "lh_foot", nu));
-      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "rh_foot", nu));
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, 0.25 * gains, "lf_foot", nu));
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_WORLD,
+                                                             PinocchioModelTypes::HyQ, 0.25 * gains, "rf_foot", nu));
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LWA,
+                                                             PinocchioModelTypes::HyQ, 0.25 * gains, "lh_foot", nu));
+      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, 0.25 * gains, "rh_foot", nu));
       if (with_friction) {
         // friction cone
         cost->addCost("lf_cone",
@@ -422,10 +426,11 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
       }
       break;
     case StateModelTypes::StateMultibody_Talos:
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
-                                                             PinocchioModelTypes::Talos, "left_sole_link", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
-                                                             PinocchioModelTypes::Talos, "right_sole_link", nu));
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
+                                                             PinocchioModelTypes::Talos, gains, "left_sole_link", nu));
+      contact->addContact(
+          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_WORLD, PinocchioModelTypes::Talos,
+                                             gains, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone
         cost->addCost("lf_cone",
@@ -477,8 +482,8 @@ DifferentialActionModelFactory::create_contactFwdDynamics(StateModelTypes::Type 
 
 boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics>
 DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type state_type,
-                                                          ActuationModelTypes::Type actuation_type,
-                                                          bool with_friction) const {
+                                                          ActuationModelTypes::Type actuation_type, bool with_friction,
+                                                          bool with_baumgarte) const {
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics> action;
   boost::shared_ptr<crocoddyl::StateMultibody> state;
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
@@ -498,14 +503,19 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(friction_bounds);
   boost::shared_ptr<crocoddyl::ActivationModelAbstract> wrench_activation =
       boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(wrench_bounds);
+  Eigen::Vector2d gains = Eigen::Vector2d::Random();
+  if (!with_baumgarte) {
+    gains.setZero();
+  }
+
   switch (state_type) {
     case StateModelTypes::StateMultibody_TalosArm:
       nu += 3;
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", boost::make_shared<crocoddyl::ContactModel3D>(
-                                    state, state->get_pinocchio()->getFrameId("gripper_left_fingertip_1_link"),
-                                    Eigen::Vector3d::Zero(), nu));
+      contact->addContact(
+          "lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL, PinocchioModelTypes::TalosArm,
+                                             gains, "gripper_left_fingertip_1_link", nu));
       if (with_friction) {
         // friction cone
         cost->addCost("lf_cone",
@@ -528,14 +538,14 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       nu += 12;  // it includes nc
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "lf_foot", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "rf_foot", nu));
-      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "lh_foot", nu));
-      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D,
-                                                             PinocchioModelTypes::HyQ, "rh_foot", nu));
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, gains, "lf_foot", nu));
+      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel3D_WORLD,
+                                                             PinocchioModelTypes::HyQ, gains, "rf_foot", nu));
+      contact->addContact("lh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LWA,
+                                                             PinocchioModelTypes::HyQ, gains, "lh_foot", nu));
+      contact->addContact("rh", ContactModelFactory().create(ContactModelTypes::ContactModel3D_LOCAL,
+                                                             PinocchioModelTypes::HyQ, gains, "rh_foot", nu));
       if (with_friction) {
         // friction cone
         cost->addCost("lf_cone",
@@ -589,10 +599,11 @@ DifferentialActionModelFactory::create_contactInvDynamics(StateModelTypes::Type 
       nu += 12;  // it includes nc
       contact = boost::make_shared<crocoddyl::ContactModelMultiple>(state, nu);
       cost = boost::make_shared<crocoddyl::CostModelSum>(state, nu);
-      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
-                                                             PinocchioModelTypes::Talos, "left_sole_link", nu));
-      contact->addContact("rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D,
-                                                             PinocchioModelTypes::Talos, "right_sole_link", nu));
+      contact->addContact("lf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_LOCAL,
+                                                             PinocchioModelTypes::Talos, gains, "left_sole_link", nu));
+      contact->addContact(
+          "rf", ContactModelFactory().create(ContactModelTypes::ContactModel6D_WORLD, PinocchioModelTypes::Talos,
+                                             gains, "right_sole_link", nu));
       if (with_friction) {
         // friction / wrench cone
         cost->addCost("lf_cone",

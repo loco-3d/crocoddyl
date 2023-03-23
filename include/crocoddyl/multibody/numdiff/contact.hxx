@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_nc(), model->get_nu()),
+    : Base(model->get_state(), model->get_type(), model->get_nc(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 

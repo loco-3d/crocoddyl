@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,14 +93,14 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ImpulseConstraintModelFactory:
     case StateModelTypes::StateMultibody_Talos:
     case StateModelTypes::StateMultibody_RandomHumanoid:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D, model_type,
-                                                                         frame_names[i]));
+        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel6D_LOCAL,
+                                                                         model_type, frame_names[i]));
       }
       break;
     case StateModelTypes::StateMultibody_HyQ:
       for (std::size_t i = 0; i < frame_names.size(); ++i) {
-        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D, model_type,
-                                                                         frame_names[i]));
+        impulse->addImpulse(frame_names[i], ImpulseModelFactory().create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
+                                                                         model_type, frame_names[i]));
       }
       break;
     default:

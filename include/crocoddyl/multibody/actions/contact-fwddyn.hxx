@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -180,6 +180,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
   d->Kinv.resize(nv + nc, nv + nc);
   pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout, d->multibody.contacts->fext);
+  contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
   pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc),
                                                d->Kinv);
 

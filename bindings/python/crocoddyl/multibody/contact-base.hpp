@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,9 +20,12 @@ namespace python {
 
 class ContactModelAbstract_wrap : public ContactModelAbstract, public bp::wrapper<ContactModelAbstract> {
  public:
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nc, int nu)
-      : ContactModelAbstract(state, nc, nu) {}
-  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, int nc) : ContactModelAbstract(state, nc) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                            std::size_t nc, std::size_t nu)
+      : ContactModelAbstract(state, type, nc, nu) {}
+  ContactModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                            std::size_t nc)
+      : ContactModelAbstract(state, type, nc) {}
 
   void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");

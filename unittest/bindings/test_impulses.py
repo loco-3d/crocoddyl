@@ -30,7 +30,7 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         pinocchio.computeForwardKinematicsDerivatives(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:],
                                                       pinocchio.utils.zero(nv))
 
-    def test_ni_dimension(self):
+    def test_nc_dimension(self):
         self.assertEqual(self.IMPULSE.nc, self.IMPULSE_DER.nc, "Wrong ni.")
 
     def test_calc(self):
@@ -50,6 +50,16 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.dv0_dq, self.data_der.dv0_dq, atol=1e-9),
                         "Wrong Jacobian of the acceleration before impulse (dv0_dq).")
+
+    def test_updateForce(self):
+        # Run updateForce for both action models
+        self.IMPULSE.calc(self.data, self.x)
+        self.IMPULSE_DER.calc(self.data_der, self.x)
+        force = np.random.rand(self.IMPULSE.nc)
+        self.IMPULSE.updateForce(self.data, force)
+        self.IMPULSE_DER.updateForce(self.data_der, force)
+        self.assertTrue(np.allclose(self.data.fext.vector, self.data_der.fext.vector, atol=1e-9),
+                        "Wrong external spatial force.")
 
 
 class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
@@ -102,14 +112,34 @@ class ImpulseModelMultipleAbstractTestCase(unittest.TestCase):
                         "Wrong Jacobian of the velocity before impulse (dv0_dq).")
 
 
-class Impulse3DTest(ImpulseModelAbstractTestCase):
+class Impulse3DLocalTest(ImpulseModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('hyq').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     # gains = pinocchio.utils.rand(2)
     frame = ROBOT_MODEL.getFrameId('lf_foot')
-    IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame)
-    IMPULSE_DER = Impulse3DModelDerived(ROBOT_STATE, frame)
+    IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame, pinocchio.LOCAL)
+    IMPULSE_DER = Impulse3DModelDerived(ROBOT_STATE, frame, pinocchio.LOCAL)
+
+
+class Impulse3DWorldTest(ImpulseModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('hyq').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    # gains = pinocchio.utils.rand(2)
+    frame = ROBOT_MODEL.getFrameId('lf_foot')
+    IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame, pinocchio.WORLD)
+    IMPULSE_DER = Impulse3DModelDerived(ROBOT_STATE, frame, pinocchio.WORLD)
+
+
+class Impulse3DLocalWorldAlignedTest(ImpulseModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('hyq').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    # gains = pinocchio.utils.rand(2)
+    frame = ROBOT_MODEL.getFrameId('lf_foot')
+    IMPULSE = crocoddyl.ImpulseModel3D(ROBOT_STATE, frame, pinocchio.LOCAL_WORLD_ALIGNED)
+    IMPULSE_DER = Impulse3DModelDerived(ROBOT_STATE, frame, pinocchio.LOCAL_WORLD_ALIGNED)
 
 
 class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
@@ -119,18 +149,36 @@ class Impulse3DMultipleTest(ImpulseModelMultipleAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     IMPULSES = collections.OrderedDict(
         sorted({
-            'lf_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot')),
-            'rh_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'))
+            'lf_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('lf_foot'), pinocchio.LOCAL),
+            'rh_foot': crocoddyl.ImpulseModel3D(ROBOT_STATE, ROBOT_MODEL.getFrameId('rh_foot'), pinocchio.LOCAL)
         }.items()))
 
 
-class Impulse6DTest(ImpulseModelAbstractTestCase):
+class Impulse6DLocalTest(ImpulseModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load('icub_reduced').model
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     frame = ROBOT_MODEL.getFrameId('r_sole')
-    IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame)
-    IMPULSE_DER = Impulse6DModelDerived(ROBOT_STATE, frame)
+    IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame, pinocchio.LOCAL)
+    IMPULSE_DER = Impulse6DModelDerived(ROBOT_STATE, frame, pinocchio.LOCAL)
+
+
+class Impulse6DWorldTest(ImpulseModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    frame = ROBOT_MODEL.getFrameId('r_sole')
+    IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame, pinocchio.WORLD)
+    IMPULSE_DER = Impulse6DModelDerived(ROBOT_STATE, frame, pinocchio.WORLD)
+
+
+class Impulse6DLocalWorldAlignedTest(ImpulseModelAbstractTestCase):
+    ROBOT_MODEL = example_robot_data.load('icub_reduced').model
+    ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
+
+    frame = ROBOT_MODEL.getFrameId('r_sole')
+    IMPULSE = crocoddyl.ImpulseModel6D(ROBOT_STATE, frame, pinocchio.LOCAL_WORLD_ALIGNED)
+    IMPULSE_DER = Impulse6DModelDerived(ROBOT_STATE, frame, pinocchio.LOCAL_WORLD_ALIGNED)
 
 
 class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
@@ -147,7 +195,10 @@ class Impulse6DMultipleTest(ImpulseModelMultipleAbstractTestCase):
 
 if __name__ == '__main__':
     # test to be run
-    test_classes_to_run = [Impulse3DTest, Impulse3DMultipleTest, Impulse6DTest, Impulse6DMultipleTest]
+    test_classes_to_run = [
+        Impulse3DLocalTest, Impulse3DWorldTest, Impulse3DLocalWorldAlignedTest, Impulse3DMultipleTest,
+        Impulse6DLocalTest, Impulse6DWorldTest, Impulse6DLocalWorldAlignedTest, Impulse6DMultipleTest
+    ]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

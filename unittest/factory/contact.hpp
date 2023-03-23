@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,17 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ContactModelTypes {
-  enum Type { ContactModel1D, ContactModel2D, ContactModel3D, ContactModel6D, NbContactModelTypes };
+  enum Type {
+    ContactModel1D,
+    ContactModel2D,
+    ContactModel3D_LOCAL,
+    ContactModel3D_WORLD,
+    ContactModel3D_LWA,
+    ContactModel6D_LOCAL,
+    ContactModel6D_WORLD,
+    ContactModel6D_LWA,
+    NbContactModelTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.reserve(NbContactModelTypes);
@@ -43,7 +53,7 @@ class ContactModelFactory {
   ~ContactModelFactory();
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> create(
-      ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type,
+      ContactModelTypes::Type contact_type, PinocchioModelTypes::Type model_type, Eigen::Vector2d gains,
       const std::string frame_name = std::string(""),
       const std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };

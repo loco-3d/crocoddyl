@@ -203,7 +203,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(CostMod
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
   }
-  crocoddyl::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
+  pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   double alpha = fabs(Eigen::VectorXd::Random(1)[0]);

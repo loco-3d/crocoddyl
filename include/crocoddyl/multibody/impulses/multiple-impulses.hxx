@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,7 +165,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(const boost::shared_ptr<Impuls
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i = force.segment(nc, nc_i);
       m_i->impulse->updateForce(d_i, force_i);
       const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d_i->frame].parent;
-      data->fext[joint] = d_i->f;
+      data->fext[joint] = d_i->fext;
       nc += nc_i;
     } else {
       m_i->impulse->setZeroForce(d_i);
@@ -218,6 +219,33 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Im
 }
 
 template <typename Scalar>
+void ImpulseModelMultipleTpl<Scalar>::updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                                                     pinocchio::DataTpl<Scalar>& pinocchio) const {
+  if (static_cast<std::size_t>(data->impulses.size()) != this->get_impulses().size()) {
+    throw_pretty("Invalid argument: "
+                 << "it doesn't match the number of impulse datas and models");
+  }
+  typename ImpulseModelContainer::const_iterator it_m, end_m;
+  typename ImpulseDataContainer::const_iterator it_d, end_d;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(), it_d = data->impulses.begin(), end_d = data->impulses.end();
+       it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
+    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    assert_pretty(it_m->first == it_d->first, "it doesn't match the impulse name between data and model");
+    if (m_i->active) {
+      switch (m_i->impulse->get_type()) {
+        case pinocchio::ReferenceFrame::LOCAL:
+          break;
+        case pinocchio::ReferenceFrame::WORLD:
+        case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+          pinocchio.dtau_dq += d_i->dtau_dq;
+          break;
+      }
+    }
+  }
+}
+
+template <typename Scalar>
 boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > ImpulseModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<ImpulseDataMultiple>(Eigen::aligned_allocator<ImpulseDataMultiple>(), this, data);
@@ -240,17 +268,7 @@ std::size_t ImpulseModelMultipleTpl<Scalar>::get_nc() const {
 }
 
 template <typename Scalar>
-std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni() const {
-  return nc_;
-}
-
-template <typename Scalar>
 std::size_t ImpulseModelMultipleTpl<Scalar>::get_nc_total() const {
-  return nc_total_;
-}
-
-template <typename Scalar>
-std::size_t ImpulseModelMultipleTpl<Scalar>::get_ni_total() const {
   return nc_total_;
 }
 

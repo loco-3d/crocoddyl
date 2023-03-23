@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,11 @@ class ImpulseModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);
+  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+                          const std::size_t nc);
+
+  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
+             ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);)
   virtual ~ImpulseModelAbstractTpl();
 
   virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
@@ -47,6 +52,26 @@ class ImpulseModelAbstractTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the reference frame id
+   */
+  pinocchio::FrameIndex get_id() const;
+
+  /**
+   * @brief Modify the reference frame id
+   */
+  void set_id(const pinocchio::FrameIndex id);
+
+  /**
+   * @brief Modify the type of contact
+   */
+  void set_type(const pinocchio::ReferenceFrame type);
+
+  /**
+   * @brief Return the type of contact
+   */
+  pinocchio::ReferenceFrame get_type() const;
+
+  /**
    * @brief Print information on the impulse model
    */
   template <class Scalar>
@@ -62,6 +87,8 @@ class ImpulseModelAbstractTpl {
  protected:
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
+  pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
+  pinocchio::ReferenceFrame type_;  //!< Type of contact
 };
 
 template <typename _Scalar>
@@ -73,11 +100,15 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   typedef ForceDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename pinocchio::SE3Tpl<Scalar> SE3;
 
   template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data), dv0_dq(model->get_nc(), model->get_state()->get_nv()) {
+      : Base(model, data),
+        dv0_dq(model->get_nc(), model->get_state()->get_nv()),
+        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     dv0_dq.setZero();
+    dtau_dq.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 
@@ -87,7 +118,10 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   using Base::Jc;
   using Base::jMf;
   using Base::pinocchio;
+
+  typename SE3::ActionMatrixType fXj;
   MatrixXs dv0_dq;
+  MatrixXs dtau_dq;
 };
 
 }  // namespace crocoddyl

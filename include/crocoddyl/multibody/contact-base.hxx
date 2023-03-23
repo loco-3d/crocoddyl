@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,13 +13,30 @@
 namespace crocoddyl {
 
 template <typename Scalar>
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                                                         const pinocchio::ReferenceFrame type, const std::size_t nc,
+                                                         const std::size_t nu)
+    : state_(state), nc_(nc), nu_(nu), id_(0), type_(type) {}
+
+template <typename Scalar>
+ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                                                         const pinocchio::ReferenceFrame type, const std::size_t nc)
+    : state_(state), nc_(nc), nu_(state->get_nv()), id_(0), type_(type) {}
+
+template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
                                                          const std::size_t nu)
-    : state_(state), nc_(nc), nu_(nu), id_(0) {}
+    : state_(state), nc_(nc), nu_(nu), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+            << std::endl;
+}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
-    : state_(state), nc_(nc), nu_(state->get_nv()), id_(0) {}
+    : state_(state), nc_(nc), nu_(state->get_nv()), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+            << std::endl;
+}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::~ContactModelAbstractTpl() {}
@@ -39,6 +57,7 @@ void ContactModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<Co
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ContactDataAbstract>& data) const {
   data->f.setZero();
+  data->fext.setZero();
 }
 
 template <typename Scalar>
@@ -79,8 +98,18 @@ pinocchio::FrameIndex ContactModelAbstractTpl<Scalar>::get_id() const {
 }
 
 template <typename Scalar>
+pinocchio::ReferenceFrame ContactModelAbstractTpl<Scalar>::get_type() const {
+  return type_;
+}
+
+template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
   id_ = id;
+}
+
+template <typename Scalar>
+void ContactModelAbstractTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
+  type_ = type;
 }
 
 template <class Scalar>

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,38 +12,16 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, 2, nu), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, nu), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
                                              const Vector2s& xref, const Vector2s& gains)
-    : Base(state, 2), xref_(xref), gains_(gains) {
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2), xref_(xref), gains_(gains) {
   id_ = id;
 }
-
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-template <typename Scalar>
-ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const FrameTranslationTpl<Scalar>& xref, const std::size_t nu,
-                                             const Vector2s& gains)
-    : Base(state, 2, nu), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
-  id_ = xref.id;
-  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
-}
-
-template <typename Scalar>
-ContactModel2DTpl<Scalar>::ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
-                                             const FrameTranslationTpl<Scalar>& xref, const Vector2s& gains)
-    : Base(state, 2), xref_(Vector2s(xref.translation[0], xref.translation[2])), gains_(gains) {
-  id_ = xref.id;
-  std::cerr << "Deprecated: Use constructor which is not based on FrameTranslation." << std::endl;
-}
-
-#pragma GCC diagnostic pop
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::~ContactModel2DTpl() {}
@@ -131,7 +110,9 @@ void ContactModel2DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
   Data* d = static_cast<Data*>(data.get());
   const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();
   data->f.linear() = R.col(0) * force[0] + R.col(2) * force[1];
-  data->f.angular() = d->jMf.translation().cross(data->f.linear());
+  data->f.angular().setZero();
+  data->fext.linear() = R.col(0) * force[0] + R.col(2) * force[1];
+  data->fext.angular() = d->jMf.translation().cross(data->fext.linear());
 }
 
 template <typename Scalar>
@@ -149,17 +130,6 @@ template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_reference() const {
   return xref_;
 }
-
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-template <typename Scalar>
-FrameTranslationTpl<Scalar> ContactModel2DTpl<Scalar>::get_xref() const {
-  Vector3s x(xref_[0], 0., xref_[1]);
-  return FrameTranslationTpl<Scalar>(id_, x);
-}
-
-#pragma GCC diagnostic pop
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s& ContactModel2DTpl<Scalar>::get_gains() const {

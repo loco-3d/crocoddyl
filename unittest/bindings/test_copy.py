@@ -97,8 +97,9 @@ class ResidualsTest(CopyModelTestCase):
     # TODO(cmastalli): add pair-collision residual
     frame_id = state.pinocchio.getFrameId("rleg6_joint")
     contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
-    contact.addContact("rleg6_contact",
-                       crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), actuation.nu, np.zeros(2)))
+    contact.addContact(
+        "rleg6_contact",
+        crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     pdata = state.pinocchio.createData()
     adata = actuation.createData()
     cdata = contact.createData(pdata)
@@ -213,7 +214,7 @@ class DataCollectorsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.DataCollectorMultibodyInContact(pdata, cdata))
     MODEL.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
     MODEL.append(crocoddyl.DataCollectorJointActMultibodyInContact(pdata, adata, jdata, cdata))
-    cmodel = crocoddyl.ContactModelAbstract(state, 3, actuation.nu)
+    cmodel = crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu)
     MODEL.append(crocoddyl.ForceDataAbstract(cmodel, pdata))
 
 
@@ -244,22 +245,23 @@ class ContactsTest(CopyModelTestCase):
     # contact models
     MODEL.append(crocoddyl.ContactModelMultiple(state, actuation.nu))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModelAbstract(state, 3, actuation.nu))
+    MODEL.append(crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel1D(state, frame_id, 1., actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ContactModel2D(state, frame_id, np.ones(2), actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModel3D(state, frame_id, np.ones(3), actuation.nu, np.zeros(2)))
+    MODEL.append(crocoddyl.ContactModel3D(state, frame_id, np.ones(3), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), actuation.nu, np.zeros(2)))
+    MODEL.append(
+        crocoddyl.ContactModel6D(state, frame_id, pinocchio.SE3.Random(), pinocchio.LOCAL, actuation.nu, np.zeros(2)))
     COLLECTOR.append(pdata)
     # impulse models
     MODEL.append(crocoddyl.ImpulseModelMultiple(state))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModelAbstract(state, 3))
+    MODEL.append(crocoddyl.ImpulseModelAbstract(state, pinocchio.LOCAL, 3))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id))
+    MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id, pinocchio.LOCAL))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ImpulseModel6D(state, frame_id))
     COLLECTOR.append(pdata)
