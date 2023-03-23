@@ -101,7 +101,6 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename pinocchio::SE3Tpl<Scalar> SE3;
-  
 
   template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
