@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, CTU, INRIA, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, CTU, INRIA, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,12 +105,14 @@ int main(int argc, char* argv[]) {
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
       boost::make_shared<crocoddyl::ContactModel6D>(state, model.getFrameId(RF), pinocchio::SE3::Identity(),
-                                                    actuation->get_nu(), Eigen::Vector2d(0., 50.));
+                                                    pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
+                                                    Eigen::Vector2d(0., 50.));
   contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
       boost::make_shared<crocoddyl::ContactModel3D>(state, model.getFrameId(LF), Eigen::Vector3d::Zero(),
-                                                    actuation->get_nu(), Eigen::Vector2d(0., 50.));
+                                                    pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
+                                                    Eigen::Vector2d(0., 50.));
   contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> runningDAM =

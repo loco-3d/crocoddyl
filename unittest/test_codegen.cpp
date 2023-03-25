@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -266,13 +267,14 @@ const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > build_bipeda
   boost::shared_ptr<ContactModelMultiple> contact_models =
       boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
-  boost::shared_ptr<ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<ContactModel6D>(state, model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity(),
-                                         actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  boost::shared_ptr<ContactModelAbstract> support_contact_model6D = boost::make_shared<ContactModel6D>(
+      state, model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity(), pinocchio::LOCAL_WORLD_ALIGNED,
+      actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
   contact_models->addContact(model.frames[model.getFrameId(RF)].name + "_contact", support_contact_model6D);
 
-  boost::shared_ptr<ContactModelAbstract> support_contact_model3D = boost::make_shared<ContactModel3D>(
-      state, model.getFrameId(LF), Vector3s::Zero(), actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
+  boost::shared_ptr<ContactModelAbstract> support_contact_model3D =
+      boost::make_shared<ContactModel3D>(state, model.getFrameId(LF), Vector3s::Zero(), pinocchio::LOCAL_WORLD_ALIGNED,
+                                         actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
   contact_models->addContact(model.frames[model.getFrameId(LF)].name + "_contact", support_contact_model3D);
 
   // Next, we need to create an action model for running and terminal knots. The
