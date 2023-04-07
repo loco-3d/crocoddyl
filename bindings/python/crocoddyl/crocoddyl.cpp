@@ -38,9 +38,9 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   eigenpy::enableEigenPySpecific<Matrix6x>();
 
   // Register converters between std::vector and Python list
-  StdVectorPythonVisitor<VectorX, std::allocator<VectorX>, true>::expose("StdVec_VectorX");
-  StdVectorPythonVisitor<MatrixX, std::allocator<MatrixX>, true>::expose("StdVec_MatrixX");
-  StdVectorPythonVisitor<RowMatrixX, std::allocator<RowMatrixX>, true>::expose("StdVec_RowMatrixX");
+  StdVectorPythonVisitor<std::vector<VectorX>, true>::expose("StdVec_VectorX");
+  StdVectorPythonVisitor<std::vector<MatrixX>, true>::expose("StdVec_MatrixX");
+  StdVectorPythonVisitor<std::vector<RowMatrixX>, true>::expose("StdVec_RowMatrixX");
 
   // Register converters between std::set and Python set
   StdSetPythonVisitor<std::string, std::less<std::string>, std::allocator<std::string>, true>::expose("StdSet_String");

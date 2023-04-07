@@ -18,7 +18,7 @@ namespace python {
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
-  StdVectorPythonVisitor<CallbackAbstractPtr, std::allocator<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
+  StdVectorPythonVisitor<std::vector<CallbackAbstractPtr>, true>::expose("StdVec_Callback");
 
   bp::enum_<FeasibilityNorm>("FeasibilityNorm").value("LInf", LInf).value("L1", L1).export_values();
 

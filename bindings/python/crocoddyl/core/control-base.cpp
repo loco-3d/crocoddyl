@@ -19,9 +19,9 @@ void exposeControlParametrizationAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<ControlParametrizationModelAbstract> ControlParametrizationModelPtr;
   typedef boost::shared_ptr<ControlParametrizationDataAbstract> ControlParametrizationDataPtr;
-  StdVectorPythonVisitor<ControlParametrizationModelPtr, std::allocator<ControlParametrizationModelPtr>, true>::expose(
+  StdVectorPythonVisitor<std::vector<ControlParametrizationModelPtr>, true>::expose(
       "StdVec_ControlParametrizationModel");
-  StdVectorPythonVisitor<ControlParametrizationDataPtr, std::allocator<ControlParametrizationDataPtr>, true>::expose(
+  StdVectorPythonVisitor<std::vector<ControlParametrizationDataPtr>, true>::expose(
       "StdVec_ControlParametrizationData");
 
   bp::register_ptr_to_python<boost::shared_ptr<ControlParametrizationModelAbstract> >();
