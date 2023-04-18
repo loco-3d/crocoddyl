@@ -20,10 +20,8 @@ void exposeDifferentialActionAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<DifferentialActionModelAbstract> DifferentialActionModelPtr;
   typedef boost::shared_ptr<DifferentialActionDataAbstract> DifferentialActionDataPtr;
-  StdVectorPythonVisitor<std::vector<DifferentialActionModelPtr>, true>::expose(
-      "StdVec_DiffActionModel");
-  StdVectorPythonVisitor<std::vector<DifferentialActionDataPtr>, true>::expose(
-      "StdVec_DiffActionData");
+  StdVectorPythonVisitor<std::vector<DifferentialActionModelPtr>, true>::expose("StdVec_DiffActionModel");
+  StdVectorPythonVisitor<std::vector<DifferentialActionDataPtr>, true>::expose("StdVec_DiffActionData");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionModelAbstract> >();
 
