@@ -34,7 +34,7 @@ If you want to learn more about **Crocoddyl** and its solvers, we suggest readin
 **Crocoddyl** is versatile:
  * Various optimal control solvers (DDP, FDDP, BoxFDDP, Ipopt, etc)
  * Analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
- * Differential geometry support
+ * Differential geometry support leveraging **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * Various integrators, dynamics, costs and constraints
  * Numerical differentiation support
  * Automatic differentiation support via **[CppAD](https://github.com/coin-or/CppAD)**
