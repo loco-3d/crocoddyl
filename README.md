@@ -202,6 +202,7 @@ You have a question or an issue? Please open a [new issue](https://github.com/lo
 - [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/), University of Oxford :uk:
 - [Justin Carpentier](https://jcarpent.github.io/), INRIA :fr:
 - [Andrea Del Prete](https://andreadelprete.github.io/), Università degli Studi di Trento :it:
+- [Wilson Jallet](https://manifoldfr.github.io), INRIA :fr:
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr), MPI :de:
 - [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti), IRI: CSIC-UPC :es:
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ), MPI :de:
