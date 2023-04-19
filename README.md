@@ -18,10 +18,7 @@
 
 <img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
 
-**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence.
-Its solvers are based on novel and efficient differential dynamic programming (DDP) algorithms.
-**Crocoddyl** computes optimal trajectories along with optimal feedback gains.
-It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
+**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence. Its solvers are based on novel and efficient differential dynamic programming (DDP) algorithms. **Crocoddyl** computes optimal trajectories and feedback gains. It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robot dynamics and analytical derivatives.
 
 If you want to learn more about **Crocoddyl** and its solvers, we suggest reading [[1]](#1) [[2]](#2) [[3]](#3) and visiting [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md). If you want to follow the current developments and contribute, please directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
 
@@ -71,7 +68,7 @@ Just run the following command in the terminal:
 
 ### :turtle: With ROS
 
-Just clone it (with `--recursive`) into a catkin workspace.
+Just clone it (with `--recursive`) into a catkin workspace and compile it.
 
 ### :package: From Debian / Ubuntu packages, with [robotpkg](http://robotpkg.openrobots.org)
 
@@ -84,7 +81,7 @@ Just clone it (with `--recursive`) into a catkin workspace.
    curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
    sudo apt update
    ```
-2. Install of Crocoddyl and its python bindings:
+2. Install Crocoddyl and its Python bindings:
    ```bash
    sudo apt install robotpkg-py3\*-crocoddyl
    ```
@@ -103,7 +100,7 @@ Just clone it (with `--recursive`) into a catkin workspace.
    * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
    * [eigenpy](https://github.com/stack-of-tasks/eigenpy)
    * [Boost](https://www.boost.org/)
-2. (optional) Install Crocoddyl's optional dependendencies
+2. (optional) Install Crocoddyl's optional dependencies
    * [OpenMP](https://www.openmp.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for multi-threading support)
    * [CppADCogen](https://github.com/joaoleal/CppADCodeGen) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
    * [Ipopt](https://github.com/coin-or/Ipopt) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for Ipopt support)
@@ -119,7 +116,7 @@ Just clone it (with `--recursive`) into a catkin workspace.
 
 ## :mag: Documentation
 
-Crocoddyl's doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. Start in the following order.
+Crocoddyl's Doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/cartpole_swing_up.py)
 - [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/arm_manipulation.ipynb)
@@ -146,7 +143,7 @@ export CROCODDYL_PLOT=1
 
 ## :telescope: Citing Crocoddyl
 
-To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
+To cite **Crocoddyl** in your academic research, please use the following BibTeX lines:
 ```bibtex
 @inproceedings{mastalli20crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
@@ -156,9 +153,9 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
   year={2020}
 }
 ```
-Please consider to cite our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
+Please consider citing our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
 
-**Crocoddyl** contributions go beyond efficient software implementation as well. Please also consider to cite the algorithm contributions of our different solvers and formulations:
+**Crocoddyl's** contributions extend beyond efficient software development. Please also consider citing the algorithm contributions of our different solvers and formulations:
  - Feasibility-driven DDP (FDDP): [[1]](#1)
  - Control-limited feasibility-driven DDP (Box-FDDP): [[2]](#2)
  - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [[3]](#3)
@@ -184,7 +181,7 @@ You have a question or an issue? Please open a [new issue](https://github.com/lo
 
 ## :mag: Steering Committee
 
-**Crocoddyl** is being managed by a steering committee which meets every two weeks to discuss ongoing developments. The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/), [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) and [Justin Carpentier](https://jcarpent.github.io/) are other members of the committee.
+**Crocoddyl** is managed by a steering committee which meets every two weeks to discuss ongoing developments. The committee is led by [Carlos Mastalli](https://cmastalli.github.io/), [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) and [Justin Carpentier](https://jcarpent.github.io/) are other members of the committee.
 
 
 ## :copyright: Credits
