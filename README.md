@@ -3,54 +3,30 @@
   <img src="./doc/images/crocoddyl_logo.png" width="800" alt="Crocoddyl Logo" align="center"/>
 </p>
 
+<p align="center">
+<a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/"><img src="https://img.shields.io/badge/docs-online-brightgreen" alt="Documentation"/></a>
+<a href="https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel"><img src="https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg">
+<a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/"><img src="https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg">
+<a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg">
+<a href="https://pypi.org/project/crocoddyl/"><img src="https://badge.fury.io/py/crocoddyl.svg">
+<a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg">
+<a href="https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext"><img src="https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat"> 
+<!-- <a href="https://github.com/loco-3d/crocoddyl/graphs/contributors"><img src="https://img.shields.io/github/contributors/loco-3d/crocoddyl"> -->
+</p>
+
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
 
 <img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
 
 **[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence.
-Its solvers are based on novel and efficient Differential Dynamic Programming (DDP) algorithms.
+Its solvers are based on novel and efficient differential dynamic programming (DDP) algorithms.
 **Crocoddyl** computes optimal trajectories along with optimal feedback gains.
 It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
 
+If you want to learn more about **Crocoddyl** and its solvers, we suggest reading [[1]](#1) [[2]](#2) [[3]](#3) and visiting [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md). If you want to follow the current developments and contribute, please directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
 
-The source code is released under the [BSD 3-Clause license](LICENSE).
 
-**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) <br />
-**Instructors:** Nicolas Mansard <br />
-**With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
-
-<a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/"><img src="https://img.shields.io/badge/docs-online-brightgreen" alt="Documentation"/></a>
-[![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
-[![CI build status](https://travis-ci.org/loco-3d/crocoddyl.svg?branch=devel)](https://travis-ci.org/loco-3d/crocoddyl)
-[![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
-[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
-[![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
-[![conda version](https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![PyPI](https://badge.fury.io/py/crocoddyl.svg)](https://pypi.org/project/crocoddyl/)
-[![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/platforms.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![conda download](https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg)](https://anaconda.org/conda-forge/crocoddyl)
-[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
-[![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
-[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
-
-If you want to follow the current developments, you can directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
-If you want to directly dive into **Crocoddyl**, only one single line is sufficient
-
-<p align="center">
-conda install crocoddyl -c conda-forge 
-</p>
-
-and if you prefer pip (in Python 3 or 2):
-
-<p align="center">
-pip install --user crocoddyl
-</p>
-
-## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
-
-## Crocoddyl features
+## :crocodile: Crocoddyl features
 <table >
   <tr>
     <td align="left"><img src="https://cmastalli.github.io/assets/img/publications/highly_dynamic_maneuvers.png" width="10000"/></td>
@@ -58,112 +34,93 @@ pip install --user crocoddyl
   </tr>
 </table>
 
-**Crocoddyl** is versatible:
+**Crocoddyl** is versatile:
 
- * various optimal control solvers (DDP, FDDP, BoxFDDP, Ipopt, etc) - single and multi-shooting methods
- * analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
- * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
- * handle autonomous and nonautomous dynamical systems
- * numerical differentiation support
- * automatic differentiation support via **[CppAD](https://github.com/coin-or/CppAD)**
+ * Various optimal control solvers (DDP, FDDP, BoxFDDP, Ipopt, etc)
+ * Analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
+ * Differential geometry support
+ * Various integrators, dynamics, costs and constraints
+ * Numerical differentiation support
+ * Automatic differentiation support via **[CppAD](https://github.com/coin-or/CppAD)**
 
 **Crocoddyl** is efficient and flexible:
+ * Cache friendly
+ * Multi-threading support via **[OpenMP](https://www.openmp.org/)**
+ * Python bindings (including abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
+ * C++14/17/20 compliant
+ * Extensively tested
+ * Automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
 
- * cache friendly,
- * multi-thread friendly
- * Python bindings (including models and solvers abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
- * C++ 14/17/20 compliant
- * extensively tested
- * automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
+## :penguin: Installation
 
-### Installation through robotpkg
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Below, there are different ways to install Crocoddyl.
 
-You can install this package through robotpkg. robotpkg is a package manager tailored for robotics softwares.
-It greatly simplifies the release of new versions along with the management of their dependencies.
-You just need to add the robotpkg apt repository to your sources.list and then use `sudo apt install robotpkg-py27-crocoddyl` (or `py3X` for python 3.X, depending on your system):
+### :dragon: From <img src="https://s3.amazonaws.com/conda-dev/conda_logo.svg" height="18">
 
-If you have never added robotpkg as a softwares repository, please follow first the instructions from 1 to 3; otherwise, go directly to instruction 4.
-Those instructions are similar to the installation procedures presented in [http://robotpkg.openrobots.org/debian.html](http://robotpkg.openrobots.org/debian.html).
-
-1. Add robotpkg as source repository to apt:
-
+Just run the following command in the terminal:
 ```bash
-sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
-deb [arch=amd64] http://robotpkg.openrobots.org/wip/packages/debian/pub $(lsb_release -sc) robotpkg
-deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
-EOF
+   conda install crocoddyl -c conda-forge
+```
+Conda installation supports [![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/platforms.svg)](https://anaconda.org/conda-forge/crocoddyl).
+
+### :snake: From <img src="https://res.cloudinary.com/practicaldev/image/fetch/s--4-K6Sjm4--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://cdn-images-1.medium.com/max/1600/1%2A_Wkc-WkNu6GJAAQ26jXZOg.png" height="22">
+
+Just run the following command in the terminal:
+```bash
+  pip install --user crocoddyl
 ```
 
-2. Register the authentication certificate of robotpkg:
+### :turtle: With ROS
 
-```bash
-curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
-```
+Just clone it (with `--recursive`) into a catkin workspace.
 
-3. You need to run at least once apt update to fetch the package descriptions:
+### :package: From Debian / Ubuntu packages, with [robotpkg](http://robotpkg.openrobots.org)
 
-```bash
-sudo apt-get update
-```
+1. If you have never added robotpkg's software repository, [do it now](http://robotpkg.openrobots.org/debian.html):
+   ```bash
+   sudo tee /etc/apt/sources.list.d/robotpkg.list <<EOF
+   deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -sc) robotpkg
+   EOF
 
-4. The installation of Crocoddyl:
+   curl http://robotpkg.openrobots.org/packages/debian/robotpkg.key | sudo apt-key add -
+   sudo apt update
+   ```
+2. Install of Crocoddyl and its python bindings:
+   ```bash
+   sudo apt install robotpkg-py3\*-crocoddyl
+   ```
+3. Configure your environment variables:
+   ```bash
+   export PATH=/opt/openrobots/bin:$PATH
+   export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+   export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
+   export PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH
+   ```
 
-```bash
-sudo apt install robotpkg-py36-crocoddyl # for Python 3
+### :file_folder: From source
 
-sudo apt install robotpkg-py27-crocoddyl # for Python 2
-```
+1. Install Crocoddyl's mandatory dependencies:
+   * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
+   * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+   * [eigenpy](https://github.com/stack-of-tasks/eigenpy)
+   * [Boost](https://www.boost.org/)
+2. (optional) Install Crocoddyl's optional dependendencies
+   * [OpenMP](https://www.openmp.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for multi-threading support)
+   * [CppADCogen](https://github.com/joaoleal/CppADCodeGen) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
+   * [Ipopt](https://github.com/coin-or/Ipopt) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for Ipopt support)
+   * [example-robot-data](https://github.com/gepetto/example-robot-data) &nbsp;&nbsp;&nbsp;&nbsp;(for robotic examples, install Python loaders)   
+   * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) &nbsp;&nbsp;(for display)
+   * [meshcat-python](https://github.com/rdeits/meshcat-python) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display)
+   * [jupyter](https://jupyter.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for notebooks)
+   * [matplotlib](https://matplotlib.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for plotting)
+3. Clone it (with --recursive), create a build directory inside, and:
+   ```bash
+   cmake .. && make && make install
+   ```
 
-Finally you will need to configure your environment variables, e.g.:
+## :mag: Documentation
 
-```bash
-export PATH=/opt/openrobots/bin:$PATH
-export PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
-export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
-```
-
-
-### Building from source
-
-**Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
-
-* [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
-* [eigenpy](https://github.com/stack-of-tasks/eigenpy)
-* [Boost](https://www.boost.org/)
-* [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
-* [OpenMP](https://www.openmp.org/) (optional for multi-threading support)
-* [Ipopt](https://github.com/coin-or/Ipopt) (optional for Ipopt support)
-* [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
-* [meshcat-python](https://github.com/rdeits/meshcat-python) (optional for display)
-* [jupyter](https://jupyter.org/) (optional for notebooks)
-* [matplotlib](https://matplotlib.org/) (optional for examples)
-
-
-You can run examples, unit-tests and benchmarks from your build dir:
-
-```bash
-cd build
-make test
-make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
-make -s benchmarks-cpp-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
-```
-
-Alternatively, you can see the 3D result and/or graphs of your run examples (through gepetto-viewer and matplotlib), you can use
-
-```bash
-export CROCODDYL_DISPLAY=1
-export CROCODDYL_PLOT=1
-```
-
-After installation, you could run the examples as follows:
-
-```bash
-python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display and plot
-```
-
-If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
+Crocoddyl's doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. Start in the following order.
 - [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/unicycle_towards_origin.ipynb)
 - [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/cartpole_swing_up.py)
 - [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/arm_manipulation.ipynb)
@@ -171,11 +128,24 @@ If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Star
 - [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/bipedal_walking.ipynb)
 - [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
-## Documentation
+Moreover, after installation, you could run the examples as follows:
+```bash
+python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display and plot
+```
+or run examples, unit tests and benchmarks from your build directory as
+```bash
+cd build
+make test
+make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
+make -s benchmarks-cpp-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
+```
+where it is possible to enable display and/or plots generated by our examples using the environment variables:
+```bash
+export CROCODDYL_DISPLAY=1
+export CROCODDYL_PLOT=1
+```
 
-The documentation of **Crocoddyl** of its last release is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/).
-
-## Citing Crocoddyl
+## :telescope: Citing Crocoddyl
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
 ```bibtex
@@ -187,15 +157,6 @@ To cite **Crocoddyl** in your academic research, please use the following bibtex
   year={2020}
 }
 ```
-and the following one to reference this website:
-```bibtex
-@misc{crocoddylweb,
-   author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
-   title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
-   howpublished = {https://github.com/loco-3d/crocoddyl/wikis/home},
-   year = {2019}
-}
-```
 Please consider to cite our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
 
 **Crocoddyl** contributions go beyond efficient software implementation as well. Please also consider to cite the algorithm contributions of our different solvers and formulations:
@@ -204,52 +165,52 @@ Please consider to cite our selected publications and contributions described in
  - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [[3]](#3)
 
 
-Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
+Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details on how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
 
 
-### Selected publications
-<a id="1">[1]</a>
-C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
+### :open_book:  Selected publications
 
-<a id="2">[2]</a>
-C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard and S. Vijayakumar. [A Feasibility-Driven Approach
+<a id="1">[1]</a> C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
+
+<a id="2">[2]</a> C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard and S. Vijayakumar. [A Feasibility-Driven Approach
 to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), Autonomous Robots, 2022
 
-<a id="3">[3]</a>
-C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonneau and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), IEEE Transactions on Robotics, 2023
+<a id="3">[3]</a> C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonneau and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), IEEE Transactions on Robotics, 2023
 
 
-## Questions and Issues
+## :computer:  Questions and Issues
 
 You have a question or an issue? Please open a [new issue](https://github.com/loco-3d/crocoddyl/issues).
 
 
-## Steering Committee
+## :mag: Steering Committee
 
-**Crocoddyl** is being managed by a steering committee which meets every two weeks to discuss the ongoing developments.
-
-The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/) (Heriot-Watt University),
-[Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS) and [Justin Carpentier](https://jcarpent.github.io/) (INRIA) are other members of the committee.
+**Crocoddyl** is being managed by a steering committee which meets every two weeks to discuss ongoing developments. The committee is being led by [Carlos Mastalli](https://cmastalli.github.io/), [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) and [Justin Carpentier](https://jcarpent.github.io/) are other members of the committee.
 
 
-## Credits
+## :copyright: Credits
 
-The following people have been involved in the development of **Crocoddyl**:
+### :writing_hand: Written by
 
-- [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor and main developer
-- [Carlos Mastalli](https://cmastalli.github.io/) (Heriot-Watt University): main developer
-- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): main developer
-- [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives, conda integration
-- [Andrea Del Prete](https://andreadelprete.github.io/) (UNITN): feature extension
-- [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
-- [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
-- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Oxford): feature extension and debugging
-- [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (IRI: CSIC-UPC): feature extension
-- [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
-- [Julian Eßer](https://github.com/julesser) (DFKI): features extension (contact stability)
+- [Carlos Mastalli](https://cmastalli.github.io/), Heriot-Watt University :uk: (project manager)
+
+- [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard), LAAS-CNRS :fr:
+
+- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ), LAAS-CNRS :fr: (alumnus)
+
+### :construction_worker: With contributions from
 
 
-## Acknowledgments
+- [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel), LAAS-CNRS :fr:
+- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/), University of Oxford :uk:
+- [Justin Carpentier](https://jcarpent.github.io/), INRIA :fr:
+- [Andrea Del Prete](https://andreadelprete.github.io/), Università degli Studi di Trento :it:
+- [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr), MPI :de:
+- [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti), IRI: CSIC-UPC :es:
+- [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ), MPI :de:
+- [Julian Eßer](https://github.com/julesser), Fraunhofer :de:
 
-The development of **Crocoddyl** was supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
-It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), the [Robot Motor Intelligence (RoMI) Lab](https://www.romilab.org) [@Heriot-Watt University](https://www.edinburgh-robotics.org/), and the [Willow team](https://www.di.ens.fr/willow/) [@INRIA](https://www.inria.fr/fr/centre-inria-de-paris).
+
+## :trophy: Acknowledgments
+
+**Crocoddyl** development was supported by the [EU MEMMO project](http://www.memmo-project.eu/) and the [EU RoboCom++ project](http://robocomplusplus.eu/). It is maintained by the [Robot Motor Intelligence (RoMI) Lab](https://www.romilab.org) [@ Heriot-Watt University](https://www.edinburgh-robotics.org/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@ LAAS-CNRS](http://www.laas.fr), and the [Willow team](https://www.di.ens.fr/willow/) [@ INRIA](https://www.inria.fr/fr/centre-inria-de-paris).
