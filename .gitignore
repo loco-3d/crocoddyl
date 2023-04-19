@@ -12,3 +12,4 @@ _build*
 .clang-format
 .vscode/
 *#*#
+.cache/

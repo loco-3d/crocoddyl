@@ -27,7 +27,7 @@ namespace bp = boost::python;
  * \sa Pickle
  */
 template <typename Container>
-struct PickleMap : public PickleVector<Container> {
+struct PickleMap : public eigenpy::PickleVector<Container> {
   static void setstate(bp::object op, bp::tuple tup) {
     Container& o = bp::extract<Container&>(op)();
     bp::stl_input_iterator<typename Container::value_type> begin(tup[0]), end;

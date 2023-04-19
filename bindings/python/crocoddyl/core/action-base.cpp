@@ -20,8 +20,8 @@ void exposeActionAbstract() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
   typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
-  StdVectorPythonVisitor<ActionModelPtr, std::allocator<ActionModelPtr>, true>::expose("StdVec_ActionModel");
-  StdVectorPythonVisitor<ActionDataPtr, std::allocator<ActionDataPtr>, true>::expose("StdVec_ActionData");
+  StdVectorPythonVisitor<std::vector<ActionModelPtr>, true>::expose("StdVec_ActionModel");
+  StdVectorPythonVisitor<std::vector<ActionDataPtr>, true>::expose("StdVec_ActionData");
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionModelAbstract> >();
 
