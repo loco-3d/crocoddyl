@@ -2,10 +2,9 @@ import copy
 import sys
 import unittest
 
+import crocoddyl
 import numpy as np
 import pinocchio
-
-import crocoddyl
 
 
 class CopyModelTestCase(unittest.TestCase):

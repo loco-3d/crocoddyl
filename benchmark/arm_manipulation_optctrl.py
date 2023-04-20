@@ -3,11 +3,10 @@ import subprocess
 import sys
 import time
 
+import crocoddyl
 import example_robot_data
 import numpy as np
 import pinocchio
-
-import crocoddyl
 from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived
 
 crocoddyl.switchToNumpyMatrix()

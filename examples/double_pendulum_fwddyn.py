@@ -3,14 +3,13 @@ import signal
 import sys
 import time
 
+import crocoddyl
 import example_robot_data
 import numpy as np
 from crocoddyl.utils.pendulum import (
     ActuationModelDoublePendulum,
     CostModelDoublePendulum,
 )
-
-import crocoddyl
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ

@@ -2,10 +2,9 @@ import sys
 import unittest
 from random import randint
 
+import crocoddyl
 import example_robot_data
 import numpy as np
-
-import crocoddyl
 from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
 

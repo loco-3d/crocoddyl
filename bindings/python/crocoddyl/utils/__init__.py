@@ -1,8 +1,7 @@
+import crocoddyl
 import numpy as np
 import pinocchio
 import scipy.linalg as scl
-
-import crocoddyl
 
 
 def a2m(a):

@@ -1,8 +1,7 @@
 # Display the solution
+import crocoddyl
 import numpy as np
 from cartpole_utils import animateCartpole
-
-import crocoddyl
 
 
 class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract):
