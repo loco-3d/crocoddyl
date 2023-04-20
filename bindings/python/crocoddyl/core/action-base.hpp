@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {

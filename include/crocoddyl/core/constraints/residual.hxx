@@ -10,6 +10,8 @@
 
 namespace crocoddyl {
 
+using std::isfinite;
+
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     boost::shared_ptr<typename Base::StateAbstract> state,

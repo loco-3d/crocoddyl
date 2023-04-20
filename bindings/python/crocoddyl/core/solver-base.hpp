@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "crocoddyl/core/solver-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {

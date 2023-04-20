@@ -10,11 +10,11 @@
 #define CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 
 #include "crocoddyl/core/constraint-base.hpp"
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

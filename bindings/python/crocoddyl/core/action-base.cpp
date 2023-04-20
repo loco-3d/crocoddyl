@@ -9,7 +9,6 @@
 
 #include "python/crocoddyl/core/action-base.hpp"
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"

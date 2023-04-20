@@ -8,7 +8,6 @@
 
 #include "python/crocoddyl/core/residual-base.hpp"
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 

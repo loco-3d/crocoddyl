@@ -9,8 +9,9 @@
 #ifndef CROCODDYL_CORE_CONSTRAINTS_RESIDUAL_CONSTRAINT_HPP_
 #define CROCODDYL_CORE_CONSTRAINTS_RESIDUAL_CONSTRAINT_HPP_
 
-#include "crocoddyl/core/constraint-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+//
+#include "crocoddyl/core/constraint-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {

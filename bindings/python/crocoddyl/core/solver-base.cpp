@@ -9,7 +9,6 @@
 
 #include "python/crocoddyl/core/solver-base.hpp"
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 

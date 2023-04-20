@@ -14,6 +14,7 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"

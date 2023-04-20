@@ -5,7 +5,6 @@ import numpy as np
 
 import pinocchio
 
-from .deprecation import DeprecatedWarnings, DeprecationHelper, deprecated  # noqa
 from .libcrocoddyl_pywrap import *  # noqa
 
 

@@ -12,8 +12,9 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+//
+#include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/state-base.hpp"
 

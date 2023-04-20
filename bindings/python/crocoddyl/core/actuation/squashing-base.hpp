@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {

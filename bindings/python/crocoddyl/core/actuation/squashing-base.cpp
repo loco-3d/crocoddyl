@@ -9,7 +9,6 @@
 
 #include "python/crocoddyl/core/actuation/squashing-base.hpp"
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {

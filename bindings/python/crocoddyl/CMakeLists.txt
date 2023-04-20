@@ -3,8 +3,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_HEADERS
 file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py
-                                          deprecation.py)
+set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py)
 
 set(PYWRAP "${PROJECT_NAME}_pywrap")
 set(${PYWRAP}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})

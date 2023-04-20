@@ -10,7 +10,6 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
 #include <memory>
-#include <vector>
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
