@@ -3,11 +3,11 @@ import subprocess
 import sys
 import time
 
+import crocoddyl
 import example_robot_data
 import numpy as np
 from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem
 
-import crocoddyl
 import pinocchio
 
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials

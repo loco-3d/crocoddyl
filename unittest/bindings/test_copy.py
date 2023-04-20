@@ -2,9 +2,9 @@ import copy
 import sys
 import unittest
 
+import crocoddyl
 import numpy as np
 
-import crocoddyl
 import pinocchio
 
 

@@ -3,10 +3,10 @@ import signal
 import sys
 import time
 
+import crocoddyl
 import example_robot_data
 import numpy as np
 
-import crocoddyl
 import pinocchio
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ

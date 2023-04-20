@@ -1,11 +1,11 @@
 import sys
 import unittest
 
-import numpy as np
-
 import crocoddyl
-import pinocchio
+import numpy as np
 from crocoddyl.utils import SquashingSmoothSatDerived
+
+import pinocchio
 
 
 class SquashingModelAbstractTestCase(unittest.TestCase):

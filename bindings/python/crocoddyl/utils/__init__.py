@@ -1,7 +1,7 @@
+import crocoddyl
 import numpy as np
 import scipy.linalg as scl
 
-import crocoddyl
 import pinocchio
 
 

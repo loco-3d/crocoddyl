@@ -3,9 +3,8 @@ import subprocess
 import sys
 import time
 
-import numpy as np
-
 import crocoddyl
+import numpy as np
 from crocoddyl.utils import LQRModelDerived
 
 NX = 37

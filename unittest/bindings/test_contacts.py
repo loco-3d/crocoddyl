@@ -2,12 +2,12 @@ import collections
 import sys
 import unittest
 
+import crocoddyl
 import example_robot_data
 import numpy as np
-
-import crocoddyl
-import pinocchio
 from crocoddyl.utils import Contact3DModelDerived, Contact6DModelDerived
+
+import pinocchio
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):
