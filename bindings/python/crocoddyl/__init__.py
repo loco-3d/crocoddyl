@@ -2,7 +2,6 @@
 import time
 
 import numpy as np
-
 import pinocchio
 
 from .libcrocoddyl_pywrap import *  # noqa

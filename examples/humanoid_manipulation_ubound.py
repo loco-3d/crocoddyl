@@ -3,12 +3,12 @@ import signal
 import sys
 import time
 
-import crocoddyl
 import example_robot_data
 import numpy as np
+import pinocchio
 from crocoddyl.utils.biped import plotSolution
 
-import pinocchio
+import crocoddyl
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ

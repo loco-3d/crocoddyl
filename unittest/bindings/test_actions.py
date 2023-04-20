@@ -2,9 +2,11 @@ import sys
 import unittest
 from random import randint
 
-import crocoddyl
 import example_robot_data
 import numpy as np
+import pinocchio
+
+import crocoddyl
 from crocoddyl.utils import (
     DifferentialFreeFwdDynamicsModelDerived,
     DifferentialLQRModelDerived,
@@ -13,8 +15,6 @@ from crocoddyl.utils import (
     LQRModelDerived,
     UnicycleModelDerived,
 )
-
-import pinocchio
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):

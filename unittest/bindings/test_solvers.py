@@ -2,12 +2,12 @@ import sys
 import unittest
 from random import randint
 
-import crocoddyl
 import example_robot_data
 import numpy as np
-from crocoddyl.utils import DDPDerived, FDDPDerived
-
 import pinocchio
+
+import crocoddyl
+from crocoddyl.utils import DDPDerived, FDDPDerived
 
 
 class SolverAbstractTestCase(unittest.TestCase):

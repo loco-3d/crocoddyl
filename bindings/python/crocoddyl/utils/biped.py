@@ -1,7 +1,7 @@
-import crocoddyl
 import numpy as np
-
 import pinocchio
+
+import crocoddyl
 
 
 class SimpleBipedGaitProblem:

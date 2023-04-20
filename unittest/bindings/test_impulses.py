@@ -2,12 +2,12 @@ import collections
 import sys
 import unittest
 
-import crocoddyl
 import example_robot_data
 import numpy as np
-from crocoddyl.utils import Impulse3DModelDerived, Impulse6DModelDerived
-
 import pinocchio
+
+import crocoddyl
+from crocoddyl.utils import Impulse3DModelDerived, Impulse6DModelDerived
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):

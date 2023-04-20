@@ -1,5 +1,4 @@
 [tool.isort]
-known_first_party = "pinocchio"
 profile = "black"
 
 [tool.ruff]

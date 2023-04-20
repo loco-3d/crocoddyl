@@ -1,12 +1,12 @@
 import sys
 import time
 
-import crocoddyl
 import example_robot_data
 import numpy as np
+import pinocchio
 from crocoddyl.utils.biped import SimpleBipedGaitProblem
 
-import pinocchio
+import crocoddyl
 
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
