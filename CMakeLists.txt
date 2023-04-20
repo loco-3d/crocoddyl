@@ -50,13 +50,6 @@ OPTION(BUILD_EXAMPLES "Build the examples" ON)
 OPTION(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 OPTION(GENERATE_PYTHON_STUBS "Generate the Python stubs associated to the Python library" OFF)
 
-IF(DEFINED BUILD_UNIT_TESTS)
-  MESSAGE(AUTHOR_WARNING "BUILD_UNIT_TESTS is deprecated. Use BUILD_TESTING instead.\
-    If you are manually building Crocoddyl from source in an existing build folder,\
-    we suggest that you delete your build folder and make a new one.")
-  OPTION(BUILD_TESTING ${BUILD_UNIT_TESTS})
-ENDIF(DEFINED BUILD_UNIT_TESTS)
-
 IF(ENABLE_VECTORIZATION)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 ENDIF()
