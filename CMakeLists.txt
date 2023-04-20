@@ -9,15 +9,22 @@ SET(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Check if the submodule cmake have been initialized
+SET(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
 IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
-  MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
+  message(STATUS "JRL cmakemodules not found. Let's fetch it.")
+  include(FetchContent)
+  FetchContent_Declare(
+    "jrl-cmakemodules"
+    GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
+  FetchContent_MakeAvailable("jrl-cmakemodules")
+  FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
 ENDIF()
 
 # Include important cmake modules
-INCLUDE(cmake/base.cmake)
-INCLUDE(cmake/boost.cmake)
-INCLUDE(cmake/apple.cmake)
-INCLUDE(cmake/stubs.cmake)
+INCLUDE("${JRL_CMAKE_MODULES}/base.cmake")
+INCLUDE("${JRL_CMAKE_MODULES}/boost.cmake")
+INCLUDE("${JRL_CMAKE_MODULES}/apple.cmake")
+INCLUDE("${JRL_CMAKE_MODULES}/stubs.cmake")
 
 # Print initial message
 MESSAGE(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
