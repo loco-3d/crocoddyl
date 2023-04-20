@@ -1,11 +1,12 @@
+# ruff: noqa: F405
 import time
 
 import numpy as np
 
 import pinocchio
 
-from .deprecation import *
-from .libcrocoddyl_pywrap import *
+from .deprecation import DeprecatedWarnings, DeprecationHelper, deprecated  # noqa
+from .libcrocoddyl_pywrap import *  # noqa
 
 
 def rotationMatrixFromTwoVectors(a, b):
@@ -84,10 +85,10 @@ class DisplayAbstract:
             if hasattr(data, "differential"):
                 if isinstance(
                     data.differential,
-                    libcrocoddyl_pywrap.DifferentialActionDataContactFwdDynamics,
+                    DifferentialActionDataContactFwdDynamics,
                 ) or isinstance(
                     data.differential,
-                    libcrocoddyl_pywrap.DifferentialActionDataContactInvDynamics,
+                    DifferentialActionDataContactInvDynamics,
                 ):
                     fc = []
                     for (
@@ -109,7 +110,7 @@ class DisplayAbstract:
                             for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(
                                     c.cost.residual,
-                                    libcrocoddyl_pywrap.ResidualModelContactFrictionCone,
+                                    ResidualModelContactFrictionCone,
                                 ):
                                     if contact.frame == c.cost.residual.id:
                                         R = c.cost.residual.reference.R
@@ -125,9 +126,7 @@ class DisplayAbstract:
                                 }
                             )
                     fs.append(fc)
-                elif isinstance(
-                    data.differential, libcrocoddyl_pywrap.StdVec_DiffActionData
-                ):
+                elif isinstance(data.differential, StdVec_DiffActionData):
                     fc = []
                     for key, contact in (
                         data.differential[0]
@@ -149,7 +148,7 @@ class DisplayAbstract:
                             for k, c in model.differential.costs.costs.todict().items():
                                 if isinstance(
                                     c.cost.residual,
-                                    libcrocoddyl_pywrap.ResidualModelContactFrictionCone,
+                                    ResidualModelContactFrictionCone,
                                 ):
                                     if contact.frame == c.cost.residual.id:
                                         R = c.cost.residual.reference.R
@@ -165,7 +164,7 @@ class DisplayAbstract:
                                 }
                             )
                     fs.append(fc)
-            elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+            elif isinstance(data, ActionDataImpulseFwdDynamics):
                 fc = []
                 for key, impulse in data.multibody.impulses.impulses.todict().items():
                     if model.impulses.impulses[key].active:
@@ -181,7 +180,7 @@ class DisplayAbstract:
                         for k, c in model.costs.costs.todict().items():
                             if isinstance(
                                 c.cost.residual,
-                                libcrocoddyl_pywrap.ResidualModelContactFrictionCone,
+                                ResidualModelContactFrictionCone,
                             ):
                                 if impulse.frame == c.cost.residual.id:
                                     R = c.cost.residual.reference.R
@@ -211,10 +210,9 @@ class DisplayAbstract:
                 model = models[i]
                 if hasattr(data, "differential"):
                     # Update the frame placement if there is not contact.
-                    # Note that, in non-contact cases, the action model does not compute it for efficiency reason
-                    if isinstance(
-                        data.differential, libcrocoddyl_pywrap.StdVec_DiffActionData
-                    ):
+                    # Note that, in non-contact cases, the action model does not compute
+                    # it for efficiency reason.
+                    if isinstance(data.differential, StdVec_DiffActionData):
                         differential = data.differential[0]
                     else:
                         differential = data.differential
@@ -229,7 +227,7 @@ class DisplayAbstract:
                         )
                     pose = differential.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
-                elif isinstance(data, libcrocoddyl_pywrap.ActionDataImpulseFwdDynamics):
+                elif isinstance(data, ActionDataImpulseFwdDynamics):
                     pose = data.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
@@ -547,9 +545,9 @@ class MeshcatDisplay(DisplayAbstract):
         return "0x%02x%02x%02x" % tuple(np.rint(255 * np.array(rgbColor)).astype(int))
 
 
-class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackDisplay(CallbackAbstract):
     def __init__(self, display):
-        libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
+        CallbackAbstract.__init__(self)
         self.visualization = display
 
     def __call__(self, solver):
@@ -558,9 +556,9 @@ class CallbackDisplay(libcrocoddyl_pywrap.CallbackAbstract):
         self.visualization.displayFromSolver(solver)
 
 
-class CallbackLogger(libcrocoddyl_pywrap.CallbackAbstract):
+class CallbackLogger(CallbackAbstract):
     def __init__(self):
-        libcrocoddyl_pywrap.CallbackAbstract.__init__(self)
+        CallbackAbstract.__init__(self)
         self.xs = []
         self.us = []
         self.fs = []

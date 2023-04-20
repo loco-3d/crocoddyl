@@ -32,7 +32,8 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.PROBLEM_DER = crocoddyl.ShootingProblem(
             self.xs[0], [self.MODEL_DER] * self.T, self.MODEL_DER
         )
-        # TODO(cmastalli): Remove the following lines once Crocoddyl supports multithreading with Python-derived models
+        # TODO(cmastalli): Remove the following lines once Crocoddyl supports
+        # multithreading with Python-derived models.
         self.PROBLEM.nthreads = 1
         self.PROBLEM_DER.nthreads = 1
 

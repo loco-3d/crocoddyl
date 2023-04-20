@@ -444,8 +444,9 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
         else:
             data.cost = dt * data.differential.cost
         # data.xnext[nq:] = x[nq:] + acc*dt
-        # data.xnext[:nq] = pinocchio.integrate(self.differential.pinocchio,
-        #                                       a2m(x[:nq]),a2m(data.xnext[nq:]*dt)).flat
+        # data.xnext[:nq] = pinocchio.integrate(
+        # self.differential.pinocchio, a2m(x[:nq]), a2m(data.xnext[nq:] * dt)
+        # ).flat
         data.dx = np.concatenate([x[nq:] * dt + acc * dt**2, acc * dt])
         data.xnext[:] = self.differential.state.integrate(x, data.dx)
 
@@ -1274,7 +1275,8 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
         if self.type == pinocchio.LOCAL:
             data.da0_dx[:, :] = data.da0_local_dx
         if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
-            # Recalculate the constrained accelerations after imposing contact constraints.
+            # Recalculate the constrained accelerations after imposing contact
+            # constraints.
             # This is necessary for the forward-dynamics case.
             data.a0_local = pinocchio.getFrameAcceleration(
                 self.state.pinocchio, data.pinocchio, self.id
@@ -1785,7 +1787,8 @@ class FDDPDerived(DDPDerived):
                         )
                         self.cost = self.cost_try
                         break
-                else:  # reducing the gaps by allowing a small increment in the cost value
+                else:
+                    # reducing the gaps by allowing a small increment in the cost value
                     if self.dV > self.th_acceptNegStep * self.dV_exp:
                         self.wasFeasible = self.isFeasible
                         self.setCandidate(

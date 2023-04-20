@@ -159,7 +159,8 @@ footTrackingCost2 = crocoddyl.CostModelResidual(
 comResidual = crocoddyl.ResidualModelCoMPosition(state, comRef, actuation.nu)
 comTrack = crocoddyl.CostModelResidual(state, comResidual)
 
-# Create cost model per each action model. We divide the motion in 3 phases plus its terminal model
+# Create cost model per each action model. We divide the motion in 3 phases plus its
+# terminal model.
 runningCostModel1 = crocoddyl.CostModelSum(state, actuation.nu)
 runningCostModel2 = crocoddyl.CostModelSum(state, actuation.nu)
 runningCostModel3 = crocoddyl.CostModelSum(state, actuation.nu)

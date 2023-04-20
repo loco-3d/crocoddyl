@@ -16,8 +16,8 @@ WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # In this example test, we will solve the reaching-goal task with the Kinova arm.
-# For that, we use the inverse dynamics (with its analytical derivatives)
-# developed inside crocoddyl; it is described inside DifferentialActionModelFreeInvDynamics class.
+# For that, we use the inverse dynamics (with its analytical derivatives) developed
+# inside crocoddyl; it is described inside DifferentialActionModelFreeInvDynamics class.
 # Finally, we use an Euler sympletic integration scheme.
 
 # First, let's load create the state and actuation models

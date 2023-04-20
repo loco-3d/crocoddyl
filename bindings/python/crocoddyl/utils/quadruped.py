@@ -7,11 +7,12 @@ import pinocchio
 class SimpleQuadrupedalGaitProblem:
     """Build simple quadrupedal locomotion problems.
 
-    This class aims to build simple locomotion problems used in the examples of Crocoddyl.
+    This class aims to build simple locomotion problems used in the examples of
+    Crocoddyl.
     The scope of this class is purely for academic reasons, and it does not aim to be
     used in any robotics application.
-    We also do not consider it as part of the API, so changes in this class will not pass
-    through a strict process of deprecation.
+    We also do not consider it as part of the API, so changes in this class will not
+    pass through a strict process of deprecation.
     Thus, we advice any user to DO NOT develop their application based on this class.
     """
 
@@ -33,9 +34,12 @@ class SimpleQuadrupedalGaitProblem:
         :param rfFoot: name of the right-front foot
         :param lhFoot: name of the left-hind foot
         :param rhFoot: name of the right-hind foot
-        :param integrator: type of the integrator (options are: 'euler', and 'rk4')
-        :param control: type of control parametrization (options are: 'zero', 'one', and 'rk4')
-        :param fwddyn: True for forward-dynamics and False for inverse-dynamics formulations
+        :param integrator: type of the integrator
+            (options are: 'euler', and 'rk4')
+        :param control: type of control parametrization
+            (options are: 'zero', 'one', and 'rk4')
+        :param fwddyn: True for forward-dynamics and False for inverse-dynamics
+            formulations
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -741,7 +745,8 @@ class SimpleQuadrupedalGaitProblem:
 
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
-        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the impulse model
+        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the
+            impulse model
         :return action model for a foot switch phase
         """
         if pseudoImpulse:
@@ -752,7 +757,8 @@ class SimpleQuadrupedalGaitProblem:
     def createPseudoImpulseModel(self, supportFootIds, swingFootTask):
         """Action model for pseudo-impulse models.
 
-        A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
+        A pseudo-impulse model consists of adding high-penalty cost for the contact
+        velocities.
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
@@ -875,7 +881,8 @@ class SimpleQuadrupedalGaitProblem:
     ):
         """Action model for impulse models.
 
-        An impulse model consists of describing the impulse dynamics against a set of contacts.
+        An impulse model consists of describing the impulse dynamics against a set of
+        contacts.
         :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return impulse action model
