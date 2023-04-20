@@ -11,8 +11,6 @@ jobs:
     strategy:
       matrix:
         env:
-          # Ubuntu 18.04, g++, Release
-          - {name: "Bionic / g++ / Release", ROS_DISTRO: melodic}
           # Ubuntu 20.04, g++, Release
           - {name: "Focal / g++ / Release", ROS_DISTRO: noetic}
           # Ubuntu 20.04, clang, Release
