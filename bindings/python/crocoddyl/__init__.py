@@ -542,7 +542,9 @@ class MeshcatDisplay(DisplayAbstract):
         )
 
     def _rgbToHexColor(self, rgbColor):
-        return "0x%02x%02x%02x" % tuple(np.rint(255 * np.array(rgbColor)).astype(int))
+        return "0x{:02x}{:02x}{:02x}".format(
+            *tuple(np.rint(255 * np.array(rgbColor)).astype(int))
+        )
 
 
 class CallbackDisplay(CallbackAbstract):

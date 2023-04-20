@@ -36,10 +36,10 @@ def deprecated(instructions):
     return decorator
 
 
-class DeprecationHelper(object):
+class DeprecationHelper:
     def __init__(self, new_target, old_name):
         self.new_target = new_target
-        self.warning_str = "%s is deprecated: Use %s" % (old_name, new_target.__name__)
+        self.warning_str = f"{old_name} is deprecated: Use {new_target.__name__}"
 
     def _warn(self):
         warnings.warn(self.warning_str)

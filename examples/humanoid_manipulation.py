@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import signal
 import sys
@@ -215,20 +213,14 @@ finalPosEff = np.array(
     rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation.T.flat
 )
 
-print("Finally reached = ({0:.3f}, {1:.3f}, {2:.3f})".format(*finalPosEff))
+print("Finally reached = ({:.3f}, {:.3f}, {:.3f})".format(*finalPosEff))
 print(
-    "Distance between hand and target = {0:.3E}".format(
+    "Distance between hand and target = {:.3E}".format(
         np.linalg.norm(finalPosEff - target)
     )
 )
-print(
-    "Distance to default state = {0:.3E}".format(np.linalg.norm(x0 - np.array(xT.flat)))
-)
-print(
-    "XY distance to CoM reference = {0:.3E}".format(
-        np.linalg.norm(com[:2] - comRef[:2])
-    )
-)
+print(f"Distance to default state = {np.linalg.norm(x0 - np.array(xT.flat)):.3E}")
+print(f"XY distance to CoM reference = {np.linalg.norm(com[:2] - comRef[:2]):.3E}")
 
 # Plotting the entire motion
 if WITHPLOT:

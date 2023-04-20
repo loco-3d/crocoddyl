@@ -4,6 +4,7 @@ profile = "black"
 
 [tool.ruff]
 extend-exclude = ["cmake", "examples/notebooks"]
+extend-select = ["UP"]
 target-version = "py38"
 
 [tool.tomlsort]

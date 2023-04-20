@@ -20,6 +20,6 @@ def assertNumDiff(A, B, threshold):
     if not np.allclose(A, B, atol=threshold):
         value = np.linalg.norm(A - B)
         raise NumDiffException(
-            "NumDiff exception, with residual of %.4g, above threshold %.4g"
-            % (value, threshold)
+            f"NumDiff exception, with residual of {value:.4g}, above threshold "
+            f"{threshold:.4g}"
         )

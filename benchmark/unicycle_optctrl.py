@@ -36,10 +36,10 @@ def runDDPSolveBenchmark(xs, us, problem):
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
-    avrg_duration = sum(duration) / len(duration)
-    min_duration = min(duration)
-    max_duration = max(duration)
-    return avrg_duration, min_duration, max_duration
+    avrg_dur = sum(duration) / len(duration)
+    min_dur = min(duration)
+    max_dur = max(duration)
+    return avrg_dur, min_dur, max_dur
 
 
 def runShootingProblemCalcBenchmark(xs, us, problem):
@@ -50,10 +50,10 @@ def runShootingProblemCalcBenchmark(xs, us, problem):
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
-    avrg_duration = sum(duration) / len(duration)
-    min_duration = min(duration)
-    max_duration = max(duration)
-    return avrg_duration, min_duration, max_duration
+    avrg_dur = sum(duration) / len(duration)
+    min_dur = min(duration)
+    max_dur = max(duration)
+    return avrg_dur, min_dur, max_dur
 
 
 def runShootingProblemCalcDiffBenchmark(xs, us, problem):
@@ -64,10 +64,10 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
-    avrg_duration = sum(duration) / len(duration)
-    min_duration = min(duration)
-    max_duration = max(duration)
-    return avrg_duration, min_duration, max_duration
+    avrg_dur = sum(duration) / len(duration)
+    min_dur = min(duration)
+    max_dur = max(duration)
+    return avrg_dur, min_dur, max_dur
 
 
 print("\033[1m")
@@ -78,47 +78,19 @@ popen = subprocess.check_call(
 
 print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.ActionModelUnicycle)
-avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print(
-    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
-)
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
-    xs, us, problem
-)
-print(
-    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
-        avrg_duration, min_duration, max_duration
-    )
-)
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
-    xs, us, problem
-)
-print(
-    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
-        avrg_duration, min_duration, max_duration
-    )
-)
+avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
+print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
+print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
+print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
 
 print("Python:")
 xs, us, problem = createProblem(UnicycleModelDerived)
-avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print(
-    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
-)
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
-    xs, us, problem
-)
-print(
-    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
-        avrg_duration, min_duration, max_duration
-    )
-)
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
-    xs, us, problem
-)
-print(
-    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
-        avrg_duration, min_duration, max_duration
-    )
-)
+avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
+print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
+print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
+print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
 print("\033[0m")

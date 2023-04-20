@@ -24,7 +24,6 @@ DataFrame API:
 
 """
 
-from __future__ import print_function
 
 import sys
 from os.path import basename, exists, splitext
