@@ -108,8 +108,8 @@ class SimpleQuadrupedalGaitProblem:
         comBackwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
 
         # Adding the CoM tasks
-        comModels += comForwardModels + [comForwardTermModel]
-        comModels += comBackwardModels + [comBackwardTermModel]
+        comModels += [*comForwardModels, comForwardTermModel]
+        comModels += [*comBackwardModels, comBackwardTermModel]
 
         # Defining the shooting problem
         problem = crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
@@ -149,7 +149,7 @@ class SimpleQuadrupedalGaitProblem:
         comForwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
 
         # Adding the CoM tasks
-        comModels += comForwardModels + [comForwardTermModel]
+        comModels += [*comForwardModels, comForwardTermModel]
 
         # Defining the shooting problem
         problem = crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
@@ -607,7 +607,7 @@ class SimpleQuadrupedalGaitProblem:
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
         for p in feetPos0:
             p += [stepLength, 0.0, 0.0]
-        return footSwingModel + [footSwitchModel]
+        return [*footSwingModel, footSwitchModel]
 
     def createSwingFootModel(
         self, timeStep, supportFootIds, comTask=None, swingFootTask=None

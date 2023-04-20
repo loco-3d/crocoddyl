@@ -275,7 +275,7 @@ class SimpleBipedGaitProblem:
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
         for p in feetPos0:
             p += [stepLength, 0.0, 0.0]
-        return footSwingModel + [footSwitchModel]
+        return [*footSwingModel, footSwitchModel]
 
     def createSwingFootModel(
         self, timeStep, supportFootIds, comTask=None, swingFootTask=None

@@ -66,7 +66,7 @@ class DisplayAbstract:
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
 
-        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0.0 for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
 
@@ -78,8 +78,8 @@ class DisplayAbstract:
         if len(self.frameTrajNames) == 0:
             return None
         fs = []
-        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
-        datas = solver.problem.runningDatas.tolist() + [solver.problem.terminalData]
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
         for i, data in enumerate(datas):
             model = models[i]
             if hasattr(data, "differential"):
@@ -202,8 +202,8 @@ class DisplayAbstract:
         if len(self.frameTrajNames) == 0:
             return None
         ps = {fr: [] for fr in self.frameTrajNames}
-        models = solver.problem.runningModels.tolist() + [solver.problem.terminalModel]
-        datas = solver.problem.runningDatas.tolist() + [solver.problem.terminalData]
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
         for key, p in ps.items():
             frameId = int(key)
             for i, data in enumerate(datas):

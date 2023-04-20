@@ -58,7 +58,7 @@ if WITHDISPLAY:
                 "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
             )  # radius = .1, RGBA=1001
             display.robot.viewer.gui.applyConfiguration(
-                "world/point", target.tolist() + [0.0, 0.0, 0.0, 1.0]
+                "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
             )  # xyz+quaternion
         except Exception:
             display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])

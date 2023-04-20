@@ -91,8 +91,13 @@ if WITHDISPLAY:
         hector.viewer.gui.addXYZaxis("world/wp", [1.0, 0.0, 0.0, 1.0], 0.03, 0.5)
         hector.viewer.gui.applyConfiguration(
             "world/wp",
-            target_pos.tolist()
-            + [target_quat[0], target_quat[1], target_quat[2], target_quat[3]],
+            [
+                *target_pos.tolist(),
+                target_quat[0],
+                target_quat[1],
+                target_quat[2],
+                target_quat[3],
+            ],
         )
         if WITHPLOT:
             solver.setCallbacks(
