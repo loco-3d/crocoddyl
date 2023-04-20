@@ -9,20 +9,22 @@
 #ifndef CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 #define CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief This class encapsulates a wrench cone
  *
- * A wrench cone is a 6D polyhedral convex cone that characterizes feasible contact wrench.
- * The wrench cone is derived in the case of rectangular support areas, which is of practical importance since most
- * humanoid robot feet can be adequately approximated by rectangles. For more details read:
- *   S. Caron et. al. Stability of surface contacts for humanoid robots: Closed-form formulae of the Contact Wrench
- * Cone for rectangular support areas (https://hal.archives-ouvertes.fr/hal-02108449/document)
+ * A wrench cone is a 6D polyhedral convex cone that characterizes feasible
+ * contact wrench. The wrench cone is derived in the case of rectangular support
+ * areas, which is of practical importance since most humanoid robot feet can be
+ * adequately approximated by rectangles. For more details read: S. Caron et.
+ * al. Stability of surface contacts for humanoid robots: Closed-form formulae
+ * of the Contact Wrench Cone for rectangular support areas
+ * (https://hal.archives-ouvertes.fr/hal-02108449/document)
  *
  * /sa `FrictionConeTpl`, `CoPSupportTpl`
  */
@@ -51,21 +53,27 @@ class WrenchConeTpl {
   /**
    * @brief Initialize the wrench cone
    *
-   * @param[in] R           Rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   * @param[in] R           Rotation matrix that defines the cone orientation
+   * w.r.t. the inertial frame
    * @param[in] mu          Friction coefficient
    * @param[in] box         Dimension of the foot surface dim = (length, width)
    * @param[in] nf          Number of facets (default 4)
-   * @param[in] inner_appr  Label that describes the type of friction cone approximation (inner/outer)
+   * @param[in] inner_appr  Label that describes the type of friction cone
+   * approximation (inner/outer)
    * @param[in] min_nforce  Minimum normal force (default 0.)
    * @param[in] max_nforce  Maximum normal force (default inf number))
    */
-  WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, const std::size_t nf = 4,
-                const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
-                const Scalar max_nforce = std::numeric_limits<Scalar>::infinity());
+  WrenchConeTpl(
+      const Matrix3s& R, const Scalar mu, const Vector2s& box,
+      const std::size_t nf = 4, const bool inner_appr = true,
+      const Scalar min_nforce = Scalar(0.),
+      const Scalar max_nforce = std::numeric_limits<Scalar>::infinity());
   DEPRECATED("Use constructor that includes inner_appr",
-             WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, std::size_t nf,
+             WrenchConeTpl(const Matrix3s& R, const Scalar mu,
+                           const Vector2s& box, std::size_t nf,
                            const Scalar min_nforce,
-                           const Scalar max_nforce = std::numeric_limits<Scalar>::infinity());)
+                           const Scalar max_nforce =
+                               std::numeric_limits<Scalar>::infinity());)
 
   /**
    * @brief Initialize the wrench cone
@@ -78,16 +86,19 @@ class WrenchConeTpl {
   /**
    * @brief Update the matrix of wrench cone inequalities in the world frame.
    *
-   * This matrix-vector pair describes the linearized Coulomb friction model as follow:
-   * \f$ -ub \leq A \times w \leq -lb \f$,
-   * where wrench, \f$ w \f$, is expressed in the inertial frame located at the
-   * center of the rectangular foot contact area (length, width) with axes parallel to
-   * those of the world frame.
+   * This matrix-vector pair describes the linearized Coulomb friction model as
+   * follow: \f$ -ub \leq A \times w \leq -lb \f$, where wrench, \f$ w \f$, is
+   * expressed in the inertial frame located at the center of the rectangular
+   * foot contact area (length, width) with axes parallel to those of the world
+   * frame.
    */
   void update();
   DEPRECATED("Use update().",
-             void update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce = Scalar(0.),
-                         const Scalar max_nforce = std::numeric_limits<Scalar>::infinity()));
+             void update(const Matrix3s& R, const Scalar mu,
+                         const Vector2s& box,
+                         const Scalar min_nforce = Scalar(0.),
+                         const Scalar max_nforce =
+                             std::numeric_limits<Scalar>::infinity()));
 
   /**
    * @brief Return the matrix of wrench cone
@@ -110,7 +121,8 @@ class WrenchConeTpl {
   std::size_t get_nf() const;
 
   /**
-   * @brief Return the rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   * @brief Return the rotation matrix that defines the cone orientation w.r.t.
+   * the inertial frame
    */
   const Matrix3s& get_R() const;
 
@@ -125,7 +137,8 @@ class WrenchConeTpl {
   const Scalar get_mu() const;
 
   /**
-   * @brief Return the label that describes the type of friction cone approximation (inner/outer)
+   * @brief Return the label that describes the type of friction cone
+   * approximation (inner/outer)
    */
   bool get_inner_appr() const;
 
@@ -140,61 +153,71 @@ class WrenchConeTpl {
   const Scalar get_max_nforce() const;
 
   /**
-   * @brief Modify the rotation matrix that defines the cone orientation w.r.t. the inertial frame
+   * @brief Modify the rotation matrix that defines the cone orientation w.r.t.
+   * the inertial frame
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify dimension of the foot surface dim = (length, width)
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_box(const Vector2s& box);
 
   /**
    * @brief Modify friction coefficient
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_mu(const Scalar mu);
 
   /**
-   * @brief Modify the label that describes the type of friction cone approximation (inner/outer)
+   * @brief Modify the label that describes the type of friction cone
+   * approximation (inner/outer)
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_inner_appr(const bool inner_appr);
 
   /**
    * @brief Modify the minium normal force
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_min_nforce(const Scalar min_nforce);
 
   /**
    * @brief Modify the maximum normal force
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_max_nforce(const Scalar max_nforce);
 
   WrenchConeTpl<Scalar>& operator=(const WrenchConeTpl<Scalar>& other);
 
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const WrenchConeTpl<Scalar>& X);
 
  private:
-  std::size_t nf_;     //!< Number of facets
-  MatrixX6s A_;        //!< Matrix of wrench cone
-  VectorXs ub_;        //!< Upper bound of the wrench cone
-  VectorXs lb_;        //!< Lower bound of the wrench cone
-  Matrix3s R_;         //!< Rotation of the wrench cone w.r.t. the inertial frame
-  Vector2s box_;       //!< Dimension of the foot surface (length, width)
-  Scalar mu_;          //!< Friction coefficient
-  bool inner_appr_;    //!< Label that describes the type of friction cone approximation (inner/outer)
+  std::size_t nf_;   //!< Number of facets
+  MatrixX6s A_;      //!< Matrix of wrench cone
+  VectorXs ub_;      //!< Upper bound of the wrench cone
+  VectorXs lb_;      //!< Lower bound of the wrench cone
+  Matrix3s R_;       //!< Rotation of the wrench cone w.r.t. the inertial frame
+  Vector2s box_;     //!< Dimension of the foot surface (length, width)
+  Scalar mu_;        //!< Friction coefficient
+  bool inner_appr_;  //!< Label that describes the type of friction cone
+                     //!< approximation (inner/outer)
   Scalar min_nforce_;  //!< Minimum normal force
   Scalar max_nforce_;  //!< Maximum normal force
 };

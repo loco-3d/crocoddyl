@@ -8,10 +8,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "solver.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
-#include "crocoddyl/core/solvers/fddp.hpp"
+
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
+#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 #ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
 #endif
@@ -57,13 +58,16 @@ SolverFactory::SolverFactory() {}
 
 SolverFactory::~SolverFactory() {}
 
-boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::Type solver_type,
-                                                                   ActionModelTypes::Type action_type,
-                                                                   size_t T) const {
+boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
+    SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+    size_t T) const {
   boost::shared_ptr<crocoddyl::SolverAbstract> solver;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = ActionModelFactory().create(action_type);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 = ActionModelFactory().create(action_type, true);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, true);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+      running_models;
   const size_t halfway = T / 2;
   for (size_t i = 0; i < halfway; ++i) {
     running_models.push_back(model);
@@ -73,7 +77,8 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::
   }
 
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(), running_models, model);
+      boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(),
+                                                     running_models, model);
 
   switch (solver_type) {
     case SolverTypes::SolverKKT:

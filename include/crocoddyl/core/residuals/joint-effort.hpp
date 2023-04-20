@@ -9,24 +9,26 @@
 #ifndef CROCODDYL_CORE_RESIDUALS_JOINT_TORQUE_HPP_
 #define CROCODDYL_CORE_RESIDUALS_JOINT_TORQUE_HPP_
 
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/data/joint.hpp"
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Define a joint-effort residual
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference joint effort inputs, respectively.
- * Note that the dimension of the residual vector is obtained from `ActuationModelAbstract::nu`.
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and
+ * reference joint effort inputs, respectively. Note that the dimension of the
+ * residual vector is obtained from `ActuationModelAbstract::nu`.
  *
  * Both residual and residual Jacobians are computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in ResidualModelAbstractTpl(), the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -53,12 +55,13 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] actuation  Actuation model
    * @param[in] uref       Reference joint effort
    * @param[in] nu         Dimension of the control vector
-   * @param[in] fwddyn     Indicates that we have a forward dynamics problem (true) or inverse dynamics (false)
-   * (default false)
+   * @param[in] fwddyn     Indicates that we have a forward dynamics problem
+   * (true) or inverse dynamics (false) (default false)
    */
-  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
-                              boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
-                              const std::size_t nu, const bool fwddyn = false);
+  ResidualModelJointEffortTpl(
+      boost::shared_ptr<StateAbstract> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
+      const std::size_t nu, const bool fwddyn = false);
 
   /**
    * @brief Initialize the joint-effort residual model
@@ -69,32 +72,39 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] actuation  Actuation model
    * @param[in] uref       Reference joint effort
    */
-  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
-                              boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref);
+  ResidualModelJointEffortTpl(
+      boost::shared_ptr<StateAbstract> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation,
+      const VectorXs& uref);
 
   /**
    * @brief Initialize the joint-effort residual model
    *
-   * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
+   * The default reference joint effort is obtained from
+   * `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
    *
    * @param[in] state      State description
    * @param[in] actuation  Actuation model
    * @param[in] nu         Dimension of the control vector
    */
-  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
-                              boost::shared_ptr<ActuationModelAbstract> actuation, const std::size_t nu);
+  ResidualModelJointEffortTpl(
+      boost::shared_ptr<StateAbstract> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation,
+      const std::size_t nu);
 
   /**
    * @brief Initialize the joint-effort residual model
    *
-   * The default reference joint effort is obtained from `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`.
-   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * The default reference joint effort is obtained from
+   * `MathBaseTpl<>::VectorXs::Zero(actuation->get_nu())`. The default `nu`
+   * value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state      State description
    * @param[in] actuation  Actuation model
    */
-  ResidualModelJointEffortTpl(boost::shared_ptr<StateAbstract> state,
-                              boost::shared_ptr<ActuationModelAbstract> actuation);
+  ResidualModelJointEffortTpl(
+      boost::shared_ptr<StateAbstract> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation);
 
   virtual ~ResidualModelJointEffortTpl();
 
@@ -105,14 +115,16 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the joint-effort residual
@@ -121,19 +133,23 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the joint-effort residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the reference joint-effort vector
@@ -174,11 +190,16 @@ struct ResidualDataJointEffortTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
   template <template <typename Scalar> class Model>
-  ResidualDataJointEffortTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+  ResidualDataJointEffortTpl(Model<Scalar>* const model,
+                             DataCollectorAbstract* const data)
+      : Base(model, data) {
     // Check that proper shared data has been passed
-    DataCollectorJointTpl<Scalar>* d = dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    DataCollectorJointTpl<Scalar>* d =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
     if (d == nullptr) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorJoint");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorJoint");
     }
     joint = d->joint;
   }

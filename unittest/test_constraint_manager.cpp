@@ -11,7 +11,6 @@
 
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
-
 #include "factory/constraint.hpp"
 #include "unittest_common.hpp"
 
@@ -39,7 +38,8 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // add an active constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_1 = create_random_constraint(state_type);
+  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_1 =
+      create_random_constraint(state_type);
   model.addConstraint("random_constraint_1", rand_constraint_1);
   std::size_t ng = rand_constraint_1->get_ng();
   std::size_t nh = rand_constraint_1->get_nh();
@@ -47,7 +47,8 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh() == nh);
 
   // add an inactive constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 = create_random_constraint(state_type);
+  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 =
+      create_random_constraint(state_type);
   model.addConstraint("random_constraint_2", rand_constraint_2, false);
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
@@ -73,7 +74,8 @@ void test_addConstraint_error_message(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // create an constraint object
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint = create_random_constraint(state_type);
+  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
+      create_random_constraint(state_type);
 
   // add twice the same constraint object to the container
   model.addConstraint("random_constraint", rand_constraint);
@@ -84,18 +86,20 @@ void test_addConstraint_error_message(StateModelTypes::Type state_type) {
   model.addConstraint("random_constraint", rand_constraint);
   capture_ios.endCapture();
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: we couldn't add the random_constraint constraint item, it already existed."
+  expected_buffer << "Warning: we couldn't add the random_constraint "
+                     "constraint item, it already existed."
                   << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 
-  // test error message when we change the constraint status of an inexistent constraint
+  // test error message when we change the constraint status of an inexistent
+  // constraint
   capture_ios.beginCapture();
   model.changeConstraintStatus("no_exist_constraint", true);
   capture_ios.endCapture();
   expected_buffer.clear();
-  expected_buffer
-      << "Warning: we couldn't change the status of the no_exist_constraint constraint item, it doesn't exist."
-      << std::endl;
+  expected_buffer << "Warning: we couldn't change the status of the "
+                     "no_exist_constraint constraint item, it doesn't exist."
+                  << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
 
@@ -105,7 +109,8 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // add an active constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint = create_random_constraint(state_type);
+  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
+      create_random_constraint(state_type);
   model.addConstraint("random_constraint", rand_constraint);
   std::size_t ng = rand_constraint->get_ng();
   std::size_t nh = rand_constraint->get_nh();
@@ -123,7 +128,8 @@ void test_removeConstraint_error_message(StateModelTypes::Type state_type) {
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
-  // remove a none existing constraint form the container, we expect a cout message here
+  // remove a none existing constraint form the container, we expect a cout
+  // message here
   CaptureIOStream capture_ios;
   capture_ios.beginCapture();
   model.removeConstraint("random_constraint");
@@ -131,7 +137,8 @@ void test_removeConstraint_error_message(StateModelTypes::Type state_type) {
 
   // Test that the error message is sent.
   std::stringstream expected_buffer;
-  expected_buffer << "Warning: we couldn't remove the random_constraint constraint item, it doesn't exist."
+  expected_buffer << "Warning: we couldn't remove the random_constraint "
+                     "constraint item, it doesn't exist."
                   << std::endl;
   BOOST_CHECK(capture_ios.str() == expected_buffer.str());
 }
@@ -153,19 +160,23 @@ void test_calc(StateModelTypes::Type state_type) {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
-    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m = create_random_constraint(state_type);
+    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
+        create_random_constraint(state_type);
     model.addConstraint(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
   }
 
   // create the data of the constraint sum
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data = model.createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data =
+      model.createData(&shared_data);
 
-  // compute the constraint sum data for the case when all constraints are defined as active
+  // compute the constraint sum data for the case when all constraints are
+  // defined as active
   const Eigen::VectorXd& x1 = state->rand();
   const Eigen::VectorXd& u1 = Eigen::VectorXd::Random(model.get_nu());
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
   model.calc(data, x1, u1);
 
   // check the constraint against single constraint computations
@@ -203,19 +214,23 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
-    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m = create_random_constraint(state_type);
+    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
+        create_random_constraint(state_type);
     model.addConstraint(os.str(), m, 1.);
     models.push_back(m);
     datas.push_back(m->createData(&shared_data));
   }
 
   // create the data of the constraint sum
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data = model.createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data =
+      model.createData(&shared_data);
 
-  // compute the constraint sum data for the case when all constraints are defined as active
+  // compute the constraint sum data for the case when all constraints are
+  // defined as active
   Eigen::VectorXd x1 = state->rand();
   const Eigen::VectorXd u1 = Eigen::VectorXd::Random(model.get_nu());
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
   model.calc(data, x1, u1);
   model.calcDiff(data, x1, u1);
 
@@ -252,7 +267,8 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->Hu.isApprox(Hu, 1e-9));
 
   x1 = state->rand();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x1);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
   model.calc(data, x1);
   model.calcDiff(data, x1);
 
@@ -301,12 +317,16 @@ void test_get_constraints(StateModelTypes::Type state_type) {
   }
 
   // get the contacts
-  const crocoddyl::ConstraintModelManager::ConstraintModelContainer& constraints = model.get_constraints();
+  const crocoddyl::ConstraintModelManager::ConstraintModelContainer&
+      constraints = model.get_constraints();
 
   // test
-  crocoddyl::ConstraintModelManager::ConstraintModelContainer::const_iterator it_m, end_m;
+  crocoddyl::ConstraintModelManager::ConstraintModelContainer::const_iterator
+      it_m,
+      end_m;
   unsigned i;
-  for (i = 0, it_m = constraints.begin(), end_m = constraints.end(); it_m != end_m; ++it_m, ++i) {
+  for (i = 0, it_m = constraints.begin(), end_m = constraints.end();
+       it_m != end_m; ++it_m, ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
     BOOST_CHECK(it_m->first == os.str());
@@ -316,7 +336,8 @@ void test_get_constraints(StateModelTypes::Type state_type) {
 void test_shareMemory(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateAbstract> state = state_factory.create(state_type);
+  const boost::shared_ptr<crocoddyl::StateAbstract> state =
+      state_factory.create(state_type);
   crocoddyl::ConstraintModelManager constraint_model(state);
   crocoddyl::DataCollectorAbstract shared_data;
   const boost::shared_ptr<crocoddyl::ConstraintDataManager>& constraint_data =
@@ -327,7 +348,8 @@ void test_shareMemory(StateModelTypes::Type state_type) {
   const std::size_t ndx = state->get_ndx();
   const std::size_t nu = constraint_model.get_nu();
   crocoddyl::ActionModelLQR action_model(ndx, nu);
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data = action_model.createData();
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data =
+      action_model.createData();
 
   action_data->h.resize(nh);
   action_data->g.resize(ng);
@@ -373,9 +395,11 @@ void register_unit_tests(StateModelTypes::Type state_type) {
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_constructor, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_addConstraint, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_addConstraint_error_message, state_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_addConstraint_error_message, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_removeConstraint, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_removeConstraint_error_message, state_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_removeConstraint_error_message, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calc, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_calcDiff, state_type)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_get_constraints, state_type)));
@@ -390,4 +414,6 @@ bool init_function() {
   return true;
 }
 
-int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char** argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

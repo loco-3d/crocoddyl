@@ -7,20 +7,18 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <boost/core/demangle.hpp>
 #include <iostream>
 #include <typeinfo>
-#include <boost/core/demangle.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                                                                               const std::size_t nu,
-                                                                               const std::size_t nr,
-                                                                               const std::size_t ng,
-                                                                               const std::size_t nh)
+DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
+    boost::shared_ptr<StateAbstract> state, const std::size_t nu,
+    const std::size_t nr, const std::size_t ng, const std::size_t nh)
     : nu_(nu),
       nr_(nr),
       ng_(ng),
@@ -34,34 +32,41 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(b
       has_control_limits_(false) {}
 
 template <typename Scalar>
-DifferentialActionModelAbstractTpl<Scalar>::~DifferentialActionModelAbstractTpl() {}
+DifferentialActionModelAbstractTpl<
+    Scalar>::~DifferentialActionModelAbstractTpl() {}
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>& x) {
+void DifferentialActionModelAbstractTpl<Scalar>::calc(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) {
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-    const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter, const Scalar tol) {
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+    const std::size_t maxiter, const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   // Check the velocity input is zero
-  assert_pretty(x.tail(state_->get_nv()).isZero(), "The velocity input should be zero for quasi-static to work.");
+  assert_pretty(x.tail(state_->get_nv()).isZero(),
+                "The velocity input should be zero for quasi-static to work.");
 
   const std::size_t ndx = state_->get_ndx();
   VectorXs dx = VectorXs::Zero(ndx);
@@ -80,9 +85,10 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
-typename MathBaseTpl<Scalar>::VectorXs DifferentialActionModelAbstractTpl<Scalar>::quasiStatic_x(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data, const VectorXs& x, const std::size_t maxiter,
-    const Scalar tol) {
+typename MathBaseTpl<Scalar>::VectorXs
+DifferentialActionModelAbstractTpl<Scalar>::quasiStatic_x(
+    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const VectorXs& x, const std::size_t maxiter, const Scalar tol) {
   VectorXs u(nu_);
   u.setZero();
   quasiStatic(data, u, x, maxiter, tol);
@@ -97,7 +103,8 @@ DifferentialActionModelAbstractTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
-bool DifferentialActionModelAbstractTpl<Scalar>::checkData(const boost::shared_ptr<DifferentialActionDataAbstract>&) {
+bool DifferentialActionModelAbstractTpl<Scalar>::checkData(
+    const boost::shared_ptr<DifferentialActionDataAbstract>&) {
   return false;
 }
 
@@ -127,50 +134,60 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >& DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
+const boost::shared_ptr<StateAbstractTpl<Scalar> >&
+DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+DifferentialActionModelAbstractTpl<Scalar>::get_g_lb() const {
   return g_lb_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_g_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+DifferentialActionModelAbstractTpl<Scalar>::get_g_ub() const {
   return g_ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+DifferentialActionModelAbstractTpl<Scalar>::get_u_lb() const {
   return u_lb_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& DifferentialActionModelAbstractTpl<Scalar>::get_u_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+DifferentialActionModelAbstractTpl<Scalar>::get_u_ub() const {
   return u_ub_;
 }
 
 template <typename Scalar>
-bool DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
+bool DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits()
+    const {
   return has_control_limits_;
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::set_u_lb(const VectorXs& u_lb) {
+void DifferentialActionModelAbstractTpl<Scalar>::set_u_lb(
+    const VectorXs& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "lower bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "lower bound has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   u_lb_ = u_lb;
   update_has_control_limits();
 }
 
 template <typename Scalar>
-void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
+void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(
+    const VectorXs& u_ub) {
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "upper bound has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "upper bound has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   u_ub_ = u_ub;
   update_has_control_limits();
@@ -178,11 +195,13 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) 
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::update_has_control_limits() {
-  has_control_limits_ = isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
+  has_control_limits_ =
+      isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
 }
 
 template <typename Scalar>
-std::ostream& operator<<(std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model) {
+std::ostream& operator<<(
+    std::ostream& os, const DifferentialActionModelAbstractTpl<Scalar>& model) {
   model.print(os);
   return os;
 }

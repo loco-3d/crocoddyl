@@ -1,41 +1,58 @@
 #ifdef CROCODDYL_WITH_IPOPT
 
+#include "crocoddyl/core/solvers/ipopt.hpp"
+
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "crocoddyl/core/solvers/ipopt.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve, 0, 5)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve,
+                                       0, 5)
 
 void exposeSolverIpopt() {
   bp::register_ptr_to_python<boost::shared_ptr<SolverIpopt>>();
   bp::class_<SolverIpopt, bp::bases<SolverAbstract>>(
       "SolverIpopt",
-      bp::init<const boost::shared_ptr<crocoddyl::ShootingProblem>&>(bp::args("self", "problem"), "Initialize solver"))
+      bp::init<const boost::shared_ptr<crocoddyl::ShootingProblem>&>(
+          bp::args("self", "problem"), "Initialize solver"))
       .def("solve", &SolverIpopt::solve,
            SolverIpopt_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible", "init_reg"),
-               "Compute the optimal trajectory xopt, uopt as lists of T+1 and T terms.\n\n"
-               "From an initial guess init_xs,init_us (feasible or not), iterate\n"
-               "over computeDirection and tryStep until stoppingCriteria is below\n"
+               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
+                        "init_reg"),
+               "Compute the optimal trajectory xopt, uopt as lists of T+1 and "
+               "T terms.\n\n"
+               "From an initial guess init_xs,init_us (feasible or not), "
+               "iterate\n"
+               "over computeDirection and tryStep until stoppingCriteria is "
+               "below\n"
                "threshold. It also describes the globalization strategy used\n"
                "during the numerical optimization.\n"
-               ":param init_xs: initial guess for state trajectory with T+1 elements (default []).\n"
-               ":param init_us: initial guess for control trajectory with T elements (default []) (default []).\n"
-               ":param maxiter: maximum allowed number of iterations (default 100).\n"
-               ":param is_feasible: true if the init_xs are obtained from integrating the init_us (rollout) (default "
+               ":param init_xs: initial guess for state trajectory with T+1 "
+               "elements (default []).\n"
+               ":param init_us: initial guess for control trajectory with T "
+               "elements (default []) (default []).\n"
+               ":param maxiter: maximum allowed number of iterations (default "
+               "100).\n"
+               ":param is_feasible: true if the init_xs are obtained from "
+               "integrating the init_us (rollout) (default "
                "False).\n"
-               ":param init_reg: initial guess for the regularization value. Very low values are typical\n"
-               "                used with very good guess points (init_xs, init_us) (default None).\n"
-               ":returns the optimal trajectory xopt, uopt and a boolean that describes if convergence was reached."))
-      .def("setStringIpoptOption", &SolverIpopt::setStringIpoptOption, bp::args("self", "param_name", "param_value"),
+               ":param init_reg: initial guess for the regularization value. "
+               "Very low values are typical\n"
+               "                used with very good guess points (init_xs, "
+               "init_us) (default None).\n"
+               ":returns the optimal trajectory xopt, uopt and a boolean that "
+               "describes if convergence was reached."))
+      .def("setStringIpoptOption", &SolverIpopt::setStringIpoptOption,
+           bp::args("self", "param_name", "param_value"),
            "Sets a string option for IPOPT\n\n")
-      .def("setNumericIpoptOption", &SolverIpopt::setNumericIpoptOption, bp::args("self", "param_name", "param_value"),
+      .def("setNumericIpoptOption", &SolverIpopt::setNumericIpoptOption,
+           bp::args("self", "param_name", "param_value"),
            "Sets a numeric option for IPOPT\n\n")
       .add_property("th_stop", bp::make_function(&SolverIpopt::get_th_stop),
-                    bp::make_function(&SolverIpopt::set_th_stop), "threshold for stopping criteria")
+                    bp::make_function(&SolverIpopt::set_th_stop),
+                    "threshold for stopping criteria")
       .def(CopyableVisitor<SolverIpopt>());
 }
 

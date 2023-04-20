@@ -6,36 +6,38 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
-                                                                 const Vector3s& cref, const std::size_t nu)
+ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(
+    boost::shared_ptr<StateMultibody> state, const Vector3s& cref,
+    const std::size_t nu)
     : Base(state, 3, nu, true, false, false), cref_(cref) {}
 
 template <typename Scalar>
-ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
-                                                                 const Vector3s& cref)
+ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(
+    boost::shared_ptr<StateMultibody> state, const Vector3s& cref)
     : Base(state, 3, true, false, false), cref_(cref) {}
 
 template <typename Scalar>
 ResidualModelCoMPositionTpl<Scalar>::~ResidualModelCoMPositionTpl() {}
 
 template <typename Scalar>
-void ResidualModelCoMPositionTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+void ResidualModelCoMPositionTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the residual residual give the reference CoMPosition position
   Data* d = static_cast<Data*>(data.get());
   data->r = d->pinocchio->com[0] - cref_;
 }
 
 template <typename Scalar>
-void ResidualModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                   const Eigen::Ref<const VectorXs>&,
-                                                   const Eigen::Ref<const VectorXs>&) {
+void ResidualModelCoMPositionTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the derivatives of the frame placement
@@ -44,19 +46,24 @@ void ResidualModelCoMPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<Resid
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelCoMPositionTpl<Scalar>::createData(
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelCoMPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
 void ResidualModelCoMPositionTpl<Scalar>::print(std::ostream& os) const {
-  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
-  os << "ResidualModelCoMPosition {cref=" << cref_.transpose().format(fmt) << "}";
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "ResidualModelCoMPosition {cref=" << cref_.transpose().format(fmt)
+     << "}";
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& ResidualModelCoMPositionTpl<Scalar>::get_reference() const {
+const typename MathBaseTpl<Scalar>::Vector3s&
+ResidualModelCoMPositionTpl<Scalar>::get_reference() const {
   return cref_;
 }
 

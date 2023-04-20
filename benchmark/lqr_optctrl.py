@@ -1,10 +1,12 @@
-import crocoddyl
-from crocoddyl.utils import LQRModelDerived
-import numpy as np
 import os
+import subprocess
 import sys
 import time
-import subprocess
+
+import numpy as np
+
+import crocoddyl
+from crocoddyl.utils import LQRModelDerived
 
 NX = 37
 NU = 12
@@ -70,25 +72,55 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print('\033[1m')
-print('C++:')
-popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/lqr-optctrl", str(T)])
+print("\033[1m")
+print("C++:")
+popen = subprocess.check_call(
+    [os.path.dirname(os.path.abspath(__file__)) + "/lqr-optctrl", str(T)]
+)
 
-print('Python bindings:')
+print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.ActionModelLQR)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
 
-print('Python:')
+print("Python:")
 xs, us, problem = createProblem(LQRModelDerived)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-print('\033[0m')
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+print("\033[0m")

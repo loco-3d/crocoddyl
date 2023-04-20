@@ -13,14 +13,17 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
-                                                         const pinocchio::ReferenceFrame type, const std::size_t nc)
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(
+    boost::shared_ptr<StateMultibody> state,
+    const pinocchio::ReferenceFrame type, const std::size_t nc)
     : state_(state), nc_(nc), id_(0), type_(type) {}
 
 template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc)
+ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(
+    boost::shared_ptr<StateMultibody> state, const std::size_t nc)
     : state_(state), nc_(nc), id_(0), type_(pinocchio::ReferenceFrame::LOCAL) {
-  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, "
+               "this assumes is pinocchio::LOCAL."
             << std::endl;
 }
 
@@ -28,29 +31,35 @@ template <typename Scalar>
 ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
-                                                      const MatrixXs& df_dx) const {
-  if (static_cast<std::size_t>(df_dx.rows()) != nc_ || static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
+void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(
+    const boost::shared_ptr<ImpulseDataAbstract>& data,
+    const MatrixXs& df_dx) const {
+  if (static_cast<std::size_t>(df_dx.rows()) != nc_ ||
+      static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
     throw_pretty("df_dq has wrong dimension");
 
   data->df_dx = df_dx;
 }
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
+void ImpulseModelAbstractTpl<Scalar>::setZeroForce(
+    const boost::shared_ptr<ImpulseDataAbstract>& data) const {
   data->f.setZero();
   data->fext.setZero();
 }
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::setZeroForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data) const {
+void ImpulseModelAbstractTpl<Scalar>::setZeroForceDiff(
+    const boost::shared_ptr<ImpulseDataAbstract>& data) const {
   data->df_dx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> > ImpulseModelAbstractTpl<Scalar>::createData(
+boost::shared_ptr<ImpulseDataAbstractTpl<Scalar> >
+ImpulseModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<ImpulseDataAbstract>(Eigen::aligned_allocator<ImpulseDataAbstract>(), this, data);
+  return boost::allocate_shared<ImpulseDataAbstract>(
+      Eigen::aligned_allocator<ImpulseDataAbstract>(), this, data);
 }
 
 template <typename Scalar>
@@ -59,7 +68,8 @@ void ImpulseModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >& ImpulseModelAbstractTpl<Scalar>::get_state() const {
+const boost::shared_ptr<StateMultibodyTpl<Scalar> >&
+ImpulseModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
@@ -94,12 +104,14 @@ void ImpulseModelAbstractTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
 }
 
 template <typename Scalar>
-void ImpulseModelAbstractTpl<Scalar>::set_type(const pinocchio::ReferenceFrame type) {
+void ImpulseModelAbstractTpl<Scalar>::set_type(
+    const pinocchio::ReferenceFrame type) {
   type_ = type;
 }
 
 template <class Scalar>
-std::ostream& operator<<(std::ostream& os, const ImpulseModelAbstractTpl<Scalar>& model) {
+std::ostream& operator<<(std::ostream& os,
+                         const ImpulseModelAbstractTpl<Scalar>& model) {
   model.print(os);
   return os;
 }

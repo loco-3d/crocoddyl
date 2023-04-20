@@ -8,8 +8,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
@@ -17,30 +18,41 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelAbstract> >();
+  bp::register_ptr_to_python<
+      boost::shared_ptr<IntegratedActionModelAbstract> >();
 
-  bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable, bp::bases<ActionModelAbstract> >(
+  bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable,
+             bp::bases<ActionModelAbstract> >(
       "IntegratedActionModelAbstract",
       "Abstract class for integrated action models.\n\n"
-      "In Crocoddyl, an integrated action model transforms a differential action model in a (discrete) action "
+      "In Crocoddyl, an integrated action model transforms a differential "
+      "action model in a (discrete) action "
       "model.\n",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, bp::optional<double, bool> >(
+      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+               bp::optional<double, bool> >(
           bp::args("self", "diffModel", "timeStep", "withCostResidual"),
           "Initialize the integrated-action model.\n\n"
-          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
+          "You can also integrate autonomous systems (i.e., when diffModel.nu "
+          "is equals to 0).\n"
           ":param diffModel: differential action model\n"
           ":param timestep: integration time step (default 1e-3)\n"
-          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
+          ":param withCostResidual: includes the cost residuals and "
+          "derivatives (default True)."))
       .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
-                    boost::shared_ptr<ControlParametrizationModelAbstract>, bp::optional<double, bool> >(
-          bp::args("self", "diffModel", "control", "stepTime", "withCostResidual"),
+                    boost::shared_ptr<ControlParametrizationModelAbstract>,
+                    bp::optional<double, bool> >(
+          bp::args("self", "diffModel", "control", "stepTime",
+                   "withCostResidual"),
           "Initialize the integrated-action integrator.\n\n"
-          "You can also integrate autonomous systems (i.e., when diffModel.nu is equals to 0).\n"
+          "You can also integrate autonomous systems (i.e., when diffModel.nu "
+          "is equals to 0).\n"
           ":param model: differential action model\n"
           ":param control: the control parametrization\n"
           ":param stepTime: step time (default 1e-3)\n"
-          ":param withCostResidual: includes the cost residuals and derivatives (default True)."))
-      .def("calc", pure_virtual(&IntegratedActionModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
+          ":param withCostResidual: includes the cost residuals and "
+          "derivatives (default True)."))
+      .def("calc", pure_virtual(&IntegratedActionModelAbstract_wrap::calc),
+           bp::args("self", "data", "x", "u"),
            "Compute the next state and cost value.\n\n"
            "It describes the time-discrete evolution of our dynamical system\n"
            "in which we obtain the next state. Additionally it computes the\n"
@@ -48,55 +60,72 @@ void exposeIntegratedActionAbstract() {
            ":param data: integrated-action data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
-      .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &IntegratedActionModelAbstract::calc, bp::args("self", "data", "x"))
-      .def("calcDiff", pure_virtual(&IntegratedActionModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
+      .def<void (IntegratedActionModelAbstract::*)(
+          const boost::shared_ptr<ActionDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &IntegratedActionModelAbstract::calc,
+          bp::args("self", "data", "x"))
+      .def("calcDiff",
+           pure_virtual(&IntegratedActionModelAbstract_wrap::calcDiff),
+           bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the dynamics and cost functions.\n\n"
-           "It computes the partial derivatives of the dynamical system and the\n"
+           "It computes the partial derivatives of the dynamical system and "
+           "the\n"
            "cost function. It assumes that calc has been run first.\n"
            "This function builds a quadratic approximation of the\n"
            "action model (i.e. linear dynamics and quadratic cost).\n"
            ":param data: integrated-action data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
-      .def<void (IntegratedActionModelAbstract::*)(const boost::shared_ptr<ActionDataAbstract>&,
-                                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &IntegratedActionModelAbstract::calcDiff, bp::args("self", "data", "x"))
+      .def<void (IntegratedActionModelAbstract::*)(
+          const boost::shared_ptr<ActionDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &IntegratedActionModelAbstract::calcDiff,
+          bp::args("self", "data", "x"))
       .def("createData", &IntegratedActionModelAbstract_wrap::createData,
-           &IntegratedActionModelAbstract_wrap::default_createData, bp::args("self"),
+           &IntegratedActionModelAbstract_wrap::default_createData,
+           bp::args("self"),
            "Create the integrated-action data.\n\n"
-           "Each integrated-action model (IAM) has its own data that needs to be allocated.\n"
+           "Each integrated-action model (IAM) has its own data that needs to "
+           "be allocated.\n"
            "This function returns the allocated data for a predefined IAM.\n"
            ":return integrated-action data.")
       .add_property("differential",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_differential,
-                                      bp::return_value_policy<bp::return_by_value>()),
+                    bp::make_function(
+                        &IntegratedActionModelAbstract_wrap::get_differential,
+                        bp::return_value_policy<bp::return_by_value>()),
                     "differential action model")
-      .add_property("control",
-                    bp::make_function(&IntegratedActionModelAbstract_wrap::get_control,
-                                      bp::return_value_policy<bp::return_by_value>()),
-                    "control parametrization model")
+      .add_property(
+          "control",
+          bp::make_function(&IntegratedActionModelAbstract_wrap::get_control,
+                            bp::return_value_policy<bp::return_by_value>()),
+          "control parametrization model")
       .add_property(
           "dt",
-          bp::make_function(&IntegratedActionModelAbstract::get_dt, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&IntegratedActionModelAbstract::get_dt,
+                            bp::return_value_policy<bp::return_by_value>()),
           &IntegratedActionModelAbstract::set_dt, "step time")
       .def(CopyableVisitor<IntegratedActionModelAbstract_wrap>())
       .def(PrintableVisitor<IntegratedActionModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataAbstract> >();
+  bp::register_ptr_to_python<
+      boost::shared_ptr<IntegratedActionDataAbstract> >();
 
   bp::class_<IntegratedActionDataAbstract, bp::bases<ActionDataAbstract> >(
       "IntegratedActionDataAbstract",
       "Abstract class for integrated-action data.\n\n"
-      "In Crocoddyl, an action data contains all the required information for processing an\n"
-      "user-defined action model. The action data typically is allocated onces by running\n"
-      "model.createData() and contains the first- and second- order derivatives of the dynamics\n"
+      "In Crocoddyl, an action data contains all the required information for "
+      "processing an\n"
+      "user-defined action model. The action data typically is allocated onces "
+      "by running\n"
+      "model.createData() and contains the first- and second- order "
+      "derivatives of the dynamics\n"
       "and cost function, respectively.",
       bp::init<IntegratedActionModelAbstract*>(
           bp::args("self", "model"),
           "Create common data shared between integrated-action models.\n\n"
-          "The integrated-action data uses its model in order to first process it.\n"
+          "The integrated-action data uses its model in order to first process "
+          "it.\n"
           ":param model: integrated-action model"))
       .def(CopyableVisitor<IntegratedActionDataAbstract>());
 }

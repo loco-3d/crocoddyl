@@ -6,14 +6,15 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-// modified from https://gist.github.com/rudolfovich/f250900f1a833e715260a66c87369d15
+// modified from
+// https://gist.github.com/rudolfovich/f250900f1a833e715260a66c87369d15
 
 #ifndef CROCODDYL_CORE_UTILS_FILE_IO_HPP_
 #define CROCODDYL_CORE_UTILS_FILE_IO_HPP_
 
-#include <string>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 class CsvStream {
   std::ofstream fs_;
@@ -24,7 +25,11 @@ class CsvStream {
 
  public:
   CsvStream(const std::string filename, const std::string separator = ",")
-      : fs_(), is_first_(true), separator_(separator), escape_seq_("\""), special_chars_("\"") {
+      : fs_(),
+        is_first_(true),
+        separator_(separator),
+        escape_seq_("\""),
+        special_chars_("\"") {
     fs_.exceptions(std::ios::failbit | std::ios::badbit);
     fs_.open(filename.c_str());
   }
@@ -73,7 +78,8 @@ class CsvStream {
     std::ostringstream result;
     result << '"';
     std::string::size_type to, from = 0u, len = val.length();
-    while (from < len && std::string::npos != (to = val.find_first_of(special_chars_, from))) {
+    while (from < len && std::string::npos !=
+                             (to = val.find_first_of(special_chars_, from))) {
       result << val.substr(from, to - from) << escape_seq_ << val[to];
       from = to + 1;
     }

@@ -10,14 +10,16 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbstract> {
+class SolverAbstract_wrap : public SolverAbstract,
+                            public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::cost_;
   using SolverAbstract::d_;
@@ -38,9 +40,12 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-             const std::size_t maxiter, const bool is_feasible, const double reg_init) {
-    return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us, maxiter, is_feasible, reg_init);
+  bool solve(const std::vector<Eigen::VectorXd>& init_xs,
+             const std::vector<Eigen::VectorXd>& init_us,
+             const std::size_t maxiter, const bool is_feasible,
+             const double reg_init) {
+    return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us,
+                          maxiter, is_feasible, reg_init);
   }
 
   void computeDirection(const bool recalc = true) {
@@ -57,7 +62,8 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   }
 
   const Eigen::Vector2d& expectedImprovement() {
-    bp::list exp_impr = bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
+    bp::list exp_impr =
+        bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
     d_ << bp::extract<double>(exp_impr[0]), bp::extract<double>(exp_impr[1]);
     return d_;
   }
@@ -71,17 +77,21 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
   }
 };
 
-class CallbackAbstract_wrap : public CallbackAbstract, public bp::wrapper<CallbackAbstract> {
+class CallbackAbstract_wrap : public CallbackAbstract,
+                              public bp::wrapper<CallbackAbstract> {
  public:
-  CallbackAbstract_wrap() : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
+  CallbackAbstract_wrap()
+      : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
   ~CallbackAbstract_wrap() {}
 
   void operator()(SolverAbstract& solver) {
-    return bp::call<void>(this->get_override("__call__").ptr(), boost::ref(solver));
+    return bp::call<void>(this->get_override("__call__").ptr(),
+                          boost::ref(solver));
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads, SolverAbstract::setCandidate, 0, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads,
+                                       SolverAbstract::setCandidate, 0, 3)
 
 }  // namespace python
 }  // namespace crocoddyl

@@ -25,7 +25,8 @@ bp::object generic__copy__(bp::object copyable) {
   Copyable* newCopyable(new Copyable(bp::extract<const Copyable&>(copyable)));
   bp::object result(bp::detail::new_reference(managingPyObject(newCopyable)));
 
-  bp::extract<bp::dict>(result.attr("__dict__"))().update(copyable.attr("__dict__"));
+  bp::extract<bp::dict>(result.attr("__dict__"))().update(
+      copyable.attr("__dict__"));
 
   return result;
 }
@@ -47,7 +48,8 @@ bp::object generic__deepcopy__(bp::object copyable, bp::dict memo) {
 }
 
 ///
-/// \brief Add the Python method copy to allow a copy of this by calling the copy constructor.
+/// \brief Add the Python method copy to allow a copy of this by calling the
+/// copy constructor.
 ///
 template <class C>
 struct CopyableVisitor : public bp::def_visitor<CopyableVisitor<C> > {

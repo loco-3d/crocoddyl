@@ -12,9 +12,11 @@
 #include "crocoddyl/multibody/fwd.hpp"
 
 struct RobotEENames {
-  RobotEENames(const std::string& robot_name, const std::vector<std::string>& contact_names,
-               const std::vector<crocoddyl::ContactType>& contact_types, const std::string& urdf_path,
-               const std::string& srdf_path, const std::string& ee_name, const std::string& reference_conf)
+  RobotEENames(const std::string& robot_name,
+               const std::vector<std::string>& contact_names,
+               const std::vector<crocoddyl::ContactType>& contact_types,
+               const std::string& urdf_path, const std::string& srdf_path,
+               const std::string& ee_name, const std::string& reference_conf)
       : robot_name(robot_name),
         contact_names(contact_names),
         contact_types(contact_types),

@@ -6,28 +6,29 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/fwd.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/center-of-mass.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
+#include "pinocchio_model.hpp"
 
 #include <example-robot-data/path.hpp>
+#include <pinocchio/algorithm/center-of-mass.hpp>
+#include <pinocchio/algorithm/centroidal-derivatives.hpp>
+#include <pinocchio/algorithm/centroidal.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
+#include <pinocchio/algorithm/rnea-derivatives.hpp>
+#include <pinocchio/fwd.hpp>
+#include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/parsers/srdf.hpp>
+#include <pinocchio/parsers/urdf.hpp>
 
-#include "pinocchio_model.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
-const std::vector<PinocchioModelTypes::Type> PinocchioModelTypes::all(PinocchioModelTypes::init_all());
+const std::vector<PinocchioModelTypes::Type> PinocchioModelTypes::all(
+    PinocchioModelTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, PinocchioModelTypes::Type type) {
   switch (type) {
@@ -60,7 +61,8 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
   frame_id_.clear();
   switch (type) {
     case PinocchioModelTypes::Hector:
-      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hector_description/robots/quadrotor_base.urdf");
+      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR
+                      "/hector_description/robots/quadrotor_base.urdf");
       frame_name_.resize(1);
       frame_id_.resize(1);
       frame_name_[0] = "base_link";
@@ -68,8 +70,9 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
       contact_nc_ = 6;
       break;
     case PinocchioModelTypes::TalosArm:
-      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
-                      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", false);
+      construct_model(
+          EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf",
+          EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", false);
       frame_name_.resize(1);
       frame_id_.resize(1);
       frame_name_[0] = "gripper_left_fingertip_1_link";
@@ -77,8 +80,10 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
       contact_nc_ = 6;
       break;
     case PinocchioModelTypes::HyQ:
-      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
-                      EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf");
+      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR
+                      "/hyq_description/robots/hyq_no_sensors.urdf",
+                      EXAMPLE_ROBOT_DATA_MODEL_DIR
+                      "/hyq_description/srdf/hyq.srdf");
       frame_name_.resize(4);
       frame_id_.resize(4);
       frame_name_[0] = "lf_foot";
@@ -91,8 +96,9 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
       contact_nc_ = 3;
       break;
     case PinocchioModelTypes::Talos:
-      construct_model(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-                      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf");
+      construct_model(
+          EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
+          EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf");
       frame_name_.resize(2);
       frame_id_.resize(2);
       frame_name_[0] = "left_sole_link";
@@ -123,21 +129,25 @@ PinocchioModelFactory::PinocchioModelFactory(PinocchioModelTypes::Type type) {
 
 PinocchioModelFactory::~PinocchioModelFactory() {}
 
-void PinocchioModelFactory::construct_model(const std::string& urdf_file, const std::string& srdf_file,
+void PinocchioModelFactory::construct_model(const std::string& urdf_file,
+                                            const std::string& srdf_file,
                                             bool free_flyer) {
   model_ = boost::make_shared<pinocchio::Model>();
   if (!urdf_file.empty()) {
     if (free_flyer) {
-      pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(), *model_.get());
+      pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(),
+                                  *model_.get());
       model_->lowerPositionLimit.segment<7>(0).fill(-1.);
       model_->upperPositionLimit.segment<7>(0).fill(1.);
       if (!srdf_file.empty()) {
-        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file,
+                                                     false);
       }
     } else {
       pinocchio::urdf::buildModel(urdf_file, *model_.get());
       if (!srdf_file.empty()) {
-        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file, false);
+        pinocchio::srdf::loadReferenceConfigurations(*model_.get(), srdf_file,
+                                                     false);
       }
     }
   } else {
@@ -147,10 +157,18 @@ void PinocchioModelFactory::construct_model(const std::string& urdf_file, const 
   }
 }
 
-boost::shared_ptr<pinocchio::Model> PinocchioModelFactory::create() const { return model_; }
-std::vector<std::string> PinocchioModelFactory::get_frame_names() const { return frame_name_; }
-std::vector<std::size_t> PinocchioModelFactory::get_frame_ids() const { return frame_id_; }
-std::size_t PinocchioModelFactory::get_contact_nc() const { return contact_nc_; }
+boost::shared_ptr<pinocchio::Model> PinocchioModelFactory::create() const {
+  return model_;
+}
+std::vector<std::string> PinocchioModelFactory::get_frame_names() const {
+  return frame_name_;
+}
+std::vector<std::size_t> PinocchioModelFactory::get_frame_ids() const {
+  return frame_id_;
+}
+std::size_t PinocchioModelFactory::get_contact_nc() const {
+  return contact_nc_;
+}
 
 /**
  * @brief Compute all the pinocchio data needed for the numerical
@@ -161,8 +179,8 @@ std::size_t PinocchioModelFactory::get_contact_nc() const { return contact_nc_; 
  * @param data contains the results of the computations.
  * @param x is the state vector.
  */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, const Eigen::VectorXd& x,
-                        const Eigen::VectorXd&) {
+void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data,
+                        const Eigen::VectorXd& x, const Eigen::VectorXd&) {
   const Eigen::VectorXd& q = x.segment(0, model->nq);
   const Eigen::VectorXd& v = x.segment(model->nq, model->nv);
   Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);
@@ -175,7 +193,8 @@ void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data, co
   pinocchio::centerOfMass(*model, *data, q, v, a);
   pinocchio::jacobianCenterOfMass(*model, *data, q);
   pinocchio::computeCentroidalMomentum(*model, *data, q, v);
-  pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp, tmp, tmp, tmp);
+  pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp,
+                                                  tmp, tmp, tmp);
   pinocchio::computeRNEADerivatives(*model, *data, q, v, a);
 }
 

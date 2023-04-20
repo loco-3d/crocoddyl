@@ -10,24 +10,26 @@
 #define CROCODDYL_CORE_UTILS_EXCEPTION_HPP_
 
 #include <exception>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 #define NOEXCEPT noexcept
 
-#define throw_pretty(m)                                                            \
-  {                                                                                \
-    std::stringstream ss;                                                          \
-    ss << m;                                                                       \
-    throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+#define throw_pretty(m)                                                 \
+  {                                                                     \
+    std::stringstream ss;                                               \
+    ss << m;                                                            \
+    throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, \
+                               __LINE__);                               \
   }
 
 #ifndef NDEBUG
-#define assert_pretty(condition, m)                                                \
-  if (!(condition)) {                                                              \
-    std::stringstream ss;                                                          \
-    ss << m;                                                                       \
-    throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+#define assert_pretty(condition, m)                                     \
+  if (!(condition)) {                                                   \
+    std::stringstream ss;                                               \
+    ss << m;                                                            \
+    throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, \
+                               __LINE__);                               \
   }
 #else
 #define assert_pretty(condition, m) ((void)0)
@@ -36,7 +38,8 @@ namespace crocoddyl {
 
 class Exception : public std::exception {
  public:
-  explicit Exception(const std::string &msg, const char *file, const char *func, int line);
+  explicit Exception(const std::string &msg, const char *file, const char *func,
+                     int line);
   virtual ~Exception() NOEXCEPT;
   virtual const char *what() const NOEXCEPT;
 

@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+
 #include <iostream>
 
 namespace crocoddyl {
@@ -18,7 +19,8 @@ WrenchConeTpl<Scalar>::WrenchConeTpl()
       ub_(nf_ + 13),
       lb_(nf_ + 13),
       R_(Matrix3s::Identity()),
-      box_(std::numeric_limits<Scalar>::infinity(), std::numeric_limits<Scalar>::infinity()),
+      box_(std::numeric_limits<Scalar>::infinity(),
+           std::numeric_limits<Scalar>::infinity()),
       mu_(Scalar(0.7)),
       inner_appr_(true),
       min_nforce_(Scalar(0.)),
@@ -32,24 +34,37 @@ WrenchConeTpl<Scalar>::WrenchConeTpl()
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, const std::size_t nf,
-                                     const bool inner_appr, const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), R_(R), box_(box), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
+                                     const Vector2s& box, const std::size_t nf,
+                                     const bool inner_appr,
+                                     const Scalar min_nforce,
+                                     const Scalar max_nforce)
+    : nf_(nf),
+      R_(R),
+      box_(box),
+      mu_(mu),
+      inner_appr_(inner_appr),
+      min_nforce_(min_nforce),
+      max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
   A_ = MatrixX6s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
@@ -60,24 +75,36 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const V
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu, const Vector2s& box, std::size_t nf,
-                                     const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), R_(R), box_(box), mu_(mu), inner_appr_(true), min_nforce_(min_nforce), max_nforce_(max_nforce) {
+WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
+                                     const Vector2s& box, std::size_t nf,
+                                     const Scalar min_nforce,
+                                     const Scalar max_nforce)
+    : nf_(nf),
+      R_(R),
+      box_(box),
+      mu_(mu),
+      inner_appr_(true),
+      min_nforce_(min_nforce),
+      max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
   A_ = MatrixX3s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
@@ -130,7 +157,8 @@ void WrenchConeTpl<Scalar>::update() {
     Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
     Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
     A_.row(2 * i).head(3) = (mu_nsurf + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1).head(3) = (mu_nsurf - tsurf_i).transpose() * R_.transpose();
+    A_.row(2 * i + 1).head(3) =
+        (mu_nsurf - tsurf_i).transpose() * R_.transpose();
   }
   A_.row(nf_).head(3) = R_.col(2).transpose();
   lb_(nf_) = min_nforce_;
@@ -180,7 +208,8 @@ void WrenchConeTpl<Scalar>::update() {
 }
 
 template <typename Scalar>
-void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu, const Vector2s& box, const Scalar min_nforce,
+void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu,
+                                   const Vector2s& box, const Scalar min_nforce,
                                    const Scalar max_nforce) {
   set_R(R);
   set_mu(mu);
@@ -194,17 +223,20 @@ void WrenchConeTpl<Scalar>::update(const Matrix3s& R, const Scalar mu, const Vec
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixX6s& WrenchConeTpl<Scalar>::get_A() const {
+const typename MathBaseTpl<Scalar>::MatrixX6s& WrenchConeTpl<Scalar>::get_A()
+    const {
   return A_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_ub()
+    const {
   return ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs& WrenchConeTpl<Scalar>::get_lb()
+    const {
   return lb_;
 }
 
@@ -214,12 +246,14 @@ std::size_t WrenchConeTpl<Scalar>::get_nf() const {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R() const {
+const typename MathBaseTpl<Scalar>::Matrix3s& WrenchConeTpl<Scalar>::get_R()
+    const {
   return R_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& WrenchConeTpl<Scalar>::get_box() const {
+const typename MathBaseTpl<Scalar>::Vector2s& WrenchConeTpl<Scalar>::get_box()
+    const {
   return box_;
 }
 
@@ -253,11 +287,13 @@ void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
   box_ = box;
   if (box_(0) < Scalar(0.)) {
     box_(0) = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+    std::cerr << "Warning: box(0) has to be a positive value, set to max. float"
+              << std::endl;
   }
   if (box_(1) < Scalar(0.)) {
     box_(1) = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: box(0) has to be a positive value, set to max. float" << std::endl;
+    std::cerr << "Warning: box(0) has to be a positive value, set to max. float"
+              << std::endl;
   }
 }
 
@@ -265,7 +301,8 @@ template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
 }
 
@@ -278,7 +315,8 @@ template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
 }
 
@@ -286,12 +324,15 @@ template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
 }
 
 template <typename Scalar>
-WrenchConeTpl<Scalar>& WrenchConeTpl<Scalar>::operator=(const WrenchConeTpl<Scalar>& other) {
+WrenchConeTpl<Scalar>& WrenchConeTpl<Scalar>::operator=(
+    const WrenchConeTpl<Scalar>& other) {
   if (this != &other) {
     nf_ = other.get_nf();
     A_ = other.get_A();

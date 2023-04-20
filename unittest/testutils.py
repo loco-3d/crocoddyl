@@ -1,5 +1,7 @@
 import numpy as np
+
 import pinocchio
+
 # from crocoddyl.utils import EPS
 from pinocchio.utils import zero
 
@@ -9,11 +11,12 @@ NUMDIFF_MODIFIER = 1e4
 
 class NumDiffException(Exception):
     """Raised when the NumDiff values are too high"""
+
     pass
 
 
 def assertNumDiff(A, B, threshold):
-    """ Assert analytical derivatives against NumDiff using the error norm.
+    """Assert analytical derivatives against NumDiff using the error norm.
 
     :param A: analytical derivatives
     :param B: NumDiff derivatives
@@ -21,11 +24,14 @@ def assertNumDiff(A, B, threshold):
     """
     if not np.allclose(A, B, atol=threshold):
         value = np.linalg.norm(A - B)
-        raise NumDiffException("NumDiff exception, with residual of %.4g, above threshold %.4g" % (value, threshold))
+        raise NumDiffException(
+            "NumDiff exception, with residual of %.4g, above threshold %.4g"
+            % (value, threshold)
+        )
 
 
 def df_dx(func, x, h=np.sqrt(2 * EPS)):
-    """ Perform df/dx by num_diff.
+    """Perform df/dx by num_diff.
     :params func: function to differentiate f : np.matrix -> np.matrix
     :params x: value at which f is differentiated. type np.matrix
     :params h: eps
@@ -43,7 +49,7 @@ def df_dx(func, x, h=np.sqrt(2 * EPS)):
 
 
 def df_dq(model, func, q, h=np.sqrt(2 * EPS)):
-    """ Perform df/dq by num_diff. q is in the lie manifold.
+    """Perform df/dq by num_diff. q is in the lie manifold.
     :params func: function to differentiate f : np.matrix -> np.matrix
     :params q: configuration value at which f is differentiated. type np.matrix
     :params h: eps

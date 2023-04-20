@@ -10,39 +10,50 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                                             const Vector3s& xref, const pinocchio::ReferenceFrame type,
-                                             const std::size_t nu, const Vector2s& gains)
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Vector3s& xref, const pinocchio::ReferenceFrame type,
+    const std::size_t nu, const Vector2s& gains)
     : Base(state, type, 3, nu), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                                             const Vector3s& xref, const pinocchio::ReferenceFrame type,
-                                             const Vector2s& gains)
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Vector3s& xref, const pinocchio::ReferenceFrame type,
+    const Vector2s& gains)
     : Base(state, type, 3), xref_(xref), gains_(gains) {
   id_ = id;
 }
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has been removed in a future release
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
+                             // been removed in a future release
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                                             const Vector3s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3, nu), xref_(xref), gains_(gains) {
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Vector3s& xref, const std::size_t nu, const Vector2s& gains)
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3, nu),
+      xref_(xref),
+      gains_(gains) {
   id_ = id;
-  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, "
+               "this assumes is pinocchio::LOCAL."
             << std::endl;
 }
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::ContactModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                                             const Vector3s& xref, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3), xref_(xref), gains_(gains) {
+ContactModel3DTpl<Scalar>::ContactModel3DTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Vector3s& xref, const Vector2s& gains)
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3),
+      xref_(xref),
+      gains_(gains) {
   id_ = id;
-  std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+  std::cerr << "Deprecated: Use constructor that passes the type of contact, "
+               "this assumes is pinocchio::LOCAL."
             << std::endl;
 }
 
@@ -52,14 +63,19 @@ template <typename Scalar>
 ContactModel3DTpl<Scalar>::~ContactModel3DTpl() {}
 
 template <typename Scalar>
-void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
-                                     const Eigen::Ref<const VectorXs>&) {
+void ContactModel3DTpl<Scalar>::calc(
+    const boost::shared_ptr<ContactDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, id_);
-  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fJf);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, id_);
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio,
+                                  id_);
+  pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
+                              id_, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(),
+                                     *d->pinocchio, id_);
   d->a0_local =
-      pinocchio::getFrameClassicalAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL)
+      pinocchio::getFrameClassicalAcceleration(
+          *state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL)
           .linear();
 
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
@@ -85,12 +101,15 @@ void ContactModel3DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
 }
 
 template <typename Scalar>
-void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>&) {
+void ContactModel3DTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ContactDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  const pinocchio::JointIndex joint = state_->get_pinocchio()->frames[d->frame].parent;
-  pinocchio::getJointAccelerationDerivatives(*state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
-                                             d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parent;
+  pinocchio::getJointAccelerationDerivatives(
+      *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
+      d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->v.linear(), d->vv_skew);
   pinocchio::skew(d->v.angular(), d->vw_skew);
@@ -98,21 +117,29 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
   d->da0_local_dx.leftCols(nv) = d->fXjda_dq.template topRows<3>();
-  d->da0_local_dx.leftCols(nv).noalias() += d->vw_skew * d->fXjdv_dq.template topRows<3>();
-  d->da0_local_dx.leftCols(nv).noalias() -= d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
+  d->da0_local_dx.leftCols(nv).noalias() +=
+      d->vw_skew * d->fXjdv_dq.template topRows<3>();
+  d->da0_local_dx.leftCols(nv).noalias() -=
+      d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
   d->da0_local_dx.rightCols(nv) = d->fXjda_dv.template topRows<3>();
-  d->da0_local_dx.rightCols(nv).noalias() += d->vw_skew * d->fJf.template topRows<3>();
-  d->da0_local_dx.rightCols(nv).noalias() -= d->vv_skew * d->fJf.template bottomRows<3>();
+  d->da0_local_dx.rightCols(nv).noalias() +=
+      d->vw_skew * d->fJf.template topRows<3>();
+  d->da0_local_dx.rightCols(nv).noalias() -=
+      d->vv_skew * d->fJf.template bottomRows<3>();
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
 
   if (gains_[0] != 0.) {
     pinocchio::skew(d->dp_local, d->dp_skew);
-    d->da0_local_dx.leftCols(nv).noalias() += gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
-    d->da0_local_dx.leftCols(nv).noalias() += gains_[0] * d->fJf.template topRows<3>();
+    d->da0_local_dx.leftCols(nv).noalias() +=
+        gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
+    d->da0_local_dx.leftCols(nv).noalias() +=
+        gains_[0] * d->fJf.template topRows<3>();
   }
   if (gains_[1] != 0.) {
-    d->da0_local_dx.leftCols(nv).noalias() += gains_[1] * d->fXjdv_dq.template topRows<3>();
-    d->da0_local_dx.rightCols(nv).noalias() += gains_[1] * d->fJf.template topRows<3>();
+    d->da0_local_dx.leftCols(nv).noalias() +=
+        gains_[1] * d->fXjdv_dq.template topRows<3>();
+    d->da0_local_dx.rightCols(nv).noalias() +=
+        gains_[1] * d->fJf.template topRows<3>();
   }
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
@@ -120,10 +147,11 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      // Recalculate the constrained accelerations after imposing contact constraints.
-      // This is necessary for the forward-dynamics case.
-      d->a0_local = pinocchio::getFrameClassicalAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, id_,
-                                                             pinocchio::LOCAL)
+      // Recalculate the constrained accelerations after imposing contact
+      // constraints. This is necessary for the forward-dynamics case.
+      d->a0_local = pinocchio::getFrameClassicalAcceleration(
+                        *state_->get_pinocchio().get(), *d->pinocchio, id_,
+                        pinocchio::LOCAL)
                         .linear();
       if (gains_[0] != 0.) {
         d->a0_local += gains_[0] * d->dp_local;
@@ -136,14 +164,15 @@ void ContactModel3DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
       pinocchio::skew(d->a0.template head<3>(), d->a0_skew);
       d->a0_world_skew.noalias() = d->a0_skew * oRf;
       d->da0_dx.noalias() = oRf * d->da0_local_dx;
-      d->da0_dx.leftCols(nv).noalias() -= d->a0_world_skew * d->fJf.template bottomRows<3>();
+      d->da0_dx.leftCols(nv).noalias() -=
+          d->a0_world_skew * d->fJf.template bottomRows<3>();
       break;
   }
 }
 
 template <typename Scalar>
-void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                                            const VectorXs& force) {
+void ContactModel3DTpl<Scalar>::updateForce(
+    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 3) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be 3)");
@@ -164,29 +193,34 @@ void ContactModel3DTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataA
       data->fext = data->jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
-      data->dtau_dq.noalias() = -d->fJf.template topRows<3>().transpose() * d->fJf_df;
+      data->dtau_dq.noalias() =
+          -d->fJf.template topRows<3>().transpose() * d->fJf_df;
       break;
   }
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModel3DTpl<Scalar>::createData(
-    pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+ContactModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name << ", type=" << type_ << "}";
+  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name
+     << ", type=" << type_ << "}";
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector3s& ContactModel3DTpl<Scalar>::get_reference() const {
+const typename MathBaseTpl<Scalar>::Vector3s&
+ContactModel3DTpl<Scalar>::get_reference() const {
   return xref_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& ContactModel3DTpl<Scalar>::get_gains() const {
+const typename MathBaseTpl<Scalar>::Vector2s&
+ContactModel3DTpl<Scalar>::get_gains() const {
   return gains_;
 }
 

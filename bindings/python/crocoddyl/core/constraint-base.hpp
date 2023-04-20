@@ -15,54 +15,72 @@
 namespace crocoddyl {
 namespace python {
 
-class ConstraintModelAbstract_wrap : public ConstraintModelAbstract, public bp::wrapper<ConstraintModelAbstract> {
+class ConstraintModelAbstract_wrap
+    : public ConstraintModelAbstract,
+      public bp::wrapper<ConstraintModelAbstract> {
  public:
+  ConstraintModelAbstract_wrap(
+      boost::shared_ptr<StateAbstract> state,
+      boost::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
+      const std::size_t nh)
+      : ConstraintModelAbstract(state, residual, ng, nh),
+        bp::wrapper<ConstraintModelAbstract>() {}
+
   ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                               boost::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
+                               const std::size_t nu, const std::size_t ng,
                                const std::size_t nh)
-      : ConstraintModelAbstract(state, residual, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
+      : ConstraintModelAbstract(state, nu, ng, nh),
+        bp::wrapper<ConstraintModelAbstract>() {}
 
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
-                               const std::size_t nh)
-      : ConstraintModelAbstract(state, nu, ng, nh), bp::wrapper<ConstraintModelAbstract>() {}
-
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh)
+  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+                               const std::size_t ng, const std::size_t nh)
       : ConstraintModelAbstract(state, ng, nh) {}
 
-  void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+            const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty("Invalid argument: "
-                   << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                   << "x has wrong dimension (it should be " +
+                          std::to_string(state_->get_nx()) + ")");
     }
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                   << "u has wrong dimension (it should be " +
+                          std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    return bp::call<void>(this->get_override("calc").ptr(), data,
+                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
+  void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty("Invalid argument: "
-                   << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                   << "x has wrong dimension (it should be " +
+                          std::to_string(state_->get_nx()) + ")");
     }
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                   << "u has wrong dimension (it should be " +
+                          std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data) {
+  boost::shared_ptr<ConstraintDataAbstract> createData(
+      DataCollectorAbstract* const data) {
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ConstraintDataAbstract> >(createData.ptr(), boost::ref(data));
+      return bp::call<boost::shared_ptr<ConstraintDataAbstract> >(
+          createData.ptr(), boost::ref(data));
     }
     return ConstraintModelAbstract::createData(data);
   }
 
-  boost::shared_ptr<ConstraintDataAbstract> default_createData(DataCollectorAbstract* const data) {
+  boost::shared_ptr<ConstraintDataAbstract> default_createData(
+      DataCollectorAbstract* const data) {
     return this->ConstraintModelAbstract::createData(data);
   }
 };

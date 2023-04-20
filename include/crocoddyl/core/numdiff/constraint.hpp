@@ -10,15 +10,18 @@
 #define CROCODDYL_CORE_NUMDIFF_CONSTRAINT_HPP_
 
 #include <boost/function.hpp>
+
 #include "crocoddyl/core/constraint-base.hpp"
 
 namespace crocoddyl {
 
 /**
- * @brief This class computes the numerical differentiation of a constraint model.
+ * @brief This class computes the numerical differentiation of a constraint
+ * model.
  *
- * It computes the Jacobian of the constraint model via numerical differentiation, i.e., \f$\mathbf{g_x}\f$,
- * \f$\mathbf{g_u}\f$ and \f$\mathbf{h_x}\f$, \f$\mathbf{h_u}\f$, which denote the Jacobians of the
+ * It computes the Jacobian of the constraint model via numerical
+ * differentiation, i.e., \f$\mathbf{g_x}\f$, \f$\mathbf{g_u}\f$ and
+ * \f$\mathbf{h_x}\f$, \f$\mathbf{h_u}\f$, which denote the Jacobians of the
  * inequality and equality constraints, respectively.
  *
  * \sa `ConstraintModelAbstractTpl()`, `calcDiff()`
@@ -35,7 +38,8 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)>
+      ReevaluationFunction;
 
   /**
    * @brief Initialize the numdiff constraint model
@@ -52,31 +56,38 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc ConstraintModelAbstract::calc()
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ConstraintModelAbstract::calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const
-   * Eigen::Ref<const VectorXs>& x)
+   * @brief @copydoc ConstraintModelAbstract::calc(const
+   * boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc ConstraintModelAbstract::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const
-   * Eigen::Ref<const VectorXs>& x)
+   * @brief @copydoc ConstraintModelAbstract::calcDiff(const
+   * boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
+   * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the original constraint model
@@ -84,18 +95,21 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used by the numerical differentiation routine
+   * @brief Return the disturbance constant used by the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used by the numerical differentiation routine
+   * @brief Modify the disturbance constant used by the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
   /**
-   * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and Hessian.
+   * @brief Register functions that updates the shared data computed for a
+   * system rollout The updated data is used to evaluate of the gradient and
+   * Hessian.
    *
    * @param reevals are the registered functions.
    */
@@ -108,18 +122,21 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
 
  private:
   /**
-   * @brief Make sure that when we finite difference the constraint model, the user
-   * does not face unknown behaviour because of the finite differencing of a
-   * quaternion around pi. For full discussions see issue
+   * @brief Make sure that when we finite difference the constraint model, the
+   * user does not face unknown behaviour because of the finite differencing of
+   * a quaternion around pi. For full discussions see issue
    * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
    *
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;              //!< Constraint model hat we want to apply the numerical differentiation
-  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
-  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
+  boost::shared_ptr<Base> model_;  //!< Constraint model hat we want to apply
+                                   //!< the numerical differentiation
+  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
+                  //!< calculation
+  std::vector<ReevaluationFunction>
+      reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>
@@ -134,7 +151,8 @@ struct ConstraintDataNumDiffTpl : public ConstraintDataAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
   template <template <typename Scalar> class Model>
-  explicit ConstraintDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
+  explicit ConstraintDataNumDiffTpl(Model<Scalar>* const model,
+                                    DataCollectorAbstract* const shared_data)
       : Base(model, shared_data),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()),
@@ -165,15 +183,21 @@ struct ConstraintDataNumDiffTpl : public ConstraintDataAbstractTpl<_Scalar> {
   using Base::shared;
 
   Scalar x_norm;  //!< Norm of the state vector
-  Scalar xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
-  Scalar uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  VectorXs dx;    //!< State disturbance.
-  VectorXs xp;    //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  VectorXs du;    //!< Control disturbance.
-  VectorXs up;    //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation.
+  Scalar
+      xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar
+      uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  VectorXs dx;  //!< State disturbance.
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
+                //!< \int x dx_i \f$".
+  VectorXs du;  //!< Control disturbance.
+  VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
+                //!< \int u du_i = u + du \f$".
+  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<boost::shared_ptr<Base> >
+      data_x;  //!< The temporary data associated with the state variation.
+  std::vector<boost::shared_ptr<Base> >
+      data_u;  //!< The temporary data associated with the control variation.
 };
 
 }  // namespace crocoddyl

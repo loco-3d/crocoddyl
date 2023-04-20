@@ -1,21 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
-// Copyright note valid unless otherwise stated in individual files.
-// All rights reserved.
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
+// Oxford Copyright note valid unless otherwise stated in individual files. All
+// rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
-#include <stdexcept>
 #include <math.h>
-#include <pinocchio/utils/static-if.hpp>
 
+#include <pinocchio/utils/static-if.hpp>
+#include <stdexcept>
+
+#include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
@@ -28,12 +29,15 @@ struct ActivationBoundsTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper, const Scalar b = (Scalar)1.)
+  ActivationBoundsTpl(const VectorXs& lower, const VectorXs& upper,
+                      const Scalar b = (Scalar)1.)
       : lb(lower), ub(upper), beta(b) {
     if (lb.size() != ub.size()) {
       throw_pretty("Invalid argument: "
-                   << "The lower and upper bounds don't have the same dimension (lb,ub dimensions equal to " +
-                          std::to_string(lb.size()) + "," + std::to_string(ub.size()) + ", respectively)");
+                   << "The lower and upper bounds don't have the same "
+                      "dimension (lb,ub dimensions equal to " +
+                          std::to_string(lb.size()) + "," +
+                          std::to_string(ub.size()) + ", respectively)");
     }
     if (beta < Scalar(0) || beta > Scalar(1.)) {
       throw_pretty("Invalid argument: "
@@ -44,7 +48,8 @@ struct ActivationBoundsTpl {
       if (isfinite(lb(i)) && isfinite(ub(i))) {
         if (lb(i) - ub(i) > 0) {
           throw_pretty("Invalid argument: "
-                       << "The lower and upper bounds are badly defined; ub has to be bigger / equals to lb");
+                       << "The lower and upper bounds are badly defined; ub "
+                          "has to be bigger / equals to lb");
         }
       }
       // Assign the maximum value for infinity/nan values
@@ -65,7 +70,8 @@ struct ActivationBoundsTpl {
       beta = Scalar(1.);
     }
   }
-  ActivationBoundsTpl(const ActivationBoundsTpl& other) : lb(other.lb), ub(other.ub), beta(other.beta) {}
+  ActivationBoundsTpl(const ActivationBoundsTpl& other)
+      : lb(other.lb), ub(other.ub), beta(other.beta) {}
   ActivationBoundsTpl() : beta(Scalar(1.)) {}
 
   ActivationBoundsTpl& operator=(const ActivationBoundsTpl& other) {
@@ -83,7 +89,8 @@ struct ActivationBoundsTpl {
 };
 
 template <typename _Scalar>
-class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Scalar> {
+class ActivationModelQuadraticBarrierTpl
+    : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -100,24 +107,28 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
       : Base(bounds.lb.size()), bounds_(bounds){};
   virtual ~ActivationModelQuadraticBarrierTpl(){};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " +
+                          std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
     d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
     d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
-    data->a_value =
-        Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() + Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
+    data->a_value = Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() +
+                    Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+                   << "r has wrong dimension (it should be " +
+                          std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -127,7 +138,8 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
     for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
       data->Arr.diagonal()[i] = if_then_else(
           pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), Scalar(1.),
-          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i], Scalar(0.), Scalar(1.), Scalar(0.)));
+          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i],
+                       Scalar(0.), Scalar(1.), Scalar(0.)));
     }
   };
 
@@ -143,7 +155,9 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const { os << "ActivationModelQuadraticBarrier {nr=" << nr_ << "}"; }
+  virtual void print(std::ostream& os) const {
+    os << "ActivationModelQuadraticBarrier {nr=" << nr_ << "}";
+  }
 
  protected:
   using Base::nr_;
@@ -153,7 +167,8 @@ class ActivationModelQuadraticBarrierTpl : public ActivationModelAbstractTpl<_Sc
 };
 
 template <typename _Scalar>
-struct ActivationDataQuadraticBarrierTpl : public ActivationDataAbstractTpl<_Scalar> {
+struct ActivationDataQuadraticBarrierTpl
+    : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -163,7 +178,9 @@ struct ActivationDataQuadraticBarrierTpl : public ActivationDataAbstractTpl<_Sca
 
   template <typename Activation>
   explicit ActivationDataQuadraticBarrierTpl(Activation* const activation)
-      : Base(activation), rlb_min_(activation->get_nr()), rub_max_(activation->get_nr()) {
+      : Base(activation),
+        rlb_min_(activation->get_nr()),
+        rub_max_(activation->get_nr()) {
     rlb_min_.setZero();
     rub_max_.setZero();
   }

@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/constraints/residual.hpp"
+
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -18,56 +19,75 @@ void exposeConstraintResidual() {
 
   bp::class_<ConstraintModelResidual, bp::bases<ConstraintModelAbstract> >(
       "ConstraintModelResidual",
-      "This defines equality / inequality constraints based on a residual vector and its bounds.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
-               Eigen::VectorXd>(bp::args("self", "state", "residual", "lower", "upper"),
-                                "Initialize the residual constraint model as an inequality constraint.\n\n"
-                                ":param state: state description\n"
-                                ":param residual: residual model\n"
-                                ":param lower: lower bound\n"
-                                ":param upper: upper bound"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
+      "This defines equality / inequality constraints based on a residual "
+      "vector and its bounds.",
+      bp::init<boost::shared_ptr<StateAbstract>,
+               boost::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
+               Eigen::VectorXd>(
+          bp::args("self", "state", "residual", "lower", "upper"),
+          "Initialize the residual constraint model as an inequality "
+          "constraint.\n\n"
+          ":param state: state description\n"
+          ":param residual: residual model\n"
+          ":param lower: lower bound\n"
+          ":param upper: upper bound"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>,
+                    boost::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
-          "Initialize the residual constraint model as an equality constraint.\n\n"
+          "Initialize the residual constraint model as an equality "
+          "constraint.\n\n"
           ":param state: state description\n"
           ":param residual: residual model"))
-      .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ConstraintModelResidual::calc, bp::args("self", "data", "x", "u"),
+      .def<void (ConstraintModelResidual::*)(
+          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calc", &ConstraintModelResidual::calc,
+          bp::args("self", "data", "x", "u"),
           "Compute the residual constraint.\n\n"
           ":param data: constraint data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
-      .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (ConstraintModelResidual::*)(
+          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual constraint based on state only.\n\n"
           "It updates the constraint based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+          "This function is commonly used in the terminal nodes of an optimal "
+          "control problem.\n"
           ":param data: constraint data\n"
           ":param x: state point (dim. state.nx)")
-      .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ConstraintModelResidual::calcDiff, bp::args("self", "data", "x", "u"),
+      .def<void (ConstraintModelResidual::*)(
+          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ConstraintModelResidual::calcDiff,
+          bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the residual constraint.\n\n"
           "It assumes that calc has been run first.\n"
           ":param data: constraint data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)\n")
-      .def<void (ConstraintModelResidual::*)(const boost::shared_ptr<ConstraintDataAbstract>&,
-                                             const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ConstraintModelAbstract::calcDiff, bp::args("self", "data", "x"),
-          "Compute the derivatives of the residual constraint with respect to the state only.\n\n"
-          "It updates the Jacobian of the constraint function based on the state only.\n"
-          "This function is commonly used in the terminal nodes of an optimal control problem.\n"
+      .def<void (ConstraintModelResidual::*)(
+          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &ConstraintModelAbstract::calcDiff,
+          bp::args("self", "data", "x"),
+          "Compute the derivatives of the residual constraint with respect to "
+          "the state only.\n\n"
+          "It updates the Jacobian of the constraint function based on the "
+          "state only.\n"
+          "This function is commonly used in the terminal nodes of an optimal "
+          "control problem.\n"
           ":param data: constraint data\n"
           ":param x: state point (dim. state.nx)")
-      .def("createData", &ConstraintModelResidual::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+      .def("createData", &ConstraintModelResidual::createData,
+           bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the residual constraint data.\n\n"
-           "Each constraint model has its own data that needs to be allocated. This function\n"
+           "Each constraint model has its own data that needs to be allocated. "
+           "This function\n"
            "returns the allocated data for a predefined constraint.\n"
            ":param data: shared data\n"
            ":return constraint data.")
@@ -81,7 +101,8 @@ void exposeConstraintResidual() {
           bp::args("self", "model", "data"),
           "Create residual constraint data.\n\n"
           ":param model: residual constraint model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
+          ":param data: shared data")[bp::with_custodian_and_ward<
+          1, 2, bp::with_custodian_and_ward<1, 3> >()])
       .def(CopyableVisitor<ConstraintDataResidual>());
 }
 

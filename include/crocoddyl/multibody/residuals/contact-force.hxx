@@ -12,35 +12,47 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                                   const pinocchio::FrameIndex id, const Force& fref,
-                                                                   const std::size_t nc, const std::size_t nu,
-                                                                   const bool fwddyn)
+ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Force& fref, const std::size_t nc, const std::size_t nu,
+    const bool fwddyn)
     : Base(state, nc, nu, fwddyn ? true : false, fwddyn ? true : false, true),
       fwddyn_(fwddyn),
       update_jacobians_(true),
       id_(id),
       fref_(fref) {
   if (nc > 6) {
-    throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
+    throw_pretty(
+        "Invalid argument in ResidualModelContactForce: nc should be less than "
+        "6");
   }
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
 template <typename Scalar>
-ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(boost::shared_ptr<StateMultibody> state,
-                                                                   const pinocchio::FrameIndex id, const Force& fref,
-                                                                   const std::size_t nc)
-    : Base(state, nc), fwddyn_(true), update_jacobians_(true), id_(id), fref_(fref) {
+ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Force& fref, const std::size_t nc)
+    : Base(state, nc),
+      fwddyn_(true),
+      update_jacobians_(true),
+      id_(id),
+      fref_(fref) {
   if (nc > 6) {
-    throw_pretty("Invalid argument in ResidualModelContactForce: nc should be less than 6");
+    throw_pretty(
+        "Invalid argument in ResidualModelContactForce: nc should be less than "
+        "6");
   }
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
@@ -48,8 +60,9 @@ template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::~ResidualModelContactForceTpl() {}
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactForceTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   // We transform the force to the contact frame
@@ -69,31 +82,34 @@ void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<Residual
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactForceTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>&,
-                                                    const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactForceTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
   }
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactForceTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactForceTpl<Scalar>::createData(
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelContactForceTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d =
-      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
+      Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -101,7 +117,8 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactForceTpl
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data) {
+void ResidualModelContactForceTpl<Scalar>::updateJacobians(
+    const boost::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -127,9 +144,12 @@ void ResidualModelContactForceTpl<Scalar>::updateJacobians(const boost::shared_p
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::print(std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
-  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
-  os << "ResidualModelContactForce {frame=" << s->get_pinocchio()->frames[id_].name
+  boost::shared_ptr<StateMultibody> s =
+      boost::static_pointer_cast<StateMultibody>(state_);
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "ResidualModelContactForce {frame="
+     << s->get_pinocchio()->frames[id_].name
      << ", fref=" << fref_.toVector().head(nr_).transpose().format(fmt) << "}";
 }
 
@@ -144,17 +164,20 @@ pinocchio::FrameIndex ResidualModelContactForceTpl<Scalar>::get_id() const {
 }
 
 template <typename Scalar>
-const pinocchio::ForceTpl<Scalar>& ResidualModelContactForceTpl<Scalar>::get_reference() const {
+const pinocchio::ForceTpl<Scalar>&
+ResidualModelContactForceTpl<Scalar>::get_reference() const {
   return fref_;
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+void ResidualModelContactForceTpl<Scalar>::set_id(
+    const pinocchio::FrameIndex id) {
   id_ = id;
 }
 
 template <typename Scalar>
-void ResidualModelContactForceTpl<Scalar>::set_reference(const Force& reference) {
+void ResidualModelContactForceTpl<Scalar>::set_reference(
+    const Force& reference) {
   fref_ = reference;
   update_jacobians_ = true;
 }

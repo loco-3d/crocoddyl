@@ -10,29 +10,34 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Control gravity residual under contact
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-(\mathbf{g}(\mathbf{q}) - \sum
- * \mathbf{J}_c(\mathbf{q})^{\top} \mathbf{f}_c)\f$, where \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control
- * input, \f$\mathbf{J}_c(\mathbf{q})\f$ is the contact Jacobians, \f$\mathbf{f}_c\f$ contains the contact forces,
- * \f$\mathbf{g}(\mathbf{q})\f$ is the gravity torque corresponding to the current configuration,
- * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ is the current position joints input. Note that the dimension of the residual
- * vector is obtained from `state->get_nv()`.
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{u}-(\mathbf{g}(\mathbf{q}) - \sum
+ * \mathbf{J}_c(\mathbf{q})^{\top} \mathbf{f}_c)\f$, where
+ * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input,
+ * \f$\mathbf{J}_c(\mathbf{q})\f$ is the contact Jacobians, \f$\mathbf{f}_c\f$
+ * contains the contact forces, \f$\mathbf{g}(\mathbf{q})\f$ is the gravity
+ * torque corresponding to the current configuration,
+ * \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ is the current position joints input.
+ * Note that the dimension of the residual vector is obtained from
+ * `state->get_nv()`.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc()` and
- * `calcDiff()`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * Jacobians are calculated by `calc()` and `calcDiff()`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
+class ResidualModelContactControlGravTpl
+    : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -53,7 +58,8 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelContactControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
+  ResidualModelContactControlGravTpl(boost::shared_ptr<StateMultibody> state,
+                                     const std::size_t nu);
 
   /**
    * @brief Initialize the contact control gravity contact residual model
@@ -62,7 +68,8 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    *
    * @param[in] state  State of the multibody system
    */
-  explicit ResidualModelContactControlGravTpl(boost::shared_ptr<StateMultibody> state);
+  explicit ResidualModelContactControlGravTpl(
+      boost::shared_ptr<StateMultibody> state);
   virtual ~ResidualModelContactControlGravTpl();
 
   /**
@@ -72,45 +79,54 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the residual vector for nodes that depends only on the state
    *
-   * It updates the residual vector based on the state only (i.e., it ignores the contact forces). This function
-   * is used in the terminal nodes of an optimal control problem.
+   * It updates the residual vector based on the state only (i.e., it ignores
+   * the contact forces). This function is used in the terminal nodes of an
+   * optimal control problem.
    *
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
-   * @brief Compute the Jacobians of the contact control gravity contact residual
+   * @brief Compute the Jacobians of the contact control gravity contact
+   * residual
    *
    * @param[in] data  Contact control gravity residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the Jacobian of the residual functions with respect to the state only
+   * @brief Compute the Jacobian of the residual functions with respect to the
+   * state only
    *
-   * It updates the Jacobian of the residual function based on the state only (i.e., it ignores the contact forces).
-   * This function is used in the terminal nodes of an optimal control problem.
+   * It updates the Jacobian of the residual function based on the state only
+   * (i.e., it ignores the contact forces). This function is used in the
+   * terminal nodes of an optimal control problem.
    *
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the contact-control-gravity residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Print relevant information of the contact-control-grav residual
@@ -130,7 +146,8 @@ class ResidualModelContactControlGravTpl : public ResidualModelAbstractTpl<_Scal
 };
 
 template <typename _Scalar>
-struct ResidualDataContactControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataContactControlGravTpl
+    : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -141,7 +158,8 @@ struct ResidualDataContactControlGravTpl : public ResidualDataAbstractTpl<_Scala
   typedef pinocchio::DataTpl<Scalar> PinocchioData;
 
   template <template <typename Scalar> class Model>
-  ResidualDataContactControlGravTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  ResidualDataContactControlGravTpl(Model<Scalar>* const model,
+                                    DataCollectorAbstract* const data)
       : Base(model, data) {
     StateMultibody* sm = static_cast<StateMultibody*>(model->get_state().get());
     pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
@@ -160,9 +178,11 @@ struct ResidualDataContactControlGravTpl : public ResidualDataAbstractTpl<_Scala
     actuation = d->actuation;
   }
 
-  PinocchioData pinocchio;                                                  //!< Pinocchio data
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;           //!< Actuation data
-  pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> > fext;  //!< External spatial forces
+  PinocchioData pinocchio;  //!< Pinocchio data
+  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> >
+      actuation;  //!< Actuation data
+  pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >
+      fext;  //!< External spatial forces
   using Base::r;
   using Base::Ru;
   using Base::Rx;

@@ -9,23 +9,25 @@
 #ifndef CROCODDYL_MULTIBODY_RESIDUALS_COM_POSITION_HPP_
 #define CROCODDYL_MULTIBODY_RESIDUALS_COM_POSITION_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief CoM position residual
  *
- * This residual function defines the CoM tracking as \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
- * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference CoM position, respectively. Note that
- * the dimension of the residual vector is obtained from 3. Furthermore, the Jacobians of the residual function are
+ * This residual function defines the CoM tracking as
+ * \f$\mathbf{r}=\mathbf{c}-\mathbf{c}^*\f$, where
+ * \f$\mathbf{c},\mathbf{c}^*\in~\mathbb{R}^3\f$ are the current and reference
+ * CoM position, respectively. Note that the dimension of the residual vector is
+ * obtained from 3. Furthermore, the Jacobians of the residual function are
  * computed analytically.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -51,7 +53,8 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] cref   Reference CoM position
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref, const std::size_t nu);
+  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+                              const Vector3s& cref, const std::size_t nu);
 
   /**
    * @brief Initialize the CoM position residual model
@@ -61,7 +64,8 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] cref   Reference CoM position
    */
-  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state, const Vector3s& cref);
+  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+                              const Vector3s& cref);
   virtual ~ResidualModelCoMPositionTpl();
 
   /**
@@ -71,7 +75,8 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -81,9 +86,11 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the CoM position reference
@@ -124,11 +131,16 @@ struct ResidualDataCoMPositionTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix3xs Matrix3xs;
 
   template <template <typename Scalar> class Model>
-  ResidualDataCoMPositionTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+  ResidualDataCoMPositionTpl(Model<Scalar>* const model,
+                             DataCollectorAbstract* const data)
+      : Base(model, data) {
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorMultibodyTpl<Scalar>* d =
+        dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime

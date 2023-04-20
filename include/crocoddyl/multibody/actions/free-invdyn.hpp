@@ -11,32 +11,36 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/core/constraints/constraint-manager.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
+#include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
- * @brief Differential action model for free inverse dynamics in multibody systems.
+ * @brief Differential action model for free inverse dynamics in multibody
+ * systems.
  *
- * This class implements forward kinematic with an inverse-dynamics computed using the Recursive Newton Euler
- * Algorithm (RNEA). The stack of cost and constraint functions are implemented in
- * `CostModelSumTpl` and `ConstraintModelManagerTpl`, respectively. The accelerations are the decision
- * variables defined as the control inputs, and the under-actuation constraint is under the name `tau`, thus the
- *  user is not allowed to use it.
+ * This class implements forward kinematic with an inverse-dynamics computed
+ * using the Recursive Newton Euler Algorithm (RNEA). The stack of cost and
+ * constraint functions are implemented in `CostModelSumTpl` and
+ * `ConstraintModelManagerTpl`, respectively. The accelerations are the decision
+ * variables defined as the control inputs, and the under-actuation constraint
+ * is under the name `tau`, thus the user is not allowed to use it.
  *
  *
- * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
+ * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`,
+ * `createData()`
  */
 template <typename _Scalar>
-class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+class DifferentialActionModelFreeInvDynamicsTpl
+    : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -44,7 +48,8 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataFreeInvDynamicsTpl<Scalar> Data;
-  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionDataAbstract;
   typedef CostModelSumTpl<Scalar> CostModelSum;
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
@@ -55,16 +60,17 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   /**
    * @brief Initialize the free inverse-dynamics action model
    *
-   * It describes the kinematic evolution of the multibody system and computes the needed torques
-   * using inverse dynamics.
+   * It describes the kinematic evolution of the multibody system and computes
+   * the needed torques using inverse dynamics.
    *
    * @param[in] state      State of the multibody system
    * @param[in] actuation  Actuation model
    * @param[in] costs      Cost model
    */
-  DifferentialActionModelFreeInvDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                            boost::shared_ptr<ActuationModelAbstract> actuation,
-                                            boost::shared_ptr<CostModelSum> costs);
+  DifferentialActionModelFreeInvDynamicsTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation,
+      boost::shared_ptr<CostModelSum> costs);
 
   /**
    * @brief Initialize the free inverse-dynamics action model
@@ -74,51 +80,61 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
    * @param[in] costs        Cost model
    * @param[in] constraints  Constraints model
    */
-  DifferentialActionModelFreeInvDynamicsTpl(boost::shared_ptr<StateMultibody> state,
-                                            boost::shared_ptr<ActuationModelAbstract> actuation,
-                                            boost::shared_ptr<CostModelSum> costs,
-                                            boost::shared_ptr<ConstraintModelManager> constraints);
+  DifferentialActionModelFreeInvDynamicsTpl(
+      boost::shared_ptr<StateMultibody> state,
+      boost::shared_ptr<ActuationModelAbstract> actuation,
+      boost::shared_ptr<CostModelSum> costs,
+      boost::shared_ptr<ConstraintModelManager> constraints);
   virtual ~DifferentialActionModelFreeInvDynamicsTpl();
 
   /**
    * @brief Compute the system acceleration, cost value and constraint residuals
    *
-   * It extracts the acceleration value from control vector and also computes the cost and constraints.
+   * It extracts the acceleration value from control vector and also computes
+   * the cost and constraints.
    *
    * @param[in] data  Free inverse-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
-   * VectorXs>& x)
-   */
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
-
-  /**
-   * @brief Compute the derivatives of the dynamics, cost and constraint functions
-   *
-   * It computes the partial derivatives of the dynamical system and the cost and contraint functions.
-   * It assumes that `calc()` has been run first. This function builds a quadratic approximation of the
-   * time-continuous action model (i.e., dynamical system, cost and constraint functions).
-   *
-   * @param[in] data  Free inverse-dynamics data
-   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
-   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
-   */
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
-
-  /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * @brief @copydoc Base::calc(const
+   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
+
+  /**
+   * @brief Compute the derivatives of the dynamics, cost and constraint
+   * functions
+   *
+   * It computes the partial derivatives of the dynamical system and the cost
+   * and contraint functions. It assumes that `calc()` has been run first. This
+   * function builds a quadratic approximation of the time-continuous action
+   * model (i.e., dynamical system, cost and constraint functions).
+   *
+   * @param[in] data  Free inverse-dynamics data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+
+  /**
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
+   */
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the free inverse-dynamics data
@@ -128,15 +144,18 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
 
   /**
-   * @brief Checks that a specific data belongs to the free inverse-dynamics model
+   * @brief Checks that a specific data belongs to the free inverse-dynamics
+   * model
    */
-  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+  virtual bool checkData(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
    *
-   * The quasic static commands are the ones produced for a reference posture as an equilibrium point with zero
-   * acceleration, i.e., for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   * The quasic static commands are the ones produced for a reference posture as
+   * an equilibrium point with zero acceleration, i.e., for
+   * \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
    * @param[in] data     Free inverse-dynamics data
    * @param[out] u       Quasic-static commands
@@ -144,9 +163,10 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
    * @param[in] maxiter  Maximum allowed number of iterations (default 100)
    * @param[in] tol      Tolerance (default 1e-9)
    */
-  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
-                           const Scalar tol = Scalar(1e-9));
+  virtual void quasiStatic(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
   /**
    * @brief Return the number of inequality constraints
@@ -214,12 +234,12 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
   /**
    * @brief Actuation residual
    *
-   * This residual function enforces the torques of under-actuated joints (e.g., floating-base joints) to be zero.
-   * We compute these torques and their derivatives using RNEA inside
-   * `DifferentialActionModelFreeInvDynamicsTpl`.
+   * This residual function enforces the torques of under-actuated joints (e.g.,
+   * floating-base joints) to be zero. We compute these torques and their
+   * derivatives using RNEA inside `DifferentialActionModelFreeInvDynamicsTpl`.
    *
-   * As described in `ResidualModelAbstractTpl`, the residual value and its Jacobians are calculated by `calc` and
-   * `calcDiff`, respectively.
+   * As described in `ResidualModelAbstractTpl`, the residual value and its
+   * Jacobians are calculated by `calc` and `calcDiff`, respectively.
    *
    * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
    */
@@ -243,8 +263,10 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
      * @param[in] state  State of the multibody system
      * @param[in] nu     Dimension of the joint torques
      */
-    ResidualModelActuation(boost::shared_ptr<StateMultibody> state, const std::size_t nu)
-        : Base(state, state->get_nv() - nu, state->get_nv(), true, true, true), na_(nu) {}
+    ResidualModelActuation(boost::shared_ptr<StateMultibody> state,
+                           const std::size_t nu)
+        : Base(state, state->get_nv() - nu, state->get_nv(), true, true, true),
+          na_(nu) {}
     virtual ~ResidualModelActuation() {}
 
     /**
@@ -254,12 +276,15 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                      const Eigen::Ref<const VectorXs>&,
                       const Eigen::Ref<const VectorXs>&) {
-      typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
+      typename Data::ResidualDataActuation* d =
+          static_cast<typename Data::ResidualDataActuation*>(data.get());
       // Update the under-actuation set and residual
       std::size_t nrow = 0;
-      for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
+      for (std::size_t k = 0;
+           k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
         if (!d->actuation->tau_set[k]) {
           data->r(nrow) = d->pinocchio->tau(k);
           nrow += 1;
@@ -268,10 +293,11 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     }
 
     /**
-     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
-     * VectorXs>& x)
+     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+     * data, const Eigen::Ref<const VectorXs>& x)
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                      const Eigen::Ref<const VectorXs>&) {
       data->r.setZero();
     }
 
@@ -282,15 +308,18 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&,
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                          const Eigen::Ref<const VectorXs>&,
                           const Eigen::Ref<const VectorXs>&) {
-      typename Data::ResidualDataActuation* d = static_cast<typename Data::ResidualDataActuation*>(data.get());
+      typename Data::ResidualDataActuation* d =
+          static_cast<typename Data::ResidualDataActuation*>(data.get());
       std::size_t nrow = 0;
       const std::size_t nv = state_->get_nv();
       d->dtau_dx.leftCols(nv) = d->pinocchio->dtau_dq;
       d->dtau_dx.rightCols(nv) = d->pinocchio->dtau_dv;
       d->dtau_dx -= d->actuation->dtau_dx;
-      for (std::size_t k = 0; k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
+      for (std::size_t k = 0;
+           k < static_cast<std::size_t>(d->actuation->tau_set.size()); ++k) {
         if (!d->actuation->tau_set[k]) {
           d->Rx.row(nrow) = d->dtau_dx.row(k);
           d->Ru.row(nrow) = d->pinocchio->M.row(k);
@@ -300,10 +329,12 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
     }
 
     /**
-     * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * @brief @copydoc Base::calcDiff(const
+     * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
      * VectorXs>& x)
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&) {
+    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                          const Eigen::Ref<const VectorXs>&) {
       data->Rx.setZero();
       data->Ru.setZero();
     }
@@ -313,9 +344,11 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
      *
      * @return Actuation residual data
      */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data) {
+    virtual boost::shared_ptr<ResidualDataAbstract> createData(
+        DataCollectorAbstract* const data) {
       return boost::allocate_shared<typename Data::ResidualDataActuation>(
-          Eigen::aligned_allocator<typename Data::ResidualDataActuation>(), this, data);
+          Eigen::aligned_allocator<typename Data::ResidualDataActuation>(),
+          this, data);
     }
 
     /**
@@ -324,8 +357,9 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
      * @param[out] os  Output stream object
      */
     virtual void print(std::ostream& os) const {
-      os << "ResidualModelActuation {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx() << ", nu=" << nu_
-         << ", na=" << na_ << "}";
+      os << "ResidualModelActuation {nx=" << state_->get_nx()
+         << ", ndx=" << state_->get_ndx() << ", nu=" << nu_ << ", na=" << na_
+         << "}";
     }
 
    protected:
@@ -336,13 +370,15 @@ class DifferentialActionModelFreeInvDynamicsTpl : public DifferentialActionModel
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataFreeInvDynamicsTpl
+    : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
   typedef JointDataAbstractTpl<Scalar> JointDataAbstract;
-  typedef DataCollectorJointActMultibodyTpl<Scalar> DataCollectorJointActMultibody;
+  typedef DataCollectorJointActMultibodyTpl<Scalar>
+      DataCollectorJointActMultibody;
   typedef CostDataSumTpl<Scalar> CostDataSum;
   typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef typename MathBase::VectorXs VectorXs;
@@ -351,8 +387,10 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
   explicit DifferentialActionDataFreeInvDynamicsTpl(Model<Scalar>* const model)
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
-        multibody(&pinocchio, model->get_actuation()->createData(),
-                  boost::make_shared<JointDataAbstract>(model->get_state(), model->get_actuation(), model->get_nu())),
+        multibody(
+            &pinocchio, model->get_actuation()->createData(),
+            boost::make_shared<JointDataAbstract>(
+                model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         constraints(model->get_constraints()->createData(&multibody)),
         tmp_xstatic(model->get_state()->get_nx()) {
@@ -368,7 +406,8 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
   DataCollectorJointActMultibody multibody;              //!< Multibody data
   boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
   boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
-  VectorXs tmp_xstatic;                                  //!< State point used for computing the quasi-static input
+  VectorXs
+      tmp_xstatic;  //!< State point used for computing the quasi-static input
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
@@ -392,13 +431,18 @@ struct DifferentialActionDataFreeInvDynamicsTpl : public DifferentialActionDataA
     typedef typename MathBase::MatrixXs MatrixXs;
 
     template <template <typename Scalar> class Model>
-    ResidualDataActuation(Model<Scalar>* const model, DataCollectorAbstract* const data)
-        : Base(model, data), dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()) {
+    ResidualDataActuation(Model<Scalar>* const model,
+                          DataCollectorAbstract* const data)
+        : Base(model, data),
+          dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()) {
       dtau_dx.setZero();
       // Check that proper shared data has been passed
-      DataCollectorActMultibody* d = dynamic_cast<DataCollectorActMultibody*>(shared);
+      DataCollectorActMultibody* d =
+          dynamic_cast<DataCollectorActMultibody*>(shared);
       if (d == NULL) {
-        throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibody");
+        throw_pretty(
+            "Invalid argument: the shared data should be derived from "
+            "DataCollectorActMultibody");
       }
 
       // Avoids data casting at runtime

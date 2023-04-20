@@ -12,8 +12,8 @@
 #include <Eigen/Cholesky>
 #include <vector>
 
-#include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/box-qp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 
 namespace crocoddyl {
 

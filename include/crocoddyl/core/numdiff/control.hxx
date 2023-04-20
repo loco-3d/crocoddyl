@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh, New York
+// University,
 //                          Heriot-Watt University
 // Max Planck Gesellschaft, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
@@ -13,26 +14,28 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelNumDiffTpl<Scalar>::ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model)
+ControlParametrizationModelNumDiffTpl<Scalar>::
+    ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model)
     : Base(model->get_nw(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
-ControlParametrizationModelNumDiffTpl<Scalar>::~ControlParametrizationModelNumDiffTpl() {}
+ControlParametrizationModelNumDiffTpl<
+    Scalar>::~ControlParametrizationModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
-    const Eigen::Ref<const VectorXs>& u) const {
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, t, u);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
-    const Eigen::Ref<const VectorXs>& u) const {
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   data->w = data_nd->data_0->w;
 
@@ -55,24 +58,26 @@ ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Scalar t,
-    const Eigen::Ref<const VectorXs>& w) const {
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const Scalar t, const Eigen::Ref<const VectorXs>& w) const {
   model_->params(data, t, w);
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
-                                                                  const Eigen::Ref<const VectorXs>& w_ub,
-                                                                  Eigen::Ref<VectorXs> u_lb,
-                                                                  Eigen::Ref<VectorXs> u_ub) const {
+void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(
+    const Eigen::Ref<const VectorXs>& w_lb,
+    const Eigen::Ref<const VectorXs>& w_ub, Eigen::Ref<VectorXs> u_lb,
+    Eigen::Ref<VectorXs> u_ub) const {
   model_->convertBounds(w_lb, w_ub, u_lb, u_ub);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
-  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+    const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op),
+                ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   MatrixXs J(nw_, nu_);
   switch (op) {
     case setto:
@@ -92,9 +97,11 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data, const Eigen::Ref<const MatrixXs>& A,
-    Eigen::Ref<MatrixXs> out, const AssignmentOp op) const {
-  assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
+    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
+    const AssignmentOp op) const {
+  assert_pretty(is_a_AssignmentOp(op),
+                ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   MatrixXs J(nw_, nu_);
   switch (op) {
     case setto:
@@ -119,12 +126,14 @@ ControlParametrizationModelNumDiffTpl<Scalar>::get_model() const {
 }
 
 template <typename Scalar>
-const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance() const {
+const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance()
+    const {
   return e_jac_;
 }
 
 template <typename Scalar>
-void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
+void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(
+    const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance constant is positive");

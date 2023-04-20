@@ -20,8 +20,9 @@ class set_indexing_suite;
 namespace detail {
 template <typename Container, bool NoProxy>
 class final_set_derived_policies
-    : public crocoddyl::python::set_indexing_suite<Container, NoProxy,
-                                                   final_set_derived_policies<Container, NoProxy> > {};
+    : public crocoddyl::python::set_indexing_suite<
+          Container, NoProxy, final_set_derived_policies<Container, NoProxy> > {
+};
 }  // namespace detail
 
 // The set_indexing_suite class is a predefined indexing_suite derived
@@ -41,9 +42,14 @@ class final_set_derived_policies
 // disabled by supplying *true* in the NoProxy template parameter.
 //
 template <typename Container, bool NoProxy = false,
-          typename DerivedPolicies = detail::final_set_derived_policies<Container, NoProxy> >
-class set_indexing_suite : public boost::python::vector_indexing_suite<Container, NoProxy, DerivedPolicies> {
-  typedef boost::python::vector_indexing_suite<Container, NoProxy, DerivedPolicies> base;
+          typename DerivedPolicies =
+              detail::final_set_derived_policies<Container, NoProxy> >
+class set_indexing_suite
+    : public boost::python::vector_indexing_suite<Container, NoProxy,
+                                                  DerivedPolicies> {
+  typedef boost::python::vector_indexing_suite<Container, NoProxy,
+                                               DerivedPolicies>
+      base;
 
  public:
   typedef typename base::data_type data_type;
@@ -58,11 +64,17 @@ class set_indexing_suite : public boost::python::vector_indexing_suite<Container
         .def("clear", &DerivedPolicies::clear);
   }
 
-  static bool contains(Container& container, key_type const& key) { return container.find(key) != container.end(); }
+  static bool contains(Container& container, key_type const& key) {
+    return container.find(key) != container.end();
+  }
 
-  static void add(Container& container, data_type const& v) { container.insert(v); }
+  static void add(Container& container, data_type const& v) {
+    container.insert(v);
+  }
 
-  static void discard(Container& container, data_type const& v) { container.erase(v); }
+  static void discard(Container& container, data_type const& v) {
+    container.erase(v);
+  }
 
   static void remove(Container& container, data_type const& v) {
     if (!container.erase(v)) {
@@ -73,27 +85,37 @@ class set_indexing_suite : public boost::python::vector_indexing_suite<Container
 
   static void clear(Container& container) { container.clear(); }
 
-  static data_type get_item(Container& container, index_type i) { return *std::next(container.begin(), i); }
+  static data_type get_item(Container& container, index_type i) {
+    return *std::next(container.begin(), i);
+  }
 
-  static void set_item(Container&, index_type, data_type const&) { not_supported(); }
+  static void set_item(Container&, index_type, data_type const&) {
+    not_supported();
+  }
 
-  static void delete_item(Container& container, index_type i) { container.erase(advance(container.begin(), i)); }
+  static void delete_item(Container& container, index_type i) {
+    container.erase(advance(container.begin(), i));
+  }
 
-  static boost::python::object get_slice(Container& container, index_type from, index_type to) {
+  static boost::python::object get_slice(Container& container, index_type from,
+                                         index_type to) {
     if (from > to) return boost::python::object(Container());
 
     auto s = slice(container, from, to);
     return boost::python::object(Container(s.first, s.second));
   }
 
-  static void set_slice(Container&, index_type, index_type, data_type const&) { not_supported(); }
+  static void set_slice(Container&, index_type, index_type, data_type const&) {
+    not_supported();
+  }
 
   template <typename Iter>
   static void set_slice(Container&, index_type, index_type, Iter, Iter) {
     not_supported();
   }
 
-  static void delete_slice(Container& container, index_type from, index_type to) {
+  static void delete_slice(Container& container, index_type from,
+                           index_type to) {
     if (to >= from) {
       auto s = slice(container, from, to);
       container.erase(s.first, s.second);
@@ -101,12 +123,13 @@ class set_indexing_suite : public boost::python::vector_indexing_suite<Container
   }
 
  private:
-  static typename Container::iterator advance(typename Container::iterator it, typename Container::difference_type i) {
+  static typename Container::iterator advance(
+      typename Container::iterator it, typename Container::difference_type i) {
     return std::advance(it, i), it;
   }
 
-  static std::pair<typename Container::iterator, typename Container::iterator> slice(Container& container,
-                                                                                     index_type from, index_type to) {
+  static std::pair<typename Container::iterator, typename Container::iterator>
+  slice(Container& container, index_type from, index_type to) {
     BOOST_ASSERT(to >= from);
     std::pair<typename Container::iterator, typename Container::iterator> s;
     s.first = container.begin();
@@ -135,7 +158,8 @@ class set_indexing_suite : public boost::python::vector_indexing_suite<Container
   }
 
   static void not_supported() {
-    PyErr_SetString(PyExc_TypeError, "__setitem__ not supported for set object");
+    PyErr_SetString(PyExc_TypeError,
+                    "__setitem__ not supported for set object");
     boost::python::throw_error_already_set();
   }
 };

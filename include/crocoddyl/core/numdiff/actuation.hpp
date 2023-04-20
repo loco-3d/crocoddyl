@@ -10,20 +10,22 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {
 
 /**
- * @brief This class computes the numerical differentiation of an actuation model.
+ * @brief This class computes the numerical differentiation of an actuation
+ * model.
  *
- * It computes the Jacobian of the residual model via numerical differentiation, i.e.,
- * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{x}}\f$ and
- * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{u}}\f$ which denote the Jacobians of the actuation function
+ * It computes the Jacobian of the residual model via numerical differentiation,
+ * i.e., \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{x}}\f$ and
+ * \f$\frac{\partial\boldsymbol{\tau}}{\partial\mathbf{u}}\f$ which denote the
+ * Jacobians of the actuation function
  * \f$\boldsymbol{\tau}(\mathbf{x},\mathbf{u})\f$.
  *
  * \sa `ActuationModelAbstractTpl()`, `calcDiff()`
@@ -42,7 +44,8 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff residual model
    *
-   * @param model  Actuation model that we want to apply the numerical differentiation
+   * @param model  Actuation model that we want to apply the numerical
+   * differentiation
    */
   explicit ActuationModelNumDiffTpl(boost::shared_ptr<Base> model);
 
@@ -54,31 +57,37 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ActuationDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::commands()
    */
-  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& tau);
 
   /**
@@ -92,18 +101,22 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used by the numerical differentiation routine
+   * @brief Return the disturbance constant used by the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used by the numerical differentiation routine
+   * @brief Modify the disturbance constant used by the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the numerical differentiation
-  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
+  boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the
+                                   //!< numerical differentiation
+  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
+                  //!< calculation
 
  protected:
   using Base::nu_;
@@ -144,15 +157,20 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
     }
   }
 
-  Scalar x_norm;                   //!< Norm of the state vector
-  Scalar xh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
-  Scalar uh_jac;                   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  VectorXs dx;                     //!< State disturbance
-  VectorXs du;                     //!< Control disturbance
-  VectorXs xp;                     //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$"
+  Scalar x_norm;  //!< Norm of the state vector
+  Scalar
+      xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar
+      uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  VectorXs dx;  //!< State disturbance
+  VectorXs du;  //!< Control disturbance
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
+                //!< \int x dx_i \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation
+  std::vector<boost::shared_ptr<Base> >
+      data_x;  //!< The temporary data associated with the state variation
+  std::vector<boost::shared_ptr<Base> >
+      data_u;  //!< The temporary data associated with the control variation
 
   using Base::dtau_du;
   using Base::dtau_dx;

@@ -10,12 +10,12 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 
-#include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/multibody/contact-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
@@ -39,8 +39,8 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the 6d contact model
    *
-   * To learn more about the computation of the contact derivatives in different frames see
-   * https://hal.science/hal-03758989/document.
+   * To learn more about the computation of the contact derivatives in different
+   * frames see https://hal.science/hal-03758989/document.
    *
    * @param[in] state  State of the multibody system
    * @param[in] id     Reference frame id of the contact
@@ -49,15 +49,17 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const pinocchio::FrameIndex id, const SE3& pref,
                     const pinocchio::ReferenceFrame type, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
 
   /**
    * @brief Initialize the 6d contact model
    *
-   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`. To learn more about the computation of the contact
-   * derivatives in different frames see https://hal.science/hal-03758989/document.
+   * The default `nu` is obtained from `StateAbstractTpl::get_nv()`. To learn
+   * more about the computation of the contact derivatives in different frames
+   * see https://hal.science/hal-03758989/document.
    *
    * @param[in] state  State of the multibody system
    * @param[in] id     Reference frame id of the contact
@@ -65,15 +67,24 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] type   Type of contact
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const SE3& pref,
-                    const pinocchio::ReferenceFrame type, const Vector2s& gains = Vector2s::Zero());
+  ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                    const pinocchio::FrameIndex id, const SE3& pref,
+                    const pinocchio::ReferenceFrame type,
+                    const Vector2s& gains = Vector2s::Zero());
 
-  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
-             ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                               const SE3& pref, const std::size_t nu, const Vector2s& gains = Vector2s::Zero());)
-  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
-             ContactModel6DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                               const SE3& pref, const Vector2s& gains = Vector2s::Zero());)
+  DEPRECATED(
+      "Use constructor that passes the type type of contact, this assumes is "
+      "pinocchio::LOCAL",
+      ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                        const pinocchio::FrameIndex id, const SE3& pref,
+                        const std::size_t nu,
+                        const Vector2s& gains = Vector2s::Zero());)
+  DEPRECATED(
+      "Use constructor that passes the type type of contact, this assumes is "
+      "pinocchio::LOCAL",
+      ContactModel6DTpl(boost::shared_ptr<StateMultibody> state,
+                        const pinocchio::FrameIndex id, const SE3& pref,
+                        const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel6DTpl();
 
   /**
@@ -83,7 +94,8 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the 6d contact holonomic constraint
@@ -92,7 +104,8 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -100,12 +113,14 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] data   6d contact data
    * @param[in] force  6d force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force);
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                           const VectorXs& force);
 
   /**
    * @brief Create the 6d contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual boost::shared_ptr<ContactDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the reference frame placement
@@ -157,7 +172,8 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   typedef typename pinocchio::ForceTpl<Scalar> Force;
 
   template <template <typename Scalar> class Model>
-  ContactData6DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+  ContactData6DTpl(Model<Scalar>* const model,
+                   pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         rMf(SE3::Identity()),
         lwaMl(SE3::Identity()),

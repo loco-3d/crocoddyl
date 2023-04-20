@@ -1,11 +1,15 @@
-import crocoddyl
 import numpy as np
+
+import crocoddyl
 
 
 class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
-
     def __init__(self, state, activation, nu):
-        activation = activation if activation is not None else crocoddyl.ActivationModelQuad(state.ndx)
+        activation = (
+            activation
+            if activation is not None
+            else crocoddyl.ActivationModelQuad(state.ndx)
+        )
         crocoddyl.CostModelAbstract.__init__(self, state, activation, nu=nu)
 
     def calc(self, data, x, u):
@@ -37,14 +41,12 @@ class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
 
 
 class CostDataDoublePendulum(crocoddyl.CostDataAbstract):
-
     def __init__(self, model, collector):
         crocoddyl.CostDataAbstract.__init__(self, model, collector)
         self.Rxx = np.zeros((6, 4))
 
 
 class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
-
     def __init__(self, state, actLink):
         crocoddyl.ActuationModelAbstract.__init__(self, state, 1)
         self.nv = state.nv
@@ -71,14 +73,13 @@ class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
 
 
 class ActuationDataDoublePendulum(crocoddyl.ActuationDataAbstract):
-
     def __init__(self, model):
         crocoddyl.ActuationDataAbstract.__init__(self, model)
         if model.actLink == 1:
-            self.dtau_du[0] = 1.
+            self.dtau_du[0] = 1.0
             self.tau_set = [True, False]
-            self.Mtau[0] = 1.
+            self.Mtau[0] = 1.0
         else:
-            self.dtau_du[1] = 1.
+            self.dtau_du[1] = 1.0
             self.tau_set = [False, True]
-            self.Mtau[1] = 1.
+            self.Mtau[1] = 1.0

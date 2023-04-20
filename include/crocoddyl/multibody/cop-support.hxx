@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+
 #include <iostream>
 
 namespace crocoddyl {
@@ -14,7 +15,8 @@ namespace crocoddyl {
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl()
     : R_(Matrix3s::Identity()),
-      box_(std::numeric_limits<Scalar>::infinity(), std::numeric_limits<Scalar>::infinity()) {
+      box_(std::numeric_limits<Scalar>::infinity(),
+           std::numeric_limits<Scalar>::infinity()) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
@@ -24,7 +26,8 @@ CoPSupportTpl<Scalar>::CoPSupportTpl()
 }
 
 template <typename Scalar>
-CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box) : R_(R), box_(box) {
+CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box)
+    : R_(R), box_(box) {
   A_.setZero();
   ub_.setZero();
   lb_.setZero();
@@ -35,11 +38,19 @@ CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box) : R
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl(const WrenchConeTpl<Scalar>& other)
-    : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
+    : A_(other.get_A()),
+      ub_(other.get_ub()),
+      lb_(other.get_lb()),
+      R_(other.get_R()),
+      box_(other.get_box()) {}
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl(const CoPSupportTpl<Scalar>& other)
-    : A_(other.get_A()), ub_(other.get_ub()), lb_(other.get_lb()), R_(other.get_R()), box_(other.get_box()) {}
+    : A_(other.get_A()),
+      ub_(other.get_ub()),
+      lb_(other.get_lb()),
+      R_(other.get_R()),
+      box_(other.get_box()) {}
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::~CoPSupportTpl() {}
@@ -67,27 +78,32 @@ void CoPSupportTpl<Scalar>::update() {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix46s& CoPSupportTpl<Scalar>::get_A() const {
+const typename MathBaseTpl<Scalar>::Matrix46s& CoPSupportTpl<Scalar>::get_A()
+    const {
   return A_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector4s& CoPSupportTpl<Scalar>::get_ub() const {
+const typename MathBaseTpl<Scalar>::Vector4s& CoPSupportTpl<Scalar>::get_ub()
+    const {
   return ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector4s& CoPSupportTpl<Scalar>::get_lb() const {
+const typename MathBaseTpl<Scalar>::Vector4s& CoPSupportTpl<Scalar>::get_lb()
+    const {
   return lb_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s& CoPSupportTpl<Scalar>::get_box() const {
+const typename MathBaseTpl<Scalar>::Vector2s& CoPSupportTpl<Scalar>::get_box()
+    const {
   return box_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix3s& CoPSupportTpl<Scalar>::get_R() const {
+const typename MathBaseTpl<Scalar>::Matrix3s& CoPSupportTpl<Scalar>::get_R()
+    const {
   return R_;
 }
 
@@ -101,16 +117,19 @@ void CoPSupportTpl<Scalar>::set_box(const Vector2s& box) {
   box_ = box;
   if (box_(0) < Scalar(0.)) {
     box_(0) = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: box(0) has to be a positive value, set to inf float" << std::endl;
+    std::cerr << "Warning: box(0) has to be a positive value, set to inf float"
+              << std::endl;
   }
   if (box_(1) < Scalar(0.)) {
     box_(1) = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: box(0) has to be a positive value, set to inf float" << std::endl;
+    std::cerr << "Warning: box(0) has to be a positive value, set to inf float"
+              << std::endl;
   }
 }
 
 template <typename Scalar>
-CoPSupportTpl<Scalar>& CoPSupportTpl<Scalar>::operator=(const CoPSupportTpl<Scalar>& other) {
+CoPSupportTpl<Scalar>& CoPSupportTpl<Scalar>::operator=(
+    const CoPSupportTpl<Scalar>& other) {
   if (this != &other) {
     A_ = other.get_A();
     ub_ = other.get_ub();

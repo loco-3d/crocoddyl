@@ -1,19 +1,23 @@
 import os
+import signal
 import sys
 import time
-import signal
+
+import example_robot_data
+import numpy as np
+from crocoddyl.utils.pendulum import (
+    ActuationModelDoublePendulum,
+    CostModelDoublePendulum,
+)
 
 import crocoddyl
-import numpy as np
-import example_robot_data
-from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoublePendulum
 
-WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
-WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
+WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the double pendulum model
-pendulum = example_robot_data.load('double_pendulum')
+pendulum = example_robot_data.load("double_pendulum")
 model = pendulum.model
 
 state = crocoddyl.StateMultibody(model)
@@ -28,45 +32,63 @@ xActivation = crocoddyl.ActivationModelQuad(state.ndx)
 uResidual = crocoddyl.ResidualModelControl(state, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
-xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(np.array([1.] * 4 + [0.1] * 2)), nu)
+xPendCost = CostModelDoublePendulum(
+    state, crocoddyl.ActivationModelWeightedQuad(np.array([1.0] * 4 + [0.1] * 2)), nu
+)
 
 dt = 1e-2
 
 runningCostModel.addCost("uReg", uRegCost, 1e-4 / dt)
 runningCostModel.addCost("xGoal", xPendCost, 1e-5 / dt)
-terminalCostModel.addCost("xGoal", xPendCost, 100.)
+terminalCostModel.addCost("xGoal", xPendCost, 100.0)
 
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(
+        state, actuation, runningCostModel
+    ),
+    dt,
+)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, terminalCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(
+        state, actuation, terminalCostModel
+    ),
+    dt,
+)
 
 # Creating the shooting problem and the FDDP solver
 T = 100
-x0 = np.array([3.14, 0., 0., 0.])
+x0 = np.array([3.14, 0.0, 0.0, 0.0])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverFDDP(problem)
 
-cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
+cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
 if WITHDISPLAY:
     try:
         import gepetto
+
         gepetto.corbaserver.Client()
         display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, floor=False)
         if WITHPLOT:
             solver.setCallbacks(
-                [crocoddyl.CallbackVerbose(),
-                 crocoddyl.CallbackLogger(),
-                 crocoddyl.CallbackDisplay(display)])
+                [
+                    crocoddyl.CallbackVerbose(),
+                    crocoddyl.CallbackLogger(),
+                    crocoddyl.CallbackDisplay(display),
+                ]
+            )
         else:
-            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
+            )
     except Exception:
         display = crocoddyl.MeshcatDisplay(pendulum)
 if WITHPLOT:
-    solver.setCallbacks([
-        crocoddyl.CallbackVerbose(),
-        crocoddyl.CallbackLogger(),
-    ])
+    solver.setCallbacks(
+        [
+            crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackLogger(),
+        ]
+    )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -79,7 +101,9 @@ solver.solve()
 if WITHPLOT:
     log = solver.getCallbacks()[1]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
+    crocoddyl.plotConvergence(
+        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2
+    )
 
 # Display the entire motion
 if WITHDISPLAY:

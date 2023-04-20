@@ -10,6 +10,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_UTILS_DEPRECATE_HPP_
 
 #include <Python.h>
+
 #include <boost/python.hpp>
 #include <string>
 
@@ -17,7 +18,8 @@ namespace crocoddyl {
 namespace python {
 template <class Policy = boost::python::default_call_policies>
 struct deprecated : Policy {
-  deprecated(const std::string& warning_message = "") : Policy(), m_warning_message(warning_message) {}
+  deprecated(const std::string& warning_message = "")
+      : Policy(), m_warning_message(warning_message) {}
 
   template <class ArgumentPackage>
   bool precall(ArgumentPackage const& args) const {

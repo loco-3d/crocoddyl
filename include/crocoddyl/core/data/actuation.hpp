@@ -11,9 +11,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/data-collector-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {
 
@@ -21,7 +21,8 @@ template <typename Scalar>
 struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  DataCollectorActuationTpl(boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
+  DataCollectorActuationTpl(
+      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
   virtual ~DataCollectorActuationTpl() {}
 

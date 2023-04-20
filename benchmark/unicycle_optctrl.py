@@ -1,10 +1,12 @@
-import crocoddyl
-from crocoddyl.utils import UnicycleModelDerived
-import numpy as np
 import os
+import subprocess
 import sys
 import time
-import subprocess
+
+import numpy as np
+
+import crocoddyl
+from crocoddyl.utils import UnicycleModelDerived
 
 N = 200  # number of nodes
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
@@ -13,11 +15,11 @@ CALLBACKS = False
 
 
 def createProblem(model):
-    x0 = np.matrix([[1.], [0.], [0.]])
+    x0 = np.matrix([[1.0], [0.0], [0.0]])
     runningModels = [model()] * N
     terminalModel = model()
     xs = [x0] * (N + 1)
-    us = [np.matrix([[0.], [0.]])] * N
+    us = [np.matrix([[0.0], [0.0]])] * N
 
     problem = crocoddyl.ShootingProblem(x0, runningModels, terminalModel)
     return xs, us, problem
@@ -68,25 +70,55 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print('\033[1m')
-print('C++:')
-popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/unicycle-optctrl", str(T)])
+print("\033[1m")
+print("C++:")
+popen = subprocess.check_call(
+    [os.path.dirname(os.path.abspath(__file__)) + "/unicycle-optctrl", str(T)]
+)
 
-print('Python bindings:')
+print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.ActionModelUnicycle)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
 
-print('Python:')
+print("Python:")
 xs, us, problem = createProblem(UnicycleModelDerived)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-print('\033[0m')
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+print("\033[0m")

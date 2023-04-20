@@ -7,8 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/activation-base.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
@@ -21,24 +22,31 @@ void exposeActivationAbstract() {
   bp::class_<ActivationModelAbstract_wrap, boost::noncopyable>(
       "ActivationModelAbstract",
       "Abstract class for activation models.\n\n"
-      "In crocoddyl, an activation model takes the residual vector and computes the activation\n"
-      "value and its derivatives from it. Activation value and its derivatives are computed by\n"
+      "In crocoddyl, an activation model takes the residual vector and "
+      "computes the activation\n"
+      "value and its derivatives from it. Activation value and its derivatives "
+      "are computed by\n"
       "calc() and calcDiff(), respectively.",
       bp::init<int>(bp::args("self", "nr"),
                     "Initialize the activation model.\n\n"
                     ":param nr: dimension of the cost-residual vector"))
-      .def("calc", pure_virtual(&ActivationModelAbstract_wrap::calc), bp::args("self", "data", "r"),
+      .def("calc", pure_virtual(&ActivationModelAbstract_wrap::calc),
+           bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff), bp::args("self", "data", "r"),
+      .def("calcDiff", pure_virtual(&ActivationModelAbstract_wrap::calcDiff),
+           bp::args("self", "data", "r"),
            "Compute the derivatives of the residual.\n\n"
-           "It computes the partial derivatives of the residual vector function\n"
+           "It computes the partial derivatives of the residual vector "
+           "function\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
-      .def("createData", &ActivationModelAbstract_wrap::createData, &ActivationModelAbstract_wrap::default_createData,
-           bp::args("self"), "Create the activation data.\n\n")
-      .add_property("nr", bp::make_function(&ActivationModelAbstract_wrap::get_nr),
+      .def("createData", &ActivationModelAbstract_wrap::createData,
+           &ActivationModelAbstract_wrap::default_createData, bp::args("self"),
+           "Create the activation data.\n\n")
+      .add_property("nr",
+                    bp::make_function(&ActivationModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .def(CopyableVisitor<ActivationModelAbstract_wrap>())
       .def(PrintableVisitor<ActivationModelAbstract>());
@@ -47,16 +55,23 @@ void exposeActivationAbstract() {
 
   bp::class_<ActivationDataAbstract, boost::noncopyable>(
       "ActivationDataAbstract", "Abstract class for activation data.\n\n",
-      bp::init<ActivationModelAbstract*>(bp::args("self", "model"),
-                                         "Create common data shared between AMs.\n\n"
-                                         "The action data uses the model in order to first process it.\n"
-                                         ":param model: action model"))
-      .add_property("a_value",
-                    bp::make_getter(&ActivationDataAbstract::a_value, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
-      .add_property("Ar", bp::make_getter(&ActivationDataAbstract::Ar, bp::return_internal_reference<>()),
-                    bp::make_setter(&ActivationDataAbstract::Ar), "Jacobian of the residual")
-      .add_property("Arr", &ActivationDataAbstract::getHessianMatrix, &ActivationDataAbstract::setHessianMatrix,
+      bp::init<ActivationModelAbstract*>(
+          bp::args("self", "model"),
+          "Create common data shared between AMs.\n\n"
+          "The action data uses the model in order to first process it.\n"
+          ":param model: action model"))
+      .add_property(
+          "a_value",
+          bp::make_getter(&ActivationDataAbstract::a_value,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&ActivationDataAbstract::a_value), "cost value")
+      .add_property("Ar",
+                    bp::make_getter(&ActivationDataAbstract::Ar,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ActivationDataAbstract::Ar),
+                    "Jacobian of the residual")
+      .add_property("Arr", &ActivationDataAbstract::getHessianMatrix,
+                    &ActivationDataAbstract::setHessianMatrix,
                     "Hessian of the residual")
       .def(CopyableVisitor<ActivationDataAbstract>());
 }

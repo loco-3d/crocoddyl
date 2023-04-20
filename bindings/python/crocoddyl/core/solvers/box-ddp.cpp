@@ -7,9 +7,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/solvers/box-ddp.hpp"
+
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "crocoddyl/core/solvers/box-ddp.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -20,11 +21,15 @@ void exposeSolverBoxDDP() {
   bp::class_<SolverBoxDDP, bp::bases<SolverDDP> >(
       "SolverBoxDDP",
       "Box-constrained DDP solver.\n\n"
-      ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
-                                                    "Initialize the vector dimension.\n\n"
-                                                    ":param problem: shooting problem."))
-      .add_property("Quu_inv", make_function(&SolverBoxDDP::get_Quu_inv, bp::return_internal_reference<>()),
+      ":param shootingProblem: shooting problem (list of action models along "
+      "trajectory.)",
+      bp::init<boost::shared_ptr<ShootingProblem> >(
+          bp::args("self", "problem"),
+          "Initialize the vector dimension.\n\n"
+          ":param problem: shooting problem."))
+      .add_property("Quu_inv",
+                    make_function(&SolverBoxDDP::get_Quu_inv,
+                                  bp::return_internal_reference<>()),
                     "inverse of the Quu computed by the box QP")
       .def(CopyableVisitor<SolverBoxDDP>());
 }

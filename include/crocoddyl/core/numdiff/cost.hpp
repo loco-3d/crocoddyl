@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York University,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York
+// University,
 //                          Max Planck Gesellschaft,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -12,17 +13,20 @@
 #define CROCODDYL_CORE_NUMDIFF_COST_HPP_
 
 #include <boost/function.hpp>
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include "crocoddyl/core/cost-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief This class computes the numerical differentiation of a cost model.
  *
- * It computes the Jacobian and Hessian of the cost model via numerical differentiation, i.e., \f$\mathbf{\ell_x}\f$,
- * \f$\mathbf{\ell_u}\f$, \f$\mathbf{\ell_{xx}}\f$, \f$\mathbf{\ell_{uu}}\f$, and \f$\mathbf{\ell_{xu}}\f$ which denote
- * the Jacobians and Hessians of the cost function, respectively.
+ * It computes the Jacobian and Hessian of the cost model via numerical
+ * differentiation, i.e., \f$\mathbf{\ell_x}\f$, \f$\mathbf{\ell_u}\f$,
+ * \f$\mathbf{\ell_{xx}}\f$, \f$\mathbf{\ell_{uu}}\f$, and
+ * \f$\mathbf{\ell_{xu}}\f$ which denote the Jacobians and Hessians of the cost
+ * function, respectively.
  *
  * \sa `CostModelAbstractTpl()`, `calcDiff()`
  */
@@ -39,12 +43,14 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)>
+      ReevaluationFunction;
 
   /**
    * @brief Initialize the numdiff cost model
    *
-   * @param model  Cost model that we want to apply the numerical differentiation
+   * @param model  Cost model that we want to apply the numerical
+   * differentiation
    */
   explicit CostModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
@@ -56,25 +62,30 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<CostDataAbstract>& data,
+   * const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<CostDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create a numdiff cost data
@@ -82,7 +93,8 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @param data  Data collector used by the original model
    * @return the numdiff cost data
    */
-  virtual boost::shared_ptr<CostDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<CostDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the original cost model
@@ -90,12 +102,14 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used by the numerical differentiation routine
+   * @brief Return the disturbance constant used by the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used by the numerical differentiation routine
+   * @brief Modify the disturbance constant used by the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
@@ -108,8 +122,9 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   bool get_with_gauss_approx();
 
   /**
-   * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and Hessian.
+   * @brief Register functions that updates the shared data computed for a
+   * system rollout The updated data is used to evaluate of the gradient and
+   * Hessian.
    *
    * @param reevals are the registered functions.
    */
@@ -135,9 +150,12 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;              //!< Cost model hat we want to apply the numerical differentiation
-  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
-  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
+  boost::shared_ptr<Base> model_;  //!< Cost model hat we want to apply the
+                                   //!< numerical differentiation
+  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
+                  //!< calculation
+  std::vector<ReevaluationFunction>
+      reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>
@@ -158,7 +176,8 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
-  explicit CostDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
+  explicit CostDataNumDiffTpl(Model<Scalar>* const model,
+                              DataCollectorAbstract* const shared_data)
       : Base(model, shared_data),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()),
@@ -193,15 +212,21 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   using Base::shared;
 
   Scalar x_norm;  //!< Norm of the state vector
-  Scalar xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
-  Scalar uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  VectorXs dx;    //!< State disturbance.
-  VectorXs xp;    //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  VectorXs du;    //!< Control disturbance.
-  VectorXs up;    //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation.
+  Scalar
+      xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar
+      uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  VectorXs dx;  //!< State disturbance.
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
+                //!< \int x dx_i \f$".
+  VectorXs du;  //!< Control disturbance.
+  VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
+                //!< \int u du_i = u + du \f$".
+  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<boost::shared_ptr<Base> >
+      data_x;  //!< The temporary data associated with the state variation.
+  std::vector<boost::shared_ptr<Base> >
+      data_u;  //!< The temporary data associated with the control variation.
 };
 
 }  // namespace crocoddyl

@@ -9,12 +9,13 @@
 #ifndef CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 #define CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 
-#include <stdexcept>
 #include <math.h>
 
+#include <stdexcept>
+
+#include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/actuation/squashing-base.hpp"
 
 namespace crocoddyl {
 
@@ -29,7 +30,8 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   typedef SquashingDataAbstractTpl<Scalar> SquashingDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
-  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& u_lb, const Eigen::Ref<const VectorXs>& u_ub,
+  SquashingModelSmoothSatTpl(const Eigen::Ref<const VectorXs>& u_lb,
+                             const Eigen::Ref<const VectorXs>& u_ub,
                              const std::size_t ns)
       : Base(ns) {
     u_lb_ = u_lb;
@@ -46,19 +48,29 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
 
   virtual ~SquashingModelSmoothSatTpl(){};
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
+  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
-    // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u - ub)^2))
-    data->u =
-        Scalar(0.5) * (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
-                       Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) + u_lb_.array() + u_ub_.array());
+    // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u -
+    // ub)^2))
+    data->u = Scalar(0.5) *
+              (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
+               Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) +
+               u_lb_.array() + u_ub_.array());
   }
 
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) {
+  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& s) {
     data->du_ds.diagonal() =
         Scalar(0.5) *
-        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2), Scalar(-0.5)).array() * (s - u_lb_).array() -
-         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2), Scalar(-0.5)).array() * (s - u_ub_).array());
+        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2),
+                    Scalar(-0.5))
+                 .array() *
+             (s - u_lb_).array() -
+         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2),
+                    Scalar(-0.5))
+                 .array() *
+             (s - u_ub_).array());
   }
 
   const Scalar get_smooth() const { return smooth_; };

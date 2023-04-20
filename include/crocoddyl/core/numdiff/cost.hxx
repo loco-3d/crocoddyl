@@ -7,13 +7,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/cost.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(const boost::shared_ptr<Base>& model)
+CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(
+    const boost::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_activation(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -22,8 +23,9 @@ template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<CostDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
   d->data_0->cost = 0.0;
   model_->calc(d->data_0, x, u);
@@ -32,8 +34,9 @@ void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>& data,
-                                       const Eigen::Ref<const VectorXs>& x) {
+void CostModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<CostDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
   d->data_0->cost = 0.0;
   model_->calc(d->data_0, x);
@@ -42,8 +45,9 @@ void CostModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<CostDataAbstract>
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void CostModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<CostDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
   const Scalar c0 = d->cost;
@@ -106,8 +110,9 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x) {
+void CostModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<CostDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
   const Scalar c0 = d->cost;
@@ -146,13 +151,15 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<CostDataAbstr
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelNumDiffTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<CostDataAbstractTpl<Scalar> >
+CostModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelAbstractTpl<Scalar> >& CostModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<CostModelAbstractTpl<Scalar> >&
+CostModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -176,12 +183,14 @@ bool CostModelNumDiffTpl<Scalar>::get_with_gauss_approx() {
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+void CostModelNumDiffTpl<Scalar>::set_reevals(
+    const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void CostModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+void CostModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs>& /*x*/) {
   // do nothing in the general case
 }
 

@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/actions/unicycle.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 
 int main(int argc, char* argv[]) {
@@ -22,10 +22,12 @@ int main(int argc, char* argv[]) {
 
   // Creating the action models and warm point for the unicycle system
   Eigen::VectorXd x0 = Eigen::Vector3d(1., 0., 0.);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model = boost::make_shared<crocoddyl::ActionModelUnicycle>();
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      boost::make_shared<crocoddyl::ActionModelUnicycle>();
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::Vector2d::Zero());
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(N, model);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
+      N, model);
 
   // Formulating the optimal control problem
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
@@ -48,8 +50,8 @@ int main(int argc, char* argv[]) {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration
+            << "-" << max_duration << ")" << std::endl;
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
@@ -61,8 +63,8 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
@@ -74,6 +76,6 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
-            << ")" << std::endl;
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 }

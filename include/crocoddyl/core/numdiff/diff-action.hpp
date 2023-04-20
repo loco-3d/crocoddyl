@@ -11,36 +11,41 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "crocoddyl/core/diff-action-base.hpp"
 
 namespace crocoddyl {
 
 /**
- * @brief This class computes the numerical differentiation of a differential action model.
+ * @brief This class computes the numerical differentiation of a differential
+ * action model.
  *
- * It computes the Jacobian of the cost, its residual and dynamics via numerical differentiation.
- * It considers that the action model owns a cost residual and the cost is the square of this residual, i.e.,
- * \f$\ell(\mathbf{x},\mathbf{u})=\frac{1}{2}\|\mathbf{r}(\mathbf{x},\mathbf{u})\|^2\f$, where
- * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$ is the residual vector.  The Hessian is computed only through the
- * Gauss-Newton approximation, i.e.,
+ * It computes the Jacobian of the cost, its residual and dynamics via numerical
+ * differentiation. It considers that the action model owns a cost residual and
+ * the cost is the square of this residual, i.e.,
+ * \f$\ell(\mathbf{x},\mathbf{u})=\frac{1}{2}\|\mathbf{r}(\mathbf{x},\mathbf{u})\|^2\f$,
+ * where \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$ is the residual vector.  The
+ * Hessian is computed only through the Gauss-Newton approximation, i.e.,
  * \f{eqnarray*}{
  *     \mathbf{\ell}_\mathbf{xx} &=& \mathbf{R_x}^T\mathbf{R_x} \\
  *     \mathbf{\ell}_\mathbf{uu} &=& \mathbf{R_u}^T\mathbf{R_u} \\
  *     \mathbf{\ell}_\mathbf{xu} &=& \mathbf{R_x}^T\mathbf{R_u}
  * \f}
- * where the Jacobians of the cost residuals are denoted by \f$\mathbf{R_x}\f$ and \f$\mathbf{R_u}\f$.
- * Note that this approximation ignores the tensor products (e.g., \f$\mathbf{R_{xx}}\mathbf{r}\f$).
+ * where the Jacobians of the cost residuals are denoted by \f$\mathbf{R_x}\f$
+ * and \f$\mathbf{R_u}\f$. Note that this approximation ignores the tensor
+ * products (e.g., \f$\mathbf{R_{xx}}\mathbf{r}\f$).
  *
- * Finally, in the case that the cost does not have a residual, we set the Hessian to zero, i.e.,
- * \f$\mathbf{L_{xx}} = \mathbf{L_{xu}} = \mathbf{L_{uu}} = \mathbf{0}\f$.
+ * Finally, in the case that the cost does not have a residual, we set the
+ * Hessian to zero, i.e., \f$\mathbf{L_{xx}} = \mathbf{L_{xu}} = \mathbf{L_{uu}}
+ * = \mathbf{0}\f$.
  *
  * \sa `DifferentialActionModelAbstractTpl()`, `calcDiff()`
  */
 template <typename _Scalar>
-class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+class DifferentialActionModelNumDiffTpl
+    : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -48,44 +53,54 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataNumDiffTpl<Scalar> Data;
-  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the numdiff differential action model
    *
-   * @param[in] model              Differential action model that we want to apply the numerical differentiation
-   * @param[in] with_gauss_approx  True if we want to use the Gauss approximation for computing the Hessians
+   * @param[in] model              Differential action model that we want to
+   * apply the numerical differentiation
+   * @param[in] with_gauss_approx  True if we want to use the Gauss
+   * approximation for computing the Hessians
    */
-  explicit DifferentialActionModelNumDiffTpl(boost::shared_ptr<Base> model, const bool with_gauss_approx = false);
+  explicit DifferentialActionModelNumDiffTpl(
+      boost::shared_ptr<Base> model, const bool with_gauss_approx = false);
   virtual ~DifferentialActionModelNumDiffTpl();
 
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const
-   * VectorXs>& x)
+   * @brief @copydoc Base::calc(const
+   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::createData()
@@ -95,22 +110,26 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   /**
    * @brief @copydoc Base::quasiStatic()
    */
-  virtual void quasiStatic(const boost::shared_ptr<DifferentialActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
-                           const Scalar tol = Scalar(1e-9));
+  virtual void quasiStatic(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
   /**
-   * @brief Return the differential acton model that we use to numerical differentiate
+   * @brief Return the differential acton model that we use to numerical
+   * differentiate
    */
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used in the numerical differentiation routine
+   * @brief Return the disturbance constant used in the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used in the numerical differentiation routine
+   * @brief Modify the disturbance constant used in the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
@@ -127,7 +146,8 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   virtual void print(std::ostream& os) const;
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::has_control_limits_;  //!< Indicates whether any of the control
+                                    //!< limits
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Control dimension
   using Base::state_;               //!< Model of the state
@@ -139,12 +159,15 @@ class DifferentialActionModelNumDiffTpl : public DifferentialActionModelAbstract
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
   boost::shared_ptr<Base> model_;
   bool with_gauss_approx_;
-  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian calculation
-  Scalar e_hess_;  //!< Constant used for computing disturbances in Hessian calculation
+  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian
+                   //!< calculation
+  Scalar e_hess_;  //!< Constant used for computing disturbances in Hessian
+                   //!< calculation
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataNumDiffTpl
+    : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -162,7 +185,8 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
   template <template <typename Scalar> class Model>
   explicit DifferentialActionDataNumDiffTpl(Model<Scalar>* const model)
       : Base(model),
-        Rx(model->get_model()->get_nr(), model->get_model()->get_state()->get_ndx()),
+        Rx(model->get_model()->get_nr(),
+           model->get_model()->get_state()->get_ndx()),
         Ru(model->get_model()->get_nr(), model->get_model()->get_nu()),
         dx(model->get_model()->get_state()->get_ndx()),
         du(model->get_model()->get_nu()),
@@ -184,11 +208,15 @@ struct DifferentialActionDataNumDiffTpl : public DifferentialActionDataAbstractT
     }
   }
 
-  Scalar x_norm;   //!< Norm of the state vector
-  Scalar xh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
-  Scalar uh_jac;   //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  Scalar xh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{xx} \f$
-  Scalar uh_hess;  //!< Disturbance value used for computing \f$ \ell_\mathbf{uu} \f$
+  Scalar x_norm;  //!< Norm of the state vector
+  Scalar
+      xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar
+      uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  Scalar xh_hess;  //!< Disturbance value used for computing \f$
+                   //!< \ell_\mathbf{xx} \f$
+  Scalar uh_hess;  //!< Disturbance value used for computing \f$
+                   //!< \ell_\mathbf{uu} \f$
   Scalar xh_hess_pow2;
   Scalar uh_hess_pow2;
   Scalar xuh_hess_pow2;

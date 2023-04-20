@@ -10,7 +10,8 @@
 #define CROCODDYL_MULTIBODY_COST_BASE_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/cost-base.hpp", "crocoddyl/core/cost-base.hpp")
+CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/cost-base.hpp",
+                                   "crocoddyl/core/cost-base.hpp")
 #include "crocoddyl/core/cost-base.hpp"
 
 #endif

@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_
 
 #include <Eigen/Dense>
+
 #include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {

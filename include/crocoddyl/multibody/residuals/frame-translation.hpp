@@ -12,29 +12,32 @@
 
 #include <pinocchio/multibody/fwd.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Frame translation residual
  *
- * This residual function defines the tracking of a frame translation as \f$\mathbf{r}=\mathbf{t}-\mathbf{t}^*\f$,
- * where \f$\mathbf{t},\mathbf{t}^*\in~\mathbb{R}^3\f$ are the current and reference frame translations, respectively.
- * Note that the dimension of the residual vector is 3. Furthermore, the Jacobians of the residual function are
- * computed analytically.
+ * This residual function defines the tracking of a frame translation as
+ * \f$\mathbf{r}=\mathbf{t}-\mathbf{t}^*\f$, where
+ * \f$\mathbf{t},\mathbf{t}^*\in~\mathbb{R}^3\f$ are the current and reference
+ * frame translations, respectively. Note that the dimension of the residual
+ * vector is 3. Furthermore, the Jacobians of the residual function are computed
+ * analytically.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar> {
+class ResidualModelFrameTranslationTpl
+    : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -56,7 +59,8 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
    * @param[in] xref   Reference frame translation
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex,
+  ResidualModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
+                                   const pinocchio::FrameIndex,
                                    const Vector3s& xref, const std::size_t nu);
 
   /**
@@ -68,7 +72,8 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
    * @param[in] id     Reference frame id
    * @param[in] xref   Reference frame translation
    */
-  ResidualModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+  ResidualModelFrameTranslationTpl(boost::shared_ptr<StateMultibody> state,
+                                   const pinocchio::FrameIndex id,
                                    const Vector3s& xref);
   virtual ~ResidualModelFrameTranslationTpl();
 
@@ -79,7 +84,8 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -89,13 +95,15 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the frame translation residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the reference frame id
@@ -132,13 +140,15 @@ class ResidualModelFrameTranslationTpl : public ResidualModelAbstractTpl<_Scalar
   using Base::v_dependent_;
 
  private:
-  pinocchio::FrameIndex id_;                                              //!< Reference frame id
-  Vector3s xref_;                                                         //!< Reference frame translation
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  pinocchio::FrameIndex id_;  //!< Reference frame id
+  Vector3s xref_;             //!< Reference frame translation
+  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+      pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>
-struct ResidualDataFrameTranslationTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataFrameTranslationTpl
+    : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -148,13 +158,17 @@ struct ResidualDataFrameTranslationTpl : public ResidualDataAbstractTpl<_Scalar>
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  ResidualDataFrameTranslationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  ResidualDataFrameTranslationTpl(Model<Scalar>* const model,
+                                  DataCollectorAbstract* const data)
       : Base(model, data), fJf(6, model->get_state()->get_nv()) {
     fJf.setZero();
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorMultibodyTpl<Scalar>* d =
+        dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime

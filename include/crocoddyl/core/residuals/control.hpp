@@ -17,14 +17,16 @@ namespace crocoddyl {
 /**
  * @brief Define a control residual
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference control inputs, respectively. Note
- * that the dimension of the residual vector is obtained from `nu`.
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and
+ * reference control inputs, respectively. Note that the dimension of the
+ * residual vector is obtained from `nu`.
  *
  * Both residual and residual Jacobians are computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in ResidualModelAbstractTpl(), the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -49,7 +51,8 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] uref   Reference control input
    */
-  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& uref);
+  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                          const VectorXs& uref);
 
   /**
    * @brief Initialize the control residual model
@@ -59,16 +62,19 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
+  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                          const std::size_t nu);
 
   /**
    * @brief Initialize the control residual model
    *
-   * The default reference control is obtained from `MathBaseTpl<>::VectorXs::Zero(nu)`.
+   * The default reference control is obtained from
+   * `MathBaseTpl<>::VectorXs::Zero(nu)`.
    *
    * @param[in] state  State of the multibody system
    */
-  explicit ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state);
+  explicit ResidualModelControlTpl(
+      boost::shared_ptr<typename Base::StateAbstract> state);
   virtual ~ResidualModelControlTpl();
 
   /**
@@ -78,14 +84,16 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the control residual
@@ -94,13 +102,15 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the control residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the reference control vector

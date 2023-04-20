@@ -9,9 +9,10 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_
 
-#include <vector>
-#include <Eigen/Dense>
 #include <Eigen/Cholesky>
+#include <Eigen/Dense>
+#include <vector>
+
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -41,7 +42,8 @@ struct BoxQPSolution {
    * @param[in] free_idx     Free space indexes
    * @param[in] clamped_idx  Clamped space indexes
    */
-  BoxQPSolution(const Eigen::MatrixXd& Hff_inv, const Eigen::VectorXd& x, const std::vector<size_t>& free_idx,
+  BoxQPSolution(const Eigen::MatrixXd& Hff_inv, const Eigen::VectorXd& x,
+                const std::vector<size_t>& free_idx,
                 const std::vector<size_t>& clamped_idx)
       : Hff_inv(Hff_inv), x(x), free_idx(free_idx), clamped_idx(clamped_idx) {}
 
@@ -52,15 +54,17 @@ struct BoxQPSolution {
 };
 
 /**
- * @brief This class implements a Box QP solver based on a Projected Newton method.
+ * @brief This class implements a Box QP solver based on a Projected Newton
+ * method.
  *
  * We consider a box QP problem of the form:
  * \f{eqnarray*}{
- *   \min_{\mathbf{x}} &= \frac{1}{2}\mathbf{x}^T\mathbf{H}\mathbf{x} + \mathbf{q}^T\mathbf{x} \\
- *   \textrm{subject to} & \hspace{1em} \mathbf{\underline{b}} \leq \mathbf{x} \leq \mathbf{\bar{b}} \\
- * \f}
- * where \f$\mathbf{H}\f$, \f$\mathbf{q}\f$ are the Hessian and gradient of the problem,
- * respectively, \f$\mathbf{\underline{b}}\f$, \f$\mathbf{\bar{b}}\f$ are lower and upper
+ *   \min_{\mathbf{x}} &= \frac{1}{2}\mathbf{x}^T\mathbf{H}\mathbf{x} +
+ * \mathbf{q}^T\mathbf{x} \\
+ *   \textrm{subject to} & \hspace{1em} \mathbf{\underline{b}} \leq \mathbf{x}
+ * \leq \mathbf{\bar{b}} \\ \f} where \f$\mathbf{H}\f$, \f$\mathbf{q}\f$ are the
+ * Hessian and gradient of the problem, respectively,
+ * \f$\mathbf{\underline{b}}\f$, \f$\mathbf{\bar{b}}\f$ are lower and upper
  * bounds of the decision variable \f$\mathbf{x}\f$.
  *
  * The algorithm procees by iteratively identifying the active bounds, and then
@@ -83,20 +87,23 @@ class BoxQP {
    * @brief Initialize the Projected-Newton QP for bound constraints
    *
    * @param[in] nx             Dimension of the decision vector
-   * @param[in] maxiter        Maximum number of allowed iterations (default 100)
+   * @param[in] maxiter        Maximum number of allowed iterations (default
+   * 100)
    * @param[in] th_acceptstep  Acceptance step threshold (default 0.1)
    * @param[in] th_grad        Gradient tolerance threshold (default 1e-9)
    * @param[in] reg            Regularization value (default 1e-9)
    */
-  BoxQP(const std::size_t nx, const std::size_t maxiter = 100, const double th_acceptstep = 0.1,
-        const double th_grad = 1e-9, const double reg = 1e-9);
+  BoxQP(const std::size_t nx, const std::size_t maxiter = 100,
+        const double th_acceptstep = 0.1, const double th_grad = 1e-9,
+        const double reg = 1e-9);
   /**
    * @brief Destroy the Projected-Newton QP solver
    */
   ~BoxQP();
 
   /**
-   * @brief Compute the solution of bound-constrained QP based on Newton projection
+   * @brief Compute the solution of bound-constrained QP based on Newton
+   * projection
    *
    * @param[in] H      Hessian (dimension nx * nx)
    * @param[in] q      Gradient (dimension nx)
@@ -105,8 +112,10 @@ class BoxQP {
    * @param[in] xinit  Initial guess (dimension nx)
    * @return The solution of the problem
    */
-  const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& lb,
-                             const Eigen::VectorXd& ub, const Eigen::VectorXd& xinit);
+  const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                             const Eigen::VectorXd& lb,
+                             const Eigen::VectorXd& ub,
+                             const Eigen::VectorXd& xinit);
 
   /**
    * @brief Return the stored solution
@@ -178,23 +187,27 @@ class BoxQP {
   BoxQPSolution solution_;  //!< Solution of the Box QP
   std::size_t maxiter_;     //!< Allowed maximum number of iterations
   double th_acceptstep_;    //!< Threshold used for accepting step
-  double th_grad_;          //!< Tolerance for stopping the algorithm (gradient threshold)
-  double reg_;              //!< Current regularization value
+  double
+      th_grad_;  //!< Tolerance for stopping the algorithm (gradient threshold)
+  double reg_;   //!< Current regularization value
 
-  double fold_;                 //!< Cost of previous iteration
-  double fnew_;                 //!< Cost of current iteration
-  std::size_t nf_;              //!< Free space dimension
-  std::size_t nc_;              //!< Constrained space dimension
-  std::vector<double> alphas_;  //!< Set of step lengths using by the line-search procedure
-  Eigen::VectorXd x_;           //!< Guess of the decision variable
-  Eigen::VectorXd xnew_;        //!< New decision vector
-  Eigen::VectorXd g_;           //!< Current gradient
-  Eigen::VectorXd dx_;          //!< Current search direction
+  double fold_;     //!< Cost of previous iteration
+  double fnew_;     //!< Cost of current iteration
+  std::size_t nf_;  //!< Free space dimension
+  std::size_t nc_;  //!< Constrained space dimension
+  std::vector<double>
+      alphas_;  //!< Set of step lengths using by the line-search procedure
+  Eigen::VectorXd x_;     //!< Guess of the decision variable
+  Eigen::VectorXd xnew_;  //!< New decision vector
+  Eigen::VectorXd g_;     //!< Current gradient
+  Eigen::VectorXd dx_;    //!< Current search direction
 
-  Eigen::VectorXd xo_;   //!< Organized decision
-  Eigen::VectorXd dxo_;  //!< Search direction organized by free and constrained subspaces
-  Eigen::VectorXd qo_;   //!< Gradient organized by free and constrained subspaces
-  Eigen::MatrixXd Ho_;   //!< Hessian organized by free and constrained subspaces
+  Eigen::VectorXd xo_;  //!< Organized decision
+  Eigen::VectorXd
+      dxo_;  //!< Search direction organized by free and constrained subspaces
+  Eigen::VectorXd
+      qo_;  //!< Gradient organized by free and constrained subspaces
+  Eigen::MatrixXd Ho_;  //!< Hessian organized by free and constrained subspaces
 
   Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;  //!< Cholesky solver
 };

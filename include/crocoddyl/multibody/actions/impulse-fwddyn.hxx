@@ -11,8 +11,10 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff, const Scalar JMinvJt_damping, const bool enable_force)
+    boost::shared_ptr<StateMultibody> state,
+    boost::shared_ptr<ImpulseModelMultiple> impulses,
+    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff,
+    const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr(), 0, 0),
       impulses_(impulses),
       costs_(costs),
@@ -29,10 +31,13 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
 
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state, boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
+    boost::shared_ptr<StateMultibody> state,
+    boost::shared_ptr<ImpulseModelMultiple> impulses,
+    boost::shared_ptr<CostModelSum> costs,
+    boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
     const Scalar JMinvJt_damping, const bool enable_force)
-    : Base(state, 0, costs->get_nr(), constraints->get_ng(), constraints->get_nh()),
+    : Base(state, 0, costs->get_nr(), constraints->get_ng(),
+           constraints->get_nh()),
       impulses_(impulses),
       costs_(costs),
       constraints_(constraints),
@@ -64,9 +69,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::init() {
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>& x,
-                                                    const Eigen::Ref<const VectorXs>& u) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
   // Computing impulse dynamics and forces
@@ -82,8 +87,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                    const Eigen::Ref<const VectorXs>& x) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
   // Computing impulse dynamics and forces
@@ -99,9 +105,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(const boost::shared_ptr<Acti
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                        const Eigen::Ref<const VectorXs>& x,
-                                                        const Eigen::Ref<const VectorXs>& u) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
   // Computing derivatives of impulse dynamics and forces
@@ -115,8 +121,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                        const Eigen::Ref<const VectorXs>& x) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
   // Computing derivatives of impulse dynamics and forces
@@ -130,12 +137,14 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(const boost::shared_ptr<
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelImpulseFwdDynamicsTpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+ActionModelImpulseFwdDynamicsTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr<ActionDataAbstract>& data) {
+bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(
+    const boost::shared_ptr<ActionDataAbstract>& data) {
   boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
@@ -145,26 +154,31 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(const boost::shared_ptr
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>&,
-                                                           Eigen::Ref<VectorXs>, const Eigen::Ref<const VectorXs>&,
-                                                           const std::size_t, const Scalar) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<ActionDataAbstract>&, Eigen::Ref<VectorXs>,
+    const Eigen::Ref<const VectorXs>&, const std::size_t, const Scalar) {
   // do nothing
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(Data* data, const Eigen::Ref<const VectorXs>& x) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(
+    Data* data, const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t nq = state_->get_nq();
   const std::size_t nv = state_->get_nv();
   const std::size_t nc = impulses_->get_nc();
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(nq);
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
+      x.head(nq);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
+      x.tail(nv);
 
-  // Computing the forward dynamics with the holonomic constraints defined by the contact model
+  // Computing the forward dynamics with the holonomic constraints defined by
+  // the contact model
   pinocchio::computeAllTerms(pinocchio_, data->pinocchio, q, v);
   pinocchio::computeCentroidalMomentum(pinocchio_, data->pinocchio);
 
@@ -176,12 +190,16 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(Data* data, const Eigen:
 #ifndef NDEBUG
   Eigen::FullPivLU<MatrixXs> Jc_lu(data->multibody.impulses->Jc.topRows(nc));
 
-  if (Jc_lu.rank() < data->multibody.impulses->Jc.topRows(nc).rows() && JMinvJt_damping_ == Scalar(0.)) {
-    throw_pretty("It is needed a damping factor since the contact Jacobian is not full-rank");
+  if (Jc_lu.rank() < data->multibody.impulses->Jc.topRows(nc).rows() &&
+      JMinvJt_damping_ == Scalar(0.)) {
+    throw_pretty(
+        "It is needed a damping factor since the contact Jacobian is not "
+        "full-rank");
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, data->pinocchio, v, data->multibody.impulses->Jc.topRows(nc), r_coeff_,
+  pinocchio::impulseDynamics(pinocchio_, data->pinocchio, v,
+                             data->multibody.impulses->Jc.topRows(nc), r_coeff_,
                              JMinvJt_damping_);
   data->xnext.head(nq) = q;
   data->xnext.tail(nv) = data->pinocchio.dq_after;
@@ -190,30 +208,37 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(Data* data, const Eigen:
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(Data* data, const Eigen::Ref<const VectorXs>& x) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(
+    Data* data, const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t nv = state_->get_nv();
   const std::size_t nc = impulses_->get_nc();
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q = x.head(state_->get_nq());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v = x.tail(nv);
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
+      x.head(state_->get_nq());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
+      x.tail(nv);
 
   // Computing the dynamics derivatives
-  // We resize the Kinv matrix because Eigen cannot call block operations recursively:
-  // https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408.
-  // Therefore, it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
+  // We resize the Kinv matrix because Eigen cannot call block operations
+  // recursively: https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408. Therefore,
+  // it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
   data->Kinv.resize(nv + nc, nv + nc);
-  pinocchio::computeRNEADerivatives(pinocchio_, data->pinocchio, q, data->vnone, data->pinocchio.dq_after - v,
+  pinocchio::computeRNEADerivatives(pinocchio_, data->pinocchio, q, data->vnone,
+                                    data->pinocchio.dq_after - v,
                                     data->multibody.impulses->fext);
-  pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, data->pinocchio, q, data->dgrav_dq);
-  pinocchio::getKKTContactDynamicMatrixInverse(pinocchio_, data->pinocchio, data->multibody.impulses->Jc.topRows(nc),
-                                               data->Kinv);
+  pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, data->pinocchio,
+                                                  q, data->dgrav_dq);
+  pinocchio::getKKTContactDynamicMatrixInverse(
+      pinocchio_, data->pinocchio, data->multibody.impulses->Jc.topRows(nc),
+      data->Kinv);
 
-  pinocchio::computeForwardKinematicsDerivatives(pinocchio_, data->pinocchio, q, data->pinocchio.dq_after,
-                                                 data->vnone);
+  pinocchio::computeForwardKinematicsDerivatives(
+      pinocchio_, data->pinocchio, q, data->pinocchio.dq_after, data->vnone);
   impulses_->calcDiff(data->multibody.impulses, x);
   impulses_->updateRneaDiff(data->multibody.impulses, data->pinocchio);
 
@@ -225,18 +250,26 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(Data* data, const Ei
   data->pinocchio.dtau_dq -= data->dgrav_dq;
   data->Fx.topLeftCorner(nv, nv).setIdentity();
   data->Fx.topRightCorner(nv, nv).setZero();
-  data->Fx.bottomLeftCorner(nv, nv).noalias() = -a_partial_dtau * data->pinocchio.dtau_dq;
-  data->Fx.bottomLeftCorner(nv, nv).noalias() -= a_partial_da * data->multibody.impulses->dv0_dq.topRows(nc);
+  data->Fx.bottomLeftCorner(nv, nv).noalias() =
+      -a_partial_dtau * data->pinocchio.dtau_dq;
+  data->Fx.bottomLeftCorner(nv, nv).noalias() -=
+      a_partial_da * data->multibody.impulses->dv0_dq.topRows(nc);
   data->Fx.bottomRightCorner(nv, nv).noalias() =
-      a_partial_dtau * data->pinocchio.M.template selfadjointView<Eigen::Upper>();
+      a_partial_dtau *
+      data->pinocchio.M.template selfadjointView<Eigen::Upper>();
 
   // Computing the cost derivatives
   if (enable_force_) {
-    data->df_dx.topLeftCorner(nc, nv).noalias() = f_partial_dtau * data->pinocchio.dtau_dq;
-    data->df_dx.topLeftCorner(nc, nv).noalias() += f_partial_da * data->multibody.impulses->dv0_dq.topRows(nc);
-    data->df_dx.topRightCorner(nc, nv).noalias() = f_partial_da * data->multibody.impulses->Jc.topRows(nc);
-    impulses_->updateVelocityDiff(data->multibody.impulses, data->Fx.bottomRows(nv));
-    impulses_->updateForceDiff(data->multibody.impulses, data->df_dx.topRows(nc));
+    data->df_dx.topLeftCorner(nc, nv).noalias() =
+        f_partial_dtau * data->pinocchio.dtau_dq;
+    data->df_dx.topLeftCorner(nc, nv).noalias() +=
+        f_partial_da * data->multibody.impulses->dv0_dq.topRows(nc);
+    data->df_dx.topRightCorner(nc, nv).noalias() =
+        f_partial_da * data->multibody.impulses->Jc.topRows(nc);
+    impulses_->updateVelocityDiff(data->multibody.impulses,
+                                  data->Fx.bottomRows(nv));
+    impulses_->updateForceDiff(data->multibody.impulses,
+                               data->df_dx.topRows(nc));
   }
 }
 
@@ -259,7 +292,8 @@ std::size_t ActionModelImpulseFwdDynamicsTpl<Scalar>::get_nh() const {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_lb() const {
   if (constraints_ != nullptr) {
     return constraints_->get_lb();
   } else {
@@ -268,7 +302,8 @@ const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<S
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_g_ub() const {
   if (constraints_ != nullptr) {
     return constraints_->get_ub();
   } else {
@@ -278,23 +313,25 @@ const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<S
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
-  os << "ActionModelImpulseFwdDynamics {nx=" << state_->get_nx() << ", ndx=" << state_->get_ndx()
-     << ", nc=" << impulses_->get_nc() << "}";
+  os << "ActionModelImpulseFwdDynamics {nx=" << state_->get_nx()
+     << ", ndx=" << state_->get_ndx() << ", nc=" << impulses_->get_nc() << "}";
 }
 
 template <typename Scalar>
-pinocchio::ModelTpl<Scalar>& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_pinocchio() const {
+pinocchio::ModelTpl<Scalar>&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ImpulseModelMultipleTpl<Scalar> >& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_impulses()
-    const {
+const boost::shared_ptr<ImpulseModelMultipleTpl<Scalar> >&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_impulses() const {
   return impulses_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_costs() const {
+const boost::shared_ptr<CostModelSumTpl<Scalar> >&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
@@ -305,32 +342,38 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::get_constraints() const {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& ActionModelImpulseFwdDynamicsTpl<Scalar>::get_armature() const {
+const typename MathBaseTpl<Scalar>::VectorXs&
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_armature() const {
   return armature_;
 }
 
 template <typename Scalar>
-const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
+const Scalar
+ActionModelImpulseFwdDynamicsTpl<Scalar>::get_restitution_coefficient() const {
   return r_coeff_;
 }
 
 template <typename Scalar>
-const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor() const {
+const Scalar ActionModelImpulseFwdDynamicsTpl<Scalar>::get_damping_factor()
+    const {
   return JMinvJt_damping_;
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_armature(const VectorXs& armature) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_armature(
+    const VectorXs& armature) {
   if (static_cast<std::size_t>(armature.size()) != state_->get_nv()) {
     throw_pretty("Invalid argument: "
-                 << "The armature dimension is wrong (it should be " + std::to_string(state_->get_nv()) + ")");
+                 << "The armature dimension is wrong (it should be " +
+                        std::to_string(state_->get_nv()) + ")");
   }
   armature_ = armature;
   with_armature_ = false;
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const Scalar r_coeff) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(
+    const Scalar r_coeff) {
   if (r_coeff < 0.) {
     throw_pretty("Invalid argument: "
                  << "The restitution coefficient has to be positive");
@@ -339,7 +382,8 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_restitution_coefficient(const
 }
 
 template <typename Scalar>
-void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(const Scalar damping) {
+void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(
+    const Scalar damping) {
   if (damping < 0.) {
     throw_pretty("Invalid argument: "
                  << "The damping factor has to be positive");

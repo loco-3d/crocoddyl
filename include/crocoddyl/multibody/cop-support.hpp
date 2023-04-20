@@ -9,15 +9,16 @@
 #ifndef CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 #define CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief This class encapsulates a center of pressure support of a 6d contact
  *
- * A CoP support defines a rectangular region that characterizes feasible CoP position.
+ * A CoP support defines a rectangular region that characterizes feasible CoP
+ * position.
  *
  * /sa `FrictionConeTpl`, `WrenchConeTpl`
  */
@@ -43,7 +44,8 @@ class CoPSupportTpl {
   /**
    * @brief Initialize the center of pressure support
    *
-   * @param[in] R    Rotation matrix that defines the support orientation w.r.t. the inertial frame
+   * @param[in] R    Rotation matrix that defines the support orientation w.r.t.
+   * the inertial frame
    * @param[in] box  Dimension of the foot surface dim = (length, width)
    */
   CoPSupportTpl(const Matrix3s& R, const Vector2s& box);
@@ -64,13 +66,14 @@ class CoPSupportTpl {
   ~CoPSupportTpl();
 
   /**
-   * @brief Update the matrix of center of pressure inequalities in the world frame.
+   * @brief Update the matrix of center of pressure inequalities in the world
+   * frame.
    *
    * This matrix-vector pair describes the center of pressure model as follow:
    * \f$ -ub \leq A \times w \leq -lb \f$,
    * where wrench, \f$ w \f$, is expressed in the inertial frame located at the
-   * center of the rectangular foot contact area (length, width) with axes parallel to
-   * those of the world frame.
+   * center of the rectangular foot contact area (length, width) with axes
+   * parallel to those of the world frame.
    */
   void update();
 
@@ -95,28 +98,33 @@ class CoPSupportTpl {
   const Vector2s& get_box() const;
 
   /**
-   * @brief Return the rotation matrix that defines the support orientation w.r.t. the inertial frame
+   * @brief Return the rotation matrix that defines the support orientation
+   * w.r.t. the inertial frame
    */
   const Matrix3s& get_R() const;
 
   /**
-   * @brief Modify the rotation matrix that defines the support orientation w.r.t. the inertial frame
+   * @brief Modify the rotation matrix that defines the support orientation
+   * w.r.t. the inertial frame
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_R(const Matrix3s& R);
 
   /**
    * @brief Modify dimension of the center of pressure support (length, width)
    *
-   * Note that you need to run `update` for updating the inequality matrix and bounds.
+   * Note that you need to run `update` for updating the inequality matrix and
+   * bounds.
    */
   void set_box(const Vector2s& box);
 
   CoPSupportTpl<Scalar>& operator=(const CoPSupportTpl<Scalar>& other);
 
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const CoPSupportTpl<Scalar>& X);
 
  private:
   Matrix46s A_;   //!< Matrix of wrench cone

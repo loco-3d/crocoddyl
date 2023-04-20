@@ -6,13 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/residual.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-ResidualModelNumDiffTpl<Scalar>::ResidualModelNumDiffTpl(const boost::shared_ptr<Base>& model)
+ResidualModelNumDiffTpl<Scalar>::ResidualModelNumDiffTpl(
+    const boost::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_nr(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -21,25 +22,27 @@ template <typename Scalar>
 ResidualModelNumDiffTpl<Scalar>::~ResidualModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void ResidualModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
   d->r = d->data_0->r;
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                           const Eigen::Ref<const VectorXs>& x) {
+void ResidualModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
   d->r = d->data_0->r;
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x,
-                                               const Eigen::Ref<const VectorXs>& u) {
+void ResidualModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
   const VectorXs& r0 = d->r;
@@ -81,8 +84,9 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualD
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                               const Eigen::Ref<const VectorXs>& x) {
+void ResidualModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
   const VectorXs& r0 = d->r;
@@ -104,13 +108,15 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualD
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelNumDiffTpl<Scalar>::createData(
-    DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >& ResidualModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
+ResidualModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -120,7 +126,8 @@ const Scalar ResidualModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
+void ResidualModelNumDiffTpl<Scalar>::set_disturbance(
+    const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance constant is positive");
@@ -129,12 +136,14 @@ void ResidualModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) 
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+void ResidualModelNumDiffTpl<Scalar>::set_reevals(
+    const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void ResidualModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+void ResidualModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs>& /*x*/) {
   // do nothing in the general case
 }
 

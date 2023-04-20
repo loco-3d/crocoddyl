@@ -7,8 +7,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/multibody/contact-base.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
 
@@ -21,60 +22,79 @@ void exposeContactAbstract() {
   bp::class_<ContactModelAbstract_wrap, boost::noncopyable>(
       "ContactModelAbstract",
       "Abstract rigid contact model.\n\n"
-      "It defines a template for rigid contact models based on acceleration-based holonomic constraints.\n"
-      "The calc and calcDiff functions compute the contact Jacobian and drift (holonomic constraint) or\n"
+      "It defines a template for rigid contact models based on "
+      "acceleration-based holonomic constraints.\n"
+      "The calc and calcDiff functions compute the contact Jacobian and drift "
+      "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame, std::size_t, bp::optional<std::size_t> >(
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame,
+               std::size_t, bp::optional<std::size_t> >(
           bp::args("self", "state", "type", "nc", "nu"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param type: type of contact\n"
           ":param nc: dimension of contact model\n"
           ":param nu: dimension of the control vector (default state.nv)"))
-      .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc), bp::args("self", "data", "x"),
+      .def("calc", pure_virtual(&ContactModelAbstract_wrap::calc),
+           bp::args("self", "data", "x"),
            "Compute the contact Jacobian and drift.\n\n"
-           "The rigid contact model throught acceleration-base holonomic constraint\n"
+           "The rigid contact model throught acceleration-base holonomic "
+           "constraint\n"
            "of the contact frame placement.\n"
            ":param data: contact data\n"
            ":param x: state point (dim. state.nx)")
-      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff), bp::args("self", "data", "x"),
+      .def("calcDiff", pure_virtual(&ContactModelAbstract_wrap::calcDiff),
+           bp::args("self", "data", "x"),
            "Compute the derivatives of contact holonomic constraint.\n\n"
-           "The rigid contact model throught acceleration-base holonomic constraint\n"
+           "The rigid contact model throught acceleration-base holonomic "
+           "constraint\n"
            "of the contact frame placement.\n"
            "It assumes that calc has been run first.\n"
            ":param data: contact data\n"
            ":param x: state point (dim. state.nx)")
-      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce), bp::args("self", "data", "force"),
+      .def("updateForce", pure_virtual(&ContactModelAbstract_wrap::updateForce),
+           bp::args("self", "data", "force"),
            "Convert the force into a stack of spatial forces.\n\n"
            ":param data: contact data\n"
            ":param force: force vector (dimension nc)")
-      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff, bp::args("self", "data", "df_dx", "df_du"),
+      .def("updateForceDiff", &ContactModelAbstract_wrap::updateForceDiff,
+           bp::args("self", "data", "df_dx", "df_du"),
            "Update the Jacobians of the force.\n\n"
            ":param data: contact data\n"
            ":param df_dx: Jacobian of the force with respect to the state\n"
            ":param df_du: Jacobian of the force with respect to the control")
-      .def("setZeroForce", &ContactModelAbstract_wrap::setZeroForce, bp::args("self", "data"),
+      .def("setZeroForce", &ContactModelAbstract_wrap::setZeroForce,
+           bp::args("self", "data"),
            "Set zero the spatial force.\n\n"
            ":param data: contact data")
-      .def("setZeroForceDiff", &ContactModelAbstract_wrap::setZeroForceDiff, bp::args("self", "data"),
+      .def("setZeroForceDiff", &ContactModelAbstract_wrap::setZeroForceDiff,
+           bp::args("self", "data"),
            "Set zero the derivatives of the spatial force.\n\n"
            ":param data: contact data")
-      .def("createData", &ContactModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+      .def("createData", &ContactModelAbstract_wrap::createData,
+           bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the contact data.\n\n"
-           "Each contact model has its own data that needs to be allocated. This function\n"
+           "Each contact model has its own data that needs to be allocated. "
+           "This function\n"
            "returns the allocated data for a predefined contact.\n"
            ":param data: Pinocchio data\n"
            ":return contact data.")
-      .def("createData", &ContactModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
+      .def("createData", &ContactModelAbstract_wrap::default_createData,
+           bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
-          bp::make_function(&ContactModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&ContactModelAbstract_wrap::get_state,
+                            bp::return_value_policy<bp::return_by_value>()),
           "state of the multibody system")
-      .add_property("nc", bp::make_function(&ContactModelAbstract_wrap::get_nc), "dimension of contact")
-      .add_property("nu", bp::make_function(&ContactModelAbstract_wrap::get_nu), "dimension of control")
-      .add_property("id", &ContactModelAbstract_wrap::get_id, &ContactModelAbstract_wrap::set_id, "reference frame id")
-      .add_property("type", bp::make_function(&ContactModelAbstract_wrap::get_type),
+      .add_property("nc", bp::make_function(&ContactModelAbstract_wrap::get_nc),
+                    "dimension of contact")
+      .add_property("nu", bp::make_function(&ContactModelAbstract_wrap::get_nu),
+                    "dimension of control")
+      .add_property("id", &ContactModelAbstract_wrap::get_id,
+                    &ContactModelAbstract_wrap::set_id, "reference frame id")
+      .add_property("type",
+                    bp::make_function(&ContactModelAbstract_wrap::get_type),
                     &ContactModelAbstract_wrap::set_type, "type of contact")
       .def(CopyableVisitor<ContactModelAbstract_wrap>())
       .def(PrintableVisitor<ContactModelAbstract>());
@@ -87,15 +107,28 @@ void exposeContactAbstract() {
           bp::args("self", "model", "data"),
           "Create common data shared between contact models.\n\n"
           ":param model: contact model\n"
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("fXj", bp::make_getter(&ContactDataAbstract::fXj, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::fXj), "action matrix from contact to local frames")
-      .add_property("a0", bp::make_getter(&ContactDataAbstract::a0, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::a0), "desired contact acceleration")
-      .add_property("da0_dx", bp::make_getter(&ContactDataAbstract::da0_dx, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::da0_dx), "Jacobian of the desired contact acceleration")
-      .add_property("dtau_dq", bp::make_getter(&ContactDataAbstract::dtau_dq, bp::return_internal_reference<>()),
-                    bp::make_setter(&ContactDataAbstract::dtau_dq), "Force contribution to dtau_dq")
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<
+          1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("fXj",
+                    bp::make_getter(&ContactDataAbstract::fXj,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::fXj),
+                    "action matrix from contact to local frames")
+      .add_property("a0",
+                    bp::make_getter(&ContactDataAbstract::a0,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::a0),
+                    "desired contact acceleration")
+      .add_property("da0_dx",
+                    bp::make_getter(&ContactDataAbstract::da0_dx,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::da0_dx),
+                    "Jacobian of the desired contact acceleration")
+      .add_property("dtau_dq",
+                    bp::make_getter(&ContactDataAbstract::dtau_dq,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactDataAbstract::dtau_dq),
+                    "Force contribution to dtau_dq")
       .def(CopyableVisitor<ContactDataAbstract>());
 }
 

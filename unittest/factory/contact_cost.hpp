@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CONTACT_COST_FACTORY_HPP_
 #define CROCODDYL_CONTACT_COST_FACTORY_HPP_
 
-#include "state.hpp"
-#include "actuation.hpp"
 #include "activation.hpp"
+#include "actuation.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -49,10 +49,11 @@ class ContactCostModelFactory {
   explicit ContactCostModelFactory();
   ~ContactCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(ContactCostModelTypes::Type cost_type,
-                                                                       PinocchioModelTypes::Type model_type,
-                                                                       ActivationModelTypes::Type activation_type,
-                                                                       ActuationModelTypes::Type actuation_type) const;
+  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
+      ContactCostModelTypes::Type cost_type,
+      PinocchioModelTypes::Type model_type,
+      ActivationModelTypes::Type activation_type,
+      ActuationModelTypes::Type actuation_type) const;
 };
 
 }  // namespace unittest

@@ -10,17 +10,18 @@
 #define CROCODDYL_CORE_NUMDIFF_RESIDUAL_HPP_
 
 #include <boost/function.hpp>
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief This class computes the numerical differentiation of a residual model.
  *
- * It computes the Jacobian of the residual model via numerical differentiation, i.e., \f$\mathbf{R_x}\f$
- * and \f$\mathbf{R_u}\f$ which denote the Jacobians of the residual function
- * \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$.
+ * It computes the Jacobian of the residual model via numerical differentiation,
+ * i.e., \f$\mathbf{R_x}\f$ and \f$\mathbf{R_u}\f$ which denote the Jacobians of
+ * the residual function \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$.
  *
  * \sa `ResidualModelAbstractTpl()`, `calcDiff()`
  */
@@ -37,12 +38,14 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
-  typedef boost::function<void(const VectorXs&, const VectorXs&)> ReevaluationFunction;
+  typedef boost::function<void(const VectorXs&, const VectorXs&)>
+      ReevaluationFunction;
 
   /**
    * @brief Initialize the numdiff residual model
    *
-   * @param model  Residual model that we want to apply the numerical differentiation
+   * @param model  Residual model that we want to apply the numerical
+   * differentiation
    */
   explicit ResidualModelNumDiffTpl(const boost::shared_ptr<Base>& model);
 
@@ -54,31 +57,37 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the original residual model
@@ -86,18 +95,21 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used by the numerical differentiation routine
+   * @brief Return the disturbance constant used by the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used by the numerical differentiation routine
+   * @brief Modify the disturbance constant used by the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
   /**
-   * @brief Register functions that updates the shared data computed for a system rollout
-   * The updated data is used to evaluate of the gradient and Hessian.
+   * @brief Register functions that updates the shared data computed for a
+   * system rollout The updated data is used to evaluate of the gradient and
+   * Hessian.
    *
    * @param reevals are the registered functions.
    */
@@ -110,10 +122,10 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
 
  private:
   /**
-   * @brief Make sure that when we finite difference the residual model, the user
-   * does not face unknown behaviour because of the finite differencing of a
-   * quaternion around pi. This behaviour might occur if ResidualModelState and
-   * FloatingInContact differential model are used together.
+   * @brief Make sure that when we finite difference the residual model, the
+   * user does not face unknown behaviour because of the finite differencing of
+   * a quaternion around pi. This behaviour might occur if ResidualModelState
+   * and FloatingInContact differential model are used together.
    *
    * For full discussions see issue
    * https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues/139
@@ -122,9 +134,12 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;              //!< Residual model hat we want to apply the numerical differentiation
-  Scalar e_jac_;                               //!< Constant used for computing disturbances in Jacobian calculation
-  std::vector<ReevaluationFunction> reevals_;  //!< Functions that needs execution before calc or calcDiff
+  boost::shared_ptr<Base> model_;  //!< Residual model hat we want to apply the
+                                   //!< numerical differentiation
+  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
+                  //!< calculation
+  std::vector<ReevaluationFunction>
+      reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
 template <typename _Scalar>
@@ -145,7 +160,8 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
-  explicit ResidualDataNumDiffTpl(Model<Scalar>* const model, DataCollectorAbstract* const shared_data)
+  explicit ResidualDataNumDiffTpl(Model<Scalar>* const model,
+                                  DataCollectorAbstract* const shared_data)
       : Base(model, shared_data),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()),
@@ -175,15 +191,21 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   using Base::shared;
 
   Scalar x_norm;  //!< Norm of the state vector
-  Scalar xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
-  Scalar uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  VectorXs dx;    //!< State disturbance.
-  VectorXs xp;    //!< The integrated state from the disturbance on one DoF "\f$ \int x dx_i \f$".
-  VectorXs du;    //!< Control disturbance.
-  VectorXs up;    //!< The integrated control from the disturbance on one DoF "\f$ \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;                //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> > data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> > data_u;  //!< The temporary data associated with the control variation.
+  Scalar
+      xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
+  Scalar
+      uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
+  VectorXs dx;  //!< State disturbance.
+  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
+                //!< \int x dx_i \f$".
+  VectorXs du;  //!< Control disturbance.
+  VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
+                //!< \int u du_i = u + du \f$".
+  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<boost::shared_ptr<Base> >
+      data_x;  //!< The temporary data associated with the state variation.
+  std::vector<boost::shared_ptr<Base> >
+      data_u;  //!< The temporary data associated with the control variation.
 };
 
 }  // namespace crocoddyl

@@ -8,11 +8,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/utils/callbacks.hpp"
+
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
-CallbackVerbose::CallbackVerbose(VerboseLevel level, int precision) : CallbackAbstract(), level_(level) {
+CallbackVerbose::CallbackVerbose(VerboseLevel level, int precision)
+    : CallbackAbstract(), level_(level) {
   set_precision(precision);
 }
 
@@ -35,15 +37,20 @@ void CallbackVerbose::set_precision(int precision) {
 
 void CallbackVerbose::update_header() {
   header_.clear();
-  const int columnwidth = 6 + precision_;  // Scientific mode requires a column width of 6 + precision
-  const std::string separator{"  "};       // We use two spaces between columns
+  const int columnwidth =
+      6 +
+      precision_;  // Scientific mode requires a column width of 6 + precision
+  const std::string separator{"  "};  // We use two spaces between columns
   header_ += "iter" + separator;
   auto center_string = [](const std::string& str, int width) {
     const int padding_size = width - static_cast<int>(str.length());
     const int padding_left = padding_size > 0 ? padding_size / 2 : 0;
     const int padding_right =
-        padding_size % 2 != 0 ? padding_left + 1 : padding_left;  // If the padding is odd, add additional space
-    return std::string(padding_left, ' ') + str + std::string(padding_right, ' ');
+        padding_size % 2 != 0
+            ? padding_left + 1
+            : padding_left;  // If the padding is odd, add additional space
+    return std::string(padding_left, ' ') + str +
+           std::string(padding_right, ' ');
   };
   header_ += center_string("cost", columnwidth) + separator;
   header_ += center_string("stop", columnwidth) + separator;
@@ -60,7 +67,8 @@ void CallbackVerbose::update_header() {
       header_ += center_string("dV", columnwidth);
       break;
     }
-    default: {}
+    default: {
+    }
   }
 }
 
@@ -70,20 +78,27 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
   }
 
   std::cout << std::setw(4) << solver.get_iter() << "  ";
-  std::cout << std::scientific << std::setprecision(precision_) << solver.get_cost() << "  ";
+  std::cout << std::scientific << std::setprecision(precision_)
+            << solver.get_cost() << "  ";
   std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
   std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "  ";
-  std::cout << std::fixed << std::setprecision(4) << solver.get_steplength() << "  ";
-  std::cout << std::scientific << std::setprecision(precision_) << solver.get_ffeas() << "  ";
-  std::cout << std::scientific << std::setprecision(precision_) << solver.get_gfeas() << "  ";
-  std::cout << std::scientific << std::setprecision(precision_) << solver.get_hfeas();
+  std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
+            << "  ";
+  std::cout << std::scientific << std::setprecision(precision_)
+            << solver.get_ffeas() << "  ";
+  std::cout << std::scientific << std::setprecision(precision_)
+            << solver.get_gfeas() << "  ";
+  std::cout << std::scientific << std::setprecision(precision_)
+            << solver.get_hfeas();
   switch (level_) {
     case _2: {
-      std::cout << "  " << std::scientific << std::setprecision(precision_) << solver.get_dVexp() << "  ";
+      std::cout << "  " << std::scientific << std::setprecision(precision_)
+                << solver.get_dVexp() << "  ";
       std::cout << solver.get_dV();
       break;
     }
-    default: {}
+    default: {
+    }
   }
   std::cout << std::endl;
   std::cout << std::flush;

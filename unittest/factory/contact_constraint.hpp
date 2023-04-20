@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CONTACT_CONSTRAINT_FACTORY_HPP_
 #define CROCODDYL_CONTACT_CONSTRAINT_FACTORY_HPP_
 
-#include "state.hpp"
-#include "actuation.hpp"
 #include "activation.hpp"
+#include "actuation.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/numdiff/diff-action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -38,7 +38,8 @@ struct ContactConstraintModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, ContactConstraintModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os,
+                         ContactConstraintModelTypes::Type type);
 
 class ContactConstraintModelFactory {
  public:
@@ -50,7 +51,8 @@ class ContactConstraintModelFactory {
   ~ContactConstraintModelFactory();
 
   boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
-      ContactConstraintModelTypes::Type constraint_type, PinocchioModelTypes::Type model_type,
+      ContactConstraintModelTypes::Type constraint_type,
+      PinocchioModelTypes::Type model_type,
       ActuationModelTypes::Type actuation_type) const;
 };
 

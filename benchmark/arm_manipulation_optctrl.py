@@ -1,12 +1,14 @@
-import crocoddyl
-from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived
-import pinocchio
-import example_robot_data
-import numpy as np
 import os
+import subprocess
 import sys
 import time
-import subprocess
+
+import example_robot_data
+import numpy as np
+
+import crocoddyl
+import pinocchio
+from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived
 
 crocoddyl.switchToNumpyMatrix()
 
@@ -20,7 +22,7 @@ CALLBACKS = False
 
 def createProblem(model):
     robot_model = ROBOT.model
-    q0 = np.matrix([0.173046, 1., -0.52366, 0., 0., 0.1, -0.005]).T
+    q0 = np.matrix([0.173046, 1.0, -0.52366, 0.0, 0.0, 0.1, -0.005]).T
     x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
 
     # Note that we need to include a cost model (i.e. set of cost functions) in
@@ -31,8 +33,12 @@ def createProblem(model):
     state = crocoddyl.StateMultibody(robot_model)
     goalTrackingCost = crocoddyl.CostModelResidual(
         state,
-        crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("gripper_left_joint"),
-                                              pinocchio.SE3(np.eye(3), np.matrix([[.0], [.0], [.4]]))))
+        crocoddyl.ResidualModelFramePlacement(
+            state,
+            robot_model.getFrameId("gripper_left_joint"),
+            pinocchio.SE3(np.eye(3), np.matrix([[0.0], [0.0], [0.4]])),
+        ),
+    )
     xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
     uRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelControl(state))
 
@@ -50,16 +56,27 @@ def createProblem(model):
     # forward dynamics (computed using ABA) are implemented
     # inside DifferentialActionModelFullyActuated.
     actuation = crocoddyl.ActuationModelFull(state)
-    runningModel = crocoddyl.IntegratedActionModelEuler(model(state, actuation, runningCostModel), 1e-3)
-    runningModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
-    terminalModel = crocoddyl.IntegratedActionModelEuler(model(state, actuation, terminalCostModel), 1e-3)
-    terminalModel.differential.armature = np.matrix([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.]).T
+    runningModel = crocoddyl.IntegratedActionModelEuler(
+        model(state, actuation, runningCostModel), 1e-3
+    )
+    runningModel.differential.armature = np.matrix(
+        [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]
+    ).T
+    terminalModel = crocoddyl.IntegratedActionModelEuler(
+        model(state, actuation, terminalCostModel), 1e-3
+    )
+    terminalModel.differential.armature = np.matrix(
+        [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]
+    ).T
 
     # For this optimal control problem, we define 100 knots (or running action
     # models) plus a terminal knot
     problem = crocoddyl.ShootingProblem(x0, [runningModel] * N, terminalModel)
     xs = [x0] * (len(problem.runningModels) + 1)
-    us = [m.quasiStatic(d, x0) for m, d in list(zip(problem.runningModels, problem.runningDatas))]
+    us = [
+        m.quasiStatic(d, x0)
+        for m, d in list(zip(problem.runningModels, problem.runningDatas))
+    ]
     return xs, us, problem
 
 
@@ -108,25 +125,55 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print('\033[1m')
-print('C++:')
-popen = subprocess.check_call([os.path.dirname(os.path.abspath(__file__)) + "/arm-manipulation-optctrl", str(T)])
+print("\033[1m")
+print("C++:")
+popen = subprocess.check_call(
+    [os.path.dirname(os.path.abspath(__file__)) + "/arm-manipulation-optctrl", str(T)]
+)
 
-print('Python bindings:')
+print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
 
-print('Python:')
+print("Python:")
 xs, us, problem = createProblem(DifferentialFreeFwdDynamicsModelDerived)
 avrg_duration, min_duration, max_duration = runDDPSolveBenchmark(xs, us, problem)
-print('  DDP.solve [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(xs, us, problem)
-print('  ShootingProblem.calc [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print('  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})'.format(avrg_duration, min_duration, max_duration))
-print('\033[0m')
+print(
+    "  DDP.solve [ms]: {0} ({1}, {2})".format(avrg_duration, min_duration, max_duration)
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calc [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+avrg_duration, min_duration, max_duration = runShootingProblemCalcDiffBenchmark(
+    xs, us, problem
+)
+print(
+    "  ShootingProblem.calcDiff [ms]: {0} ({1}, {2})".format(
+        avrg_duration, min_duration, max_duration
+    )
+)
+print("\033[0m")

@@ -9,13 +9,13 @@
 #ifndef CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 #define CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
 
@@ -24,19 +24,24 @@ enum ConstraintType { Inequality = 0, Equality, Both };
 /**
  * @brief Abstract class for constraint models
  *
- * A constraint model defines both: inequality \f$\mathbf{g}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{ng}\f$
- * and equality \f$\mathbf{h}(\mathbf{x}, \mathbf{u})\in\mathbb{R}^{nh}\f$ constraints. The constraint
- * function depends on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold
- * described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in T_{\mathbf{x}}\mathcal{X}\f$ that belongs to
- * the tangent space with `ndx` dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
+ * A constraint model defines both: inequality \f$\mathbf{g}(\mathbf{x},
+ * \mathbf{u})\in\mathbb{R}^{ng}\f$ and equality \f$\mathbf{h}(\mathbf{x},
+ * \mathbf{u})\in\mathbb{R}^{nh}\f$ constraints. The constraint function depends
+ * on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state
+ * manifold described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in
+ * T_{\mathbf{x}}\mathcal{X}\f$ that belongs to the tangent space with `ndx`
+ * dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
  *
- * The main computations are carried out in `calc()` and `calcDiff()` routines. `calc()` computes the
- * constraint residual and `calcDiff()` computes the Jacobians of the constraint function. Concretely speaking,
- * `calcDiff()` builds a linear approximation of the constraint function with the form:
- * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$, \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
- * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$. Additionally, it is
- * important to note that `calcDiff()` computes the derivatives using the latest stored values by `calc()`. Thus, we
- * need to first run `calc()`.
+ * The main computations are carried out in `calc()` and `calcDiff()` routines.
+ * `calc()` computes the constraint residual and `calcDiff()` computes the
+ * Jacobians of the constraint function. Concretely speaking, `calcDiff()`
+ * builds a linear approximation of the constraint function with the form:
+ * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
+ * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
+ * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$. Additionally, it is important
+ * to note that `calcDiff()` computes the derivatives using the latest stored
+ * values by `calc()`. Thus, we need to first run `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -61,7 +66,8 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng        Number of inequality constraints
    * @param[in] nh        Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ResidualModelAbstract> residual,
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                             boost::shared_ptr<ResidualModelAbstract> residual,
                              const std::size_t ng, const std::size_t nh);
 
   /**
@@ -72,7 +78,8 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t ng,
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                             const std::size_t nu, const std::size_t ng,
                              const std::size_t nh);
 
   /**
@@ -84,7 +91,8 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t ng, const std::size_t nh);
+  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                             const std::size_t ng, const std::size_t nh);
   virtual ~ConstraintModelAbstractTpl();
 
   /**
@@ -94,55 +102,64 @@ class ConstraintModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the constraint value for nodes that depends only on the state
+   * @brief Compute the constraint value for nodes that depends only on the
+   * state
    *
-   * It updates the constraint based on the state only. This function is commonly used in the terminal nodes of an
-   * optimal control problem.
+   * It updates the constraint based on the state only. This function is
+   * commonly used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the Jacobian of the constraint
    *
-   * It computes the Jacobian of the constraint function. It assumes that `calc()` has
-   * been run first.
+   * It computes the Jacobian of the constraint function. It assumes that
+   * `calc()` has been run first.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the Jacobian of the constraint with respect to the state only
+   * @brief Compute the Jacobian of the constraint with respect to the state
+   * only
    *
-   * It computes the Jacobian of the constraint function based on the state only. This function is commonly used
-   * in the terminal nodes of an optimal control problem.
+   * It computes the Jacobian of the constraint function based on the state
+   * only. This function is commonly used in the terminal nodes of an optimal
+   * control problem.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the constraint data
    *
-   * The default data contains objects to store the values of the constraint, residual vector and their first
-   * derivatives. However, it is possible to specialize this function is we need to create additional data, for
+   * The default data contains objects to store the values of the constraint,
+   * residual vector and their first derivatives. However, it is possible to
+   * specialize this function is we need to create additional data, for
    * instance, to avoid dynamic memory allocation.
    *
    * @param data  Data collector
    * @return the constraint data
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Update the lower and upper bounds the upper bound of constraint
@@ -198,7 +215,8 @@ class ConstraintModelAbstractTpl {
    * @brief Print information on the constraint model
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const CostModelAbstractTpl<Scalar>& model);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const CostModelAbstractTpl<Scalar>& model);
 
   /**
    * @brief Print relevant information of the constraint model
@@ -208,19 +226,22 @@ class ConstraintModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  private:
-  std::size_t ng_internal_;  //!< Number of inequality constraints defined at construction time
-  std::size_t nh_internal_;  //!< Number of equality constraints defined at construction time
+  std::size_t ng_internal_;  //!< Number of inequality constraints defined at
+                             //!< construction time
+  std::size_t nh_internal_;  //!< Number of equality constraints defined at
+                             //!< construction time
 
  protected:
   boost::shared_ptr<StateAbstract> state_;             //!< State description
   boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
-  ConstraintType type_;                                //!< Type of constraint: inequality=0, equality=1, both=2
-  VectorXs lb_;                                        //!< Lower bound of the constraint
-  VectorXs ub_;                                        //!< Upper bound of the constraint
-  std::size_t nu_;                                     //!< Control dimension
-  std::size_t ng_;                                     //!< Number of inequality constraints
-  std::size_t nh_;                                     //!< Number of equality constraints
-  VectorXs unone_;                                     //!< No control vector
+  ConstraintType
+      type_;        //!< Type of constraint: inequality=0, equality=1, both=2
+  VectorXs lb_;     //!< Lower bound of the constraint
+  VectorXs ub_;     //!< Upper bound of the constraint
+  std::size_t nu_;  //!< Control dimension
+  std::size_t ng_;  //!< Number of inequality constraints
+  std::size_t nh_;  //!< Number of equality constraints
+  VectorXs unone_;  //!< No control vector
 };
 
 template <typename _Scalar>
@@ -234,7 +255,8 @@ struct ConstraintDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  ConstraintDataAbstractTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  ConstraintDataAbstractTpl(Model<Scalar>* const model,
+                            DataCollectorAbstract* const data)
       : shared(data),
         residual(model->get_residual()->createData(data)),
         g(model->get_ng()),
@@ -258,12 +280,12 @@ struct ConstraintDataAbstractTpl {
 
   DataCollectorAbstract* shared;                     //!< Shared data
   boost::shared_ptr<ResidualDataAbstract> residual;  //!< Residual data
-  VectorXs g;                                        //!< Inequality constraint values
-  MatrixXs Gx;                                       //!< Jacobian of the inequality constraint
-  MatrixXs Gu;                                       //!< Jacobian of the inequality constraint
-  VectorXs h;                                        //!< Equality constraint values
-  MatrixXs Hx;                                       //!< Jacobian of the equality constraint
-  MatrixXs Hu;                                       //!< Jacobian of the equality constraint
+  VectorXs g;   //!< Inequality constraint values
+  MatrixXs Gx;  //!< Jacobian of the inequality constraint
+  MatrixXs Gu;  //!< Jacobian of the inequality constraint
+  VectorXs h;   //!< Equality constraint values
+  MatrixXs Hx;  //!< Jacobian of the equality constraint
+  MatrixXs Hu;  //!< Jacobian of the equality constraint
 };
 
 }  // namespace crocoddyl

@@ -11,41 +11,49 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                                               boost::shared_ptr<ResidualModelAbstract> residual,
-                                                               const VectorXs& lower, const VectorXs& upper)
+ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
+    boost::shared_ptr<typename Base::StateAbstract> state,
+    boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
+    const VectorXs& upper)
     : Base(state, residual, residual->get_nr(), 0) {
   lb_ = lower;
   ub_ = upper;
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
       if (lb_(i) - ub_(i) > 0) {
-        throw_pretty("Invalid argument: the upper bound is not equal to / higher than the lower bound.")
+        throw_pretty(
+            "Invalid argument: the upper bound is not equal to / higher than "
+            "the lower bound.")
       }
     }
   }
   if ((lb_.array() == std::numeric_limits<Scalar>::infinity()).any() ||
       (lb_.array() == std::numeric_limits<Scalar>::max()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot contain a positive infinity/max value");
+    throw_pretty(
+        "Invalid argument: the lower bound cannot contain a positive "
+        "infinity/max value");
   }
   if ((ub_.array() == -std::numeric_limits<Scalar>::infinity()).any() ||
       (ub_.array() == -std::numeric_limits<Scalar>::infinity()).any()) {
-    throw_pretty("Invalid argument: the lower bound cannot contain a negative infinity/max value");
+    throw_pretty(
+        "Invalid argument: the lower bound cannot contain a negative "
+        "infinity/max value");
   }
 }
 
 template <typename Scalar>
-ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                                                               boost::shared_ptr<ResidualModelAbstract> residual)
+ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
+    boost::shared_ptr<typename Base::StateAbstract> state,
+    boost::shared_ptr<ResidualModelAbstract> residual)
     : Base(state, residual, 0, residual->get_nr()) {}
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::~ConstraintModelResidualTpl() {}
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& x,
-                                              const Eigen::Ref<const VectorXs>& u) {
+void ConstraintModelResidualTpl<Scalar>::calc(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the constraint residual
   residual_->calc(data->residual, x, u);
 
@@ -54,8 +62,9 @@ void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<Constraint
 }
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& x) {
+void ConstraintModelResidualTpl<Scalar>::calc(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   // Compute the constraint residual
   residual_->calc(data->residual, x);
 
@@ -64,9 +73,9 @@ void ConstraintModelResidualTpl<Scalar>::calc(const boost::shared_ptr<Constraint
 }
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>& x,
-                                                  const Eigen::Ref<const VectorXs>& u) {
+void ConstraintModelResidualTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the derivatives of the residual function
   residual_->calcDiff(data->residual, x, u);
 
@@ -75,8 +84,9 @@ void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<Constr
 }
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                                  const Eigen::Ref<const VectorXs>& x) {
+void ConstraintModelResidualTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   // Compute the derivatives of the residual function
   residual_->calcDiff(data->residual, x);
 
@@ -85,13 +95,16 @@ void ConstraintModelResidualTpl<Scalar>::calcDiff(const boost::shared_ptr<Constr
 }
 
 template <typename Scalar>
-boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> > ConstraintModelResidualTpl<Scalar>::createData(
+boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
+ConstraintModelResidualTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::updateCalc(const boost::shared_ptr<ConstraintDataAbstract>& data) {
+void ConstraintModelResidualTpl<Scalar>::updateCalc(
+    const boost::shared_ptr<ConstraintDataAbstract>& data) {
   switch (type_) {
     case ConstraintType::Inequality:
       data->g = data->residual->r;
@@ -105,7 +118,8 @@ void ConstraintModelResidualTpl<Scalar>::updateCalc(const boost::shared_ptr<Cons
 }
 
 template <typename Scalar>
-void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data) {
+void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
+    const boost::shared_ptr<ConstraintDataAbstract>& data) {
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
   const bool is_ru = residual_->get_u_dependent() || nu_ == 0;

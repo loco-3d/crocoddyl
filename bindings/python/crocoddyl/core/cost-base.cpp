@@ -7,17 +7,19 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/cost-base.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "python/crocoddyl/utils/printable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
 void exposeCostAbstract() {
-// TODO: Remove once the deprecated update call has been removed in a future release
+// TODO: Remove once the deprecated update call has been removed in a future
+// release
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -26,32 +28,43 @@ void exposeCostAbstract() {
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
       "CostModelAbstract",
       "Abstract multibody cost models.\n\n"
-      "In Crocoddyl, a cost model is defined by the scalar activation function a(.) and by the residual\n"
+      "In Crocoddyl, a cost model is defined by the scalar activation function "
+      "a(.) and by the residual\n"
       " function r(.) as follows:\n"
       "    cost = a(r(x, u)),\n"
-      "where the residual function depends on the state point x, which lies in the state manifold\n"
-      "described with a nq-tuple, its velocity xd that belongs to the tangent space with nv dimension,\n"
-      "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
-      "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
-      "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ResidualModelAbstract> >(bp::args("self", "state", "activation", "residual"),
-                                                          "Initialize the cost model.\n\n"
-                                                          ":param state: state description\n"
-                                                          ":param activation: activation model\n"
-                                                          ":param residual: residual model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
+      "where the residual function depends on the state point x, which lies in "
+      "the state manifold\n"
+      "described with a nq-tuple, its velocity xd that belongs to the tangent "
+      "space with nv dimension,\n"
+      "and the control input u. The dimension of the residual vector is "
+      "defined by nr, which belongs to\n"
+      "the Euclidean space. On the other hand, the activation function builds "
+      "a cost value based on the\n"
+      "definition of the residual vector. The residual vector has to be "
+      "specialized in a derived classes.",
+      bp::init<boost::shared_ptr<StateAbstract>,
+               boost::shared_ptr<ActivationModelAbstract>,
+               boost::shared_ptr<ResidualModelAbstract> >(
+          bp::args("self", "state", "activation", "residual"),
+          "Initialize the cost model.\n\n"
+          ":param state: state description\n"
+          ":param activation: activation model\n"
+          ":param residual: residual model"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>,
+                    boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract> >(
+      .def(bp::init<boost::shared_ptr<StateAbstract>,
+                    boost::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ResidualModelAbstract> >(
+      .def(bp::init<boost::shared_ptr<StateAbstract>,
+                    boost::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
@@ -59,66 +72,85 @@ void exposeCostAbstract() {
       .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
+          "We use ActivationModelQuad as a default activation model (i.e. "
+          "a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param nr: dimension of residual vector\n"
           ":param nu: dimension of control vector (default state.nv)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
-          "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and the default nu value is "
+          "We use ActivationModelQuad as a default activation model (i.e. "
+          "a=0.5*||r||^2), and the default nu value is "
           "obtained from state.nv.\n"
           ":param state: state description\n"
           ":param nr: dimension of cost vector"))
-      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc), bp::args("self", "data", "x", "u"),
+      .def("calc", pure_virtual(&CostModelAbstract_wrap::calc),
+           bp::args("self", "data", "x", "u"),
            "Compute the cost value and its residuals.\n\n"
            ":param data: cost data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
-      .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (CostModelAbstract::*)(
+          const boost::shared_ptr<CostDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
-          "Compute the total cost value for nodes that depends only on the state.\n\n"
+          "Compute the total cost value for nodes that depends only on the "
+          "state.\n\n"
           "It updates the total cost based on the state only.\n"
-          "This function is used in the terminal nodes of an optimal control problem.\n"
+          "This function is used in the terminal nodes of an optimal control "
+          "problem.\n"
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
-      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
+      .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff),
+           bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
            "It computes the partial derivatives of the cost function.\n"
            "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
-      .def<void (CostModelAbstract::*)(const boost::shared_ptr<CostDataAbstract>&,
-                                       const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &CostModelAbstract::calcDiff, bp::args("self", "data", "x"),
-          "Compute the Jacobian and Hessian of the cost functions with respect to the state only.\n\n"
-          "It updates the Jacobian and Hessian of the cost function based on the state only.\n"
-          "This function is used in the terminal nodes of an optimal control problem.\n"
+      .def<void (CostModelAbstract::*)(
+          const boost::shared_ptr<CostDataAbstract>&,
+          const Eigen::Ref<const Eigen::VectorXd>&)>(
+          "calcDiff", &CostModelAbstract::calcDiff,
+          bp::args("self", "data", "x"),
+          "Compute the Jacobian and Hessian of the cost functions with respect "
+          "to the state only.\n\n"
+          "It updates the Jacobian and Hessian of the cost function based on "
+          "the state only.\n"
+          "This function is used in the terminal nodes of an optimal control "
+          "problem.\n"
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
-      .def("createData", &CostModelAbstract_wrap::createData, bp::with_custodian_and_ward_postcall<0, 2>(),
+      .def("createData", &CostModelAbstract_wrap::createData,
+           bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
            "Create the cost data.\n\n"
-           "Each cost model has its own data that needs to be allocated. This function\n"
+           "Each cost model has its own data that needs to be allocated. This "
+           "function\n"
            "returns the allocated data for a predefined cost.\n"
            ":param data: shared data\n"
            ":return cost data.")
-      .def("createData", &CostModelAbstract_wrap::default_createData, bp::with_custodian_and_ward_postcall<0, 2>())
+      .def("createData", &CostModelAbstract_wrap::default_createData,
+           bp::with_custodian_and_ward_postcall<0, 2>())
       .add_property(
           "state",
-          bp::make_function(&CostModelAbstract_wrap::get_state, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&CostModelAbstract_wrap::get_state,
+                            bp::return_value_policy<bp::return_by_value>()),
           "state description")
       .add_property(
           "activation",
-          bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&CostModelAbstract_wrap::get_activation,
+                            bp::return_value_policy<bp::return_by_value>()),
           "activation model")
       .add_property(
           "residual",
-          bp::make_function(&CostModelAbstract_wrap::get_residual, bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&CostModelAbstract_wrap::get_residual,
+                            bp::return_value_policy<bp::return_by_value>()),
           "residual model")
-      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector")
+      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu),
+                    "dimension of control vector")
       .def(CopyableVisitor<CostModelAbstract_wrap>())
       .def(PrintableVisitor<CostModelAbstract>());
 
@@ -130,42 +162,76 @@ void exposeCostAbstract() {
           bp::args("self", "model", "data"),
           "Create common data shared between cost models.\n\n"
           ":param model: cost model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("shared", bp::make_getter(&CostDataAbstract::shared, bp::return_internal_reference<>()),
+          ":param data: shared data")[bp::with_custodian_and_ward<
+          1, 2, bp::with_custodian_and_ward<1, 3> >()])
+      .add_property("shared",
+                    bp::make_getter(&CostDataAbstract::shared,
+                                    bp::return_internal_reference<>()),
                     "shared data")
-      .add_property("activation",
-                    bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
-                    "activation data")
-      .add_property("residual",
-                    bp::make_getter(&CostDataAbstract::residual, bp::return_value_policy<bp::return_by_value>()),
-                    "residual data")
-      .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
-                    bp::make_setter(&CostDataAbstract::cost), "cost value")
-      .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Lx), "Jacobian of the cost")
-      .add_property("Lu", bp::make_getter(&CostDataAbstract::Lu, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Lu), "Jacobian of the cost")
-      .add_property("Lxx", bp::make_getter(&CostDataAbstract::Lxx, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Lxx), "Hessian of the cost")
-      .add_property("Lxu", bp::make_getter(&CostDataAbstract::Lxu, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Lxu), "Hessian of the cost")
-      .add_property("Luu", bp::make_getter(&CostDataAbstract::Luu, bp::return_internal_reference<>()),
-                    bp::make_setter(&CostDataAbstract::Luu), "Hessian of the cost")
-      .add_property("r",
-                    bp::make_function(&CostDataAbstract::get_r,
-                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.r.")),
-                    bp::make_function(&CostDataAbstract::set_r, deprecated<>("Deprecated. Use residual.r.")),
-                    "cost residual")
-      .add_property("Rx",
-                    bp::make_function(&CostDataAbstract::get_Rx,
-                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Rx.")),
-                    bp::make_function(&CostDataAbstract::set_Rx, deprecated<>("Deprecated. Use residual.Rx.")),
-                    "Jacobian of the cost residual")
-      .add_property("Ru",
-                    bp::make_function(&CostDataAbstract::get_Ru,
-                                      deprecated<bp::return_internal_reference<> >("Deprecated. Use residual.Ru.")),
-                    bp::make_function(&CostDataAbstract::set_Ru, deprecated<>("Deprecated. Use residual.Ru.")),
-                    "Jacobian of the cost residual")
+      .add_property(
+          "activation",
+          bp::make_getter(&CostDataAbstract::activation,
+                          bp::return_value_policy<bp::return_by_value>()),
+          "activation data")
+      .add_property(
+          "residual",
+          bp::make_getter(&CostDataAbstract::residual,
+                          bp::return_value_policy<bp::return_by_value>()),
+          "residual data")
+      .add_property(
+          "cost",
+          bp::make_getter(&CostDataAbstract::cost,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&CostDataAbstract::cost), "cost value")
+      .add_property("Lx",
+                    bp::make_getter(&CostDataAbstract::Lx,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataAbstract::Lx),
+                    "Jacobian of the cost")
+      .add_property("Lu",
+                    bp::make_getter(&CostDataAbstract::Lu,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataAbstract::Lu),
+                    "Jacobian of the cost")
+      .add_property("Lxx",
+                    bp::make_getter(&CostDataAbstract::Lxx,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataAbstract::Lxx),
+                    "Hessian of the cost")
+      .add_property("Lxu",
+                    bp::make_getter(&CostDataAbstract::Lxu,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataAbstract::Lxu),
+                    "Hessian of the cost")
+      .add_property("Luu",
+                    bp::make_getter(&CostDataAbstract::Luu,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&CostDataAbstract::Luu),
+                    "Hessian of the cost")
+      .add_property(
+          "r",
+          bp::make_function(&CostDataAbstract::get_r,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use residual.r.")),
+          bp::make_function(&CostDataAbstract::set_r,
+                            deprecated<>("Deprecated. Use residual.r.")),
+          "cost residual")
+      .add_property(
+          "Rx",
+          bp::make_function(&CostDataAbstract::get_Rx,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use residual.Rx.")),
+          bp::make_function(&CostDataAbstract::set_Rx,
+                            deprecated<>("Deprecated. Use residual.Rx.")),
+          "Jacobian of the cost residual")
+      .add_property(
+          "Ru",
+          bp::make_function(&CostDataAbstract::get_Ru,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use residual.Ru.")),
+          bp::make_function(&CostDataAbstract::set_Ru,
+                            deprecated<>("Deprecated. Use residual.Ru.")),
+          "Jacobian of the cost residual")
       .def(CopyableVisitor<CostDataAbstract>());
 
 #pragma GCC diagnostic pop

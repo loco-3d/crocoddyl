@@ -11,9 +11,9 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_STATE_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/multibody/fwd.hpp"
-#include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
@@ -21,14 +21,16 @@ namespace crocoddyl {
 /**
  * @brief State residual
  *
- * This residual function defines the state tracking as \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
- * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference states, respectively, which belong to the
- * state manifold \f$\mathcal{X}\f$. Note that the dimension of the residual vector is obtained from
- * `StateAbstract::get_ndx()`. Furthermore, the Jacobians of the residual function are
- * computed analytically.
+ * This residual function defines the state tracking as
+ * \f$\mathbf{r}=\mathbf{x}\ominus\mathbf{x}^*\f$, where
+ * \f$\mathbf{x},\mathbf{x}^*\in~\mathcal{X}\f$ are the current and reference
+ * states, respectively, which belong to the state manifold \f$\mathcal{X}\f$.
+ * Note that the dimension of the residual vector is obtained from
+ * `StateAbstract::get_ndx()`. Furthermore, the Jacobians of the residual
+ * function are computed analytically.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its derivatives are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * derivatives are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -54,8 +56,8 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] xref        Reference state
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref,
-                        const std::size_t nu);
+  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                        const VectorXs& xref, const std::size_t nu);
 
   /**
    * @brief Initialize the state residual model
@@ -65,7 +67,8 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] xref        Reference state
    */
-  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref);
+  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                        const VectorXs& xref);
 
   /**
    * @brief Initialize the state residual model
@@ -75,13 +78,14 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
+  ResidualModelStateTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+                        const std::size_t nu);
 
   /**
    * @brief Initialize the state residual model
    *
-   * The default state reference is obtained from `StateAbstractTpl::zero()`, and `nu` from
-   * `StateAbstractTpl::get_nv()`.
+   * The default state reference is obtained from `StateAbstractTpl::zero()`,
+   * and `nu` from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State of the multibody system
    * @param[in] activation  Activation model
@@ -96,7 +100,8 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -106,22 +111,28 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the derivative of the state-cost function and store it in cost data
+   * @brief Compute the derivative of the state-cost function and store it in
+   * cost data
    *
-   * This function assumes that the derivatives of the activation and residual are computed via calcDiff functions.
+   * This function assumes that the derivatives of the activation and residual
+   * are computed via calcDiff functions.
    *
    * @param cdata     Cost data
    * @param rdata     Residual data
    * @param adata     Activation data
-   * @param update_u  Update the derivative of the cost function w.r.t. to the control if True.
+   * @param update_u  Update the derivative of the cost function w.r.t. to the
+   * control if True.
    */
-  virtual void calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
-                            const boost::shared_ptr<ResidualDataAbstract>& rdata,
-                            const boost::shared_ptr<ActivationDataAbstract>& adata, const bool update_u = true);
+  virtual void calcCostDiff(
+      const boost::shared_ptr<CostDataAbstract>& cdata,
+      const boost::shared_ptr<ResidualDataAbstract>& rdata,
+      const boost::shared_ptr<ActivationDataAbstract>& adata,
+      const bool update_u = true);
 
   /**
    * @brief Return the reference state
@@ -148,8 +159,9 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::unone_;
 
  private:
-  VectorXs xref_;                                                         //!< Reference state
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  VectorXs xref_;  //!< Reference state
+  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+      pin_model_;  //!< Pinocchio model
 };
 
 }  // namespace crocoddyl

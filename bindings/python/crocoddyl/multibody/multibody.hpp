@@ -11,6 +11,7 @@
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_MULTIBODY_HPP_
 
 #include <pinocchio/fwd.hpp>
+
 #include "python/crocoddyl/fwd.hpp"
 
 namespace crocoddyl {

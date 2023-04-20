@@ -11,11 +11,12 @@
 #define CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 
 #include <pinocchio/multibody/fwd.hpp>
-#include "crocoddyl/multibody/fwd.hpp"
+
 #include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/force-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/multibody/force-base.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
@@ -39,16 +40,23 @@ class ContactModelAbstractTpl {
    * @param[in] nc     Dimension of the contact model
    * @param[in] nu     Dimension of the control vector
    */
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                          const pinocchio::ReferenceFrame type,
                           const std::size_t nc, const std::size_t nu);
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                          const pinocchio::ReferenceFrame type,
                           const std::size_t nc);
 
-  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
-             ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc,
-                                     const std::size_t nu);)
-  DEPRECATED("Use constructor that passes the type type of contact, this assumes is pinocchio::LOCAL",
-             ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nc);)
+  DEPRECATED(
+      "Use constructor that passes the type type of contact, this assumes is "
+      "pinocchio::LOCAL",
+      ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                              const std::size_t nc, const std::size_t nu);)
+  DEPRECATED(
+      "Use constructor that passes the type type of contact, this assumes is "
+      "pinocchio::LOCAL",
+      ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+                              const std::size_t nc);)
   virtual ~ContactModelAbstractTpl();
 
   /**
@@ -58,7 +66,8 @@ class ContactModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) = 0;
 
   /**
    * @brief Compute the derivatives of the acceleration-based contact
@@ -67,7 +76,8 @@ class ContactModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data, const Eigen::Ref<const VectorXs>& x) = 0;
+  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) = 0;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -75,7 +85,8 @@ class ContactModelAbstractTpl {
    * @param[in] data   Contact data
    * @param[in] force  Contact force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) = 0;
+  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+                           const VectorXs& force) = 0;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -83,8 +94,8 @@ class ContactModelAbstractTpl {
    * @param[in] data   Contact data
    * @param[in] force  Contact force
    */
-  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
-                       const MatrixXs& df_du) const;
+  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                       const MatrixXs& df_dx, const MatrixXs& df_du) const;
 
   /**
    * @brief Set the stack of spatial forces to zero
@@ -98,12 +109,14 @@ class ContactModelAbstractTpl {
    *
    * @param[in] data  Contact data
    */
-  void setZeroForceDiff(const boost::shared_ptr<ContactDataAbstract>& data) const;
+  void setZeroForceDiff(
+      const boost::shared_ptr<ContactDataAbstract>& data) const;
 
   /**
    * @brief Create the contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual boost::shared_ptr<ContactDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the state
@@ -144,7 +157,8 @@ class ContactModelAbstractTpl {
    * @brief Print information on the contact model
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ContactModelAbstractTpl<Scalar>& model);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ContactModelAbstractTpl<Scalar>& model);
 
   /**
    * @brief Print relevant information of the contact model
@@ -173,7 +187,8 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   typedef typename pinocchio::SE3Tpl<Scalar> SE3;
 
   template <template <typename Scalar> class Model>
-  ContactDataAbstractTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+  ContactDataAbstractTpl(Model<Scalar>* const model,
+                         pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         fXj(jMf.inverse().toActionMatrix()),
         a0(model->get_nc()),

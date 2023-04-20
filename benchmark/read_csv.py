@@ -20,39 +20,45 @@ DataFrame API:     value = benches.bench1.loc[fn_name, nthreads, with(out)_cg][b
 """
 
 from __future__ import print_function
-import pandas as pd
+
 import sys
-from os.path import exists, splitext, basename
+from os.path import basename, exists, splitext
+
+import pandas as pd
 
 pd.options.display.width = 0
 
 
-class Benchmarks():
+class Benchmarks:
     pass
 
 
-def parseCsvFile(filename, sep=',', delimiter=None):
+def parseCsvFile(filename, sep=",", delimiter=None):
     """Inputs a file and ouputs a matrix.
     input: (string) filename
     output: (numpy array) seq
     """
-    col_types = dict(fn_name=str,
-                     nthreads=int,
-                     with_cg=bool,
-                     mean=float,
-                     stddev=float,
-                     max=float,
-                     min=float,
-                     mean_per_nodes=float,
-                     stddev_per_nodes=float)
+    col_types = dict(
+        fn_name=str,
+        nthreads=int,
+        with_cg=bool,
+        mean=float,
+        stddev=float,
+        max=float,
+        min=float,
+        mean_per_nodes=float,
+        stddev_per_nodes=float,
+    )
 
-    seq = pd.read_csv(filename,
-                      header=0,
-                      sep=sep,
-                      delim_whitespace=False,
-                      quoting=2,
-                      index_col=[0, 1, 2],
-                      dtype=col_types)
+    seq = pd.read_csv(
+        filename,
+        header=0,
+        sep=sep,
+        delim_whitespace=False,
+        quoting=2,
+        index_col=[0, 1, 2],
+        dtype=col_types,
+    )
 
     return seq
 

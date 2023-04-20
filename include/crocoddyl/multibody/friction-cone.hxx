@@ -7,6 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+
 #include <iostream>
 
 namespace crocoddyl {
@@ -31,24 +32,35 @@ FrictionConeTpl<Scalar>::FrictionConeTpl()
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu, std::size_t nf, const bool inner_appr,
-                                         const Scalar min_nforce, const Scalar max_nforce)
-    : nf_(nf), R_(R), mu_(mu), inner_appr_(inner_appr), min_nforce_(min_nforce), max_nforce_(max_nforce) {
+FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu,
+                                         std::size_t nf, const bool inner_appr,
+                                         const Scalar min_nforce,
+                                         const Scalar max_nforce)
+    : nf_(nf),
+      R_(R),
+      mu_(mu),
+      inner_appr_(inner_appr),
+      min_nforce_(min_nforce),
+      max_nforce_(max_nforce) {
   if (nf_ % 2 != 0) {
     nf_ = 4;
     std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
   }
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
   A_ = MatrixX3s::Zero(nf_ + 1, 3);
   ub_ = VectorXs::Zero(nf_ + 1);
@@ -59,10 +71,13 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu, std
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu, std::size_t nf, const bool inner_appr,
-                                         const Scalar min_nforce, const Scalar max_nforce)
+FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
+                                         std::size_t nf, const bool inner_appr,
+                                         const Scalar min_nforce,
+                                         const Scalar max_nforce)
     : nf_(nf),
-      R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix()),
+      R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ())
+             .toRotationMatrix()),
       mu_(mu),
       inner_appr_(inner_appr),
       min_nforce_(min_nforce),
@@ -74,24 +89,31 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
   Eigen::Vector3d normal = nsurf;
   if (!nsurf.isUnitary()) {
     normal /= nsurf.norm();
-    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+    std::cerr
+        << "Warning: normal is not an unitary vector, then we normalized it"
+        << std::endl;
   }
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
   A_ = MatrixX3s::Zero(nf_ + 1, 3);
   ub_ = VectorXs::Zero(nf_ + 1);
   lb_ = VectorXs::Zero(nf_ + 1);
-  R_ = Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
+  R_ =
+      Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
 
   // Update the inequality matrix and bounds
   update();
@@ -139,8 +161,10 @@ void FrictionConeTpl<Scalar>::update() {
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     theta_i = theta * static_cast<Scalar>(i);
     tsurf_i << cos(theta_i), sin(theta_i), Scalar(0.);
-    A_.row(2 * i) = (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1) = (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * R_.transpose();
+    A_.row(2 * i) =
+        (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * R_.transpose();
+    A_.row(2 * i + 1) =
+        (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * R_.transpose();
   }
   A_.row(nf_) = R_.col(2).transpose();
   lb_(nf_) = min_nforce_;
@@ -148,13 +172,17 @@ void FrictionConeTpl<Scalar>::update() {
 }
 
 template <typename Scalar>
-void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, const bool inner_appr,
-                                     const Scalar min_nforce, const Scalar max_nforce) {
+void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu,
+                                     const bool inner_appr,
+                                     const Scalar min_nforce,
+                                     const Scalar max_nforce) {
   Eigen::Vector3d nsurf = normal;
   // Sanity checks
   if (!nsurf.isUnitary()) {
     nsurf /= normal.norm();
-    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+    std::cerr
+        << "Warning: normal is not an unitary vector, then we normalized it"
+        << std::endl;
   }
   R_ = Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ()).toRotationMatrix();
   set_mu(mu);
@@ -167,22 +195,26 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu, co
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::MatrixX3s& FrictionConeTpl<Scalar>::get_A() const {
+const typename MathBaseTpl<Scalar>::MatrixX3s& FrictionConeTpl<Scalar>::get_A()
+    const {
   return A_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub() const {
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_ub()
+    const {
   return ub_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb() const {
+const typename MathBaseTpl<Scalar>::VectorXs& FrictionConeTpl<Scalar>::get_lb()
+    const {
   return lb_;
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Matrix3s& FrictionConeTpl<Scalar>::get_R() const {
+const typename MathBaseTpl<Scalar>::Matrix3s& FrictionConeTpl<Scalar>::get_R()
+    const {
   return R_;
 }
 
@@ -227,16 +259,20 @@ void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
   // Sanity checks
   if (!nsurf.isUnitary()) {
     normal /= nsurf.norm();
-    std::cerr << "Warning: normal is not an unitary vector, then we normalized it" << std::endl;
+    std::cerr
+        << "Warning: normal is not an unitary vector, then we normalized it"
+        << std::endl;
   }
-  R_ = Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
+  R_ =
+      Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
 }
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_mu(const Scalar mu) {
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1." << std::endl;
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
   }
   mu_ = mu;
 }
@@ -250,7 +286,8 @@ template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0" << std::endl;
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
   }
   min_nforce_ = min_nforce;
 }
@@ -259,13 +296,16 @@ template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to infinity value" << std::endl;
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
   }
   max_nforce_ = max_nforce;
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>& FrictionConeTpl<Scalar>::operator=(const FrictionConeTpl<Scalar>& other) {
+FrictionConeTpl<Scalar>& FrictionConeTpl<Scalar>::operator=(
+    const FrictionConeTpl<Scalar>& other) {
   if (this != &other) {
     nf_ = other.get_nf();
     A_ = other.get_A();

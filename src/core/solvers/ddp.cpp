@@ -7,9 +7,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/solvers/ddp.hpp"
+
 #include <iostream>
 
-#include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -33,20 +34,24 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
   }
   if (th_stepinc_ < alphas_[n_alphas - 1]) {
     th_stepinc_ = alphas_[n_alphas - 1];
-    std::cerr << "Warning: th_stepinc has higher value than lowest alpha value, set to "
+    std::cerr << "Warning: th_stepinc has higher value than lowest alpha "
+                 "value, set to "
               << std::to_string(alphas_[n_alphas - 1]) << std::endl;
   }
 }
 
 SolverDDP::~SolverDDP() {}
 
-bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                      const std::size_t maxiter, const bool is_feasible, const double init_reg) {
+bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
+                      const std::vector<Eigen::VectorXd>& init_us,
+                      const std::size_t maxiter, const bool is_feasible,
+                      const double init_reg) {
   START_PROFILER("SolverDDP::solve");
   if (problem_->is_updated()) {
     resizeData();
   }
-  xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
+  xs_try_[0] =
+      problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
@@ -78,7 +83,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
 
     // We need to recalculate the derivatives when the step length passes
     recalcDiff = false;
-    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+    for (std::vector<double>::const_iterator it = alphas_.begin();
+         it != alphas_.end(); ++it) {
       steplength_ = *it;
 
       try {
@@ -89,7 +95,8 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::ve
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
       if (dVexp_ >= 0) {  // descend direction
-        if (abs(d_[0]) < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+        if (abs(d_[0]) < th_grad_ || !is_feasible_ ||
+            dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, true);
           cost_ = cost_try_;
@@ -143,9 +150,10 @@ double SolverDDP::tryStep(const double steplength) {
 }
 
 double SolverDDP::stoppingCriteria() {
-  // This stopping criteria represents the expected reduction in the value function.
-  // If this reduction is less than a certain threshold, then the algorithm reaches the local minimum.
-  // For more details, see C. Mastalli et al. "Inverse-dynamics MPC via Nullspace Resolution".
+  // This stopping criteria represents the expected reduction in the value
+  // function. If this reduction is less than a certain threshold, then the
+  // algorithm reaches the local minimum. For more details, see C. Mastalli et
+  // al. "Inverse-dynamics MPC via Nullspace Resolution".
   stop_ = abs(d_[0] + 0.5 * d_[1]);
   return stop_;
 }
@@ -153,7 +161,8 @@ double SolverDDP::stoppingCriteria() {
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
   d_.fill(0);
   const std::size_t T = this->problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
@@ -170,7 +179,8 @@ void SolverDDP::resizeData() {
 
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -205,7 +215,8 @@ double SolverDDP::calcDiff() {
 
 void SolverDDP::backwardPass() {
   START_PROFILER("SolverDDP::backwardPass");
-  const boost::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
+  const boost::shared_ptr<ActionDataAbstract>& d_T =
+      problem_->get_terminalData();
   Vxx_.back() = d_T->Lxx;
   Vx_.back() = d_T->Lx;
 
@@ -216,13 +227,16 @@ void SolverDDP::backwardPass() {
   if (!is_feasible_) {
     Vx_.back().noalias() += Vxx_.back() * fs_.back();
   }
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
 
-    // Compute the linear-quadratic approximation of the control Hamiltonian function
+    // Compute the linear-quadratic approximation of the control Hamiltonian
+    // function
     computeActionValueFunction(t, m, d);
 
     // Compute the feedforward and feedback gains
@@ -249,8 +263,10 @@ void SolverDDP::forwardPass(const double steplength) {
   START_PROFILER("SolverDDP::forwardPass");
   cost_try_ = 0.;
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& m = models[t];
     const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -277,7 +293,8 @@ void SolverDDP::forwardPass(const double steplength) {
     }
   }
 
-  const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionModelAbstract>& m =
+      problem_->get_terminalModel();
   const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
@@ -289,10 +306,12 @@ void SolverDDP::forwardPass(const double steplength) {
   STOP_PROFILER("SolverDDP::forwardPass");
 }
 
-void SolverDDP::computeActionValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
-                                           const boost::shared_ptr<ActionDataAbstract>& data) {
+void SolverDDP::computeActionValueFunction(
+    const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
+    const boost::shared_ptr<ActionDataAbstract>& data) {
   assert_pretty(t < problem_->get_T(),
-                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
   const Eigen::VectorXd& Vx_p = Vx_[t + 1];
@@ -326,9 +345,11 @@ void SolverDDP::computeActionValueFunction(const std::size_t t, const boost::sha
   }
 }
 
-void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+void SolverDDP::computeValueFunction(
+    const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
   assert_pretty(t < problem_->get_T(),
-                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()););
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()););
   const std::size_t nu = model->get_nu();
   Vx_[t] = Qx_[t];
   Vxx_[t] = Qxx_[t];
@@ -356,7 +377,8 @@ void SolverDDP::computeValueFunction(const std::size_t t, const boost::shared_pt
 
 void SolverDDP::computeGains(const std::size_t t) {
   assert_pretty(t < problem_->get_T(),
-                "Invalid argument: t should be between 0 and " + std::to_string(problem_->get_T()));
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()));
   START_PROFILER("SolverDDP::computeGains");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
@@ -416,7 +438,8 @@ void SolverDDP::allocateData() {
   Quuk_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -487,7 +510,10 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_Qx() const { return Qx_; }
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_Qu() const { return Qu_; }
 
-const std::vector<typename MathBaseTpl<double>::MatrixXsRowMajor>& SolverDDP::get_K() const { return K_; }
+const std::vector<typename MathBaseTpl<double>::MatrixXsRowMajor>&
+SolverDDP::get_K() const {
+  return K_;
+}
 
 const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 

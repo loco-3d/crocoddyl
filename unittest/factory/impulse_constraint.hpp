@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_IMPULSE_CONSTRAINT_FACTORY_HPP_
 #define CROCODDYL_IMPULSE_CONSTRAINT_FACTORY_HPP_
 
-#include "state.hpp"
-#include "actuation.hpp"
 #include "activation.hpp"
+#include "actuation.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -38,7 +38,8 @@ struct ImpulseConstraintModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os, ImpulseConstraintModelTypes::Type type);
+std::ostream &operator<<(std::ostream &os,
+                         ImpulseConstraintModelTypes::Type type);
 
 class ImpulseConstraintModelFactory {
  public:
@@ -49,8 +50,9 @@ class ImpulseConstraintModelFactory {
   explicit ImpulseConstraintModelFactory();
   ~ImpulseConstraintModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ImpulseConstraintModelTypes::Type constraint_type,
-                                                           PinocchioModelTypes::Type model_type) const;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+      ImpulseConstraintModelTypes::Type constraint_type,
+      PinocchioModelTypes::Type model_type) const;
 };
 
 }  // namespace unittest

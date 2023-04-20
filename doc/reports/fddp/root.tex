@@ -42,7 +42,7 @@ $$s.t. \quad x(0) = f_0$$
 $$\quad \forall t \in [0,\Treal], \quad \dot{x}(t) = f(x(t),u(t),t))$$
 where $\xtraj: t \rightarrow x(t)$ is the state trajectory, $\utraj: t \rightarrow u(t)$ is the control trajectory, $\ell$ is the integral --running-- cost, $\ell_T$ is the terminal cost, $f_0$ is the initial state value, $f$ is the robot dynamics and $T$, the time interval, is fixed.
 
-The decision variables are $\xtraj,\utraj$, both of infinite dimension. 
+The decision variables are $\xtraj,\utraj$, both of infinite dimension.
 We approximate this problem using a discrete version of it, by following the so-called direct --discretize first, solve second -- approach.
 
 \subsection{Discretize first}
@@ -99,7 +99,7 @@ L_{ux} & & &       & L_{uu} & & & & F_u^T\\
 -I &&&&&&&&&&\\
 F_x & -I &  & & F_u &&&&&& \\
 &\ddots & \ddots & & & \ddots &&&&&&\\
-&    &  F_x & -I & & & F_u 
+&    &  F_x & -I & & & F_u
 \end{array} \right]
 %
 \bmat
@@ -223,7 +223,7 @@ What is the effect of taking a partial step?
 
 For the KKT formulation, the effect is pretty clear. As $\Delta \dxtraj$ was a step from a zero initial guess $\dxtrajguess = 0$, making a partial step $\alpha \Delta$ will bridge only a part of the gap. Denoting by $\dxtraj^\alpha$ the solution obtained after making a step of length $\alpha<1$, we have:
 $$\dx_0^\alpha = \alpha f_0$$
-$$\dx_{t+1}^\alpha - F_x \dx_t^\alpha - Fu \du_t^\alpha = \alpha f_t$$ 
+$$\dx_{t+1}^\alpha - F_x \dx_t^\alpha - Fu \du_t^\alpha = \alpha f_t$$
 The new solution  $\dxtraj^\alpha,\dutraj^\alpha$ is then infeasible and the gaps at each shooting points have only be reduced of $(1-\alpha)$.
 
 For the DDP formulation, this is less clear as it is not described in the literature.
@@ -434,12 +434,12 @@ The second-order term is:
 We can recognize in the additional terms (the 2 last ones) the same terms as in $\Delta_1$.
 Nicely, they will cancel out in the case we make a full step $\alpha=1$:
 $$\Delta(\alpha) = \alpha( \Delta_1+\frac{\alpha}{2} \Delta_2)$$
-$$\Delta(1)= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
+$$\Delta(1)= V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1
 - \frac{1}{2} f_0^T V_{xx0} f_0 + \frac{1}{2} k_0^T Q_{uu0}^T k_0 - \frac{1}{2} f_1^T V_{xx1} f_1 $$
 
 But they do not cancel out in the general case:
 \begin{align*}
-  \Delta(\alpha) = \alpha \Big( V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1 
+  \Delta(\alpha) = \alpha \Big( V_{x0}^T f_0 + Q_{u0}^T k_0 + V_{x1}^T f_1
 + \frac{\alpha}{2} ( - f_0^T V_{xx0} f_0 - f_1^T V_{xx1} f_1 + k_0^T Q_{uu0}^T k_0 ) \\
 + (\alpha-1) ( f_0^T V_{xx0} x_0 + f_1^T V_{xx1} x_1 ) \Big)
 \end{align*}
@@ -461,7 +461,7 @@ $$\Delta_2 = \sum_{t=0}^T k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t +2 f_t^T V_{xxt}
 
 
 The expectation model is finally:
-$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t
 + \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
 + (\alpha-1) f_t^T V_{xxt} x_t$$
 
@@ -533,7 +533,7 @@ We do not have the linear direction $\dx_t$, however, we can easily computes the
 We then set:
 $$\dx_t = x_t'-x_t$$
 And we modify the expectation model accordingly:
-$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t 
+$$\Delta(\alpha) = \alpha \sum_{t=0}^T V_{xt}^T f_t + Q_{ut}^T k_t
 + \frac{\alpha}{2} \Big( k_t^T Q_{uut}^T k_t-f_t^T V_{xxt} f_t \Big)
 + (\alpha-1) f_t^T V_{xxt} (x_t'(\alpha) - x_t)$$
 Again, this boils down to the sum of the $Q.k$ when the gaps are all zero.
@@ -547,4 +547,3 @@ Again, this boils down to the sum of the $Q.k$ when the gaps are all zero.
 }
 
 \end{document}
-

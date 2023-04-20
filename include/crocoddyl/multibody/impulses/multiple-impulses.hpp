@@ -10,13 +10,13 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
 #include <utility>
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
 namespace crocoddyl {
@@ -29,13 +29,16 @@ struct ImpulseItemTpl {
   typedef ImpulseModelAbstractTpl<Scalar> ImpulseModelAbstract;
 
   ImpulseItemTpl() {}
-  ImpulseItemTpl(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true)
+  ImpulseItemTpl(const std::string& name,
+                 boost::shared_ptr<ImpulseModelAbstract> impulse,
+                 const bool active = true)
       : name(name), impulse(impulse), active(active) {}
 
   /**
    * @brief Print information on the impulse item
    */
-  friend std::ostream& operator<<(std::ostream& os, const ImpulseItemTpl<Scalar>& model) {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ImpulseItemTpl<Scalar>& model) {
     os << "{" << *model.impulse << "}";
     return os;
   }
@@ -48,9 +51,10 @@ struct ImpulseItemTpl {
 /**
  * @brief Define a stack of impulse models
  *
- * The impulse models can be defined with active and inactive status. The idea behind this design choice is to be able
- * to create a mechanism that allocates the entire data needed for the computations. Then, there are designed routines
- * that update the only active impulse.
+ * The impulse models can be defined with active and inactive status. The idea
+ * behind this design choice is to be able to create a mechanism that allocates
+ * the entire data needed for the computations. Then, there are designed
+ * routines that update the only active impulse.
  */
 template <typename _Scalar>
 class ImpulseModelMultipleTpl {
@@ -71,9 +75,12 @@ class ImpulseModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ImpulseItem> > ImpulseModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> > ImpulseDataContainer;
-  typedef typename pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
+  typedef std::map<std::string, boost::shared_ptr<ImpulseItem> >
+      ImpulseModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> >
+      ImpulseDataContainer;
+  typedef typename pinocchio::container::aligned_vector<
+      pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
 
   /**
    * @brief Initialize the multi-impulse model
@@ -92,7 +99,9 @@ class ImpulseModelMultipleTpl {
    * @param[in] impulse  Impulse model
    * @param[in] active   Impulse status (active by default)
    */
-  void addImpulse(const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse, const bool active = true);
+  void addImpulse(const std::string& name,
+                  boost::shared_ptr<ImpulseModelAbstract> impulse,
+                  const bool active = true);
 
   /**
    * @brief Remove impulse item
@@ -115,7 +124,8 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
+            const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the impulse holonomic constraint
@@ -123,15 +133,18 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Update the system velocity after impulse
    *
    * @param[in] data   Multi-impulse data
-   * @param[in] vnext  System velocity after impulse \f$\mathbf{v}'\in\mathbb{R}^{nv}\f$
+   * @param[in] vnext  System velocity after impulse
+   * \f$\mathbf{v}'\in\mathbb{R}^{nv}\f$
    */
-  void updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& vnext) const;
+  void updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                      const VectorXs& vnext) const;
 
   /**
    * @brief Update the spatial impulse defined in frame coordinate
@@ -140,25 +153,31 @@ class ImpulseModelMultipleTpl {
    * @param[in] impulse  Spatial impulse defined in frame coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c\in\mathbb{R}^{nc}\f$
    */
-  void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& impulse);
+  void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                   const VectorXs& impulse);
 
   /**
    * @brief Update the Jacobian of the system velocity after impulse
    *
    * @param[in] data       Multi-impulse data
-   * @param[in] dvnext_dx  Jacobian of the system velocity after impact in generalized coordinates
+   * @param[in] dvnext_dx  Jacobian of the system velocity after impact in
+   * generalized coordinates
    * \f$\frac{\partial\dot{\mathbf{v}'}}{\partial\mathbf{x}}\in\mathbb{R}^{nv\times{ndx}}\f$
    */
-  void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& dvnext_dx) const;
+  void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                          const MatrixXs& dvnext_dx) const;
 
   /**
-   * @brief Update the Jacobian of the spatial impulse defined in frame coordinate
+   * @brief Update the Jacobian of the spatial impulse defined in frame
+   * coordinate
    *
    * @param[in] data    Multi-contact data
-   * @param[in] df_dx   Jacobian of the spatial impulse defined in frame coordinate
+   * @param[in] df_dx   Jacobian of the spatial impulse defined in frame
+   * coordinate
    * \f$\frac{\partial{}^o\underline{\boldsymbol{\Lambda}}_c}{\partial\mathbf{x}}\in\mathbb{R}^{nc\times{ndx}}\f$
    */
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, const MatrixXs& df_dx) const;
+  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                       const MatrixXs& df_dx) const;
 
   /**
    * @brief Update the RNEA derivatives dtau_dq by adding the skew term
@@ -169,7 +188,8 @@ class ImpulseModelMultipleTpl {
    * @param[in] data       Multi-contact data
    * @param[in] pinocchio  Pinocchio data
    */
-  void updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data, pinocchio::DataTpl<Scalar>& pinocchio) const;
+  void updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+                      pinocchio::DataTpl<Scalar>& pinocchio) const;
 
   /**
    * @brief Create the multi-impulse data
@@ -177,7 +197,8 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Pinocchio data
    * @return the multi-impulse data.
    */
-  boost::shared_ptr<ImpulseDataMultiple> createData(pinocchio::DataTpl<Scalar>* const data);
+  boost::shared_ptr<ImpulseDataMultiple> createData(
+      pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the multibody state
@@ -218,7 +239,8 @@ class ImpulseModelMultipleTpl {
    * @brief Print information on the impulse models
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ImpulseModelMultipleTpl<Scalar>& model);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ImpulseModelMultipleTpl<Scalar>& model);
 
  private:
   boost::shared_ptr<StateMultibody> state_;
@@ -252,34 +274,44 @@ struct ImpulseDataMultipleTpl {
    * @param[in] data   Pinocchio data
    */
   template <template <typename Scalar> class Model>
-  ImpulseDataMultipleTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+  ImpulseDataMultipleTpl(Model<Scalar>* const model,
+                         pinocchio::DataTpl<Scalar>* const data)
       : Jc(model->get_nc_total(), model->get_state()->get_nv()),
         dv0_dq(model->get_nc_total(), model->get_state()->get_nv()),
         vnext(model->get_state()->get_nv()),
         dvnext_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
-        fext(model->get_state()->get_pinocchio()->njoints, pinocchio::ForceTpl<Scalar>::Zero()) {
+        fext(model->get_state()->get_pinocchio()->njoints,
+             pinocchio::ForceTpl<Scalar>::Zero()) {
     Jc.setZero();
     dv0_dq.setZero();
     vnext.setZero();
     dvnext_dx.setZero();
-    for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator it = model->get_impulses().begin();
+    for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator
+             it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
       const boost::shared_ptr<ImpulseItem>& item = it->second;
-      impulses.insert(std::make_pair(item->name, item->impulse->createData(data)));
+      impulses.insert(
+          std::make_pair(item->name, item->impulse->createData(data)));
     }
   }
 
-  MatrixXs Jc;  //!< Contact Jacobian in frame coordinate \f$\mathbf{J}_c\in\mathbb{R}^{ni_{total}\times{nv}}\f$
+  MatrixXs Jc;  //!< Contact Jacobian in frame coordinate
+                //!< \f$\mathbf{J}_c\in\mathbb{R}^{ni_{total}\times{nv}}\f$
                 //!< (memory defined for active and inactive impulses)
   MatrixXs
-      dv0_dq;  //!< Jacobian of the desired spatial contact acceleration in frame coordinate
+      dv0_dq;  //!< Jacobian of the desired spatial contact acceleration in
+               //!< frame coordinate
                //!< \f$\frac{\partial\underline{\mathbf{v}}_0}{\partial\mathbf{q}}\in\mathbb{R}^{ni_{total}\times{nv}}\f$
                //!< (memory defined for active and inactive impulse)
-  VectorXs vnext;      //!< Constrained system velocity after impact in generalized coordinates
-                       //!< \f$\dot{\mathbf{v}'}\in\mathbb{R}^{nv}\f$
-  MatrixXs dvnext_dx;  //!< Jacobian of the system velocity after impact in generalized coordinates
-                       //!< \f$\frac{\partial\dot{\mathbf{v}'}}{\partial\mathbf{x}}\in\mathbb{R}^{nv\times ndx}\f$
-  typename ImpulseModelMultiple::ImpulseDataContainer impulses;  //!< Stack of impulse data
+  VectorXs vnext;  //!< Constrained system velocity after impact in generalized
+                   //!< coordinates \f$\dot{\mathbf{v}'}\in\mathbb{R}^{nv}\f$
+  MatrixXs
+      dvnext_dx;  //!< Jacobian of the system velocity after impact in
+                  //!< generalized coordinates
+                  //!< \f$\frac{\partial\dot{\mathbf{v}'}}{\partial\mathbf{x}}\in\mathbb{R}^{nv\times
+                  //!< ndx}\f$
+  typename ImpulseModelMultiple::ImpulseDataContainer
+      impulses;  //!< Stack of impulse data
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >
       fext;  //!< External spatial forces in body coordinates
 };

@@ -2,24 +2,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of Oxford
-// Copyright note valid unless otherwise stated in individual files.
-// All rights reserved.
+// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
+// Oxford Copyright note valid unless otherwise stated in individual files. All
+// rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_MULTIBODY_FRAMES_DEPRECATED_HPP_
 #define CROCODDYL_MULTIBODY_FRAMES_DEPRECATED_HPP_
 
 #include <pinocchio/multibody/fwd.hpp>
-#include <pinocchio/spatial/se3.hpp>
-#include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/spatial/force.hpp>
+#include <pinocchio/spatial/motion.hpp>
+#include <pinocchio/spatial/se3.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/multibody/friction-cone.hpp"
-#include "crocoddyl/multibody/wrench-cone.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/multibody/friction-cone.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/wrench-cone.hpp"
 
 namespace crocoddyl {
 
@@ -33,17 +33,22 @@ struct FrameTranslationTpl {
   typedef typename MathBaseTpl<Scalar>::Vector3s Vector3s;
 
   DEPRECATED("Do not use FrameTranslation", explicit FrameTranslationTpl());
-  DEPRECATED("Do not use FrameTranslation", FrameTranslationTpl(const FrameTranslationTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameTranslation", FrameTranslationTpl(const FrameIndex& id, const Vector3s& translation));
+  DEPRECATED("Do not use FrameTranslation",
+             FrameTranslationTpl(const FrameTranslationTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameTranslation",
+             FrameTranslationTpl(const FrameIndex& id,
+                                 const Vector3s& translation));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameTranslationTpl<Scalar>& X) {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameTranslationTpl<Scalar>& X) {
     os << "         id: " << X.id << std::endl
        << "translation: " << std::endl
        << X.translation.transpose() << std::endl;
     return os;
   }
 
-  FrameTranslationTpl<Scalar>& operator=(const FrameTranslationTpl<Scalar>& other) {
+  FrameTranslationTpl<Scalar>& operator=(
+      const FrameTranslationTpl<Scalar>& other) {
     if (this != &other) {
       id = other.id;
       translation = other.translation;
@@ -68,11 +73,16 @@ struct FrameRotationTpl {
   typedef typename MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
   DEPRECATED("Do not use FrameRotation", explicit FrameRotationTpl());
-  DEPRECATED("Do not use FrameRotation", FrameRotationTpl(const FrameRotationTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameRotation", FrameRotationTpl(const FrameIndex& id, const Matrix3s& rotation));
+  DEPRECATED("Do not use FrameRotation",
+             FrameRotationTpl(const FrameRotationTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameRotation",
+             FrameRotationTpl(const FrameIndex& id, const Matrix3s& rotation));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameRotationTpl<Scalar>& X) {
-    os << "      id: " << X.id << std::endl << "rotation: " << std::endl << X.rotation << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameRotationTpl<Scalar>& X) {
+    os << "      id: " << X.id << std::endl
+       << "rotation: " << std::endl
+       << X.rotation << std::endl;
     return os;
   }
 
@@ -101,8 +111,10 @@ struct FramePlacementTpl {
   typedef pinocchio::SE3Tpl<Scalar> SE3;
 
   DEPRECATED("Do not use FramePlacement", explicit FramePlacementTpl());
-  DEPRECATED("Do not use FramePlacement", FramePlacementTpl(const FramePlacementTpl<Scalar>& other));
-  DEPRECATED("Do not use FramePlacement", FramePlacementTpl(const FrameIndex& id, const SE3& placement));
+  DEPRECATED("Do not use FramePlacement",
+             FramePlacementTpl(const FramePlacementTpl<Scalar>& other));
+  DEPRECATED("Do not use FramePlacement",
+             FramePlacementTpl(const FrameIndex& id, const SE3& placement));
 
   FramePlacementTpl<Scalar>& operator=(const FramePlacementTpl<Scalar>& other) {
     if (this != &other) {
@@ -117,8 +129,11 @@ struct FramePlacementTpl {
     return id == other.id && placement == other.placement;
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const FramePlacementTpl<Scalar>& X) {
-    os << "       id: " << X.id << std::endl << "placement: " << std::endl << X.placement << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FramePlacementTpl<Scalar>& X) {
+    os << "       id: " << X.id << std::endl
+       << "placement: " << std::endl
+       << X.placement << std::endl;
     return os;
   }
 
@@ -134,11 +149,15 @@ struct FrameMotionTpl {
   typedef pinocchio::MotionTpl<Scalar> Motion;
 
   DEPRECATED("Do not use FrameMotion", explicit FrameMotionTpl());
-  DEPRECATED("Do not use FrameMotion", FrameMotionTpl(const FrameMotionTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameMotion", FrameMotionTpl(const FrameIndex& id, const Motion& motion,
-                                                      pinocchio::ReferenceFrame reference = pinocchio::LOCAL));
+  DEPRECATED("Do not use FrameMotion",
+             FrameMotionTpl(const FrameMotionTpl<Scalar>& other));
+  DEPRECATED(
+      "Do not use FrameMotion",
+      FrameMotionTpl(const FrameIndex& id, const Motion& motion,
+                     pinocchio::ReferenceFrame reference = pinocchio::LOCAL));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameMotionTpl<Scalar>& X) {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameMotionTpl<Scalar>& X) {
     os << "       id: " << X.id << std::endl;
     os << "   motion: " << std::endl << X.motion;
     switch (X.reference) {
@@ -166,7 +185,8 @@ struct FrameMotionTpl {
 
   template <typename OtherScalar>
   bool operator==(const FrameMotionTpl<OtherScalar>& other) const {
-    return id == other.id && motion == other.motion && reference == other.reference;
+    return id == other.id && motion == other.motion &&
+           reference == other.reference;
   }
 
   FrameIndex id;
@@ -182,11 +202,16 @@ struct FrameForceTpl {
   typedef pinocchio::ForceTpl<Scalar> Force;
 
   DEPRECATED("Do not use FrameForce", explicit FrameForceTpl());
-  DEPRECATED("Do not use FrameForce", FrameForceTpl(const FrameForceTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameForce", FrameForceTpl(const FrameIndex& id, const Force& force));
+  DEPRECATED("Do not use FrameForce",
+             FrameForceTpl(const FrameForceTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameForce",
+             FrameForceTpl(const FrameIndex& id, const Force& force));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameForceTpl<Scalar>& X) {
-    os << "   id: " << X.id << std::endl << "force: " << std::endl << X.force << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameForceTpl<Scalar>& X) {
+    os << "   id: " << X.id << std::endl
+       << "force: " << std::endl
+       << X.force << std::endl;
     return os;
   }
 
@@ -215,15 +240,22 @@ struct FrameFrictionConeTpl {
   typedef FrictionConeTpl<Scalar> FrictionCone;
 
   DEPRECATED("Do not use FrameFrictionCone", explicit FrameFrictionConeTpl());
-  DEPRECATED("Do not use FrameFrictionCone", FrameFrictionConeTpl(const FrameFrictionConeTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameFrictionCone", FrameFrictionConeTpl(const FrameIndex& id, const FrictionCone& cone));
+  DEPRECATED("Do not use FrameFrictionCone",
+             FrameFrictionConeTpl(const FrameFrictionConeTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameFrictionCone",
+             FrameFrictionConeTpl(const FrameIndex& id,
+                                  const FrictionCone& cone));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameFrictionConeTpl& X) {
-    os << "  id: " << X.id << std::endl << "cone: " << std::endl << X.cone << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameFrictionConeTpl& X) {
+    os << "  id: " << X.id << std::endl
+       << "cone: " << std::endl
+       << X.cone << std::endl;
     return os;
   }
 
-  FrameFrictionConeTpl<Scalar>& operator=(const FrameFrictionConeTpl<Scalar>& other) {
+  FrameFrictionConeTpl<Scalar>& operator=(
+      const FrameFrictionConeTpl<Scalar>& other) {
     if (this != &other) {
       id = other.id;
       cone = other.cone;
@@ -243,15 +275,21 @@ struct FrameWrenchConeTpl {
   typedef WrenchConeTpl<Scalar> WrenchCone;
 
   DEPRECATED("Do not use FrameWrenchCone", explicit FrameWrenchConeTpl());
-  DEPRECATED("Do not use FrameWrenchCone", FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameWrenchCone", FrameWrenchConeTpl(const FrameIndex& id, const WrenchCone& cone));
+  DEPRECATED("Do not use FrameWrenchCone",
+             FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameWrenchCone",
+             FrameWrenchConeTpl(const FrameIndex& id, const WrenchCone& cone));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameWrenchConeTpl& X) {
-    os << "frame: " << X.id << std::endl << " cone: " << std::endl << X.cone << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameWrenchConeTpl& X) {
+    os << "frame: " << X.id << std::endl
+       << " cone: " << std::endl
+       << X.cone << std::endl;
     return os;
   }
 
-  FrameWrenchConeTpl<Scalar>& operator=(const FrameWrenchConeTpl<Scalar>& other) {
+  FrameWrenchConeTpl<Scalar>& operator=(
+      const FrameWrenchConeTpl<Scalar>& other) {
     if (this != &other) {
       id = other.id;
       cone = other.cone;
@@ -274,15 +312,21 @@ struct FrameCoPSupportTpl {
 
  public:
   DEPRECATED("Do not use FrameCoPSupport", explicit FrameCoPSupportTpl());
-  DEPRECATED("Do not use FrameCoPSupport", FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& other));
-  DEPRECATED("Do not use FrameCoPSupport", FrameCoPSupportTpl(const FrameIndex& id, const Vector2s& box));
+  DEPRECATED("Do not use FrameCoPSupport",
+             FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& other));
+  DEPRECATED("Do not use FrameCoPSupport",
+             FrameCoPSupportTpl(const FrameIndex& id, const Vector2s& box));
 
-  friend std::ostream& operator<<(std::ostream& os, const FrameCoPSupportTpl<Scalar>& X) {
-    os << " id: " << X.get_id() << std::endl << "box: " << std::endl << X.get_box() << std::endl;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const FrameCoPSupportTpl<Scalar>& X) {
+    os << " id: " << X.get_id() << std::endl
+       << "box: " << std::endl
+       << X.get_box() << std::endl;
     return os;
   }
 
-  FrameCoPSupportTpl<Scalar>& operator=(const FrameCoPSupportTpl<Scalar>& other) {
+  FrameCoPSupportTpl<Scalar>& operator=(
+      const FrameCoPSupportTpl<Scalar>& other) {
     if (this != &other) {
       id_ = other.get_id();
       box_ = other.get_box();
@@ -291,12 +335,14 @@ struct FrameCoPSupportTpl {
     return *this;
   }
 
-  // Define the inequality matrix A to implement A * f >= 0. Compare eq.(18-19) in
-  // https://hal.archives-ouvertes.fr/hal-02108449/document
+  // Define the inequality matrix A to implement A * f >= 0. Compare eq.(18-19)
+  // in https://hal.archives-ouvertes.fr/hal-02108449/document
   void update_A() {
-    A_ << Scalar(0), Scalar(0), box_[0] / Scalar(2), Scalar(0), Scalar(-1), Scalar(0), Scalar(0), Scalar(0),
-        box_[0] / Scalar(2), Scalar(0), Scalar(1), Scalar(0), Scalar(0), Scalar(0), box_[1] / Scalar(2), Scalar(1),
-        Scalar(0), Scalar(0), Scalar(0), Scalar(0), box_[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
+    A_ << Scalar(0), Scalar(0), box_[0] / Scalar(2), Scalar(0), Scalar(-1),
+        Scalar(0), Scalar(0), Scalar(0), box_[0] / Scalar(2), Scalar(0),
+        Scalar(1), Scalar(0), Scalar(0), Scalar(0), box_[1] / Scalar(2),
+        Scalar(1), Scalar(0), Scalar(0), Scalar(0), Scalar(0),
+        box_[1] / Scalar(2), Scalar(-1), Scalar(0), Scalar(0);
   }
 
   void set_id(FrameIndex id) { id_ = id; }
@@ -316,52 +362,62 @@ struct FrameCoPSupportTpl {
 };
 
 template <typename Scalar>
-FrameTranslationTpl<Scalar>::FrameTranslationTpl() : id(0), translation(Vector3s::Zero()) {
+FrameTranslationTpl<Scalar>::FrameTranslationTpl()
+    : id(0), translation(Vector3s::Zero()) {
   std::cerr << "Deprecated: Do not use FrameTranslation." << std::endl;
 }
 template <typename Scalar>
-FrameTranslationTpl<Scalar>::FrameTranslationTpl(const FrameTranslationTpl<Scalar>& other)
+FrameTranslationTpl<Scalar>::FrameTranslationTpl(
+    const FrameTranslationTpl<Scalar>& other)
     : id(other.id), translation(other.translation) {
   std::cerr << "Deprecated: Do not use FrameTranslation." << std::endl;
 }
 template <typename Scalar>
-FrameTranslationTpl<Scalar>::FrameTranslationTpl(const FrameIndex& id, const Vector3s& translation)
+FrameTranslationTpl<Scalar>::FrameTranslationTpl(const FrameIndex& id,
+                                                 const Vector3s& translation)
     : id(id), translation(translation) {
   std::cerr << "Deprecated: Do not use FrameTranslation." << std::endl;
 }
 
 template <typename Scalar>
-FrameRotationTpl<Scalar>::FrameRotationTpl() : id(0), rotation(Matrix3s::Identity()) {
+FrameRotationTpl<Scalar>::FrameRotationTpl()
+    : id(0), rotation(Matrix3s::Identity()) {
   std::cerr << "Deprecated: Do not use FrameRotation." << std::endl;
 }
 template <typename Scalar>
-FrameRotationTpl<Scalar>::FrameRotationTpl(const FrameRotationTpl<Scalar>& other)
+FrameRotationTpl<Scalar>::FrameRotationTpl(
+    const FrameRotationTpl<Scalar>& other)
     : id(other.id), rotation(other.rotation) {
   std::cerr << "Deprecated: Do not use FrameRotation." << std::endl;
 }
 template <typename Scalar>
-FrameRotationTpl<Scalar>::FrameRotationTpl(const FrameIndex& id, const Matrix3s& rotation)
+FrameRotationTpl<Scalar>::FrameRotationTpl(const FrameIndex& id,
+                                           const Matrix3s& rotation)
     : id(id), rotation(rotation) {
   std::cerr << "Deprecated: Do not use FrameRotation." << std::endl;
 }
 
 template <typename Scalar>
-FramePlacementTpl<Scalar>::FramePlacementTpl() : id(0), placement(SE3::Identity()) {
+FramePlacementTpl<Scalar>::FramePlacementTpl()
+    : id(0), placement(SE3::Identity()) {
   std::cerr << "Deprecated: Do not use FramePlacement." << std::endl;
 }
 template <typename Scalar>
-FramePlacementTpl<Scalar>::FramePlacementTpl(const FramePlacementTpl<Scalar>& other)
+FramePlacementTpl<Scalar>::FramePlacementTpl(
+    const FramePlacementTpl<Scalar>& other)
     : id(other.id), placement(other.placement) {
   std::cerr << "Deprecated: Do not use FramePlacement." << std::endl;
 }
 template <typename Scalar>
-FramePlacementTpl<Scalar>::FramePlacementTpl(const FrameIndex& id, const SE3& placement)
+FramePlacementTpl<Scalar>::FramePlacementTpl(const FrameIndex& id,
+                                             const SE3& placement)
     : id(id), placement(placement) {
   std::cerr << "Deprecated: Do not use FramePlacement." << std::endl;
 }
 
 template <typename Scalar>
-FrameMotionTpl<Scalar>::FrameMotionTpl() : id(0), motion(Motion::Zero()), reference(pinocchio::LOCAL) {
+FrameMotionTpl<Scalar>::FrameMotionTpl()
+    : id(0), motion(Motion::Zero()), reference(pinocchio::LOCAL) {
   std::cerr << "Deprecated: Do not use FrameMotion." << std::endl;
 }
 template <typename Scalar>
@@ -370,7 +426,9 @@ FrameMotionTpl<Scalar>::FrameMotionTpl(const FrameMotionTpl<Scalar>& other)
   std::cerr << "Deprecated: Do not use FrameMotion." << std::endl;
 }
 template <typename Scalar>
-FrameMotionTpl<Scalar>::FrameMotionTpl(const FrameIndex& id, const Motion& motion, pinocchio::ReferenceFrame reference)
+FrameMotionTpl<Scalar>::FrameMotionTpl(const FrameIndex& id,
+                                       const Motion& motion,
+                                       pinocchio::ReferenceFrame reference)
     : id(id), motion(motion), reference(reference) {
   std::cerr << "Deprecated: Do not use FrameMotion." << std::endl;
 }
@@ -380,25 +438,30 @@ FrameForceTpl<Scalar>::FrameForceTpl() : id(0), force(Force::Zero()) {
   std::cerr << "Deprecated: Do not use FrameForce." << std::endl;
 }
 template <typename Scalar>
-FrameForceTpl<Scalar>::FrameForceTpl(const FrameForceTpl<Scalar>& other) : id(other.id), force(other.force) {
+FrameForceTpl<Scalar>::FrameForceTpl(const FrameForceTpl<Scalar>& other)
+    : id(other.id), force(other.force) {
   std::cerr << "Deprecated: Do not use FrameForce." << std::endl;
 }
 template <typename Scalar>
-FrameForceTpl<Scalar>::FrameForceTpl(const FrameIndex& id, const Force& force) : id(id), force(force) {
+FrameForceTpl<Scalar>::FrameForceTpl(const FrameIndex& id, const Force& force)
+    : id(id), force(force) {
   std::cerr << "Deprecated: Do not use FrameForce." << std::endl;
 }
 
 template <typename Scalar>
-FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl() : id(0), cone(FrictionCone()) {
+FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl()
+    : id(0), cone(FrictionCone()) {
   std::cerr << "Deprecated: Do not use FrameFrictionCone." << std::endl;
 }
 template <typename Scalar>
-FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl(const FrameFrictionConeTpl<Scalar>& other)
+FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl(
+    const FrameFrictionConeTpl<Scalar>& other)
     : id(other.id), cone(other.cone) {
   std::cerr << "Deprecated: Do not use FrameFrictionCone." << std::endl;
 }
 template <typename Scalar>
-FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl(const FrameIndex& id, const FrictionCone& cone)
+FrameFrictionConeTpl<Scalar>::FrameFrictionConeTpl(const FrameIndex& id,
+                                                   const FrictionCone& cone)
     : id(id), cone(cone) {
   std::cerr << "Deprecated: Do not use FrameFrictionCone." << std::endl;
 }
@@ -408,27 +471,34 @@ FrameWrenchConeTpl<Scalar>::FrameWrenchConeTpl() : id(0), cone(WrenchCone()) {
   std::cerr << "Deprecated: Do not use FrameWrenchCone." << std::endl;
 }
 template <typename Scalar>
-FrameWrenchConeTpl<Scalar>::FrameWrenchConeTpl(const FrameWrenchConeTpl<Scalar>& other)
+FrameWrenchConeTpl<Scalar>::FrameWrenchConeTpl(
+    const FrameWrenchConeTpl<Scalar>& other)
     : id(other.id), cone(other.cone) {
   std::cerr << "Deprecated: Do not use FrameWrenchCone." << std::endl;
 }
 template <typename Scalar>
-FrameWrenchConeTpl<Scalar>::FrameWrenchConeTpl(const FrameIndex& id, const WrenchCone& cone) : id(id), cone(cone) {
+FrameWrenchConeTpl<Scalar>::FrameWrenchConeTpl(const FrameIndex& id,
+                                               const WrenchCone& cone)
+    : id(id), cone(cone) {
   std::cerr << "Deprecated: Do not use FrameWrenchCone." << std::endl;
 }
 
 template <typename Scalar>
-FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl() : id_(0), box_(Vector2s::Zero()) {
+FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl()
+    : id_(0), box_(Vector2s::Zero()) {
   update_A();
   std::cerr << "Deprecated: Do not use FrameCoPSupport." << std::endl;
 }
 template <typename Scalar>
-FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl(const FrameCoPSupportTpl<Scalar>& other)
+FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl(
+    const FrameCoPSupportTpl<Scalar>& other)
     : id_(other.get_id()), box_(other.get_box()), A_(other.get_A()) {
   std::cerr << "Deprecated: Do not use FrameCoPSupport." << std::endl;
 }
 template <typename Scalar>
-FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl(const FrameIndex& id, const Vector2s& box) : id_(id), box_(box) {
+FrameCoPSupportTpl<Scalar>::FrameCoPSupportTpl(const FrameIndex& id,
+                                               const Vector2s& box)
+    : id_(id), box_(box) {
   update_A();
   std::cerr << "Deprecated: Do not use FrameCoPSupport." << std::endl;
 }

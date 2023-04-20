@@ -23,19 +23,23 @@ class SolverIntro : public SolverFDDP {
    * @brief Initialize the INTRO solver
    *
    * @param[in] problem  Shooting problem
-   * @param[in] reduced  Use the reduced Schur-complement approach (default true)
+   * @param[in] reduced  Use the reduced Schur-complement approach (default
+   * true)
    */
   explicit SolverIntro(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverIntro();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-                     const bool is_feasible = false, const double init_reg = 1e-9);
+  virtual bool solve(
+      const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const double init_reg = 1e-9);
   virtual double tryStep(const double step_length = 1);
   virtual double stoppingCriteria();
   virtual void resizeData();
   virtual double calcDiff();
-  virtual void computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model);
+  virtual void computeValueFunction(
+      const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model);
   virtual void computeGains(const std::size_t t);
 
   /**
@@ -64,8 +68,8 @@ class SolverIntro : public SolverFDDP {
   double get_dPhiexp() const;
 
   /**
-   * @brief Return the estimated penalty parameter that balances relative contribution
-   * of the cost function and equality constraints
+   * @brief Return the estimated penalty parameter that balances relative
+   * contribution of the cost function and equality constraints
    */
   double get_upsilon() const;
 
@@ -75,7 +79,8 @@ class SolverIntro : public SolverFDDP {
   const std::vector<std::size_t>& get_Hu_rank() const;
 
   /**
-   * @brief Return the span and kernel of control-equality constraints \f$\mathbf{H_u}\f
+   * @brief Return the span and kernel of control-equality constraints
+   * \f$\mathbf{H_u}\f
    */
   const std::vector<Eigen::MatrixXd>& get_YZ() const;
 
@@ -100,12 +105,14 @@ class SolverIntro : public SolverFDDP {
   const std::vector<Eigen::VectorXd>& get_Qz() const;
 
   /**
-   * @brief Return span-projected Jacobian of the equality-constraint with respect to the control
+   * @brief Return span-projected Jacobian of the equality-constraint with
+   * respect to the control
    */
   const std::vector<Eigen::MatrixXd>& get_Hy() const;
 
   /**
-   * @brief Return feedforward term related to the nullspace of \f$\mathbf{H_u}\f$
+   * @brief Return feedforward term related to the nullspace of
+   * \f$\mathbf{H_u}\f$
    */
   const std::vector<Eigen::VectorXd>& get_kz() const;
 
@@ -127,15 +134,17 @@ class SolverIntro : public SolverFDDP {
   /**
    * @brief Return the zero-upsilon label
    *
-   * True if we set the estimated penalty parameter (upsilon) to zero when solve is called.
+   * True if we set the estimated penalty parameter (upsilon) to zero when solve
+   * is called.
    */
   bool get_zero_upsilon() const;
 
   /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
-   * Note that the default solver is nullspace LU. When we enable parallelization, this strategy is generally faster
-   * than others for medium to large systems.
+   * Note that the default solver is nullspace LU. When we enable
+   * parallelization, this strategy is generally faster than others for medium
+   * to large systems.
    */
   void set_equality_solver(const EqualitySolverType type);
 
@@ -152,45 +161,64 @@ class SolverIntro : public SolverFDDP {
   /**
    * @brief Modify the zero-upsilon label
    *
-   * @param zero_upsilon  True if we set estimated penalty parameter (upsilon) to zero when solve is called.
+   * @param zero_upsilon  True if we set estimated penalty parameter (upsilon)
+   * to zero when solve is called.
    */
   void set_zero_upsilon(const bool zero_upsilon);
 
  protected:
-  enum EqualitySolverType eq_solver_;  //!< Strategy used for handling the equality constraints
-  double th_feas_;                     //!< Threshold for switching to feasibility
-  double rho_;                         //!< Parameter used in the merit function to predict the expected reduction
-  double dPhi_;                        //!< Reduction in the merit function obtained by `tryStep()`
-  double dPhiexp_;                     //!< Expected reduction in the merit function
-  double hfeas_try_;                   //!< Feasibility of the equality constraint computed by the line search
-  double upsilon_;     //!< Estimated penalty parameter that balances relative contribution of the cost function and
-                       //!< equality constraints
-  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter (upsilon) to zero when solve is called.
+  enum EqualitySolverType
+      eq_solver_;   //!< Strategy used for handling the equality constraints
+  double th_feas_;  //!< Threshold for switching to feasibility
+  double rho_;      //!< Parameter used in the merit function to predict the
+                    //!< expected reduction
+  double dPhi_;     //!< Reduction in the merit function obtained by `tryStep()`
+  double dPhiexp_;  //!< Expected reduction in the merit function
+  double hfeas_try_;  //!< Feasibility of the equality constraint computed by
+                      //!< the line search
+  double
+      upsilon_;  //!< Estimated penalty parameter that balances relative
+                 //!< contribution of the cost function and equality constraints
+  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
+                       //!< (upsilon) to zero when solve is called.
 
-  std::vector<std::size_t> Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
+  std::vector<std::size_t>
+      Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
   std::vector<Eigen::MatrixXd> KQuu_tmp_;
   std::vector<Eigen::MatrixXd>
-      YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the
-            //!< control-equality constraints \f$\mathbf{H_u}\f$
+      YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel
+            //!< \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the control-equality
+            //!< constraints \f$\mathbf{H_u}\f$
   std::vector<Eigen::MatrixXd>
-      Hy_;  //!< Span-projected Jacobian of the equality-constraint with respect to the control
-  std::vector<Eigen::VectorXd> Qz_;   //!< Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
-  std::vector<Eigen::MatrixXd> Qzz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
-  std::vector<Eigen::MatrixXd> Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
-  std::vector<Eigen::MatrixXd> Quz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
-  std::vector<Eigen::VectorXd> kz_;   //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::MatrixXd> Kz_;   //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::VectorXd> ks_;   //!< Feedforward term related to the equality constraints
-  std::vector<Eigen::MatrixXd> Ks_;   //!< Feedback gain related to the equality constraints
+      Hy_;  //!< Span-projected Jacobian of the equality-constraint with respect
+            //!< to the control
+  std::vector<Eigen::VectorXd>
+      Qz_;  //!< Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
+  std::vector<Eigen::MatrixXd>
+      Qzz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
+  std::vector<Eigen::MatrixXd>
+      Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
+  std::vector<Eigen::MatrixXd>
+      Quz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
+  std::vector<Eigen::VectorXd>
+      kz_;  //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
+  std::vector<Eigen::MatrixXd>
+      Kz_;  //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
+  std::vector<Eigen::VectorXd>
+      ks_;  //!< Feedforward term related to the equality constraints
+  std::vector<Eigen::MatrixXd>
+      Ks_;  //!< Feedback gain related to the equality constraints
   std::vector<Eigen::MatrixXd> QuuinvHuT_;
   std::vector<Eigen::LLT<Eigen::MatrixXd> > Qzz_llt_;  //!< Cholesky LLT solver
   std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
-      Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and nullspace matrices
+      Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and
+               //!< nullspace matrices
   std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
-      Hu_qr_;  //!< Column-pivot QR solvers used for computing the span and nullspace matrices
+      Hu_qr_;  //!< Column-pivot QR solvers used for computing the span and
+               //!< nullspace matrices
   std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
-      Hy_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward and feedback gain related to the
-               //!< equality constraint
+      Hy_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward
+               //!< and feedback gain related to the equality constraint
 };
 
 }  // namespace crocoddyl

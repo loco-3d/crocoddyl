@@ -7,15 +7,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "control.hpp"
-#include "crocoddyl/core/controls/poly-zero.hpp"
+
 #include "crocoddyl/core/controls/poly-one.hpp"
 #include "crocoddyl/core/controls/poly-two-rk.hpp"
+#include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
-const std::vector<ControlTypes::Type> ControlTypes::all(ControlTypes::init_all());
+const std::vector<ControlTypes::Type> ControlTypes::all(
+    ControlTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
   switch (type) {
@@ -43,21 +45,29 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
 ControlFactory::ControlFactory() {}
 ControlFactory::~ControlFactory() {}
 
-boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> ControlFactory::create(
-    ControlTypes::Type control_type, const std::size_t nu) const {
+boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>
+ControlFactory::create(ControlTypes::Type control_type,
+                       const std::size_t nu) const {
   boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> control;
   switch (control_type) {
     case ControlTypes::PolyZero:
-      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyZero>(nu);
+      control =
+          boost::make_shared<crocoddyl::ControlParametrizationModelPolyZero>(
+              nu);
       break;
     case ControlTypes::PolyOne:
-      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
+      control =
+          boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
       break;
     case ControlTypes::PolyTwoRK3:
-      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(nu, RKType::three);
+      control =
+          boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
+              nu, RKType::three);
       break;
     case ControlTypes::PolyTwoRK4:
-      control = boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(nu, RKType::four);
+      control =
+          boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
+              nu, RKType::four);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong ControlTypes::Type given");

@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "crocoddyl/core/solver-base.hpp"
 

@@ -10,8 +10,8 @@
 #define CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_
 
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/state-base.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -28,17 +28,26 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
 
   virtual VectorXs zero() const;
   virtual VectorXs rand() const;
-  virtual void diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+  virtual void diff(const Eigen::Ref<const VectorXs>& x0,
+                    const Eigen::Ref<const VectorXs>& x1,
                     Eigen::Ref<VectorXs> dxout) const;
-  virtual void integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+  virtual void integrate(const Eigen::Ref<const VectorXs>& x,
+                         const Eigen::Ref<const VectorXs>& dx,
                          Eigen::Ref<VectorXs> xout) const;
-  virtual void Jdiff(const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&, Eigen::Ref<MatrixXs> Jfirst,
-                     Eigen::Ref<MatrixXs> Jsecond, const Jcomponent firstsecond = both) const;
-  virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                          Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                          const Jcomponent firstsecond = both, const AssignmentOp = setto) const;
-  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                   Eigen::Ref<MatrixXs> Jin, const Jcomponent firstsecond) const;
+  virtual void Jdiff(const Eigen::Ref<const VectorXs>&,
+                     const Eigen::Ref<const VectorXs>&,
+                     Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                     const Jcomponent firstsecond = both) const;
+  virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x,
+                          const Eigen::Ref<const VectorXs>& dx,
+                          Eigen::Ref<MatrixXs> Jfirst,
+                          Eigen::Ref<MatrixXs> Jsecond,
+                          const Jcomponent firstsecond = both,
+                          const AssignmentOp = setto) const;
+  virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
+                                   const Eigen::Ref<const VectorXs>& dx,
+                                   Eigen::Ref<MatrixXs> Jin,
+                                   const Jcomponent firstsecond) const;
 
  protected:
   using StateAbstractTpl<Scalar>::nx_;

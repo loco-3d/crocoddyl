@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2010-2013 Tommaso Urli (tommaso.urli@uniud.it; University of Udine)
+// Copyright (c) 2010-2013 Tommaso Urli (tommaso.urli@uniud.it; University of
+// Udine)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,9 +25,9 @@
 #ifndef CROCODDYL_CORE_UTILS_STOPWATCH_H_
 #define CROCODDYL_CORE_UTILS_STOPWATCH_H_
 
+#include <ctime>
 #include <iostream>
 #include <map>
-#include <ctime>
 #include <sstream>
 
 #ifndef WIN32
@@ -34,8 +35,10 @@
 #pragma GCC visibility push(default)
 #endif
 
-#define START_PROFILER(name) getProfiler().profiler_status() ? getProfiler().start(name) : void()
-#define STOP_PROFILER(name) getProfiler().profiler_status() ? getProfiler().stop(name) : void()
+#define START_PROFILER(name) \
+  getProfiler().profiler_status() ? getProfiler().start(name) : void()
+#define STOP_PROFILER(name) \
+  getProfiler().profiler_status() ? getProfiler().stop(name) : void()
 
 #define STOP_WATCH_MAX_NAME_LENGTH 60
 #define STOP_WATCH_TIME_WIDTH 10
@@ -186,7 +189,8 @@ class Stopwatch {
   void reset_all();
 
   /** @brief Dump the data of a certain performance record */
-  void report(const std::string &perf_name, int precision = 2, std::ostream &output = std::cout);
+  void report(const std::string &perf_name, int precision = 2,
+              std::ostream &output = std::cout);
 
   /** @brief Dump the data of all the performance records */
   void report_all(int precision = 2, std::ostream &output = std::cout);
@@ -225,21 +229,29 @@ class Stopwatch {
   /** @brief Struct to hold the performance data */
   struct PerformanceData {
     PerformanceData()
-        : clock_start(0), total_time(0), min_time(0), max_time(0), last_time(0), paused(false), stops(0) {}
+        : clock_start(0),
+          total_time(0),
+          min_time(0),
+          max_time(0),
+          last_time(0),
+          paused(false),
+          stops(0) {}
 
     long double clock_start;  //!< Start time
     long double total_time;   //!< Cumulative total time
     long double min_time;     //!< Minimum time
     long double max_time;     //!< Maximum time
     long double last_time;    //!< Last time
-    bool paused;              //!< Tells if this performance has been paused, only for internal use
-    int stops;                //!< How many cycles have been this stopwatch executed?
+    bool paused;  //!< Tells if this performance has been paused, only for
+                  //!< internal use
+    int stops;    //!< How many cycles have been this stopwatch executed?
   };
 
-  bool active;                                         //!< Flag to hold the clock's status
-  StopwatchMode mode;                                  //!< Time taking mode
-  std::map<std::string, PerformanceData> *records_of;  //!< Dynamic collection of performance data
-  bool profiler_active;                                //!< Indicates if the profiler is enabled
+  bool active;         //!< Flag to hold the clock's status
+  StopwatchMode mode;  //!< Time taking mode
+  std::map<std::string, PerformanceData>
+      *records_of;       //!< Dynamic collection of performance data
+  bool profiler_active;  //!< Indicates if the profiler is enabled
 };
 
 Stopwatch &getProfiler();

@@ -8,14 +8,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
-ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(boost::shared_ptr<Base> model, bool with_gauss_approx)
-    : Base(model->get_state(), model->get_nu(), model->get_nr(), model->get_ng(), model->get_nh()),
+ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(
+    boost::shared_ptr<Base> model, bool with_gauss_approx)
+    : Base(model->get_state(), model->get_nu(), model->get_nr(),
+           model->get_ng(), model->get_nh()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
@@ -28,15 +30,18 @@ template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::~ActionModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+void ActionModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
@@ -47,11 +52,13 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
 }
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstract>& data,
-                                         const Eigen::Ref<const VectorXs>& x) {
+void ActionModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
@@ -62,16 +69,18 @@ void ActionModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActionDataAbstr
 }
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x,
-                                             const Eigen::Ref<const VectorXs>& u) {
+void ActionModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -152,12 +161,15 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
       d->dx(jx) = d->xh_hess;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
-      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp =
+          d->data_x[ix]
+              ->cost;  // cost due to positive disturbance in both directions
       d->dx(ix) = 0.;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
       const Scalar czp =
-          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and
+                                // positive disturbance in 'j' direction
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
@@ -179,11 +191,14 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
     for (std::size_t ju = iu + 1; ju < nu; ++ju) {
       d->du(ju) = d->uh_hess;
       model_->calc(d->data_u[iu], x, u + d->du);
-      const Scalar cpp = d->data_u[iu]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp =
+          d->data_u[iu]
+              ->cost;  // cost due to positive disturbance in both directions
       d->du(iu) = 0.;
       model_->calc(d->data_u[iu], x, u + d->du);
       const Scalar czp =
-          d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+          d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and
+                                // positive disturbance in 'j' direction
       data->Luu(iu, ju) = (cpp - czp - cp + c0) / d->uh_hess_pow2;
       data->Luu(ju, iu) = data->Luu(iu, ju);
       d->du(iu) = d->uh_hess;
@@ -223,11 +238,13 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
 }
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x) {
+void ActionModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActionDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -280,12 +297,15 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
       d->dx(jx) = d->xh_hess;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
-      const Scalar cpp = d->data_x[ix]->cost;  // cost due to positive disturbance in both directions
+      const Scalar cpp =
+          d->data_x[ix]
+              ->cost;  // cost due to positive disturbance in both directions
       d->dx(ix) = 0.;
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
       const Scalar czp =
-          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and positive disturbance in 'j' direction
+          d->data_x[ix]->cost;  // cost due to zero disturance in 'i' and
+                                // positive disturbance in 'j' direction
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
@@ -301,20 +321,23 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataA
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionModelNumDiffTpl<Scalar>::createData() {
+boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+ActionModelNumDiffTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
-                                                Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                                                const std::size_t maxiter, const Scalar tol) {
+void ActionModelNumDiffTpl<Scalar>::quasiStatic(
+    const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,
+    const Scalar tol) {
   Data* d = static_cast<Data*>(data.get());
   model_->quasiStatic(d->data_0, u, x, maxiter, tol);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >& ActionModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >&
+ActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -344,7 +367,8 @@ void ActionModelNumDiffTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-void ActionModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /** x */) {
+void ActionModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs>& /** x */) {
   // do nothing in the general case
 }
 

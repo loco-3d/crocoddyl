@@ -15,19 +15,26 @@
 namespace crocoddyl {
 namespace python {
 
-class SquashingModelAbstract_wrap : public SquashingModelAbstract, public bp::wrapper<SquashingModelAbstract> {
+class SquashingModelAbstract_wrap : public SquashingModelAbstract,
+                                    public bp::wrapper<SquashingModelAbstract> {
  public:
   SquashingModelAbstract_wrap(const std::size_t ns)
       : SquashingModelAbstract(ns), bp::wrapper<SquashingModelAbstract>() {}
 
-  void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& s) {
-    assert_pretty(static_cast<std::size_t>(s.size()) == ns_, "s has wrong dimension");
-    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)s);
+  void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+            const Eigen::Ref<const Eigen::VectorXd>& s) {
+    assert_pretty(static_cast<std::size_t>(s.size()) == ns_,
+                  "s has wrong dimension");
+    return bp::call<void>(this->get_override("calc").ptr(), data,
+                          (Eigen::VectorXd)s);
   }
 
-  void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& s) {
-    assert_pretty(static_cast<std::size_t>(s.size()) == ns_, "s has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)s);
+  void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& s) {
+    assert_pretty(static_cast<std::size_t>(s.size()) == ns_,
+                  "s has wrong dimension");
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                          (Eigen::VectorXd)s);
   }
 };
 

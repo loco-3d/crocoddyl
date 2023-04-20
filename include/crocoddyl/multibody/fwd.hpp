@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_MULTIBODY_FWD_HPP_
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
-#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 
@@ -269,7 +269,8 @@ class ImpulseModelMultipleTpl;
 template <typename Scalar>
 struct ImpulseDataMultipleTpl;
 
-/*******************************Template Instantiation**************************/
+/*******************************Template
+ * Instantiation**************************/
 
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
@@ -283,14 +284,22 @@ typedef ContactDataAbstractTpl<double> ContactDataAbstract;
 typedef ActionModelImpulseFwdDynamicsTpl<double> ActionModelImpulseFwdDynamics;
 typedef ActionDataImpulseFwdDynamicsTpl<double> ActionDataImpulseFwdDynamics;
 
-typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionModelFreeFwdDynamics;
-typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
-typedef DifferentialActionModelFreeInvDynamicsTpl<double> DifferentialActionModelFreeInvDynamics;
-typedef DifferentialActionDataFreeInvDynamicsTpl<double> DifferentialActionDataFreeInvDynamics;
-typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
-typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
-typedef DifferentialActionModelContactInvDynamicsTpl<double> DifferentialActionModelContactInvDynamics;
-typedef DifferentialActionDataContactInvDynamicsTpl<double> DifferentialActionDataContactInvDynamics;
+typedef DifferentialActionModelFreeFwdDynamicsTpl<double>
+    DifferentialActionModelFreeFwdDynamics;
+typedef DifferentialActionDataFreeFwdDynamicsTpl<double>
+    DifferentialActionDataFreeFwdDynamics;
+typedef DifferentialActionModelFreeInvDynamicsTpl<double>
+    DifferentialActionModelFreeInvDynamics;
+typedef DifferentialActionDataFreeInvDynamicsTpl<double>
+    DifferentialActionDataFreeInvDynamics;
+typedef DifferentialActionModelContactFwdDynamicsTpl<double>
+    DifferentialActionModelContactFwdDynamics;
+typedef DifferentialActionDataContactFwdDynamicsTpl<double>
+    DifferentialActionDataContactFwdDynamics;
+typedef DifferentialActionModelContactInvDynamicsTpl<double>
+    DifferentialActionModelContactInvDynamics;
+typedef DifferentialActionDataContactInvDynamicsTpl<double>
+    DifferentialActionDataContactInvDynamics;
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
@@ -301,29 +310,45 @@ typedef FrictionConeTpl<double> FrictionCone;
 typedef WrenchConeTpl<double> WrenchCone;
 typedef CoPSupportTpl<double> CoPSupport;
 
-DEPRECATED("Do not use FrameTranslation", typedef FrameTranslationTpl<double> FrameTranslation;)
-DEPRECATED("Do not use FrameTranslation", typedef FrameRotationTpl<double> FrameRotation;)
-DEPRECATED("Do not use FramePlacement", typedef FramePlacementTpl<double> FramePlacement;)
-DEPRECATED("Do not use FrameMotion", typedef FrameMotionTpl<double> FrameMotion;)
+DEPRECATED("Do not use FrameTranslation",
+           typedef FrameTranslationTpl<double> FrameTranslation;)
+DEPRECATED("Do not use FrameTranslation",
+           typedef FrameRotationTpl<double> FrameRotation;)
+DEPRECATED("Do not use FramePlacement",
+           typedef FramePlacementTpl<double> FramePlacement;)
+DEPRECATED("Do not use FrameMotion",
+           typedef FrameMotionTpl<double> FrameMotion;)
 DEPRECATED("Do not use FrameForce", typedef FrameForceTpl<double> FrameForce;)
-DEPRECATED("Do not use FrameFrictionCone", typedef FrameFrictionConeTpl<double> FrameFrictionCone;)
-DEPRECATED("Do not use FrameWrenchCone", typedef FrameWrenchConeTpl<double> FrameWrenchCone;)
-DEPRECATED("Do not use FrameCopSupport", typedef FrameCoPSupportTpl<double> FrameCoPSupport;)
+DEPRECATED("Do not use FrameFrictionCone",
+           typedef FrameFrictionConeTpl<double> FrameFrictionCone;)
+DEPRECATED("Do not use FrameWrenchCone",
+           typedef FrameWrenchConeTpl<double> FrameWrenchCone;)
+DEPRECATED("Do not use FrameCopSupport",
+           typedef FrameCoPSupportTpl<double> FrameCoPSupport;)
 
-typedef ResidualModelCentroidalMomentumTpl<double> ResidualModelCentroidalMomentum;
-typedef ResidualDataCentroidalMomentumTpl<double> ResidualDataCentroidalMomentum;
+typedef ResidualModelCentroidalMomentumTpl<double>
+    ResidualModelCentroidalMomentum;
+typedef ResidualDataCentroidalMomentumTpl<double>
+    ResidualDataCentroidalMomentum;
 typedef ResidualModelCoMPositionTpl<double> ResidualModelCoMPosition;
 typedef ResidualDataCoMPositionTpl<double> ResidualDataCoMPosition;
 typedef ResidualModelContactForceTpl<double> ResidualModelContactForce;
 typedef ResidualDataContactForceTpl<double> ResidualDataContactForce;
-typedef ResidualModelContactFrictionConeTpl<double> ResidualModelContactFrictionCone;
-typedef ResidualDataContactFrictionConeTpl<double> ResidualDataContactFrictionCone;
-typedef ResidualModelContactCoPPositionTpl<double> ResidualModelContactCoPPosition;
-typedef ResidualDataContactCoPPositionTpl<double> ResidualDataContactCoPPosition;
-typedef ResidualModelContactWrenchConeTpl<double> ResidualModelContactWrenchCone;
+typedef ResidualModelContactFrictionConeTpl<double>
+    ResidualModelContactFrictionCone;
+typedef ResidualDataContactFrictionConeTpl<double>
+    ResidualDataContactFrictionCone;
+typedef ResidualModelContactCoPPositionTpl<double>
+    ResidualModelContactCoPPosition;
+typedef ResidualDataContactCoPPositionTpl<double>
+    ResidualDataContactCoPPosition;
+typedef ResidualModelContactWrenchConeTpl<double>
+    ResidualModelContactWrenchCone;
 typedef ResidualDataContactWrenchConeTpl<double> ResidualDataContactWrenchCone;
-typedef ResidualModelContactControlGravTpl<double> ResidualModelContactControlGrav;
-typedef ResidualDataContactControlGravTpl<double> ResidualDataContactControlGrav;
+typedef ResidualModelContactControlGravTpl<double>
+    ResidualModelContactControlGrav;
+typedef ResidualDataContactControlGravTpl<double>
+    ResidualDataContactControlGrav;
 typedef ResidualModelControlGravTpl<double> ResidualModelControlGrav;
 typedef ResidualDataControlGravTpl<double> ResidualDataControlGrav;
 typedef ResidualModelFramePlacementTpl<double> ResidualModelFramePlacement;
@@ -347,7 +372,13 @@ typedef ResidualDataPairCollisionTpl<double> ResidualDataPairCollision;
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
 
-enum ContactType { ContactUndefined, Contact1D, Contact2D, Contact3D, Contact6D };
+enum ContactType {
+  ContactUndefined,
+  Contact1D,
+  Contact2D,
+  Contact3D,
+  Contact6D
+};
 enum ImpulseType { ImpulseUndefined, Impulse3D, Impulse6D };
 
 typedef ContactItemTpl<double> ContactItem;
@@ -366,13 +397,18 @@ typedef StateMultibodyTpl<double> StateMultibody;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
-typedef DataCollectorJointActMultibodyTpl<double> DataCollectorJointActMultibody;
+typedef DataCollectorJointActMultibodyTpl<double>
+    DataCollectorJointActMultibody;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
-typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
-typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
-typedef DataCollectorJointActMultibodyInContactTpl<double> DataCollectorJointActMultibodyInContact;
+typedef DataCollectorMultibodyInContactTpl<double>
+    DataCollectorMultibodyInContact;
+typedef DataCollectorActMultibodyInContactTpl<double>
+    DataCollectorActMultibodyInContact;
+typedef DataCollectorJointActMultibodyInContactTpl<double>
+    DataCollectorJointActMultibodyInContact;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
-typedef DataCollectorMultibodyInImpulseTpl<double> DataCollectorMultibodyInImpulse;
+typedef DataCollectorMultibodyInImpulseTpl<double>
+    DataCollectorMultibodyInImpulse;
 
 typedef ImpulseModel6DTpl<double> ImpulseModel6D;
 typedef ImpulseData6DTpl<double> ImpulseData6D;

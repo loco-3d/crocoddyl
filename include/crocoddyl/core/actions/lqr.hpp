@@ -11,8 +11,8 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
@@ -29,15 +29,20 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActionModelLQRTpl(const std::size_t nx, const std::size_t nu, const bool drift_free = true);
+  ActionModelLQRTpl(const std::size_t nx, const std::size_t nu,
+                    const bool drift_free = true);
   virtual ~ActionModelLQRTpl();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
@@ -93,8 +98,10 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   explicit ActionDataLQRTpl(Model<Scalar>* const model)
       : Base(model),
         Luu_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
-        Lxx_x_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
-    // Setting the linear model and quadratic cost here because they are constant
+        Lxx_x_tmp(VectorXs::Zero(
+            static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
+    // Setting the linear model and quadratic cost here because they are
+    // constant
     Fx = model->get_Fx();
     Fu = model->get_Fu();
     Lxx = model->get_Lxx();
@@ -112,8 +119,10 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
-  VectorXs Luu_u_tmp;  // Temporary variable for storing Hessian-vector product (size: nu)
-  VectorXs Lxx_x_tmp;  // Temporary variable for storing Hessian-vector product (size: nx)
+  VectorXs Luu_u_tmp;  // Temporary variable for storing Hessian-vector product
+                       // (size: nu)
+  VectorXs Lxx_x_tmp;  // Temporary variable for storing Hessian-vector product
+                       // (size: nx)
 };
 
 }  // namespace crocoddyl

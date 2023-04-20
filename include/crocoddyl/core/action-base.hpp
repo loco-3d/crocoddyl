@@ -10,9 +10,9 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <stdexcept>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
@@ -23,53 +23,71 @@ namespace crocoddyl {
 /**
  * @brief Abstract class for action model
  *
- * An action model combines dynamics, cost functions and constraints. Each node, in our optimal control problem, is
- * described through an action model. Every time that we want describe a problem, we need to provide ways of computing
- * the dynamics, cost functions, constraints and their derivatives. All these is described inside the action model.
+ * An action model combines dynamics, cost functions and constraints. Each node,
+ * in our optimal control problem, is described through an action model. Every
+ * time that we want describe a problem, we need to provide ways of computing
+ * the dynamics, cost functions, constraints and their derivatives. All these is
+ * described inside the action model.
  *
- * Concretely speaking, the action model describes a time-discrete action model with a first-order ODE along a cost
- * function, i.e.
- *  - the state \f$\mathbf{z}\in\mathcal{Z}\f$ lies in a manifold described with a `nx`-tuple,
- *  - the state rate \f$\mathbf{\dot{x}}\in T_{\mathbf{q}}\mathcal{Q}\f$ is the tangent vector to the state manifold
- * with `ndx` dimension,
- *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean vector
- *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation functions (see
- * `ResidualModelAbstractTpl` and `ActivationModelAbstractTpl`, respetively),
- *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and
- * equality vector functions, respectively.
+ * Concretely speaking, the action model describes a time-discrete action model
+ * with a first-order ODE along a cost function, i.e.
+ *  - the state \f$\mathbf{z}\in\mathcal{Z}\f$ lies in a manifold described with
+ * a `nx`-tuple,
+ *  - the state rate \f$\mathbf{\dot{x}}\in T_{\mathbf{q}}\mathcal{Q}\f$ is the
+ * tangent vector to the state manifold with `ndx` dimension,
+ *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean
+ * vector
+ *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation
+ * functions (see `ResidualModelAbstractTpl` and `ActivationModelAbstractTpl`,
+ * respetively),
+ *  - \f$\mathbf{g}(\cdot)\in\mathbb{R}^{ng}\f$ and
+ * \f$\mathbf{h}(\cdot)\in\mathbb{R}^{nh}\f$ are the inequality and equality
+ * vector functions, respectively.
  *
- * The computation of these equations are carried out out inside `calc()` function. In short, this function computes
- * the system acceleration, cost and constraints values (also called constraints violations). This procedure is
+ * The computation of these equations are carried out out inside `calc()`
+ * function. In short, this function computes the system acceleration, cost and
+ * constraints values (also called constraints violations). This procedure is
  * equivalent to running a forward pass of the action model.
  *
- * However, during numerical optimization, we also need to run backward passes of the action model. These calculations
- * are performed by `calcDiff()`. In short, this method builds a linear-quadratic approximation of the action model,
- * i.e.: \f[ \begin{aligned}
- * &\delta\mathbf{x}_{k+1} = \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k, &\textrm{(dynamics)}\\
- * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
- * \delta\mathbf{u}_k\end{bmatrix}^T
- * \begin{bmatrix}0 & \mathbf{\ell_x}^T & \mathbf{\ell_u}^T \\ \mathbf{\ell_x} & \mathbf{\ell_{xx}} &
+ * However, during numerical optimization, we also need to run backward passes
+ * of the action model. These calculations are performed by `calcDiff()`. In
+ * short, this method builds a linear-quadratic approximation of the action
+ * model, i.e.: \f[ \begin{aligned}
+ * &\delta\mathbf{x}_{k+1} =
+ * \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k,
+ * &\textrm{(dynamics)}\\
+ * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1
+ * \\ \delta\mathbf{x}_k \\ \delta\mathbf{u}_k\end{bmatrix}^T \begin{bmatrix}0 &
+ * \mathbf{\ell_x}^T & \mathbf{\ell_u}^T \\ \mathbf{\ell_x} & \mathbf{\ell_{xx}}
+ * &
  * \mathbf{\ell_{ux}}^T \\
- * \mathbf{\ell_u} & \mathbf{\ell_{ux}} & \mathbf{\ell_{uu}}\end{bmatrix} \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
+ * \mathbf{\ell_u} & \mathbf{\ell_{ux}} & \mathbf{\ell_{uu}}\end{bmatrix}
+ * \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
  * \delta\mathbf{u}_k\end{bmatrix}, &\textrm{(cost)}\\
- * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)<\mathbf{0}, &\textrm{(inequality constraint)}\\
- * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)=\mathbf{0}, &\textrm{(equality constraint)}
- * \end{aligned}
- * \f]
- * where
- *  - \f$\mathbf{f_x}\in\mathbb{R}^{ndx\times ndx}\f$ and \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ are the
- * Jacobians of the dynamics,
- *  - \f$\mathbf{\ell_x}\in\mathbb{R}^{ndx}\f$ and \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the
+ * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)<\mathbf{0},
+ * &\textrm{(inequality constraint)}\\
+ * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)=\mathbf{0},
+ * &\textrm{(equality constraint)} \end{aligned} \f] where
+ *  - \f$\mathbf{f_x}\in\mathbb{R}^{ndx\times ndx}\f$ and
+ * \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ are the Jacobians of the
+ * dynamics,
+ *  - \f$\mathbf{\ell_x}\in\mathbb{R}^{ndx}\f$ and
+ * \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the cost
+ * function,
+ *  - \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
+ * \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
+ * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the
  * cost function,
- *  - \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
- * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the cost function,
- *  - \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$ and \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the
- * Jacobians of the inequality constraints, and
- *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the
- * Jacobians of the equality constraints.
+ *  - \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$ and
+ * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the Jacobians of the
+ * inequality constraints, and
+ *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and
+ * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the Jacobians of the
+ * equality constraints.
  *
- * Additionally, it is important to note that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to first run `calc()`.
+ * Additionally, it is important to note that `calcDiff()` computes the
+ * derivatives using the latest stored values by `calc()`. Thus, we need to
+ * first run `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -93,7 +111,8 @@ class ActionModelAbstractTpl {
    * @param[in] ng     Number of inequality constraints
    * @param[in] nh     Number of equality constraints
    */
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 0,
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                         const std::size_t nu, const std::size_t nr = 0,
                          const std::size_t ng = 0, const std::size_t nh = 0);
   virtual ~ActionModelAbstractTpl();
 
@@ -104,44 +123,53 @@ class ActionModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the total cost value for nodes that depends only on the state
+   * @brief Compute the total cost value for nodes that depends only on the
+   * state
    *
-   * It updates the total cost and the next state is not computed as it is not expected to change. This function is
-   * used in the terminal nodes of an optimal control problem.
+   * It updates the total cost and the next state is not computed as it is not
+   * expected to change. This function is used in the terminal nodes of an
+   * optimal control problem.
    *
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the dynamics and cost functions
    *
-   * It computes the partial derivatives of the dynamical system and the cost function. It assumes that `calc()` has
-   * been run first. This function builds a linear-quadratic approximation of the action model (i.e. dynamical system
+   * It computes the partial derivatives of the dynamical system and the cost
+   * function. It assumes that `calc()` has been run first. This function builds
+   * a linear-quadratic approximation of the action model (i.e. dynamical system
    * and cost function).
    *
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
   /**
-   * @brief Compute the derivatives of the cost functions with respect to the state only
+   * @brief Compute the derivatives of the cost functions with respect to the
+   * state only
    *
-   * It updates the derivatives of the cost function with respect to the state only. This function is used in
-   * the terminal nodes of an optimal control problem.
+   * It updates the derivatives of the cost function with respect to the state
+   * only. This function is used in the terminal nodes of an optimal control
+   * problem.
    *
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the action data
@@ -158,8 +186,9 @@ class ActionModelAbstractTpl {
   /**
    * @brief Computes the quasic static commands
    *
-   * The quasic static commands are the ones produced for a the reference posture as an equilibrium point, i.e.
-   * for \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   * The quasic static commands are the ones produced for a the reference
+   * posture as an equilibrium point, i.e. for
+   * \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
    *
    * @param[in] data    Action data
    * @param[out] u      Quasic static commands
@@ -167,8 +196,10 @@ class ActionModelAbstractTpl {
    * @param[in] maxiter Maximum allowed number of iterations
    * @param[in] tol     Tolerance
    */
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+                           Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x,
+                           const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9));
 
   /**
@@ -182,8 +213,9 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    * @return Quasic static commands
    */
-  VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x,
-                         const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+  VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data,
+                         const VectorXs& x, const std::size_t maxiter = 100,
+                         const Scalar tol = Scalar(1e-9));
 
   /**
    * @brief Return the dimension of the control input
@@ -249,7 +281,8 @@ class ActionModelAbstractTpl {
    * @brief Print information on the action model
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ActionModelAbstractTpl<Scalar>& model);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ActionModelAbstractTpl<Scalar>& model);
 
   /**
    * @brief Print relevant information of the action model
@@ -259,20 +292,22 @@ class ActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  std::size_t nu_;                          //!< Control dimension
-  std::size_t nr_;                          //!< Dimension of the cost residual
-  std::size_t ng_;                          //!< Number of inequality constraints
-  std::size_t nh_;                          //!< Number of equality constraints
+  std::size_t nu_;  //!< Control dimension
+  std::size_t nr_;  //!< Dimension of the cost residual
+  std::size_t ng_;  //!< Number of inequality constraints
+  std::size_t nh_;  //!< Number of equality constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
-  VectorXs g_lb_;                           //!< Lower bound of the inequality constraints
-  VectorXs g_ub_;                           //!< Lower bound of the inequality constraints
-  VectorXs u_lb_;                           //!< Lower control limits
-  VectorXs u_ub_;                           //!< Upper control limits
-  bool has_control_limits_;                 //!< Indicates whether any of the control limits is finite
+  VectorXs g_lb_;            //!< Lower bound of the inequality constraints
+  VectorXs g_ub_;            //!< Lower bound of the inequality constraints
+  VectorXs u_lb_;            //!< Lower control limits
+  VectorXs u_ub_;            //!< Upper control limits
+  bool has_control_limits_;  //!< Indicates whether any of the control limits is
+                             //!< finite
 
   /**
-   * @brief Update the status of the control limits (i.e. if there are defined limits)
+   * @brief Update the status of the control limits (i.e. if there are defined
+   * limits)
    */
   void update_has_control_limits();
 
@@ -327,20 +362,26 @@ struct ActionDataAbstractTpl {
 
   Scalar cost;     //!< cost value
   VectorXs xnext;  //!< evolution state
-  MatrixXs Fx;     //!< Jacobian of the dynamics w.r.t. the state \f$\mathbf{x}\f$
-  MatrixXs Fu;     //!< Jacobian of the dynamics w.r.t. the control \f$\mathbf{u}\f$
-  VectorXs r;      //!< Cost residual
-  VectorXs Lx;     //!< Jacobian of the cost w.r.t. the state \f$\mathbf{x}\f$
-  VectorXs Lu;     //!< Jacobian of the cost w.r.t. the control \f$\mathbf{u}\f$
-  MatrixXs Lxx;    //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$
-  MatrixXs Lxu;    //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$ and control \f$\mathbf{u}\f$
-  MatrixXs Luu;    //!< Hessian of the cost w.r.t. the control \f$\mathbf{u}\f$
-  VectorXs g;      //!< Inequality constraint values
-  MatrixXs Gx;     //!< Jacobian of the inequality constraint w.r.t. the state \f$\mathbf{x}\f$
-  MatrixXs Gu;     //!< Jacobian of the inequality constraint w.r.t. the control \f$\mathbf{u}\f$
-  VectorXs h;      //!< Equality constraint values
-  MatrixXs Hx;     //!< Jacobian of the equality constraint w.r.t. the state \f$\mathbf{x}\f$
-  MatrixXs Hu;     //!< Jacobian of the equality constraint w.r.t. the control \f$\mathbf{u}\f$
+  MatrixXs Fx;  //!< Jacobian of the dynamics w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs
+      Fu;      //!< Jacobian of the dynamics w.r.t. the control \f$\mathbf{u}\f$
+  VectorXs r;  //!< Cost residual
+  VectorXs Lx;   //!< Jacobian of the cost w.r.t. the state \f$\mathbf{x}\f$
+  VectorXs Lu;   //!< Jacobian of the cost w.r.t. the control \f$\mathbf{u}\f$
+  MatrixXs Lxx;  //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$
+  MatrixXs Lxu;  //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$ and
+                 //!< control \f$\mathbf{u}\f$
+  MatrixXs Luu;  //!< Hessian of the cost w.r.t. the control \f$\mathbf{u}\f$
+  VectorXs g;    //!< Inequality constraint values
+  MatrixXs Gx;   //!< Jacobian of the inequality constraint w.r.t. the state
+                 //!< \f$\mathbf{x}\f$
+  MatrixXs Gu;   //!< Jacobian of the inequality constraint w.r.t. the control
+                 //!< \f$\mathbf{u}\f$
+  VectorXs h;    //!< Equality constraint values
+  MatrixXs Hx;   //!< Jacobian of the equality constraint w.r.t. the state
+                 //!< \f$\mathbf{x}\f$
+  MatrixXs Hu;   //!< Jacobian of the equality constraint w.r.t. the control
+                 //!< \f$\mathbf{u}\f$
 };
 
 }  // namespace crocoddyl

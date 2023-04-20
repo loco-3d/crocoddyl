@@ -10,11 +10,11 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/activation-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 
 namespace crocoddyl {
 
@@ -46,12 +46,14 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r);
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& r);
 
   /**
    * @brief Create a Data object from the given model.
@@ -68,18 +70,22 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
   const boost::shared_ptr<Base>& get_model() const;
 
   /**
-   * @brief Return the disturbance constant used in the numerical differentiation routine
+   * @brief Return the disturbance constant used in the numerical
+   * differentiation routine
    */
   const Scalar get_disturbance() const;
 
   /**
-   * @brief Modify the disturbance constant used in the numerical differentiation routine
+   * @brief Modify the disturbance constant used in the numerical
+   * differentiation routine
    */
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base> model_;  //!< model to compute the finite differentiation from
-  Scalar e_jac_;                   //!< Constant used for computing disturbances in Jacobian calculation
+  boost::shared_ptr<Base>
+      model_;     //!< model to compute the finite differentiation from
+  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
+                  //!< calculation
 
  protected:
   using Base::nr_;
@@ -103,7 +109,10 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
    */
   template <template <typename Scalar> class Model>
   explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
-      : Base(model), dr(model->get_model()->get_nr()), rp(model->get_model()->get_nr()), Arr_(Arr.rows(), Arr.cols()) {
+      : Base(model),
+        dr(model->get_model()->get_nr()),
+        rp(model->get_model()->get_nr()),
+        Arr_(Arr.rows(), Arr.cols()) {
     dr.setZero();
     rp.setZero();
     Arr_.setZero();
@@ -120,11 +129,14 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
     }
   }
 
-  VectorXs dr;                     //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
-  VectorXs rp;                     //!< The input + the disturbance on one DoF "\f$ r^+ = rp =  \int r + dr \f$"
+  VectorXs dr;  //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
+  VectorXs rp;  //!< The input + the disturbance on one DoF "\f$ r^+ = rp = \int
+                //!< r + dr \f$"
   boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> > data_rp;   //!< The temporary data associated with the input variation
-  std::vector<boost::shared_ptr<Base> > data_r2p;  //!< The temporary data associated with the input variation
+  std::vector<boost::shared_ptr<Base> >
+      data_rp;  //!< The temporary data associated with the input variation
+  std::vector<boost::shared_ptr<Base> >
+      data_r2p;  //!< The temporary data associated with the input variation
 
   MatrixXs Arr_;
   using Base::a_value;

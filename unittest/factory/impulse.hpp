@@ -10,9 +10,9 @@
 #ifndef CROCODDYL_IMPULSES_FACTORY_HPP_
 #define CROCODDYL_IMPULSES_FACTORY_HPP_
 
-#include "state.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -47,9 +47,10 @@ class ImpulseModelFactory {
   explicit ImpulseModelFactory();
   ~ImpulseModelFactory();
 
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(ImpulseModelTypes::Type impulse_type,
-                                                            PinocchioModelTypes::Type model_type,
-                                                            const std::string frame_name = std::string("")) const;
+  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(
+      ImpulseModelTypes::Type impulse_type,
+      PinocchioModelTypes::Type model_type,
+      const std::string frame_name = std::string("")) const;
 };
 
 boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();

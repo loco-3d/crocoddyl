@@ -10,9 +10,10 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_SET_CONVERTER_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_UTILS_SET_CONVERTER_HPP_
 
-#include <set>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/to_python_converter.hpp>
+#include <set>
+
 #include "set_indexing_suite.hpp"
 
 namespace crocoddyl {
@@ -46,12 +47,16 @@ struct PickleSet : bp::pickle_suite {
   }
 };
 
-/** @brief Type that allows for registration of conversions from python iterable types. */
+/** @brief Type that allows for registration of conversions from python iterable
+ * types. */
 template <typename Container>
 struct set_to_set {
-  /** @note Registers converter from a python iterable type to the provided type. */
+  /** @note Registers converter from a python iterable type to the provided
+   * type. */
   static void register_converter() {
-    bp::converter::registry::push_back(&set_to_set::convertible, &set_to_set::construct, bp::type_id<Container>());
+    bp::converter::registry::push_back(&set_to_set::convertible,
+                                       &set_to_set::construct,
+                                       bp::type_id<Container>());
   }
 
   /** @brief Check if PyObject is iterable. */
@@ -76,7 +81,8 @@ struct set_to_set {
    * Container Concept requirements:
    *    * Container::value_type is CopyConstructable.
    */
-  static void construct(PyObject* object, bp::converter::rvalue_from_python_stage1_data* data) {
+  static void construct(PyObject* object,
+                        bp::converter::rvalue_from_python_stage1_data* data) {
     // Object is a borrowed reference, so create a handle indicting it is
     // borrowed for proper reference counting.
     bp::handle<> handle(bp::borrowed(object));
@@ -117,16 +123,21 @@ struct set_to_set {
  * @param[in] NoProxy    When set to false, the elements will be copied when
  * returned to Python.
  */
-template <class T, class Compare = std::less<T>, class Allocator = std::allocator<T>, bool NoProxy = false>
-struct StdSetPythonVisitor : public set_indexing_suite<typename std::set<T, Compare, Allocator>, NoProxy>,
-                             set_to_set<std::set<T, Compare, Allocator>> {
+template <class T, class Compare = std::less<T>,
+          class Allocator = std::allocator<T>, bool NoProxy = false>
+struct StdSetPythonVisitor
+    : public set_indexing_suite<typename std::set<T, Compare, Allocator>,
+                                NoProxy>,
+      set_to_set<std::set<T, Compare, Allocator>> {
   typedef std::set<T, Compare, Allocator> Container;
   typedef set_to_set<Container> FromPythonSetConverter;
 
-  static void expose(const std::string& class_name, const std::string& doc_string = "") {
+  static void expose(const std::string& class_name,
+                     const std::string& doc_string = "") {
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())
         .def(StdSetPythonVisitor())
-        .def("toset", &FromPythonSetConverter::toset, bp::arg("self"), "Returns the std::set as a Python set.")
+        .def("toset", &FromPythonSetConverter::toset, bp::arg("self"),
+             "Returns the std::set as a Python set.")
         .def_pickle(PickleSet<Container>());
     // Register conversion
     FromPythonSetConverter::register_converter();

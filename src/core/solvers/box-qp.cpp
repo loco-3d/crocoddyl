@@ -6,14 +6,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #include "crocoddyl/core/solvers/box-qp.hpp"
+
+#include <iostream>
+
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
-BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_acceptstep, const double th_grad,
-             const double reg)
+BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,
+             const double th_acceptstep, const double th_grad, const double reg)
     : nx_(nx),
       maxiter_(maxiter),
       th_acceptstep_(th_acceptstep),
@@ -31,7 +33,8 @@ BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_ac
       Ho_(nx, nx) {
   // Check if values have a proper range
   if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
-    std::cerr << "Warning: th_acceptstep value should between 0 and 0.5" << std::endl;
+    std::cerr << "Warning: th_acceptstep value should between 0 and 0.5"
+              << std::endl;
   }
   if (0. > th_grad) {
     std::cerr << "Warning: th_grad value has to be positive." << std::endl;
@@ -63,27 +66,36 @@ BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter, const double th_ac
 
 BoxQP::~BoxQP() {}
 
-const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& lb,
-                                  const Eigen::VectorXd& ub, const Eigen::VectorXd& xinit) {
-  if (static_cast<std::size_t>(H.rows()) != nx_ || static_cast<std::size_t>(H.cols()) != nx_) {
+const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
+                                  const Eigen::VectorXd& q,
+                                  const Eigen::VectorXd& lb,
+                                  const Eigen::VectorXd& ub,
+                                  const Eigen::VectorXd& xinit) {
+  if (static_cast<std::size_t>(H.rows()) != nx_ ||
+      static_cast<std::size_t>(H.cols()) != nx_) {
     throw_pretty("Invalid argument: "
-                 << "H has wrong dimension (it should be " + std::to_string(nx_) + "," + std::to_string(nx_) + ")");
+                 << "H has wrong dimension (it should be " +
+                        std::to_string(nx_) + "," + std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(q.size()) != nx_) {
     throw_pretty("Invalid argument: "
-                 << "q has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "q has wrong dimension (it should be " +
+                        std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(lb.size()) != nx_) {
     throw_pretty("Invalid argument: "
-                 << "lb has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "lb has wrong dimension (it should be " +
+                        std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(ub.size()) != nx_) {
     throw_pretty("Invalid argument: "
-                 << "ub has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "ub has wrong dimension (it should be " +
+                        std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(xinit.size()) != nx_) {
     throw_pretty("Invalid argument: "
-                 << "xinit has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "xinit has wrong dimension (it should be " +
+                        std::to_string(nx_) + ")");
   }
 
   // We need to enforce feasible warm-starting of the algorithm
@@ -156,10 +168,12 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H, const Eigen::VectorX
 
     // Try different step lengths
     fold_ = 0.5 * x_.dot(H * x_) + q.dot(x_);
-    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+    for (std::vector<double>::const_iterator it = alphas_.begin();
+         it != alphas_.end(); ++it) {
       double steplength = *it;
       for (std::size_t i = 0; i < nx_; ++i) {
-        xnew_(i) = std::max(std::min(x_(i) + steplength * dx_(i), ub(i)), lb(i));
+        xnew_(i) =
+            std::max(std::min(x_(i) + steplength * dx_(i), ub(i)), lb(i));
       }
       fnew_ = 0.5 * xnew_.dot(H * xnew_) + q.dot(xnew_);
       if (fold_ - fnew_ > th_acceptstep_ * g_.dot(x_ - xnew_)) {

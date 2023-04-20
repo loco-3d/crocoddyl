@@ -10,22 +10,25 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Control gravity residual
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
- * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input, \f$\mathbf{g}(\mathbf{q})\f$ is the
- * gravity torque corresponding to the current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current position
- * joints input. Note that the dimension of the residual vector is obtained from `StateAbstractTpl::get_nv()`.
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{u}-\mathbf{g}(\mathbf{q})\f$, where
+ * \f$\mathbf{u}\in~\mathbb{R}^{nu}\f$ is the current control input,
+ * \f$\mathbf{g}(\mathbf{q})\f$ is the gravity torque corresponding to the
+ * current configuration, \f$\mathbf{q}\in~\mathbb{R}^{nq}\f$ the current
+ * position joints input. Note that the dimension of the residual vector is
+ * obtained from `StateAbstractTpl::get_nv()`.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc()` and
- * `calcDiff()`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * Jacobians are calculated by `calc()` and `calcDiff()`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -50,7 +53,8 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of control vector
    */
-  ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state, const std::size_t nu);
+  ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
+                              const std::size_t nu);
 
   /**
    * @brief Initialize the control gravity residual model
@@ -69,14 +73,16 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x,
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
-   * VectorXs>& x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &x);
 
   /**
    * @brief Compute the Jacobians of the control gravity residual
@@ -85,16 +91,20 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x,
                         const Eigen::Ref<const VectorXs> &u);
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * @brief @copydoc Base::calcDiff(const
+   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data, const Eigen::Ref<const VectorXs> &x);
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &x);
 
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract *const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract *const data);
 
   /**
    * @brief Print relevant information of the control-grav residual
@@ -110,7 +120,8 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::v_dependent_;
 
  private:
-  typename StateMultibody::PinocchioModel pin_model_;  //!< Pinocchio model used for internal computations
+  typename StateMultibody::PinocchioModel
+      pin_model_;  //!< Pinocchio model used for internal computations
 };
 
 template <typename _Scalar>
@@ -125,20 +136,27 @@ struct ResidualDataControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef pinocchio::DataTpl<Scalar> PinocchioData;
 
   template <template <typename Scalar> class Model>
-  ResidualDataControlGravTpl(Model<Scalar> *const model, DataCollectorAbstract *const data) : Base(model, data) {
+  ResidualDataControlGravTpl(Model<Scalar> *const model,
+                             DataCollectorAbstract *const data)
+      : Base(model, data) {
     // Check that proper shared data has been passed
-    DataCollectorActMultibodyTpl<Scalar> *d = dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
+    DataCollectorActMultibodyTpl<Scalar> *d =
+        dynamic_cast<DataCollectorActMultibodyTpl<Scalar> *>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorActMultibodyTpl");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorActMultibodyTpl");
     }
     // Avoids data casting at runtime
-    StateMultibody *sm = static_cast<StateMultibody *>(model->get_state().get());
+    StateMultibody *sm =
+        static_cast<StateMultibody *>(model->get_state().get());
     pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
     actuation = d->actuation;
   }
 
-  PinocchioData pinocchio;                                         //!< Pinocchio data
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;  //!< Actuation data
+  PinocchioData pinocchio;  //!< Pinocchio data
+  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> >
+      actuation;  //!< Actuation data
   using Base::r;
   using Base::Ru;
   using Base::Rx;

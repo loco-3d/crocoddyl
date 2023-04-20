@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Duisburg-Essen, University of Edinburgh,
+// Copyright (C) 2020-2023, University of Duisburg-Essen, University of
+// Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -13,8 +14,8 @@ namespace crocoddyl {
 
 template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref,
-    const std::size_t nu, const bool fwddyn)
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const CoPSupport& cref, const std::size_t nu, const bool fwddyn)
     : Base(state, 4, nu, fwddyn ? true : false, fwddyn ? true : false, true),
       fwddyn_(fwddyn),
       update_jacobians_(true),
@@ -23,16 +24,22 @@ ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
 
 template <typename _Scalar>
 ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const CoPSupport& cref)
-    : Base(state, 4), fwddyn_(true), update_jacobians_(true), id_(id), cref_(cref) {}
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const CoPSupport& cref)
+    : Base(state, 4),
+      fwddyn_(true),
+      update_jacobians_(true),
+      id_(id),
+      cref_(cref) {}
 
 template <typename Scalar>
-ResidualModelContactCoPPositionTpl<Scalar>::~ResidualModelContactCoPPositionTpl() {}
+ResidualModelContactCoPPositionTpl<
+    Scalar>::~ResidualModelContactCoPPositionTpl() {}
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>&,
-                                                      const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactCoPPositionTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the residual residual r =  A * f
@@ -40,31 +47,34 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<Re
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                      const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactCoPPositionTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                          const Eigen::Ref<const VectorXs>&,
-                                                          const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
   }
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                          const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactCoPPositionTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactCoPPositionTpl<Scalar>::createData(
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelContactCoPPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d =
-      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
+      Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -72,7 +82,8 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactCoPPosit
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data) {
+void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(
+    const boost::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -85,9 +96,12 @@ void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(const boost::sh
 
 template <typename Scalar>
 void ResidualModelContactCoPPositionTpl<Scalar>::print(std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
-  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
-  os << "ResidualModelContactCoPPosition {frame=" << s->get_pinocchio()->frames[id_].name
+  boost::shared_ptr<StateMultibody> s =
+      boost::static_pointer_cast<StateMultibody>(state_);
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "ResidualModelContactCoPPosition {frame="
+     << s->get_pinocchio()->frames[id_].name
      << ", box=" << cref_.get_box().transpose().format(fmt) << "}";
 }
 
@@ -97,22 +111,26 @@ bool ResidualModelContactCoPPositionTpl<Scalar>::is_fwddyn() const {
 }
 
 template <typename Scalar>
-pinocchio::FrameIndex ResidualModelContactCoPPositionTpl<Scalar>::get_id() const {
+pinocchio::FrameIndex ResidualModelContactCoPPositionTpl<Scalar>::get_id()
+    const {
   return id_;
 }
 
 template <typename Scalar>
-const CoPSupportTpl<Scalar>& ResidualModelContactCoPPositionTpl<Scalar>::get_reference() const {
+const CoPSupportTpl<Scalar>&
+ResidualModelContactCoPPositionTpl<Scalar>::get_reference() const {
   return cref_;
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+void ResidualModelContactCoPPositionTpl<Scalar>::set_id(
+    const pinocchio::FrameIndex id) {
   id_ = id;
 }
 
 template <typename Scalar>
-void ResidualModelContactCoPPositionTpl<Scalar>::set_reference(const CoPSupport& reference) {
+void ResidualModelContactCoPPositionTpl<Scalar>::set_reference(
+    const CoPSupport& reference) {
   cref_ = reference;
   update_jacobians_ = true;
 }

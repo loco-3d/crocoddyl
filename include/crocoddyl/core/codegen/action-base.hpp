@@ -11,9 +11,9 @@
 #define CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 
 #include <functional>
-#include "pinocchio/codegen/cppadcg.hpp"
 
 #include "crocoddyl/core/action-base.hpp"
+#include "pinocchio/codegen/cppadcg.hpp"
 
 namespace crocoddyl {
 
@@ -40,13 +40,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBaseTpl<ADScalar>::Vector3s ADVector3s;
   typedef typename MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
 
-  typedef typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(ADMatrixXs) RowADMatrixXs;
+  typedef
+      typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(ADMatrixXs) RowADMatrixXs;
 
   typedef CppAD::ADFun<CGScalar> ADFun;
 
-  ActionModelCodeGenTpl(boost::shared_ptr<ADBase> admodel, boost::shared_ptr<Base> model,
-                        const std::string& library_name, const std::size_t n_env = 0,
-                        std::function<void(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&)>
+  ActionModelCodeGenTpl(boost::shared_ptr<ADBase> admodel,
+                        boost::shared_ptr<Base> model,
+                        const std::string& library_name,
+                        const std::size_t n_env = 0,
+                        std::function<void(boost::shared_ptr<ADBase>,
+                                           const Eigen::Ref<const ADVectorXs>&)>
                             fn_record_env = empty_record_env,
                         const std::string& function_name_calc = "calc",
                         const std::string& function_name_calcDiff = "calcDiff")
@@ -69,7 +73,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     loadLib();
   }
 
-  static void empty_record_env(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&) {}
+  static void empty_record_env(boost::shared_ptr<ADBase>,
+                               const Eigen::Ref<const ADVectorXs>&) {}
 
   void recordCalc() {
     CppAD::Independent(ad_X);
@@ -139,15 +144,19 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // generates source code
     recordCalcDiff();
     calcDiffgen_ptr = std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> >(
-        new CppAD::cg::ModelCSourceGen<Scalar>(ad_calcDiff, function_name_calcDiff));
+        new CppAD::cg::ModelCSourceGen<Scalar>(ad_calcDiff,
+                                               function_name_calcDiff));
     calcDiffgen_ptr->setCreateForwardZero(true);
     calcDiffgen_ptr->setCreateJacobian(false);
 
     libcgen_ptr = std::unique_ptr<CppAD::cg::ModelLibraryCSourceGen<Scalar> >(
-        new CppAD::cg::ModelLibraryCSourceGen<Scalar>(*calcgen_ptr, *calcDiffgen_ptr));
+        new CppAD::cg::ModelLibraryCSourceGen<Scalar>(*calcgen_ptr,
+                                                      *calcDiffgen_ptr));
 
-    dynamicLibManager_ptr = std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> >(
-        new CppAD::cg::DynamicModelLibraryProcessor<Scalar>(*libcgen_ptr, library_name));
+    dynamicLibManager_ptr =
+        std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> >(
+            new CppAD::cg::DynamicModelLibraryProcessor<Scalar>(*libcgen_ptr,
+                                                                library_name));
   }
 
   void compileLib() {
@@ -160,7 +169,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   bool existLib() const {
     const std::string filename =
-        dynamicLibManager_ptr->getLibraryName() + CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
+        dynamicLibManager_ptr->getLibraryName() +
+        CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
     std::ifstream file(filename.c_str());
     return file.good();
   }
@@ -171,11 +181,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     const auto it = dynamicLibManager_ptr->getOptions().find("dlOpenMode");
     if (it == dynamicLibManager_ptr->getOptions().end()) {
       dynamicLib_ptr.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-          dynamicLibManager_ptr->getLibraryName() + CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
+          dynamicLibManager_ptr->getLibraryName() +
+          CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
     } else {
       int dlOpenMode = std::stoi(it->second);
       dynamicLib_ptr.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-          dynamicLibManager_ptr->getLibraryName() + CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION,
+          dynamicLibManager_ptr->getLibraryName() +
+              CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION,
           dlOpenMode));
     }
 
@@ -183,12 +195,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     calcDiffFun_ptr = dynamicLib_ptr->model(function_name_calcDiff.c_str());
   }
 
-  void set_env(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& env_val) const {
+  void set_env(const boost::shared_ptr<ActionDataAbstract>& data,
+               const Eigen::Ref<const VectorXs>& env_val) const {
     Data* d = static_cast<Data*>(data.get());
     d->xu.tail(n_env) = env_val;
   }
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = ad_model->get_state()->get_nx();
@@ -201,7 +215,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     d->distribute_calcout();
   }
 
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = ad_model->get_state()->get_nx();
@@ -221,7 +236,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   Eigen::DenseIndex getInputDimension() const { return ad_X.size(); }
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control limits
+  using Base::has_control_limits_;  //!< Indicates whether any of the control
+                                    //!< limits
   using Base::nr_;                  //!< Dimension of the cost residual
   using Base::nu_;                  //!< Control dimension
   using Base::state_;               //!< Model of the state
@@ -242,10 +258,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   /// \brief Size of the environment variables
   const std::size_t n_env;
 
-  /// \brief A function that updates the environment variables before starting record.
-  std::function<void(boost::shared_ptr<ADBase>, const Eigen::Ref<const ADVectorXs>&)> fn_record_env;
+  /// \brief A function that updates the environment variables before starting
+  /// record.
+  std::function<void(boost::shared_ptr<ADBase>,
+                     const Eigen::Ref<const ADVectorXs>&)>
+      fn_record_env;
 
-  /// \brief Options to generate or not the source code for the evaluation function
+  /// \brief Options to generate or not the source code for the evaluation
+  /// function
   bool build_forward;
 
   ADVectorXs ad_X, ad_X2;
@@ -255,11 +275,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   ADFun ad_calc, ad_calcDiff;
 
-  std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> > calcgen_ptr, calcDiffgen_ptr;
+  std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> > calcgen_ptr,
+      calcDiffgen_ptr;
   std::unique_ptr<CppAD::cg::ModelLibraryCSourceGen<Scalar> > libcgen_ptr;
-  std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> > dynamicLibManager_ptr;
+  std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> >
+      dynamicLibManager_ptr;
   std::unique_ptr<CppAD::cg::DynamicLib<Scalar> > dynamicLib_ptr;
-  std::unique_ptr<CppAD::cg::GenericModel<Scalar> > calcFun_ptr, calcDiffFun_ptr;
+  std::unique_ptr<CppAD::cg::GenericModel<Scalar> > calcFun_ptr,
+      calcDiffFun_ptr;
 
 };  // struct CodeGenBase
 
@@ -315,8 +338,10 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   }
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataCodeGenTpl(Model<Scalar>* const model) : Base(model), calcout(model->get_state()->get_nx() + 1) {
-    ActionModelCodeGenTpl<Scalar>* m = static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
+  explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
+      : Base(model), calcout(model->get_state()->get_nx() + 1) {
+    ActionModelCodeGenTpl<Scalar>* m =
+        static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     xu.resize(m->getInputDimension());
     xu.setZero();
     calcout.setZero();

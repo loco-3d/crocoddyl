@@ -11,37 +11,45 @@
 
 #include <stdexcept>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 
 namespace crocoddyl {
 
 template <typename _Scalar>
-class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<_Scalar> {
+class DifferentialActionModelLQRTpl
+    : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataLQRTpl<Scalar> Data;
   typedef StateVectorTpl<Scalar> StateVector;
-  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionDataAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  DifferentialActionModelLQRTpl(const std::size_t nq, const std::size_t nu, const bool drift_free = true);
+  DifferentialActionModelLQRTpl(const std::size_t nq, const std::size_t nu,
+                                const bool drift_free = true);
   virtual ~DifferentialActionModelLQRTpl();
 
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
-  virtual void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calcDiff(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x);
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
-  virtual bool checkData(const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+  virtual bool checkData(
+      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
   const MatrixXs& get_Fq() const;
   const MatrixXs& get_Fv() const;
@@ -88,7 +96,8 @@ class DifferentialActionModelLQRTpl : public DifferentialActionModelAbstractTpl<
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_Scalar> {
+struct DifferentialActionDataLQRTpl
+    : public DifferentialActionDataAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar> Base;
@@ -96,8 +105,10 @@ struct DifferentialActionDataLQRTpl : public DifferentialActionDataAbstractTpl<_
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model) : Base(model) {
-    // Setting the linear model and quadratic cost here because they are constant
+  explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model)
+      : Base(model) {
+    // Setting the linear model and quadratic cost here because they are
+    // constant
     Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
     Fx.rightCols(model->get_state()->get_nv()) = model->get_Fv();
     Fu = model->get_Fu();

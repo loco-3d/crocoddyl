@@ -12,70 +12,87 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const FrictionCone& fref,
-    const std::size_t nu, const bool fwddyn)
-    : Base(state, fref.get_nf() + 1, nu, fwddyn ? true : false, fwddyn ? true : false, true),
+ResidualModelContactFrictionConeTpl<Scalar>::
+    ResidualModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
+                                        const pinocchio::FrameIndex id,
+                                        const FrictionCone& fref,
+                                        const std::size_t nu, const bool fwddyn)
+    : Base(state, fref.get_nf() + 1, nu, fwddyn ? true : false,
+           fwddyn ? true : false, true),
       fwddyn_(fwddyn),
       update_jacobians_(true),
       id_(id),
       fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
 template <typename Scalar>
-ResidualModelContactFrictionConeTpl<Scalar>::ResidualModelContactFrictionConeTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id, const FrictionCone& fref)
-    : Base(state, fref.get_nf() + 1), fwddyn_(true), update_jacobians_(true), id_(id), fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+ResidualModelContactFrictionConeTpl<Scalar>::
+    ResidualModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
+                                        const pinocchio::FrameIndex id,
+                                        const FrictionCone& fref)
+    : Base(state, fref.get_nf() + 1),
+      fwddyn_(true),
+      update_jacobians_(true),
+      id_(id),
+      fref_(fref) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
 template <typename Scalar>
-ResidualModelContactFrictionConeTpl<Scalar>::~ResidualModelContactFrictionConeTpl() {}
+ResidualModelContactFrictionConeTpl<
+    Scalar>::~ResidualModelContactFrictionConeTpl() {}
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>&,
-                                                       const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactFrictionConeTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the residual of the friction cone. Note that we need to transform the force
-  // to the contact frame
+  // Compute the residual of the friction cone. Note that we need to transform
+  // the force to the contact frame
   data->r.noalias() = fref_.get_A() * d->contact->f.linear();
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                       const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactFrictionConeTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                           const Eigen::Ref<const VectorXs>&,
-                                                           const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
   }
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                           const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactFrictionConeTpl<Scalar>::createData(
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelContactFrictionConeTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d =
-      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
+      Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -112,9 +129,12 @@ void ResidualModelContactFrictionConeTpl<Scalar>::updateJacobians(
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::print(std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
-  os << "ResidualModelContactFrictionCone {frame=" << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
+void ResidualModelContactFrictionConeTpl<Scalar>::print(
+    std::ostream& os) const {
+  boost::shared_ptr<StateMultibody> s =
+      boost::static_pointer_cast<StateMultibody>(state_);
+  os << "ResidualModelContactFrictionCone {frame="
+     << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
      << "}";
 }
 
@@ -124,22 +144,26 @@ bool ResidualModelContactFrictionConeTpl<Scalar>::is_fwddyn() const {
 }
 
 template <typename Scalar>
-pinocchio::FrameIndex ResidualModelContactFrictionConeTpl<Scalar>::get_id() const {
+pinocchio::FrameIndex ResidualModelContactFrictionConeTpl<Scalar>::get_id()
+    const {
   return id_;
 }
 
 template <typename Scalar>
-const FrictionConeTpl<Scalar>& ResidualModelContactFrictionConeTpl<Scalar>::get_reference() const {
+const FrictionConeTpl<Scalar>&
+ResidualModelContactFrictionConeTpl<Scalar>::get_reference() const {
   return fref_;
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+void ResidualModelContactFrictionConeTpl<Scalar>::set_id(
+    const pinocchio::FrameIndex id) {
   id_ = id;
 }
 
 template <typename Scalar>
-void ResidualModelContactFrictionConeTpl<Scalar>::set_reference(const FrictionCone& reference) {
+void ResidualModelContactFrictionConeTpl<Scalar>::set_reference(
+    const FrictionCone& reference) {
   fref_ = reference;
   update_jacobians_ = true;
 }

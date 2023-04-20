@@ -10,7 +10,6 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/multibody/data/multibody.hpp"
-
 #include "factory/constraint.hpp"
 #include "unittest_common.hpp"
 
@@ -19,10 +18,12 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
-void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type, StateModelTypes::Type state_type) {
+void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
+                                  StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model = factory.create(constraint_type, state_type);
+  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+      factory.create(constraint_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -30,7 +31,8 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type, St
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data = model->createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+      model->createData(&shared_data);
   data->g *= nan("");
   data->h *= nan("");
 
@@ -49,10 +51,12 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type, St
   BOOST_CHECK(!data->h.hasNaN());
 }
 
-void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, StateModelTypes::Type state_type) {
+void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
+                               StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model = factory.create(constraint_type, state_type);
+  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+      factory.create(constraint_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -60,11 +64,13 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, State
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data = model->createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+      model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ConstraintModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
+      model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
   const Eigen::VectorXd x = model->get_state()->rand();
@@ -82,11 +88,13 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type, State
   BOOST_CHECK((data->h - data_num_diff->h).isZero());
 }
 
-void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constraint_type,
-                                              StateModelTypes::Type state_type) {
+void test_partial_derivatives_against_numdiff(
+    ConstraintModelTypes::Type constraint_type,
+    StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model = factory.create(constraint_type, state_type);
+  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+      factory.create(constraint_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -94,11 +102,13 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data = model->createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+      model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ConstraintModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff = model_num_diff.createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
+      model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
   Eigen::VectorXd x = model->get_state()->rand();
@@ -111,7 +121,8 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   using namespace boost::placeholders;
 
   std::vector<crocoddyl::ConstraintModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio, &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
+                                &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the cost derivatives
@@ -144,11 +155,13 @@ void test_partial_derivatives_against_numdiff(ConstraintModelTypes::Type constra
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
 }
 
-void test_dimensions_in_constraint_manager(ConstraintModelTypes::Type constraint_type,
-                                           StateModelTypes::Type state_type) {
+void test_dimensions_in_constraint_manager(
+    ConstraintModelTypes::Type constraint_type,
+    StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model = factory.create(constraint_type, state_type);
+  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+      factory.create(constraint_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -167,20 +180,26 @@ void test_dimensions_in_constraint_manager(ConstraintModelTypes::Type constraint
   // Compute all the pinocchio function needed for the models.
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
 
-  BOOST_CHECK(model->get_state()->get_nx() == constraint_man.get_state()->get_nx());
-  BOOST_CHECK(model->get_state()->get_ndx() == constraint_man.get_state()->get_ndx());
+  BOOST_CHECK(model->get_state()->get_nx() ==
+              constraint_man.get_state()->get_nx());
+  BOOST_CHECK(model->get_state()->get_ndx() ==
+              constraint_man.get_state()->get_ndx());
   BOOST_CHECK(model->get_nu() == constraint_man.get_nu());
-  BOOST_CHECK(model->get_state()->get_nq() == constraint_man.get_state()->get_nq());
-  BOOST_CHECK(model->get_state()->get_nv() == constraint_man.get_state()->get_nv());
+  BOOST_CHECK(model->get_state()->get_nq() ==
+              constraint_man.get_state()->get_nq());
+  BOOST_CHECK(model->get_state()->get_nv() ==
+              constraint_man.get_state()->get_nv());
   BOOST_CHECK(model->get_ng() == constraint_man.get_ng());
   BOOST_CHECK(model->get_nh() == constraint_man.get_nh());
 }
 
-void test_partial_derivatives_in_constraint_manager(ConstraintModelTypes::Type constraint_type,
-                                                    StateModelTypes::Type state_type) {
+void test_partial_derivatives_in_constraint_manager(
+    ConstraintModelTypes::Type constraint_type,
+    StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model = factory.create(constraint_type, state_type);
+  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+      factory.create(constraint_type, state_type);
 
   // create the corresponding data object
   const boost::shared_ptr<crocoddyl::StateMultibody>& state =
@@ -188,12 +207,14 @@ void test_partial_derivatives_in_constraint_manager(ConstraintModelTypes::Type c
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data = model->createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+      model->createData(&shared_data);
 
   // create the constraint manager model
   crocoddyl::ConstraintModelManager constraint_man(state, model->get_nu());
   constraint_man.addConstraint("myConstraint", model, 1.);
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data_man = constraint_man.createData(&shared_data);
+  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data_man =
+      constraint_man.createData(&shared_data);
 
   // Generating random values for the state and control
   const Eigen::VectorXd x = state->rand();
@@ -216,30 +237,42 @@ void test_partial_derivatives_in_constraint_manager(ConstraintModelTypes::Type c
 
 //----------------------------------------------------------------------------//
 
-void register_constraint_model_unit_tests(ConstraintModelTypes::Type constraint_type,
-                                          StateModelTypes::Type state_type) {
+void register_constraint_model_unit_tests(
+    ConstraintModelTypes::Type constraint_type,
+    StateModelTypes::Type state_type) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << constraint_type << "_" << state_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_returns_a_residual, constraint_type, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_against_numdiff, constraint_type, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff, constraint_type, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_constraint_manager, constraint_type, state_type)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_in_constraint_manager, constraint_type, state_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_calc_returns_a_residual, constraint_type, state_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_calc_against_numdiff, constraint_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff,
+                                      constraint_type, state_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_dimensions_in_constraint_manager,
+                                      constraint_type, state_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_partial_derivatives_in_constraint_manager,
+                  constraint_type, state_type)));
   framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
   // Test all constraints available with all available states types.
-  for (size_t constraint_type = 0; constraint_type < ConstraintModelTypes::all.size(); ++constraint_type) {
-    for (size_t state_type = StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
+  for (size_t constraint_type = 0;
+       constraint_type < ConstraintModelTypes::all.size(); ++constraint_type) {
+    for (size_t state_type =
+             StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
          state_type < StateModelTypes::all.size(); ++state_type) {
-      register_constraint_model_unit_tests(ConstraintModelTypes::all[constraint_type],
-                                           StateModelTypes::all[state_type]);
+      register_constraint_model_unit_tests(
+          ConstraintModelTypes::all[constraint_type],
+          StateModelTypes::all[state_type]);
     }
   }
   return true;
 }
 
-int main(int argc, char** argv) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char** argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

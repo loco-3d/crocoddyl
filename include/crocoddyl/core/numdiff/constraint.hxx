@@ -11,8 +11,10 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_nu(), model->get_ng(), model->get_nh()),
+ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(
+    const boost::shared_ptr<Base>& model)
+    : Base(model->get_state(), model->get_nu(), model->get_ng(),
+           model->get_nh()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
@@ -20,16 +22,18 @@ template <typename Scalar>
 ConstraintModelNumDiffTpl<Scalar>::~ConstraintModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x,
-                                             const Eigen::Ref<const VectorXs>& u) {
+void ConstraintModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
 
   Data* d = static_cast<Data*>(data.get());
@@ -41,11 +45,13 @@ void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& x) {
+void ConstraintModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -57,16 +63,18 @@ void ConstraintModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ConstraintD
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>& x,
-                                                 const Eigen::Ref<const VectorXs>& u) {
+void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " + std::to_string(nu_) + ")");
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -119,11 +127,13 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>& x) {
+void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -156,13 +166,16 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Constra
 }
 
 template <typename Scalar>
-boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> > ConstraintModelNumDiffTpl<Scalar>::createData(
+boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
+ConstraintModelNumDiffTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelAbstractTpl<Scalar> >& ConstraintModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ConstraintModelAbstractTpl<Scalar> >&
+ConstraintModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -172,7 +185,8 @@ const Scalar ConstraintModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
+void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(
+    const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance constant is positive");
@@ -181,12 +195,14 @@ void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+void ConstraintModelNumDiffTpl<Scalar>::set_reevals(
+    const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void ConstraintModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+void ConstraintModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs>& /*x*/) {
   // do nothing in the general case
 }
 

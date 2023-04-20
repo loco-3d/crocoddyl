@@ -1,17 +1,18 @@
 from __future__ import print_function
 
 import os
+import signal
 import sys
 import time
-import signal
+
+import example_robot_data
+import numpy as np
 
 import crocoddyl
 import pinocchio
-import numpy as np
-import example_robot_data
 
-WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
-WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
+WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # In this example test, we will solve the reaching-goal task with the Kinova arm.
@@ -20,7 +21,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Finally, we use an Euler sympletic integration scheme.
 
 # First, let's load create the state and actuation models
-kinova = example_robot_data.load('kinova')
+kinova = example_robot_data.load("kinova")
 robot_model = kinova.model
 state = crocoddyl.StateMultibody(robot_model)
 actuation = crocoddyl.ActuationModelFull(state)
@@ -37,8 +38,12 @@ terminalCostModel = crocoddyl.CostModelSum(state, nu)
 # For this particular example, we formulate three running-cost functions:
 # goal-tracking cost, state and control regularization; and one terminal-cost:
 # goal cost. First, let's create the common cost functions.
-framePlacementResidual = crocoddyl.ResidualModelFramePlacement(state, robot_model.getFrameId("j2s6s200_end_effector"),
-                                                               pinocchio.SE3(np.eye(3), np.array([.6, .2, .5])), nu)
+framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
+    state,
+    robot_model.getFrameId("j2s6s200_end_effector"),
+    pinocchio.SE3(np.eye(3), np.array([0.6, 0.2, 0.5])),
+    nu,
+)
 uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
 xResidual = crocoddyl.ResidualModelState(state, x0, nu)
 goalTrackingCost = crocoddyl.CostModelResidual(state, framePlacementResidual)
@@ -56,9 +61,17 @@ terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 # inside DifferentialActionModelFreeInvDynamics.
 dt = 1e-2
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCostModel), dt)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(
+        state, actuation, runningCostModel
+    ),
+    dt,
+)
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, terminalCostModel), 0.)
+    crocoddyl.DifferentialActionModelFreeInvDynamics(
+        state, actuation, terminalCostModel
+    ),
+    0.0,
+)
 
 # For this optimal control problem, we define 100 knots (or running action
 # models) plus a terminal knot
@@ -67,26 +80,34 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the solver for this OC problem, defining a logger
 solver = crocoddyl.SolverIntro(problem)
-cameraTF = [2., 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
+cameraTF = [2.0, 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 if WITHDISPLAY:
     try:
         import gepetto
+
         gepetto.corbaserver.Client()
         display = crocoddyl.GepettoDisplay(kinova, 4, 4, cameraTF, floor=False)
         if WITHPLOT:
             solver.setCallbacks(
-                [crocoddyl.CallbackVerbose(),
-                 crocoddyl.CallbackLogger(),
-                 crocoddyl.CallbackDisplay(display)])
+                [
+                    crocoddyl.CallbackVerbose(),
+                    crocoddyl.CallbackLogger(),
+                    crocoddyl.CallbackDisplay(display),
+                ]
+            )
         else:
-            solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+            solver.setCallbacks(
+                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
+            )
     except Exception:
         display = crocoddyl.MeshcatDisplay(kinova)
 if WITHPLOT:
-    solver.setCallbacks([
-        crocoddyl.CallbackVerbose(),
-        crocoddyl.CallbackLogger(),
-    ])
+    solver.setCallbacks(
+        [
+            crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackLogger(),
+        ]
+    )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 solver.getCallbacks()[0].precision = 3
@@ -96,16 +117,24 @@ solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 solver.solve()
 
 print(
-    'Finally reached = ', solver.problem.terminalData.differential.multibody.pinocchio.oMf[robot_model.getFrameId(
-        "j2s6s200_end_effector")].translation.T)
+    "Finally reached = ",
+    solver.problem.terminalData.differential.multibody.pinocchio.oMf[
+        robot_model.getFrameId("j2s6s200_end_effector")
+    ].translation.T,
+)
 
 # Plotting the solution and the solver convergence
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(solver.xs, [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
-                             figIndex=1,
-                             show=False)
-    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
+    crocoddyl.plotOCSolution(
+        solver.xs,
+        [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
+        figIndex=1,
+        show=False,
+    )
+    crocoddyl.plotConvergence(
+        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2
+    )
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:

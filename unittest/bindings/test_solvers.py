@@ -25,15 +25,23 @@ class SolverAbstractTestCase(unittest.TestCase):
         for _ in range(self.T):
             self.xs.append(state.rand())
             self.us.append(np.random.rand(self.MODEL.nu))
-        self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
-        self.PROBLEM_DER = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
+        self.PROBLEM = crocoddyl.ShootingProblem(
+            self.xs[0], [self.MODEL] * self.T, self.MODEL
+        )
+        self.PROBLEM_DER = crocoddyl.ShootingProblem(
+            self.xs[0], [self.MODEL] * self.T, self.MODEL
+        )
         self.solver = self.SOLVER(self.PROBLEM)
         self.solver_der = self.SOLVER_DER(self.PROBLEM_DER)
 
     def test_number_of_nodes(self):
         # Check the number of nodes
-        self.assertEqual(self.T, self.solver.problem.T, "Wrong number of nodes in SOLVER")
-        self.assertEqual(self.T, self.solver_der.problem.T, "Wrong number of nodes in SOLVER_DER")
+        self.assertEqual(
+            self.T, self.solver.problem.T, "Wrong number of nodes in SOLVER"
+        )
+        self.assertEqual(
+            self.T, self.solver_der.problem.T, "Wrong number of nodes in SOLVER_DER"
+        )
 
     def test_solve(self):
         # Run maximum 10 iterations in order to boost test analysis
@@ -97,7 +105,10 @@ class SolverAbstractTestCase(unittest.TestCase):
         self.solver_der.solve([], [], 2)
         expImp = self.solver.expectedImprovement()
         expImpDer = self.solver_der.expectedImprovement()
-        self.assertTrue(np.allclose(expImp, expImpDer, atol=1e-9), "Expected improvement doesn't match.")
+        self.assertTrue(
+            np.allclose(expImp, expImpDer, atol=1e-9),
+            "Expected improvement doesn't match.",
+        )
 
 
 class UnicycleDDPTest(SolverAbstractTestCase):
@@ -113,46 +124,83 @@ class UnicycleFDDPTest(SolverAbstractTestCase):
 
 
 class TalosArmDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load('talos_arm').model
+    ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
-        'gripperPose',
+        "gripperPose",
         crocoddyl.CostModelResidual(
             STATE,
-            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                                                  pinocchio.SE3.Random())), 1e-5)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+            crocoddyl.ResidualModelFramePlacement(
+                STATE,
+                ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                pinocchio.SE3.Random(),
+            ),
+        ),
+        1e-5,
+    )
+    COST_SUM.addCost(
+        "xReg",
+        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
+        1e-7,
+    )
+    COST_SUM.addCost(
+        "uReg",
+        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
+        1e-7,
+    )
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
+        STATE, ACTUATION, COST_SUM
+    )
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     SOLVER = crocoddyl.SolverDDP
     SOLVER_DER = DDPDerived
 
 
 class TalosArmFDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load('talos_arm').model
+    ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
     ACTUATION = crocoddyl.ActuationModelFull(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
-        'gripperPose',
+        "gripperPose",
         crocoddyl.CostModelResidual(
             STATE,
-            crocoddyl.ResidualModelFramePlacement(STATE, ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                                                  pinocchio.SE3.Random())), 1e-5)
-    COST_SUM.addCost("xReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)), 1e-7)
-    COST_SUM.addCost("uReg", crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)), 1e-7)
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
+            crocoddyl.ResidualModelFramePlacement(
+                STATE,
+                ROBOT_MODEL.getFrameId("gripper_left_joint"),
+                pinocchio.SE3.Random(),
+            ),
+        ),
+        1e-5,
+    )
+    COST_SUM.addCost(
+        "xReg",
+        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
+        1e-7,
+    )
+    COST_SUM.addCost(
+        "uReg",
+        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
+        1e-7,
+    )
+    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
+        STATE, ACTUATION, COST_SUM
+    )
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     SOLVER = crocoddyl.SolverFDDP
     SOLVER_DER = FDDPDerived
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # test to be run
-    test_classes_to_run = [UnicycleDDPTest, UnicycleFDDPTest, TalosArmDDPTest, TalosArmFDDPTest]
+    test_classes_to_run = [
+        UnicycleDDPTest,
+        UnicycleFDDPTest,
+        TalosArmDDPTest,
+        TalosArmFDDPTest,
+    ]
     loader = unittest.TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

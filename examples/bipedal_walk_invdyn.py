@@ -1,43 +1,72 @@
 import os
+import signal
 import sys
 import time
-import signal
 
-import numpy as np
-
-import crocoddyl
 import example_robot_data
-import pinocchio
+import numpy as np
 from crocoddyl.utils.biped import SimpleBipedGaitProblem, plotSolution
 
-WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
-WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
+import crocoddyl
+import pinocchio
+
+WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
+WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Creating the lower-body part of Talos
-talos_legs = example_robot_data.load('talos_legs')
+talos_legs = example_robot_data.load("talos_legs")
 
 # Defining the initial state of the robot
-q0 = talos_legs.model.referenceConfigurations['half_sitting'].copy()
+q0 = talos_legs.model.referenceConfigurations["half_sitting"].copy()
 v0 = pinocchio.utils.zero(talos_legs.model.nv)
 x0 = np.concatenate([q0, v0])
 
 # Setting up the 3d walking problem
-rightFoot = 'right_sole_link'
-leftFoot = 'left_sole_link'
+rightFoot = "right_sole_link"
+leftFoot = "left_sole_link"
 gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot, fwddyn=False)
 
 # Setting up all tasks
-GAITPHASES = \
-    [{'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
-     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
-     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}},
-     {'walking': {'stepLength': 0.6, 'stepHeight': 0.1,
-                  'timeStep': 0.03, 'stepKnots': 35, 'supportKnots': 10}}]
-cameraTF = [3., 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
+GAITPHASES = [
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+]
+cameraTF = [3.0, 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 solver = [None] * len(GAITPHASES)
 display = None
@@ -45,34 +74,53 @@ if WITHDISPLAY:
     if display is None:
         try:
             import gepetto
+
             gepetto.corbaserver.Client()
-            display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot])
+            display = crocoddyl.GepettoDisplay(
+                talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
+            )
         except Exception:
-            display = crocoddyl.MeshcatDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
+            display = crocoddyl.MeshcatDisplay(
+                talos_legs, frameNames=[rightFoot, leftFoot]
+            )
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
-        if key == 'walking':
+        if key == "walking":
             # Creating a walking problem
             solver[i] = crocoddyl.SolverIntro(
-                gait.createWalkingProblem(x0, value['stepLength'], value['stepHeight'], value['timeStep'],
-                                          value['stepKnots'], value['supportKnots']))
+                gait.createWalkingProblem(
+                    x0,
+                    value["stepLength"],
+                    value["stepHeight"],
+                    value["timeStep"],
+                    value["stepKnots"],
+                    value["supportKnots"],
+                )
+            )
             solver[i].th_stop = 1e-7
 
     # Added the callback functions
-    print('*** SOLVE ' + key + ' ***')
+    print("*** SOLVE " + key + " ***")
     if WITHDISPLAY and type(display) == crocoddyl.GepettoDisplay:
         if WITHPLOT:
             solver[i].setCallbacks(
-                [crocoddyl.CallbackVerbose(),
-                 crocoddyl.CallbackLogger(),
-                 crocoddyl.CallbackDisplay(display)])
+                [
+                    crocoddyl.CallbackVerbose(),
+                    crocoddyl.CallbackLogger(),
+                    crocoddyl.CallbackDisplay(display),
+                ]
+            )
         else:
-            solver[i].setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)])
+            solver[i].setCallbacks(
+                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
+            )
     elif WITHPLOT:
-        solver[i].setCallbacks([
-            crocoddyl.CallbackVerbose(),
-            crocoddyl.CallbackLogger(),
-        ])
+        solver[i].setCallbacks(
+            [
+                crocoddyl.CallbackVerbose(),
+                crocoddyl.CallbackLogger(),
+            ]
+        )
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
     solver[i].getCallbacks()[0].precision = 3
@@ -102,12 +150,14 @@ if WITHPLOT:
     for i, phase in enumerate(GAITPHASES):
         title = list(phase.keys())[0] + " (phase " + str(i) + ")"
         log = solver[i].getCallbacks()[1]
-        crocoddyl.plotConvergence(log.costs,
-                                  log.u_regs,
-                                  log.x_regs,
-                                  log.grads,
-                                  log.stops,
-                                  log.steps,
-                                  figTitle=title,
-                                  figIndex=i + 3,
-                                  show=True if i == len(GAITPHASES) - 1 else False)
+        crocoddyl.plotConvergence(
+            log.costs,
+            log.u_regs,
+            log.x_regs,
+            log.grads,
+            log.stops,
+            log.steps,
+            figTitle=title,
+            figIndex=i + 3,
+            show=True if i == len(GAITPHASES) - 1 else False,
+        )

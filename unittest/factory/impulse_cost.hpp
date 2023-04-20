@@ -9,10 +9,10 @@
 #ifndef CROCODDYL_IMPULSE_COST_FACTORY_HPP_
 #define CROCODDYL_IMPULSE_COST_FACTORY_HPP_
 
-#include "state.hpp"
 #include "activation.hpp"
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -49,9 +49,10 @@ class ImpulseCostModelFactory {
   explicit ImpulseCostModelFactory();
   ~ImpulseCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(ImpulseCostModelTypes::Type cost_type,
-                                                           PinocchioModelTypes::Type model_type,
-                                                           ActivationModelTypes::Type activation_type) const;
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+      ImpulseCostModelTypes::Type cost_type,
+      PinocchioModelTypes::Type model_type,
+      ActivationModelTypes::Type activation_type) const;
 };
 
 }  // namespace unittest

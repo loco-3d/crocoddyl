@@ -1,23 +1,33 @@
 # Display the solution
 import numpy as np
 from cartpole_utils import animateCartpole
+
 import crocoddyl
 
 
 class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract):
-
     def __init__(self):
-        crocoddyl.DifferentialActionModelAbstract.__init__(self, crocoddyl.StateVector(4), 1, 6)  # nu = 1; nr = 6
+        crocoddyl.DifferentialActionModelAbstract.__init__(
+            self, crocoddyl.StateVector(4), 1, 6
+        )  # nu = 1; nr = 6
         self.unone = np.zeros(self.nu)
 
-        self.m1 = 1.
-        self.m2 = .1
-        self.l = .5
+        self.m1 = 1.0
+        self.m2 = 0.1
+        self.l = 0.5
         self.g = 9.81
-        self.costWeights = [1., 1., 0.1, 0.001, 0.001, 1.]  # sin, 1-cos, x, xdot, thdot, f
+        self.costWeights = [
+            1.0,
+            1.0,
+            0.1,
+            0.001,
+            0.001,
+            1.0,
+        ]  # sin, 1-cos, x, xdot, thdot, f
 
     def calc(self, data, x, u=None):
-        if u is None: u = model.unone
+        if u is None:
+            u = model.unone
         # Getting the state and control variables
         y, th, ydot, thdot = x[0], x[1], x[2], x[3]
         f = u[0]
@@ -35,7 +45,7 @@ class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract)
 
         # Computing the cost residual and value
         data.r = np.matrix(self.costWeights * np.array([s, 1 - c, y, ydot, thdot, f])).T
-        data.cost = .5 * sum(np.asarray(data.r)**2)
+        data.cost = 0.5 * sum(np.asarray(data.r) ** 2)
 
     def calcDiff(self, data, x, u=None):
         # Advance user might implement the derivatives
@@ -57,7 +67,7 @@ timeStep = 5e-2
 cartpoleIAM = crocoddyl.IntegratedActionModelEuler(cartpoleND, timeStep)
 
 # Creating the shooting problem
-x0 = np.array([0., 3.14, 0., 0.])
+x0 = np.array([0.0, 3.14, 0.0, 0.0])
 T = 50
 
 terminalCartpole = DifferentialActionModelCartpole()
@@ -66,7 +76,7 @@ terminalCartpoleIAM = crocoddyl.IntegratedActionModelEuler(terminalCartpoleDAM)
 
 terminalCartpole.costWeights[0] = 100
 terminalCartpole.costWeights[1] = 100
-terminalCartpole.costWeights[2] = 1.
+terminalCartpole.costWeights[2] = 1.0
 terminalCartpole.costWeights[3] = 0.1
 terminalCartpole.costWeights[4] = 0.01
 terminalCartpole.costWeights[5] = 0.0001

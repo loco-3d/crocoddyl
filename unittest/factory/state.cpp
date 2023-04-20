@@ -6,20 +6,22 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/fwd.hpp>
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
-#include <example-robot-data/path.hpp>
-
 #include "state.hpp"
+
+#include <example-robot-data/path.hpp>
+#include <pinocchio/fwd.hpp>
+#include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/parsers/urdf.hpp>
+
 #include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
-const std::vector<StateModelTypes::Type> StateModelTypes::all(StateModelTypes::init_all());
+const std::vector<StateModelTypes::Type> StateModelTypes::all(
+    StateModelTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
   switch (type) {
@@ -56,7 +58,8 @@ std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
 StateModelFactory::StateModelFactory() {}
 StateModelFactory::~StateModelFactory() {}
 
-boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModelTypes::Type state_type) const {
+boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(
+    StateModelTypes::Type state_type) const {
   boost::shared_ptr<pinocchio::Model> model;
   boost::shared_ptr<crocoddyl::StateAbstract> state;
   switch (state_type) {
@@ -84,7 +87,8 @@ boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(StateModel
       state = boost::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibody_RandomHumanoid:
-      model = PinocchioModelFactory(PinocchioModelTypes::RandomHumanoid).create();
+      model =
+          PinocchioModelFactory(PinocchioModelTypes::RandomHumanoid).create();
       state = boost::make_shared<crocoddyl::StateMultibody>(model);
       break;
     default:

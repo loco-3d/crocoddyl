@@ -15,12 +15,12 @@ CP := cp -f
 AR := ar
 TEX2DVI :=  pdflatex -interaction=nonstopmode -output-format dvi
 DVI2PS := dvips -Ppdf -G0 -tb4
-PS2PDF := ps2pdf -dCompatibilityLevel=1.4 -dMAxSubsetPct=100 -dSubsetFonts=true -dEmbedAllFonts=true -sPAPERSIZE=letter 
+PS2PDF := ps2pdf -dCompatibilityLevel=1.4 -dMAxSubsetPct=100 -dSubsetFonts=true -dEmbedAllFonts=true -sPAPERSIZE=letter
 TEX2PDF := pdflatex -interaction=nonstopmode
 BIBTEX := bibtex
 GZIP := gzip -c
 XDVI := xdvi -watchfile 0.5 -s 9
-TGZ := tar -czvf 
+TGZ := tar -czvf
 
 # ---------------------------------------------
 # --- REPERTOIRES -----------------------------
@@ -29,14 +29,14 @@ TGZ := tar -czvf
 PROJECT_DIR		= .
 ROOT_DIR		= .
 IMG_DIR      		= $(ROOT_DIR)
-BIB_DIR   		=. 
+BIB_DIR   		=.
 
 # ---------------------------------------------
 # --- OBJETS ----------------------------------
 # ---------------------------------------------
 
 OBJS	=	root
-OBJS2	=	
+OBJS2	=
 
 BIB	=	biblio.bib
 
@@ -58,8 +58,8 @@ TGZ_FILE        =       ../icra10.tgz
 # ---> Regle generale
 # --->
 
-.PHONY = all 
-all: 
+.PHONY = all
+all:
 
 dvi: $(OBJS_DVI)
 
@@ -69,7 +69,7 @@ psgz: $(OBJS_PS_GZ)
 
 pdf: $(OBJS_PDF)
 
-print: $(OBJS_PS) 
+print: $(OBJS_PS)
 	lpr -P $(IMPRIMANTE) $^
 	@touch print
 
@@ -83,12 +83,12 @@ edit:
 # --->
 
 %.dvi: %.tex $(OBJS2:%=%.tex) $(BIB)
-	$(TEX2DVI) $< 
+	$(TEX2DVI) $<
 
-bib: 
-	$(TEX2PDF) $(OBJS_TEX) 
+bib:
+	$(TEX2PDF) $(OBJS_TEX)
 	$(BIBTEX) $(OBJS)
-	$(TEX2PDF) $(OBJS_TEX) 
+	$(TEX2PDF) $(OBJS_TEX)
 	$(TEX2PDF) $(OBJS_TEX)
 
 %.ps: %.dvi
@@ -107,15 +107,15 @@ bib:
 # --->
 
 .PHONY = clean
-clean: 
+clean:
 	$(RM) *.aux *.blg *.dvi *.log *.bbl
-	$(RM) *~ 
-	$(RM) core 
+	$(RM) *~
+	$(RM) core
 	$(RM) print
 	$(RM) -r auto
 
 .PHONY = clean_all
-clean_all: clean 
+clean_all: clean
 	$(RM) *.ps *.pdf
 
 .PHONY = tgz

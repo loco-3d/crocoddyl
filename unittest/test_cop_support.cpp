@@ -10,8 +10,9 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include <pinocchio/math/quaternion.hpp>
-#include "crocoddyl/multibody/cop-support.hpp"
+
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/multibody/cop-support.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
@@ -19,7 +20,8 @@ using namespace crocoddyl::unittest;
 
 void test_constructor() {
   // Common parameters
-  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
+                                        random_real_in_range(0.01, 0.1));
 
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
@@ -54,7 +56,8 @@ void test_constructor() {
     BOOST_CHECK(support.get_R().isApprox(support_from_reference.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_reference.get_box()));
     BOOST_CHECK(support.get_A().isApprox(support_from_reference.get_A()));
-    for (std::size_t i = 0; i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
+    for (std::size_t i = 0;
+         i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
       BOOST_CHECK(support.get_ub()[i] == support_from_reference.get_ub()[i]);
       BOOST_CHECK(support.get_lb()[i] == support_from_reference.get_lb()[i]);
     }
@@ -68,7 +71,8 @@ void test_constructor() {
     BOOST_CHECK(support.get_R().isApprox(support_from_copy.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_copy.get_box()));
     BOOST_CHECK(support.get_A().isApprox(support_from_copy.get_A()));
-    for (std::size_t i = 0; i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
+    for (std::size_t i = 0;
+         i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
       BOOST_CHECK(support.get_ub()[i] == support_from_copy.get_ub()[i]);
       BOOST_CHECK(support.get_lb()[i] == support_from_copy.get_lb()[i]);
     }
@@ -77,7 +81,8 @@ void test_constructor() {
 
 void test_A_matrix_with_rotation_change() {
   // Common parameters
-  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
+                                        random_real_in_range(0.01, 0.1));
 
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
@@ -90,7 +95,9 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::CoPSupport support_2(R, box);
 
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK((support_1.get_A().row(i).head(3) - support_2.get_A().row(i).head(3) * R).isZero(1e-9));
+    BOOST_CHECK((support_1.get_A().row(i).head(3) -
+                 support_2.get_A().row(i).head(3) * R)
+                    .isZero(1e-9));
   }
 }
 
@@ -99,13 +106,15 @@ void test_cop_within_the_support_region() {
   Eigen::Quaterniond q;
   pinocchio::quaternion::uniformRandom(q);
   Eigen::Matrix3d R = q.toRotationMatrix();
-  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1), random_real_in_range(0.01, 0.1));
+  Eigen::Vector2d box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
+                                        random_real_in_range(0.01, 0.1));
   crocoddyl::CoPSupport support(R, box);
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(support.get_lb(), support.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data = activation.createData();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+      activation.createData();
 
   // Compute the activation value with a force along the contact normal
   Eigen::VectorXd wrench(6);
@@ -137,9 +146,12 @@ void test_cop_within_the_support_region() {
 }
 
 void register_unit_tests() {
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_constructor)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_A_matrix_with_rotation_change)));
-  framework::master_test_suite().add(BOOST_TEST_CASE(boost::bind(&test_cop_within_the_support_region)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_constructor)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_A_matrix_with_rotation_change)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_cop_within_the_support_region)));
 }
 
 bool init_function() {
@@ -147,4 +159,6 @@ bool init_function() {
   return true;
 }
 
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char* argv[]) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

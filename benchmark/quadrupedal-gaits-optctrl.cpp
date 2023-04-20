@@ -6,13 +6,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
 #include <example-robot-data/path.hpp>
-#include "crocoddyl/multibody/utils/quadruped-gaits.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
+#include <pinocchio/parsers/srdf.hpp>
+#include <pinocchio/parsers/urdf.hpp>
+
 #include "crocoddyl/core/solvers/fddp.hpp"
+#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/multibody/utils/quadruped-gaits.hpp"
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -23,12 +24,15 @@ int main(int argc, char* argv[]) {
   }
 
   pinocchio::Model model;
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/robots/hyq_no_sensors.urdf",
+  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR
+                              "/hyq_description/robots/hyq_no_sensors.urdf",
                               pinocchio::JointModelFreeFlyer(), model);
-  pinocchio::srdf::loadReferenceConfigurations(model, EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf",
-                                               false);
+  pinocchio::srdf::loadReferenceConfigurations(
+      model, EXAMPLE_ROBOT_DATA_MODEL_DIR "/hyq_description/srdf/hyq.srdf",
+      false);
 
-  crocoddyl::SimpleQuadrupedGaitProblem gait(model, "lf_foot", "rf_foot", "lh_foot", "rh_foot");
+  crocoddyl::SimpleQuadrupedGaitProblem gait(model, "lf_foot", "rf_foot",
+                                             "lh_foot", "rh_foot");
 
   const Eigen::VectorXd& x0 = gait.get_defaultState();
 
@@ -38,7 +42,8 @@ int main(int argc, char* argv[]) {
 
   // DDP Solver
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots);
+      gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots,
+                                supportKnots);
   crocoddyl::SolverFDDP ddp(problem);
   if (CALLBACKS) {
     std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
@@ -63,8 +68,8 @@ int main(int argc, char* argv[]) {
   double avrg_duration = duration.mean();
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration
+            << "-" << max_duration << ")" << std::endl;
 
   // Running calc
   for (unsigned int i = 0; i < T; ++i) {
@@ -76,8 +81,8 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration << ")"
-            << std::endl;
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 
   // Running calcDiff
   for (unsigned int i = 0; i < T; ++i) {
@@ -89,6 +94,6 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " (" << min_duration << "-" << max_duration
-            << ")" << std::endl;
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " ("
+            << min_duration << "-" << max_duration << ")" << std::endl;
 }

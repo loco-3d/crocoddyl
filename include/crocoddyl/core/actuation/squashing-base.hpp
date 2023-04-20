@@ -9,9 +9,9 @@
 #ifndef CROCODDYL_CORE_SQUASHING_BASE_HPP_
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
-#include <stdexcept>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
@@ -37,10 +37,13 @@ class SquashingModelAbstractTpl {
   };
   virtual ~SquashingModelAbstractTpl(){};
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) = 0;
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data, const Eigen::Ref<const VectorXs>& s) = 0;
+  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& s) = 0;
+  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& s) = 0;
   virtual boost::shared_ptr<SquashingDataAbstract> createData() {
-    return boost::allocate_shared<SquashingDataAbstract>(Eigen::aligned_allocator<SquashingDataAbstract>(), this);
+    return boost::allocate_shared<SquashingDataAbstract>(
+        Eigen::aligned_allocator<SquashingDataAbstract>(), this);
   }
 
   std::size_t get_ns() const { return ns_; };
@@ -54,8 +57,10 @@ class SquashingModelAbstractTpl {
   std::size_t ns_;
   VectorXs u_ub_;  // Squashing function upper bound
   VectorXs u_lb_;  // Squashing function lower bound
-  VectorXs s_ub_;  // Bound for the s variable (to apply using the Quadratic barrier)
-  VectorXs s_lb_;  // Bound for the s variable (to apply using the Quadratic barrier)
+  VectorXs
+      s_ub_;  // Bound for the s variable (to apply using the Quadratic barrier)
+  VectorXs
+      s_lb_;  // Bound for the s variable (to apply using the Quadratic barrier)
 };
 
 template <typename _Scalar>

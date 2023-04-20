@@ -9,11 +9,11 @@
 #ifndef CROCODDYL_CONSTRAINT_FACTORY_HPP_
 #define CROCODDYL_CONSTRAINT_FACTORY_HPP_
 
-#include "state.hpp"
 #include "crocoddyl/core/constraint-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/numdiff/constraint.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -57,11 +57,13 @@ class ConstraintModelFactory {
   ~ConstraintModelFactory();
 
   boost::shared_ptr<crocoddyl::ConstraintModelAbstract> create(
-      ConstraintModelTypes::Type constraint_type, StateModelTypes::Type state_type,
+      ConstraintModelTypes::Type constraint_type,
+      StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::ConstraintModelAbstract> create_random_constraint(StateModelTypes::Type state_type);
+boost::shared_ptr<crocoddyl::ConstraintModelAbstract> create_random_constraint(
+    StateModelTypes::Type state_type);
 
 }  // namespace unittest
 }  // namespace crocoddyl

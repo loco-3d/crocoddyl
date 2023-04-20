@@ -9,30 +9,33 @@
 #ifndef CROCODDYL_CORE_RESIDUALS_JOINT_ACCELERATION_HPP_
 #define CROCODDYL_CORE_RESIDUALS_JOINT_ACCELERATION_HPP_
 
-#include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/data/joint.hpp"
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Define a joint-acceleration residual
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
- * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and reference joint acceleration, respectively.
- * Note that the dimension of the residual vector is obtained from `StateAbstract::nv`, as it represents the
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{u}-\mathbf{u}^*\f$, where
+ * \f$\mathbf{u},\mathbf{u}^*\in~\mathbb{R}^{nu}\f$ are the current and
+ * reference joint acceleration, respectively. Note that the dimension of the
+ * residual vector is obtained from `StateAbstract::nv`, as it represents the
  * generalized acceleration.
  *
  * Both residual and residual Jacobians are computed analytically.
  *
- * As described in ResidualModelAbstractTpl(), the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in ResidualModelAbstractTpl(), the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scalar> {
+class ResidualModelJointAccelerationTpl
+    : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -54,8 +57,8 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * @param[in] uref        Reference joint acceleration
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state, const VectorXs& uref,
-                                    const std::size_t nu);
+  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state,
+                                    const VectorXs& uref, const std::size_t nu);
 
   /**
    * @brief Initialize the joint-acceleration residual model
@@ -65,23 +68,27 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * @param[in] state       State description
    * @param[in] uref        Reference joint acceleration
    */
-  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state, const VectorXs& uref);
+  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state,
+                                    const VectorXs& uref);
 
   /**
    * @brief Initialize the joint-acceleration residual model
    *
-   * The default reference joint acceleration is obtained from `MathBaseTpl<>::VectorXs::Zero(state->get_nv())`.
+   * The default reference joint acceleration is obtained from
+   * `MathBaseTpl<>::VectorXs::Zero(state->get_nv())`.
    *
    * @param[in] state       State description
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
+  ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state,
+                                    const std::size_t nu);
 
   /**
    * @brief Initialize the joint-acceleration residual model
    *
-   * The default reference joint acceleration is obtained from `MathBaseTpl<>::VectorXs::Zero(state->get_nv())`.
-   * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
+   * The default reference joint acceleration is obtained from
+   * `MathBaseTpl<>::VectorXs::Zero(state->get_nv())`. The default `nu` value is
+   * obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State description
    */
@@ -96,14 +103,16 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>&
-   * x)
+   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the joint-acceleration residual
@@ -112,13 +121,15 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the joint-acceleration residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the reference joint-acceleration vector
@@ -147,7 +158,8 @@ class ResidualModelJointAccelerationTpl : public ResidualModelAbstractTpl<_Scala
 };
 
 template <typename _Scalar>
-struct ResidualDataJointAccelerationTpl : public ResidualDataAbstractTpl<_Scalar> {
+struct ResidualDataJointAccelerationTpl
+    : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -156,11 +168,16 @@ struct ResidualDataJointAccelerationTpl : public ResidualDataAbstractTpl<_Scalar
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
   template <template <typename Scalar> class Model>
-  ResidualDataJointAccelerationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {
+  ResidualDataJointAccelerationTpl(Model<Scalar>* const model,
+                                   DataCollectorAbstract* const data)
+      : Base(model, data) {
     // Check that proper shared data has been passed
-    DataCollectorJointTpl<Scalar>* d = dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    DataCollectorJointTpl<Scalar>* d =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
     if (d == nullptr) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorJoint");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorJoint");
     }
     joint = d->joint;
   }

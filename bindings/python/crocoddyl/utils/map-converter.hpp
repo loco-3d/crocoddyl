@@ -9,10 +9,11 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_UTILS_MAP_CONVERTER_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_UTILS_MAP_CONVERTER_HPP_
 
-#include <map>
 #include <boost/python/stl_iterator.hpp>
-#include <boost/python/to_python_converter.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include <boost/python/to_python_converter.hpp>
+#include <map>
+
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
@@ -41,7 +42,9 @@ struct PickleMap : public eigenpy::PickleVector<Container> {
 template <typename Container>
 struct dict_to_map {
   static void register_converter() {
-    bp::converter::registry::push_back(&dict_to_map::convertible, &dict_to_map::construct, bp::type_id<Container>());
+    bp::converter::registry::push_back(&dict_to_map::convertible,
+                                       &dict_to_map::construct,
+                                       bp::type_id<Container>());
   }
 
   /// Check if conversion is possible
@@ -52,7 +55,8 @@ struct dict_to_map {
   }
 
   /// Perform the conversion
-  static void construct(PyObject* object, bp::converter::rvalue_from_python_stage1_data* data) {
+  static void construct(PyObject* object,
+                        bp::converter::rvalue_from_python_stage1_data* data) {
     // convert the PyObject pointed to by `object` to a bp::dict
     bp::handle<> handle(bp::borrowed(object));  // "smart ptr"
     bp::dict dict(handle);
@@ -109,17 +113,23 @@ struct dict_to_map {
  *
  * @param[in] T          Type to expose as std::map<T>.
  * @param[in] Compare    Type for the Compare in std::map<T,Compare,Allocator>.
- * @param[in] Allocator  Type for the Allocator in std::map<T,Compare,Allocator>.
- * @param[in] NoProxy    When set to false, the elements will be copied when returned to Python.
+ * @param[in] Allocator  Type for the Allocator in
+ * std::map<T,Compare,Allocator>.
+ * @param[in] NoProxy    When set to false, the elements will be copied when
+ * returned to Python.
  */
 template <class Key, class T, class Compare = std::less<Key>,
-          class Allocator = std::allocator<std::pair<const Key, T> >, bool NoProxy = false>
-struct StdMapPythonVisitor : public bp::map_indexing_suite<typename std::map<Key, T, Compare, Allocator>, NoProxy>,
-                             public dict_to_map<std::map<Key, T, Compare, Allocator> > {
+          class Allocator = std::allocator<std::pair<const Key, T> >,
+          bool NoProxy = false>
+struct StdMapPythonVisitor
+    : public bp::map_indexing_suite<
+          typename std::map<Key, T, Compare, Allocator>, NoProxy>,
+      public dict_to_map<std::map<Key, T, Compare, Allocator> > {
   typedef std::map<Key, T, Compare, Allocator> Container;
   typedef dict_to_map<Container> FromPythonDictConverter;
 
-  static void expose(const std::string& class_name, const std::string& doc_string = "") {
+  static void expose(const std::string& class_name,
+                     const std::string& doc_string = "") {
     namespace bp = bp;
 
     bp::class_<Container>(class_name.c_str(), doc_string.c_str())

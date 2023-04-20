@@ -9,8 +9,8 @@
 #ifndef CROCODDYL_CORE_CONSTRAINTS_RESIDUAL_CONSTRAINT_HPP_
 #define CROCODDYL_CORE_CONSTRAINTS_RESIDUAL_CONSTRAINT_HPP_
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/constraint-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 
 namespace crocoddyl {
@@ -18,20 +18,27 @@ namespace crocoddyl {
 /**
  * @brief Residual-based constraint
  *
- * This constraint function uses a residual model to define equality / inequality constraint as \f[
- * \mathbf{\underline{r}} \leq \mathbf{r}(\mathbf{x}, \mathbf{u}) \leq \mathbf{\bar{r}} \f] where
- * \f$\mathbf{r}(\cdot)\f$ describes the residual function, and \f$\mathbf{\underline{r}}\f$, \f$\mathbf{\bar{r}}\f$
- * are the lower and upper bounds, respectively. We can define element-wise equality constraints by defining the same
- * value for both: lower and upper values. Additionally, if we do not define the bounds, then it is assumed that
+ * This constraint function uses a residual model to define equality /
+ * inequality constraint as \f[ \mathbf{\underline{r}} \leq
+ * \mathbf{r}(\mathbf{x}, \mathbf{u}) \leq \mathbf{\bar{r}} \f] where
+ * \f$\mathbf{r}(\cdot)\f$ describes the residual function, and
+ * \f$\mathbf{\underline{r}}\f$, \f$\mathbf{\bar{r}}\f$ are the lower and upper
+ * bounds, respectively. We can define element-wise equality constraints by
+ * defining the same value for both: lower and upper values. Additionally, if we
+ * do not define the bounds, then it is assumed that
  * \f$\mathbf{\underline{r}}=\mathbf{\bar{r}}=\mathbf{0}\f$.
  *
- * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the constraint residual and
- * `calcDiff` computes the Jacobians of the constraint function. Concretely speaking, `calcDiff` builds
- * a linear approximation of the constraint function with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
- * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
+ * The main computations are carring out in `calc` and `calcDiff` routines.
+ * `calc` computes the constraint residual and `calcDiff` computes the Jacobians
+ * of the constraint function. Concretely speaking, `calcDiff` builds a linear
+ * approximation of the constraint function with the form:
+ * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
+ * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
- * Additionally, it is important to note that `calcDiff()` computes the derivatives using the latest stored values by
- * `calc()`. Thus, we need to run first `calc()`.
+ * Additionally, it is important to note that `calcDiff()` computes the
+ * derivatives using the latest stored values by `calc()`. Thus, we need to run
+ * first `calc()`.
  *
  * \sa `ConstraintModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -56,9 +63,10 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] lower       Lower bound (dimension of the residual vector)
    * @param[in] upper       Upper bound (dimension of the residual vector)
    */
-  ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                             boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
-                             const VectorXs& upper);
+  ConstraintModelResidualTpl(
+      boost::shared_ptr<typename Base::StateAbstract> state,
+      boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
+      const VectorXs& upper);
 
   /**
    * @brief Initialize the residual constraint model as an equality constraint
@@ -66,8 +74,9 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] residual    Residual model
    */
-  ConstraintModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                             boost::shared_ptr<ResidualModelAbstract> residual);
+  ConstraintModelResidualTpl(
+      boost::shared_ptr<typename Base::StateAbstract> state,
+      boost::shared_ptr<ResidualModelAbstract> residual);
   virtual ~ConstraintModelResidualTpl();
 
   /**
@@ -77,19 +86,21 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the residual constraint based on state only
    *
-   * It updates the constraint based on the state only. This function is commonly used in
-   * the terminal nodes of an optimal control problem.
+   * It updates the constraint based on the state only. This function is
+   * commonly used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Residual constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the residual constraint
@@ -98,24 +109,29 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the derivatives of the residual constraint with respect to the state only
+   * @brief Compute the derivatives of the residual constraint with respect to
+   * the state only
    *
-   * It updates the Jacobian of the constraint function based on the state only. This function is commonly used
-   * in the terminal nodes of an optimal control problem.
+   * It updates the Jacobian of the constraint function based on the state only.
+   * This function is commonly used in the terminal nodes of an optimal control
+   * problem.
    *
    * @param[in] data  Residual constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the residual constraint data
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Print relevant information of the cost-residual model
@@ -150,7 +166,9 @@ struct ConstraintDataResidualTpl : public ConstraintDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
 
   template <template <typename Scalar> class Model>
-  ConstraintDataResidualTpl(Model<Scalar>* const model, DataCollectorAbstract* const data) : Base(model, data) {}
+  ConstraintDataResidualTpl(Model<Scalar>* const model,
+                            DataCollectorAbstract* const data)
+      : Base(model, data) {}
 
   using Base::g;
   using Base::Gu;

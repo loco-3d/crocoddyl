@@ -11,8 +11,8 @@
 #include <omp.h>
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -21,13 +21,16 @@ SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
 
 SolverFDDP::~SolverFDDP() {}
 
-bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                       const std::size_t maxiter, const bool is_feasible, const double init_reg) {
+bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
+                       const std::vector<Eigen::VectorXd>& init_us,
+                       const std::size_t maxiter, const bool is_feasible,
+                       const double init_reg) {
   START_PROFILER("SolverFDDP::solve");
   if (problem_->is_updated()) {
     resizeData();
   }
-  xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
+  xs_try_[0] =
+      problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
@@ -59,7 +62,8 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
 
     // We need to recalculate the derivatives when the step length passes
     recalcDiff = false;
-    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+    for (std::vector<double>::const_iterator it = alphas_.begin();
+         it != alphas_.end(); ++it) {
       steplength_ = *it;
 
       try {
@@ -78,7 +82,8 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::v
           recalcDiff = true;
           break;
         }
-      } else {  // reducing the gaps by allowing a small increment in the cost value
+      } else {  // reducing the gaps by allowing a small increment in the cost
+                // value
         if (!is_feasible_ && dV_ > th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
@@ -120,14 +125,17 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   dv_ = 0;
   const std::size_t T = this->problem_->get_T();
   if (!is_feasible_) {
-    // NB: The dimension of vectors xs_try_ and xs_ are T+1, whereas the dimension of dx_ is T. Here, we are re-using
-    // the final element of dx_ for the computation of the difference at the terminal node. Using the access iterator
-    // back() this re-use of the final element is fine. Cf. the discussion at
-    // https://github.com/loco-3d/crocoddyl/issues/1022
-    problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(), dx_.back());
+    // NB: The dimension of vectors xs_try_ and xs_ are T+1, whereas the
+    // dimension of dx_ is T. Here, we are re-using the final element of dx_ for
+    // the computation of the difference at the terminal node. Using the access
+    // iterator back() this re-use of the final element is fine. Cf. the
+    // discussion at https://github.com/loco-3d/crocoddyl/issues/1022
+    problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(),
+                                                     dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+        problem_->get_runningModels();
 
     for (std::size_t t = 0; t < T; ++t) {
       models[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
@@ -149,7 +157,8 @@ void SolverFDDP::updateExpectedImprovement() {
     fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
     dq_ += fs_.back().dot(fTVxx_p_);
   }
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
@@ -173,8 +182,10 @@ void SolverFDDP::forwardPass(const double steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
       const boost::shared_ptr<ActionModelAbstract>& m = models[t];
@@ -202,8 +213,10 @@ void SolverFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+    const boost::shared_ptr<ActionModelAbstract>& m =
+        problem_->get_terminalModel();
+    const boost::shared_ptr<ActionDataAbstract>& d =
+        problem_->get_terminalData();
     xs_try_.back() = xnext_;
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
@@ -238,9 +251,12 @@ void SolverFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1), xs_try_.back());
+    const boost::shared_ptr<ActionModelAbstract>& m =
+        problem_->get_terminalModel();
+    const boost::shared_ptr<ActionDataAbstract>& d =
+        problem_->get_terminalData();
+    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1),
+                              xs_try_.back());
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
 

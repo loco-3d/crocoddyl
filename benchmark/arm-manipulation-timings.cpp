@@ -6,34 +6,37 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/algorithm/model.hpp>
 #include <example-robot-data/path.hpp>
+#include <pinocchio/algorithm/model.hpp>
+#include <pinocchio/parsers/urdf.hpp>
 
-#include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/integrator/rk.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/integrator/euler.hpp"
+#include "crocoddyl/core/integrator/rk.hpp"
+#include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/core/residuals/control.hpp"
+#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/utils/callbacks.hpp"
+#include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
-#include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
-#include "crocoddyl/core/utils/timer.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 #define SMOOTH(s) for (size_t _smooth = 0; _smooth < s; ++_smooth)
 
-#define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / ((double)vec.size() - 1))
+#define STDDEV(vec) \
+  std::sqrt(((vec - vec.mean())).square().sum() / ((double)vec.size() - 1))
 #define AVG(vec) (vec.mean())
 
 void printStatistics(std::string name, Eigen::ArrayXd duration) {
-  std::cout << "  " << std::left << std::setw(42) << name << std::left << std::setw(15) << AVG(duration) << std::left
-            << std::setw(15) << STDDEV(duration) << std::left << std::setw(15) << duration.maxCoeff() << std::left
-            << std::setw(15) << duration.minCoeff() << std::endl;
+  std::cout << "  " << std::left << std::setw(42) << name << std::left
+            << std::setw(15) << AVG(duration) << std::left << std::setw(15)
+            << STDDEV(duration) << std::left << std::setw(15)
+            << duration.maxCoeff() << std::left << std::setw(15)
+            << duration.minCoeff() << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -47,7 +50,9 @@ int main(int argc, char* argv[]) {
   /**************************DOUBLE**********************/
   /**************************DOUBLE**********************/
   pinocchio::Model model_full, model;
-  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_left_arm.urdf", model_full);
+  pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR
+                              "/talos_data/robots/talos_left_arm.urdf",
+                              model_full);
   std::vector<pinocchio::JointIndex> locked_joints;
   locked_joints.reserve(3);
 
@@ -55,7 +60,8 @@ int main(int argc, char* argv[]) {
   locked_joints.push_back(6);
   locked_joints.push_back(7);
 
-  pinocchio::buildReducedModel(model_full, locked_joints, Eigen::VectorXd::Zero(model_full.nq), model);
+  pinocchio::buildReducedModel(model_full, locked_joints,
+                               Eigen::VectorXd::Zero(model_full.nq), model);
 
   /*************************PINOCCHIO MODEL**************/
 
@@ -64,24 +70,33 @@ int main(int argc, char* argv[]) {
   std::cout << "NQ: " << model.nq << std::endl;
 
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(model));
+      boost::make_shared<crocoddyl::StateMultibody>(
+          boost::make_shared<pinocchio::Model>(model));
   boost::shared_ptr<crocoddyl::ActuationModelFull> actuation =
       boost::make_shared<crocoddyl::ActuationModelFull>(state);
 
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());
-  Eigen::MatrixXd Jfirst(2 * model.nv, 2 * model.nv), Jsecond(2 * model.nv, 2 * model.nv);
+  Eigen::MatrixXd Jfirst(2 * model.nv, 2 * model.nv),
+      Jsecond(2 * model.nv, 2 * model.nv);
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost = boost::make_shared<crocoddyl::CostModelResidual>(
-      state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
-                 state, model.getFrameId("gripper_left_joint"),
-                 pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(.0, .0, .4)), actuation->get_nu()));
+  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
+      boost::make_shared<crocoddyl::CostModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
+                     state, model.getFrameId("gripper_left_joint"),
+                     pinocchio::SE3(Eigen::Matrix3d::Identity(),
+                                    Eigen::Vector3d(.0, .0, .4)),
+                     actuation->get_nu()));
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost = boost::make_shared<crocoddyl::CostModelResidual>(
-      state, boost::make_shared<crocoddyl::ResidualModelState>(state, actuation->get_nu()));
-  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost = boost::make_shared<crocoddyl::CostModelResidual>(
-      state, boost::make_shared<crocoddyl::ResidualModelControl>(state, actuation->get_nu()));
+  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost =
+      boost::make_shared<crocoddyl::CostModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelState>(
+                     state, actuation->get_nu()));
+  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost =
+      boost::make_shared<crocoddyl::CostModelResidual>(
+          state, boost::make_shared<crocoddyl::ResidualModelControl>(
+                     state, actuation->get_nu()));
 
   boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel =
       boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
@@ -93,44 +108,66 @@ int main(int argc, char* argv[]) {
   runningCostModel->addCost("uReg", uRegCost, 1e-4);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> runningDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
+      runningDAM =
+          boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(
+              state, actuation, runningCostModel);
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> terminalDAM =
-      boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
+  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
+      terminalDAM =
+          boost::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(
+              state, actuation, terminalCostModel);
 
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM,
+                                                                1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
-      boost::make_shared<crocoddyl::IntegratedActionModelRK>(runningDAM, crocoddyl::RKType::four, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+          runningDAM, crocoddyl::RKType::four, 1e-3);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM, 1e-3);
+      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM,
+                                                                1e-3);
 
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModelsWithEuler(N, runningModelWithEuler);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModelsWithRK4(N, runningModelWithRK4);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+      runningModelsWithEuler(N, runningModelWithEuler);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+      runningModelsWithRK4(N, runningModelWithRK4);
 
   boost::shared_ptr<crocoddyl::ShootingProblem> problemWithEuler =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithEuler, terminalModel);
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithEuler,
+                                                     terminalModel);
   boost::shared_ptr<crocoddyl::ShootingProblem> problemWithRK4 =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithRK4, terminalModel);
+      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithRK4,
+                                                     terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
 
   /***************************************************************/
 
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithEuler_data = runningModelWithEuler->createData();
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data = runningModelWithRK4->createData();
-  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data = runningDAM->createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithEuler_data =
+      runningModelWithEuler->createData();
+  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data =
+      runningModelWithRK4->createData();
+  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data =
+      runningDAM->createData();
   crocoddyl::DifferentialActionDataFreeFwdDynamics* d =
-      static_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics*>(runningDAM_data.get());
-  boost::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data = actuation->createData();
-  boost::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data = goalTrackingCost->createData(&d->multibody);
-  boost::shared_ptr<crocoddyl::CostDataAbstract> xRegCost_data = xRegCost->createData(&d->multibody);
-  boost::shared_ptr<crocoddyl::CostDataAbstract> uRegCost_data = uRegCost->createData(&d->multibody);
+      static_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics*>(
+          runningDAM_data.get());
+  boost::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data =
+      actuation->createData();
+  boost::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data =
+      goalTrackingCost->createData(&d->multibody);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> xRegCost_data =
+      xRegCost->createData(&d->multibody);
+  boost::shared_ptr<crocoddyl::CostDataAbstract> uRegCost_data =
+      uRegCost->createData(&d->multibody);
 
-  boost::shared_ptr<crocoddyl::CostDataSum> runningCostModel_data = runningCostModel->createData(&d->multibody);
+  boost::shared_ptr<crocoddyl::CostDataSum> runningCostModel_data =
+      runningCostModel->createData(&d->multibody);
 
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> activationQuad = xRegCost->get_activation();
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> activationQuad_data = activationQuad->createData();
+  boost::shared_ptr<crocoddyl::ActivationModelAbstract> activationQuad =
+      xRegCost->get_activation();
+  boost::shared_ptr<crocoddyl::ActivationDataAbstract> activationQuad_data =
+      activationQuad->createData();
 
   /********************************************************************/
 
@@ -141,7 +178,8 @@ int main(int argc, char* argv[]) {
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x1s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) x2s;  // (T, state->rand());
   PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) us;   // (T, state->rand());
-  PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd) dxs(T, Eigen::VectorXd::Zero(2 * model.nv));
+  PINOCCHIO_ALIGNED_STD_VECTOR(Eigen::VectorXd)
+  dxs(T, Eigen::VectorXd::Zero(2 * model.nv));
 
   for (size_t i = 0; i < T; ++i) {
     x1s.push_back(state->rand());
@@ -156,13 +194,16 @@ int main(int argc, char* argv[]) {
 
   /*********************State**********************************/
   std::cout << std::left << std::setw(42) << "Function call"
-            << "  " << std::left << std::setw(15) << "AVG (us)" << std::left << std::setw(15) << "STDDEV (us)"
-            << std::left << std::setw(15) << "MAX (us)" << std::left << std::setw(15) << "MIN (us)" << std::endl;
+            << "  " << std::left << std::setw(15) << "AVG (us)" << std::left
+            << std::setw(15) << "STDDEV (us)" << std::left << std::setw(15)
+            << "MAX (us)" << std::left << std::setw(15) << "MIN (us)"
+            << std::endl;
 
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    pinocchio::difference(model, x1s[_smooth].head(model.nq), x2s[_smooth].head(model.nq),
+    pinocchio::difference(model, x1s[_smooth].head(model.nq),
+                          x2s[_smooth].head(model.nq),
                           dxs[_smooth].head(model.nv));
     duration[_smooth] = timer.get_us_duration();
   }
@@ -172,7 +213,9 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    pinocchio::integrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), x2s[_smooth].head(model.nq));
+    pinocchio::integrate(model, x1s[_smooth].head(model.nq),
+                         dxs[_smooth].head(model.nv),
+                         x2s[_smooth].head(model.nq));
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("integrate", duration);
@@ -180,8 +223,9 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    pinocchio::dIntegrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
-                          Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG1);
+    pinocchio::dIntegrate(
+        model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
+        Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG1);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("dIntegrate ARG1", duration);
@@ -189,8 +233,9 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    pinocchio::dIntegrate(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
-                          Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG0);
+    pinocchio::dIntegrate(
+        model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv),
+        Jsecond.bottomLeftCorner(model.nv, model.nv), pinocchio::ARG0);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("dIntegrate ARG0", duration);
@@ -199,7 +244,8 @@ int main(int argc, char* argv[]) {
   Eigen::MatrixXd Jin(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
     timer.reset();
-    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin,
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq),
+                                   dxs[_smooth].head(model.nv), Jin,
                                    pinocchio::ARG0);
     duration[_smooth] = timer.get_us_duration();
   }
@@ -210,7 +256,8 @@ int main(int argc, char* argv[]) {
   Eigen::MatrixXd Jout(Eigen::MatrixXd::Random(model.nv, 2 * model.nv));
   SMOOTH(T) {
     timer.reset();
-    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq), dxs[_smooth].head(model.nv), Jin, Jout,
+    pinocchio::dIntegrateTransport(model, x1s[_smooth].head(model.nq),
+                                   dxs[_smooth].head(model.nv), Jin, Jout,
                                    pinocchio::ARG0);
     duration[_smooth] = timer.get_us_duration();
   }
@@ -252,7 +299,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond, crocoddyl::second);
+    state->Jdiff(x1s[_smooth], x2s[_smooth], Jfirst, Jsecond,
+                 crocoddyl::second);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("Jdiff second", duration);
@@ -260,7 +308,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::both);
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond,
+                      crocoddyl::both);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("Jintegrate both", duration);
@@ -268,7 +317,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::first);
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond,
+                      crocoddyl::first);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("Jintegrate first", duration);
@@ -276,7 +326,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond, crocoddyl::second);
+    state->Jintegrate(x1s[_smooth], dxs[_smooth], Jfirst, Jsecond,
+                      crocoddyl::second);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("Jintegrate second", duration);
@@ -332,7 +383,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    goalTrackingCost->calcDiff(goalTrackingCost_data, x1s[_smooth], us[_smooth]);
+    goalTrackingCost->calcDiff(goalTrackingCost_data, x1s[_smooth],
+                               us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);
@@ -383,7 +435,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningCostModel->calcDiff(runningCostModel_data, x1s[_smooth], us[_smooth]);
+    runningCostModel->calcDiff(runningCostModel_data, x1s[_smooth],
+                               us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);
@@ -408,7 +461,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModelWithEuler->calc(runningModelWithEuler_data, x1s[_smooth], us[_smooth]);
+    runningModelWithEuler->calc(runningModelWithEuler_data, x1s[_smooth],
+                                us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   std::cout << "FreeFwdDynamics+Euler" << std::endl;
@@ -417,7 +471,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModelWithEuler->calcDiff(runningModelWithEuler_data, x1s[_smooth], us[_smooth]);
+    runningModelWithEuler->calcDiff(runningModelWithEuler_data, x1s[_smooth],
+                                    us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);
@@ -425,7 +480,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModelWithRK4->calc(runningModelWithRK4_data, x1s[_smooth], us[_smooth]);
+    runningModelWithRK4->calc(runningModelWithRK4_data, x1s[_smooth],
+                              us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   std::cout << "FreeFwdDynamics+RK4" << std::endl;
@@ -434,7 +490,8 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningModelWithRK4->calcDiff(runningModelWithRK4_data, x1s[_smooth], us[_smooth]);
+    runningModelWithRK4->calcDiff(runningModelWithRK4_data, x1s[_smooth],
+                                  us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);

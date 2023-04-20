@@ -24,7 +24,8 @@ struct CostModelTypes {
     CostModelResidualState,
     CostModelResidualControl,
     CostModelResidualCoMPosition,
-    // CostModelResidualCentroidalMomentum,  // @todo Figure out the pinocchio callbacks.
+    // CostModelResidualCentroidalMomentum,  // @todo Figure out the pinocchio
+    // callbacks.
     CostModelResidualFramePlacement,
     CostModelResidualFrameRotation,
     CostModelResidualFrameTranslation,
@@ -88,10 +89,12 @@ class CostModelFactory {
   ~CostModelFactory();
 
   boost::shared_ptr<crocoddyl::CostModelAbstract> create(
-      CostModelTypes::Type cost_type, StateModelTypes::Type state_type, ActivationModelTypes::Type activation_type,
+      CostModelTypes::Type cost_type, StateModelTypes::Type state_type,
+      ActivationModelTypes::Type activation_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
   boost::shared_ptr<crocoddyl::CostModelAbstract> create(
-      CostModelNoFFTypes::Type cost_type, ActivationModelTypes::Type activation_type,
+      CostModelNoFFTypes::Type cost_type,
+      ActivationModelTypes::Type activation_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
@@ -102,7 +105,8 @@ class CostModelFactory {
 };
 
 boost::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
-    StateModelTypes::Type state_type, std::size_t nu = std::numeric_limits<std::size_t>::max());
+    StateModelTypes::Type state_type,
+    std::size_t nu = std::numeric_limits<std::size_t>::max());
 }  // namespace unittest
 }  // namespace crocoddyl
 

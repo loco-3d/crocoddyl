@@ -11,72 +11,84 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                             const pinocchio::FrameIndex id,
-                                                                             const WrenchCone& fref,
-                                                                             const std::size_t nu, const bool fwddyn)
-    : Base(state, fref.get_nf() + 13, nu, fwddyn ? true : false, fwddyn ? true : false, true),
+ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const WrenchCone& fref, const std::size_t nu, const bool fwddyn)
+    : Base(state, fref.get_nf() + 13, nu, fwddyn ? true : false,
+           fwddyn ? true : false, true),
       fwddyn_(fwddyn),
       update_jacobians_(true),
       id_(id),
       fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
 template <typename Scalar>
-ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(boost::shared_ptr<StateMultibody> state,
-                                                                             const pinocchio::FrameIndex id,
-                                                                             const WrenchCone& fref)
-    : Base(state, fref.get_nf() + 13), fwddyn_(true), update_jacobians_(true), id_(id), fref_(fref) {
-  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <= id) {
-    throw_pretty("Invalid argument: "
-                 << "the frame index is wrong (it does not exist in the robot)");
+ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(
+    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const WrenchCone& fref)
+    : Base(state, fref.get_nf() + 13),
+      fwddyn_(true),
+      update_jacobians_(true),
+      id_(id),
+      fref_(fref) {
+  if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
+      id) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the frame index is wrong (it does not exist in the robot)");
   }
 }
 
 template <typename Scalar>
-ResidualModelContactWrenchConeTpl<Scalar>::~ResidualModelContactWrenchConeTpl() {}
+ResidualModelContactWrenchConeTpl<
+    Scalar>::~ResidualModelContactWrenchConeTpl() {}
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                     const Eigen::Ref<const VectorXs>&,
-                                                     const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactWrenchConeTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the residual of the wrench cone. Note that we need to transform the wrench
-  // to the contact frame
+  // Compute the residual of the wrench cone. Note that we need to transform the
+  // wrench to the contact frame
   data->r.noalias() = fref_.get_A() * d->contact->f.toVector();
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                     const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactWrenchConeTpl<Scalar>::calc(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                         const Eigen::Ref<const VectorXs>&,
-                                                         const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
   }
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                                                         const Eigen::Ref<const VectorXs>&) {
+void ResidualModelContactWrenchConeTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactWrenchConeTpl<Scalar>::createData(
+boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+ResidualModelContactWrenchConeTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d =
-      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
+      Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -84,7 +96,8 @@ boost::shared_ptr<ResidualDataAbstractTpl<Scalar> > ResidualModelContactWrenchCo
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data) {
+void ResidualModelContactWrenchConeTpl<Scalar>::updateJacobians(
+    const boost::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -97,9 +110,12 @@ void ResidualModelContactWrenchConeTpl<Scalar>::updateJacobians(const boost::sha
 
 template <typename Scalar>
 void ResidualModelContactWrenchConeTpl<Scalar>::print(std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s = boost::static_pointer_cast<StateMultibody>(state_);
-  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[", "]");
-  os << "ResidualModelContactWrenchCone {frame=" << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
+  boost::shared_ptr<StateMultibody> s =
+      boost::static_pointer_cast<StateMultibody>(state_);
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "ResidualModelContactWrenchCone {frame="
+     << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
      << ", box=" << fref_.get_box().transpose().format(fmt) << "}";
 }
 
@@ -109,22 +125,26 @@ bool ResidualModelContactWrenchConeTpl<Scalar>::is_fwddyn() const {
 }
 
 template <typename Scalar>
-pinocchio::FrameIndex ResidualModelContactWrenchConeTpl<Scalar>::get_id() const {
+pinocchio::FrameIndex ResidualModelContactWrenchConeTpl<Scalar>::get_id()
+    const {
   return id_;
 }
 
 template <typename Scalar>
-const WrenchConeTpl<Scalar>& ResidualModelContactWrenchConeTpl<Scalar>::get_reference() const {
+const WrenchConeTpl<Scalar>&
+ResidualModelContactWrenchConeTpl<Scalar>::get_reference() const {
   return fref_;
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
+void ResidualModelContactWrenchConeTpl<Scalar>::set_id(
+    const pinocchio::FrameIndex id) {
   id_ = id;
 }
 
 template <typename Scalar>
-void ResidualModelContactWrenchConeTpl<Scalar>::set_reference(const WrenchCone& reference) {
+void ResidualModelContactWrenchConeTpl<Scalar>::set_reference(
+    const WrenchCone& reference) {
   fref_ = reference;
   update_jacobians_ = true;
 }

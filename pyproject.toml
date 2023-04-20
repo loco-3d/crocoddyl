@@ -1,8 +1,9 @@
 [tool.isort]
-profile = "black"
 known_first_party = "pinocchio"
+profile = "black"
 
 [tool.ruff]
+extend-exclude = ["examples/notebooks"]
 target-version = "py38"
 
 [tool.tomlsort]

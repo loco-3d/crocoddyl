@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/solvers/box-fddp.hpp"
+
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "crocoddyl/core/solvers/box-fddp.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -19,11 +20,15 @@ void exposeSolverBoxFDDP() {
   bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP> >(
       "SolverBoxFDDP",
       "Box-constrained FDDP solver.\n\n"
-      ":param shootingProblem: shooting problem (list of action models along trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(bp::args("self", "problem"),
-                                                    "Initialize the vector dimension.\n\n"
-                                                    ":param problem: shooting problem."))
-      .add_property("Quu_inv", make_function(&SolverBoxFDDP::get_Quu_inv, bp::return_internal_reference<>()),
+      ":param shootingProblem: shooting problem (list of action models along "
+      "trajectory.)",
+      bp::init<boost::shared_ptr<ShootingProblem> >(
+          bp::args("self", "problem"),
+          "Initialize the vector dimension.\n\n"
+          ":param problem: shooting problem."))
+      .add_property("Quu_inv",
+                    make_function(&SolverBoxFDDP::get_Quu_inv,
+                                  bp::return_internal_reference<>()),
                     "inverse of the Quu computed by the box QP")
       .def(CopyableVisitor<SolverBoxFDDP>());
 }

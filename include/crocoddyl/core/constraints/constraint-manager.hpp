@@ -9,12 +9,12 @@
 #ifndef CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_
 #define CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_
 
-#include <string>
 #include <map>
+#include <string>
 #include <utility>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/constraint-base.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
@@ -27,13 +27,16 @@ struct ConstraintItemTpl {
   typedef ConstraintModelAbstractTpl<Scalar> ConstraintModelAbstract;
 
   ConstraintItemTpl() {}
-  ConstraintItemTpl(const std::string& name, boost::shared_ptr<ConstraintModelAbstract> constraint, bool active = true)
+  ConstraintItemTpl(const std::string& name,
+                    boost::shared_ptr<ConstraintModelAbstract> constraint,
+                    bool active = true)
       : name(name), constraint(constraint), active(active) {}
 
   /**
    * @brief Print information on the constraint item
    */
-  friend std::ostream& operator<<(std::ostream& os, const ConstraintItemTpl<Scalar>& model) {
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ConstraintItemTpl<Scalar>& model) {
     os << "{" << *model.constraint << "}";
     return os;
   }
@@ -46,14 +49,17 @@ struct ConstraintItemTpl {
 /**
  * @brief Manage the individual constraint models
  *
- * This class serves to manage a set of added constraint models. The constraint functions might active or inactive,
- * with this approach we avoid dynamic allocation of memory. Each constraint model is added through `addConstraint`,
+ * This class serves to manage a set of added constraint models. The constraint
+ * functions might active or inactive, with this approach we avoid dynamic
+ * allocation of memory. Each constraint model is added through `addConstraint`,
  * where its status can be defined.
  *
- * The main computations are carring out in `calc` and `calcDiff` routines. `calc` computes the constraint residuals
- * and `calcDiff` computes the Jacobians of the constraint functions. Concretely speaking,
- * `calcDiff` builds a linear approximation of the total constraint function (both inequality and equality) with the
- * form: \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$, \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
+ * The main computations are carring out in `calc` and `calcDiff` routines.
+ * `calc` computes the constraint residuals and `calcDiff` computes the
+ * Jacobians of the constraint functions. Concretely speaking, `calcDiff` builds
+ * a linear approximation of the total constraint function (both inequality and
+ * equality) with the form: \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
  * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
  *
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
@@ -74,8 +80,10 @@ class ConstraintModelManagerTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ConstraintItem> > ConstraintModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ConstraintDataAbstract> > ConstraintDataContainer;
+  typedef std::map<std::string, boost::shared_ptr<ConstraintItem> >
+      ConstraintModelContainer;
+  typedef std::map<std::string, boost::shared_ptr<ConstraintDataAbstract> >
+      ConstraintDataContainer;
 
   /**
    * @brief Initialize the constraint-manager model
@@ -83,7 +91,8 @@ class ConstraintModelManagerTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
+  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state,
+                            const std::size_t nu);
 
   /**
    * @brief Initialize the constraint-manager model
@@ -103,7 +112,8 @@ class ConstraintModelManagerTpl {
    * @param[in] weight      Constraint weight
    * @param[in] active      True if the constraint is activated (default true)
    */
-  void addConstraint(const std::string& name, boost::shared_ptr<ConstraintModelAbstract> constraint,
+  void addConstraint(const std::string& name,
+                     boost::shared_ptr<ConstraintModelAbstract> constraint,
                      const bool active = true);
 
   /**
@@ -117,7 +127,8 @@ class ConstraintModelManagerTpl {
    * @brief Change the constraint status
    *
    * @param[in] name    Constraint name
-   * @param[in] active  Constraint status (true for active and false for inactive)
+   * @param[in] active  Constraint status (true for active and false for
+   * inactive)
    */
   void changeConstraintStatus(const std::string& name, bool active);
 
@@ -128,19 +139,22 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x,
+  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+            const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the total constraint value for nodes that depends only on the state
+   * @brief Compute the total constraint value for nodes that depends only on
+   * the state
    *
-   * It updates the constraint based on the state only. This function is commonly used in the terminal nodes of an
-   * optimal control problem.
+   * It updates the constraint based on the state only. This function is
+   * commonly used in the terminal nodes of an optimal control problem.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
+  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+            const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the Jacobian of the total constraint
@@ -149,31 +163,37 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x,
+  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+                const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief Compute the Jacobian of the total constraint with respect to the state only
+   * @brief Compute the Jacobian of the total constraint with respect to the
+   * state only
    *
-   * It computes the Jacobian of the constraint function based on the state only. This function is commonly used
-   * in the terminal nodes of an optimal control problem.
+   * It computes the Jacobian of the constraint function based on the state
+   * only. This function is commonly used in the terminal nodes of an optimal
+   * control problem.
    *
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data, const Eigen::Ref<const VectorXs>& x);
+  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+                const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the constraint data
    *
-   * The default data contains objects to store the values of the constraint and their derivatives (i.e. Jacobians).
-   * However, it is possible to specialize this function is we need to create additional data, for instance, to avoid
+   * The default data contains objects to store the values of the constraint and
+   * their derivatives (i.e. Jacobians). However, it is possible to specialize
+   * this function is we need to create additional data, for instance, to avoid
    * dynamic memory allocation.
    *
    * @param data  Data collector
    * @return the constraint data
    */
-  boost::shared_ptr<ConstraintDataManager> createData(DataCollectorAbstract* const data);
+  boost::shared_ptr<ConstraintDataManager> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the state
@@ -231,7 +251,8 @@ class ConstraintModelManagerTpl {
    * @brief Print information on the stack of constraints
    */
   template <class Scalar>
-  friend std::ostream& operator<<(std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model);
+  friend std::ostream& operator<<(
+      std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model);
 
  private:
   boost::shared_ptr<StateAbstract> state_;  //!< State description
@@ -239,11 +260,12 @@ class ConstraintModelManagerTpl {
   VectorXs lb_;                             //!< Lower bound of the constraint
   VectorXs ub_;                             //!< Upper bound of the constraint
   std::size_t nu_;                          //!< Dimension of the control input
-  std::size_t ng_;                          //!< Number of the active inequality constraints
-  std::size_t nh_;                          //!< Number of the active equality constraints
-  std::set<std::string> active_set_;        //!< Names of the active constraint items
-  std::set<std::string> inactive_set_;      //!< Names of the inactive constraint items
-  VectorXs unone_;                          //!< No control vector
+  std::size_t ng_;  //!< Number of the active inequality constraints
+  std::size_t nh_;  //!< Number of the active equality constraints
+  std::set<std::string> active_set_;  //!< Names of the active constraint items
+  std::set<std::string>
+      inactive_set_;  //!< Names of the inactive constraint items
+  VectorXs unone_;    //!< No control vector
 };
 
 template <typename _Scalar>
@@ -258,7 +280,8 @@ struct ConstraintDataManagerTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  ConstraintDataManagerTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  ConstraintDataManagerTpl(Model<Scalar>* const model,
+                           DataCollectorAbstract* const data)
       : g_internal(model->get_ng()),
         Gx_internal(model->get_ng(), model->get_state()->get_ndx()),
         Gu_internal(model->get_ng(), model->get_nu()),
@@ -278,11 +301,13 @@ struct ConstraintDataManagerTpl {
     h.setZero();
     Hx.setZero();
     Hu.setZero();
-    for (typename ConstraintModelManagerTpl<Scalar>::ConstraintModelContainer::const_iterator it =
+    for (typename ConstraintModelManagerTpl<
+             Scalar>::ConstraintModelContainer::const_iterator it =
              model->get_constraints().begin();
          it != model->get_constraints().end(); ++it) {
       const boost::shared_ptr<ConstraintItem>& item = it->second;
-      constraints.insert(std::make_pair(item->name, item->constraint->createData(data)));
+      constraints.insert(
+          std::make_pair(item->name, item->constraint->createData(data)));
     }
   }
 
@@ -297,11 +322,15 @@ struct ConstraintDataManagerTpl {
     Hu_internal.resize(0, 0);
     // Share memory with the differential action data
     new (&g) Eigen::Map<VectorXs>(data->g.data(), data->g.size());
-    new (&Gx) Eigen::Map<MatrixXs>(data->Gx.data(), data->Gx.rows(), data->Gx.cols());
-    new (&Gu) Eigen::Map<MatrixXs>(data->Gu.data(), data->Gu.rows(), data->Gu.cols());
+    new (&Gx)
+        Eigen::Map<MatrixXs>(data->Gx.data(), data->Gx.rows(), data->Gx.cols());
+    new (&Gu)
+        Eigen::Map<MatrixXs>(data->Gu.data(), data->Gu.rows(), data->Gu.cols());
     new (&h) Eigen::Map<VectorXs>(data->h.data(), data->h.size());
-    new (&Hx) Eigen::Map<MatrixXs>(data->Hx.data(), data->Hx.rows(), data->Hx.cols());
-    new (&Hu) Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
+    new (&Hx)
+        Eigen::Map<MatrixXs>(data->Hx.data(), data->Hx.rows(), data->Hx.cols());
+    new (&Hu)
+        Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
   }
 
   template <class ActionModel, class ActionData>
@@ -334,14 +363,16 @@ struct ConstraintDataManagerTpl {
   void set_g(const VectorXs& _g) {
     if (g.size() != _g.size()) {
       throw_pretty("Invalid argument: "
-                   << "g has wrong dimension (it should be " + std::to_string(g.size()) + ")");
+                   << "g has wrong dimension (it should be " +
+                          std::to_string(g.size()) + ")");
     }
     g = _g;
   }
   void set_Gx(const MatrixXs& _Gx) {
     if (Gx.rows() != _Gx.rows() || Gx.cols() != _Gx.cols()) {
       throw_pretty("Invalid argument: "
-                   << "Gx has wrong dimension (it should be " + std::to_string(Gx.rows()) + ", " +
+                   << "Gx has wrong dimension (it should be " +
+                          std::to_string(Gx.rows()) + ", " +
                           std::to_string(Gx.cols()) + ")");
     }
     Gx = _Gx;
@@ -349,7 +380,8 @@ struct ConstraintDataManagerTpl {
   void set_Gu(const MatrixXs& _Gu) {
     if (Gu.rows() != _Gu.rows() || Gu.cols() != _Gu.cols()) {
       throw_pretty("Invalid argument: "
-                   << "Gu has wrong dimension (it should be " + std::to_string(Gu.rows()) + ", " +
+                   << "Gu has wrong dimension (it should be " +
+                          std::to_string(Gu.rows()) + ", " +
                           std::to_string(Gu.cols()) + ")");
     }
     Gu = _Gu;
@@ -357,14 +389,16 @@ struct ConstraintDataManagerTpl {
   void set_h(const VectorXs& _h) {
     if (h.size() != _h.size()) {
       throw_pretty("Invalid argument: "
-                   << "h has wrong dimension (it should be " + std::to_string(h.size()) + ")");
+                   << "h has wrong dimension (it should be " +
+                          std::to_string(h.size()) + ")");
     }
     h = _h;
   }
   void set_Hx(const MatrixXs& _Hx) {
     if (Hx.rows() != _Hx.rows() || Hx.cols() != _Hx.cols()) {
       throw_pretty("Invalid argument: "
-                   << "Hx has wrong dimension (it should be " + std::to_string(Hx.rows()) + ", " +
+                   << "Hx has wrong dimension (it should be " +
+                          std::to_string(Hx.rows()) + ", " +
                           std::to_string(Hx.cols()) + ")");
     }
     Hx = _Hx;
@@ -372,7 +406,8 @@ struct ConstraintDataManagerTpl {
   void set_Hu(const MatrixXs& _Hu) {
     if (Hu.rows() != _Hu.rows() || Hu.cols() != _Hu.cols()) {
       throw_pretty("Invalid argument: "
-                   << "Hu has wrong dimension (it should be " + std::to_string(Hu.rows()) + ", " +
+                   << "Hu has wrong dimension (it should be " +
+                          std::to_string(Hu.rows()) + ", " +
                           std::to_string(Hu.cols()) + ")");
     }
     Hu = _Hu;
@@ -386,7 +421,8 @@ struct ConstraintDataManagerTpl {
   MatrixXs Hx_internal;
   MatrixXs Hu_internal;
 
-  typename ConstraintModelManagerTpl<Scalar>::ConstraintDataContainer constraints;
+  typename ConstraintModelManagerTpl<Scalar>::ConstraintDataContainer
+      constraints;
   DataCollectorAbstract* shared;
   Eigen::Map<VectorXs> g;
   Eigen::Map<MatrixXs> Gx;

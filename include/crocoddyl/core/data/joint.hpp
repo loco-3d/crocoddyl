@@ -11,9 +11,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
@@ -30,14 +30,15 @@ struct JointDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize a joint data structure containing generalized accelerations and joint efforts, and their
-   * derivatives.
+   * @brief Initialize a joint data structure containing generalized
+   * accelerations and joint efforts, and their derivatives.
    *
    * @param state      State description
    * @param actuation  Actuation model
    * @param nu         Dimension of control input
    */
-  JointDataAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActuationModelAbstract> actuation,
+  JointDataAbstractTpl(boost::shared_ptr<StateAbstract> state,
+                       boost::shared_ptr<ActuationModelAbstract> actuation,
                        const std::size_t nu)
       : tau(actuation->get_nu()),
         a(state->get_nv()),
@@ -56,10 +57,14 @@ struct JointDataAbstractTpl {
 
   VectorXs tau;      //!< Joint efforts
   VectorXs a;        //!< Generalized joint acceleration
-  MatrixXs dtau_dx;  //!< Partial derivatives of the joint efforts w.r.t. the state point
-  MatrixXs dtau_du;  //!< Partial derivatives of the joint efforts w.r.t. the control input
-  MatrixXs da_dx;    //!< Partial derivatives of the generalized joint accelerations w.r.t. the state point
-  MatrixXs da_du;    //!< Partial derivatives of the generalized joint accelerations w.r.t. the control input
+  MatrixXs dtau_dx;  //!< Partial derivatives of the joint efforts w.r.t. the
+                     //!< state point
+  MatrixXs dtau_du;  //!< Partial derivatives of the joint efforts w.r.t. the
+                     //!< control input
+  MatrixXs da_dx;    //!< Partial derivatives of the generalized joint
+                     //!< accelerations w.r.t. the state point
+  MatrixXs da_du;    //!< Partial derivatives of the generalized joint
+                     //!< accelerations w.r.t. the control input
 };
 
 template <typename Scalar>
@@ -83,8 +88,9 @@ struct DataCollectorJointActuationTpl : DataCollectorActuationTpl<Scalar> {
    * @param[in] actuation  Actuation data
    * @param[in] joint      Joint data
    */
-  DataCollectorJointActuationTpl(boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-                                 boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint)
+  DataCollectorJointActuationTpl(
+      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+      boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint)
       : DataCollectorActuationTpl<Scalar>(actuation), joint(joint) {}
   virtual ~DataCollectorJointActuationTpl() {}
 

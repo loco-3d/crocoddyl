@@ -7,22 +7,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "residual.hpp"
-#include "crocoddyl/multibody/residuals/state.hpp"
+
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
-#include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
 
-const std::vector<ResidualModelTypes::Type> ResidualModelTypes::all(ResidualModelTypes::init_all());
+const std::vector<ResidualModelTypes::Type> ResidualModelTypes::all(
+    ResidualModelTypes::init_all());
 
 std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
   switch (type) {
@@ -70,12 +72,15 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
 ResidualModelFactory::ResidualModelFactory() {}
 ResidualModelFactory::~ResidualModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
-    ResidualModelTypes::Type residual_type, StateModelTypes::Type state_type, std::size_t nu) const {
+boost::shared_ptr<crocoddyl::ResidualModelAbstract>
+ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
+                             StateModelTypes::Type state_type,
+                             std::size_t nu) const {
   StateModelFactory state_factory;
   boost::shared_ptr<crocoddyl::ResidualModelAbstract> residual;
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+          state_factory.create(state_type));
   pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
 
@@ -83,13 +88,18 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   boost::shared_ptr<pinocchio::GeometryModel> geometry =
       boost::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-  pinocchio::GeomIndex ig_frame = geometry->addGeometryObject(
-      pinocchio::GeometryObject("frame", frame_index, state->get_pinocchio()->frames[frame_index].parent,
-                                CollisionGeometryPtr(new hpp::fcl::Sphere(0)), frame_SE3));
-  pinocchio::GeomIndex ig_obs = geometry->addGeometryObject(
-      pinocchio::GeometryObject("obs", state->get_pinocchio()->getFrameId("universe"),
-                                state->get_pinocchio()->frames[state->get_pinocchio()->getFrameId("universe")].parent,
-                                CollisionGeometryPtr(new hpp::fcl::Sphere(0)), frame_SE3_obstacle));
+  pinocchio::GeomIndex ig_frame =
+      geometry->addGeometryObject(pinocchio::GeometryObject(
+          "frame", frame_index,
+          state->get_pinocchio()->frames[frame_index].parent,
+          CollisionGeometryPtr(new hpp::fcl::Sphere(0)), frame_SE3));
+  pinocchio::GeomIndex ig_obs =
+      geometry->addGeometryObject(pinocchio::GeometryObject(
+          "obs", state->get_pinocchio()->getFrameId("universe"),
+          state->get_pinocchio()
+              ->frames[state->get_pinocchio()->getFrameId("universe")]
+              .parent,
+          CollisionGeometryPtr(new hpp::fcl::Sphere(0)), frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
 #endif  // PINOCCHIO_WITH_HPP_FCL
   if (nu == std::numeric_limits<std::size_t>::max()) {
@@ -97,40 +107,48 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
   }
   switch (residual_type) {
     case ResidualModelTypes::ResidualModelState:
-      residual = boost::make_shared<crocoddyl::ResidualModelState>(state, state->rand(), nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelState>(
+          state, state->rand(), nu);
       break;
     case ResidualModelTypes::ResidualModelControl:
-      residual = boost::make_shared<crocoddyl::ResidualModelControl>(state, Eigen::VectorXd::Random(nu));
+      residual = boost::make_shared<crocoddyl::ResidualModelControl>(
+          state, Eigen::VectorXd::Random(nu));
       break;
     case ResidualModelTypes::ResidualModelCoMPosition:
-      residual = boost::make_shared<crocoddyl::ResidualModelCoMPosition>(state, Eigen::Vector3d::Random(), nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelCoMPosition>(
+          state, Eigen::Vector3d::Random(), nu);
       break;
     case ResidualModelTypes::ResidualModelCentroidalMomentum:
-      residual = boost::make_shared<crocoddyl::ResidualModelCentroidalMomentum>(state, Vector6d::Random(), nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelCentroidalMomentum>(
+          state, Vector6d::Random(), nu);
       break;
     case ResidualModelTypes::ResidualModelFramePlacement:
-      residual = boost::make_shared<crocoddyl::ResidualModelFramePlacement>(state, frame_index, frame_SE3, nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
+          state, frame_index, frame_SE3, nu);
       break;
     case ResidualModelTypes::ResidualModelFrameRotation:
-      residual =
-          boost::make_shared<crocoddyl::ResidualModelFrameRotation>(state, frame_index, frame_SE3.rotation(), nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelFrameRotation>(
+          state, frame_index, frame_SE3.rotation(), nu);
       break;
     case ResidualModelTypes::ResidualModelFrameTranslation:
-      residual = boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(state, frame_index,
-                                                                              frame_SE3.translation(), nu);
+      residual = boost::make_shared<crocoddyl::ResidualModelFrameTranslation>(
+          state, frame_index, frame_SE3.translation(), nu);
       break;
     case ResidualModelTypes::ResidualModelFrameVelocity:
       residual = boost::make_shared<crocoddyl::ResidualModelFrameVelocity>(
-          state, frame_index, pinocchio::Motion::Random(), static_cast<pinocchio::ReferenceFrame>(rand() % 2),
+          state, frame_index, pinocchio::Motion::Random(),
+          static_cast<pinocchio::ReferenceFrame>(rand() % 2),
           nu);  // the code cannot test LOCAL_WORLD_ALIGNED
       break;
     case ResidualModelTypes::ResidualModelControlGrav:
-      residual = boost::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
+      residual =
+          boost::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
       break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
     case ResidualModelTypes::ResidualModelPairCollision:
       residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(
-          state, nu, geometry, 0, state->get_pinocchio()->frames[frame_index].parent);
+          state, nu, geometry, 0,
+          state->get_pinocchio()->frames[frame_index].parent);
       break;
 #endif  // PINOCCHIO_WITH_HPP_FCL
     default:
@@ -140,7 +158,8 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create
   return residual;
 }
 
-boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(StateModelTypes::Type state_type) {
+boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
+    StateModelTypes::Type state_type) {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
@@ -148,8 +167,8 @@ boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(State
   }
 
   ResidualModelFactory factory;
-  ResidualModelTypes::Type rand_type =
-      static_cast<ResidualModelTypes::Type>(rand() % ResidualModelTypes::NbResidualModelTypes);
+  ResidualModelTypes::Type rand_type = static_cast<ResidualModelTypes::Type>(
+      rand() % ResidualModelTypes::NbResidualModelTypes);
   return factory.create(rand_type, state_type);
 }
 

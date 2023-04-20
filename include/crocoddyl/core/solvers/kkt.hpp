@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft,
+// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck
+// Gesellschaft,
 //                          University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,8 +11,8 @@
 #ifndef CROCODDYL_CORE_SOLVERS_KKT_HPP_
 #define CROCODDYL_CORE_SOLVERS_KKT_HPP_
 
-#include <Eigen/Dense>
 #include <Eigen/Cholesky>
+#include <Eigen/Dense>
 
 #include "crocoddyl/core/solver-base.hpp"
 
@@ -24,9 +25,11 @@ class SolverKKT : public SolverAbstract {
   explicit SolverKKT(boost::shared_ptr<ShootingProblem> problem);
   virtual ~SolverKKT();
 
-  virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-                     const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t maxiter = 100,
-                     const bool is_feasible = false, const double regInit = 1e-9);
+  virtual bool solve(
+      const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
+      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const double regInit = 1e-9);
   virtual void computeDirection(const bool recalc = true);
   virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();

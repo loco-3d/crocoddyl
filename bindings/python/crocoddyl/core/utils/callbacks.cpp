@@ -7,9 +7,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/utils/callbacks.hpp"
+
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -21,15 +22,18 @@ void exposeCallbacks() {
 
   bp::class_<CallbackVerbose, bp::bases<CallbackAbstract> >(
       "CallbackVerbose", "Callback function for printing the solver values.",
-      bp::init<bp::optional<VerboseLevel, int> >(bp::args("self", "level", "precision"),
-                                                 "Initialize the differential verbose callback.\n\n"
-                                                 ":param level: verbose level (default _1)\n"
-                                                 ":param precision: precision of floating point output (default 5)"))
+      bp::init<bp::optional<VerboseLevel, int> >(
+          bp::args("self", "level", "precision"),
+          "Initialize the differential verbose callback.\n\n"
+          ":param level: verbose level (default _1)\n"
+          ":param precision: precision of floating point output (default 5)"))
       .def("__call__", &CallbackVerbose::operator(), bp::args("self", "solver"),
            "Run the callback function given a solver.\n\n"
            ":param solver: solver to be diagnostic")
-      .add_property("level", &CallbackVerbose::get_level, &CallbackVerbose::set_level, "verbose level")
-      .add_property("precision", &CallbackVerbose::get_precision, &CallbackVerbose::set_precision, "precision")
+      .add_property("level", &CallbackVerbose::get_level,
+                    &CallbackVerbose::set_level, "verbose level")
+      .add_property("precision", &CallbackVerbose::get_precision,
+                    &CallbackVerbose::set_precision, "precision")
       .def(CopyableVisitor<CallbackVerbose>());
 }
 

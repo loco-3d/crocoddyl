@@ -12,18 +12,23 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ActivationModelNumDiffTpl<Scalar>::ActivationModelNumDiffTpl(boost::shared_ptr<Base> model)
-    : Base(model->get_nr()), model_(model), e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
+ActivationModelNumDiffTpl<Scalar>::ActivationModelNumDiffTpl(
+    boost::shared_ptr<Base> model)
+    : Base(model->get_nr()),
+      model_(model),
+      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ActivationModelNumDiffTpl<Scalar>::~ActivationModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ActivationModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActivationDataAbstract>& data,
-                                             const Eigen::Ref<const VectorXs>& r) {
+void ActivationModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ActivationDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
     throw_pretty("Invalid argument: "
-                 << "r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+                 << "r has wrong dimension (it should be " +
+                        std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, r);
@@ -31,11 +36,13 @@ void ActivationModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ActivationD
 }
 
 template <typename Scalar>
-void ActivationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
-                                                 const Eigen::Ref<const VectorXs>& r) {
+void ActivationModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ActivationDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
     throw_pretty("Invalid argument: "
-                 << "r has wrong dimension (it should be " + std::to_string(model_->get_nr()) + ")");
+                 << "r has wrong dimension (it should be " +
+                        std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
@@ -59,12 +66,14 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<Activat
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActivationDataAbstractTpl<Scalar> > ActivationModelNumDiffTpl<Scalar>::createData() {
+boost::shared_ptr<ActivationDataAbstractTpl<Scalar> >
+ActivationModelNumDiffTpl<Scalar>::createData() {
   return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >& ActivationModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >&
+ActivationModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -74,7 +83,8 @@ const Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
 }
 
 template <typename Scalar>
-void ActivationModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
+void ActivationModelNumDiffTpl<Scalar>::set_disturbance(
+    const Scalar disturbance) {
   if (disturbance < 0.) {
     throw_pretty("Invalid argument: "
                  << "Disturbance constant is positive");

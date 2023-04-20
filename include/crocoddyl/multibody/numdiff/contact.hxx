@@ -13,8 +13,10 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model)
-    : Base(model->get_state(), model->get_type(), model->get_nc(), model->get_nu()),
+ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(
+    const boost::shared_ptr<Base>& model)
+    : Base(model->get_state(), model->get_type(), model->get_nc(),
+           model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
 
@@ -22,16 +24,18 @@ template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract>& data,
-                                          const Eigen::Ref<const VectorXs>& x) {
+void ContactModelNumDiffTpl<Scalar>::calc(
+    const boost::shared_ptr<ContactDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
   model_->calc(d->data_0, x);
   d->a0 = d->data_0->a0;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                                              const Eigen::Ref<const VectorXs>& x) {
+void ContactModelNumDiffTpl<Scalar>::calcDiff(
+    const boost::shared_ptr<ContactDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   const VectorXs& a0 = d->a0;
@@ -57,11 +61,12 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDat
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                                                 const VectorXs& force) {
+void ContactModelNumDiffTpl<Scalar>::updateForce(
+    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != model_->get_nc()) {
     throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be " << model_->get_nc() << ")");
+                 << "lambda has wrong dimension (it should be "
+                 << model_->get_nc() << ")");
   }
 
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -70,13 +75,16 @@ void ContactModelNumDiffTpl<Scalar>::updateForce(const boost::shared_ptr<Contact
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> > ContactModelNumDiffTpl<Scalar>::createData(
+boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+ContactModelNumDiffTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
+  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                      data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >& ContactModelNumDiffTpl<Scalar>::get_model() const {
+const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >&
+ContactModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
 
@@ -95,12 +103,14 @@ void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::set_reevals(const std::vector<ReevaluationFunction>& reevals) {
+void ContactModelNumDiffTpl<Scalar>::set_reevals(
+    const std::vector<ReevaluationFunction>& reevals) {
   reevals_ = reevals;
 }
 
 template <typename Scalar>
-void ContactModelNumDiffTpl<Scalar>::assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/) {
+void ContactModelNumDiffTpl<Scalar>::assertStableStateFD(
+    const Eigen::Ref<const VectorXs>& /*x*/) {
   // do nothing in the general case
 }
 

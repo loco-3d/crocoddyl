@@ -18,7 +18,9 @@
 
 namespace crocoddyl {
 
-IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem>& problem) : problem_(problem) {
+IpoptInterface::IpoptInterface(
+    const boost::shared_ptr<ShootingProblem>& problem)
+    : problem_(problem) {
   const std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
   us_.resize(T);
@@ -27,7 +29,8 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem>& problem
 
   nconst_ = 0;
   nvar_ = 0;
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nxi = models[t]->get_state()->get_nx();
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -45,7 +48,8 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem>& problem
   // Initial condition
   nconst_ += models[0]->get_state()->get_ndx();
 
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_terminalModel();
   const std::size_t nxi = model->get_state()->get_nx();
   const std::size_t ndxi = model->get_state()->get_ndx();
   nvar_ += ndxi;  // final node
@@ -56,7 +60,8 @@ IpoptInterface::IpoptInterface(const boost::shared_ptr<ShootingProblem>& problem
 void IpoptInterface::resizeData() {
   const std::size_t T = problem_->get_T();
   nvar_ = 0;
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nxi = models[t]->get_state()->get_nx();
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -74,7 +79,8 @@ void IpoptInterface::resizeData() {
   // Initial condition
   nconst_ += models[0]->get_state()->get_ndx();
 
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_terminalModel();
   const std::size_t nxi = model->get_state()->get_nx();
   const std::size_t ndxi = model->get_state()->get_ndx();
   nvar_ += ndxi;  // final node
@@ -84,19 +90,23 @@ void IpoptInterface::resizeData() {
 
 IpoptInterface::~IpoptInterface() {}
 
-bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index& nnz_jac_g, Ipopt::Index& nnz_h_lag,
+bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m,
+                                  Ipopt::Index& nnz_jac_g,
+                                  Ipopt::Index& nnz_h_lag,
                                   IndexStyleEnum& index_style) {
   n = static_cast<Ipopt::Index>(nvar_);    // number of variables
   m = static_cast<Ipopt::Index>(nconst_);  // number of constraints
 
   nnz_jac_g = 0;  // Jacobian nonzeros for dynamic constraints
   nnz_h_lag = 0;  // Hessian nonzeros (only lower triangular part)
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t ndxi_next =
-        t + 1 == T ? problem_->get_terminalModel()->get_state()->get_ndx() : models[t + 1]->get_state()->get_ndx();
+        t + 1 == T ? problem_->get_terminalModel()->get_state()->get_ndx()
+                   : models[t + 1]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
     nnz_jac_g += ndxi * (ndxi + ndxi_next + nui);
 
@@ -109,10 +119,12 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index
   }
 
   // Initial condition
-  nnz_jac_g += models[0]->get_state()->get_ndx() * models[0]->get_state()->get_ndx();
+  nnz_jac_g +=
+      models[0]->get_state()->get_ndx() * models[0]->get_state()->get_ndx();
 
   // Hessian nonzero for the terminal cost
-  const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxi =
+      problem_->get_terminalModel()->get_state()->get_ndx();
   std::size_t nonzero = 0;
   for (std::size_t i = 1; i <= ndxi; ++i) {
     nonzero += i;
@@ -126,17 +138,22 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m, Ipopt::Index
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::get_bounds_info(Ipopt::Index n, Ipopt::Number* x_l, Ipopt::Number* x_u, Ipopt::Index m,
+bool IpoptInterface::get_bounds_info(Ipopt::Index n, Ipopt::Number* x_l,
+                                     Ipopt::Number* x_u, Ipopt::Index m,
                                      Ipopt::Number* g_l, Ipopt::Number* g_u) {
 #else
-bool IpoptInterface::get_bounds_info(Ipopt::Index, Ipopt::Number* x_l, Ipopt::Number* x_u, Ipopt::Index,
+bool IpoptInterface::get_bounds_info(Ipopt::Index, Ipopt::Number* x_l,
+                                     Ipopt::Number* x_u, Ipopt::Index,
                                      Ipopt::Number* g_l, Ipopt::Number* g_u) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
+                "Inconsistent number of constraints");
 
   // Adding bounds
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {
     // Running state bounds
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -147,15 +164,18 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index, Ipopt::Number* x_l, Ipopt::Nu
       x_u[ixu_[t] + j] = std::numeric_limits<double>::max();
     }
     for (std::size_t j = 0; j < nui; ++j) {
-      x_l[ixu_[t] + ndxi + j] =
-          models[t]->get_has_control_limits() ? models[t]->get_u_lb()(j) : std::numeric_limits<double>::lowest();
-      x_u[ixu_[t] + ndxi + j] =
-          models[t]->get_has_control_limits() ? models[t]->get_u_ub()(j) : std::numeric_limits<double>::max();
+      x_l[ixu_[t] + ndxi + j] = models[t]->get_has_control_limits()
+                                    ? models[t]->get_u_lb()(j)
+                                    : std::numeric_limits<double>::lowest();
+      x_u[ixu_[t] + ndxi + j] = models[t]->get_has_control_limits()
+                                    ? models[t]->get_u_ub()(j)
+                                    : std::numeric_limits<double>::max();
     }
   }
 
   // Final state bounds
-  const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxi =
+      problem_->get_terminalModel()->get_state()->get_ndx();
   for (std::size_t j = 0; j < ndxi; j++) {
     x_l[ixu_.back() + j] = std::numeric_limits<double>::lowest();
     x_u[ixu_.back() + j] = std::numeric_limits<double>::max();
@@ -171,22 +191,34 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index, Ipopt::Number* x_l, Ipopt::Nu
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::get_starting_point(Ipopt::Index n, bool init_x, Ipopt::Number* x, bool init_z,
-                                        Ipopt::Number* /*z_L*/, Ipopt::Number* /*z_U*/, Ipopt::Index m,
-                                        bool init_lambda, Ipopt::Number* /*lambda*/) {
+bool IpoptInterface::get_starting_point(Ipopt::Index n, bool init_x,
+                                        Ipopt::Number* x, bool init_z,
+                                        Ipopt::Number* /*z_L*/,
+                                        Ipopt::Number* /*z_U*/, Ipopt::Index m,
+                                        bool init_lambda,
+                                        Ipopt::Number* /*lambda*/) {
 #else
-bool IpoptInterface::get_starting_point(Ipopt::Index, bool /*init_x*/, Ipopt::Number* x, bool, Ipopt::Number*,
-                                        Ipopt::Number*, Ipopt::Index, bool, Ipopt::Number*) {
+bool IpoptInterface::get_starting_point(Ipopt::Index, bool /*init_x*/,
+                                        Ipopt::Number* x, bool, Ipopt::Number*,
+                                        Ipopt::Number*, Ipopt::Index, bool,
+                                        Ipopt::Number*) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
-  assert_pretty(init_x == true, "Make sure to provide initial value for primal variables");
-  assert_pretty(init_z == false, "Cannot provide initial value for bound multipliers");
-  assert_pretty(init_lambda == false, "Cannot provide initial value for constraint multipliers");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
+                "Inconsistent number of constraints");
+  assert_pretty(init_x == true,
+                "Make sure to provide initial value for primal variables");
+  assert_pretty(init_z == false,
+                "Cannot provide initial value for bound multipliers");
+  assert_pretty(init_lambda == false,
+                "Cannot provide initial value for constraint multipliers");
 
   // initialize to the given starting point
-  // State variables are always at 0 since they represent increments from the given initial point
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  // State variables are always at 0 since they represent increments from the
+  // given initial point
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
@@ -197,7 +229,8 @@ bool IpoptInterface::get_starting_point(Ipopt::Index, bool /*init_x*/, Ipopt::Nu
       x[ixu_[t] + ndxi + j] = us_[t](j);
     }
   }
-  const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+  const std::size_t ndxi =
+      problem_->get_terminalModel()->get_state()->get_ndx();
   for (std::size_t j = 0; j < ndxi; j++) {
     x[ixu_.back() + j] = 0;
   }
@@ -206,15 +239,20 @@ bool IpoptInterface::get_starting_point(Ipopt::Index, bool /*init_x*/, Ipopt::Nu
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_f(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Number& obj_value) {
+bool IpoptInterface::eval_f(Ipopt::Index n, const Ipopt::Number* x,
+                            bool /*new_x*/, Ipopt::Number& obj_value) {
 #else
-bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::Number& obj_value) {
+bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool,
+                            Ipopt::Number& obj_value) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
 
   // Running costs
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
@@ -240,8 +278,10 @@ bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
   }
 
   // Terminal costs
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_terminalData();
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_terminalModel();
+  const boost::shared_ptr<ActionDataAbstract>& data =
+      problem_->get_terminalData();
   const std::size_t ndxi = model->get_state()->get_ndx();
 
   datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
@@ -253,14 +293,19 @@ bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Number* grad_f) {
+bool IpoptInterface::eval_grad_f(Ipopt::Index n, const Ipopt::Number* x,
+                                 bool /*new_x*/, Ipopt::Number* grad_f) {
 #else
-bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::Number* grad_f) {
+bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool,
+                                 Ipopt::Number* grad_f) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
@@ -274,7 +319,8 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipo
     datas_[t]->dx = Eigen::VectorXd::Map(x + ixu_[t], ndxi);
     datas_[t]->u = Eigen::VectorXd::Map(x + ixu_[t] + ndxi, nui);
     model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
-    model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx, datas_[t]->Jint_dx, second, setto);
+    model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx,
+                                   datas_[t]->Jint_dx, second, setto);
     model->calc(data, datas_[t]->x, datas_[t]->u);
     model->calcDiff(data, datas_[t]->x, datas_[t]->u);
     datas_[t]->Ldx.noalias() = datas_[t]->Jint_dx.transpose() * data->Lx;
@@ -293,13 +339,16 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipo
   }
 
   // Terminal model
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_terminalData();
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_terminalModel();
+  const boost::shared_ptr<ActionDataAbstract>& data =
+      problem_->get_terminalData();
   const std::size_t ndxi = model->get_state()->get_ndx();
 
   datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
   model->get_state()->integrate(xs_[T], datas_[T]->dx, datas_[T]->x);
-  model->get_state()->Jintegrate(xs_[T], datas_[T]->dx, datas_[T]->Jint_dx, datas_[T]->Jint_dx, second, setto);
+  model->get_state()->Jintegrate(xs_[T], datas_[T]->dx, datas_[T]->Jint_dx,
+                                 datas_[T]->Jint_dx, second, setto);
   model->calc(data, datas_[T]->x);
   model->calcDiff(data, datas_[T]->x);
   datas_[T]->Ldx.noalias() = datas_[T]->Jint_dx.transpose() * data->Lx;
@@ -311,16 +360,22 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool, Ipo
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Index m, Ipopt::Number* g) {
+bool IpoptInterface::eval_g(Ipopt::Index n, const Ipopt::Number* x,
+                            bool /*new_x*/, Ipopt::Index m, Ipopt::Number* g) {
 #else
-bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Index, Ipopt::Number* g) {
+bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x,
+                            bool /*new_x*/, Ipopt::Index, Ipopt::Number* g) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
+                "Inconsistent number of constraints");
 
   // Dynamic constraints
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
@@ -336,9 +391,11 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x, bool /*new_x*/
 
     datas_[t]->dx = Eigen::VectorXd::Map(x + ixu_[t], ndxi);
     datas_[t]->u = Eigen::VectorXd::Map(x + ixu_[t] + ndxi, nui);
-    datas_[t]->dxnext = Eigen::VectorXd::Map(x + ixu_[t] + ndxi + nui, ndxi_next);
+    datas_[t]->dxnext =
+        Eigen::VectorXd::Map(x + ixu_[t] + ndxi + nui, ndxi_next);
     model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
-    model_next->get_state()->integrate(xs_[t + 1], datas_[t]->dxnext, datas_[t]->xnext);
+    model_next->get_state()->integrate(xs_[t + 1], datas_[t]->dxnext,
+                                       datas_[t]->xnext);
     model->calc(data, datas_[t]->x, datas_[t]->u);
     model->get_state()->diff(data->xnext, datas_[t]->xnext, datas_[t]->x_diff);
   }
@@ -358,7 +415,8 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x, bool /*new_x*/
   const std::size_t ndxi = model->get_state()->get_ndx();
   datas_[0]->dx = Eigen::VectorXd::Map(x, ndxi);
   model->get_state()->integrate(xs_[0], datas_[0]->dx, datas_[0]->x);
-  model->get_state()->diff(datas_[0]->x, problem_->get_x0(), datas_[0]->x_diff);  // x(0) - x_0
+  model->get_state()->diff(datas_[0]->x, problem_->get_x0(),
+                           datas_[0]->x_diff);  // x(0) - x_0
   for (std::size_t j = 0; j < ndxi; j++) {
     g[ix + j] = datas_[0]->x_diff[j];
   }
@@ -367,16 +425,22 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x, bool /*new_x*/
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Index m,
-                                Ipopt::Index nele_jac, Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values) {
+bool IpoptInterface::eval_jac_g(Ipopt::Index n, const Ipopt::Number* x,
+                                bool /*new_x*/, Ipopt::Index m,
+                                Ipopt::Index nele_jac, Ipopt::Index* iRow,
+                                Ipopt::Index* jCol, Ipopt::Number* values) {
 #else
-bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::Index, Ipopt::Index,
-                                Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values) {
+bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
+                                Ipopt::Index, Ipopt::Index, Ipopt::Index* iRow,
+                                Ipopt::Index* jCol, Ipopt::Number* values) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
+                "Inconsistent number of constraints");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   if (values == NULL) {
     // Dynamic constraints
     std::size_t idx = 0;
@@ -387,9 +451,11 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipop
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
       const std::size_t ndxi_next =
-          t + 1 == T ? problem_->get_terminalModel()->get_state()->get_ndx() : models[t + 1]->get_state()->get_ndx();
+          t + 1 == T ? problem_->get_terminalModel()->get_state()->get_ndx()
+                     : models[t + 1]->get_state()->get_ndx();
       for (std::size_t idx_row = 0; idx_row < ndxi; ++idx_row) {
-        for (std::size_t idx_col = 0; idx_col < (ndxi + nui + ndxi_next); ++idx_col) {
+        for (std::size_t idx_col = 0; idx_col < (ndxi + nui + ndxi_next);
+             ++idx_col) {
           iRow[idx] = static_cast<Ipopt::Index>(ix + idx_row);
           jCol[idx] = static_cast<Ipopt::Index>(ixu_[t] + idx_col);
           idx++;
@@ -409,9 +475,11 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipop
     }
 
     assert_pretty(nele_jac == static_cast<Ipopt::Index>(idx),
-                  "Number of jacobian elements set does not coincide with the total non-zero Jacobian values");
+                  "Number of jacobian elements set does not coincide with the "
+                  "total non-zero Jacobian values");
   } else {
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+        problem_->get_runningDatas();
     // Dynamic constraints
     const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
@@ -427,18 +495,26 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipop
       const std::size_t nui = model->get_nu();
       datas_[t]->dx = Eigen::VectorXd::Map(x + ixu_[t], ndxi);
       datas_[t]->u = Eigen::VectorXd::Map(x + ixu_[t] + ndxi, nui);
-      datas_[t]->dxnext = Eigen::VectorXd::Map(x + ixu_[t] + ndxi + nui, ndxi_next);
+      datas_[t]->dxnext =
+          Eigen::VectorXd::Map(x + ixu_[t] + ndxi + nui, ndxi_next);
 
       model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
-      model_next->get_state()->integrate(xs_[t + 1], datas_[t]->dxnext, datas_[t]->xnext);
+      model_next->get_state()->integrate(xs_[t + 1], datas_[t]->dxnext,
+                                         datas_[t]->xnext);
       model->calcDiff(data, datas_[t]->x, datas_[t]->u);
-      model_next->get_state()->Jintegrate(xs_[t + 1], datas_[t]->dxnext, datas_[t]->Jint_dxnext,
-                                          datas_[t]->Jint_dxnext, second, setto);  // datas_[t]->Jsum_dxnext == eq. 81
-      model->get_state()->Jdiff(data->xnext, datas_[t]->xnext, datas_[t]->Jdiff_x, datas_[t]->Jdiff_xnext,
-                                both);  // datas_[t+1]->Jdiff_x == eq. 83, datas_[t]->Jdiff_x == eq.82
-      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx, datas_[t]->Jint_dx, second,
+      model_next->get_state()->Jintegrate(
+          xs_[t + 1], datas_[t]->dxnext, datas_[t]->Jint_dxnext,
+          datas_[t]->Jint_dxnext, second,
+          setto);  // datas_[t]->Jsum_dxnext == eq. 81
+      model->get_state()->Jdiff(
+          data->xnext, datas_[t]->xnext, datas_[t]->Jdiff_x,
+          datas_[t]->Jdiff_xnext,
+          both);  // datas_[t+1]->Jdiff_x == eq. 83, datas_[t]->Jdiff_x == eq.82
+      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx,
+                                     datas_[t]->Jint_dx, second,
                                      setto);  // datas_[t]->Jsum_dx == eq. 81
-      datas_[t]->Jg_dxnext.noalias() = datas_[t]->Jdiff_xnext * datas_[t]->Jint_dxnext;  // chain rule
+      datas_[t]->Jg_dxnext.noalias() =
+          datas_[t]->Jdiff_xnext * datas_[t]->Jint_dxnext;  // chain rule
       datas_[t]->FxJint_dx.noalias() = data->Fx * datas_[t]->Jint_dx;
       datas_[t]->Jg_dx.noalias() = datas_[t]->Jdiff_x * datas_[t]->FxJint_dx;
       datas_[t]->Jg_u.noalias() = datas_[t]->Jdiff_x * data->Fu;
@@ -474,8 +550,10 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipop
     datas_[0]->dx = Eigen::VectorXd::Map(x, ndxi);
 
     model->get_state()->integrate(xs_[0], datas_[0]->dx, datas_[0]->x);
-    model->get_state()->Jdiff(datas_[0]->x, problem_->get_x0(), datas_[0]->Jdiff_x, datas_[0]->Jdiff_x, first);
-    model->get_state()->Jintegrate(xs_[0], datas_[0]->dx, datas_[0]->Jint_dx, datas_[0]->Jint_dx, second, setto);
+    model->get_state()->Jdiff(datas_[0]->x, problem_->get_x0(),
+                              datas_[0]->Jdiff_x, datas_[0]->Jdiff_x, first);
+    model->get_state()->Jintegrate(xs_[0], datas_[0]->dx, datas_[0]->Jint_dx,
+                                   datas_[0]->Jint_dx, second, setto);
     datas_[0]->Jg_ic.noalias() = datas_[0]->Jdiff_x * datas_[0]->Jint_dx;
     for (std::size_t idx_row = 0; idx_row < ndxi; ++idx_row) {
       for (std::size_t idx_col = 0; idx_col < ndxi; ++idx_col) {
@@ -489,18 +567,26 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool, Ipop
 }
 
 #ifndef NDEBUG
-bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number* x, bool /*new_x*/, Ipopt::Number obj_factor,
-                            Ipopt::Index m, const Ipopt::Number* /*lambda*/, bool /*new_lambda*/,
-                            Ipopt::Index nele_hess, Ipopt::Index* iRow, Ipopt::Index* jCol, Ipopt::Number* values) {
+bool IpoptInterface::eval_h(Ipopt::Index n, const Ipopt::Number* x,
+                            bool /*new_x*/, Ipopt::Number obj_factor,
+                            Ipopt::Index m, const Ipopt::Number* /*lambda*/,
+                            bool /*new_lambda*/, Ipopt::Index nele_hess,
+                            Ipopt::Index* iRow, Ipopt::Index* jCol,
+                            Ipopt::Number* values) {
 #else
-bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::Number obj_factor, Ipopt::Index,
-                            const Ipopt::Number*, bool, Ipopt::Index, Ipopt::Index* iRow, Ipopt::Index* jCol,
+bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
+                            Ipopt::Number obj_factor, Ipopt::Index,
+                            const Ipopt::Number*, bool, Ipopt::Index,
+                            Ipopt::Index* iRow, Ipopt::Index* jCol,
                             Ipopt::Number* values) {
 #endif
-  assert_pretty(n == static_cast<Ipopt::Index>(nvar_), "Inconsistent number of decision variables");
-  assert_pretty(m == static_cast<Ipopt::Index>(nconst_), "Inconsistent number of constraints");
+  assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
+                "Inconsistent number of decision variables");
+  assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
+                "Inconsistent number of constraints");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   if (values == NULL) {
     // return the structure. This is a symmetric matrix, fill the lower left
@@ -526,7 +612,8 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
     }
 
     // Terminal costs
-    const std::size_t ndxi = problem_->get_terminalModel()->get_state()->get_ndx();
+    const std::size_t ndxi =
+        problem_->get_terminalModel()->get_state()->get_ndx();
     for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
       for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
         // We need the lower triangular matrix
@@ -540,12 +627,14 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
     }
 
     assert_pretty(nele_hess == static_cast<Ipopt::Index>(idx),
-                  "Number of Hessian elements set does not coincide with the total non-zero Hessian values");
+                  "Number of Hessian elements set does not coincide with the "
+                  "total non-zero Hessian values");
   } else {
     // return the values. This is a symmetric matrix, fill the lower left
     // triangle only
     // Running Costs
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+        problem_->get_runningDatas();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
@@ -558,9 +647,12 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
       datas_[t]->u = Eigen::VectorXd::Map(x + ixu_[t] + ndxi, nui);
 
       model->get_state()->integrate(xs_[t], datas_[t]->dx, datas_[t]->x);
-      model->calcDiff(data, datas_[t]->x, datas_[t]->u);  // this might be removed
-      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx, datas_[t]->Jint_dx, second, setto);
-      datas_[t]->Ldxdx.noalias() = datas_[t]->Jint_dx.transpose() * data->Lxx * datas_[t]->Jint_dx;
+      model->calcDiff(data, datas_[t]->x,
+                      datas_[t]->u);  // this might be removed
+      model->get_state()->Jintegrate(xs_[t], datas_[t]->dx, datas_[t]->Jint_dx,
+                                     datas_[t]->Jint_dx, second, setto);
+      datas_[t]->Ldxdx.noalias() =
+          datas_[t]->Jint_dx.transpose() * data->Lxx * datas_[t]->Jint_dx;
       datas_[t]->Ldxu.noalias() = datas_[t]->Jint_dx.transpose() * data->Lxu;
     }
 
@@ -596,16 +688,20 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
     }
 
     // Terminal costs
-    const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& data = problem_->get_terminalData();
+    const boost::shared_ptr<ActionModelAbstract>& model =
+        problem_->get_terminalModel();
+    const boost::shared_ptr<ActionDataAbstract>& data =
+        problem_->get_terminalData();
     const std::size_t ndxi = model->get_state()->get_ndx();
     datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
 
     model->get_state()->integrate(xs_[T], datas_[T]->dx, datas_[T]->x);
     model->calc(data, datas_[T]->x);
     model->calcDiff(data, datas_[T]->x);
-    model->get_state()->Jintegrate(xs_[T], datas_[T]->dx, datas_[T]->Jint_dx, datas_[T]->Jint_dx, second, setto);
-    datas_[T]->Ldxdx.noalias() = datas_[T]->Jint_dx.transpose() * data->Lxx * datas_[T]->Jint_dx;
+    model->get_state()->Jintegrate(xs_[T], datas_[T]->dx, datas_[T]->Jint_dx,
+                                   datas_[T]->Jint_dx, second, setto);
+    datas_[T]->Ldxdx.noalias() =
+        datas_[T]->Jint_dx.transpose() * data->Lxx * datas_[T]->Jint_dx;
     for (std::size_t idx_row = 0; idx_row < ndxi; idx_row++) {
       for (std::size_t idx_col = 0; idx_col < ndxi; idx_col++) {
         // We need the lower triangular matrix
@@ -621,13 +717,16 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool, Ipopt::N
   return true;
 }
 
-void IpoptInterface::finalize_solution(Ipopt::SolverReturn /*status*/, Ipopt::Index /*n*/, const Ipopt::Number* x,
-                                       const Ipopt::Number* /*z_L*/, const Ipopt::Number* /*z_U*/, Ipopt::Index /*m*/,
-                                       const Ipopt::Number* /*g*/, const Ipopt::Number* /*lambda*/,
-                                       Ipopt::Number obj_value, const Ipopt::IpoptData* /*ip_data*/,
-                                       Ipopt::IpoptCalculatedQuantities* /*ip_cq*/) {
+void IpoptInterface::finalize_solution(
+    Ipopt::SolverReturn /*status*/, Ipopt::Index /*n*/, const Ipopt::Number* x,
+    const Ipopt::Number* /*z_L*/, const Ipopt::Number* /*z_U*/,
+    Ipopt::Index /*m*/, const Ipopt::Number* /*g*/,
+    const Ipopt::Number* /*lambda*/, Ipopt::Number obj_value,
+    const Ipopt::IpoptData* /*ip_data*/,
+    Ipopt::IpoptCalculatedQuantities* /*ip_cq*/) {
   // Copy the solution to vector once solver is finished
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -640,7 +739,8 @@ void IpoptInterface::finalize_solution(Ipopt::SolverReturn /*status*/, Ipopt::In
     us_[t] = datas_[t]->u;
   }
   // Terminal node
-  const boost::shared_ptr<ActionModelAbstract>& model = problem_->get_terminalModel();
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_terminalModel();
   const std::size_t ndxi = model->get_state()->get_ndx();
   datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
   model->get_state()->integrate(xs_[T], datas_[T]->dx, datas_[T]->x);
@@ -649,34 +749,46 @@ void IpoptInterface::finalize_solution(Ipopt::SolverReturn /*status*/, Ipopt::In
   cost_ = obj_value;
 }
 
-bool IpoptInterface::intermediate_callback(Ipopt::AlgorithmMode /*mode*/, Ipopt::Index /*iter*/,
-                                           Ipopt::Number /*obj_value*/, Ipopt::Number /*inf_pr*/,
-                                           Ipopt::Number /*inf_du*/, Ipopt::Number /*mu*/, Ipopt::Number /*d_norm*/,
-                                           Ipopt::Number /*regularization_size*/, Ipopt::Number /*alpha_du*/,
-                                           Ipopt::Number /*alpha_pr*/, Ipopt::Index /*ls_trials*/,
-                                           const Ipopt::IpoptData* /*ip_data*/,
-                                           Ipopt::IpoptCalculatedQuantities* /*ip_cq*/) {
+bool IpoptInterface::intermediate_callback(
+    Ipopt::AlgorithmMode /*mode*/, Ipopt::Index /*iter*/,
+    Ipopt::Number /*obj_value*/, Ipopt::Number /*inf_pr*/,
+    Ipopt::Number /*inf_du*/, Ipopt::Number /*mu*/, Ipopt::Number /*d_norm*/,
+    Ipopt::Number /*regularization_size*/, Ipopt::Number /*alpha_du*/,
+    Ipopt::Number /*alpha_pr*/, Ipopt::Index /*ls_trials*/,
+    const Ipopt::IpoptData* /*ip_data*/,
+    Ipopt::IpoptCalculatedQuantities* /*ip_cq*/) {
   return true;
 }
 
-boost::shared_ptr<IpoptInterfaceData> IpoptInterface::createData(const std::size_t nx, const std::size_t ndx,
-                                                                 const std::size_t nu) {
-  return boost::allocate_shared<IpoptInterfaceData>(Eigen::aligned_allocator<IpoptInterfaceData>(), nx, ndx, nu);
+boost::shared_ptr<IpoptInterfaceData> IpoptInterface::createData(
+    const std::size_t nx, const std::size_t ndx, const std::size_t nu) {
+  return boost::allocate_shared<IpoptInterfaceData>(
+      Eigen::aligned_allocator<IpoptInterfaceData>(), nx, ndx, nu);
 }
 
-void IpoptInterface::set_xs(const std::vector<Eigen::VectorXd>& xs) { xs_ = xs; }
+void IpoptInterface::set_xs(const std::vector<Eigen::VectorXd>& xs) {
+  xs_ = xs;
+}
 
-void IpoptInterface::set_us(const std::vector<Eigen::VectorXd>& us) { us_ = us; }
+void IpoptInterface::set_us(const std::vector<Eigen::VectorXd>& us) {
+  us_ = us;
+}
 
 std::size_t IpoptInterface::get_nvar() const { return nvar_; }
 
 std::size_t IpoptInterface::get_nconst() const { return nconst_; }
 
-const std::vector<Eigen::VectorXd>& IpoptInterface::get_xs() const { return xs_; }
+const std::vector<Eigen::VectorXd>& IpoptInterface::get_xs() const {
+  return xs_;
+}
 
-const std::vector<Eigen::VectorXd>& IpoptInterface::get_us() const { return us_; }
+const std::vector<Eigen::VectorXd>& IpoptInterface::get_us() const {
+  return us_;
+}
 
-const boost::shared_ptr<ShootingProblem>& IpoptInterface::get_problem() const { return problem_; }
+const boost::shared_ptr<ShootingProblem>& IpoptInterface::get_problem() const {
+  return problem_;
+}
 
 double IpoptInterface::get_cost() const { return cost_; }
 

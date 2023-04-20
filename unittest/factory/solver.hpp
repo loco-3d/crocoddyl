@@ -18,7 +18,15 @@ namespace crocoddyl {
 namespace unittest {
 
 struct SolverTypes {
-  enum Type { SolverKKT, SolverDDP, SolverFDDP, SolverBoxDDP, SolverBoxFDDP, SolverIpopt, NbSolverTypes };
+  enum Type {
+    SolverKKT,
+    SolverDDP,
+    SolverFDDP,
+    SolverBoxDDP,
+    SolverBoxFDDP,
+    SolverIpopt,
+    NbSolverTypes
+  };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.reserve(NbSolverTypes);
@@ -44,8 +52,9 @@ class SolverFactory {
   explicit SolverFactory();
   ~SolverFactory();
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> create(SolverTypes::Type solver_type,
-                                                      ActionModelTypes::Type action_type, size_t T) const;
+  boost::shared_ptr<crocoddyl::SolverAbstract> create(
+      SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+      size_t T) const;
 };
 
 }  // namespace unittest

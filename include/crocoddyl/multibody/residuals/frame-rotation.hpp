@@ -11,24 +11,26 @@
 
 #include <pinocchio/multibody/fwd.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/multibody/states/multibody.hpp"
-#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Frame rotation residual
  *
- * This residual function is defined as \f$\mathbf{r}=\mathbf{R}\ominus\mathbf{R}^*\f$, where
- * \f$\mathbf{R},\mathbf{R}^*\in~\mathbb{SO(3)}\f$ are the current and reference frame rotations, respectively. Note
- * that the dimension of the residual vector is 3. Furthermore, the Jacobians of the residual function are
- * computed analytically.
+ * This residual function is defined as
+ * \f$\mathbf{r}=\mathbf{R}\ominus\mathbf{R}^*\f$, where
+ * \f$\mathbf{R},\mathbf{R}^*\in~\mathbb{SO(3)}\f$ are the current and reference
+ * frame rotations, respectively. Note that the dimension of the residual vector
+ * is 3. Furthermore, the Jacobians of the residual function are computed
+ * analytically.
  *
- * As described in `ResidualModelAbstractTpl()`, the residual value and its Jacobians are calculated by `calc` and
- * `calcDiff`, respectively.
+ * As described in `ResidualModelAbstractTpl()`, the residual value and its
+ * Jacobians are calculated by `calc` and `calcDiff`, respectively.
  *
  * \sa `ResidualModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -55,7 +57,8 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] Rref   Reference frame rotation
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+                                const pinocchio::FrameIndex id,
                                 const Matrix3s& Rref, const std::size_t nu);
 
   /**
@@ -67,7 +70,8 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] id     Reference frame id
    * @param[in] Rref   Reference frame rotation
    */
-  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+                                const pinocchio::FrameIndex id,
                                 const Matrix3s& Rref);
   virtual ~ResidualModelFrameRotationTpl();
 
@@ -78,7 +82,8 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -88,13 +93,15 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const VectorXs>& x,
+  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the frame rotation residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(DataCollectorAbstract* const data);
+  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data);
 
   /**
    * @brief Return the reference frame id
@@ -131,10 +138,11 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::v_dependent_;
 
  private:
-  pinocchio::FrameIndex id_;                                              //!< Reference frame id
-  Matrix3s Rref_;                                                         //!< Reference frame rotation
-  Matrix3s oRf_inv_;                                                      //!< Inverse reference rotation
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;  //!< Pinocchio model
+  pinocchio::FrameIndex id_;  //!< Reference frame id
+  Matrix3s Rref_;             //!< Reference frame rotation
+  Matrix3s oRf_inv_;          //!< Inverse reference rotation
+  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+      pin_model_;  //!< Pinocchio model
 };
 
 template <typename _Scalar>
@@ -151,16 +159,20 @@ struct ResidualDataFrameRotationTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>
-  ResidualDataFrameRotationTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)
+  ResidualDataFrameRotationTpl(Model<Scalar>* const model,
+                               DataCollectorAbstract* const data)
       : Base(model, data), rJf(3, 3), fJf(6, model->get_state()->get_nv()) {
     r.setZero();
     rRf.setIdentity();
     rJf.setZero();
     fJf.setZero();
     // Check that proper shared data has been passed
-    DataCollectorMultibodyTpl<Scalar>* d = dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
+    DataCollectorMultibodyTpl<Scalar>* d =
+        dynamic_cast<DataCollectorMultibodyTpl<Scalar>*>(shared);
     if (d == NULL) {
-      throw_pretty("Invalid argument: the shared data should be derived from DataCollectorMultibody");
+      throw_pretty(
+          "Invalid argument: the shared data should be derived from "
+          "DataCollectorMultibody");
     }
 
     // Avoids data casting at runtime

@@ -12,8 +12,8 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/spatial/force.hpp>
 
-#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {
 
@@ -49,12 +49,14 @@ struct ForceDataAbstractTpl {
   PinocchioData* pinocchio;        //!< Pinocchio data
   pinocchio::FrameIndex frame;     //!< Frame index of the contact frame
   pinocchio::ReferenceFrame type;  //!< Type of contact
-  SE3 jMf;                         //!< Local frame placement of the contact frame
-  MatrixXs Jc;                     //!< Contact Jacobian
-  Force f;                         //!< Contact force expressed in the coordinate defined by type
-  Force fext;                      //!< External spatial force at the parent joint level
-  MatrixXs df_dx;                  //!< Jacobian of the contact forces expressed in the coordinate defined by type
-  MatrixXs df_du;                  //!< Jacobian of the contact forces expressed in the coordinate defined by type
+  SE3 jMf;      //!< Local frame placement of the contact frame
+  MatrixXs Jc;  //!< Contact Jacobian
+  Force f;      //!< Contact force expressed in the coordinate defined by type
+  Force fext;   //!< External spatial force at the parent joint level
+  MatrixXs df_dx;  //!< Jacobian of the contact forces expressed in the
+                   //!< coordinate defined by type
+  MatrixXs df_du;  //!< Jacobian of the contact forces expressed in the
+                   //!< coordinate defined by type
 };
 
 }  // namespace crocoddyl

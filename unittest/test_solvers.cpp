@@ -24,7 +24,8 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   // Create the kkt solver
   SolverFactory factory;
   boost::shared_ptr<crocoddyl::SolverKKT> kkt =
-      boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(
+          factory.create(SolverTypes::SolverKKT, action_type, T));
 
   // define some aliases
   const std::size_t ndx = kkt->get_ndx();
@@ -45,15 +46,19 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   // Create the kkt solver
   SolverFactory factory;
   boost::shared_ptr<crocoddyl::SolverKKT> kkt =
-      boost::static_pointer_cast<crocoddyl::SolverKKT>(factory.create(SolverTypes::SolverKKT, action_type, T));
+      boost::static_pointer_cast<crocoddyl::SolverKKT>(
+          factory.create(SolverTypes::SolverKKT, action_type, T));
 
   // Generate the different state along the trajectory
-  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = kkt->get_problem();
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      kkt->get_problem();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
     xs.push_back(state->rand());
     us.push_back(Eigen::VectorXd::Random(model->get_nu()));
   }
@@ -73,27 +78,35 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   BOOST_CHECK((hess - hess.transpose()).isZero(1e-9));
 
   // Check initial state
-  BOOST_CHECK(
-      (state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]), kkt->get_problem()->get_x0())).isZero(1e-9));
+  BOOST_CHECK((state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]),
+                              kkt->get_problem()->get_x0()))
+                  .isZero(1e-9));
 }
 
 //____________________________________________________________________________//
 
-void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTypes::Type action_type, size_t T) {
+void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
+                                    ActionModelTypes::Type action_type,
+                                    size_t T) {
   // Create the testing and KKT solvers
   SolverFactory solver_factory;
-  boost::shared_ptr<crocoddyl::SolverAbstract> solver = solver_factory.create(solver_type, action_type, T);
-  boost::shared_ptr<crocoddyl::SolverAbstract> kkt = solver_factory.create(SolverTypes::SolverKKT, action_type, T);
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, action_type, T);
+  boost::shared_ptr<crocoddyl::SolverAbstract> kkt =
+      solver_factory.create(SolverTypes::SolverKKT, action_type, T);
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
-  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem = solver->get_problem();
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
 
   // Generate the different state along the trajectory
-  const boost::shared_ptr<crocoddyl::StateAbstract>& state = problem->get_runningModels()[0]->get_state();
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem->get_runningModels()[i];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
     xs.push_back(state->rand());
     us.push_back(Eigen::VectorXd::Random(model->get_nu()));
   }
@@ -123,32 +136,39 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type, ActionModelTy
 
   // check solutions against each other
   for (unsigned int t = 0; t < T; ++t) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = solver->get_problem()->get_runningModels()[t];
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        solver->get_problem()->get_runningModels()[t];
     std::size_t nu = model->get_nu();
-    BOOST_CHECK((state->diff_dx(solver->get_xs()[t], kkt->get_xs()[t])).isZero(1e-9));
+    BOOST_CHECK(
+        (state->diff_dx(solver->get_xs()[t], kkt->get_xs()[t])).isZero(1e-9));
     BOOST_CHECK((solver->get_us()[t].head(nu) - kkt->get_us()[t]).isZero(1e-9));
   }
-  BOOST_CHECK((state->diff_dx(solver->get_xs()[T], kkt->get_xs()[T])).isZero(1e-9));
+  BOOST_CHECK(
+      (state->diff_dx(solver->get_xs()[T], kkt->get_xs()[T])).isZero(1e-9));
 }
 
 //____________________________________________________________________________//
 
-void register_kkt_solver_unit_tests(ActionModelTypes::Type action_type, const std::size_t T) {
+void register_kkt_solver_unit_tests(ActionModelTypes::Type action_type,
+                                    const std::size_t T) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << action_type;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_dimension, action_type, T)));
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_kkt_search_direction, action_type, T)));
+  ts->add(
+      BOOST_TEST_CASE(boost::bind(&test_kkt_search_direction, action_type, T)));
   framework::master_test_suite().add(ts);
 }
 
-void register_solvers_againt_kkt_unit_tests(SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+void register_solvers_againt_kkt_unit_tests(SolverTypes::Type solver_type,
+                                            ActionModelTypes::Type action_type,
                                             const std::size_t T) {
   boost::test_tools::output_test_stream test_name;
   test_name << "test_" << solver_type << "_" << action_type;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   std::cout << "Running " << test_name.str() << std::endl;
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver, solver_type, action_type, T)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver,
+                                      solver_type, action_type, T)));
   framework::master_test_suite().add(ts);
 }
 
@@ -163,8 +183,10 @@ bool init_function() {
 
   // We start from 1 as 0 is the kkt solver
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
-    for (size_t i = 0; i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
-      register_solvers_againt_kkt_unit_tests(SolverTypes::all[s], ActionModelTypes::all[i], T);
+    for (size_t i = 0; i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ;
+         ++i) {
+      register_solvers_againt_kkt_unit_tests(SolverTypes::all[s],
+                                             ActionModelTypes::all[i], T);
     }
   }
   return true;
@@ -172,4 +194,6 @@ bool init_function() {
 
 //____________________________________________________________________________//
 
-int main(int argc, char* argv[]) { return ::boost::unit_test::unit_test_main(&init_function, argc, argv); }
+int main(int argc, char* argv[]) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

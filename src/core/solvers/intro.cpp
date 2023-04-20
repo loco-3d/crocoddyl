@@ -6,9 +6,10 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "crocoddyl/core/solvers/intro.hpp"
+
 #include <iostream>
 
-#include "crocoddyl/core/solvers/intro.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
@@ -43,7 +44,8 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   Hy_lu_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -70,13 +72,16 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
 
 SolverIntro::~SolverIntro() {}
 
-bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::vector<Eigen::VectorXd>& init_us,
-                        const std::size_t maxiter, const bool is_feasible, const double init_reg) {
+bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
+                        const std::vector<Eigen::VectorXd>& init_us,
+                        const std::size_t maxiter, const bool is_feasible,
+                        const double init_reg) {
   START_PROFILER("SolverIntro::solve");
   if (problem_->is_updated()) {
     resizeData();
   }
-  xs_try_[0] = problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
+  xs_try_[0] =
+      problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
@@ -110,15 +115,18 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
     updateExpectedImprovement();
     expectedImprovement();
 
-    // Update the penalty parameter for computing the merit function and its directional derivative
-    // For more details see Section 3 of "An Interior Point Algorithm for Large Scale Nonlinear Programming"
+    // Update the penalty parameter for computing the merit function and its
+    // directional derivative For more details see Section 3 of "An Interior
+    // Point Algorithm for Large Scale Nonlinear Programming"
     if (hfeas_ != 0 && iter_ != 0) {
-      upsilon_ = std::max(upsilon_, (d_[0] + .5 * d_[1]) / ((1 - rho_) * hfeas_));
+      upsilon_ =
+          std::max(upsilon_, (d_[0] + .5 * d_[1]) / ((1 - rho_) * hfeas_));
     }
 
     // We need to recalculate the derivatives when the step length passes
     recalcDiff = false;
-    for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it) {
+    for (std::vector<double>::const_iterator it = alphas_.begin();
+         it != alphas_.end(); ++it) {
       steplength_ = *it;
       try {
         dV_ = tryStep(steplength_);
@@ -138,7 +146,8 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs, const std::
           recalcDiff = true;
           break;
         }
-      } else {  // reducing the gaps by allowing a small increment in the cost value
+      } else {  // reducing the gaps by allowing a small increment in the cost
+                // value
         if (dV_ > th_acceptnegstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
@@ -194,7 +203,8 @@ void SolverIntro::resizeData() {
 
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -219,25 +229,30 @@ double SolverIntro::calcDiff() {
   START_PROFILER("SolverIntro::calcDiff");
   SolverFDDP::calcDiff();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models = problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas = problem_->get_runningDatas();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
   switch (eq_solver_) {
     case LuNull:
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
       for (std::size_t t = 0; t < T; ++t) {
-        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = models[t];
+        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+            models[t];
         const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
         if (model->get_nu() > 0 && model->get_nh() > 0) {
           Hu_lu_[t].compute(data->Hu);
           YZ_[t] << Hu_lu_[t].matrixLU().transpose(), Hu_lu_[t].kernel();
           Hu_rank_[t] = Hu_lu_[t].rank();
-          const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
-              YZ_[t].leftCols(Hu_lu_[t].rank());
+          const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                             Eigen::RowMajor>
+              Y = YZ_[t].leftCols(Hu_lu_[t].rank());
           Hy_[t].noalias() = data->Hu * Y;
           Hy_lu_[t].compute(Hy_[t]);
-          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv = Hy_lu_[t].inverse();
+          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv =
+              Hy_lu_[t].inverse();
           ks_[t].noalias() = Hy_inv * data->h;
           Ks_[t].noalias() = Hy_inv * data->Hx;
           kz_[t].noalias() = Y * ks_[t];
@@ -250,17 +265,20 @@ double SolverIntro::calcDiff() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
       for (std::size_t t = 0; t < T; ++t) {
-        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = models[t];
+        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+            models[t];
         const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
         if (model->get_nu() > 0 && model->get_nh() > 0) {
           Hu_qr_[t].compute(data->Hu.transpose());
           YZ_[t] = Hu_qr_[t].householderQ();
           Hu_rank_[t] = Hu_qr_[t].rank();
-          const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Y =
-              YZ_[t].leftCols(Hu_qr_[t].rank());
+          const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                             Eigen::RowMajor>
+              Y = YZ_[t].leftCols(Hu_qr_[t].rank());
           Hy_[t].noalias() = data->Hu * Y;
           Hy_lu_[t].compute(Hy_[t]);
-          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv = Hy_lu_[t].inverse();
+          const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv =
+              Hy_lu_[t].inverse();
           ks_[t].noalias() = Hy_inv * data->h;
           Ks_[t].noalias() = Hy_inv * data->Hx;
           kz_[t].noalias() = Y * ks_[t];
@@ -276,7 +294,8 @@ double SolverIntro::calcDiff() {
   return cost_;
 }
 
-void SolverIntro::computeValueFunction(const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+void SolverIntro::computeValueFunction(
+    const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
   const std::size_t nu = model->get_nu();
   Vx_[t] = Qx_[t];
   Vxx_[t] = Qxx_[t];
@@ -309,8 +328,10 @@ void SolverIntro::computeValueFunction(const std::size_t t, const boost::shared_
 
 void SolverIntro::computeGains(const std::size_t t) {
   START_PROFILER("SolverIntro::computeGains");
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model = problem_->get_runningModels()[t];
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = problem_->get_runningDatas()[t];
+  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+      problem_->get_runningModels()[t];
+  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+      problem_->get_runningDatas()[t];
 
   const std::size_t nu = model->get_nu();
   const std::size_t nh = model->get_nh();
@@ -321,8 +342,9 @@ void SolverIntro::computeGains(const std::size_t t) {
         START_PROFILER("SolverIntro::Qzz_inv");
         const std::size_t rank = Hu_rank_[t];
         const std::size_t nullity = data->Hu.cols() - rank;
-        const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Z =
-            YZ_[t].rightCols(nullity);
+        const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                           Eigen::RowMajor>
+            Z = YZ_[t].rightCols(nullity);
         Quz_[t].noalias() = Quu_[t] * Z;
         Qzz_[t].noalias() = Z.transpose() * Quz_[t];
         Qzz_llt_[t].compute(Qzz_[t]);
@@ -376,7 +398,9 @@ void SolverIntro::computeGains(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeGains");
 }
 
-EqualitySolverType SolverIntro::get_equality_solver() const { return eq_solver_; }
+EqualitySolverType SolverIntro::get_equality_solver() const {
+  return eq_solver_;
+}
 
 double SolverIntro::get_th_feas() const { return th_feas_; }
 
@@ -390,15 +414,23 @@ double SolverIntro::get_upsilon() const { return upsilon_; }
 
 bool SolverIntro::get_zero_upsilon() const { return zero_upsilon_; }
 
-const std::vector<std::size_t>& SolverIntro::get_Hu_rank() const { return Hu_rank_; }
+const std::vector<std::size_t>& SolverIntro::get_Hu_rank() const {
+  return Hu_rank_;
+}
 
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_YZ() const { return YZ_; }
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzz() const { return Qzz_; }
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzz() const {
+  return Qzz_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qxz() const { return Qxz_; }
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qxz() const {
+  return Qxz_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Quz() const { return Quz_; }
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Quz() const {
+  return Quz_;
+}
 
 const std::vector<Eigen::VectorXd>& SolverIntro::get_Qz() const { return Qz_; }
 
@@ -412,7 +444,9 @@ const std::vector<Eigen::VectorXd>& SolverIntro::get_ks() const { return ks_; }
 
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_Ks() const { return Ks_; }
 
-void SolverIntro::set_equality_solver(const EqualitySolverType type) { eq_solver_ = type; }
+void SolverIntro::set_equality_solver(const EqualitySolverType type) {
+  eq_solver_ = type;
+}
 
 void SolverIntro::set_th_feas(const double th_feas) { th_feas_ = th_feas; }
 
@@ -424,6 +458,8 @@ void SolverIntro::set_rho(const double rho) {
   rho_ = rho;
 }
 
-void SolverIntro::set_zero_upsilon(const bool zero_upsilon) { zero_upsilon_ = zero_upsilon; }
+void SolverIntro::set_zero_upsilon(const bool zero_upsilon) {
+  zero_upsilon_ = zero_upsilon;
+}
 
 }  // namespace crocoddyl

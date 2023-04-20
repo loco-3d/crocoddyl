@@ -10,8 +10,8 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 
-#include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/spatial/motion.hpp>
 
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
@@ -42,8 +42,9 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] id     Reference frame id of the impulse
    * @param[in] type   Type of impulse (default LOCAL)
    */
-  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-                    const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
+  ImpulseModel3DTpl(
+      boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+      const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
   virtual ~ImpulseModel3DTpl();
 
   /**
@@ -52,7 +53,8 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data  6d impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the 6d impulse holonomic constraint
@@ -60,7 +62,8 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data  6d impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -68,12 +71,14 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data   6d impulse data
    * @param[in] force  6d impulse
    */
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                           const VectorXs& force);
 
   /**
    * @brief Create the 6d impulse data
    */
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
+  virtual boost::shared_ptr<ImpulseDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Print relevant information of the 3d impulse model
@@ -102,7 +107,8 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   typedef typename pinocchio::ForceTpl<Scalar> Force;
 
   template <template <typename Scalar> class Model>
-  ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+  ImpulseData3DTpl(Model<Scalar>* const model,
+                   pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data),
         f_local(Force::Zero()),
         dv0_local_dq(3, model->get_state()->get_nv()),
@@ -111,7 +117,8 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dv(6, model->get_state()->get_nv()),
         fJf_df(3, model->get_state()->get_nv()) {
     frame = model->get_id();
-    jMf = model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
+    jMf =
+        model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
     fXj = jMf.inverse().toActionMatrix();
     v0.setZero();
     dv0_local_dq.setZero();

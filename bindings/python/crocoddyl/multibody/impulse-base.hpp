@@ -10,50 +10,64 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_
 
-#include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-
+#include "crocoddyl/multibody/impulse-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-class ImpulseModelAbstract_wrap : public ImpulseModelAbstract, public bp::wrapper<ImpulseModelAbstract> {
+class ImpulseModelAbstract_wrap : public ImpulseModelAbstract,
+                                  public bp::wrapper<ImpulseModelAbstract> {
  public:
-  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
+                            const pinocchio::ReferenceFrame type,
                             std::size_t nc)
       : ImpulseModelAbstract(state, type, nc) {}
 
-  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state, std::size_t nc)
+  ImpulseModelAbstract_wrap(boost::shared_ptr<StateMultibody> state,
+                            std::size_t nc)
       : ImpulseModelAbstract(state, pinocchio::ReferenceFrame::LOCAL, nc) {
-    std::cerr << "Deprecated: Use constructor that passes the type of contact, this assumes is pinocchio::LOCAL."
+    std::cerr << "Deprecated: Use constructor that passes the type of contact, "
+                 "this assumes is pinocchio::LOCAL."
               << std::endl;
   }
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    return bp::call<void>(this->get_override("calc").ptr(), data, (Eigen::VectorXd)x);
+  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
+            const Eigen::Ref<const Eigen::VectorXd>& x) {
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(),
+                  "x has wrong dimension");
+    return bp::call<void>(this->get_override("calc").ptr(), data,
+                          (Eigen::VectorXd)x);
   }
 
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x) {
-    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(), "x has wrong dimension");
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data, (Eigen::VectorXd)x);
+  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                const Eigen::Ref<const Eigen::VectorXd>& x) {
+    assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(),
+                  "x has wrong dimension");
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                          (Eigen::VectorXd)x);
   }
 
-  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force) {
-    assert_pretty(static_cast<std::size_t>(force.size()) == nc_, "force has wrong dimension");
+  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+                   const Eigen::VectorXd& force) {
+    assert_pretty(static_cast<std::size_t>(force.size()) == nc_,
+                  "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 
-  boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data) {
+  boost::shared_ptr<ImpulseDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data) {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ImpulseDataAbstract> >(createData.ptr(), boost::ref(data));
+      return bp::call<boost::shared_ptr<ImpulseDataAbstract> >(
+          createData.ptr(), boost::ref(data));
     }
     return ImpulseModelAbstract::createData(data);
   }
 
-  boost::shared_ptr<ImpulseDataAbstract> default_createData(pinocchio::DataTpl<Scalar>* const data) {
+  boost::shared_ptr<ImpulseDataAbstract> default_createData(
+      pinocchio::DataTpl<Scalar>* const data) {
     return this->ImpulseModelAbstract::createData(data);
   }
 };

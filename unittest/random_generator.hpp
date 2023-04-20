@@ -28,7 +28,8 @@ RealType random_real_in_range(RealType first = 0, RealType last = 1) {
 }
 
 bool random_boolean() {
-  static auto generator = std::bind(std::uniform_int_distribution<>(0, 1), std::default_random_engine());
+  static auto generator = std::bind(std::uniform_int_distribution<>(0, 1),
+                                    std::default_random_engine());
   return generator();
 }
 
