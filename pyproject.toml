@@ -1,0 +1,9 @@
+[tool.isort]
+profile = "black"
+known_first_party = "pinocchio"
+
+[tool.ruff]
+target-version = "py38"
+
+[tool.tomlsort]
+all = true
