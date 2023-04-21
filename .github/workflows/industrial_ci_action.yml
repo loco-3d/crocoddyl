@@ -51,6 +51,9 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
       # Run industrial_ci - use fork until awaits https://github.com/ros-industrial/industrial_ci/issues/767 is resolved
+      - name: debug
+        run: env
+        env: ${{ matrix.env }}
       - uses: 'wxmerkt/industrial_ci@topic/clang-format-check-in-deterministic-location'
         env: ${{ matrix.env }}
       # # Run industrial_ci
