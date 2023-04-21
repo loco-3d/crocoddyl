@@ -147,11 +147,6 @@ endif()
 if(BUILD_WITH_MULTITHREADS)
   find_package(OpenMP REQUIRED)
 
-  if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xpreprocessor -fopenmp")
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-  endif(APPLE)
   add_definitions(-DCROCODDYL_WITH_MULTITHREADING)
   add_definitions(-DCROCODDYL_WITH_NTHREADS=${BUILD_WITH_NTHREADS})
   set(PACKAGE_EXTRA_MACROS
@@ -409,7 +404,7 @@ if(UNIX)
   target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::system
                         Boost::serialization)
 
-  if(OPENMP_FOUND)
+  if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
   endif()
 
