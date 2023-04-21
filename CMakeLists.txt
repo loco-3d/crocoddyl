@@ -145,9 +145,8 @@ endif()
 
 # Add OpenMP
 if(BUILD_WITH_MULTITHREADS)
-  find_package(OpenMP)
-endif()
-if(OPENMP_FOUND AND BUILD_WITH_MULTITHREADS)
+  find_package(OpenMP REQUIRED)
+
   if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xpreprocessor -fopenmp")
   else()
