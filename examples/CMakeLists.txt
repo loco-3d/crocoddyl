@@ -64,6 +64,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
       &&
       /bin/bash
       ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
+    set_tests_properties("test_logfiles" PROPERTIES TIMEOUT 7200)
 
     add_custom_target(
       "test_logfiles"

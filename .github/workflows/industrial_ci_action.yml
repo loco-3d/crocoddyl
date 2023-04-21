@@ -39,7 +39,7 @@ jobs:
       # target after completion of the regular test target. The output of this step does affect the output of the CI process.
       # Note, this does not affect projects that do not have pure CMake projects in their upstream_ws.
       BUILDER: catkin_tools
-      AFTER_RUN_TARGET_TEST: 'source /root/target_ws/install/setup.bash && cd /root/target_ws/build/crocoddyl && make test'
+      AFTER_RUN_TARGET_TEST: 'source /root/target_ws/install/setup.bash && cd /root/target_ws/build/crocoddyl && env && make test'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -51,9 +51,6 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
       # Run industrial_ci - use fork until awaits https://github.com/ros-industrial/industrial_ci/issues/767 is resolved
-      - name: debug
-        run: env
-        env: ${{ matrix.env }}
       - uses: 'wxmerkt/industrial_ci@topic/clang-format-check-in-deterministic-location'
         env: ${{ matrix.env }}
       # # Run industrial_ci
