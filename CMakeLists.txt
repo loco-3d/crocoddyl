@@ -145,7 +145,7 @@ endif()
 
 # Add OpenMP
 if(BUILD_WITH_MULTITHREADS)
-  find_package(OpenMP REQUIRED)
+  find_package(OpenMP REQUIRED COMPONENTS CXX)
 
   add_definitions(-DCROCODDYL_WITH_MULTITHREADING)
   add_definitions(-DCROCODDYL_WITH_NTHREADS=${BUILD_WITH_NTHREADS})
