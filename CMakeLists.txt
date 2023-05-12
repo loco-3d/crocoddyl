@@ -37,15 +37,7 @@ message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
 
 # Set a default build type to 'Release' if none was specified
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE
-      Release
-      CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-                                               "MinSizeRel" "RelWithDebInfo")
-endif()
+set_default_cmake_build_type("Release")
 
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
