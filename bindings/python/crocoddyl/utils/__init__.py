@@ -1,7 +1,10 @@
-import crocoddyl
+import warnings
+
 import numpy as np
 import pinocchio
 import scipy.linalg as scl
+
+import crocoddyl
 
 
 def a2m(a):
@@ -1663,16 +1666,16 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 - self.k[t] * stepLength
                 - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
             )
-            with np.warnings.catch_warnings():
-                np.warnings.simplefilter(warning)
+            with warnings.catch_warnings():
+                warnings.simplefilter(warning)
                 m.calc(d, xtry[t], utry[t])
                 xnext, cost = d.xnext, d.cost
             xtry[t + 1] = xnext.copy()  # not sure copy helpful here.
             ctry += cost
             raiseIfNan([ctry, cost], ArithmeticError("forward error"))
             raiseIfNan(xtry[t + 1], ArithmeticError("forward error"))
-        with np.warnings.catch_warnings():
-            np.warnings.simplefilter(warning)
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
             ctry += self.problem.terminalData.cost
         raiseIfNan(ctry, ArithmeticError("forward error"))
@@ -1880,8 +1883,8 @@ class FDDPDerived(DDPDerived):
                 - self.k[t] * stepLength
                 - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
             )
-            with np.warnings.catch_warnings():
-                np.warnings.simplefilter(warning)
+            with warnings.catch_warnings():
+                warnings.simplefilter(warning)
                 m.calc(d, xtry[t], utry[t])
                 xnext, cost = d.xnext, d.cost
             ctry += cost
@@ -1893,8 +1896,8 @@ class FDDPDerived(DDPDerived):
             xtry[-1] = self.problem.terminalModel.state.integrate(
                 xnext, self.fs[-1] * (stepLength - 1)
             )
-        with np.warnings.catch_warnings():
-            np.warnings.simplefilter(warning)
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
             ctry += self.problem.terminalData.cost
         raiseIfNan(ctry, ArithmeticError("forward error"))
