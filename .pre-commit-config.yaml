@@ -2,7 +2,7 @@ ci:
     autoupdate_branch: 'devel'
 repos:
 -   repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v16.0.0
+    rev: v16.0.3
     hooks:
     -   id: clang-format
         args: [--style=Google]
@@ -34,11 +34,11 @@ repos:
     hooks:
     -   id: black
 -   repo: https://github.com/pappasam/toml-sort
-    rev: v0.23.0
+    rev: v0.23.1
     hooks:
     - id: toml-sort-fix
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.260
+  rev: v0.0.267
   hooks:
     - id: ruff
       args: [--fix, --exit-non-zero-on-fix]
