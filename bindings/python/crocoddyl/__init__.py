@@ -425,7 +425,7 @@ class MeshcatDisplay(DisplayAbstract):
                 visual_model=self.robot.visual_model,
             )
         )
-        if cameraTF is not None:
+        if cameraTF is not None and hasattr(self.robot.viz, "viewer"):
             self.robot.viewer["/Cameras/default"].set_transform(
                 pinocchio.XYZQUATToSE3(cameraTF).homogeneous
             )
