@@ -95,7 +95,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
       if (dVexp_ >= 0) {  // descend direction
-        if (abs(d_[0]) < th_grad_ || !is_feasible_ ||
+        if (std::abs(d_[0]) < th_grad_ || !is_feasible_ ||
             dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, true);
@@ -154,7 +154,7 @@ double SolverDDP::stoppingCriteria() {
   // function. If this reduction is less than a certain threshold, then the
   // algorithm reaches the local minimum. For more details, see C. Mastalli et
   // al. "Inverse-dynamics MPC via Nullspace Resolution".
-  stop_ = abs(d_[0] + 0.5 * d_[1]);
+  stop_ = std::abs(d_[0] + 0.5 * d_[1]);
   return stop_;
 }
 

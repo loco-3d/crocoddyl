@@ -75,7 +75,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
       if (dVexp_ >= 0) {  // descend direction
-        if (abs(d_[0]) < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
+        if (std::abs(d_[0]) < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
