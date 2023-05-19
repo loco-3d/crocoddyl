@@ -69,6 +69,8 @@ check_minimal_cxx_standard(14 ENFORCE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/"
                       ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/OpenMP/"
+                      ${CMAKE_MODULE_PATH})
 
 # Add the different required and optional dependencies
 if(BUILD_PYTHON_INTERFACE)
