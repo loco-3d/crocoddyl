@@ -138,7 +138,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
       dPhiexp_ = dVexp_ + steplength_ * upsilon_ * (hfeas_ - hfeas_try_);
       if (dPhiexp_ >= 0) {  // descend direction
-        if (abs(d_[0]) < th_grad_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
+        if (std::abs(d_[0]) < th_grad_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
@@ -169,7 +169,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
     if (steplength_ > th_stepdec_ && dV_ >= 0.) {
       decreaseRegularization();
     }
-    if (steplength_ <= th_stepinc_ || abs(d_[1]) <= th_feas_) {
+    if (steplength_ <= th_stepinc_ || std::abs(d_[1]) <= th_feas_) {
       if (xreg_ == reg_max_) {
         STOP_PROFILER("SolverIntro::solve");
         return false;
@@ -193,7 +193,7 @@ double SolverIntro::tryStep(const double steplength) {
 }
 
 double SolverIntro::stoppingCriteria() {
-  stop_ = std::max(hfeas_, abs(d_[0] + 0.5 * d_[1]));
+  stop_ = std::max(hfeas_, std::abs(d_[0] + 0.5 * d_[1]));
   return stop_;
 }
 
