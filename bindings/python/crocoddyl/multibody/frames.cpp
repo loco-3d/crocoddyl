@@ -9,6 +9,7 @@
 #include <eigenpy/eigen-to-python.hpp>
 #include <eigenpy/memory.hpp>
 #include <pinocchio/bindings/python/utils/std-aligned-vector.hpp>
+#include <pinocchio/fwd.hpp>
 
 #include "crocoddyl/multibody/frames-deprecated.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
