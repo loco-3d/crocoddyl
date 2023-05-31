@@ -9,13 +9,6 @@ repos:
     - --profile
     - black
     - --filter-files
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.270
-  hooks:
-  - id: ruff
-    args:
-    - --fix
-    - --exit-non-zero-on-fix
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: v0.6.13
   hooks:
