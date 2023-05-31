@@ -1,3 +1,4 @@
+# flake8: noqa: F821
 # Use this function inside DifferentialActionModel.calc by setting:
 #      xddot, thddot = cartpole_dynamics(self, data, x, u)
 

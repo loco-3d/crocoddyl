@@ -1,4 +1,4 @@
-# ruff: noqa: F405
+# flake8: noqa: F405
 import time
 
 import numpy as np
