@@ -182,9 +182,9 @@ set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
 set(BOOST_BUILD_COMPONENTS unit_test_framework)
 set_boost_default_options()
 export_boost_default_options()
-add_project_dependency(Boost 1.71 REQUIRED COMPONENTS
+add_project_dependency(Boost 1.65 REQUIRED COMPONENTS
                        ${BOOST_REQUIRED_COMPONENTS})
-find_package(Boost 1.71 REQUIRED COMPONENTS ${BOOST_BUILD_COMPONENTS})
+find_package(Boost 1.65 REQUIRED COMPONENTS ${BOOST_BUILD_COMPONENTS})
 
 if(Boost_VERSION GREATER 107299)
   # Silence a warning about a deprecated use of boost bind by boost python at
