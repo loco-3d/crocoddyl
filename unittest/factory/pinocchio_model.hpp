@@ -9,7 +9,6 @@
 #ifndef CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 #define CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 
-#include <example-robot-data/path.hpp>
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/centroidal-derivatives.hpp>
 #include <pinocchio/algorithm/centroidal.hpp>
