@@ -1,5 +1,6 @@
-import crocoddyl
 import numpy as np
+
+import crocoddyl
 
 
 class CostModelDoublePendulum(crocoddyl.CostModelAbstract):

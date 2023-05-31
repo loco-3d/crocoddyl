@@ -1,7 +1,8 @@
-import crocoddyl
 import example_robot_data
 import numpy as np
 import pinocchio
+
+import crocoddyl
 
 robot = example_robot_data.load("talos_arm")
 robot_model = robot.model

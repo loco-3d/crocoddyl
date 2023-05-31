@@ -1,4 +1,5 @@
 [tool.isort]
+known_first_party = ["crocoddyl"]
 profile = "black"
 
 [tool.tomlsort]
