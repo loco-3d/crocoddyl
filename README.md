@@ -13,7 +13,6 @@
 <a href="https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext"><img src="https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat">
 <!-- <a href="https://github.com/loco-3d/crocoddyl/graphs/contributors"><img src="https://img.shields.io/github/contributors/loco-3d/crocoddyl"> -->
 <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
-<a href="https://github.com/charliermarsh/ruff"><img="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json" alt="Ruff" /></a>
 </p>
 
 ## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
