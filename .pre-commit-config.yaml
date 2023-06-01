@@ -1,48 +1,56 @@
 ci:
-    autoupdate_branch: 'devel'
+  autoupdate_branch: devel
 repos:
--   repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v16.0.4
-    hooks:
-    -   id: clang-format
-        args: [--style=Google]
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-    -   id: check-added-large-files
-    -   id: check-ast
-    -   id: check-executables-have-shebangs
-    -   id: check-json
-    -   id: check-merge-conflict
-    -   id: check-symlinks
-    -   id: check-toml
-    -   id: check-yaml
-    -   id: debug-statements
-    -   id: destroyed-symlinks
-    -   id: detect-private-key
-    -   id: end-of-file-fixer
-    -   id: fix-byte-order-marker
-    -   id: mixed-line-ending
-    -   id: trailing-whitespace
--   repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-    -   id: isort
-        args: ["--profile", "black", "--filter-files"]
--   repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-    -   id: black
--   repo: https://github.com/pappasam/toml-sort
-    rev: v0.23.1
-    hooks:
-    - id: toml-sort-fix
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.270
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
   hooks:
-    - id: ruff
-      args: [--fix, --exit-non-zero-on-fix]
--   repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.13
-    hooks:
-    - id: cmake-format
+  - id: isort
+    args:
+    - --profile
+    - black
+    - --project
+    - crocoddyl
+    - --filter-files
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+  - id: cmake-format
+- repo: https://github.com/pappasam/toml-sort
+  rev: v0.23.1
+  hooks:
+  - id: toml-sort-fix
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: v16.0.4
+  hooks:
+  - id: clang-format
+    args:
+    - --style=Google
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-ast
+  - id: check-executables-have-shebangs
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: check-toml
+  - id: check-yaml
+  - id: debug-statements
+  - id: destroyed-symlinks
+  - id: detect-private-key
+  - id: end-of-file-fixer
+  - id: fix-byte-order-marker
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+  - id: black
+- repo: https://github.com/pycqa/flake8
+  rev: 6.0.0
+  hooks:
+  - id: flake8
+    args:
+    - --max-line-length
+    - '88'

@@ -1,11 +1,14 @@
+# flake8: noqa: E203
+# ref. https://github.com/PyCQA/pycodestyle/issues/373, remove this for ruff
 import os
 import signal
 import sys
 import time
 
-import crocoddyl
 import example_robot_data
 import numpy as np
+
+import crocoddyl
 from crocoddyl.utils.pendulum import (
     ActuationModelDoublePendulum,
     CostModelDoublePendulum,

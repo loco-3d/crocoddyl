@@ -1,3 +1,4 @@
+# flake8: noqa: F821
 def cartpole_analytical_derivatives(model, data, x, u=None):
     if u is None:
         u = model.unone

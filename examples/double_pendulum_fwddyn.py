@@ -3,9 +3,10 @@ import signal
 import sys
 import time
 
-import crocoddyl
 import example_robot_data
 import numpy as np
+
+import crocoddyl
 from crocoddyl.utils.pendulum import (
     ActuationModelDoublePendulum,
     CostModelDoublePendulum,

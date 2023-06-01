@@ -1,10 +1,6 @@
 [tool.isort]
+known_first_party = ["crocoddyl"]
 profile = "black"
-
-[tool.ruff]
-extend-exclude = ["cmake", "examples/notebooks"]
-extend-select = ["RUF", "UP"]
-target-version = "py38"
 
 [tool.tomlsort]
 all = true

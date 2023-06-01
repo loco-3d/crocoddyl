@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10)
 
 # Set up project properties
 set(PROJECT_NAMESPACE loco-3d)
@@ -13,13 +13,20 @@ option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
-  message(STATUS "JRL cmakemodules not found. Let's fetch it.")
-  include(FetchContent)
-  FetchContent_Declare(
-    "jrl-cmakemodules"
-    GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
-  FetchContent_MakeAvailable("jrl-cmakemodules")
-  FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
+  if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
+    message(
+      FATAL_ERROR
+        "\nPlease run the following command first:\ngit submodule update --init\n"
+    )
+  else()
+    message(STATUS "JRL cmakemodules not found. Let's fetch it.")
+    include(FetchContent)
+    FetchContent_Declare(
+      "jrl-cmakemodules"
+      GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
+    FetchContent_MakeAvailable("jrl-cmakemodules")
+    FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
+  endif()
 endif()
 
 # Include important cmake modules
@@ -175,9 +182,9 @@ set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
 set(BOOST_BUILD_COMPONENTS unit_test_framework)
 set_boost_default_options()
 export_boost_default_options()
-add_project_dependency(Boost 1.71 REQUIRED COMPONENTS
+add_project_dependency(Boost 1.65 REQUIRED COMPONENTS
                        ${BOOST_REQUIRED_COMPONENTS})
-find_package(Boost 1.71 REQUIRED COMPONENTS ${BOOST_BUILD_COMPONENTS})
+find_package(Boost 1.65 REQUIRED COMPONENTS ${BOOST_BUILD_COMPONENTS})
 
 if(Boost_VERSION GREATER 107299)
   # Silence a warning about a deprecated use of boost bind by boost python at

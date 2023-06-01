@@ -3,8 +3,9 @@ import subprocess
 import sys
 import time
 
-import crocoddyl
 import numpy as np
+
+import crocoddyl
 from crocoddyl.utils import UnicycleModelDerived
 
 N = 200  # number of nodes

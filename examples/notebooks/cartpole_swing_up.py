@@ -1,7 +1,8 @@
 # Display the solution
-import crocoddyl
 import numpy as np
 from cartpole_utils import animateCartpole
+
+import crocoddyl
 
 
 class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract):
@@ -13,7 +14,7 @@ class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract)
 
         self.m1 = 1.0
         self.m2 = 0.1
-        self.l = 0.5
+        self.length = 0.5
         self.g = 9.81
         self.costWeights = [
             1.0,
@@ -32,14 +33,14 @@ class DifferentialActionModelCartpole(crocoddyl.DifferentialActionModelAbstract)
         f = u[0]
 
         # Shortname for system parameters
-        m1, m2, l, g = self.m1, self.m2, self.l, self.g
+        m1, m2, length, g = self.m1, self.m2, self.length, self.g
         s, c = np.sin(th), np.cos(th)
 
         # Defining the equation of motions
         m = m1 + m2
         mu = m1 + m2 * s**2
-        xddot = (f + m2 * c * s * g - m2 * l * s * thdot**2) / mu
-        thddot = (c * f / l + m * g * s / l - m2 * c * s * thdot**2) / mu
+        xddot = (f + m2 * c * s * g - m2 * length * s * thdot**2) / mu
+        thddot = (c * f / length + m * g * s / length - m2 * c * s * thdot**2) / mu
         data.xout = np.matrix([xddot, thddot]).T
 
         # Computing the cost residual and value
