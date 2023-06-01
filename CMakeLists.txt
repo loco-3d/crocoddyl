@@ -97,8 +97,8 @@ add_project_dependency(pinocchio 2.6.3 REQUIRED PKG_CONFIG_REQUIRES
 if(BUILD_EXAMPLES
    OR BUILD_TESTING
    OR BUILD_BENCHMARK)
-  add_project_dependency(example-robot-data 4.0.0 REQUIRED PKG_CONFIG_REQUIRES
-                         "example-robot-data >= 4.0.0")
+  add_project_dependency(example-robot-data 4.0.7 REQUIRED PKG_CONFIG_REQUIRES
+                         "example-robot-data >= 4.0.7")
 else()
   add_optional_dependency(example-robot-data)
 endif()

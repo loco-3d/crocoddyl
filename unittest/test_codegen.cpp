@@ -10,7 +10,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <example-robot-data/path.hpp>
 #include <pinocchio/algorithm/model.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 #include <pinocchio/parsers/srdf.hpp>
