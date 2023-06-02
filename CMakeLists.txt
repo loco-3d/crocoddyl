@@ -91,6 +91,8 @@ endif(APPLE)
 if(BUILD_PYTHON_INTERFACE)
   add_project_dependency(eigenpy 2.8.0 REQUIRED PKG_CONFIG_REQUIRES
                          "eigenpy >= 2.8.0")
+  # workaround temporary issue in submodule
+  include("${JRL_CMAKE_MODULES}/python.cmake")
 endif(BUILD_PYTHON_INTERFACE)
 add_project_dependency(pinocchio 2.6.3 REQUIRED PKG_CONFIG_REQUIRES
                        "pinocchio >= 2.6.3")
