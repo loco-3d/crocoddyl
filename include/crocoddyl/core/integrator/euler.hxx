@@ -51,7 +51,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(nv);
 
-  control_->calc(d->control, 0., u);
+  control_->calc(d->control, Scalar(0.), u);
   differential_->calc(d->differential, x, d->control->w);
   const VectorXs& a = d->differential->xout;
   d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
@@ -105,7 +105,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
   const std::size_t nv = state_->get_nv();
   Data* d = static_cast<Data*>(data.get());
 
-  control_->calc(d->control, 0., u);
+  control_->calc(d->control, Scalar(0.), u);
   differential_->calcDiff(d->differential, x, d->control->w);
   const MatrixXs& da_dx = d->differential->Fx;
   const MatrixXs& da_du = d->differential->Fu;
@@ -194,9 +194,9 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
 
   const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
 
-  d->control->w *= 0.;
+  d->control->w.setZero();
   differential_->quasiStatic(d->differential, d->control->w, x, maxiter, tol);
-  control_->params(d->control, 0., d->control->w);
+  control_->params(d->control, Scalar(0.), d->control->w);
   u = d->control->u;
 }
 
