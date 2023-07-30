@@ -5,8 +5,6 @@ from random import randint
 import example_robot_data
 import numpy as np
 import pinocchio
-
-import crocoddyl
 from factory import (
     DifferentialFreeFwdDynamicsModelDerived,
     DifferentialLQRModelDerived,
@@ -15,6 +13,8 @@ from factory import (
     LQRModelDerived,
     UnicycleModelDerived,
 )
+
+import crocoddyl
 
 
 class ActionModelAbstractTestCase(unittest.TestCase):

@@ -4,8 +4,6 @@ import unittest
 import example_robot_data
 import numpy as np
 import pinocchio
-
-import crocoddyl
 from factory import (
     CoMPositionCostModelDerived,
     ControlCostModelDerived,
@@ -15,6 +13,8 @@ from factory import (
     FrameVelocityCostModelDerived,
     StateCostModelDerived,
 )
+
+import crocoddyl
 
 
 class CostModelAbstractTestCase(unittest.TestCase):

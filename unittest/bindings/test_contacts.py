@@ -5,9 +5,9 @@ import unittest
 import example_robot_data
 import numpy as np
 import pinocchio
+from factory import Contact3DModelDerived, Contact6DModelDerived
 
 import crocoddyl
-from factory import Contact3DModelDerived, Contact6DModelDerived
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):

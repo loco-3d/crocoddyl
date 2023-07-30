@@ -195,21 +195,19 @@ if(Boost_VERSION GREATER 107299)
 endif()
 
 # Include header and source files
-FILE(GLOB_RECURSE ${PROJECT_NAME}_SOURCES
-  ${PROJECT_SOURCE_DIR}/src/*.cpp)
-FILE(GLOB_RECURSE ${PROJECT_NAME}_HEADERS
-  ${PROJECT_SOURCE_DIR}/include/*.hpp
-  ${PROJECT_SOURCE_DIR}/include/*.hxx)
+file(GLOB_RECURSE ${PROJECT_NAME}_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS ${PROJECT_SOURCE_DIR}/include/*.hpp
+     ${PROJECT_SOURCE_DIR}/include/*.hxx)
 # Remove header and source files that we want to build
 if(NOT BUILD_WITH_IPOPT)
   list(REMOVE_ITEM ${PROJECT_NAME}_HEADERS
-    ${PROJECT_SOURCE_DIR}/include/core/solvers/ipopt/ipopt-iface.cpp  
-    ${PROJECT_SOURCE_DIR}/include/core/solvers/ipopt.cpp)
+       ${PROJECT_SOURCE_DIR}/include/core/solvers/ipopt/ipopt-iface.cpp
+       ${PROJECT_SOURCE_DIR}/include/core/solvers/ipopt.cpp)
 endif()
 if(NOT BUILD_WITH_IPOPT)
   list(REMOVE_ITEM ${PROJECT_NAME}_SOURCES
-    ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt/ipopt-iface.cpp  
-    ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt.cpp)
+       ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt/ipopt-iface.cpp
+       ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt.cpp)
 endif()
 
 if(UNIX)
