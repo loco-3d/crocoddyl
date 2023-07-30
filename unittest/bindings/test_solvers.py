@@ -7,7 +7,7 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import DDPDerived, FDDPDerived
+from factory import DDPDerived, FDDPDerived
 
 
 class SolverAbstractTestCase(unittest.TestCase):

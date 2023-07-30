@@ -7,7 +7,7 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import Impulse3DModelDerived, Impulse6DModelDerived
+from factory import Impulse3DModelDerived, Impulse6DModelDerived
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):

@@ -7,7 +7,7 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import Contact3DModelDerived, Contact6DModelDerived
+from factory import Contact3DModelDerived, Contact6DModelDerived
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):

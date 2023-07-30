@@ -6,7 +6,7 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import (
+from factory import (
     CoMPositionCostModelDerived,
     ControlCostModelDerived,
     FramePlacementCostModelDerived,

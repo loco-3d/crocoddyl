@@ -6,7 +6,7 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
+from factory import StateMultibodyDerived, StateVectorDerived
 
 
 class StateAbstractTestCase(unittest.TestCase):

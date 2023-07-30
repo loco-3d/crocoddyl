@@ -6,7 +6,7 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
+from factory import FreeFloatingActuationDerived, FullActuationDerived
 
 
 class ActuationModelAbstractTestCase(unittest.TestCase):
