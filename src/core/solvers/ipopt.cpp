@@ -1,12 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifdef CROCODDYL_WITH_IPOPT
 
 #include "crocoddyl/core/solvers/ipopt.hpp"
 
@@ -84,5 +82,3 @@ void SolverIpopt::set_th_stop(const double th_stop) {
 }
 
 }  // namespace crocoddyl
-
-#endif

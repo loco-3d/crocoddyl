@@ -1,12 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifdef CROCODDYL_WITH_IPOPT
 
 #include <cmath>
 #include <iostream>
@@ -793,5 +791,3 @@ const boost::shared_ptr<ShootingProblem>& IpoptInterface::get_problem() const {
 double IpoptInterface::get_cost() const { return cost_; }
 
 }  // namespace crocoddyl
-
-#endif

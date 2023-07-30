@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef CROCODDYL_WITH_IPOPT
 #ifndef CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 #define CROCODDYL_CORE_SOLVERS_IPOPT_HPP_
 
@@ -76,5 +75,4 @@ class SolverIpopt : public SolverAbstract {
 };
 }  // namespace crocoddyl
 
-#endif
 #endif
