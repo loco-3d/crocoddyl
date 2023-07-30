@@ -358,8 +358,6 @@ set(${PROJECT_NAME}_HEADERS
     include/crocoddyl/multibody/data/impulses.hpp
     include/crocoddyl/multibody/data/multibody.hpp
     include/crocoddyl/multibody/force-base.hpp
-    include/crocoddyl/multibody/frames-deprecated.hpp
-    include/crocoddyl/multibody/frames.hpp
     include/crocoddyl/multibody/friction-cone.hpp
     include/crocoddyl/multibody/friction-cone.hxx
     include/crocoddyl/multibody/fwd.hpp

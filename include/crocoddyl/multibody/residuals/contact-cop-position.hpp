@@ -252,7 +252,6 @@ struct ResidualDataContactCoPPositionTpl
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef FrameCoPSupportTpl<Scalar> FrameCoPSupport;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
