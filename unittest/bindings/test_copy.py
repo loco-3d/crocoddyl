@@ -248,7 +248,7 @@ class ControlsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.ControlParametrizationModelPolyZero(2))
     MODEL.append(crocoddyl.ControlParametrizationModelPolyOne(2))
     MODEL.append(
-        crocoddyl.ControlParametrizationModelPolyTwoRK(2, crocoddyl.RKType.two)
+        crocoddyl.ControlParametrizationModelPolyTwoRK(2, crocoddyl.RKType.three)
     )
 
 
