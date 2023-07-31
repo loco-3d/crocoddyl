@@ -14,24 +14,38 @@ class CopyModelTestCase(unittest.TestCase):
     COLLECTOR = list()
 
     def test_copy(self):
-        for i, m in enumerate(self.MODEL):
-            copy.copy(m)
-            if self.DATA:
+        Mcopy = copy.copy(self.MODEL)
+        self.assertFalse(id(self.MODEL) == id(Mcopy))
+        if self.DATA:
+            D = []
+            for i, m in enumerate(self.MODEL):            
                 if not self.COLLECTOR:
-                    d = m.createData()
+                    D.append(m.createData())
                 else:
-                    d = m.createData(self.COLLECTOR[i])
-                copy.copy(d)
+                    D.append(m.createData(self.COLLECTOR[i]))
+            Dcopy = copy.copy(D)
+            self.assertFalse(id(D) == id(Dcopy))
+        for i, m in enumerate(self.MODEL):
+            self.assertTrue(id(self.MODEL[i]) == id(Mcopy[i]))
+            if self.DATA:
+                self.assertTrue(id(D[i]) == id(Dcopy[i]))
 
     def test_deepcopy(self):
-        for i, m in enumerate(self.MODEL):
-            copy.deepcopy(m)
-            if self.DATA:
+        Mcopy = copy.deepcopy(self.MODEL)
+        self.assertFalse(id(self.MODEL) == id(Mcopy))
+        if self.DATA:
+            D = []
+            for i, m in enumerate(self.MODEL):
                 if not self.COLLECTOR:
-                    d = m.createData()
+                    D.append(m.createData())
                 else:
-                    d = m.createData(self.COLLECTOR[i])
-                copy.deepcopy(d)
+                    D.append(m.createData(self.COLLECTOR[i]))
+            Dcopy = copy.deepcopy(D)
+            self.assertFalse(id(D) == id(Dcopy))
+        for i, m in enumerate(self.MODEL):
+            self.assertFalse(id(self.MODEL[i]) == id(Mcopy[i]))
+            if self.DATA:
+                self.assertFalse(id(D[i]) == id(Dcopy[i]))
 
 
 class ActionsTest(CopyModelTestCase):
