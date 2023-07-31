@@ -5,9 +5,9 @@ import unittest
 import example_robot_data
 import numpy as np
 import pinocchio
+from factory import Impulse3DModelDerived, Impulse6DModelDerived
 
 import crocoddyl
-from crocoddyl.utils import Impulse3DModelDerived, Impulse6DModelDerived
 
 
 class ImpulseModelAbstractTestCase(unittest.TestCase):

@@ -150,12 +150,11 @@ void exposeCostAbstract() {
           "residual model")
       .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu),
                     "dimension of control vector")
-      .def(CopyableVisitor<CostModelAbstract_wrap>())
       .def(PrintableVisitor<CostModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 
-  bp::class_<CostDataAbstract, boost::noncopyable>(
+  bp::class_<CostDataAbstract>(
       "CostDataAbstract", "Abstract class for cost data.\n\n",
       bp::init<CostModelAbstract*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),

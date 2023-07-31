@@ -43,8 +43,10 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualModelAbstractTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
+  typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;

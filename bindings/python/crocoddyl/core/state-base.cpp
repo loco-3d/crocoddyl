@@ -146,8 +146,7 @@ void exposeStateAbstract() {
       .add_property("ub",
                     bp::make_getter(&StateAbstract_wrap::ub_,
                                     bp::return_internal_reference<>()),
-                    &StateAbstract_wrap::set_ub, "upper state limits")
-      .def(CopyableVisitor<StateAbstract_wrap>());
+                    &StateAbstract_wrap::set_ub, "upper state limits");
 }
 
 }  // namespace python

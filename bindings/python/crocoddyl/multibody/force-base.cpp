@@ -19,7 +19,7 @@ namespace python {
 void exposeForceAbstract() {
   bp::register_ptr_to_python<boost::shared_ptr<ForceDataAbstract> >();
 
-  bp::class_<ForceDataAbstract, boost::noncopyable>(
+  bp::class_<ForceDataAbstract>(
       "ForceDataAbstract", "Abstract class for force datas.\n\n",
       bp::init<ContactModelAbstract*, pinocchio::Data*>(
           bp::args("self", "model", "data"),
@@ -66,7 +66,6 @@ void exposeForceAbstract() {
                     bp::make_setter(&ForceDataAbstract::df_du),
                     "Jacobian of the contact forces expressed in the "
                     "coordinate defined by type")
-
       .def(CopyableVisitor<ForceDataAbstract>());
 }
 

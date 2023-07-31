@@ -14,32 +14,43 @@ class CopyModelTestCase(unittest.TestCase):
     COLLECTOR = list()
 
     def test_copy(self):
-        for i, m in enumerate(self.MODEL):
-            copy.copy(m)
-            if self.DATA:
+        Mcopy = copy.copy(self.MODEL)
+        self.assertFalse(id(self.MODEL) == id(Mcopy))
+        if self.DATA:
+            D = []
+            for i, m in enumerate(self.MODEL):
                 if not self.COLLECTOR:
-                    d = m.createData()
+                    D.append(m.createData())
                 else:
-                    d = m.createData(self.COLLECTOR[i])
-                copy.copy(d)
+                    D.append(m.createData(self.COLLECTOR[i]))
+            Dcopy = copy.copy(D)
+            self.assertFalse(id(D) == id(Dcopy))
+        for i, m in enumerate(self.MODEL):
+            self.assertTrue(id(self.MODEL[i]) == id(Mcopy[i]))
+            if self.DATA:
+                self.assertTrue(id(D[i]) == id(Dcopy[i]))
 
     def test_deepcopy(self):
-        for i, m in enumerate(self.MODEL):
-            copy.deepcopy(m)
-            if self.DATA:
+        Mcopy = copy.deepcopy(self.MODEL)
+        self.assertFalse(id(self.MODEL) == id(Mcopy))
+        if self.DATA:
+            D = []
+            for i, m in enumerate(self.MODEL):
                 if not self.COLLECTOR:
-                    d = m.createData()
+                    D.append(m.createData())
                 else:
-                    d = m.createData(self.COLLECTOR[i])
-                copy.deepcopy(d)
+                    D.append(m.createData(self.COLLECTOR[i]))
+            Dcopy = copy.deepcopy(D)
+            self.assertFalse(id(D) == id(Dcopy))
+        for i, m in enumerate(self.MODEL):
+            self.assertFalse(id(self.MODEL[i]) == id(Mcopy[i]))
+            if self.DATA:
+                self.assertFalse(id(D[i]) == id(Dcopy[i]))
 
 
 class ActionsTest(CopyModelTestCase):
     MODEL = list()
     DATA = True
-    # action abstracts
-    MODEL.append(crocoddyl.ActionModelAbstract(crocoddyl.StateVector(2), 2))
-    MODEL.append(crocoddyl.DifferentialActionModelAbstract(crocoddyl.StateVector(2), 2))
     # core actions
     MODEL.append(crocoddyl.ActionModelUnicycle())
     MODEL.append(crocoddyl.ActionModelLQR(2, 2))
@@ -71,11 +82,6 @@ class ActionsTest(CopyModelTestCase):
     )
     # integrated actions
     MODEL.append(
-        crocoddyl.IntegratedActionModelAbstract(
-            crocoddyl.DifferentialActionModelLQR(2, 2), 0.1
-        )
-    )
-    MODEL.append(
         crocoddyl.IntegratedActionModelEuler(
             crocoddyl.DifferentialActionModelLQR(2, 2), 0.1
         )
@@ -96,8 +102,6 @@ class ActionsTest(CopyModelTestCase):
 
 class StatesTest(CopyModelTestCase):
     MODEL = list()
-    # state abstracts
-    MODEL.append(crocoddyl.StateAbstract(2, 2))
     # core states
     MODEL.append(crocoddyl.StateVector(2))
     MODEL.append(crocoddyl.StateNumDiff(crocoddyl.StateVector(2)))
@@ -109,15 +113,12 @@ class ResidualsTest(CopyModelTestCase):
     MODEL = list()
     DATA = True
     COLLECTOR = list()
-    # residual abstracts
-    MODEL.append(crocoddyl.ResidualModelAbstract(crocoddyl.StateVector(2), 2))
-    COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     # core residuals
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
     joint = crocoddyl.JointDataAbstract(state, actuation, actuation.nu)
     MODEL.append(crocoddyl.ResidualModelControl(crocoddyl.StateVector(2)))
-    COLLECTOR.append(crocoddyl.DataCollectorAbstract())
+    COLLECTOR.append(crocoddyl.DataCollectorJoint(joint))
     MODEL.append(crocoddyl.ResidualModelJointEffort(state, actuation))
     COLLECTOR.append(crocoddyl.DataCollectorJoint(joint))
     MODEL.append(crocoddyl.ResidualModelJointAcceleration(state))
@@ -223,8 +224,6 @@ class CostsTest(CopyModelTestCase):
     state = crocoddyl.StateVector(2)
     residual = crocoddyl.ResidualModelControl(crocoddyl.StateVector(2))
     activation = crocoddyl.ActivationModelWeightedQuad(np.ones(1))
-    MODEL.append(crocoddyl.CostModelAbstract(state, 2))
-    COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.CostModelResidual(state, activation, residual))
     COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.CostModelSum(state, 2))
@@ -237,8 +236,6 @@ class ConstraintsTest(CopyModelTestCase):
     COLLECTOR = list()
     state = crocoddyl.StateVector(2)
     residual = crocoddyl.ResidualModelControl(crocoddyl.StateVector(2))
-    MODEL.append(crocoddyl.ConstraintModelAbstract(state, 2, 2, 2))
-    COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.ConstraintModelResidual(state, residual))
     COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.ConstraintModelManager(state, 2))
@@ -248,11 +245,10 @@ class ConstraintsTest(CopyModelTestCase):
 class ControlsTest(CopyModelTestCase):
     MODEL = list()
     DATA = True
-    MODEL.append(crocoddyl.ControlParametrizationModelAbstract(2, 2))
     MODEL.append(crocoddyl.ControlParametrizationModelPolyZero(2))
     MODEL.append(crocoddyl.ControlParametrizationModelPolyOne(2))
     MODEL.append(
-        crocoddyl.ControlParametrizationModelPolyTwoRK(2, crocoddyl.RKType.two)
+        crocoddyl.ControlParametrizationModelPolyTwoRK(2, crocoddyl.RKType.three)
     )
 
 
@@ -321,10 +317,6 @@ class ContactsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.ContactModelMultiple(state, actuation.nu))
     COLLECTOR.append(pdata)
     MODEL.append(
-        crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu)
-    )
-    COLLECTOR.append(pdata)
-    MODEL.append(
         crocoddyl.ContactModel1D(state, frame_id, 1.0, actuation.nu, np.zeros(2))
     )
     COLLECTOR.append(pdata)
@@ -352,8 +344,6 @@ class ContactsTest(CopyModelTestCase):
     # impulse models
     MODEL.append(crocoddyl.ImpulseModelMultiple(state))
     COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModelAbstract(state, pinocchio.LOCAL, 3))
-    COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id, pinocchio.LOCAL))
     COLLECTOR.append(pdata)
     MODEL.append(crocoddyl.ImpulseModel6D(state, frame_id))
@@ -372,9 +362,7 @@ class ProblemAndSolversTest(CopyModelTestCase):
     m = crocoddyl.ActionModelLQR(2, 2)
     problem = crocoddyl.ShootingProblem(m.state.zero(), [m] * 10, m)
     MODEL.append(problem)
-    MODEL.append(crocoddyl.CallbackAbstract())
     MODEL.append(crocoddyl.CallbackVerbose())
-    MODEL.append(crocoddyl.SolverAbstract(problem))
     MODEL.append(crocoddyl.SolverKKT(problem))
     MODEL.append(crocoddyl.SolverDDP(problem))
     MODEL.append(crocoddyl.SolverFDDP(problem))

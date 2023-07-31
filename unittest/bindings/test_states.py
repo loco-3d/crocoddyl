@@ -4,9 +4,9 @@ from random import randint
 
 import example_robot_data
 import numpy as np
+from factory import StateMultibodyDerived, StateVectorDerived
 
 import crocoddyl
-from crocoddyl.utils import StateMultibodyDerived, StateVectorDerived
 
 
 class StateAbstractTestCase(unittest.TestCase):

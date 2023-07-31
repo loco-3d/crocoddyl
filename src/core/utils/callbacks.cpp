@@ -42,15 +42,20 @@ void CallbackVerbose::update_header() {
       precision_;  // Scientific mode requires a column width of 6 + precision
   const std::string separator{"  "};  // We use two spaces between columns
   header_ += "iter" + separator;
-  auto center_string = [](const std::string& str, int width) {
+  auto center_string = [](const std::string& str, int width,
+                          bool right_padding = true) {
     const int padding_size = width - static_cast<int>(str.length());
     const int padding_left = padding_size > 0 ? padding_size / 2 : 0;
     const int padding_right =
         padding_size % 2 != 0
             ? padding_left + 1
             : padding_left;  // If the padding is odd, add additional space
-    return std::string(padding_left, ' ') + str +
-           std::string(padding_right, ' ');
+    if (right_padding) {
+      return std::string(padding_left, ' ') + str +
+             std::string(padding_right, ' ');
+    } else {
+      return std::string(padding_left, ' ') + str;
+    }
   };
   header_ += center_string("cost", columnwidth) + separator;
   header_ += center_string("stop", columnwidth) + separator;
@@ -60,11 +65,15 @@ void CallbackVerbose::update_header() {
   header_ += center_string("step", 2 + 4) + separator;
   header_ += center_string("||ffeas||", columnwidth) + separator;
   header_ += center_string("||gfeas||", columnwidth) + separator;
-  header_ += center_string("||hfeas||", columnwidth);
   switch (level_) {
+    case _1: {
+      header_ += center_string("||hfeas||", columnwidth, false);
+      break;
+    }
     case _2: {
+      header_ += center_string("||hfeas||", columnwidth);
       header_ += separator + center_string("dV-exp", columnwidth) + separator;
-      header_ += center_string("dV", columnwidth);
+      header_ += center_string("dV", columnwidth, false);
       break;
     }
     default: {

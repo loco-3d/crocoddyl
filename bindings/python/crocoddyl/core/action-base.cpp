@@ -149,12 +149,11 @@ void exposeActionAbstract() {
                     bp::make_function(&ActionModelAbstract_wrap::get_u_ub,
                                       bp::return_internal_reference<>()),
                     &ActionModelAbstract_wrap::set_u_ub, "upper control limits")
-      .def(CopyableVisitor<ActionModelAbstract_wrap>())
       .def(PrintableVisitor<ActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
 
-  bp::class_<ActionDataAbstract, boost::noncopyable>(
+  bp::class_<ActionDataAbstract>(
       "ActionDataAbstract",
       "Abstract class for action data.\n\n"
       "In crocoddyl, an action data contains all the required information for "

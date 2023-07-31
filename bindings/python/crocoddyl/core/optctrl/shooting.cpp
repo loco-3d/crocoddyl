@@ -27,7 +27,7 @@ void exposeShootingProblem() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
 
-  bp::class_<ShootingProblem, boost::noncopyable>(
+  bp::class_<ShootingProblem>(
       "ShootingProblem",
       "Declare a shooting problem.\n\n"
       "A shooting problem declares the initial state, a set of running action "

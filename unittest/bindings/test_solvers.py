@@ -5,9 +5,9 @@ from random import randint
 import example_robot_data
 import numpy as np
 import pinocchio
+from factory import DDPDerived, FDDPDerived
 
 import crocoddyl
-from crocoddyl.utils import DDPDerived, FDDPDerived
 
 
 class SolverAbstractTestCase(unittest.TestCase):

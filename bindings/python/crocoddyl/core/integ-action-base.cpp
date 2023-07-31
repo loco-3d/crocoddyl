@@ -104,7 +104,6 @@ void exposeIntegratedActionAbstract() {
           bp::make_function(&IntegratedActionModelAbstract::get_dt,
                             bp::return_value_policy<bp::return_by_value>()),
           &IntegratedActionModelAbstract::set_dt, "step time")
-      .def(CopyableVisitor<IntegratedActionModelAbstract_wrap>())
       .def(PrintableVisitor<IntegratedActionModelAbstract>());
 
   bp::register_ptr_to_python<

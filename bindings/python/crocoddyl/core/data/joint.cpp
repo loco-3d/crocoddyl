@@ -17,7 +17,7 @@ namespace python {
 void exposeDataCollectorJoint() {
   bp::register_ptr_to_python<boost::shared_ptr<JointDataAbstract> >();
 
-  bp::class_<JointDataAbstract, boost::noncopyable>(
+  bp::class_<JointDataAbstract>(
       "JointDataAbstract",
       "Abstract class for joint datas.\n\n"
       "A joint data contains all the required information about joint efforts "
@@ -77,7 +77,8 @@ void exposeDataCollectorJoint() {
           "joint",
           bp::make_getter(&DataCollectorJoint::joint,
                           bp::return_value_policy<bp::return_by_value>()),
-          "joint data");
+          "joint data")
+      .def(CopyableVisitor<DataCollectorJoint>());
 
   bp::class_<DataCollectorJointActuation, bp::bases<DataCollectorActuation> >(
       "DataCollectorJointActuation", "Joint-actuation data collector.\n\n",

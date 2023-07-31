@@ -141,12 +141,11 @@ void exposeConstraintAbstract() {
       .add_property("nh",
                     bp::make_function(&ConstraintModelAbstract_wrap::get_nh),
                     "number of equality constraints")
-      .def(CopyableVisitor<ConstraintModelAbstract_wrap>())
       .def(PrintableVisitor<ConstraintModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();
 
-  bp::class_<ConstraintDataAbstract, boost::noncopyable>(
+  bp::class_<ConstraintDataAbstract>(
       "ConstraintDataAbstract", "Abstract class for constraint data.\n\n",
       bp::init<ConstraintModelAbstract*, DataCollectorAbstract*>(
           bp::args("self", "model", "data"),

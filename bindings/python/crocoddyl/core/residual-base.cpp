@@ -137,7 +137,7 @@ void exposeResidualAbstract() {
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
 
-  bp::class_<ResidualDataAbstract, boost::noncopyable>(
+  bp::class_<ResidualDataAbstract>(
       "ResidualDataAbstract",
       "Abstract class for residual data.\n\n"
       "In crocoddyl, a residual data contains all the required information for "

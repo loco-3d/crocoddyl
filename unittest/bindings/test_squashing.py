@@ -3,9 +3,9 @@ import unittest
 
 import numpy as np
 import pinocchio
+from factory import SquashingSmoothSatDerived
 
 import crocoddyl
-from crocoddyl.utils import SquashingSmoothSatDerived
 
 
 class SquashingModelAbstractTestCase(unittest.TestCase):

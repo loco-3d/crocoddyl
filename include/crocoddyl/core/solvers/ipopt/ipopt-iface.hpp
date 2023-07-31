@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef CROCODDYL_WITH_IPOPT
 #ifndef __CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_IFACE_HPP__
 #define __CROCODDYL_CORE_SOLVERS_IPOPT_IPOPT_IFACE_HPP__
 
@@ -569,5 +568,4 @@ struct IpoptInterfaceData {
 
 }  // namespace crocoddyl
 
-#endif
 #endif

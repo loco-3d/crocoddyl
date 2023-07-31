@@ -5,12 +5,9 @@ from random import randint
 import example_robot_data
 import numpy as np
 import pinocchio
+from factory import DifferentialFreeFwdDynamicsModelDerived, UnicycleModelDerived
 
 import crocoddyl
-from crocoddyl.utils import (
-    DifferentialFreeFwdDynamicsModelDerived,
-    UnicycleModelDerived,
-)
 
 
 class ShootingProblemTestCase(unittest.TestCase):

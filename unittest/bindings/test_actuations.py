@@ -4,9 +4,9 @@ import unittest
 import example_robot_data
 import numpy as np
 import pinocchio
+from factory import FreeFloatingActuationDerived, FullActuationDerived
 
 import crocoddyl
-from crocoddyl.utils import FreeFloatingActuationDerived, FullActuationDerived
 
 
 class ActuationModelAbstractTestCase(unittest.TestCase):

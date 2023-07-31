@@ -72,31 +72,6 @@ class ContactModelNumDiffTpl;
 template <typename Scalar>
 struct ContactDataNumDiffTpl;
 
-// frame
-template <typename Scalar>
-struct FrameTranslationTpl;
-
-template <typename Scalar>
-struct FrameRotationTpl;
-
-template <typename Scalar>
-struct FramePlacementTpl;
-
-template <typename Scalar>
-struct FrameMotionTpl;
-
-template <typename Scalar>
-struct FrameForceTpl;
-
-template <typename Scalar>
-struct FrameFrictionConeTpl;
-
-template <typename Scalar>
-struct FrameWrenchConeTpl;
-
-template <typename Scalar>
-struct FrameCoPSupportTpl;
-
 // residual
 template <typename Scalar>
 class ResidualModelCentroidalMomentumTpl;
@@ -309,22 +284,6 @@ typedef ContactDataNumDiffTpl<double> ContactDataNumDiff;
 typedef FrictionConeTpl<double> FrictionCone;
 typedef WrenchConeTpl<double> WrenchCone;
 typedef CoPSupportTpl<double> CoPSupport;
-
-DEPRECATED("Do not use FrameTranslation",
-           typedef FrameTranslationTpl<double> FrameTranslation;)
-DEPRECATED("Do not use FrameTranslation",
-           typedef FrameRotationTpl<double> FrameRotation;)
-DEPRECATED("Do not use FramePlacement",
-           typedef FramePlacementTpl<double> FramePlacement;)
-DEPRECATED("Do not use FrameMotion",
-           typedef FrameMotionTpl<double> FrameMotion;)
-DEPRECATED("Do not use FrameForce", typedef FrameForceTpl<double> FrameForce;)
-DEPRECATED("Do not use FrameFrictionCone",
-           typedef FrameFrictionConeTpl<double> FrameFrictionCone;)
-DEPRECATED("Do not use FrameWrenchCone",
-           typedef FrameWrenchConeTpl<double> FrameWrenchCone;)
-DEPRECATED("Do not use FrameCopSupport",
-           typedef FrameCoPSupportTpl<double> FrameCoPSupport;)
 
 typedef ResidualModelCentroidalMomentumTpl<double>
     ResidualModelCentroidalMomentum;
