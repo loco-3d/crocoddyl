@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeDataCollector() {
-  bp::class_<DataCollectorAbstract, boost::noncopyable>(
+  bp::class_<DataCollectorAbstract>(
       "DataCollectorAbstract",
       "Abstract class for common collection of data used in different objects "
       "in action model.\n\n",

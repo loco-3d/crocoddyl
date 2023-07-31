@@ -171,13 +171,12 @@ void exposeDifferentialActionAbstract() {
                             bp::return_value_policy<bp::return_by_value>()),
           &DifferentialActionModelAbstract_wrap::set_u_ub,
           "upper control limits")
-      .def(CopyableVisitor<DifferentialActionModelAbstract_wrap>())
       .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<
       boost::shared_ptr<DifferentialActionDataAbstract> >();
 
-  bp::class_<DifferentialActionDataAbstract, boost::noncopyable>(
+  bp::class_<DifferentialActionDataAbstract>(
       "DifferentialActionDataAbstract",
       "Abstract class for differential action data.\n\n"
       "In crocoddyl, an action data contains all the required information for "

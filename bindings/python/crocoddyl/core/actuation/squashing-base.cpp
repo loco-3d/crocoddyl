@@ -65,7 +65,7 @@ void exposeSquashingAbstract() {
 
   bp::register_ptr_to_python<boost::shared_ptr<SquashingDataAbstract> >();
 
-  bp::class_<SquashingDataAbstract, boost::noncopyable>(
+  bp::class_<SquashingDataAbstract>(
       "SquashingDataAbstract",
       "Abstract class for squashing datas. \n\n"
       "In crocoddyl, an squashing data contains all the required information "
