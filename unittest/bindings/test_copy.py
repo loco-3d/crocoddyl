@@ -18,7 +18,7 @@ class CopyModelTestCase(unittest.TestCase):
         self.assertFalse(id(self.MODEL) == id(Mcopy))
         if self.DATA:
             D = []
-            for i, m in enumerate(self.MODEL):            
+            for i, m in enumerate(self.MODEL):
                 if not self.COLLECTOR:
                     D.append(m.createData())
                 else:

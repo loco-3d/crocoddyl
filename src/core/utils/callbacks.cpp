@@ -42,7 +42,8 @@ void CallbackVerbose::update_header() {
       precision_;  // Scientific mode requires a column width of 6 + precision
   const std::string separator{"  "};  // We use two spaces between columns
   header_ += "iter" + separator;
-  auto center_string = [](const std::string& str, int width, bool right_padding = true) {
+  auto center_string = [](const std::string& str, int width,
+                          bool right_padding = true) {
     const int padding_size = width - static_cast<int>(str.length());
     const int padding_left = padding_size > 0 ? padding_size / 2 : 0;
     const int padding_right =
