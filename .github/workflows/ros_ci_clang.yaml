@@ -1,4 +1,4 @@
-name: ROS-CI-2
+name: ROS
 
 # This determines when this workflow is run
 on: [push, pull_request] # on all pushes and PRs
@@ -8,9 +8,9 @@ jobs:
     strategy:
       matrix:
         env:
-          - {name: "CI (noetic, g++, Release)", ROS_DISTRO: noetic}
-          - {name: "CI (noetic, clang, Release)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++}
-          - {name: "CI (noetic, clang, Release, multi-threading)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          - {name: "CI (noetic)", ROS_DISTRO: noetic}
+          - {name: "CI (noetic, clang)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++}
+          - {name: "CI (noetic, clang, multi-threading)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
           - {name: "CI (noetic, clang, Debug)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: clang, CC: clang, CXX: clang++, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
           # Format check
           #- {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0", BEFORE_RUN_CLANG_FORMAT_CHECK: "wget https://raw.githubusercontent.com/Gepetto/linters/master/.clang-format-6.0 -O /tmp/clang_format_check/crocoddyl/.clang-format", ADDITIONAL_DEBS: wget}         
