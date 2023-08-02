@@ -8,7 +8,6 @@ jobs:
     strategy:
       matrix:
         env:
-          # - {ROS_DISTRO: noetic, PRERELEASE: true}
           - {ROS_DISTRO: humble}
           # - {name: "humble, multi-threading", ROS_DISTRO: humble, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
           # - {name: "humble, Debug", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
