@@ -1,0 +1,15 @@
+name: crocoddyl
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - eigen=3.4.0
+  - hpp-fcl
+  - numpy
+  - boost
+  - eigenpy
+  - urdfdom
+  - pinocchio
+  - cppadcodegen
+  - python
+  - mamba
