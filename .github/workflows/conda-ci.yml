@@ -42,7 +42,7 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate crocoddyl
-        mamba install cmake ccache llvm-openmp compilers=1.4.2 pinocchio cppadcodegen -c conda-forge
+        mamba install cmake ccache llvm-openmp compilers=1.4.2 pinocchio cppadcodegen example-robot-data -c conda-forge
         conda list
 
     - name: Build Crocoddyl

@@ -11,5 +11,6 @@ dependencies:
   - urdfdom
   - pinocchio
   - cppadcodegen
+  - example-robot-data
   - python
   - mamba
