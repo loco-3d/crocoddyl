@@ -36,13 +36,12 @@ jobs:
         activate-environment: crocoddyl
         auto-update-conda: true
         environment-file: .github/workflows/conda/conda-env.yml
-        python-version: 3.8
 
     - name: Install dependencies and update conda
       shell: bash -l {0}
       run: |
         conda activate crocoddyl
-        mamba install cmake ccache llvm-openmp compilers=1.4.2 -c conda-forge
+        conda install cmake ccache llvm-openmp -c conda-forge
         conda list
 
     - name: Build Crocoddyl
@@ -60,8 +59,8 @@ jobs:
         fi
         cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_WITH_CODEGEN_SUPPORT=ON -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
         make
-        make build_tests
-        CTEST_OUTPUT_ON_FAILURE=1 make test
+        export CTEST_OUTPUT_ON_FAILURE=1
+        make test
         make install
 
     - name: Uninstall Crocoddyl
