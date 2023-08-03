@@ -41,8 +41,27 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate crocoddyl
-        conda install cmake ccache llvm-openmp -c conda-forge
+        conda install cmake ccache -c conda-forge
+        conda install llvm-openmp libcxx=13 -c conda-forge
         conda list
+
+    - name: Install compilers for macOS
+      shell: bash -l {0}
+      if: contains(matrix.os, 'macos-latest')
+      run: |
+        conda install compilers=1.4.2 -c conda-forge
+
+    - name: Enable CppADCodeGen compilation
+      shell: bash -l {0}
+      if: contains(matrix.build_type, 'Release')
+      run: |
+        export CODEGEN_SUPPORT=1
+
+    - name: Disable CppADCodeGen compilation
+      shell: bash -l {0}
+      if: contains(matrix.build_type, 'Debug')
+      run: |
+        export CODEGEN_SUPPORT=0
 
     - name: Build Crocoddyl
       shell: bash -l {0}
@@ -57,7 +76,7 @@ jobs:
         if [ "$(uname)" == "Darwin" ]; then
           export LINK_PYTHON_INTERFACE_TO_OPENMP=OFF
         fi
-        cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_WITH_CODEGEN_SUPPORT=ON -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
+        cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_WITH_CODEGEN_SUPPORT=$CODEGEN_SUPPORT -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
         make
         export CTEST_OUTPUT_ON_FAILURE=1
         make test
