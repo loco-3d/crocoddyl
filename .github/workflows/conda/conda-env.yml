@@ -9,8 +9,9 @@ dependencies:
   - boost
   - eigenpy
   - urdfdom
-  - pinocchio
   - cppadcodegen
   - example-robot-data
+  - pinocchio
+  - ipopt
   - python
   - mamba
