@@ -156,7 +156,7 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print("*** SOLVE " + key + " ***")
-    if WITHDISPLAY and type(display) == crocoddyl.GepettoDisplay:
+    if WITHDISPLAY and isinstance(crocoddyl.GepettoDisplay, type(display)):
         if WITHPLOT:
             solver[i].setCallbacks(
                 [

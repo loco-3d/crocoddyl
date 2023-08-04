@@ -213,7 +213,7 @@ problem = crocoddyl.ShootingProblem(
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverBoxFDDP(problem)
-if WITHDISPLAY and type(display) == crocoddyl.GepettoDisplay:
+if WITHDISPLAY and isinstance(crocoddyl.GepettoDisplay, type(display)):
     display.rate = 4
     display.freq = 4
     if WITHPLOT:
