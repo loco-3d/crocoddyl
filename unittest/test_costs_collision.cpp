@@ -251,8 +251,9 @@ bool init_function() {
        ++cost_type) {
     register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type],
                                    StateModelTypes::StateMultibody_HyQ);
-    register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type],
-                                   StateModelTypes::StateMultibody_RandomHumanoid);
+    register_cost_model_unit_tests(
+        CostModelCollisionTypes::all[cost_type],
+        StateModelTypes::StateMultibody_RandomHumanoid);
   }
   return true;
 }

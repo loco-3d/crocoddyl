@@ -244,8 +244,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   switch (cost_type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          boost::make_shared<crocoddyl::ActivationModelQuad>(3),
+          state, boost::make_shared<crocoddyl::ActivationModelQuad>(3),
           boost::make_shared<crocoddyl::ResidualModelPairCollision>(
               state, nu, geometry, 0,
               state->get_pinocchio()->frames[frame_index].parent));
