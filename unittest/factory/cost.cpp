@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +15,7 @@
 #include "crocoddyl/multibody/residuals/control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
-#include "crocoddyl/core/activations/2norm-barrier.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
@@ -222,7 +223,6 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double beta = fabs(Eigen::VectorXd::Random(1)[0]);
-  double gamma = fabs(Eigen::VectorXd::Random(1)[0]);
 
   boost::shared_ptr<pinocchio::GeometryModel> geometry =
       boost::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
@@ -244,8 +244,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   switch (cost_type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
       cost = boost::make_shared<crocoddyl::CostModelResidual>(
-          state,
-          boost::make_shared<crocoddyl::ActivationModel2NormBarrier>(3, gamma),
+          state, boost::make_shared<crocoddyl::ActivationModelQuad>(3),
           boost::make_shared<crocoddyl::ResidualModelPairCollision>(
               state, nu, geometry, 0,
               state->get_pinocchio()->frames[frame_index].parent));

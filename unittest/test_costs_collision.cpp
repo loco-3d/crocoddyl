@@ -249,12 +249,11 @@ bool init_function() {
   // states types.
   for (size_t cost_type = 0; cost_type < CostModelCollisionTypes::all.size();
        ++cost_type) {
-    for (size_t state_type =
-             StateModelTypes::all[StateModelTypes::StateMultibody_TalosArm];
-         state_type < StateModelTypes::all.size(); ++state_type) {
-      register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type],
-                                     StateModelTypes::all[state_type]);
-    }
+    register_cost_model_unit_tests(CostModelCollisionTypes::all[cost_type],
+                                   StateModelTypes::StateMultibody_HyQ);
+    register_cost_model_unit_tests(
+        CostModelCollisionTypes::all[cost_type],
+        StateModelTypes::StateMultibody_RandomHumanoid);
   }
   return true;
 }

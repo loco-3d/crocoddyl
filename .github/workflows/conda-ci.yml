@@ -1,0 +1,85 @@
+name: CONDA
+
+on: [push, pull_request]
+
+jobs:
+  crocoddyl-conda:
+    name: (${{ matrix.os }}, ${{ matrix.build_type }})
+    runs-on: ${{ matrix.os }}
+    env:
+      CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        build_type: [Release, Debug]
+
+        include:
+          - os: ubuntu-latest
+            CCACHE_DIR: /home/runner/.ccache
+          - os: macos-latest
+            CCACHE_DIR: /Users/runner/.ccache
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - uses: actions/cache@v3
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: crocoddyl
+        auto-update-conda: true
+        environment-file: .github/workflows/conda/conda-env.yml
+
+    - name: Install dependencies and update conda
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        conda install cmake ccache -c conda-forge
+        conda install llvm-openmp libcxx -c conda-forge
+        conda list
+
+    - name: Install compilers for macOS
+      shell: bash -l {0}
+      if: contains(matrix.os, 'macos-latest')
+      run: |
+        conda install compilers -c conda-forge
+
+    - name: Enable CppADCodeGen compilation
+      shell: bash -l {0}
+      if: contains(matrix.build_type, 'Release')
+      run: |
+        echo "codegen_support=OFF" >> "$GITHUB_ENV"
+
+    - name: Disable CppADCodeGen compilation
+      shell: bash -l {0}
+      if: contains(matrix.build_type, 'Debug')
+      run: |
+        echo "codegen_support=OFF" >> "$GITHUB_ENV"
+
+    - name: Build Crocoddyl
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        echo $CONDA_PREFIX
+
+        mkdir build
+        cd build
+
+        cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
+        make
+        export CTEST_OUTPUT_ON_FAILURE=1
+        make test
+        make install
+
+    - name: Uninstall Crocoddyl
+      shell: bash -l {0}
+      run: |
+        cd build
+        make uninstall

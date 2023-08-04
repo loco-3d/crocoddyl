@@ -1,0 +1,36 @@
+name: ROS
+
+# This determines when this workflow is run
+on: [push, pull_request]
+
+jobs:
+  CI:
+    strategy:
+      matrix:
+        env:
+          - {ROS_DISTRO: humble}
+          # - {name: "humble, multi-threading", ROS_DISTRO: humble, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # - {name: "humble, Debug", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
+          - {ROS_DISTRO: rolling}
+          # - {name: "rolling, multi-threading", ROS_DISTRO: rolling, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # - {name: "rolling, Debug", ROS_DISTRO: rolling, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
+    env:
+      CCACHE_DIR: /github/home/.ccache             # Enable ccache
+      UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
+      CTEST_OUTPUT_ON_FAILURE: 1
+      BUILDER: colcon
+      # This by-passes issues on importing example_robot_data module when running examples and unit tests.
+      # It seems target_ws is unable to properly overlay upstream_ws.
+      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      # This step will fetch/store the directory used by ccache before/after the ci run
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{ matrix.env }}

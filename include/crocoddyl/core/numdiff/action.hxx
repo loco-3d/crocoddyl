@@ -115,7 +115,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     model_->get_state()->diff(x0, d->data_x[ix]->xnext, d->Fx.col(ix));
     // cost
     data->Lx(ix) = (d->data_x[ix]->cost - c0) / d->xh_jac;
-    if (get_with_gauss_approx() > 0) {
+    if (get_with_gauss_approx()) {
       d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / d->xh_jac;
     }
     // constraint
@@ -134,7 +134,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     model_->get_state()->diff(x0, d->data_u[iu]->xnext, d->Fu.col(iu));
     // cost
     data->Lu(iu) = (d->data_u[iu]->cost - c0) / d->uh_jac;
-    if (get_with_gauss_approx() > 0) {
+    if (get_with_gauss_approx()) {
       d->Ru.col(iu) = (d->data_u[iu]->r - d->data_0->r) / d->uh_jac;
     }
     // constraint
@@ -230,7 +230,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   }
 #endif
 
-  if (get_with_gauss_approx() > 0) {
+  if (get_with_gauss_approx()) {
     data->Lxx = d->Rx.transpose() * d->Rx;
     data->Lxu = d->Rx.transpose() * d->Ru;
     data->Luu = d->Ru.transpose() * d->Ru;
@@ -270,7 +270,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     model_->calc(d->data_x[ix], d->xp);
     // cost
     data->Lx(ix) = (d->data_x[ix]->cost - c0) / d->xh_jac;
-    if (get_with_gauss_approx() > 0) {
+    if (get_with_gauss_approx()) {
       d->Rx.col(ix) = (d->data_x[ix]->r - d->data_0->r) / d->xh_jac;
     }
     // constraint
@@ -315,7 +315,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   }
 #endif
 
-  if (get_with_gauss_approx() > 0) {
+  if (get_with_gauss_approx()) {
     data->Lxx = d->Rx.transpose() * d->Rx;
   }
 }
