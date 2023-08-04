@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
                    << "r has wrong dimension (it should be " +
                           std::to_string(nr_) + ")");
     }
-    data->a_value = (Scalar(0.5) * r.transpose() * r)[0];
+    data->a_value = Scalar(0.5) * r.dot(r);
   };
 
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
