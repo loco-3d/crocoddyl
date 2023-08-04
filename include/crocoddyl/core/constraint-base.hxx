@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
                     "bigger than the residual dimension.")
   }
   std::size_t max_ng = 2 * (residual_->get_nr() - nh_);
-  if (0 > ng_ || ng_ > max_ng) {
+  if (ng_ > max_ng) {
     throw_pretty("Invalid argument: "
                  << "the number of inequality constraints (ng) is wrong as it "
                     "should be in the range [0, " +
