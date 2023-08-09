@@ -55,7 +55,7 @@ jobs:
       shell: bash -l {0}
       if: contains(matrix.build_type, 'Release')
       run: |
-        echo "codegen_support=OFF" >> "$GITHUB_ENV"
+        echo "codegen_support=ON" >> "$GITHUB_ENV"
 
     - name: Disable CppADCodeGen compilation
       shell: bash -l {0}
