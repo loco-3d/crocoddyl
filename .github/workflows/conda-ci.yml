@@ -45,6 +45,11 @@ jobs:
         conda install llvm-openmp libcxx -c conda-forge
         conda list
 
+        git clone --recursive https://github.com/Gepetto/example-robot-data.git
+        cd example-robot-data && mkdir build && cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
+        make install
+
     - name: Install compilers for macOS
       shell: bash -l {0}
       if: contains(matrix.os, 'macos-latest')
