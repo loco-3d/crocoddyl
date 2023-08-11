@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   crocoddyl-conda:
-    name: (${{ matrix.os }}, ${{ matrix.build_type }})
+    name: (${{ matrix.os }}, clang, multi-threading, ipopt, ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
     env:
       CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
