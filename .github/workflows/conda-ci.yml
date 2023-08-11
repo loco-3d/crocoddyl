@@ -18,8 +18,8 @@ jobs:
         compiler: [clang]
 
         include:
-          - os: ubuntu-latest
-            CCACHE_DIR: /home/runner/.ccache
+          # - os: ubuntu-latest
+          #   CCACHE_DIR: /home/runner/.ccache
           - os: macos-latest
             CCACHE_DIR: /Users/runner/.ccache
 
