@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   crocoddyl-conda:
-    name: (${{ matrix.os }}, ${{ matrix.build_type }})
+    name: (${{ matrix.os }}, clang, multi-threading, ipopt, ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
     env:
       CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
@@ -12,12 +12,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
+        # os: ["ubuntu-latest", "macos-latest"]
+        os: ["macos-latest"]
         build_type: [Release, Debug]
+        compiler: [clang]
 
         include:
-          - os: ubuntu-latest
-            CCACHE_DIR: /home/runner/.ccache
+          # - os: ubuntu-latest
+          #   CCACHE_DIR: /home/runner/.ccache
           - os: macos-latest
             CCACHE_DIR: /Users/runner/.ccache
 
@@ -37,13 +39,23 @@ jobs:
         auto-update-conda: true
         environment-file: .github/workflows/conda/conda-env.yml
 
-    - name: Install dependencies and update conda
+    - name: Install conda dependencies
       shell: bash -l {0}
       run: |
         conda activate crocoddyl
         conda install cmake ccache -c conda-forge
         conda install llvm-openmp libcxx -c conda-forge
         conda list
+
+    - name: Install example-robot-data
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        mkdir third-party && cd third-party
+        git clone --recursive https://github.com/Gepetto/example-robot-data.git
+        cd example-robot-data && mkdir build && cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
+        make install
 
     - name: Install compilers for macOS
       shell: bash -l {0}
@@ -55,7 +67,7 @@ jobs:
       shell: bash -l {0}
       if: contains(matrix.build_type, 'Release')
       run: |
-        echo "codegen_support=OFF" >> "$GITHUB_ENV"
+        echo "codegen_support=ON" >> "$GITHUB_ENV"
 
     - name: Disable CppADCodeGen compilation
       shell: bash -l {0}
@@ -72,10 +84,25 @@ jobs:
         mkdir build
         cd build
 
-        cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
+        cmake .. \
+          -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
+          -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
         make
+
+    - name: Run unit tests
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        cd build
         export CTEST_OUTPUT_ON_FAILURE=1
         make test
+
+    - name:  Install Crocoddyl
+      shell: bash -l {0}
+      run: |
+        cd build
         make install
 
     - name: Uninstall Crocoddyl

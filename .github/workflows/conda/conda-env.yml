@@ -13,6 +13,5 @@ dependencies:
   - urdfdom
   - cppad
   - cppadcodegen
-  - example-robot-data
   - pinocchio
   - ipopt

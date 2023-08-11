@@ -8,12 +8,13 @@ jobs:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: humble}
+          - {name: "(humble, Release)", ROS_DISTRO: humble}
           # - {name: "humble, multi-threading", ROS_DISTRO: humble, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
           # - {name: "humble, Debug", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
-          - {ROS_DISTRO: rolling}
+          - {name: "(rolling, Release)", ROS_DISTRO: rolling}
           # - {name: "rolling, multi-threading", ROS_DISTRO: rolling, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
           # - {name: "rolling, Debug", ROS_DISTRO: rolling, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
+    name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
       UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
