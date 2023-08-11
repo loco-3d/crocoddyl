@@ -9,17 +9,16 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/multibody/data/multibody.hpp"
-#include "factory/actuation.hpp"
-#include "factory/residual.hpp"
-#include "unittest_common.hpp"
-
-#include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/residuals/joint-acceleration.hpp"
 #include "crocoddyl/core/residuals/joint-effort.hpp"
+#include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
+#include "factory/actuation.hpp"
+#include "factory/residual.hpp"
+#include "unittest_common.hpp"
 
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
@@ -208,11 +207,13 @@ void test_partial_derivatives_against_numdiff(
 void test_reference() {
   ResidualModelFactory factory;
   StateModelTypes::Type state_type = StateModelTypes::StateMultibody_Talos;
-  ActuationModelTypes::Type actuation_type = ActuationModelTypes::ActuationModelFloatingBase;
+  ActuationModelTypes::Type actuation_type =
+      ActuationModelTypes::ActuationModelFloatingBase;
   StateModelFactory state_factory;
-  ActuationModelFactory actuation_factory; 
+  ActuationModelFactory actuation_factory;
   boost::shared_ptr<crocoddyl::StateMultibody> state =
-        boost::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(state_type));
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+          state_factory.create(state_type));
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
       actuation_factory.create(actuation_type, state_type);
 
@@ -244,13 +245,15 @@ void test_reference() {
   BOOST_CHECK((tau_ref - jeff_residual.get_reference()).isZero());
 
   // Test reference in centroidal-momentum residual
-  crocoddyl::ResidualModelCentroidalMomentum cmon_residual(state, Eigen::Matrix<double, 6, 1>::Zero());
+  crocoddyl::ResidualModelCentroidalMomentum cmon_residual(
+      state, Eigen::Matrix<double, 6, 1>::Zero());
   Eigen::Matrix<double, 6, 1> h_ref = Eigen::Matrix<double, 6, 1>::Random();
   cmon_residual.set_reference(h_ref);
   BOOST_CHECK((h_ref - cmon_residual.get_reference()).isZero());
 
   // Test reference in com-position residual
-  crocoddyl::ResidualModelCoMPosition c_residual(state, Eigen::Vector3d::Zero());
+  crocoddyl::ResidualModelCoMPosition c_residual(state,
+                                                 Eigen::Vector3d::Zero());
   Eigen::Vector3d c_ref = Eigen::Vector3d::Random();
   c_residual.set_reference(c_ref);
   BOOST_CHECK((c_ref - c_residual.get_reference()).isZero());
@@ -278,7 +281,7 @@ void register_residual_model_unit_tests(
 }
 
 void regiter_residual_reference_unit_tests() {
-    boost::test_tools::output_test_stream test_name;
+  boost::test_tools::output_test_stream test_name;
   test_name << "test_reference";
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
