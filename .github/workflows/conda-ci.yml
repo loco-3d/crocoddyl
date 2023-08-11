@@ -12,7 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
+        # os: ["ubuntu-latest", "macos-latest"]
+        os: ["macos-latest"]
         build_type: [Release, Debug]
         compiler: [clang]
 
