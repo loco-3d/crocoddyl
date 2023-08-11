@@ -38,7 +38,7 @@ jobs:
         auto-update-conda: true
         environment-file: .github/workflows/conda/conda-env.yml
 
-    - name: Install dependencies and update conda
+    - name: Install conda dependencies
       shell: bash -l {0}
       run: |
         conda activate crocoddyl
@@ -46,6 +46,11 @@ jobs:
         conda install llvm-openmp libcxx -c conda-forge
         conda list
 
+    - name: Install example-robot-data
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        mkdir third-party && cd third-party
         git clone --recursive https://github.com/Gepetto/example-robot-data.git
         cd example-robot-data && mkdir build && cd build
         cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
@@ -84,8 +89,19 @@ jobs:
           -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
           -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
         make
+
+    - name: Run unit tests
+      shell: bash -l {0}
+      run: |
+        conda activate crocoddyl
+        cd build
         export CTEST_OUTPUT_ON_FAILURE=1
         make test
+
+    - name:  Install Crocoddyl
+      shell: bash -l {0}
+      run: |
+        cd build
         make install
 
     - name: Uninstall Crocoddyl
