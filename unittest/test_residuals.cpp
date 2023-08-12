@@ -9,7 +9,13 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/residuals/control.hpp"
+#include "crocoddyl/core/residuals/joint-acceleration.hpp"
+#include "crocoddyl/core/residuals/joint-effort.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
+#include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
+#include "crocoddyl/multibody/residuals/com-position.hpp"
+#include "crocoddyl/multibody/residuals/state.hpp"
 #include "factory/actuation.hpp"
 #include "factory/residual.hpp"
 #include "unittest_common.hpp"
@@ -198,6 +204,61 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(tol));
 }
 
+void test_reference() {
+  ResidualModelFactory factory;
+  StateModelTypes::Type state_type = StateModelTypes::StateMultibody_Talos;
+  ActuationModelTypes::Type actuation_type =
+      ActuationModelTypes::ActuationModelFloatingBase;
+  StateModelFactory state_factory;
+  ActuationModelFactory actuation_factory;
+  boost::shared_ptr<crocoddyl::StateMultibody> state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+          state_factory.create(state_type));
+  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+      actuation_factory.create(actuation_type, state_type);
+
+  const std::size_t nu = actuation->get_nu();
+  const std::size_t nv = state->get_nv();
+
+  // Test reference in state residual
+  crocoddyl::ResidualModelState state_residual(state, state->rand(), nu);
+  Eigen::VectorXd x_ref = state_residual.get_state()->rand();
+  state_residual.set_reference(x_ref);
+  BOOST_CHECK((x_ref - state_residual.get_reference()).isZero());
+
+  // Test reference in control residual
+  crocoddyl::ResidualModelControl control_residual(state, nu);
+  Eigen::VectorXd u_ref = Eigen::VectorXd::Random(nu);
+  control_residual.set_reference(u_ref);
+  BOOST_CHECK((u_ref - control_residual.get_reference()).isZero());
+
+  // Test reference in joint-acceleration residual
+  crocoddyl::ResidualModelJointAcceleration jacc_residual(state, nu);
+  Eigen::VectorXd a_ref = Eigen::VectorXd::Random(nv);
+  jacc_residual.set_reference(a_ref);
+  BOOST_CHECK((a_ref - jacc_residual.get_reference()).isZero());
+
+  // Test reference in joint-effort residual
+  crocoddyl::ResidualModelJointEffort jeff_residual(state, actuation, nu);
+  Eigen::VectorXd tau_ref = Eigen::VectorXd::Random(nu);
+  jeff_residual.set_reference(tau_ref);
+  BOOST_CHECK((tau_ref - jeff_residual.get_reference()).isZero());
+
+  // Test reference in centroidal-momentum residual
+  crocoddyl::ResidualModelCentroidalMomentum cmon_residual(
+      state, Eigen::Matrix<double, 6, 1>::Zero());
+  Eigen::Matrix<double, 6, 1> h_ref = Eigen::Matrix<double, 6, 1>::Random();
+  cmon_residual.set_reference(h_ref);
+  BOOST_CHECK((h_ref - cmon_residual.get_reference()).isZero());
+
+  // Test reference in com-position residual
+  crocoddyl::ResidualModelCoMPosition c_residual(state,
+                                                 Eigen::Vector3d::Zero());
+  Eigen::Vector3d c_ref = Eigen::Vector3d::Random();
+  c_residual.set_reference(c_ref);
+  BOOST_CHECK((c_ref - c_residual.get_reference()).isZero());
+}
+
 //----------------------------------------------------------------------------//
 
 void register_residual_model_unit_tests(
@@ -216,6 +277,15 @@ void register_residual_model_unit_tests(
   ts->add(
       BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff,
                                   residual_type, state_type, actuation_type)));
+  framework::master_test_suite().add(ts);
+}
+
+void regiter_residual_reference_unit_tests() {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_reference";
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_reference)));
   framework::master_test_suite().add(ts);
 }
 
@@ -247,6 +317,7 @@ bool init_function() {
       }
     }
   }
+  regiter_residual_reference_unit_tests();
   return true;
 }
 

@@ -15,13 +15,25 @@ template <typename Scalar>
 ResidualModelJointAccelerationTpl<Scalar>::ResidualModelJointAccelerationTpl(
     boost::shared_ptr<StateAbstract> state, const VectorXs& aref,
     const std::size_t nu)
-    : Base(state, state->get_nv(), nu, true, true, true), aref_(aref) {}
+    : Base(state, state->get_nv(), nu, true, true, true), aref_(aref) {
+  if (static_cast<std::size_t>(aref_.size()) != state->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "aref has wrong dimension (it should be " +
+                        std::to_string(state->get_nv()) + ")");
+  }
+}
 
 template <typename Scalar>
 ResidualModelJointAccelerationTpl<Scalar>::ResidualModelJointAccelerationTpl(
     boost::shared_ptr<StateAbstract> state, const VectorXs& aref)
     : Base(state, state->get_nv(), state->get_nv(), true, true, true),
-      aref_(aref) {}
+      aref_(aref) {
+  if (static_cast<std::size_t>(aref_.size()) != state->get_nv()) {
+    throw_pretty("Invalid argument: "
+                 << "aref has wrong dimension (it should be " +
+                        std::to_string(state->get_nv()) + ")");
+  }
+}
 
 template <typename Scalar>
 ResidualModelJointAccelerationTpl<Scalar>::ResidualModelJointAccelerationTpl(

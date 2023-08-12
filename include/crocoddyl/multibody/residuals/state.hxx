@@ -147,11 +147,11 @@ ResidualModelStateTpl<Scalar>::get_reference() const {
 
 template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::set_reference(const VectorXs& reference) {
-  if (static_cast<std::size_t>(reference.size()) != nr_) {
-    throw_pretty("Invalid argument: "
-                 << "the state reference has wrong dimension ("
-                 << reference.size()
-                 << " provided - it should be " + std::to_string(nr_) + ")")
+  if (static_cast<std::size_t>(reference.size()) != state_->get_nx()) {
+    throw_pretty(
+        "Invalid argument: "
+        << "the state reference has wrong dimension (" << reference.size()
+        << " provided - it should be " + std::to_string(state_->get_nx()) + ")")
   }
   xref_ = reference;
 }

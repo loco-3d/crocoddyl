@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University
+// Copyright (C) 2022-2023, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,11 +54,11 @@ class ResidualModelJointAccelerationTpl
    * @brief Initialize the joint-acceleration residual model
    *
    * @param[in] state       State description
-   * @param[in] uref        Reference joint acceleration
+   * @param[in] aref        Reference joint acceleration
    * @param[in] nu          Dimension of the control vector
    */
   ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state,
-                                    const VectorXs& uref, const std::size_t nu);
+                                    const VectorXs& aref, const std::size_t nu);
 
   /**
    * @brief Initialize the joint-acceleration residual model
@@ -66,10 +66,10 @@ class ResidualModelJointAccelerationTpl
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
    * @param[in] state       State description
-   * @param[in] uref        Reference joint acceleration
+   * @param[in] aref        Reference joint acceleration
    */
   ResidualModelJointAccelerationTpl(boost::shared_ptr<StateAbstract> state,
-                                    const VectorXs& uref);
+                                    const VectorXs& aref);
 
   /**
    * @brief Initialize the joint-acceleration residual model
