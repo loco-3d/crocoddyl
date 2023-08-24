@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,18 +219,21 @@ bool init_function() {
     register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull,
                                         StateModelTypes::all[i]);
   }
+  for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
+    if (StateModelTypes::all[i] != StateModelTypes::StateVector &&
+        StateModelTypes::all[i] != StateModelTypes::StateMultibody_Hector) {
+      register_actuation_model_unit_tests(
+          ActuationModelTypes::ActuationModelFloatingBase,
+          StateModelTypes::all[i]);
+      register_actuation_model_unit_tests(
+          ActuationModelTypes::ActuationModelSquashingFull,
+          StateModelTypes::all[i]);
+    }
+  }
+
   register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelFloatingBase,
-      StateModelTypes::StateMultibody_HyQ);
-  register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelFloatingBase,
-      StateModelTypes::StateMultibody_Talos);
-  register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelFloatingBase,
-      StateModelTypes::StateMultibody_RandomHumanoid);
-  register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelSquashingFull,
-      StateModelTypes::StateMultibody_TalosArm);
+      ActuationModelTypes::ActuationModelMultiCopterBase,
+      StateModelTypes::StateMultibody_Hector);
   return true;
 }
 
