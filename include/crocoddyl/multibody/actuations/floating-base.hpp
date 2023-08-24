@@ -52,7 +52,14 @@ class ActuationModelFloatingBaseTpl
    */
   explicit ActuationModelFloatingBaseTpl(
       boost::shared_ptr<StateMultibody> state)
-      : Base(state, state->get_nv() - state->get_pinocchio()->joints[1].nv()){};
+      : Base(state,
+             state->get_nv() -
+                 state->get_pinocchio()
+                     ->joints[(
+                         state->get_pinocchio()->existJointName("root_joint")
+                             ? state->get_pinocchio()->getJointId("root_joint")
+                             : 0)]
+                     .nv()){};
   virtual ~ActuationModelFloatingBaseTpl(){};
 
   /**
@@ -131,7 +138,11 @@ class ActuationModelFloatingBaseTpl
         boost::static_pointer_cast<StateMultibody>(state_);
     boost::shared_ptr<Data> data =
         boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
-    const std::size_t nfb = state->get_pinocchio()->joints[1].nv();
+    const std::size_t root_joint_id =
+        state->get_pinocchio()->existJointName("root_joint")
+            ? state->get_pinocchio()->getJointId("root_joint")
+            : 0;
+    const std::size_t nfb = state->get_pinocchio()->joints[root_joint_id].nv();
     data->dtau_du.diagonal(-nfb).setOnes();
     data->Mtau.diagonal(nfb).setOnes();
     for (std::size_t i = 0; i < nfb; ++i) {
