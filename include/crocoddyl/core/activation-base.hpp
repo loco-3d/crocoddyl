@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,7 +79,7 @@ struct ActivationDataAbstractTpl {
 
   template <template <typename Scalar> class Activation>
   explicit ActivationDataAbstractTpl(Activation<Scalar>* const activation)
-      : a_value(0.),
+      : a_value(Scalar(0.)),
         Ar(VectorXs::Zero(activation->get_nr())),
         Arr(DiagonalMatrixXs(activation->get_nr())) {
     Arr.setZero();

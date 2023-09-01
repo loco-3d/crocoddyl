@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -106,7 +106,7 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSum>& data,
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of cost datas and models");
   }
-  data->cost = 0.;
+  data->cost = Scalar(0.);
 
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
@@ -138,7 +138,7 @@ void CostModelSumTpl<Scalar>::calc(const boost::shared_ptr<CostDataSum>& data,
     throw_pretty("Invalid argument: "
                  << "it doesn't match the number of cost datas and models");
   }
-  data->cost = 0.;
+  data->cost = Scalar(0.);
 
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
