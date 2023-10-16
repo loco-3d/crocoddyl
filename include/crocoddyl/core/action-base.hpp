@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -245,12 +245,12 @@ class ActionModelAbstractTpl {
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  const VectorXs& get_g_lb() const;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  const VectorXs& get_g_ub() const;
 
   /**
    * @brief Return the control lower bound
@@ -266,6 +266,16 @@ class ActionModelAbstractTpl {
    * @brief Indicates if there are defined control limits
    */
   bool get_has_control_limits() const;
+
+  /**
+   * @brief Modify the lower bound of the inequality constraints
+   */
+  void set_g_lb(const VectorXs& g_lb);
+
+  /**
+   * @brief Modify the upper bound of the inequality constraints
+   */
+  void set_g_ub(const VectorXs& g_ub);
 
   /**
    * @brief Modify the control lower bounds

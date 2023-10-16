@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -68,8 +68,6 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
   assert_pretty(x.tail(state_->get_nv()).isZero(),
                 "The velocity input should be zero for quasi-static to work.");
 
-  const std::size_t ndx = state_->get_ndx();
-  VectorXs dx = VectorXs::Zero(ndx);
   if (nu_ != 0) {
     VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
@@ -167,6 +165,30 @@ template <typename Scalar>
 bool DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits()
     const {
   return has_control_limits_;
+}
+
+template <typename Scalar>
+void DifferentialActionModelAbstractTpl<Scalar>::set_g_lb(
+    const VectorXs& g_lb) {
+  if (static_cast<std::size_t>(g_lb.size()) != ng_) {
+    throw_pretty(
+        "Invalid argument: "
+        << "inequality lower bound has wrong dimension (it should be " +
+               std::to_string(ng_) + ")");
+  }
+  g_lb_ = g_lb;
+}
+
+template <typename Scalar>
+void DifferentialActionModelAbstractTpl<Scalar>::set_g_ub(
+    const VectorXs& g_ub) {
+  if (static_cast<std::size_t>(g_ub.size()) != ng_) {
+    throw_pretty(
+        "Invalid argument: "
+        << "inequality upper bound has wrong dimension (it should be " +
+               std::to_string(ng_) + ")");
+  }
+  g_ub_ = g_ub;
 }
 
 template <typename Scalar>
