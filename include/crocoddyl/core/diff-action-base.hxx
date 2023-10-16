@@ -68,8 +68,6 @@ void DifferentialActionModelAbstractTpl<Scalar>::quasiStatic(
   assert_pretty(x.tail(state_->get_nv()).isZero(),
                 "The velocity input should be zero for quasi-static to work.");
 
-  const std::size_t ndx = state_->get_ndx();
-  VectorXs dx = VectorXs::Zero(ndx);
   if (nu_ != 0) {
     VectorXs du = VectorXs::Zero(nu_);
     for (std::size_t i = 0; i < maxiter; ++i) {
