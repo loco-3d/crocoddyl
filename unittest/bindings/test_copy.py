@@ -317,7 +317,7 @@ class ContactsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.ContactModelMultiple(state, actuation.nu))
     COLLECTOR.append(pdata)
     MODEL.append(
-        crocoddyl.ContactModel1D(state, frame_id, 1.0, actuation.nu, np.zeros(2))
+        crocoddyl.ContactModel1D(state, frame_id, 0., pinocchio.LOCAL, np.eye(3), actuation.nu, np.zeros(2))
     )
     COLLECTOR.append(pdata)
     MODEL.append(
