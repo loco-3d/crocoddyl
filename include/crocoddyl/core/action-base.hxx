@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -171,10 +171,32 @@ bool ActionModelAbstractTpl<Scalar>::get_has_control_limits() const {
 }
 
 template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::set_g_lb(const VectorXs& g_lb) {
+  if (static_cast<std::size_t>(g_lb.size()) != ng_) {
+    throw_pretty(
+        "Invalid argument: "
+        << "inequality lower bound has wrong dimension (it should be " +
+               std::to_string(ng_) + ")");
+  }
+  g_lb_ = g_lb;
+}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::set_g_ub(const VectorXs& g_ub) {
+  if (static_cast<std::size_t>(g_ub.size()) != ng_) {
+    throw_pretty(
+        "Invalid argument: "
+        << "inequality upper bound has wrong dimension (it should be " +
+               std::to_string(ng_) + ")");
+  }
+  g_ub_ = g_ub;
+}
+
+template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::set_u_lb(const VectorXs& u_lb) {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "lower bound has wrong dimension (it should be " +
+                 << "control lower bound has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
   u_lb_ = u_lb;
@@ -185,7 +207,7 @@ template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
     throw_pretty("Invalid argument: "
-                 << "upper bound has wrong dimension (it should be " +
+                 << "control upper bound has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
   u_ub_ = u_ub;

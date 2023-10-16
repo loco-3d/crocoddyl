@@ -148,29 +148,31 @@ void exposeDifferentialActionAbstract() {
           "g_lb",
           bp::make_function(&DifferentialActionModelAbstract_wrap::get_g_lb,
                             bp::return_internal_reference<>()),
+          &DifferentialActionModelAbstract_wrap::set_g_lb,
           "lower bound of the inequality constraints")
       .add_property(
           "g_ub",
           bp::make_function(&DifferentialActionModelAbstract_wrap::get_g_ub,
                             bp::return_internal_reference<>()),
+          &DifferentialActionModelAbstract_wrap::set_g_ub,
           "upper bound of the inequality constraints")
-      .add_property(
-          "has_control_limits",
-          bp::make_function(
-              &DifferentialActionModelAbstract_wrap::get_has_control_limits),
-          "indicates whether problem has finite control limits")
       .add_property(
           "u_lb",
           bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_lb,
-                            bp::return_value_policy<bp::return_by_value>()),
+                            bp::return_internal_reference<>()),
           &DifferentialActionModelAbstract_wrap::set_u_lb,
           "lower control limits")
       .add_property(
           "u_ub",
           bp::make_function(&DifferentialActionModelAbstract_wrap::get_u_ub,
-                            bp::return_value_policy<bp::return_by_value>()),
+                            bp::return_internal_reference<>()),
           &DifferentialActionModelAbstract_wrap::set_u_ub,
           "upper control limits")
+      .add_property(
+          "has_control_limits",
+          bp::make_function(
+              &DifferentialActionModelAbstract_wrap::get_has_control_limits),
+          "indicates whether problem has finite control limits")
       .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<
