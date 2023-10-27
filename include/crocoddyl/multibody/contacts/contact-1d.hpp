@@ -42,20 +42,20 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * To learn more about the computation of the contact derivatives in different
    * frames see
-   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary 
+   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary
    *  Frames: Application to Polishing with Talos, ICHR 2022
-   * 
+   *
    * @param[in] state     State of the multibody system
    * @param[in] id        Reference frame id of the contact
    * @param[in] xref      Contact position used for the Baumgarte stabilization
    * @param[in] type      Type of contact
-   * @param[in] rotation  Rotation of the reference frame's z-axis 
+   * @param[in] rotation  Rotation of the reference frame's z-axis
    * @param[in] nu        Dimension of the control vector
    * @param[in] gains     Baumgarte stabilization gains
    */
   ContactModel1DTpl(boost::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Scalar xref,
-                    const pinocchio::ReferenceFrame type, 
+                    const pinocchio::ReferenceFrame type,
                     const Matrix3s& rotation, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
 
@@ -65,7 +65,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * The default `nu` is obtained from `StateAbstractTpl::get_nv()`. To learn
    * more about the computation of the contact derivatives in different frames
    * see
-   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary 
+   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary
    *  Frames: Application to Polishing with Talos, ICHR 2022
    *
    * @param[in] state     State of the multibody system
@@ -169,9 +169,9 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::type_;
 
  private:
-  Scalar xref_;       //!< Contact position used for the Baumgarte stabilization
-  Vector2s gains_;    //!< Baumgarte stabilization gains
-  Matrix3s Raxis_;    //!< Rotation of the reference frame's z-axis
+  Scalar xref_;     //!< Contact position used for the Baumgarte stabilization
+  Vector2s gains_;  //!< Baumgarte stabilization gains
+  Matrix3s Raxis_;  //!< Rotation of the reference frame's z-axis
 };
 
 template <typename _Scalar>
@@ -263,7 +263,6 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs fXjda_dv;
   Matrix2s oRf;
   Matrix3xs fJf_df;
-
 };
 
 }  // namespace crocoddyl

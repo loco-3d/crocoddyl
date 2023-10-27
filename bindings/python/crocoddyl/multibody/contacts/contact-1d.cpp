@@ -28,10 +28,11 @@ void exposeContact1D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, 
-               double, pinocchio::ReferenceFrame, Eigen::Matrix3d, 
-               std::size_t, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "type", "rotation", "nu", "gains"),
+      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double,
+               pinocchio::ReferenceFrame, Eigen::Matrix3d, std::size_t,
+               bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "xref", "type", "rotation", "nu",
+                   "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
@@ -42,7 +43,7 @@ void exposeContact1D() {
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-                    double, pinocchio::ReferenceFrame,  
+                    double, pinocchio::ReferenceFrame,
                     bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "gains"),
           "Initialize the contact model.\n\n"

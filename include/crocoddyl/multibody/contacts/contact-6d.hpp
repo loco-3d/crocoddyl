@@ -41,7 +41,7 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * To learn more about the computation of the contact derivatives in different
    * frames see
-   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary 
+   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary
    *  Frames: Application to Polishing with Talos, ICHR 2022
    *
    * @param[in] state  State of the multibody system
@@ -61,8 +61,8 @@ class ContactModel6DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * The default `nu` is obtained from `StateAbstractTpl::get_nv()`. To learn
    * more about the computation of the contact derivatives in different frames
-   * see 
-   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary 
+   * see
+   *  S. Kleff et. al, On the Derivation of the Contact Dynamics in Arbitrary
    *  Frames: Application to Polishing with Talos, ICHR 2022
    *
    * @param[in] state  State of the multibody system

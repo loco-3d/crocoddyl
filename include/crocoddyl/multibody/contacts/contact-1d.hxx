@@ -12,8 +12,8 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const pinocchio::ReferenceFrame type,
-    const Matrix3s& rotation, const std::size_t nu, const Vector2s& gains)
+    Scalar xref, const pinocchio::ReferenceFrame type, const Matrix3s& rotation,
+    const std::size_t nu, const Vector2s& gains)
     : Base(state, type, 1, nu), xref_(xref), Raxis_(rotation), gains_(gains) {
   id_ = id;
 }
@@ -83,7 +83,8 @@ void ContactModel1DTpl<Scalar>::calc(
 
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
   if (gains_[0] != 0.) {
-    d->dp = d->pinocchio->oMf[id_].translation() - (xref_ * Raxis_ * Vector3s::UnitZ());
+    d->dp = d->pinocchio->oMf[id_].translation() -
+            (xref_ * Raxis_ * Vector3s::UnitZ());
     d->dp_local.noalias() = oRf.transpose() * d->dp;
     d->a0_local += gains_[0] * d->dp_local;
   }
@@ -97,7 +98,7 @@ void ContactModel1DTpl<Scalar>::calc(
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      d->Jc.row(0) = (Raxis_* oRf * d->fJf.template topRows<3>()).row(2);
+      d->Jc.row(0) = (Raxis_ * oRf * d->fJf.template topRows<3>()).row(2);
       d->a0[0] = (Raxis_ * oRf * d->a0_local)[2];
       break;
   }
@@ -164,10 +165,11 @@ void ContactModel1DTpl<Scalar>::calcDiff(
       }
       d->a0[0] = (Raxis_ * oRf * d->a0_local)[2];
 
-      pinocchio::skew((Raxis_ * oRf * d->a0_local).template head<3>(), d->a0_skew);
+      pinocchio::skew((Raxis_ * oRf * d->a0_local).template head<3>(),
+                      d->a0_skew);
       d->a0_world_skew.noalias() = d->a0_skew * Raxis_ * oRf;
       d->da0_dx.row(0) = (Raxis_ * oRf * d->da0_local_dx).row(2);
-      d->da0_dx.leftCols(nv).row(0) -= 
+      d->da0_dx.leftCols(nv).row(0) -=
           (d->a0_world_skew * d->fJf.template bottomRows<3>()).row(2);
       break;
   }
@@ -188,13 +190,14 @@ void ContactModel1DTpl<Scalar>::updateForce(
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
       data->fext.linear() = (R * Raxis_.transpose()).col(2) * force[0];
-      data->fext.angular() = d->jMf.translation().cross(data->fext.linear());     
+      data->fext.angular() = d->jMf.translation().cross(data->fext.linear());
       data->dtau_dq.setZero();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-      d->f_local.linear().noalias() = (oRf.transpose() * Raxis_.transpose()).col(2) * force[0];
+      d->f_local.linear().noalias() =
+          (oRf.transpose() * Raxis_.transpose()).col(2) * force[0];
       d->f_local.angular().setZero();
       data->fext = data->jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
@@ -203,7 +206,6 @@ void ContactModel1DTpl<Scalar>::updateForce(
           -d->fJf.template topRows<3>().transpose() * d->fJf_df;
       break;
   }
-
 }
 
 template <typename Scalar>
@@ -245,6 +247,5 @@ template <typename Scalar>
 void ContactModel1DTpl<Scalar>::set_axis_rotation(const Matrix3s& rotation) {
   Raxis_ = rotation;
 }
-
 
 }  // namespace crocoddyl

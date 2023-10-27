@@ -83,34 +83,31 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(
     nu = state->get_nv();
   }
   switch (contact_type) {
-    case ContactModelTypes::ContactModel1D_LOCAL:
-    {
+    case ContactModelTypes::ContactModel1D_LOCAL: {
       pinocchio::SE3 M = pinocchio::SE3::Random();
       gains[0] =
           0;  // TODO(cmastalli): remove hard-coded zero when fixed the contact
       contact = boost::make_shared<crocoddyl::ContactModel1D>(
-          state, frame_id, 0.,
-          pinocchio::ReferenceFrame::LOCAL, M.rotation(), nu, gains);
+          state, frame_id, 0., pinocchio::ReferenceFrame::LOCAL, M.rotation(),
+          nu, gains);
       break;
     }
-    case ContactModelTypes::ContactModel1D_WORLD:
-    {
+    case ContactModelTypes::ContactModel1D_WORLD: {
       pinocchio::SE3 M = pinocchio::SE3::Random();
       gains[0] =
           0;  // TODO(cmastalli): remove hard-coded zero when fixed the contact
       contact = boost::make_shared<crocoddyl::ContactModel1D>(
-          state, frame_id, 0.,
-          pinocchio::ReferenceFrame::WORLD, M.rotation(), nu, gains);
+          state, frame_id, 0., pinocchio::ReferenceFrame::WORLD, M.rotation(),
+          nu, gains);
       break;
     }
-    case ContactModelTypes::ContactModel1D_LWA:
-    {
+    case ContactModelTypes::ContactModel1D_LWA: {
       pinocchio::SE3 M = pinocchio::SE3::Random();
       gains[0] =
           0;  // TODO(cmastalli): remove hard-coded zero when fixed the contact
       contact = boost::make_shared<crocoddyl::ContactModel1D>(
-          state, frame_id, 0.,
-          pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, M.rotation(), nu, gains);
+          state, frame_id, 0., pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED,
+          M.rotation(), nu, gains);
       break;
     }
     case ContactModelTypes::ContactModel2D:

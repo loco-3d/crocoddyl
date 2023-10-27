@@ -1110,7 +1110,9 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
         oRf = data.pinocchio.oMf[self.id].rotation
         data.vw[:] = data.v.angular
         data.vv[:] = data.v.linear
-        data.dp[:] = data.pinocchio.oMf[self.id].translation - self.xref * np.dot(self.Raxis, np.array([0,0,1]))
+        data.dp[:] = data.pinocchio.oMf[self.id].translation - self.xref * np.dot(
+            self.Raxis, np.array([0, 0, 1])
+        )
         data.dp_local[:] = np.dot(oRf.T, data.dp)
 
         if self.gains[0] != 0.0:
@@ -1158,9 +1160,9 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
         if self.gains[1] != 0.0:
             data.da0_local_dx[:, :nv] += self.gains[1] * data.fXjdv_dq[:3, :]
             data.da0_local_dx[:, nv:] += self.gains[1] * data.fJf[:3, :]
-        
+
         if self.type == pinocchio.LOCAL:
-            data.da0_dx[:] = (self.Raxis @ data.da0_local_dx)[2,:]
+            data.da0_dx[:] = (self.Raxis @ data.da0_local_dx)[2, :]
         if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
             data.a0_local[:] = pinocchio.getFrameClassicalAcceleration(
                 self.state.pinocchio, data.pinocchio, self.id, pinocchio.LOCAL
@@ -1170,8 +1172,10 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
             if self.gains[1] != 0.0:
                 data.a0_local[:] += self.gains[1] * data.vv
             data.a0[0] = np.dot(np.dot(self.Raxis, oRf), data.a0_local)[2]
-            
-            data.a0_skew[:, :] = pinocchio.skew(np.dot(np.dot(self.Raxis, oRf), data.a0_local))
+
+            data.a0_skew[:, :] = pinocchio.skew(
+                np.dot(np.dot(self.Raxis, oRf), data.a0_local)
+            )
             data.a0_world_skew = np.dot(data.a0_skew, np.dot(self.Raxis, oRf))
             data.da0_dx[:] = np.dot(np.dot(self.Raxis, oRf), data.da0_local_dx)[2]
             data.da0_dx[:nv] -= np.dot(data.a0_world_skew, data.fJf[3:, :])[2]
@@ -1187,18 +1191,18 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
         data.f.linear[:2] = np.zeros(2)
         data.f.angular = np.zeros(3)
         if self.type == pinocchio.LOCAL:
-            data.fext.linear = np.dot(data.jMf.rotation, self.Raxis.T)[:,2] * force[0]
-            data.fext.angular = np.cross(data.jMf.translation, data.fext.linear); 
+            data.fext.linear = np.dot(data.jMf.rotation, self.Raxis.T)[:, 2] * force[0]
+            data.fext.angular = np.cross(data.jMf.translation, data.fext.linear)
             data.dtau_dq[:, :] = np.zeros((nv, nv))
         if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
             oRf = data.pinocchio.oMf[self.id].rotation
-            data.f_local.linear = np.dot(oRf.T, self.Raxis.T)[:,2] * force[0]
+            data.f_local.linear = np.dot(oRf.T, self.Raxis.T)[:, 2] * force[0]
             data.f_local.angular = np.zeros(3)
             data.fext = data.jMf.act(data.f_local)
             data.f_skew[:, :] = pinocchio.skew(data.f_local.linear)
             data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
             data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
-        
+
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
     def __init__(
@@ -1304,6 +1308,7 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
             data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
             data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
 
+
 class Contact1DDataDerived(crocoddyl.ContactDataAbstract):
     def __init__(self, model, data):
         crocoddyl.ContactDataAbstract.__init__(self, model, data)
@@ -1329,6 +1334,7 @@ class Contact1DDataDerived(crocoddyl.ContactDataAbstract):
         self.fXjda_dq = np.zeros((6, model.state.nv))
         self.fXjda_dv = np.zeros((6, model.state.nv))
         self.fJf_df = np.zeros((3, model.state.nv))
+
 
 class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
     def __init__(self, model, data):
