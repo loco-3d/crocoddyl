@@ -29,22 +29,28 @@ void exposeContact1D() {
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
       bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double,
-               std::size_t, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "nu", "gains"),
+               pinocchio::ReferenceFrame, Eigen::Matrix3d, std::size_t,
+               bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "xref", "type", "rotation", "nu",
+                   "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
+          ":param type: type of contact\n"
+          ":param rotation: rotation of the reference frame's z axis"
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))
       .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-                    double, bp::optional<Eigen::Vector2d> >(
-          bp::args("self", "state", "id", "xref", "gains"),
+                    double, pinocchio::ReferenceFrame,
+                    bp::optional<Eigen::Vector2d> >(
+          bp::args("self", "state", "id", "xref", "type", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param id: reference frame id of the contact\n"
           ":param xref: contact position used for the Baumgarte stabilization\n"
+          ":param type: type of contact\n"
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))
       .def("calc", &ContactModel1D::calc, bp::args("self", "data", "x"),
@@ -81,6 +87,11 @@ void exposeContact1D() {
           bp::make_function(&ContactModel1D::get_reference,
                             bp::return_value_policy<bp::return_by_value>()),
           &ContactModel1D::set_reference, "reference contact translation")
+      .add_property("Raxis",
+                    bp::make_function(&ContactModel1D::get_axis_rotation,
+                                      bp::return_internal_reference<>()),
+                    &ContactModel1D::set_axis_rotation,
+                    "rotation of the reference frame's z axis")
       .add_property(
           "gains",
           bp::make_function(&ContactModel1D::get_gains,
@@ -103,11 +114,43 @@ void exposeContact1D() {
           bp::make_getter(&ContactData1D::v,
                           bp::return_value_policy<bp::return_by_value>()),
           "spatial velocity of the contact body")
+      .add_property("a0_local",
+                    bp::make_getter(&ContactData1D::a0_local,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::a0_local),
+                    "desired local contact acceleration")
+      .add_property("a0_skew",
+                    bp::make_getter(&ContactData1D::a0_skew,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::a0_skew),
+                    "contact acceleration skew (local)")
+      .add_property("a0_world_skew",
+                    bp::make_getter(&ContactData1D::a0_world_skew,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::a0_world_skew),
+                    "contact acceleration skew (world)")
       .add_property(
-          "a",
-          bp::make_getter(&ContactData1D::a,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "spatial acceleration of the contact body")
+          "dp",
+          bp::make_getter(&ContactData1D::dp,
+                          bp::return_internal_reference<>()),
+          bp::make_setter(&ContactData1D::dp),
+          "Translation error computed for the Baumgarte regularization term")
+      .add_property("dp_local",
+                    bp::make_getter(&ContactData1D::dp_local,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::dp_local),
+                    "local translation error computed for the Baumgarte "
+                    "regularization term")
+      .add_property("f_local",
+                    bp::make_getter(&ContactData1D::f_local,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::f_local),
+                    "spatial contact force in local coordinates")
+      .add_property("da0_local_dx",
+                    bp::make_getter(&ContactData1D::da0_local_dx,
+                                    bp::return_internal_reference<>()),
+                    bp::make_setter(&ContactData1D::da0_local_dx),
+                    "Jacobian of the desired local contact acceleration")
       .add_property("fJf",
                     bp::make_getter(&ContactData1D::fJf,
                                     bp::return_internal_reference<>()),

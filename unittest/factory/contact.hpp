@@ -22,7 +22,9 @@ namespace unittest {
 
 struct ContactModelTypes {
   enum Type {
-    ContactModel1D,
+    ContactModel1D_LOCAL,
+    ContactModel1D_WORLD,
+    ContactModel1D_LWA,
     ContactModel2D,
     ContactModel3D_LOCAL,
     ContactModel3D_WORLD,

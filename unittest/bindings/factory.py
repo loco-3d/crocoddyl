@@ -1081,6 +1081,129 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
         self.joint = model.state.pinocchio.frames[model._frame_id].parent
 
 
+class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
+    def __init__(
+        self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=[0.0, 0.0]
+    ):
+        crocoddyl.ContactModelAbstract.__init__(self, state, type, 1)
+        self.id = id
+        self.xref = xref
+        self.gains = gains
+        self.Raxis = np.eye(3)
+
+    def calc(self, data, x):
+        assert self.xref is not None or self.gains[0] == 0.0
+        pinocchio.updateFramePlacement(self.state.pinocchio, data.pinocchio, self.id)
+        data.fJf[:, :] = pinocchio.getFrameJacobian(
+            self.state.pinocchio,
+            data.pinocchio,
+            self.id,
+            pinocchio.ReferenceFrame.LOCAL,
+        )
+        data.v = pinocchio.getFrameVelocity(
+            self.state.pinocchio, data.pinocchio, self.id
+        )
+        data.a0_local[:] = pinocchio.getFrameClassicalAcceleration(
+            self.state.pinocchio, data.pinocchio, self.id, pinocchio.LOCAL
+        ).linear
+
+        oRf = data.pinocchio.oMf[self.id].rotation
+        data.vw[:] = data.v.angular
+        data.vv[:] = data.v.linear
+        data.dp[:] = data.pinocchio.oMf[self.id].translation - self.xref * np.dot(
+            self.Raxis, np.array([0, 0, 1])
+        )
+        data.dp_local[:] = np.dot(oRf.T, data.dp)
+
+        if self.gains[0] != 0.0:
+            data.a0_local[:] += self.gains[0] * data.dp_local
+        if self.gains[1] != 0.0:
+            data.a0_local[:] += self.gains[1] * data.vv
+
+        if self.type == pinocchio.LOCAL:
+            data.Jc = np.dot(self.Raxis, data.fJf[:3, :])[2]
+            data.a0[0] = np.dot(self.Raxis, data.a0_local)[2]
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            data.Jc = np.dot(np.dot(self.Raxis, oRf), data.fJf[:3, :])[2]
+            data.a0[0] = np.dot(np.dot(self.Raxis, oRf), data.a0_local)[2]
+
+    def calcDiff(self, data, x):
+        joint = self.state.pinocchio.frames[self.id].parent
+        (
+            v_partial_dq,
+            a_partial_dq,
+            a_partial_dv,
+            _,
+        ) = pinocchio.getJointAccelerationDerivatives(
+            self.state.pinocchio, data.pinocchio, joint, pinocchio.ReferenceFrame.LOCAL
+        )
+        nv = self.state.nv
+        data.vv_skew[:, :] = pinocchio.skew(data.vv)
+        data.vw_skew[:, :] = pinocchio.skew(data.vw)
+        data.dp_skew[:, :] = pinocchio.skew(data.dp_local)
+        data.fXjdv_dq[:] = np.dot(data.fXj, v_partial_dq)
+        data.fXjda_dq[:] = np.dot(data.fXj, a_partial_dq)
+        data.fXjda_dv[:] = np.dot(data.fXj, a_partial_dv)
+        data.da0_local_dx[:, :nv] = data.fXjda_dq[:3, :]
+        data.da0_local_dx[:, :nv] += np.dot(data.vw_skew, data.fXjdv_dq[:3, :])
+        data.da0_local_dx[:, :nv] -= np.dot(data.vv_skew, data.fXjdv_dq[3:, :])
+        data.da0_local_dx[:, nv:] = data.fXjda_dv[:3, :]
+        data.da0_local_dx[:, nv:] += np.dot(data.vw_skew, data.fJf[:3, :])
+        data.da0_local_dx[:, nv:] -= np.dot(data.vv_skew, data.fJf[3:, :])
+        oRf = data.pinocchio.oMf[self.id].rotation
+
+        if self.gains[0] != 0.0:
+            data.da0_local_dx[:, :nv] += self.gains[0] * np.dot(
+                data.dp_skew, data.fJf[3:, :]
+            )
+            data.da0_local_dx[:, :nv] += self.gains[0] * data.fJf[:3, :]
+        if self.gains[1] != 0.0:
+            data.da0_local_dx[:, :nv] += self.gains[1] * data.fXjdv_dq[:3, :]
+            data.da0_local_dx[:, nv:] += self.gains[1] * data.fJf[:3, :]
+
+        if self.type == pinocchio.LOCAL:
+            data.da0_dx[:] = (self.Raxis @ data.da0_local_dx)[2, :]
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            data.a0_local[:] = pinocchio.getFrameClassicalAcceleration(
+                self.state.pinocchio, data.pinocchio, self.id, pinocchio.LOCAL
+            ).linear
+            if self.gains[0] != 0.0:
+                data.a0_local[:] += self.gains[0] * data.dp_local
+            if self.gains[1] != 0.0:
+                data.a0_local[:] += self.gains[1] * data.vv
+            data.a0[0] = np.dot(np.dot(self.Raxis, oRf), data.a0_local)[2]
+
+            data.a0_skew[:, :] = pinocchio.skew(
+                np.dot(np.dot(self.Raxis, oRf), data.a0_local)
+            )
+            data.a0_world_skew = np.dot(data.a0_skew, np.dot(self.Raxis, oRf))
+            data.da0_dx[:] = np.dot(np.dot(self.Raxis, oRf), data.da0_local_dx)[2]
+            data.da0_dx[:nv] -= np.dot(data.a0_world_skew, data.fJf[3:, :])[2]
+
+    def createData(self, data):
+        data = Contact1DDataDerived(self, data)
+        return data
+
+    def updateForce(self, data, force):
+        assert force.shape[0] == 1
+        nv = self.state.nv
+        data.f.linear[2] = force[0]
+        data.f.linear[:2] = np.zeros(2)
+        data.f.angular = np.zeros(3)
+        if self.type == pinocchio.LOCAL:
+            data.fext.linear = np.dot(data.jMf.rotation, self.Raxis.T)[:, 2] * force[0]
+            data.fext.angular = np.cross(data.jMf.translation, data.fext.linear)
+            data.dtau_dq[:, :] = np.zeros((nv, nv))
+        if self.type == pinocchio.WORLD or self.type == pinocchio.LOCAL_WORLD_ALIGNED:
+            oRf = data.pinocchio.oMf[self.id].rotation
+            data.f_local.linear = np.dot(oRf.T, self.Raxis.T)[:, 2] * force[0]
+            data.f_local.angular = np.zeros(3)
+            data.fext = data.jMf.act(data.f_local)
+            data.f_skew[:, :] = pinocchio.skew(data.f_local.linear)
+            data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
+            data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
+
+
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
     def __init__(
         self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=[0.0, 0.0]
@@ -1184,6 +1307,33 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
             data.f_skew[:, :] = pinocchio.skew(data.f_local.linear)
             data.fJf_df[:, :] = np.dot(data.f_skew, data.fJf[3:, :])
             data.dtau_dq[:, :] = -np.dot(data.fJf[:3, :].T, data.fJf_df)
+
+
+class Contact1DDataDerived(crocoddyl.ContactDataAbstract):
+    def __init__(self, model, data):
+        crocoddyl.ContactDataAbstract.__init__(self, model, data)
+        self.jMf = model.state.pinocchio.frames[model.id].placement
+        self.fXj = self.jMf.inverse().action
+        self.v = pinocchio.Motion.Zero()
+        self.a0_local = np.zeros(3)
+        self.vw = np.zeros(3)
+        self.vv = np.zeros(3)
+        self.dp = np.zeros(3)
+        self.dp_local = np.zeros(3)
+        self.f_local = pinocchio.Force.Zero()
+        self.da0_local_dx = np.zeros((3, model.state.ndx))
+        self.fJf = np.zeros((6, model.state.nv))
+        self.vv_skew = np.zeros((3, 3))
+        self.vw_skew = np.zeros((3, 3))
+        self.a0_skew = np.zeros((3, 3))
+        self.a0_world_skew = np.zeros((3, 3))
+        self.dp_skew = np.zeros((3, 3))
+        self.f_skew = np.zeros((3, 3))
+        self.vw_skew = np.zeros((3, 3))
+        self.fXjdv_dq = np.zeros((6, model.state.nv))
+        self.fXjda_dq = np.zeros((6, model.state.nv))
+        self.fXjda_dv = np.zeros((6, model.state.nv))
+        self.fJf_df = np.zeros((3, model.state.nv))
 
 
 class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
