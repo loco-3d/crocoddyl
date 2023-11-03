@@ -92,6 +92,15 @@ ResidualModelControlTpl<Scalar>::createData(
 }
 
 template <typename Scalar>
+void ResidualModelControlTpl<Scalar>::calcCostDiff(
+    const boost::shared_ptr<CostDataAbstract>& cdata,
+    const boost::shared_ptr<ResidualDataAbstract>&,
+    const boost::shared_ptr<ActivationDataAbstract>& adata, const bool) {
+  cdata->Lu = adata->Ar;
+  cdata->Luu = adata->Arr;
+}
+
+template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::print(std::ostream& os) const {
   os << "ResidualModelControl";
 }
