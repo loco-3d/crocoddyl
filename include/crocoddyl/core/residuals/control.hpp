@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,6 +112,24 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual boost::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
+
+  /**
+   * @brief Compute the derivative of the control-cost function
+   *
+   * This function assumes that the derivatives of the activation and residual
+   * are computed via calcDiff functions.
+   *
+   * @param cdata     Cost data
+   * @param rdata     Residual data
+   * @param adata     Activation data
+   * @param update_u  Update the derivative of the cost function w.r.t. to the
+   * control if True.
+   */
+  virtual void calcCostDiff(
+      const boost::shared_ptr<CostDataAbstract>& cdata,
+      const boost::shared_ptr<ResidualDataAbstract>& rdata,
+      const boost::shared_ptr<ActivationDataAbstract>& adata,
+      const bool update_u = true);
 
   /**
    * @brief Return the reference control vector

@@ -34,7 +34,7 @@ void exposeFrictionCone() {
           ":param R: rotation matrix that defines the cone orientation w.r.t. "
           "the inertial frame\n"
           ":param mu: friction coefficient\n"
-          ":param nf: number of facets\n"
+          ":param nf: number of facets (default 4)\n"
           ":param inner_appr: inner or outer approximation (default True)\n"
           ":param min_nforce: minimum normal force (default 0.)\n"
           ":param max_nforce: maximum normal force (default "
