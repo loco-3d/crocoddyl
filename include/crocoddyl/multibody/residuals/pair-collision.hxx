@@ -26,7 +26,8 @@ ResidualModelPairCollisionTpl<Scalar>::ResidualModelPairCollisionTpl(
       geom_model_(geom_model),
       pair_id_(pair_id),
       joint_id_(joint_id) {
-  if (static_cast<pinocchio::FrameIndex>(geom_model->ngeoms) <= pair_id) {
+  if (static_cast<pinocchio::FrameIndex>(geom_model->collisionPairs.size()) <=
+      pair_id) {
     throw_pretty(
         "Invalid argument: "
         << "the pair index is wrong (it does not exist in the geometry model)");
