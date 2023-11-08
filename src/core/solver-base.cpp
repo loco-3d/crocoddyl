@@ -290,6 +290,8 @@ bool SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
 double SolverAbstract::get_cost() const { return cost_; }
 
+double SolverAbstract::get_merit() const { return merit_; }
+
 double SolverAbstract::get_stop() const { return stop_; }
 
 const Eigen::Vector2d& SolverAbstract::get_d() const { return d_; }
@@ -302,7 +304,13 @@ double SolverAbstract::get_steplength() const { return steplength_; }
 
 double SolverAbstract::get_dV() const { return dV_; }
 
+double SolverAbstract::get_dPhi() const { return dPhi_; }
+
 double SolverAbstract::get_dVexp() const { return dVexp_; }
+
+double SolverAbstract::get_dPhiexp() const { return dPhiexp_; }
+
+double SolverAbstract::get_dfeas() const { return dfeas_; }
 
 double SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
 
@@ -312,11 +320,19 @@ std::size_t SolverAbstract::get_iter() const { return iter_; }
 
 double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
 
+double SolverAbstract::get_feas() const { return feas_; }
+
 double SolverAbstract::get_ffeas() const { return ffeas_; }
 
 double SolverAbstract::get_gfeas() const { return gfeas_; }
 
 double SolverAbstract::get_hfeas() const { return hfeas_; }
+
+double SolverAbstract::get_ffeas_try() const { return ffeas_try_; }
+
+double SolverAbstract::get_gfeas_try() const { return gfeas_try_; }
+
+double SolverAbstract::get_hfeas_try() const { return hfeas_try_; }
 
 FeasibilityNorm SolverAbstract::get_feasnorm() const { return feasnorm_; }
 

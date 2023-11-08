@@ -255,17 +255,22 @@ class SolverAbstract {
   bool get_is_feasible() const;
 
   /**
-   * @brief Return the total cost
+   * @brief Return the cost for the current guess
    */
   double get_cost() const;
 
   /**
-   * @brief Return the value computed by `stoppingCriteria()`
+   * @brief Return the merit for the current guess
+   */
+  double get_merit() const;
+
+  /**
+   * @brief Return the stopping-criteria value computed by `stoppingCriteria()`
    */
   double get_stop() const;
 
   /**
-   * @brief Return the LQ approximation of the expected improvement
+   * @brief Return the linear and quadratic terms of the expected improvement
    */
   const Eigen::Vector2d& get_d() const;
 
@@ -285,14 +290,31 @@ class SolverAbstract {
   double get_steplength() const;
 
   /**
-   * @brief Return the cost reduction \f$dV\f$
+   * @brief Return the reduction in the cost function \f$\Delta V\f$
    */
   double get_dV() const;
 
   /**
-   * @brief Return the expected cost reduction \f$dV_{exp}\f$
+   * @brief Return the reduction in the merit function \f$\Delta\Phi\f$
+   */
+  double get_dPhi() const;
+
+  /**
+   * @brief Return the expected reduction in the cost function \f$\Delta
+   * V_{exp}\f$
    */
   double get_dVexp() const;
+
+  /**
+   * @brief Return the expected reduction in the merit function
+   * \f$\Delta\Phi_{exp}\f$
+   */
+  double get_dPhiexp() const;
+
+  /**
+   * @brief Return the reduction in the feasibility
+   */
+  double get_dfeas() const;
 
   /**
    * @brief Return the threshold used for accepting a step
@@ -315,6 +337,11 @@ class SolverAbstract {
   double get_th_gaptol() const;
 
   /**
+   * @brief Return the total feasibility for the current guess
+   */
+  double get_feas() const;
+
+  /**
    * @brief Return the dynamic feasibility for the current guess
    */
   double get_ffeas() const;
@@ -328,6 +355,21 @@ class SolverAbstract {
    * @brief Return the equality feasibility for the current guess
    */
   double get_hfeas() const;
+
+  /**
+   * @brief Return the dynamic feasibility for the current step length
+   */
+  double get_ffeas_try() const;
+
+  /**
+   * @brief Return the inequality feasibility for the current step length
+   */
+  double get_gfeas_try() const;
+
+  /**
+   * @brief Return the equality feasibility for the current step length
+   */
+  double get_hfeas_try() const;
 
   /**
    * @brief Return the type of norm used to evaluate the dynamic and constraints
