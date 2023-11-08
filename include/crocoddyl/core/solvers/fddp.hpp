@@ -71,7 +71,7 @@ class SolverFDDP : public SolverDDP {
       const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
       const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double init_reg = 1e-9);
+      const double init_reg = NAN);
 
   /**
    * @copybrief SolverAbstract::expectedImprovement

@@ -10,6 +10,7 @@
 #include "python/crocoddyl/core/solver-base.hpp"
 
 #include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
@@ -211,12 +212,30 @@ void exposeSolverAbstract() {
       .def_readwrite(
           "hfeas_try", &SolverAbstract_wrap::hfeas_try_,
           "feasibility of the equality constraint for the current step length")
-      .add_property("x_reg", bp::make_function(&SolverAbstract_wrap::get_xreg),
-                    bp::make_function(&SolverAbstract_wrap::set_xreg),
-                    "state regularization")
-      .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
-                    bp::make_function(&SolverAbstract_wrap::set_ureg),
-                    "control regularization")
+      .add_property("preg", bp::make_function(&SolverAbstract_wrap::get_preg),
+                    bp::make_function(&SolverAbstract_wrap::set_preg),
+                    "primal-variable regularization")
+      .add_property("dreg", bp::make_function(&SolverAbstract_wrap::get_dreg),
+                    bp::make_function(&SolverAbstract_wrap::set_dreg),
+                    "dual-variable regularization")
+      .add_property(
+          "x_reg",
+          bp::make_function(
+              &SolverAbstract_wrap::get_xreg,
+              deprecated<bp::return_value_policy<bp::return_by_value> >(
+                  "Deprecated. Use preg")),
+          bp::make_function(&SolverAbstract_wrap::set_xreg,
+                            deprecated<>("Deprecated. Use preg.")),
+          "state regularization")
+      .add_property(
+          "u_reg",
+          bp::make_function(
+              &SolverAbstract_wrap::get_ureg,
+              deprecated<bp::return_value_policy<bp::return_by_value> >(
+                  "Deprecated. Use preg")),
+          bp::make_function(&SolverAbstract_wrap::set_ureg,
+                            deprecated<>("Deprecated. Use preg.")),
+          "control regularization")
       .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_,
                      "applied step length")
       .add_property("th_acceptStep",

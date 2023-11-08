@@ -131,7 +131,7 @@ if WITHPLOT:
     log = solver.getCallbacks()[1]
     crocoddyl.plotOCSolution(solver.xs, solver.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2
+        log.costs, log.pregs, log.dregs, log.stops, log.grads, log.steps, figIndex=2
     )
 
 # Display the entire motion

@@ -60,8 +60,8 @@ void CallbackVerbose::update_header() {
   header_ += center_string("cost", columnwidth) + separator;
   header_ += center_string("stop", columnwidth) + separator;
   header_ += center_string("grad", columnwidth) + separator;
-  header_ += center_string("xreg", columnwidth) + separator;
-  header_ += center_string("ureg", columnwidth) + separator;
+  header_ += center_string("preg", columnwidth) + separator;
+  header_ += center_string("dreg", columnwidth) + separator;
   header_ += center_string("step", 2 + 4) + separator;
   header_ += center_string("||ffeas||", columnwidth) + separator;
   header_ += center_string("||gfeas||", columnwidth) + separator;
@@ -90,7 +90,7 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
   std::cout << std::scientific << std::setprecision(precision_)
             << solver.get_cost() << "  ";
   std::cout << solver.get_stop() << "  " << -solver.get_d()[1] << "  ";
-  std::cout << solver.get_xreg() << "  " << solver.get_ureg() << "  ";
+  std::cout << solver.get_preg() << "  " << solver.get_dreg() << "  ";
   std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
             << "  ";
   std::cout << std::scientific << std::setprecision(precision_)

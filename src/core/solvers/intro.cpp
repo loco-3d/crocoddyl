@@ -83,11 +83,11 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
-    xreg_ = reg_min_;
-    ureg_ = reg_min_;
+    preg_ = reg_min_;
+    dreg_ = reg_min_;
   } else {
-    xreg_ = init_reg;
-    ureg_ = init_reg;
+    preg_ = init_reg;
+    dreg_ = init_reg;
   }
   was_feasible_ = false;
   if (zero_upsilon_) {
@@ -102,7 +102,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         recalcDiff = false;
         increaseRegularization();
-        if (xreg_ == reg_max_) {
+        if (preg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -168,7 +168,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       decreaseRegularization();
     }
     if (steplength_ <= th_stepinc_ || std::abs(d_[1]) <= th_feas_) {
-      if (xreg_ == reg_max_) {
+      if (preg_ == reg_max_) {
         STOP_PROFILER("SolverIntro::solve");
         return false;
       }
@@ -314,8 +314,8 @@ void SolverIntro::computeValueFunction(
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
 
-  if (!std::isnan(xreg_)) {
-    Vxx_[t].diagonal().array() += xreg_;
+  if (!std::isnan(preg_)) {
+    Vxx_[t].diagonal().array() += preg_;
   }
 
   // Compute and store the Vx gradient at end of the interval (rollout state)

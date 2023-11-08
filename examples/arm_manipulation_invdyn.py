@@ -131,7 +131,7 @@ if WITHPLOT:
         show=False,
     )
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2
+        log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )
 
 # Visualizing the solution in gepetto-viewer

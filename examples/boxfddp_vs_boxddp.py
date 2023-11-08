@@ -153,8 +153,8 @@ if WITHPLOT:
     log = boxfddp.getCallbacks()[1]
     crocoddyl.plotConvergence(
         log.costs,
-        log.u_regs,
-        log.x_regs,
+        log.pregs,
+        log.dregs,
         log.grads,
         log.stops,
         log.steps,
@@ -165,8 +165,8 @@ if WITHPLOT:
     log = boxddp.getCallbacks()[1]
     crocoddyl.plotConvergence(
         log.costs,
-        log.u_regs,
-        log.x_regs,
+        log.pregs,
+        log.dregs,
         log.grads,
         log.stops,
         log.steps,

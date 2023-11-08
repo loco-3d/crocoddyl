@@ -35,8 +35,8 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       ffeas_try_(0.),
       gfeas_try_(0.),
       hfeas_try_(0.),
-      xreg_(NAN),
-      ureg_(NAN),
+      preg_(0.),
+      dreg_(0.),
       steplength_(1.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
@@ -320,9 +320,17 @@ double SolverAbstract::get_gfeas_try() const { return gfeas_try_; }
 
 double SolverAbstract::get_hfeas_try() const { return hfeas_try_; }
 
-double SolverAbstract::get_xreg() const { return xreg_; }
+double SolverAbstract::get_preg() const { return preg_; }
 
-double SolverAbstract::get_ureg() const { return ureg_; }
+double SolverAbstract::get_dreg() const { return dreg_; }
+
+DEPRECATED(
+    "Use get_preg for gettting the primal-dual regularization",
+    double SolverAbstract::get_xreg() const { return preg_; })
+
+DEPRECATED(
+    "Use get_preg for gettting the primal-dual regularization",
+    double SolverAbstract::get_ureg() const { return preg_; })
 
 double SolverAbstract::get_steplength() const { return steplength_; }
 
@@ -384,21 +392,43 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
   us_ = us;
 }
 
-void SolverAbstract::set_xreg(const double xreg) {
-  if (xreg < 0.) {
+void SolverAbstract::set_preg(const double preg) {
+  if (preg < 0.) {
     throw_pretty("Invalid argument: "
-                 << "xreg value has to be positive.");
+                 << "preg value has to be positive.");
   }
-  xreg_ = xreg;
+  preg_ = preg;
 }
 
-void SolverAbstract::set_ureg(const double ureg) {
-  if (ureg < 0.) {
+void SolverAbstract::set_dreg(const double dreg) {
+  if (dreg < 0.) {
     throw_pretty("Invalid argument: "
-                 << "ureg value has to be positive.");
+                 << "dreg value has to be positive.");
   }
-  ureg_ = ureg;
+  dreg_ = dreg;
 }
+
+DEPRECATED(
+    "Use set_preg for gettting the primal-variable regularization",
+    void SolverAbstract::set_xreg(const double xreg) {
+      if (xreg < 0.) {
+        throw_pretty("Invalid argument: "
+                     << "xreg value has to be positive.");
+      }
+      xreg_ = xreg;
+      preg_ = xreg;
+    })
+
+DEPRECATED(
+    "Use set_preg for gettting the primal-variable regularization",
+    void SolverAbstract::set_ureg(const double ureg) {
+      if (ureg < 0.) {
+        throw_pretty("Invalid argument: "
+                     << "ureg value has to be positive.");
+      }
+      ureg_ = ureg;
+      preg_ = ureg;
+    })
 
 void SolverAbstract::set_th_acceptstep(const double th_acceptstep) {
   if (0. >= th_acceptstep || th_acceptstep > 1) {

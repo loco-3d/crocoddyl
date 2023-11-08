@@ -23,8 +23,8 @@ SolverKKT::SolverKKT(boost::shared_ptr<ShootingProblem> problem)
       was_feasible_(false) {
   allocateData();
   const std::size_t n_alphas = 10;
-  xreg_ = 0.;
-  ureg_ = 0.;
+  preg_ = 0.;
+  dreg_ = 0.;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
     alphas_[n] = 1. / pow(2., (double)n);
@@ -45,7 +45,7 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
         computeDirection(recalc);
       } catch (std::exception& e) {
         recalc = false;
-        if (xreg_ == reg_max_) {
+        if (preg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -254,19 +254,19 @@ void SolverKKT::computePrimalDual() {
 }
 
 void SolverKKT::increaseRegularization() {
-  xreg_ *= reg_incfactor_;
-  if (xreg_ > reg_max_) {
-    xreg_ = reg_max_;
+  preg_ *= reg_incfactor_;
+  if (preg_ > reg_max_) {
+    preg_ = reg_max_;
   }
-  ureg_ = xreg_;
+  dreg_ = preg_;
 }
 
 void SolverKKT::decreaseRegularization() {
-  xreg_ /= reg_decfactor_;
-  if (xreg_ < reg_min_) {
-    xreg_ = reg_min_;
+  preg_ /= reg_decfactor_;
+  if (preg_ < reg_min_) {
+    preg_ = reg_min_;
   }
-  ureg_ = xreg_;
+  dreg_ = preg_;
 }
 
 void SolverKKT::allocateData() {

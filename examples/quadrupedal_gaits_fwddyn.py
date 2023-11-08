@@ -207,8 +207,8 @@ if WITHPLOT:
         log = solver[i].getCallbacks()[1]
         crocoddyl.plotConvergence(
             log.costs,
-            log.u_regs,
-            log.x_regs,
+            log.pregs,
+            log.dregs,
             log.grads,
             log.stops,
             log.steps,

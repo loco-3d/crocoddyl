@@ -228,5 +228,5 @@ if WITHPLOT:
     plotSolution(solver, bounds=False, figIndex=1, show=False)
 
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=3
+        log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=3
     )

@@ -94,7 +94,7 @@ class SolverAbstract {
       const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
       const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double reg_init = 1e-9) = 0;
+      const double reg_init = NAN) = 0;
 
   /**
    * @brief Compute the search direction
@@ -337,14 +337,19 @@ class SolverAbstract {
   double get_hfeas_try() const;
 
   /**
-   * @brief Return the state regularization value
+   * @brief Return the primal-variable regularization
    */
-  double get_xreg() const;
+  double get_preg() const;
 
   /**
-   * @brief Return the control regularization value
+   * @brief Return the dual-variable regularization
    */
-  double get_ureg() const;
+  double get_dreg() const;
+
+  DEPRECATED("Use get_preg for primal-variable regularization",
+             double get_xreg() const;)
+  DEPRECATED("Use get_preg for primal-variable regularization",
+             double get_ureg() const;)
 
   /**
    * @brief Return the step length \f$\alpha\f$
@@ -388,14 +393,19 @@ class SolverAbstract {
   void set_us(const std::vector<Eigen::VectorXd>& us);
 
   /**
-   * @brief Modify the state regularization value
+   * @brief Modify the primal-variable regularization value
    */
-  void set_xreg(const double xreg);
+  void set_preg(const double preg);
 
   /**
-   * @brief Modify the control regularization value
+   * @brief Modify the dual-variable regularization value
    */
-  void set_ureg(const double ureg);
+  void set_dreg(const double dreg);
+
+  DEPRECATED("Use set_preg for primal-variable regularization",
+             void set_xreg(const double xreg);)
+  DEPRECATED("Use set_preg for primal-variable regularization",
+             void set_ureg(const double ureg);)
 
   /**
    * @brief Modify the threshold used for accepting step
@@ -450,8 +460,12 @@ class SolverAbstract {
                       //!< for the current step length
   double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
                       //!< the current step length
-  double xreg_;       //!< Current state regularization value
-  double ureg_;       //!< Current control regularization values
+  double preg_;       //!< Current primal-variable regularization value
+  double dreg_;       //!< Current dual-variable regularization value
+  DEPRECATED("Use preg_ for primal-variable regularization",
+             double xreg_;)  //!< Current state regularization value
+  DEPRECATED("Use dreg_ for primal-variable regularization",
+             double ureg_;)        //!< Current control regularization values
   double steplength_;              //!< Current applied step length
   double th_acceptstep_;           //!< Threshold used for accepting step
   double th_stop_;                 //!< Tolerance for stopping the algorithm
