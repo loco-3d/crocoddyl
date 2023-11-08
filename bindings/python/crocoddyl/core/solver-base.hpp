@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,14 +25,22 @@ class SolverAbstract_wrap : public SolverAbstract,
  public:
   using SolverAbstract::cost_;
   using SolverAbstract::d_;
+  using SolverAbstract::dfeas_;
+  using SolverAbstract::dPhi_;
+  using SolverAbstract::dPhiexp_;
   using SolverAbstract::dV_;
   using SolverAbstract::dVexp_;
+  using SolverAbstract::feas_;
   using SolverAbstract::ffeas_;
+  using SolverAbstract::ffeas_try_;
   using SolverAbstract::fs_;
   using SolverAbstract::gfeas_;
+  using SolverAbstract::gfeas_try_;
   using SolverAbstract::hfeas_;
+  using SolverAbstract::hfeas_try_;
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
+  using SolverAbstract::merit_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
   using SolverAbstract::us_;

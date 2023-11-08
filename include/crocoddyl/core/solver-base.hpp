@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -382,25 +382,39 @@ class SolverAbstract {
   std::vector<Eigen::VectorXd> us_;             //!< Control trajectory
   std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
   std::vector<boost::shared_ptr<CallbackAbstract> >
-      callbacks_;         //!< Callback functions
-  bool is_feasible_;      //!< Label that indicates is the iteration is feasible
-  bool was_feasible_;     //!< Label that indicates in the previous iterate was
-                          //!< feasible
-  double cost_;           //!< Total cost
-  double stop_;           //!< Value computed by `stoppingCriteria()`
-  Eigen::Vector2d d_;     //!< LQ approximation of the expected improvement
-  double xreg_;           //!< Current state regularization value
-  double ureg_;           //!< Current control regularization values
-  double steplength_;     //!< Current applied step-length
-  double dV_;             //!< Cost reduction obtained by `tryStep()`
-  double dVexp_;          //!< Expected cost reduction
+      callbacks_;      //!< Callback functions
+  bool is_feasible_;   //!< Label that indicates is the iteration is feasible
+  bool was_feasible_;  //!< Label that indicates in the previous iterate was
+                       //!< feasible
+  double cost_;        //!< Cost for the current guess
+  double merit_;       //!< Merit for the current guess
+  double stop_;        //!< Value computed by `stoppingCriteria()`
+  Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
+  double xreg_;        //!< Current state regularization value
+  double ureg_;        //!< Current control regularization values
+  double steplength_;  //!< Current applied step-length
+  double dV_;       //!< Reduction in the cost function computed by `tryStep()`
+  double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
+  double dVexp_;    //!< Expected reduction in the cost function
+  double dPhiexp_;  //!< Expected reduction in the merit function
+  double dfeas_;    //!< Reduction in the feasibility
   double th_acceptstep_;  //!< Threshold used for accepting step
   double th_stop_;        //!< Tolerance for stopping the algorithm
   std::size_t iter_;      //!< Number of iteration performed by the solver
   double th_gaptol_;      //!< Threshold limit to check non-zero gaps
-  double ffeas_;          //!< Feasibility of the dynamic constraints
-  double gfeas_;          //!< Feasibility of the inequality constraints
-  double hfeas_;          //!< Feasibility of the equality constraints
+  double feas_;           //!< Total feasibility for the current guess
+  double
+      ffeas_;  //!< Feasibility of the dynamic constraints for the current guess
+  double gfeas_;  //!< Feasibility of the inequality constraints for the current
+                  //!< guess
+  double hfeas_;  //!< Feasibility of the equality constraints for the current
+                  //!< guess
+  double ffeas_try_;  //!< Feasibility of the dynamic constraints evaluated for
+                      //!< the current step length
+  double gfeas_try_;  //!< Feasibility of the inequality constraints evaluated
+                      //!< for the current step length
+  double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
+                      //!< the current step length
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
                                    //!< dynamics and constraints feasibility
   double tmp_feas_;  //!< Temporal variables used for computed the feasibility

@@ -173,7 +173,10 @@ void exposeSolverAbstract() {
       .def_readwrite("fs", &SolverAbstract_wrap::fs_, "dynamics gaps")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_,
                      "feasible (xs,us)")
-      .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
+      .def_readwrite("cost", &SolverAbstract_wrap::cost_,
+                     "cost for the current guess")
+      .def_readwrite("merit", &SolverAbstract_wrap::merit_,
+                     "merit for the current guess")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_,
                      "stopping criteria value")
       .def_readwrite("d", &SolverAbstract_wrap::d_, "expected improvement")
@@ -186,9 +189,15 @@ void exposeSolverAbstract() {
       .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_,
                      "applied step length")
       .def_readwrite("dV", &SolverAbstract_wrap::dV_,
-                     "reduction in the cost function")
+                     "reduction in the cost function computed by `tryStep()`")
+      .def_readwrite("dPhi", &SolverAbstract_wrap::dPhi_,
+                     "reduction in the merit function computed by `tryStep()`")
       .def_readwrite("dVexp", &SolverAbstract_wrap::dVexp_,
                      "expected reduction in the cost function")
+      .def_readwrite("dPhiexp", &SolverAbstract_wrap::dPhiexp_,
+                     "expected reduction in the merit function")
+      .def_readwrite("dfeas", &SolverAbstract_wrap::dfeas_,
+                     "reduction in the feasibility")
       .add_property("th_acceptStep",
                     bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep),
@@ -203,6 +212,8 @@ void exposeSolverAbstract() {
                     bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
                     bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
                     "threshold for accepting a gap as non-zero")
+      .def_readwrite("feas", &SolverAbstract_wrap::feas_,
+                     "total feasibility for the current guess")
       .def_readwrite(
           "ffeas", &SolverAbstract_wrap::ffeas_,
           "feasibility of the dynamic constraint for the current guess")
@@ -212,6 +223,15 @@ void exposeSolverAbstract() {
       .def_readwrite(
           "hfeas", &SolverAbstract_wrap::hfeas_,
           "feasibility of the equality constraint for the current guess")
+      .def_readwrite(
+          "ffeas_try", &SolverAbstract_wrap::ffeas_try_,
+          "feasibility of the dynamic constraint for the current step length")
+      .def_readwrite("gfeas_try", &SolverAbstract_wrap::gfeas_try_,
+                     "feasibility of the inequality constraint for the current "
+                     "step length")
+      .def_readwrite(
+          "hfeas_try", &SolverAbstract_wrap::hfeas_try_,
+          "feasibility of the equality constraint for the current step length")
       .add_property(
           "feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
           bp::make_function(&SolverAbstract_wrap::set_feasnorm),

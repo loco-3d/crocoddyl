@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -21,19 +21,27 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       is_feasible_(false),
       was_feasible_(false),
       cost_(0.),
+      merit_(0.),
       stop_(0.),
       xreg_(NAN),
       ureg_(NAN),
       steplength_(1.),
       dV_(0.),
+      dPhi_(0.),
       dVexp_(0.),
+      dPhiexp_(0.),
+      dfeas_(0.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
       iter_(0),
       th_gaptol_(1e-16),
-      ffeas_(NAN),
-      gfeas_(NAN),
-      hfeas_(NAN),
+      feas_(0.),
+      ffeas_(0.),
+      gfeas_(0.),
+      hfeas_(0.),
+      ffeas_try_(0.),
+      gfeas_try_(0.),
+      hfeas_try_(0.),
       feasnorm_(LInf),
       tmp_feas_(0.) {
   // Allocate common data

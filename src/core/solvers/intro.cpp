@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,8 +20,6 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
       eq_solver_(LuNull),
       th_feas_(1e-4),
       rho_(0.3),
-      dPhi_(0.),
-      hfeas_try_(0.),
       upsilon_(0.),
       zero_upsilon_(false) {
   const std::size_t T = problem_->get_T();
@@ -405,10 +403,6 @@ EqualitySolverType SolverIntro::get_equality_solver() const {
 double SolverIntro::get_th_feas() const { return th_feas_; }
 
 double SolverIntro::get_rho() const { return rho_; }
-
-double SolverIntro::get_dPhi() const { return dPhi_; }
-
-double SolverIntro::get_dPhiexp() const { return dPhiexp_; }
 
 double SolverIntro::get_upsilon() const { return upsilon_; }
 
