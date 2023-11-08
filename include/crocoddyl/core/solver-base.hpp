@@ -275,21 +275,6 @@ class SolverAbstract {
   const Eigen::Vector2d& get_d() const;
 
   /**
-   * @brief Return the state regularization value
-   */
-  double get_xreg() const;
-
-  /**
-   * @brief Return the control regularization value
-   */
-  double get_ureg() const;
-
-  /**
-   * @brief Return the step length \f$\alpha\f$
-   */
-  double get_steplength() const;
-
-  /**
    * @brief Return the reduction in the cost function \f$\Delta V\f$
    */
   double get_dV() const;
@@ -315,26 +300,6 @@ class SolverAbstract {
    * @brief Return the reduction in the feasibility
    */
   double get_dfeas() const;
-
-  /**
-   * @brief Return the threshold used for accepting a step
-   */
-  double get_th_acceptstep() const;
-
-  /**
-   * @brief Return the tolerance for stopping the algorithm
-   */
-  double get_th_stop() const;
-
-  /**
-   * @brief Return the number of iterations performed by the solver
-   */
-  std::size_t get_iter() const;
-
-  /**
-   * @brief Return the threshold for accepting a gap as non-zero
-   */
-  double get_th_gaptol() const;
 
   /**
    * @brief Return the total feasibility for the current guess
@@ -372,10 +337,45 @@ class SolverAbstract {
   double get_hfeas_try() const;
 
   /**
+   * @brief Return the state regularization value
+   */
+  double get_xreg() const;
+
+  /**
+   * @brief Return the control regularization value
+   */
+  double get_ureg() const;
+
+  /**
+   * @brief Return the step length \f$\alpha\f$
+   */
+  double get_steplength() const;
+
+  /**
+   * @brief Return the threshold used for accepting a step
+   */
+  double get_th_acceptstep() const;
+
+  /**
+   * @brief Return the tolerance for stopping the algorithm
+   */
+  double get_th_stop() const;
+
+  /**
+   * @brief Return the threshold for accepting a gap as non-zero
+   */
+  double get_th_gaptol() const;
+
+  /**
    * @brief Return the type of norm used to evaluate the dynamic and constraints
    * feasibility
    */
   FeasibilityNorm get_feasnorm() const;
+
+  /**
+   * @brief Return the number of iterations performed by the solver
+   */
+  std::size_t get_iter() const;
 
   /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
@@ -432,19 +432,12 @@ class SolverAbstract {
   double merit_;       //!< Merit for the current guess
   double stop_;        //!< Value computed by `stoppingCriteria()`
   Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
-  double xreg_;        //!< Current state regularization value
-  double ureg_;        //!< Current control regularization values
-  double steplength_;  //!< Current applied step-length
   double dV_;       //!< Reduction in the cost function computed by `tryStep()`
   double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
   double dVexp_;    //!< Expected reduction in the cost function
   double dPhiexp_;  //!< Expected reduction in the merit function
   double dfeas_;    //!< Reduction in the feasibility
-  double th_acceptstep_;  //!< Threshold used for accepting step
-  double th_stop_;        //!< Tolerance for stopping the algorithm
-  std::size_t iter_;      //!< Number of iteration performed by the solver
-  double th_gaptol_;      //!< Threshold limit to check non-zero gaps
-  double feas_;           //!< Total feasibility for the current guess
+  double feas_;     //!< Total feasibility for the current guess
   double
       ffeas_;  //!< Feasibility of the dynamic constraints for the current guess
   double gfeas_;  //!< Feasibility of the inequality constraints for the current
@@ -457,9 +450,16 @@ class SolverAbstract {
                       //!< for the current step length
   double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
                       //!< the current step length
+  double xreg_;       //!< Current state regularization value
+  double ureg_;       //!< Current control regularization values
+  double steplength_;              //!< Current applied step length
+  double th_acceptstep_;           //!< Threshold used for accepting step
+  double th_stop_;                 //!< Tolerance for stopping the algorithm
+  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
                                    //!< dynamics and constraints feasibility
-  double tmp_feas_;  //!< Temporal variables used for computed the feasibility
+  std::size_t iter_;  //!< Number of iteration performed by the solver
+  double tmp_feas_;   //!< Temporal variables used for computed the feasibility
 };
 
 /**

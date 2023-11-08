@@ -23,18 +23,11 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       cost_(0.),
       merit_(0.),
       stop_(0.),
-      xreg_(NAN),
-      ureg_(NAN),
-      steplength_(1.),
       dV_(0.),
       dPhi_(0.),
       dVexp_(0.),
       dPhiexp_(0.),
       dfeas_(0.),
-      th_acceptstep_(0.1),
-      th_stop_(1e-9),
-      iter_(0),
-      th_gaptol_(1e-16),
       feas_(0.),
       ffeas_(0.),
       gfeas_(0.),
@@ -42,7 +35,14 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
       ffeas_try_(0.),
       gfeas_try_(0.),
       hfeas_try_(0.),
+      xreg_(NAN),
+      ureg_(NAN),
+      steplength_(1.),
+      th_acceptstep_(0.1),
+      th_stop_(1e-9),
+      th_gaptol_(1e-16),
       feasnorm_(LInf),
+      iter_(0),
       tmp_feas_(0.) {
   // Allocate common data
   const std::size_t ndx = problem_->get_ndx();
@@ -296,12 +296,6 @@ double SolverAbstract::get_stop() const { return stop_; }
 
 const Eigen::Vector2d& SolverAbstract::get_d() const { return d_; }
 
-double SolverAbstract::get_xreg() const { return xreg_; }
-
-double SolverAbstract::get_ureg() const { return ureg_; }
-
-double SolverAbstract::get_steplength() const { return steplength_; }
-
 double SolverAbstract::get_dV() const { return dV_; }
 
 double SolverAbstract::get_dPhi() const { return dPhi_; }
@@ -311,14 +305,6 @@ double SolverAbstract::get_dVexp() const { return dVexp_; }
 double SolverAbstract::get_dPhiexp() const { return dPhiexp_; }
 
 double SolverAbstract::get_dfeas() const { return dfeas_; }
-
-double SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
-
-double SolverAbstract::get_th_stop() const { return th_stop_; }
-
-std::size_t SolverAbstract::get_iter() const { return iter_; }
-
-double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
 
 double SolverAbstract::get_feas() const { return feas_; }
 
@@ -334,7 +320,21 @@ double SolverAbstract::get_gfeas_try() const { return gfeas_try_; }
 
 double SolverAbstract::get_hfeas_try() const { return hfeas_try_; }
 
+double SolverAbstract::get_xreg() const { return xreg_; }
+
+double SolverAbstract::get_ureg() const { return ureg_; }
+
+double SolverAbstract::get_steplength() const { return steplength_; }
+
+double SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
+
+double SolverAbstract::get_th_stop() const { return th_stop_; }
+
+double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
+
 FeasibilityNorm SolverAbstract::get_feasnorm() const { return feasnorm_; }
+
+std::size_t SolverAbstract::get_iter() const { return iter_; }
 
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
