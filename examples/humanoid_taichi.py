@@ -213,22 +213,7 @@ problem = crocoddyl.ShootingProblem(
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverBoxFDDP(problem)
-if WITHDISPLAY and isinstance(crocoddyl.GepettoDisplay, type(display)):
-    display.rate = 4
-    display.freq = 4
-    if WITHPLOT:
-        solver.setCallbacks(
-            [
-                crocoddyl.CallbackVerbose(),
-                crocoddyl.CallbackLogger(),
-                crocoddyl.CallbackDisplay(display),
-            ]
-        )
-    else:
-        solver.setCallbacks(
-            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-        )
-elif WITHPLOT:
+if WITHPLOT:
     solver.setCallbacks(
         [
             crocoddyl.CallbackVerbose(),
@@ -246,6 +231,16 @@ solver.solve(xs, us, 500, False, 1e-9)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
+    try:
+        import gepetto
+
+        gepetto.corbaserver.Client()
+        cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
+        display = crocoddyl.GepettoDisplay(
+            robot, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
+        )
+    except Exception:
+        display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
     display.rate = -1
     display.freq = 1
     while True:
