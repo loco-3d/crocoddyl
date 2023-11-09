@@ -190,8 +190,6 @@ elif WITHPLOT:
     )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
-solver.getCallbacks()[0].precision = 3
-solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving it with the DDP algorithm
 xs = [x0] * (solver.problem.T + 1)

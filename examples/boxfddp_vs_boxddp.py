@@ -116,10 +116,6 @@ if WITHPLOT:
 else:
     boxfddp.setCallbacks([crocoddyl.CallbackVerbose()])
     boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
-boxfddp.getCallbacks()[0].precision = 3
-boxfddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
-boxddp.getCallbacks()[0].precision = 3
-boxddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the both solvers
 xs = [x0] * (boxfddp.problem.T + 1)

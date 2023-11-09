@@ -180,8 +180,6 @@ for i, phase in enumerate(GAITPHASES):
         )
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
-    solver[i].getCallbacks()[0].precision = 3
-    solver[i].getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
     # Solving the problem with the solver
     xs = [x0] * (solver[i].problem.T + 1)
