@@ -128,18 +128,20 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       steplength_ = *it;
       try {
         dV_ = tryStep(steplength_);
-        dPhi_ = dV_ + upsilon_ * (hfeas_ - hfeas_try_);
+        dfeas_ = hfeas_ - hfeas_try_;
+        dPhi_ = dV_ + upsilon_ * dfeas_;
       } catch (std::exception& e) {
         continue;
       }
       expectedImprovement();
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
-      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * (hfeas_ - hfeas_try_);
+      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * dfeas_;
       if (dPhiexp_ >= 0) {  // descend direction
         if (std::abs(d_[0]) < th_grad_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
+          merit_ = cost_ + upsilon_ * dfeas_;
           hfeas_ = hfeas_try_;
           recalcDiff = true;
           break;
@@ -150,6 +152,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
+          merit_ = cost_ + upsilon_ * dfeas_;
           hfeas_ = hfeas_try_;
           recalcDiff = true;
           break;
