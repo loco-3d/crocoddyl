@@ -163,8 +163,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     }
     case _1: {
       std::cout << std::scientific << std::setprecision(precision_)
-                << solver.get_cost() << separator_;               // cost
-      std::cout << solver.get_merit() << separator_;              // merit
+                << solver.get_cost() << separator_short_;         // cost
+      std::cout << space_sign(solver.get_merit()) << separator_;  // merit
       std::cout << solver.get_stop() << separator_short_;         // stop
       std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
       std::cout << solver.get_preg() << separator_;               // preg
@@ -178,8 +178,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     }
     case _2: {
       std::cout << std::scientific << std::setprecision(precision_)
-                << solver.get_cost() << separator_;               // cost
-      std::cout << solver.get_merit() << separator_;              // merit
+                << solver.get_cost() << separator_short_;         // cost
+      std::cout << space_sign(solver.get_merit()) << separator_;  // merit
       std::cout << solver.get_stop() << separator_short_;         // stop
       std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
       std::cout << solver.get_preg() << separator_;               // preg
@@ -194,8 +194,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     }
     case _3: {
       std::cout << std::scientific << std::setprecision(precision_)
-                << solver.get_cost() << separator_;               // cost
-      std::cout << solver.get_merit() << separator_;              // merit
+                << solver.get_cost() << separator_short_;         // cost
+      std::cout << space_sign(solver.get_merit()) << separator_;  // merit
       std::cout << solver.get_stop() << separator_short_;         // stop
       std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
       std::cout << solver.get_preg() << separator_;               // preg
@@ -212,8 +212,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     }
     case _4: {
       std::cout << std::scientific << std::setprecision(precision_)
-                << solver.get_cost() << separator_;               // cost
-      std::cout << solver.get_merit() << separator_;              // merit
+                << solver.get_cost() << separator_short_;         // cost
+      std::cout << space_sign(solver.get_merit()) << separator_;  // merit
       std::cout << solver.get_stop() << separator_short_;         // stop
       std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
       std::cout << solver.get_preg() << separator_;               // preg
