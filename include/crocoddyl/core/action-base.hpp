@@ -245,12 +245,12 @@ class ActionModelAbstractTpl {
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const;
 
   /**
    * @brief Return the control lower bound
