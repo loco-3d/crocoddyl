@@ -141,8 +141,8 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
-          merit_ = cost_ + upsilon_ * dfeas_;
           hfeas_ = hfeas_try_;
+          merit_ = cost_ + upsilon_ * hfeas_;
           recalcDiff = true;
           break;
         }
@@ -152,8 +152,8 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
-          merit_ = cost_ + upsilon_ * dfeas_;
           hfeas_ = hfeas_try_;
+          merit_ = cost_ + upsilon_ * hfeas_;
           recalcDiff = true;
           break;
         }
