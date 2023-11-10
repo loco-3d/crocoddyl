@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -94,7 +94,7 @@ class SolverAbstract {
       const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
       const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double reg_init = 1e-9) = 0;
+      const double reg_init = NAN) = 0;
 
   /**
    * @brief Compute the search direction
@@ -255,64 +255,56 @@ class SolverAbstract {
   bool get_is_feasible() const;
 
   /**
-   * @brief Return the total cost
+   * @brief Return the cost for the current guess
    */
   double get_cost() const;
 
   /**
-   * @brief Return the value computed by `stoppingCriteria()`
+   * @brief Return the merit for the current guess
+   */
+  double get_merit() const;
+
+  /**
+   * @brief Return the stopping-criteria value computed by `stoppingCriteria()`
    */
   double get_stop() const;
 
   /**
-   * @brief Return the LQ approximation of the expected improvement
+   * @brief Return the linear and quadratic terms of the expected improvement
    */
   const Eigen::Vector2d& get_d() const;
 
   /**
-   * @brief Return the state regularization value
-   */
-  double get_xreg() const;
-
-  /**
-   * @brief Return the control regularization value
-   */
-  double get_ureg() const;
-
-  /**
-   * @brief Return the step length \f$\alpha\f$
-   */
-  double get_steplength() const;
-
-  /**
-   * @brief Return the cost reduction \f$dV\f$
+   * @brief Return the reduction in the cost function \f$\Delta V\f$
    */
   double get_dV() const;
 
   /**
-   * @brief Return the expected cost reduction \f$dV_{exp}\f$
+   * @brief Return the reduction in the merit function \f$\Delta\Phi\f$
+   */
+  double get_dPhi() const;
+
+  /**
+   * @brief Return the expected reduction in the cost function \f$\Delta
+   * V_{exp}\f$
    */
   double get_dVexp() const;
 
   /**
-   * @brief Return the threshold used for accepting a step
+   * @brief Return the expected reduction in the merit function
+   * \f$\Delta\Phi_{exp}\f$
    */
-  double get_th_acceptstep() const;
+  double get_dPhiexp() const;
 
   /**
-   * @brief Return the tolerance for stopping the algorithm
+   * @brief Return the reduction in the feasibility
    */
-  double get_th_stop() const;
+  double get_dfeas() const;
 
   /**
-   * @brief Return the number of iterations performed by the solver
+   * @brief Return the total feasibility for the current guess
    */
-  std::size_t get_iter() const;
-
-  /**
-   * @brief Return the threshold for accepting a gap as non-zero
-   */
-  double get_th_gaptol() const;
+  double get_feas() const;
 
   /**
    * @brief Return the dynamic feasibility for the current guess
@@ -330,10 +322,65 @@ class SolverAbstract {
   double get_hfeas() const;
 
   /**
+   * @brief Return the dynamic feasibility for the current step length
+   */
+  double get_ffeas_try() const;
+
+  /**
+   * @brief Return the inequality feasibility for the current step length
+   */
+  double get_gfeas_try() const;
+
+  /**
+   * @brief Return the equality feasibility for the current step length
+   */
+  double get_hfeas_try() const;
+
+  /**
+   * @brief Return the primal-variable regularization
+   */
+  double get_preg() const;
+
+  /**
+   * @brief Return the dual-variable regularization
+   */
+  double get_dreg() const;
+
+  DEPRECATED("Use get_preg for primal-variable regularization",
+             double get_xreg() const;)
+  DEPRECATED("Use get_preg for primal-variable regularization",
+             double get_ureg() const;)
+
+  /**
+   * @brief Return the step length \f$\alpha\f$
+   */
+  double get_steplength() const;
+
+  /**
+   * @brief Return the threshold used for accepting a step
+   */
+  double get_th_acceptstep() const;
+
+  /**
+   * @brief Return the tolerance for stopping the algorithm
+   */
+  double get_th_stop() const;
+
+  /**
+   * @brief Return the threshold for accepting a gap as non-zero
+   */
+  double get_th_gaptol() const;
+
+  /**
    * @brief Return the type of norm used to evaluate the dynamic and constraints
    * feasibility
    */
   FeasibilityNorm get_feasnorm() const;
+
+  /**
+   * @brief Return the number of iterations performed by the solver
+   */
+  std::size_t get_iter() const;
 
   /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
@@ -346,14 +393,19 @@ class SolverAbstract {
   void set_us(const std::vector<Eigen::VectorXd>& us);
 
   /**
-   * @brief Modify the state regularization value
+   * @brief Modify the primal-variable regularization value
    */
-  void set_xreg(const double xreg);
+  void set_preg(const double preg);
 
   /**
-   * @brief Modify the control regularization value
+   * @brief Modify the dual-variable regularization value
    */
-  void set_ureg(const double ureg);
+  void set_dreg(const double dreg);
+
+  DEPRECATED("Use set_preg for primal-variable regularization",
+             void set_xreg(const double xreg);)
+  DEPRECATED("Use set_preg for primal-variable regularization",
+             void set_ureg(const double ureg);)
 
   /**
    * @brief Modify the threshold used for accepting step
@@ -382,28 +434,46 @@ class SolverAbstract {
   std::vector<Eigen::VectorXd> us_;             //!< Control trajectory
   std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
   std::vector<boost::shared_ptr<CallbackAbstract> >
-      callbacks_;         //!< Callback functions
-  bool is_feasible_;      //!< Label that indicates is the iteration is feasible
-  bool was_feasible_;     //!< Label that indicates in the previous iterate was
-                          //!< feasible
-  double cost_;           //!< Total cost
-  double stop_;           //!< Value computed by `stoppingCriteria()`
-  Eigen::Vector2d d_;     //!< LQ approximation of the expected improvement
-  double xreg_;           //!< Current state regularization value
-  double ureg_;           //!< Current control regularization values
-  double steplength_;     //!< Current applied step-length
-  double dV_;             //!< Cost reduction obtained by `tryStep()`
-  double dVexp_;          //!< Expected cost reduction
-  double th_acceptstep_;  //!< Threshold used for accepting step
-  double th_stop_;        //!< Tolerance for stopping the algorithm
-  std::size_t iter_;      //!< Number of iteration performed by the solver
-  double th_gaptol_;      //!< Threshold limit to check non-zero gaps
-  double ffeas_;          //!< Feasibility of the dynamic constraints
-  double gfeas_;          //!< Feasibility of the inequality constraints
-  double hfeas_;          //!< Feasibility of the equality constraints
+      callbacks_;      //!< Callback functions
+  bool is_feasible_;   //!< Label that indicates is the iteration is feasible
+  bool was_feasible_;  //!< Label that indicates in the previous iterate was
+                       //!< feasible
+  double cost_;        //!< Cost for the current guess
+  double merit_;       //!< Merit for the current guess
+  double stop_;        //!< Value computed by `stoppingCriteria()`
+  Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
+  double dV_;       //!< Reduction in the cost function computed by `tryStep()`
+  double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
+  double dVexp_;    //!< Expected reduction in the cost function
+  double dPhiexp_;  //!< Expected reduction in the merit function
+  double dfeas_;    //!< Reduction in the feasibility
+  double feas_;     //!< Total feasibility for the current guess
+  double
+      ffeas_;  //!< Feasibility of the dynamic constraints for the current guess
+  double gfeas_;  //!< Feasibility of the inequality constraints for the current
+                  //!< guess
+  double hfeas_;  //!< Feasibility of the equality constraints for the current
+                  //!< guess
+  double ffeas_try_;  //!< Feasibility of the dynamic constraints evaluated for
+                      //!< the current step length
+  double gfeas_try_;  //!< Feasibility of the inequality constraints evaluated
+                      //!< for the current step length
+  double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
+                      //!< the current step length
+  double preg_;       //!< Current primal-variable regularization value
+  double dreg_;       //!< Current dual-variable regularization value
+  DEPRECATED("Use preg_ for primal-variable regularization",
+             double xreg_;)  //!< Current state regularization value
+  DEPRECATED("Use dreg_ for primal-variable regularization",
+             double ureg_;)        //!< Current control regularization values
+  double steplength_;              //!< Current applied step length
+  double th_acceptstep_;           //!< Threshold used for accepting step
+  double th_stop_;                 //!< Tolerance for stopping the algorithm
+  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
                                    //!< dynamics and constraints feasibility
-  double tmp_feas_;  //!< Temporal variables used for computed the feasibility
+  std::size_t iter_;  //!< Number of iteration performed by the solver
+  double tmp_feas_;   //!< Temporal variables used for computed the feasibility
 };
 
 /**

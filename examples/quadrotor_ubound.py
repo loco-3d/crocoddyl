@@ -80,13 +80,34 @@ problem = crocoddyl.ShootingProblem(
     np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel
 )
 solver = crocoddyl.SolverBoxDDP(problem)
+if WITHPLOT:
+    solver.setCallbacks(
+        [
+            crocoddyl.CallbackVerbose(),
+            crocoddyl.CallbackLogger(),
+        ]
+    )
+else:
+    solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
+# Solving the problem with the BoxDDP solver
+solver.solve([], [], 200)
+
+# Plotting the entire motion
+if WITHPLOT:
+    log = solver.getCallbacks()[1]
+    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
+    crocoddyl.plotConvergence(
+        log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
+    )
+
+# Display the entire motion
 if WITHDISPLAY:
     try:
         import gepetto
 
         gepetto.corbaserver.Client()
+        cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
         display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF, floor=False)
         hector.viewer.gui.addXYZaxis("world/wp", [1.0, 0.0, 0.0, 1.0], 0.03, 0.5)
         hector.viewer.gui.applyConfiguration(
@@ -99,45 +120,8 @@ if WITHDISPLAY:
                 target_quat[3],
             ],
         )
-        if WITHPLOT:
-            solver.setCallbacks(
-                [
-                    crocoddyl.CallbackVerbose(),
-                    crocoddyl.CallbackLogger(),
-                    crocoddyl.CallbackDisplay(display),
-                ]
-            )
-        else:
-            solver.setCallbacks(
-                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-            )
     except Exception:
         display = crocoddyl.MeshcatDisplay(hector)
-if WITHPLOT:
-    solver.setCallbacks(
-        [
-            crocoddyl.CallbackVerbose(),
-            crocoddyl.CallbackLogger(),
-        ]
-    )
-else:
-    solver.setCallbacks([crocoddyl.CallbackVerbose()])
-solver.getCallbacks()[0].precision = 3
-solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
-
-# Solving the problem with the BoxDDP solver
-solver.solve([], [], 200)
-
-# Plotting the entire motion
-if WITHPLOT:
-    log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-    crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2
-    )
-
-# Display the entire motion
-if WITHDISPLAY:
     display.rate = -1
     display.freq = 1
     while True:

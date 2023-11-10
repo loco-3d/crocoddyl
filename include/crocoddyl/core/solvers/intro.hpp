@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ class SolverIntro : public SolverFDDP {
       const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
       const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double init_reg = 1e-9);
+      const double init_reg = NAN);
   virtual double tryStep(const double step_length = 1);
   virtual double stoppingCriteria();
   virtual void resizeData();
@@ -56,16 +56,6 @@ class SolverIntro : public SolverFDDP {
    * @brief Return the rho parameter used in the merit function
    */
   double get_rho() const;
-
-  /**
-   * @brief Return the reduction in the merit function
-   */
-  double get_dPhi() const;
-
-  /**
-   * @brief Return the expected reduction in the merit function
-   */
-  double get_dPhiexp() const;
 
   /**
    * @brief Return the estimated penalty parameter that balances relative
@@ -172,10 +162,6 @@ class SolverIntro : public SolverFDDP {
   double th_feas_;  //!< Threshold for switching to feasibility
   double rho_;      //!< Parameter used in the merit function to predict the
                     //!< expected reduction
-  double dPhi_;     //!< Reduction in the merit function obtained by `tryStep()`
-  double dPhiexp_;  //!< Expected reduction in the merit function
-  double hfeas_try_;  //!< Feasibility of the equality constraint computed by
-                      //!< the line search
   double
       upsilon_;  //!< Estimated penalty parameter that balances relative
                  //!< contribution of the cost function and equality constraints

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Oxford
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,10 +17,21 @@
 
 namespace crocoddyl {
 
-enum VerboseLevel { _1 = 0, _2 };
+enum VerboseLevel {
+  _0 = 0,  //<! Zero print level that doesn't contain merit-function and
+           // constraints information
+  _1,      //<! First print level that includes level-0, merit-function and
+           // dynamics-constraints information
+  _2,      //<! Second print level that includes level-1 and dual-variable
+           // regularization
+  _3,  //<! Third print level that includes level-2, and equality and inequality
+       // constraints information
+  _4,  //<! Fourht print level that includes expected and current improvements
+       // in the merit function
+};
 class CallbackVerbose : public CallbackAbstract {
  public:
-  explicit CallbackVerbose(VerboseLevel level = _1, int precision = 5);
+  explicit CallbackVerbose(VerboseLevel level = _4, int precision = 3);
   ~CallbackVerbose() override;
 
   void operator()(SolverAbstract& solver) override;
@@ -34,6 +46,8 @@ class CallbackVerbose : public CallbackAbstract {
   VerboseLevel level_;
   int precision_;
   std::string header_;
+  std::string separator_;
+  std::string separator_short_;
 
   void update_header();
 };

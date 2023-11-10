@@ -76,23 +76,8 @@ GAITPHASES = [
         }
     },
 ]
-cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
 
 solver = [None] * len(GAITPHASES)
-display = None
-if WITHDISPLAY:
-    if display is None:
-        try:
-            import gepetto
-
-            gepetto.corbaserver.Client()
-            display = crocoddyl.GepettoDisplay(
-                anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-            )
-        except Exception:
-            display = crocoddyl.MeshcatDisplay(
-                anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-            )
 for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == "walking":
@@ -158,20 +143,7 @@ for i, phase in enumerate(GAITPHASES):
 
     # Added the callback functions
     print("*** SOLVE " + key + " ***")
-    if WITHDISPLAY and isinstance(crocoddyl.GepettoDisplay, type(display)):
-        if WITHPLOT:
-            solver[i].setCallbacks(
-                [
-                    crocoddyl.CallbackVerbose(),
-                    crocoddyl.CallbackLogger(),
-                    crocoddyl.CallbackDisplay(display),
-                ]
-            )
-        else:
-            solver[i].setCallbacks(
-                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-            )
-    elif WITHPLOT:
+    if WITHPLOT:
         solver[i].setCallbacks(
             [
                 crocoddyl.CallbackVerbose(),
@@ -180,8 +152,6 @@ for i, phase in enumerate(GAITPHASES):
         )
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
-    solver[i].getCallbacks()[0].precision = 3
-    solver[i].getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
     # Solving the problem with the solver
     xs = [x0] * (solver[i].problem.T + 1)
@@ -193,6 +163,18 @@ for i, phase in enumerate(GAITPHASES):
 
 # Display the entire motion
 if WITHDISPLAY:
+    try:
+        import gepetto
+
+        gepetto.corbaserver.Client()
+        cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
+        display = crocoddyl.GepettoDisplay(
+            anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
+        )
+    except Exception:
+        display = crocoddyl.MeshcatDisplay(
+            anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
+        )
     display.rate = -1
     display.freq = 1
     while True:
@@ -209,8 +191,8 @@ if WITHPLOT:
         log = solver[i].getCallbacks()[1]
         crocoddyl.plotConvergence(
             log.costs,
-            log.u_regs,
-            log.x_regs,
+            log.pregs,
+            log.dregs,
             log.grads,
             log.stops,
             log.steps,

@@ -10,6 +10,7 @@
 #include "python/crocoddyl/core/solver-base.hpp"
 
 #include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 namespace crocoddyl {
@@ -173,36 +174,26 @@ void exposeSolverAbstract() {
       .def_readwrite("fs", &SolverAbstract_wrap::fs_, "dynamics gaps")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_,
                      "feasible (xs,us)")
-      .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
+      .def_readwrite("cost", &SolverAbstract_wrap::cost_,
+                     "cost for the current guess")
+      .def_readwrite("merit", &SolverAbstract_wrap::merit_,
+                     "merit for the current guess")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_,
                      "stopping criteria value")
-      .def_readwrite("d", &SolverAbstract_wrap::d_, "expected improvement")
-      .add_property("x_reg", bp::make_function(&SolverAbstract_wrap::get_xreg),
-                    bp::make_function(&SolverAbstract_wrap::set_xreg),
-                    "state regularization")
-      .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
-                    bp::make_function(&SolverAbstract_wrap::set_ureg),
-                    "control regularization")
-      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_,
-                     "applied step length")
+      .def_readwrite("d", &SolverAbstract_wrap::d_,
+                     "linear and quadratic terms of the expected improvement")
       .def_readwrite("dV", &SolverAbstract_wrap::dV_,
-                     "reduction in the cost function")
+                     "reduction in the cost function computed by `tryStep()`")
+      .def_readwrite("dPhi", &SolverAbstract_wrap::dPhi_,
+                     "reduction in the merit function computed by `tryStep()`")
       .def_readwrite("dVexp", &SolverAbstract_wrap::dVexp_,
                      "expected reduction in the cost function")
-      .add_property("th_acceptStep",
-                    bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
-                    bp::make_function(&SolverAbstract_wrap::set_th_acceptstep),
-                    "threshold for step acceptance")
-      .add_property("th_stop",
-                    bp::make_function(&SolverAbstract_wrap::get_th_stop),
-                    bp::make_function(&SolverAbstract_wrap::set_th_stop),
-                    "threshold for stopping criteria")
-      .def_readwrite("iter", &SolverAbstract_wrap::iter_,
-                     "number of iterations runned in solve()")
-      .add_property("th_gapTol",
-                    bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
-                    bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
-                    "threshold for accepting a gap as non-zero")
+      .def_readwrite("dPhiexp", &SolverAbstract_wrap::dPhiexp_,
+                     "expected reduction in the merit function")
+      .def_readwrite("dfeas", &SolverAbstract_wrap::dfeas_,
+                     "reduction in the feasibility")
+      .def_readwrite("feas", &SolverAbstract_wrap::feas_,
+                     "total feasibility for the current guess")
       .def_readwrite(
           "ffeas", &SolverAbstract_wrap::ffeas_,
           "feasibility of the dynamic constraint for the current guess")
@@ -212,10 +203,59 @@ void exposeSolverAbstract() {
       .def_readwrite(
           "hfeas", &SolverAbstract_wrap::hfeas_,
           "feasibility of the equality constraint for the current guess")
+      .def_readwrite(
+          "ffeas_try", &SolverAbstract_wrap::ffeas_try_,
+          "feasibility of the dynamic constraint for the current step length")
+      .def_readwrite("gfeas_try", &SolverAbstract_wrap::gfeas_try_,
+                     "feasibility of the inequality constraint for the current "
+                     "step length")
+      .def_readwrite(
+          "hfeas_try", &SolverAbstract_wrap::hfeas_try_,
+          "feasibility of the equality constraint for the current step length")
+      .add_property("preg", bp::make_function(&SolverAbstract_wrap::get_preg),
+                    bp::make_function(&SolverAbstract_wrap::set_preg),
+                    "primal-variable regularization")
+      .add_property("dreg", bp::make_function(&SolverAbstract_wrap::get_dreg),
+                    bp::make_function(&SolverAbstract_wrap::set_dreg),
+                    "dual-variable regularization")
+      .add_property(
+          "x_reg",
+          bp::make_function(
+              &SolverAbstract_wrap::get_xreg,
+              deprecated<bp::return_value_policy<bp::return_by_value> >(
+                  "Deprecated. Use preg")),
+          bp::make_function(&SolverAbstract_wrap::set_xreg,
+                            deprecated<>("Deprecated. Use preg.")),
+          "state regularization")
+      .add_property(
+          "u_reg",
+          bp::make_function(
+              &SolverAbstract_wrap::get_ureg,
+              deprecated<bp::return_value_policy<bp::return_by_value> >(
+                  "Deprecated. Use preg")),
+          bp::make_function(&SolverAbstract_wrap::set_ureg,
+                            deprecated<>("Deprecated. Use preg.")),
+          "control regularization")
+      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_,
+                     "applied step length")
+      .add_property("th_acceptStep",
+                    bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
+                    bp::make_function(&SolverAbstract_wrap::set_th_acceptstep),
+                    "threshold for step acceptance")
+      .add_property("th_stop",
+                    bp::make_function(&SolverAbstract_wrap::get_th_stop),
+                    bp::make_function(&SolverAbstract_wrap::set_th_stop),
+                    "threshold for stopping criteria")
+      .add_property("th_gapTol",
+                    bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
+                    bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
+                    "threshold for accepting a gap as non-zero")
       .add_property(
           "feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
           bp::make_function(&SolverAbstract_wrap::set_feasnorm),
           "norm used to compute the dynamic and constraints feasibility")
+      .def_readwrite("iter", &SolverAbstract_wrap::iter_,
+                     "number of iterations runned in solve()")
       .def(CopyableVisitor<SolverAbstract_wrap>());
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(

@@ -1660,8 +1660,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.th_grad = 1e-12
 
         self.callbacks = None
-        self.x_reg = 0
-        self.u_reg = 0
+        self.preg = 0
+        self.dreg = 0
         self.reg_incFactor = 10
         self.reg_decFactor = 10
         self.reg_max = 1e9
@@ -1672,8 +1672,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None
     ):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.reg_min
-        self.u_reg = regInit if regInit is not None else self.reg_min
+        self.preg = regInit if regInit is not None else self.reg_min
+        self.dreg = regInit if regInit is not None else self.reg_min
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
@@ -1683,7 +1683,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.reg_max:
+                    if self.preg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
@@ -1712,7 +1712,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.reg_max:
+                if self.preg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i
@@ -1760,9 +1760,9 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
 
-        if self.x_reg != 0:
+        if self.preg != 0:
             ndx = self.problem.terminalModel.state.ndx
-            self.Vxx[-1][range(ndx), range(ndx)] += self.x_reg
+            self.Vxx[-1][range(ndx), range(ndx)] += self.preg
 
         # Compute and store the Vx gradient at end of the interval (rollout state)
         if not self.isFeasible:
@@ -1783,8 +1783,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.Qx[t][:] = data.Lx + np.dot(data.Fx.T, self.Vx[t + 1])
             self.Qu[t][:] = data.Lu + np.dot(data.Fu.T, self.Vx[t + 1])
 
-            if self.u_reg != 0:
-                self.Quu[t][range(model.nu), range(model.nu)] += self.u_reg
+            if self.preg != 0:
+                self.Quu[t][range(model.nu), range(model.nu)] += self.preg
 
             self.computeGains(t)
 
@@ -1794,10 +1794,8 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 self.Vxx[t][:, :] + self.Vxx[t][:, :].T
             )  # ensure symmetric
 
-            if self.x_reg != 0:
-                self.Vxx[t][
-                    range(model.state.ndx), range(model.state.ndx)
-                ] += self.x_reg
+            if self.preg != 0:
+                self.Vxx[t][range(model.state.ndx), range(model.state.ndx)] += self.preg
 
             # Compute and store the Vx gradient at end of the interval (rollout state)
             if not self.isFeasible:
@@ -1846,16 +1844,16 @@ class DDPDerived(crocoddyl.SolverAbstract):
             raise ArithmeticError("backward error")
 
     def increaseRegularization(self):
-        self.x_reg *= self.reg_incFactor
-        if self.x_reg > self.reg_max:
-            self.x_reg = self.reg_max
-        self.u_reg = self.x_reg
+        self.preg *= self.reg_incFactor
+        if self.preg > self.reg_max:
+            self.preg = self.reg_max
+        self.dreg = self.preg
 
     def decreaseRegularization(self):
-        self.x_reg /= self.reg_decFactor
-        if self.x_reg < self.reg_min:
-            self.x_reg = self.reg_min
-        self.u_reg = self.x_reg
+        self.preg /= self.reg_decFactor
+        if self.preg < self.reg_min:
+            self.preg = self.reg_min
+        self.dreg = self.preg
 
     def allocateData(self):
         models = [*self.problem.runningModels.tolist(), self.problem.terminalModel]
@@ -1906,8 +1904,8 @@ class FDDPDerived(DDPDerived):
         self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None
     ):
         self.setCandidate(init_xs, init_us, isFeasible)
-        self.x_reg = regInit if regInit is not None else self.reg_min
-        self.u_reg = regInit if regInit is not None else self.reg_min
+        self.preg = regInit if regInit is not None else self.reg_min
+        self.dreg = regInit if regInit is not None else self.reg_min
         self.wasFeasible = False
         for i in range(maxiter):
             recalc = True
@@ -1917,7 +1915,7 @@ class FDDPDerived(DDPDerived):
                 except ArithmeticError:
                     recalc = False
                     self.increaseRegularization()
-                    if self.x_reg == self.reg_max:
+                    if self.preg == self.reg_max:
                         return self.xs, self.us, False
                     else:
                         continue
@@ -1954,7 +1952,7 @@ class FDDPDerived(DDPDerived):
                 self.decreaseRegularization()
             if a == self.alphas[-1]:
                 self.increaseRegularization()
-                if self.x_reg == self.reg_max:
+                if self.preg == self.reg_max:
                     return self.xs, self.us, False
             self.stepLength = a
             self.iter = i

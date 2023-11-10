@@ -566,8 +566,8 @@ class CallbackLogger(CallbackAbstract):
         self.costs = []
         self.stops = []
         self.grads = []
-        self.u_regs = []
-        self.x_regs = []
+        self.pregs = []
+        self.dregs = []
         self.steps = []
         self.ffeass = []
         self.hfeass = []
@@ -582,8 +582,8 @@ class CallbackLogger(CallbackAbstract):
         self.costs.append(solver.cost)
         self.stops.append(solver.stoppingCriteria())
         self.grads.append(-solver.expectedImprovement()[1].item())
-        self.u_regs.append(solver.u_reg)
-        self.x_regs.append(solver.x_reg)
+        self.pregs.append(solver.preg)
+        self.dregs.append(solver.dreg)
         self.steps.append(solver.stepLength)
         self.ffeass.append(solver.ffeas)
         self.hfeass.append(solver.hfeas)
@@ -724,8 +724,8 @@ def saveLogfile(filename, log):
         "steps": log.steps,
         "iters": log.iters,
         "costs": log.costs,
-        "muLM": log.u_regs,
-        "muV": log.x_regs,
+        "primal-reg": log.pregs,
+        "dual-reg": log.dregs,
         "stops": log.stops,
         "grads": log.grads,
     }

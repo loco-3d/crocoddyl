@@ -64,28 +64,6 @@ T = 100
 x0 = np.array([3.14, 0.0, 0.0, 0.0])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverIntro(problem)
-
-cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
-if WITHDISPLAY:
-    try:
-        import gepetto
-
-        gepetto.corbaserver.Client()
-        display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, floor=False)
-        if WITHPLOT:
-            solver.setCallbacks(
-                [
-                    crocoddyl.CallbackVerbose(),
-                    crocoddyl.CallbackLogger(),
-                    crocoddyl.CallbackDisplay(display),
-                ]
-            )
-        else:
-            solver.setCallbacks(
-                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-            )
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(pendulum)
 if WITHPLOT:
     solver.setCallbacks(
         [
@@ -95,8 +73,6 @@ if WITHPLOT:
     )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
-solver.getCallbacks()[0].precision = 3
-solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the solver
 solver.solve()
@@ -108,11 +84,19 @@ if WITHPLOT:
         log.xs, [u[state.nv :] for u in log.us], figIndex=1, show=False
     )
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2
+        log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )
 
 # Display the entire motion
 if WITHDISPLAY:
+    try:
+        import gepetto
+
+        gepetto.corbaserver.Client()
+        cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
+        display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, floor=False)
+    except Exception:
+        display = crocoddyl.MeshcatDisplay(pendulum)
     display.rate = -1
     display.freq = 1
     while True:

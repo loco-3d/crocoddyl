@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,8 +20,6 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
       eq_solver_(LuNull),
       th_feas_(1e-4),
       rho_(0.3),
-      dPhi_(0.),
-      hfeas_try_(0.),
       upsilon_(0.),
       zero_upsilon_(false) {
   const std::size_t T = problem_->get_T();
@@ -85,11 +83,11 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
-    xreg_ = reg_min_;
-    ureg_ = reg_min_;
+    preg_ = reg_min_;
+    dreg_ = reg_min_;
   } else {
-    xreg_ = init_reg;
-    ureg_ = init_reg;
+    preg_ = init_reg;
+    dreg_ = init_reg;
   }
   was_feasible_ = false;
   if (zero_upsilon_) {
@@ -104,7 +102,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         recalcDiff = false;
         increaseRegularization();
-        if (xreg_ == reg_max_) {
+        if (preg_ == reg_max_) {
           return false;
         } else {
           continue;
@@ -130,19 +128,21 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       steplength_ = *it;
       try {
         dV_ = tryStep(steplength_);
-        dPhi_ = dV_ + upsilon_ * (hfeas_ - hfeas_try_);
+        dfeas_ = hfeas_ - hfeas_try_;
+        dPhi_ = dV_ + upsilon_ * dfeas_;
       } catch (std::exception& e) {
         continue;
       }
       expectedImprovement();
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
-      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * (hfeas_ - hfeas_try_);
+      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * dfeas_;
       if (dPhiexp_ >= 0) {  // descend direction
         if (std::abs(d_[0]) < th_grad_ || dPhi_ > th_acceptstep_ * dPhiexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           hfeas_ = hfeas_try_;
+          merit_ = cost_ + upsilon_ * hfeas_;
           recalcDiff = true;
           break;
         }
@@ -153,6 +153,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
           setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
           cost_ = cost_try_;
           hfeas_ = hfeas_try_;
+          merit_ = cost_ + upsilon_ * hfeas_;
           recalcDiff = true;
           break;
         }
@@ -170,7 +171,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
       decreaseRegularization();
     }
     if (steplength_ <= th_stepinc_ || std::abs(d_[1]) <= th_feas_) {
-      if (xreg_ == reg_max_) {
+      if (preg_ == reg_max_) {
         STOP_PROFILER("SolverIntro::solve");
         return false;
       }
@@ -316,8 +317,8 @@ void SolverIntro::computeValueFunction(
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
 
-  if (!std::isnan(xreg_)) {
-    Vxx_[t].diagonal().array() += xreg_;
+  if (!std::isnan(preg_)) {
+    Vxx_[t].diagonal().array() += preg_;
   }
 
   // Compute and store the Vx gradient at end of the interval (rollout state)
@@ -405,10 +406,6 @@ EqualitySolverType SolverIntro::get_equality_solver() const {
 double SolverIntro::get_th_feas() const { return th_feas_; }
 
 double SolverIntro::get_rho() const { return rho_; }
-
-double SolverIntro::get_dPhi() const { return dPhi_; }
-
-double SolverIntro::get_dPhiexp() const { return dPhiexp_; }
 
 double SolverIntro::get_upsilon() const { return upsilon_; }
 

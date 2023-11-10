@@ -74,10 +74,6 @@ void exposeSolverIntro() {
                     bp::make_function(&SolverIntro::set_rho),
                     "parameter used in the merit function to predict the "
                     "expected reduction.")
-      .add_property("dPhi", bp::make_function(&SolverIntro::get_dPhi),
-                    "reduction in the merit function.")
-      .add_property("dPhiexp", bp::make_function(&SolverIntro::get_dPhiexp),
-                    "expected reduction in the merit function.")
       .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
                     "estimated penalty parameter that balances relative "
                     "contribution of the cost function and equality "

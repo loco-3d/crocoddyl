@@ -41,8 +41,6 @@ jumping_gait = {
     "flyingKnots": 20,
 }
 
-cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-
 # Creating a both solvers
 boxfddp = crocoddyl.SolverBoxFDDP(
     gait.createJumpingProblem(
@@ -66,40 +64,6 @@ boxddp = crocoddyl.SolverBoxDDP(
 )
 
 # Added the callback functions
-if WITHDISPLAY:
-    try:
-        import gepetto
-
-        gepetto.corbaserver.Client()
-        display = crocoddyl.GepettoDisplay(
-            anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-        )
-        if WITHPLOT:
-            boxfddp.setCallbacks(
-                [
-                    crocoddyl.CallbackVerbose(),
-                    crocoddyl.CallbackLogger(),
-                    crocoddyl.CallbackDisplay(display),
-                ]
-            )
-            boxddp.setCallbacks(
-                [
-                    crocoddyl.CallbackVerbose(),
-                    crocoddyl.CallbackLogger(),
-                    crocoddyl.CallbackDisplay(display),
-                ]
-            )
-        else:
-            boxfddp.setCallbacks(
-                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-            )
-            boxddp.setCallbacks(
-                [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-            )
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(
-            anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-        )
 if WITHPLOT:
     boxfddp.setCallbacks(
         [
@@ -116,10 +80,6 @@ if WITHPLOT:
 else:
     boxfddp.setCallbacks([crocoddyl.CallbackVerbose()])
     boxddp.setCallbacks([crocoddyl.CallbackVerbose()])
-boxfddp.getCallbacks()[0].precision = 3
-boxfddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
-boxddp.getCallbacks()[0].precision = 3
-boxddp.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving the problem with the both solvers
 xs = [x0] * (boxfddp.problem.T + 1)
@@ -129,21 +89,31 @@ print("*** SOLVE with Box-FDDP ***")
 boxfddp.th_stop = 1e-7
 boxfddp.solve(xs, us, 50, False)
 
-# Display the entire motion
-if WITHDISPLAY:
-    display.rate = -1
-    display.freq = 1
-    display.displayFromSolver(boxfddp)
-    time.sleep(1.0)
-
 print("*** SOLVE with Box-DDP ***")
 boxddp.th_stop = 1e-7
 boxddp.solve(xs, us, 30, False)
 
 # Display the entire motion
 if WITHDISPLAY:
-    display.displayFromSolver(boxddp)
-    time.sleep(1.0)
+    try:
+        import gepetto
+
+        gepetto.corbaserver.Client()
+        cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
+        display = crocoddyl.GepettoDisplay(
+            anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
+        )
+    except Exception:
+        display = crocoddyl.MeshcatDisplay(
+            anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
+        )
+    display.rate = -1
+    display.freq = 1
+    while True:
+        display.displayFromSolver(boxddp)
+        time.sleep(1.0)
+        display.displayFromSolver(boxfddp)
+        time.sleep(1.0)
 
 # Plotting the entire motion
 if WITHPLOT:
@@ -153,8 +123,8 @@ if WITHPLOT:
     log = boxfddp.getCallbacks()[1]
     crocoddyl.plotConvergence(
         log.costs,
-        log.u_regs,
-        log.x_regs,
+        log.pregs,
+        log.dregs,
         log.grads,
         log.stops,
         log.steps,
@@ -165,8 +135,8 @@ if WITHPLOT:
     log = boxddp.getCallbacks()[1]
     crocoddyl.plotConvergence(
         log.costs,
-        log.u_regs,
-        log.x_regs,
+        log.pregs,
+        log.dregs,
         log.grads,
         log.stops,
         log.steps,

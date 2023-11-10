@@ -170,8 +170,8 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
 
  private:
   Scalar xref_;     //!< Contact position used for the Baumgarte stabilization
-  Vector2s gains_;  //!< Baumgarte stabilization gains
   Matrix3s Raxis_;  //!< Rotation of the reference frame's z-axis
+  Vector2s gains_;  //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>

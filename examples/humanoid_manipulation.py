@@ -164,22 +164,7 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverFDDP(problem)
-if WITHDISPLAY and isinstance(crocoddyl.GepettoDisplay, type(display)):
-    display.rate = 4
-    display.freq = 4
-    if WITHPLOT:
-        solver.setCallbacks(
-            [
-                crocoddyl.CallbackVerbose(),
-                crocoddyl.CallbackLogger(),
-                crocoddyl.CallbackDisplay(display),
-            ]
-        )
-    else:
-        solver.setCallbacks(
-            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
-        )
-elif WITHPLOT:
+if WITHPLOT:
     solver.setCallbacks(
         [
             crocoddyl.CallbackVerbose(),
@@ -188,8 +173,6 @@ elif WITHPLOT:
     )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
-solver.getCallbacks()[0].precision = 3
-solver.getCallbacks()[0].level = crocoddyl.VerboseLevel._2
 
 # Solving it with the FDDP algorithm
 xs = [x0] * (solver.problem.T + 1)
@@ -198,6 +181,16 @@ solver.solve(xs, us, 500, False, 0.1)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
+    try:
+        import gepetto
+
+        gepetto.corbaserver.Client()
+        cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
+        display = crocoddyl.GepettoDisplay(
+            robot, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
+        )
+    except Exception:
+        display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
     display.rate = -1
     display.freq = 1
     while True:
@@ -228,5 +221,5 @@ if WITHPLOT:
     plotSolution(solver, bounds=False, figIndex=1, show=False)
 
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=3
+        log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=3
     )

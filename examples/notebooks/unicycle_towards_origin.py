@@ -26,8 +26,8 @@ log = ddp.getCallbacks()[0]
 crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
 crocoddyl.plotConvergence(
     log.costs,
-    log.u_regs,
-    log.x_regs,
+    log.pregs,
+    log.dregs,
     log.grads,
     log.stops,
     log.steps,
