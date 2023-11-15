@@ -21,6 +21,7 @@ class SolverAbstract_wrap : public SolverAbstract,
                             public bp::wrapper<SolverAbstract> {
  public:
   using SolverAbstract::cost_;
+  using SolverAbstract::cost_try_;
   using SolverAbstract::d_;
   using SolverAbstract::dfeas_;
   using SolverAbstract::dPhi_;
@@ -31,6 +32,7 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::ffeas_;
   using SolverAbstract::ffeas_try_;
   using SolverAbstract::fs_;
+  using SolverAbstract::fs_try_;
   using SolverAbstract::gfeas_;
   using SolverAbstract::gfeas_try_;
   using SolverAbstract::hfeas_;
@@ -41,7 +43,9 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
   using SolverAbstract::us_;
+  using SolverAbstract::us_try_;
   using SolverAbstract::xs_;
+  using SolverAbstract::xs_try_;
 
   explicit SolverAbstract_wrap(std::shared_ptr<ShootingProblem> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}

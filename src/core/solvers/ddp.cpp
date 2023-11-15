@@ -17,7 +17,6 @@ SolverDDP::SolverDDP(std::shared_ptr<ShootingProblem> problem)
       reg_decfactor_(10.),
       reg_min_(1e-9),
       reg_max_(1e9),
-      cost_try_(0.),
       th_grad_(1e-12),
       th_stepdec_(0.5),
       th_stepinc_(0.01) {

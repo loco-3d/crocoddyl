@@ -347,11 +347,6 @@ class SolverDDP : public SolverAbstract {
   double reg_min_;        //!< Minimum allowed regularization value
   double reg_max_;        //!< Maximum allowed regularization value
 
-  double cost_try_;  //!< Total cost computed by line-search procedure
-  std::vector<Eigen::VectorXd>
-      xs_try_;  //!< State trajectory computed by line-search procedure
-  std::vector<Eigen::VectorXd>
-      us_try_;  //!< Control trajectory computed by line-search procedure
   std::vector<Eigen::VectorXd>
       dx_;  //!< State error during the roll-out/forward-pass (size T)
 

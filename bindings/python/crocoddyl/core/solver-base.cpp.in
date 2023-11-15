@@ -183,10 +183,18 @@ void exposeSolverAbstract() {
       .def_readwrite("xs", &SolverAbstract_wrap::xs_, "state trajectory")
       .def_readwrite("us", &SolverAbstract_wrap::us_, "control sequence")
       .def_readwrite("fs", &SolverAbstract_wrap::fs_, "dynamics gaps")
+      .def_readwrite("xs_try", &SolverAbstract_wrap::xs_try_,
+                     "state trajectory computed in the line-search procedure")
+      .def_readwrite("us_try", &SolverAbstract_wrap::us_try_,
+                     "control sequence computed in the line-search procedure")
+      .def_readwrite("fs_try", &SolverAbstract_wrap::fs_try_,
+                     "dynamics gaps computed in the line-search procedure")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_,
                      "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_,
                      "cost for the current guess")
+      .def_readwrite("cost_try", &SolverAbstract_wrap::cost_try_,
+                     "cost computed in the line-search procedure")
       .def_readwrite("merit", &SolverAbstract_wrap::merit_,
                      "merit for the current guess")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_,

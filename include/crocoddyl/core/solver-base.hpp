@@ -446,11 +446,19 @@ class SolverAbstract {
   // allocate data
   std::vector<Eigen::VectorXd> xs_;  //!< State trajectory
   std::vector<Eigen::VectorXd> us_;  //!< Control trajectory
-  std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
+  std::vector<Eigen::VectorXd> fs_;  //!< Dynamics gaps in each node
+  std::vector<Eigen::VectorXd>
+      xs_try_;  //!< State trajectory computed by line-search procedure
+  std::vector<Eigen::VectorXd>
+      us_try_;  //!< Control trajectory computed by line-search procedure
+  std::vector<Eigen::VectorXd>
+      fs_try_;  //!< Dynamics gaps in each node computed by the line-search
+                //!< procedure
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was
                        //!< feasible
   double cost_;        //!< Cost for the current guess
+  double cost_try_;    //!< Total cost computed by line-search procedure
   double merit_;       //!< Merit for the current guess
   double stop_;        //!< Value computed by `stoppingCriteria()`
   std::size_t iter_;   //!< Number of iteration performed by the solver

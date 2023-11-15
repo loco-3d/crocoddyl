@@ -245,8 +245,11 @@ void SolverAbstract::allocateData() {
   const std::size_t T = problem_->get_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   xs_.resize(T + 1);
+  xs_try_.resize(T + 1);
   us_.resize(T);
+  us_try_.resize(T);
   fs_.resize(T + 1);
+  fs_try_.resize(T + 1);
   g_adj_.resize(T + 1);
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -255,17 +258,23 @@ void SolverAbstract::allocateData() {
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     xs_[t] = model->get_state()->zero();
+    xs_try_[t] = model->get_state()->zero();
     us_[t] = Eigen::VectorXd::Zero(nu);
+    us_try_[t] = Eigen::VectorXd::Zero(nu);
     fs_[t] = Eigen::VectorXd::Zero(ndx);
+    fs_try_[t] = Eigen::VectorXd::Zero(ndx);
     g_adj_[t] = Eigen::VectorXd::Zero(ng);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
+  xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
   fs_.back() = Eigen::VectorXd::Zero(ndx);
+  fs_try_.back() = Eigen::VectorXd::Zero(ndx);
   g_adj_.back() = Eigen::VectorXd::Zero(ng_T);
   // Cost, merit and convergence
   is_feasible_ = false;
   was_feasible_ = false;
   cost_ = 0.;
+  cost_try_ = 0.;
   merit_ = 0.;
   stop_ = 0.;
   // Expected reduction and improvement

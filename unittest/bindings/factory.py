@@ -1875,7 +1875,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
             ctry += self.problem.terminalData.cost
         raiseIfNan(ctry, ArithmeticError("forward error"))
         self.cost_try = ctry
-        return xtry, utry, ctry
 
     def computeGains(self, t):
         try:
@@ -1928,12 +1927,6 @@ class DDPDerived(crocoddyl.SolverAbstract):
 
         self.K = [np.zeros([m.nu, m.state.ndx]) for m in self.problem.runningModels]
         self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
-
-        self.xs_try = [self.problem.x0] + [np.nan * self.problem.x0] * self.problem.T
-        self.us_try = [np.nan] * self.problem.T
-        self.fs = [np.zeros(self.problem.runningModels[0].state.ndx)] + [
-            np.zeros(m.state.ndx) for m in self.problem.runningModels
-        ]
 
 
 class FDDPDerived(DDPDerived):
@@ -2101,4 +2094,3 @@ class FDDPDerived(DDPDerived):
             ctry += self.problem.terminalData.cost
         raiseIfNan(ctry, ArithmeticError("forward error"))
         self.cost_try = ctry
-        return xtry, utry, ctry
