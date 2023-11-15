@@ -138,7 +138,7 @@ void SolverDDP::computeDirection(const bool recalcDiff) {
   STOP_PROFILER("SolverDDP::computeDirection");
 }
 
-double SolverDDP::tryStep(const double steplength) {
+double SolverDDP::tryStep(const double steplength, const bool) {
   START_PROFILER("SolverDDP::tryStep");
   forwardPass(steplength);
   STOP_PROFILER("SolverDDP::tryStep");

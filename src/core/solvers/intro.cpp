@@ -184,7 +184,7 @@ bool SolverIntro::solve(const std::vector<Eigen::VectorXd>& init_xs,
   return false;
 }
 
-double SolverIntro::tryStep(const double steplength) {
+double SolverIntro::tryStep(const double steplength, const bool) {
   forwardPass(steplength);
   hfeas_try_ = computeEqualityFeasibility();
   return cost_ - cost_try_;

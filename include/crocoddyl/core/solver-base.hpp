@@ -123,9 +123,10 @@ class SolverAbstract {
    * \f$dV\f$ along the predefined step length \f$\alpha\f$.
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
+   * @param[in] recalc  true for recalculating part of the step evaluation
    * @return  the cost improvement
    */
-  virtual double tryStep(const double steplength = 1) = 0;
+  virtual double tryStep(const double steplength, const bool recalc) = 0;
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination

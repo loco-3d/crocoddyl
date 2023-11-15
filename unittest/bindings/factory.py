@@ -1771,7 +1771,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
-    def tryStep(self, stepLength=1):
+    def tryStep(self, stepLength=1, recal=True):
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
 
@@ -2015,7 +2015,7 @@ class FDDPDerived(DDPDerived):
         self.backwardPass()
         return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
-    def tryStep(self, stepLength=1):
+    def tryStep(self, stepLength=1, recalc=True):
         self.forwardPass(stepLength)
         return self.cost - self.cost_try
 

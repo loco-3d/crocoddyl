@@ -116,7 +116,7 @@ void SolverKKT::computeDirection(const bool recalc) {
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
 
-double SolverKKT::tryStep(const double steplength) {
+double SolverKKT::tryStep(const double steplength, const bool) {
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();

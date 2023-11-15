@@ -34,7 +34,8 @@ class SolverIntro : public SolverFDDP {
       const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
       const std::size_t maxiter = 100, const bool is_feasible = false,
       const double init_reg = NAN);
-  virtual double tryStep(const double step_length = 1);
+  virtual double tryStep(const double step_length = 1,
+                         const bool recalc = true);
   virtual double stoppingCriteria();
   virtual void resizeData();
   virtual double calcDiff();

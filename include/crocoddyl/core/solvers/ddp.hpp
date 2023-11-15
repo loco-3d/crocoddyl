@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -69,7 +69,7 @@ class SolverDDP : public SolverAbstract {
       const std::size_t maxiter = 100, const bool is_feasible = false,
       const double init_reg = NAN);
   virtual void computeDirection(const bool recalc = true);
-  virtual double tryStep(const double steplength = 1);
+  virtual double tryStep(const double steplength = 1, const bool recalc = true);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
   virtual void resizeData();
