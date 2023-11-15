@@ -1853,6 +1853,7 @@ class DDPDerived(crocoddyl.SolverAbstract):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         ctry = 0
+        xtry[0] = self.problem.x0
         for t, (m, d) in enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):

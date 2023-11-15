@@ -45,8 +45,7 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
   if (problem_->is_updated()) {
     resizeData();
   }
-  xs_try_[0] =
-      problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
+
   setCandidate(init_xs, init_us, is_feasible);
 
   if (std::isnan(init_reg)) {
@@ -256,6 +255,7 @@ void SolverDDP::forwardPass(const double steplength) {
   }
   START_PROFILER("SolverDDP::forwardPass");
   cost_try_ = 0.;
+  xs_try_[0] = problem_->get_x0();
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -264,7 +264,6 @@ void SolverDDP::forwardPass(const double steplength) {
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-
     m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (m->get_nu() != 0) {
       us_try_[t].noalias() = us_[t];
@@ -422,8 +421,6 @@ void SolverDDP::allocateData() {
   K_.resize(T);
   k_.resize(T);
 
-  xs_try_.resize(T + 1);
-  us_try_.resize(T);
   dx_.resize(T);
 
   FuTVxx_p_.resize(T);
@@ -446,12 +443,6 @@ void SolverDDP::allocateData() {
     K_[t] = MatrixXdRowMajor::Zero(nu, ndx);
     k_[t] = Eigen::VectorXd::Zero(nu);
 
-    if (t == 0) {
-      xs_try_[t] = problem_->get_x0();
-    } else {
-      xs_try_[t] = model->get_state()->zero();
-    }
-    us_try_[t] = Eigen::VectorXd::Zero(nu);
     dx_[t] = Eigen::VectorXd::Zero(ndx);
 
     FuTVxx_p_[t] = MatrixXdRowMajor::Zero(nu, ndx);
@@ -461,7 +452,6 @@ void SolverDDP::allocateData() {
   Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
   Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
   Vx_.back() = Eigen::VectorXd::Zero(ndx);
-  xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
 
   FxTVxx_p_ = MatrixXdRowMajor::Zero(ndx, ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
