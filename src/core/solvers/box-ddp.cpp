@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, CNRS-LAAS, University of Edinburgh
+// Copyright (C) 2019-2023, CNRS-LAAS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,8 +48,6 @@ void SolverBoxDDP::resizeData() {
 }
 
 void SolverBoxDDP::allocateData() {
-  SolverDDP::allocateData();
-
   const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
   du_lb_.resize(T);

@@ -187,11 +187,6 @@ class SolverDDP : public SolverAbstract {
   void decreaseRegularization();
 
   /**
-   * @brief Allocate all the internal data needed for the solver
-   */
-  virtual void allocateData();
-
-  /**
    * @brief Return the regularization factor used to increase the damping value
    */
   double get_reg_incfactor() const;
@@ -340,6 +335,11 @@ class SolverDDP : public SolverAbstract {
   void set_th_grad(const double th_grad);
 
  protected:
+  /**
+   * @brief Allocate all the internal data needed for the solver
+   */
+  void allocateData();
+
   double reg_incfactor_;  //!< Regularization factor used to increase the
                           //!< damping value
   double reg_decfactor_;  //!< Regularization factor used to decrease the

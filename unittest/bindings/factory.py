@@ -1694,7 +1694,7 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
 class DDPDerived(crocoddyl.SolverAbstract):
     def __init__(self, shootingProblem):
         crocoddyl.SolverAbstract.__init__(self, shootingProblem)
-        self.allocateData()  # TODO remove it?
+        self.allocateData()
 
         self.isFeasible = False
         self.alphas = [2 ** (-n) for n in range(10)]

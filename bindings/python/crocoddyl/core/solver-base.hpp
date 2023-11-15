@@ -76,6 +76,8 @@ class SolverAbstract_wrap : public SolverAbstract,
     return d_;
   }
 
+  void allocateData() { SolverAbstract::allocateData(); }
+
   bp::list expectedImprovement_wrap() {
     expectedImprovement();
     bp::list exp_impr;

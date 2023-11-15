@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,6 @@ class SolverBoxFDDP : public SolverFDDP {
   explicit SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxFDDP();
 
-  virtual void allocateData();
   virtual void computeGains(const std::size_t t);
   virtual void forwardPass(const double steplength);
   virtual void resizeData();
@@ -29,6 +28,8 @@ class SolverBoxFDDP : public SolverFDDP {
   const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
 
  protected:
+  void allocateData();
+
   BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
   std::vector<Eigen::VectorXd> du_lb_;

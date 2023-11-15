@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,6 @@ void SolverBoxFDDP::resizeData() {
 }
 
 void SolverBoxFDDP::allocateData() {
-  SolverFDDP::allocateData();
-
   const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
   du_lb_.resize(T);

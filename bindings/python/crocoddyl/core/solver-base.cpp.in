@@ -122,6 +122,8 @@ void exposeSolverAbstract() {
            "direction.\n\n"
            "For computing the expected improvement, you need to compute first\n"
            "the search direction by running computeDirection.")
+      .def("allocateData", &SolverAbstract_wrap::allocateData, bp::args("self"),
+           "Allocate the data used by the solver.")
       .def("setCandidate", &SolverAbstract_wrap::setCandidate,
            setCandidate_overloads(
                bp::args("self", "xs", "us", "isFeasible"),

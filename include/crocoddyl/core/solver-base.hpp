@@ -429,18 +429,31 @@ class SolverAbstract {
   void set_feasnorm(const FeasibilityNorm feas_norm);
 
  protected:
+  /**
+   * @brief Allocate all the basic data needed in solvers
+   */
+  void allocateData();
+
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
-  std::vector<Eigen::VectorXd> xs_;           //!< State trajectory
-  std::vector<Eigen::VectorXd> us_;           //!< Control trajectory
-  std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
   std::vector<std::shared_ptr<CallbackAbstract> >
-      callbacks_;      //!< Callback functions
+      callbacks_;                  //!< Callback functions
+  double th_acceptstep_;           //!< Threshold used for accepting step
+  double th_stop_;                 //!< Tolerance for stopping the algorithm
+  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
+  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
+                                   //!< dynamics and constraints feasibility
+
+  // allocate data
+  std::vector<Eigen::VectorXd> xs_;  //!< State trajectory
+  std::vector<Eigen::VectorXd> us_;  //!< Control trajectory
+  std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was
                        //!< feasible
   double cost_;        //!< Cost for the current guess
   double merit_;       //!< Merit for the current guess
   double stop_;        //!< Value computed by `stoppingCriteria()`
+  std::size_t iter_;   //!< Number of iteration performed by the solver
   Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
   double dV_;       //!< Reduction in the cost function computed by `tryStep()`
   double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
@@ -460,6 +473,7 @@ class SolverAbstract {
                       //!< for the current step length
   double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
                       //!< the current step length
+  double tmp_feas_;   //!< Temporal variables used for computed the feasibility
   double preg_;       //!< Current primal-variable regularization value
   double dreg_;       //!< Current dual-variable regularization value
   DEPRECATED("Use preg_ for primal-variable regularization",
@@ -467,13 +481,6 @@ class SolverAbstract {
   DEPRECATED("Use dreg_ for primal-variable regularization",
              double ureg_;)        //!< Current control regularization values
   double steplength_;              //!< Current applied step length
-  double th_acceptstep_;           //!< Threshold used for accepting step
-  double th_stop_;                 //!< Tolerance for stopping the algorithm
-  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
-  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
-                                   //!< dynamics and constraints feasibility
-  std::size_t iter_;  //!< Number of iteration performed by the solver
-  double tmp_feas_;   //!< Temporal variables used for computed the feasibility
   std::vector<Eigen::VectorXd> g_adj_;  //!< Adjusted inequality bound
 };
 

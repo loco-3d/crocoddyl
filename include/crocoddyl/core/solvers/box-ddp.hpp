@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, CNRS-LAAS, University of Edinburgh
+// Copyright (C) 2019-2023, CNRS-LAAS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +22,6 @@ class SolverBoxDDP : public SolverDDP {
   explicit SolverBoxDDP(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxDDP();
 
-  virtual void allocateData();
   virtual void computeGains(const std::size_t t);
   virtual void forwardPass(const double steplength);
   virtual void resizeData();
@@ -29,6 +29,8 @@ class SolverBoxDDP : public SolverDDP {
   const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
 
  protected:
+  void allocateData();
+
   BoxQP qp_;
   std::vector<Eigen::MatrixXd> Quu_inv_;
   std::vector<Eigen::VectorXd> du_lb_;

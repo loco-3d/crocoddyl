@@ -43,6 +43,8 @@ class SolverKKT : public SolverAbstract {
   std::size_t get_nu() const;
 
  protected:
+  void allocateData();
+
   double reg_incfactor_;
   double reg_decfactor_;
   double reg_min_;
@@ -56,7 +58,6 @@ class SolverKKT : public SolverAbstract {
   void computePrimalDual();
   void increaseRegularization();
   void decreaseRegularization();
-  void allocateData();
 
   std::size_t nx_;
   std::size_t ndx_;

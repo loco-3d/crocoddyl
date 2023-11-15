@@ -17,54 +17,12 @@ namespace crocoddyl {
 
 SolverAbstract::SolverAbstract(std::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
-      is_feasible_(false),
-      was_feasible_(false),
-      cost_(0.),
-      merit_(0.),
-      stop_(0.),
-      dV_(0.),
-      dPhi_(0.),
-      dVexp_(0.),
-      dPhiexp_(0.),
-      dfeas_(0.),
-      feas_(0.),
-      ffeas_(0.),
-      gfeas_(0.),
-      hfeas_(0.),
-      ffeas_try_(0.),
-      gfeas_try_(0.),
-      hfeas_try_(0.),
-      preg_(0.),
-      dreg_(0.),
-      steplength_(1.),
       th_acceptstep_(0.1),
       th_stop_(1e-9),
       th_gaptol_(1e-16),
       feasnorm_(LInf),
       iter_(0),
       tmp_feas_(0.) {
-  // Allocate common data
-  const std::size_t ndx = problem_->get_ndx();
-  const std::size_t T = problem_->get_T();
-  const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
-  xs_.resize(T + 1);
-  us_.resize(T);
-  fs_.resize(T + 1);
-  g_adj_.resize(T + 1);
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
-      problem_->get_runningModels();
-  for (std::size_t t = 0; t < T; ++t) {
-    const std::shared_ptr<ActionModelAbstract>& model = models[t];
-    const std::size_t nu = model->get_nu();
-    const std::size_t ng = model->get_ng();
-    xs_[t] = model->get_state()->zero();
-    us_[t] = Eigen::VectorXd::Zero(nu);
-    fs_[t] = Eigen::VectorXd::Zero(ndx);
-    g_adj_[t] = Eigen::VectorXd::Zero(ng);
-  }
-  xs_.back() = problem_->get_terminalModel()->get_state()->zero();
-  fs_.back() = Eigen::VectorXd::Zero(ndx);
-  g_adj_.back() = Eigen::VectorXd::Zero(ng_T);
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -279,6 +237,57 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
   is_feasible_ = is_feasible;
+}
+
+void SolverAbstract::allocateData() {
+  // Guess trajectory
+  const std::size_t ndx = problem_->get_ndx();
+  const std::size_t T = problem_->get_T();
+  const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
+  xs_.resize(T + 1);
+  us_.resize(T);
+  fs_.resize(T + 1);
+  g_adj_.resize(T + 1);
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t ng = model->get_ng();
+    xs_[t] = model->get_state()->zero();
+    us_[t] = Eigen::VectorXd::Zero(nu);
+    fs_[t] = Eigen::VectorXd::Zero(ndx);
+    g_adj_[t] = Eigen::VectorXd::Zero(ng);
+  }
+  xs_.back() = problem_->get_terminalModel()->get_state()->zero();
+  fs_.back() = Eigen::VectorXd::Zero(ndx);
+  g_adj_.back() = Eigen::VectorXd::Zero(ng_T);
+  // Cost, merit and convergence
+  is_feasible_ = false;
+  was_feasible_ = false;
+  cost_ = 0.;
+  merit_ = 0.;
+  stop_ = 0.;
+  // Expected reduction and improvement
+  d_.setZero();
+  dV_ = 0.;
+  dPhi_ = 0.;
+  dVexp_ = 0.;
+  dPhiexp_ = 0.;
+  dfeas_ = 0.;
+  // Current and next feasibility
+  feas_ = 0.;
+  ffeas_ = 0.;
+  gfeas_ = 0.;
+  hfeas_ = 0.;
+  ffeas_try_ = 0.;
+  gfeas_try_ = 0.;
+  hfeas_try_ = 0.;
+  tmp_feas_ = 0.;
+  // Regularization and step length
+  preg_ = 0.;
+  dreg_ = 0.;
+  steplength_ = 1.;
 }
 
 void SolverAbstract::setCallbacks(
