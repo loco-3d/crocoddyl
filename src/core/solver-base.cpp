@@ -38,6 +38,7 @@ void SolverAbstract::resizeData() {
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     us_[t].conservativeResize(nu);
+    us_try_[t].conservativeResize(nu);
     g_adj_[t].conservativeResize(ng);
   }
 
@@ -47,6 +48,7 @@ void SolverAbstract::resizeData() {
 }
 
 double SolverAbstract::computeDynamicFeasibility() {
+  START_PROFILER("SolverAbstract::computeDynamicFeasibility");
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
   const Eigen::VectorXd& x0 = problem_->get_x0();
@@ -78,10 +80,12 @@ double SolverAbstract::computeDynamicFeasibility() {
       }
       break;
   }
+  STOP_PROFILER("SolverAbstract::computeDynamicFeasibility");
   return tmp_feas_;
 }
 
 double SolverAbstract::computeInequalityFeasibility() {
+  START_PROFILER("SolverAbstract::computeInequalityFeasibility");
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -129,10 +133,12 @@ double SolverAbstract::computeInequalityFeasibility() {
       }
       break;
   }
+  STOP_PROFILER("SolverAbstract::computeInequalityFeasibility");
   return tmp_feas_;
 }
 
 double SolverAbstract::computeEqualityFeasibility() {
+  START_PROFILER("SolverAbstract::computeEqualityFeasibility");
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -164,14 +170,15 @@ double SolverAbstract::computeEqualityFeasibility() {
       }
       break;
   }
+  STOP_PROFILER("SolverAbstract::computeEqualityFeasibility");
   return tmp_feas_;
 }
 
 void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   const std::vector<Eigen::VectorXd>& us_warm,
                                   bool is_feasible) {
+  START_PROFILER("SolverAbstract::setCandidate");
   const std::size_t T = problem_->get_T();
-
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   if (xs_warm.size() == 0) {
@@ -209,7 +216,6 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     }
     std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
   }
-
   if (us_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
       const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -237,6 +243,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
   is_feasible_ = is_feasible;
+  STOP_PROFILER("SolverAbstract::setCandidate");
 }
 
 void SolverAbstract::allocateData() {
