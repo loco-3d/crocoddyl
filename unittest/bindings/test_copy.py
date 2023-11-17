@@ -390,9 +390,7 @@ class ProblemAndSolversTest(CopyModelTestCase):
     MODEL.append(problem)
     MODEL.append(crocoddyl.CallbackVerbose())
     MODEL.append(crocoddyl.SolverKKT(problem))
-    MODEL.append(crocoddyl.SolverDDP(problem))
     MODEL.append(crocoddyl.SolverFDDP(problem))
-    MODEL.append(crocoddyl.SolverBoxDDP(problem))
     MODEL.append(crocoddyl.SolverBoxFDDP(problem))
     MODEL.append(crocoddyl.SolverIntro(problem))
     if hasattr(crocoddyl, "SolverIpopt"):

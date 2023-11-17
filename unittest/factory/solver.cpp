@@ -10,9 +10,7 @@
 
 #include "solver.hpp"
 
-#include "crocoddyl/core/solvers/box-ddp.hpp"
 #include "crocoddyl/core/solvers/box-fddp.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 #ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
@@ -28,17 +26,17 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverKKT:
       os << "SolverKKT";
       break;
-    case SolverTypes::SolverDDP:
-      os << "SolverDDP";
+    case SolverTypes::SolverFDDP_SingleShoot:
+      os << "SolverFDDP_SingleShoot";
       break;
-    case SolverTypes::SolverFDDP:
-      os << "SolverFDDP";
+    case SolverTypes::SolverFDDP_FeasDriven:
+      os << "SolverFDDP_FeasDriven";
       break;
-    case SolverTypes::SolverBoxDDP:
-      os << "SolverBoxDDP";
+    case SolverTypes::SolverBoxFDDP_SingleShoot:
+      os << "SolverBoxFDDP_SingleShoot";
       break;
-    case SolverTypes::SolverBoxFDDP:
-      os << "SolverBoxFDDP";
+    case SolverTypes::SolverBoxFDDP_FeasDriven:
+      os << "SolverBoxFDDP_FeasDriven";
       break;
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
@@ -81,17 +79,21 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
     case SolverTypes::SolverKKT:
       solver = std::make_shared<crocoddyl::SolverKKT>(problem);
       break;
-    case SolverTypes::SolverDDP:
-      solver = std::make_shared<crocoddyl::SolverDDP>(problem);
+    case SolverTypes::SolverFDDP_SingleShoot:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot);
       break;
-    case SolverTypes::SolverFDDP:
-      solver = std::make_shared<crocoddyl::SolverFDDP>(problem);
+    case SolverTypes::SolverFDDP_FeasDriven:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::FeasDriven);
       break;
-    case SolverTypes::SolverBoxDDP:
-      solver = std::make_shared<crocoddyl::SolverBoxDDP>(problem);
+    case SolverTypes::SolverBoxFDDP_SingleShoot:
+      solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot);
       break;
-    case SolverTypes::SolverBoxFDDP:
-      solver = std::make_shared<crocoddyl::SolverBoxFDDP>(problem);
+    case SolverTypes::SolverBoxFDDP_FeasDriven:
+      solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
+          problem, crocoddyl::DynamicsSolverType::FeasDriven);
       break;
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:

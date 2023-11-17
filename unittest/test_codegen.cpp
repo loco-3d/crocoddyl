@@ -22,7 +22,6 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"

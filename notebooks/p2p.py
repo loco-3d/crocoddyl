@@ -89,7 +89,7 @@ problem = crocoddyl.ShootingProblem(
 )
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = crocoddyl.SolverDDP(problem)
+ddp = crocoddyl.SolverFDDP(problem)
 ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm

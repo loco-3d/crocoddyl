@@ -21,10 +21,10 @@ namespace unittest {
 struct SolverTypes {
   enum Type {
     SolverKKT,
-    SolverDDP,
-    SolverFDDP,
-    SolverBoxDDP,
-    SolverBoxFDDP,
+    SolverFDDP_SingleShoot,
+    SolverFDDP_FeasDriven,
+    SolverBoxFDDP_SingleShoot,
+    SolverBoxFDDP_FeasDriven,
     SolverIpopt,
     NbSolverTypes
   };

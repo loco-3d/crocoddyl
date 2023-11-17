@@ -10,7 +10,8 @@
 #ifndef CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solver-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 

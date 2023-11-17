@@ -4,7 +4,7 @@
 # ##########################################################################
 
 # Creating the DDP solver
-ddp = crocoddyl.SolverDDP(problem)
+ddp = crocoddyl.SolverFDDP(problem)
 ddp.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving this problem

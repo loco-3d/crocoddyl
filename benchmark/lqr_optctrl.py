@@ -25,7 +25,7 @@ def createProblem(model):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    solver = crocoddyl.SolverFDDP(problem)
+    solver = crocoddyl.SolverFDDP(problem, crocoddyl.DynamicsSolverType.MultiShoot)
     if CALLBACKS:
         solver.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []

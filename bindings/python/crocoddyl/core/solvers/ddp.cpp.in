@@ -7,8 +7,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/ddp.hpp"
-
+#include "crocoddyl/core/solvers/ddp-deprecated.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"

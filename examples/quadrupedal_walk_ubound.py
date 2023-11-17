@@ -40,7 +40,7 @@ walking_gait = {
 }
 
 # Setting up the control-limited DDP solver
-solver = crocoddyl.SolverBoxDDP(
+solver = crocoddyl.SolverBoxFDDP(
     gait.createWalkingProblem(
         x0,
         walking_gait["stepLength"],

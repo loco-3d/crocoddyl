@@ -10,33 +10,10 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 
-#include "crocoddyl/core/solvers/box-qp.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 
-namespace crocoddyl {
+CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER("crocoddyl/core/solvers/box-ddp.hpp")
 
-class SolverBoxDDP : public SolverDDP {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  explicit SolverBoxDDP(std::shared_ptr<ShootingProblem> problem);
-  virtual ~SolverBoxDDP();
-
-  virtual void computePolicy(const std::size_t t);
-  virtual void forwardPass(const double steplength);
-  virtual void resizeData();
-
-  const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
-
- protected:
-  void allocateData();
-
-  BoxQP qp_;
-  std::vector<Eigen::MatrixXd> Quu_inv_;
-  std::vector<Eigen::VectorXd> du_lb_;
-  std::vector<Eigen::VectorXd> du_ub_;
-};
-
-}  // namespace crocoddyl
+#include "crocoddyl/core/solvers/box-ddp-deprecated.hpp"
 
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_

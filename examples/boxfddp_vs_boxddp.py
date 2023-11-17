@@ -52,7 +52,7 @@ boxfddp = crocoddyl.SolverBoxFDDP(
         jumping_gait["flyingKnots"],
     )
 )
-boxddp = crocoddyl.SolverBoxDDP(
+boxddp = crocoddyl.SolverBoxFDDP(
     gait.createJumpingProblem(
         x0,
         jumping_gait["jumpHeight"],
@@ -60,7 +60,8 @@ boxddp = crocoddyl.SolverBoxDDP(
         jumping_gait["timeStep"],
         jumping_gait["groundKnots"],
         jumping_gait["flyingKnots"],
-    )
+    ),
+    crocoddyl.DynamicsSolverType.SingleShoot,
 )
 
 # Added the callback functions

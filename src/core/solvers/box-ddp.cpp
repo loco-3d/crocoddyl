@@ -7,13 +7,17 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/box-ddp.hpp"
+#include "crocoddyl/core/solvers/box-ddp-deprecated.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 SolverBoxDDP::SolverBoxDDP(std::shared_ptr<ShootingProblem> problem)
     : SolverDDP(problem),
       qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
+  std::cerr << "Deprecated. Do not use SolverDDP. Instead, you should use "
+               "SolverFDDP(problem, DynamicsSolverType.SingleShoot)"
+            << std::endl;
   allocateData();
 
   const std::size_t n_alphas = 10;

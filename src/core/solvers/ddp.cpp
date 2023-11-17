@@ -7,7 +7,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/ddp-deprecated.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -20,6 +21,9 @@ SolverDDP::SolverDDP(std::shared_ptr<ShootingProblem> problem)
       th_grad_(1e-12),
       th_stepdec_(0.5),
       th_stepinc_(0.01) {
+  std::cerr << "Deprecated. Do not use SolverDDP. Instead, you should use "
+               "SolverFDDP(problem, DynamicsSolverType.SingleShoot)"
+            << std::endl;
   allocateData();
 
   const std::size_t n_alphas = 10;

@@ -351,11 +351,11 @@ void print_benchmark(RobotEENames robot) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.multiShootForwardPass(0.005);
+    ddp.multiShootForwardPass(0.005, true);
     duration[i] = timer.get_us_duration();
   }
-  double avg_fp = AVG(duration);
-  double stddev_fp = STDDEV(duration);
+  avg_fp = AVG(duration);
+  stddev_fp = STDDEV(duration);
   std::cout << "multiShootForwardPass [us]: \t\t" << avg_fp << " +- "
             << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N
@@ -368,11 +368,11 @@ void print_benchmark(RobotEENames robot) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.hybridShootForwardPass(0.005);
+    ddp.hybridShootForwardPass(0.005, true);
     duration[i] = timer.get_us_duration();
   }
-  double avg_fp = AVG(duration);
-  double stddev_fp = STDDEV(duration);
+  avg_fp = AVG(duration);
+  stddev_fp = STDDEV(duration);
   std::cout << "hybridShootForwardPass [us]: \t\t" << avg_fp << " +- "
             << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N
