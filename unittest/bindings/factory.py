@@ -1878,26 +1878,17 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     def expectedImprovement(self):
         # We define dVexp = Vexp - Vexptry as done for dV
-        if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
-            self.dV1 = 0.0
-            self.dV2 = 0.0
-            for t in range(self.problem.T):  # in parallel
-                nu = self.problem.runningModels[t].nu
-                if nu != 0:
-                    self.dV1 += self.k[t].T @ self.Qu[t]
-                    self.dV2 -= self.k[t].T @ self.Quuk[t]
-        else:
-            # The expected cost changes with the dynamics gaps.
-            self.dV1 = -self.fs[0].T @ self.Vx[0]
-            self.dV2 = -self.fs[-1].T @ self.Vxx_f[-1]
-            for t in range(self.problem.T):  # in parallel
-                nu = self.problem.runningModels[t].nu
-                if nu != 0:
-                    self.dV1 += self.k[t].T @ self.Qu[t]
-                    self.dV2 -= self.k[t].T @ self.Quuk[t]
-                dx = self.fs[t]
-                self.dV1 -= dx.T @ self.Vx[t]
-                self.dV2 -= dx.T @ self.Vxx_f[t]
+        # The expected cost changes with the dynamics gaps.
+        self.dV1 = -self.fs[0].T @ self.Vx[0]
+        self.dV2 = -self.fs[-1].T @ self.Vxx_f[-1]
+        for t in range(self.problem.T):  # in parallel
+            nu = self.problem.runningModels[t].nu
+            if nu != 0:
+                self.dV1 += self.k[t].T @ self.Qu[t]
+                self.dV2 -= self.k[t].T @ self.Quuk[t]
+            dx = self.fs[t]
+            self.dV1 -= dx.T @ self.Vx[t]
+            self.dV2 -= dx.T @ self.Vxx_f[t]
         self.d = np.array([self.dV1, self.dV2])
         return copy.deepcopy(self.d)
 

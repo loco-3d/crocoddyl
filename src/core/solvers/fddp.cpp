@@ -264,32 +264,17 @@ double SolverFDDP::stoppingCriteria() {
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   // We define dVexp = Vexp - Vexptry as done for dV
   const std::size_t T = this->problem_->get_T();
-  switch (dyn_solver_) {
-    case SingleShoot:
-      d_[0] = 0.;
-      d_[1] = 0.;
-      for (std::size_t t = 0; t < T; ++t) {
-        const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
-        if (nu != 0) {
-          d_[0] += k_[t].dot(Qu_[t]);
-          d_[1] -= k_[t].dot(Quuk_[t]);
-        }
-      }
-      break;
-    default:
-      // The expected cost changes with the dynamics gaps.
-      d_[0] = -fs_[0].dot(Vx_[0]);
-      d_[1] = -fs_.back().dot(Vxx_f_.back());
-      for (std::size_t t = 0; t < T; ++t) {
-        const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
-        if (nu != 0) {
-          d_[0] += k_[t].dot(Qu_[t]);
-          d_[1] -= k_[t].dot(Quuk_[t]);
-        }
-        d_[0] -= fs_[t].dot(Vx_[t]);
-        d_[1] -= fs_[t].dot(Vxx_f_[t]);
-      }
-      break;
+  // The expected cost changes with the dynamics gaps.
+  d_[0] = -fs_[0].dot(Vx_[0]);
+  d_[1] = -fs_.back().dot(Vxx_f_.back());
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+    if (nu != 0) {
+      d_[0] += k_[t].dot(Qu_[t]);
+      d_[1] -= k_[t].dot(Quuk_[t]);
+    }
+    d_[0] -= fs_[t].dot(Vx_[t]);
+    d_[1] -= fs_[t].dot(Vxx_f_[t]);
   }
   return d_;
 }
