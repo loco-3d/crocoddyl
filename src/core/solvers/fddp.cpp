@@ -181,7 +181,6 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
         switch (dyn_solver_) {
           case SingleShoot:
             ffeas_ = 0.;
-            is_feasible_ = true;
             break;
           default:
             ffeas_ = ffeas_try_;
@@ -468,8 +467,8 @@ void SolverFDDP::feasDrivenForwardPass(const double steplength) {
     const std::size_t nu = m->get_nu();
     fs_try_[t] = fs_[t] * (steplength - 1);
     m->get_state()->integrate(xnext_, fs_try_[t], xs_try_[t]);
-    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
     if (nu != 0) {
+      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t] = us_[t] - k_[t] * steplength;
       us_try_[t].noalias() -= K_[t] * dx_[t];
       m->calc(d, xs_try_[t], us_try_[t]);
@@ -671,7 +670,7 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
   }
   START_PROFILER("SolverFDDP::singleShootForwardPass");
   cost_try_ = 0.;
-  xnext_ = problem_->get_x0();
+  xs_try_[0] = problem_->get_x0();
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -680,7 +679,6 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-    xs_try_[t] = xnext_;
     if (m->get_nu() != 0) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t] = us_[t] - k_[t] * steplength;
@@ -689,13 +687,13 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
     } else {
       m->calc(d, xs_try_[t]);
     }
-    xnext_ = d->xnext;
+    xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;
     if (raiseIfNaN(cost_try_)) {
       STOP_PROFILER("SolverFDDP::singleShootForwardPass");
       throw_pretty("forward_error");
     }
-    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
       STOP_PROFILER("SolverFDDP::singleShootForwardPass");
       throw_pretty("forward_error");
     }
@@ -703,8 +701,7 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
   const std::shared_ptr<ActionModelAbstract>& m =
       problem_->get_terminalModel();
   const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-  xs_try_.back() = xnext_;
-  m->calc(d, xnext_);
+  m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
   if (raiseIfNaN(cost_try_)) {
     STOP_PROFILER("SolverFDDP::singleShootForwardPass");
