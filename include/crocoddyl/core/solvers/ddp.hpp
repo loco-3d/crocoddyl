@@ -172,7 +172,7 @@ class SolverDDP : public SolverAbstract {
    * Note that if the Cholesky decomposition fails, then we re-start the
    * backward pass and increase the state and control regularization values.
    */
-  virtual void computeGains(const std::size_t t);
+  virtual void computePolicy(const std::size_t t);
 
   /**
    * @brief Increase the state and control regularization values by a
@@ -347,10 +347,9 @@ class SolverDDP : public SolverAbstract {
   double reg_min_;        //!< Minimum allowed regularization value
   double reg_max_;        //!< Maximum allowed regularization value
 
+  // allocate data
   std::vector<Eigen::VectorXd>
       dx_;  //!< State error during the roll-out/forward-pass (size T)
-
-  // allocate data
   std::vector<Eigen::MatrixXd>
       Vxx_;  //!< Hessian of the Value function \f$\mathbf{V_{xx}}\f$
   Eigen::MatrixXd

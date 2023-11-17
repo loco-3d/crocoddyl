@@ -22,7 +22,7 @@ class SolverBoxDDP : public SolverDDP {
   explicit SolverBoxDDP(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxDDP();
 
-  virtual void computeGains(const std::size_t t);
+  virtual void computePolicy(const std::size_t t);
   virtual void forwardPass(const double steplength);
   virtual void resizeData();
 

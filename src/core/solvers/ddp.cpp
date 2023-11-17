@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -233,7 +233,7 @@ void SolverDDP::backwardPass() {
     computeActionValueFunction(t, m, d);
 
     // Compute the feedforward and feedback gains
-    computeGains(t);
+    computePolicy(t);
 
     // Compute the linear-quadratic approximation of the Value function
     computeValueFunction(t, m);
@@ -367,11 +367,11 @@ void SolverDDP::computeValueFunction(
   }
 }
 
-void SolverDDP::computeGains(const std::size_t t) {
+void SolverDDP::computePolicy(const std::size_t t) {
   assert_pretty(t < problem_->get_T(),
                 "Invalid argument: t should be between 0 and " +
                     std::to_string(problem_->get_T()));
-  START_PROFILER("SolverDDP::computeGains");
+  START_PROFILER("SolverDDP::computePolicy");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     START_PROFILER("SolverDDP::Quu_inv");
@@ -379,7 +379,7 @@ void SolverDDP::computeGains(const std::size_t t) {
     STOP_PROFILER("SolverDDP::Quu_inv");
     const Eigen::ComputationInfo& info = Quu_llt_[t].info();
     if (info != Eigen::Success) {
-      STOP_PROFILER("SolverDDP::computeGains");
+      STOP_PROFILER("SolverDDP::computePolicy");
       throw_pretty("backward_error");
     }
     K_[t] = Qxu_[t].transpose();
@@ -390,7 +390,7 @@ void SolverDDP::computeGains(const std::size_t t) {
     k_[t] = Qu_[t];
     Quu_llt_[t].solveInPlace(k_[t]);
   }
-  STOP_PROFILER("SolverDDP::computeGains");
+  STOP_PROFILER("SolverDDP::computePolicy");
 }
 
 void SolverDDP::increaseRegularization() {

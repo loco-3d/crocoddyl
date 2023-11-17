@@ -63,14 +63,14 @@ void SolverBoxDDP::allocateData() {
   }
 }
 
-void SolverBoxDDP::computeGains(const std::size_t t) {
-  START_PROFILER("SolverBoxDDP::computeGains");
+void SolverBoxDDP::computePolicy(const std::size_t t) {
+  START_PROFILER("SolverBoxDDP::computePolicy");
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() ||
         !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
-      SolverDDP::computeGains(t);
+      SolverDDP::computePolicy(t);
       return;
     }
 
@@ -105,7 +105,7 @@ void SolverBoxDDP::computeGains(const std::size_t t) {
     }
     STOP_PROFILER("SolverBoxDDP::Qu_proj");
   }
-  STOP_PROFILER("SolverBoxDDP::computeGains");
+  STOP_PROFILER("SolverBoxDDP::computePolicy");
 }
 
 void SolverBoxDDP::forwardPass(double steplength) {
