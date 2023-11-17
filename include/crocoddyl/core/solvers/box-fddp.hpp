@@ -21,7 +21,7 @@ class SolverBoxFDDP : public SolverFDDP {
   explicit SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxFDDP();
 
-  virtual void computeGains(const std::size_t t);
+  virtual void computePolicy(const std::size_t t);
   virtual void forwardPass(const double steplength);
   virtual void resizeData();
 

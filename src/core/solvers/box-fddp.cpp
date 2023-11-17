@@ -62,13 +62,13 @@ void SolverBoxFDDP::allocateData() {
   }
 }
 
-void SolverBoxFDDP::computeGains(const std::size_t t) {
+void SolverBoxFDDP::computePolicy(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() ||
         !is_feasible_) {
       // No control limits on this model: Use vanilla DDP
-      SolverFDDP::computeGains(t);
+      SolverFDDP::computePolicy(t);
       return;
     }
 

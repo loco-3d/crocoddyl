@@ -312,7 +312,7 @@ void print_benchmark(RobotEENames robot) {
   /******************* DDP BACKWARD AND FORWARD PASSES TIMINGS
    * *******************/
   // Backward pass timings
-  ddp.calcDiff();
+  ddp.calcDir();
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
@@ -334,17 +334,51 @@ void print_benchmark(RobotEENames robot) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.forwardPass(0.005);
+    ddp.feasDrivenForwardPass(0.005);
     duration[i] = timer.get_us_duration();
   }
   double avg_fp = AVG(duration);
   double stddev_fp = STDDEV(duration);
-  std::cout << "forwardPass [us]: \t\t" << avg_fp << " +- " << stddev_fp
-            << " (max: " << duration.maxCoeff()
+  std::cout << "feasDrivenForwardPass [us]: \t\t" << avg_fp << " +- "
+            << stddev_fp << " (max: " << duration.maxCoeff()
             << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N
             << " +- " << stddev_fp / N << ")" << std::endl;
 
-  csv << "forwardPass" << 1 << false << avg_fp << stddev_fp
+  csv << "feasDrivenForwardPass" << 1 << false << avg_fp << stddev_fp
+      << duration.maxCoeff() << duration.minCoeff() << avg_fp / N
+      << stddev_fp / N << csv.endl;
+
+  duration.setZero();
+  for (unsigned int i = 0; i < T; ++i) {
+    crocoddyl::Timer timer;
+    ddp.multiShootForwardPass(0.005);
+    duration[i] = timer.get_us_duration();
+  }
+  double avg_fp = AVG(duration);
+  double stddev_fp = STDDEV(duration);
+  std::cout << "multiShootForwardPass [us]: \t\t" << avg_fp << " +- "
+            << stddev_fp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N
+            << " +- " << stddev_fp / N << ")" << std::endl;
+
+  csv << "multiShootForwardPass" << 1 << false << avg_fp << stddev_fp
+      << duration.maxCoeff() << duration.minCoeff() << avg_fp / N
+      << stddev_fp / N << csv.endl;
+
+  duration.setZero();
+  for (unsigned int i = 0; i < T; ++i) {
+    crocoddyl::Timer timer;
+    ddp.hybridShootForwardPass(0.005);
+    duration[i] = timer.get_us_duration();
+  }
+  double avg_fp = AVG(duration);
+  double stddev_fp = STDDEV(duration);
+  std::cout << "hybridShootForwardPass [us]: \t\t" << avg_fp << " +- "
+            << stddev_fp << " (max: " << duration.maxCoeff()
+            << ", min: " << duration.minCoeff() << ", per nodes: " << avg_fp / N
+            << " +- " << stddev_fp / N << ")" << std::endl;
+
+  csv << "hybridShootForwardPass" << 1 << false << avg_fp << stddev_fp
       << duration.maxCoeff() << duration.minCoeff() << avg_fp / N
       << stddev_fp / N << csv.endl;
 
@@ -418,7 +452,7 @@ void print_benchmark(RobotEENames robot) {
   /******************* DDP BACKWARD AND FORWARD PASSES TIMINGS
    * *******************/
   // Backward pass timings
-  cg_ddp.calcDiff();
+  cg_ddp.calcDir();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
     cg_ddp.backwardPass();

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -15,23 +15,63 @@
 
 namespace crocoddyl {
 
-SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem)
-    : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptnegstep_(2) {}
+SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
+                       const DynamicsSolverType dyn_solver)
+    : SolverAbstract(problem),
+      reg_incfactor_(10.),
+      reg_decfactor_(5.),
+      reg_min_(1e-9),
+      reg_max_(1e9),
+      th_grad_(1e-12),
+      th_stepdec_(0.25),
+      th_stepinc_(0.25),
+      th_minimprove_(1e-5),
+      th_acceptnegstep_(8),
+      th_acceptminstep_(0.01),
+      rho_(0.3),
+      th_minfeas_(
+          std::sqrt(std::numeric_limits<double>::epsilon() / (1. - rho_))),
+      upsilon_(0.),
+      upsilon_decfactor_(0.5),
+      zero_upsilon_(false),
+      acceptstep_(false),
+      recalcdir_(true),
+      recalcstep_(true) {
+  allocateData();
+
+  switch (dyn_solver) {
+    case HybridShoot: {
+      const std::size_t Tshoot =
+          problem_->get_T() /
+          std::max((std::size_t)3, problem_->get_nthreads());
+      set_dynamics_solver(dyn_solver, Tshoot);
+      break;
+    }
+    default:
+      set_dynamics_solver(dyn_solver, 0);
+      break;
+  }
+
+  const std::size_t n_alphas = 10;
+  alphas_.resize(n_alphas);
+  for (std::size_t n = 0; n < n_alphas; ++n) {
+    alphas_[n] = 1. / pow(2., static_cast<double>(n));
+  }
+}
 
 SolverFDDP::~SolverFDDP() {}
 
 bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
                        const std::vector<Eigen::VectorXd>& init_us,
-                       const std::size_t maxiter, const bool is_feasible,
+                       const std::size_t maxiter, const bool,
                        const double init_reg) {
   START_PROFILER("SolverFDDP::solve");
   if (problem_->is_updated()) {
     resizeData();
   }
-  xs_try_[0] =
-      problem_->get_x0();  // it is needed in case that init_xs[0] is infeasible
-  setCandidate(init_xs, init_us, is_feasible);
-
+  // TODO: Deprecate isfeasible_. Update setCandidate API.
+  setCandidate(init_xs, init_us, false);
+  // Initialize the value used for primal and dual regularization
   if (std::isnan(init_reg)) {
     preg_ = reg_min_;
     dreg_ = reg_min_;
@@ -39,15 +79,17 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
     preg_ = init_reg;
     dreg_ = init_reg;
   }
-  was_feasible_ = false;
-
-  bool recalcDiff = true;
+  if (zero_upsilon_) {
+    upsilon_ = 0.;
+  }
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
+    recalcdir_ = true;
+    // Compute search direction
     while (true) {
       try {
-        computeDirection(recalcDiff);
+        computeDirection(recalcdir_);
       } catch (std::exception& e) {
-        recalcDiff = false;
+        recalcdir_ = false;
         increaseRegularization();
         if (preg_ == reg_max_) {
           return false;
@@ -57,61 +99,119 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       }
       break;
     }
-    updateExpectedImprovement();
-
-    // We need to recalculate the derivatives when the step length passes
-    recalcDiff = false;
+    // Estimate the expected improvement
+    expectedImprovement();
+    // Update the penalty parameter for computing the merit function and its
+    // directional derivative For more details see Section 3 of "An Interior
+    // Point Algorithm for Large Scale Nonlinear Programming"
+    if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
+      // We incorporate a barrier-reduction strategy that still maintains a the
+      // directional derivative be sufficiently negative (as explained in
+      // Nocedal's texbook page 542) while allowing for a reduction when it is
+      // possible.
+      upsilon_ = std::max(upsilon_ * upsilon_decfactor_,
+                          (d_[0] + .5 * d_[1]) / ((1 - rho_) * feas_));
+    }
+    // Try and evaluate the search direction
+    recalcstep_ = true;
     for (std::vector<double>::const_iterator it = alphas_.begin();
          it != alphas_.end(); ++it) {
+      // TODO: break the forward pass if the allocated time has been reached
+      // (c++)
       steplength_ = *it;
-
       try {
-        dV_ = tryStep(steplength_);
+        dV_ = tryStep(steplength_, recalcstep_);
+        recalcstep_ = false;
+        // Using the expected reduction in the infeasibilities lead to higher
+        // convergence for both feasibility-driven and classical multi-shooting
+        // approach.
+        switch (dyn_solver_) {
+          case SingleShoot:
+            ffeas_ = 0.;
+            ffeas_try_ = 0.;
+            dfeas_ = 0.;
+            break;
+          default:
+            dfeas_ = ffeas_ - ffeas_try_;
+            break;
+        }
+        dfeas_ += gfeas_ - gfeas_try_;
+        dfeas_ += hfeas_ - hfeas_try_;
+        dPhi_ = dV_ + upsilon_ * dfeas_;
       } catch (std::exception& e) {
         continue;
       }
-      expectedImprovement();
       dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
-
-      if (dVexp_ >= 0) {  // descend direction
-        if (std::abs(d_[0]) < th_grad_ || dV_ > th_acceptstep_ * dVexp_) {
-          was_feasible_ = is_feasible_;
-          setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
-          cost_ = cost_try_;
-          recalcDiff = true;
-          break;
+      dPhiexp_ = dVexp_ + steplength_ * upsilon_ * dfeas_;
+      // Check if we should accept or not the step. The criterio is as follows.
+      // When expected to decrease the merit function value (dPhiexp > 0), we
+      // analyse if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and
+      // define different criterio. For the first case (dPhi > 0), we use the
+      // Armijo condition with the merit function. Instead, for the second case,
+      // we use the Armijo condition with the cost function as this encourage
+      // progress and the possibility of increasing the cost when expectations
+      // are unrealistic. Moreover, when it is expected to increase the merit
+      // function, our strategy is to accept an increment in the cost function.
+      // This approach enables our solver to increase both infeasibility and
+      // cost in order to ensure convergence; it increases the algorithm's
+      // globalization. Finally, we accept any improvement for step lengths
+      // smaller than th_acceptMinStep. This ensures any possible progress in
+      // the iteration.
+      acceptstep_ = false;
+      if (dPhiexp_ >= 0.) {
+        if (dPhi_ > 0.) {
+          if (dPhi_ > th_acceptstep_ * dPhiexp_ || std::abs(d_[0]) < th_grad_) {
+            acceptstep_ = true;
+          }
+        } else if (dV_ > th_acceptstep_ * dVexp_ ||
+                   std::abs(d_[0]) < th_grad_) {
+          acceptstep_ = true;
         }
-      } else {  // reducing the gaps by allowing a small increment in the cost
-                // value
-        if (!is_feasible_ && dV_ > th_acceptnegstep_ * dVexp_) {
-          was_feasible_ = is_feasible_;
-          setCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
-          cost_ = cost_try_;
-          recalcDiff = true;
-          break;
-        }
+      } else if (dV_ > th_acceptnegstep_ * dVexp_) {
+        acceptstep_ = true;
       }
-    }
-
-    if (steplength_ > th_stepdec_) {
-      decreaseRegularization();
-    }
-    if (steplength_ <= th_stepinc_) {
-      increaseRegularization();
-      if (preg_ == reg_max_) {
-        STOP_PROFILER("SolverFDDP::solve");
-        return false;
+      // TODO: accept dPhi > 0 when allocated time has been reached (c++)
+      if (steplength_ <= th_acceptminstep_ && dPhi_ > 0.) {
+        acceptstep_ = true;
+      }
+      // Set candidate guess, cost and feasibilities if we accept the step
+      if (acceptstep_) {
+        setCandidate(xs_try_, us_try_, false);
+        cost_ = cost_try_;
+        switch (dyn_solver_) {
+          case SingleShoot:
+            ffeas_ = 0.;
+            is_feasible_ = true;
+            break;
+          default:
+            ffeas_ = ffeas_try_;
+            break;
+        }
+        gfeas_ = gfeas_try_;
+        hfeas_ = hfeas_try_;
+        merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
+        break;
       }
     }
     stoppingCriteria();
-
     const std::size_t n_callbacks = callbacks_.size();
     for (std::size_t c = 0; c < n_callbacks; ++c) {
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
-
-    if (was_feasible_ && stop_ < th_stop_) {
+    dImpr_ = std::max(dV_, dPhi_);
+    if (steplength_ >= th_stepdec_ && dImpr_ > th_minimprove_) {
+      decreaseRegularization();
+    }
+    if ((steplength_ >= th_stepinc_ && dImpr_ <= th_minimprove_) ||
+        !acceptstep_) {
+      if (preg_ == reg_max_) {
+        STOP_PROFILER("SolverFDDP::solve");
+        return false;
+      }
+      increaseRegularization();
+    }
+    if (stop_ < th_stop_) {
       STOP_PROFILER("SolverFDDP::solve");
       return true;
     }
@@ -120,64 +220,256 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
   return false;
 }
 
-const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
-  dv_ = 0;
-  const std::size_t T = this->problem_->get_T();
-  if (!is_feasible_) {
-    // NB: The dimension of vectors xs_try_ and xs_ are T+1, whereas the
-    // dimension of dx_ is T. Here, we are re-using the final element of dx_ for
-    // the computation of the difference at the terminal node. Using the access
-    // iterator back() this re-use of the final element is fine. Cf. the
-    // discussion at https://github.com/loco-3d/crocoddyl/issues/1022
-    problem_->get_terminalModel()->get_state()->diff(xs_try_.back(), xs_.back(),
-                                                     dx_.back());
-    fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
-    dv_ -= fs_.back().dot(fTVxx_p_);
-    const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
-        problem_->get_runningModels();
-
-    for (std::size_t t = 0; t < T; ++t) {
-      models[t]->get_state()->diff(xs_try_[t], xs_[t], dx_[t]);
-      fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
-      dv_ -= fs_[t].dot(fTVxx_p_);
-    }
+void SolverFDDP::computeDirection(const bool recalc) {
+  START_PROFILER("SolverFDDP::computeDirection");
+  if (recalc) {
+    calcDir();
   }
-  d_[0] = dg_ + dv_;
-  d_[1] = dq_ - 2 * dv_;
+  backwardPass();
+  STOP_PROFILER("SolverFDDP::computeDirection");
+}
+
+double SolverFDDP::tryStep(const double steplength, const bool recalc) {
+  START_PROFILER("SolverFDDP::tryStep");
+  switch (dyn_solver_) {
+    case FeasDriven:
+      feasDrivenForwardPass(steplength);
+      break;
+    case MultiShoot:
+      multiShootForwardPass(steplength, recalc);
+      break;
+    case HybridShoot:
+      hybridShootForwardPass(steplength, recalc);
+      break;
+    case SingleShoot:
+      singleShootForwardPass(steplength);
+      break;
+    default:
+      feasDrivenForwardPass(steplength);
+      break;
+  }
+  ffeas_try_ = computeFeasibility(fs_try_);
+  gfeas_try_ = computeInequalityFeasibility();
+  hfeas_try_ = computeEqualityFeasibility();
+  STOP_PROFILER("SolverFDDP::tryStep");
+  return cost_ - cost_try_;
+}
+
+double SolverFDDP::stoppingCriteria() {
+  feas_ = ffeas_ + gfeas_ + hfeas_;
+  stop_ = std::max(feas_, std::abs(d_[0] + 0.5 * d_[1]));
+  return stop_;
+}
+
+const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
+  // We define dVexp = Vexp - Vexptry as done for dV
+  const std::size_t T = this->problem_->get_T();
+  switch (dyn_solver_) {
+    case SingleShoot:
+      d_[0] = 0.;
+      d_[1] = 0.;
+      for (std::size_t t = 0; t < T; ++t) {
+        const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+        if (nu != 0) {
+          d_[0] += k_[t].dot(Qu_[t]);
+          d_[1] -= k_[t].dot(Quuk_[t]);
+        }
+      }
+      break;
+    default:
+      // The expected cost changes with the dynamics gaps.
+      d_[0] = -fs_[0].dot(Vx_[0]);
+      d_[1] = -fs_.back().dot(Vxx_f_.back());
+      for (std::size_t t = 0; t < T; ++t) {
+        const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+        if (nu != 0) {
+          d_[0] += k_[t].dot(Qu_[t]);
+          d_[1] -= k_[t].dot(Quuk_[t]);
+        }
+        d_[0] -= fs_[t].dot(Vx_[t]);
+        d_[1] -= fs_[t].dot(Vxx_f_[t]);
+      }
+      break;
+  }
   return d_;
 }
 
-void SolverFDDP::updateExpectedImprovement() {
-  dg_ = 0;
-  dq_ = 0;
-  const std::size_t T = this->problem_->get_T();
-  if (!is_feasible_) {
-    dg_ -= Vx_.back().dot(fs_.back());
-    fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
-    dq_ += fs_.back().dot(fTVxx_p_);
-  }
+void SolverFDDP::resizeData() {
+  START_PROFILER("SolverFDDP::resizeData");
+  SolverAbstract::resizeData();
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const std::size_t nu = models[t]->get_nu();
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    Qxu_[t].conservativeResize(ndx, nu);
+    Quu_[t].conservativeResize(nu, nu);
+    Qu_[t].conservativeResize(nu);
+    K_[t].conservativeResize(nu, ndx);
+    k_[t].conservativeResize(nu);
+    us_try_[t].conservativeResize(nu);
+    dus_[t].conservativeResize(nu);
+    FuTVxx_p_[t].conservativeResize(nu, ndx);
+    Quuk_[t].conservativeResize(nu);
     if (nu != 0) {
-      dg_ += Qu_[t].dot(k_[t]);
-      dq_ -= k_[t].dot(Quuk_[t]);
-    }
-    if (!is_feasible_) {
-      dg_ -= Vx_[t].dot(fs_[t]);
-      fTVxx_p_.noalias() = Vxx_[t] * fs_[t];
-      dq_ += fs_[t].dot(fTVxx_p_);
+      FuTVxx_p_[t].setZero();
     }
   }
+  STOP_PROFILER("SolverFDDP::resizeData");
 }
 
-void SolverFDDP::forwardPass(const double steplength) {
+void SolverFDDP::calcDir() {
+  START_PROFILER("SolverFDDP::calcDir");
+  if (iter_ == 0 || !acceptstep_) {
+    problem_->calc(xs_, us_);
+  }
+  cost_ = problem_->calcDiff(xs_, us_);
+  ffeas_ = computeDynamicFeasibility();
+  gfeas_ = computeInequalityFeasibility();
+  hfeas_ = computeEqualityFeasibility();
+  feas_ = ffeas_ + gfeas_ + hfeas_;
+  STOP_PROFILER("SolverFDDP::calcDir");
+}
+
+void SolverFDDP::backwardPass() {
+  START_PROFILER("SolverFDDP::backwardPass");
+  const std::shared_ptr<ActionDataAbstract>& d_T =
+      problem_->get_terminalData();
+  Vxx_.back() = d_T->Lxx;
+  Vx_.back() = d_T->Lx;
+  if (!std::isnan(preg_)) {
+    Vxx_.back().diagonal().array() += preg_;
+  }
+  // Compute and store the Vx gradient at end of the interval (rollout state)
+  Vxx_f_.back().noalias() = Vxx_.back() * fs_.back();
+  Vx_.back() += Vxx_f_.back();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    // Update control-action function
+    computeActionValueFunction(t, m, d);
+    // Update policy
+    computePolicy(t);
+    // Update value function
+    computeValueFunction(t, m);
+    if (raiseIfNaN(Vx_[t].lpNorm<Eigen::Infinity>())) {
+      throw_pretty("backward_error");
+    }
+    if (raiseIfNaN(Vxx_[t].lpNorm<Eigen::Infinity>())) {
+      throw_pretty("backward_error");
+    }
+  }
+  STOP_PROFILER("SolverFDDP::backwardPass");
+}
+
+void SolverFDDP::computeActionValueFunction(
+    const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model,
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  START_PROFILER("SolverFDDP::computeActionValueFunction");
+  assert_pretty(t < problem_->get_T(),
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()););
+  const std::size_t nu = model->get_nu();
+  const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
+  const Eigen::VectorXd& Vx_p = Vx_[t + 1];
+  START_PROFILER("SolverFDDP::Qx");
+  Qx_[t] = data->Lx;
+  Qx_[t].noalias() += data->Fx.transpose() * Vx_p;
+  STOP_PROFILER("SolverFDDP::Qx");
+  START_PROFILER("SolverFDDP::Qxx");
+  FxTVxx_p_[t].noalias() = data->Fx.transpose() * Vxx_p;
+  Qxx_[t] = data->Lxx;
+  Qxx_[t].noalias() += FxTVxx_p_[t] * data->Fx;
+  if (!std::isnan(preg_)) {
+    Qxx_[t].diagonal().array() += preg_;
+  }
+  STOP_PROFILER("SolverFDDP::Qxx");
+  if (nu != 0) {
+    START_PROFILER("SolverFDDP::Qu");
+    Qu_[t] = data->Lu;
+    Qu_[t].noalias() += data->Fu.transpose() * Vx_p;
+    STOP_PROFILER("SolverFDDP::Qu");
+    START_PROFILER("SolverFDDP::Quu");
+    FuTVxx_p_[t].noalias() = data->Fu.transpose() * Vxx_p;
+    Quu_[t] = data->Luu;
+    Quu_[t].noalias() += FuTVxx_p_[t] * data->Fu;
+    if (!std::isnan(preg_)) {
+      Quu_[t].diagonal().array() += preg_;
+    }
+    STOP_PROFILER("SolverFDDP::Quu");
+    START_PROFILER("SolverFDDP::Qxu");
+    Qxu_[t] = data->Lxu;
+    Qxu_[t].noalias() += FxTVxx_p_[t] * data->Fu;
+    STOP_PROFILER("SolverFDDP::Qxu");
+  }
+  STOP_PROFILER("SolverFDDP::computeActionValueFunction");
+}
+
+void SolverFDDP::computePolicy(const std::size_t t) {
+  START_PROFILER("SolverFDDP::computePolicy");
+  assert_pretty(t < problem_->get_T(),
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()));
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+  if (nu > 0) {
+    START_PROFILER("SolverFDDP::Quu_cholesky");
+    Quu_llt_[t].compute(Quu_[t]);
+    STOP_PROFILER("SolverFDDP::Quu_cholesky");
+    const Eigen::ComputationInfo& info = Quu_llt_[t].info();
+    if (info != Eigen::Success) {
+      STOP_PROFILER("SolverFDDP::computePolicy");
+      throw_pretty("backward_error");
+    }
+    START_PROFILER("SolverFDDP::feedback");
+    K_[t] = Qxu_[t].transpose();
+    Quu_llt_[t].solveInPlace(K_[t]);
+    STOP_PROFILER("SolverFDDP::feedback");
+    START_PROFILER("SolverFDDP::feedforward");
+    k_[t] = Qu_[t];
+    Quu_llt_[t].solveInPlace(k_[t]);
+    STOP_PROFILER("SolverFDDP::feedforward");
+  }
+  STOP_PROFILER("SolverFDDP::computePolicy");
+}
+
+void SolverFDDP::computeValueFunction(
+    const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
+  START_PROFILER("SolverFDDP::computeValueFunction");
+  assert_pretty(t < problem_->get_T(),
+                "Invalid argument: t should be between 0 and " +
+                    std::to_string(problem_->get_T()););
+  const std::size_t nu = model->get_nu();
+  Vx_[t] = Qx_[t];
+  Vxx_[t] = Qxx_[t];
+  if (nu != 0) {
+    START_PROFILER("SolverFDDP::Vx");
+    Quuk_[t].noalias() = Quu_[t] * k_[t];
+    Vx_[t].noalias() -= K_[t].transpose() * Qu_[t];
+    STOP_PROFILER("SolverFDDP::Vx");
+    START_PROFILER("SolverFDDP::Vxx");
+    Vxx_[t].noalias() -= Qxu_[t] * K_[t];
+    STOP_PROFILER("SolverFDDP::Vxx");
+  }
+  Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+  Vxx_[t] = Vxx_tmp_;
+  // Compute and store the Vx gradient at end of the interval (rollout state)
+  Vxx_f_[t].noalias() = Vxx_[t] * fs_[t];
+  Vx_[t] += Vxx_f_[t];
+  STOP_PROFILER("SolverFDDP::computeValueFunction");
+}
+
+void SolverFDDP::feasDrivenForwardPass(const double steplength) {
+  START_PROFILER("SolverFDDP::feasDrivenForwardPass");
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
-  START_PROFILER("SolverFDDP::forwardPass");
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
@@ -185,87 +477,515 @@ void SolverFDDP::forwardPass(const double steplength) {
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
-  if ((is_feasible_) || (steplength == 1)) {
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::shared_ptr<ActionModelAbstract>& m = models[t];
-      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t nu = m->get_nu();
-
-      xs_try_[t] = xnext_;
-      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (nu != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t]);
-      } else {
-        m->calc(d, xs_try_[t]);
-      }
-      xnext_ = d->xnext;
-      cost_try_ += d->cost;
-
-      if (raiseIfNaN(cost_try_)) {
-        STOP_PROFILER("SolverFDDP::forwardPass");
-        throw_pretty("forward_error");
-      }
-      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-        STOP_PROFILER("SolverFDDP::forwardPass");
-        throw_pretty("forward_error");
-      }
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    const std::size_t nu = m->get_nu();
+    fs_try_[t] = fs_[t] * (steplength - 1);
+    m->get_state()->integrate(xnext_, fs_try_[t], xs_try_[t]);
+    m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+    if (nu != 0) {
+      us_try_[t] = us_[t] - k_[t] * steplength;
+      us_try_[t].noalias() -= K_[t] * dx_[t];
+      m->calc(d, xs_try_[t], us_try_[t]);
+    } else {
+      m->calc(d, xs_try_[t]);
     }
-
-    const std::shared_ptr<ActionModelAbstract>& m =
-        problem_->get_terminalModel();
-    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-    xs_try_.back() = xnext_;
-    m->calc(d, xs_try_.back());
+    xnext_ = d->xnext;
     cost_try_ += d->cost;
-
     if (raiseIfNaN(cost_try_)) {
-      STOP_PROFILER("SolverFDDP::forwardPass");
+      STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
       throw_pretty("forward_error");
     }
-  } else {
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::shared_ptr<ActionModelAbstract>& m = models[t];
-      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-      const std::size_t nu = m->get_nu();
-      m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
-      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      if (nu != 0) {
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t]);
-      } else {
-        m->calc(d, xs_try_[t]);
-      }
-      xnext_ = d->xnext;
-      cost_try_ += d->cost;
-
-      if (raiseIfNaN(cost_try_)) {
-        STOP_PROFILER("SolverFDDP::forwardPass");
-        throw_pretty("forward_error");
-      }
-      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-        STOP_PROFILER("SolverFDDP::forwardPass");
-        throw_pretty("forward_error");
-      }
-    }
-
-    const std::shared_ptr<ActionModelAbstract>& m =
-        problem_->get_terminalModel();
-    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1),
-                              xs_try_.back());
-    m->calc(d, xs_try_.back());
-    cost_try_ += d->cost;
-
-    if (raiseIfNaN(cost_try_)) {
-      STOP_PROFILER("SolverFDDP::forwardPass");
+    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
       throw_pretty("forward_error");
     }
   }
-  STOP_PROFILER("SolverFDDP::forwardPass");
+  const std::shared_ptr<ActionModelAbstract>& m =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+  fs_try_.back() = fs_.back() * (steplength - 1);
+  m->get_state()->integrate(xnext_, fs_try_.back(), xs_try_.back());
+  m->calc(d, xs_try_.back());
+  cost_try_ += d->cost;
+  if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
+    throw_pretty("forward_error");
+  }
+  STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
 }
 
+void SolverFDDP::multiShootForwardPass(const double steplength,
+                                       const bool recalc) {
+  START_PROFILER("SolverFDDP::multiShootForwardPass");
+  if (steplength > 1. || steplength < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
+  }
+  const std::size_t T = problem_->get_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  if (recalc) {
+    // Perform the linear rollout for the entire trajectory
+    dxs_[0] = fs_[0];
+    for (std::size_t t = 0; t < T; ++t) {  // in sequence
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+      dxs_[t + 1].noalias() = d->Fx * dxs_[t];
+      dxs_[t + 1] += fs_[t + 1];
+      if (m->get_nu() != 0) {
+        dus_[t] = -k_[t];
+        dus_[t].noalias() -= K_[t] * dxs_[t];
+        dxs_[t + 1].noalias() += d->Fu * dus_[t];
+      }
+    }
+  }
+  // Update the dynamics gap for each node
+  models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
+  models[0]->get_state()->diff(xs_try_[0], xs_[0], fs_try_[0]);
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    m->get_state()->integrate(xs_[t + 1], steplength * dxs_[t + 1],
+                              xs_try_[t + 1]);
+  }
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(problem_->get_nthreads())
+#endif
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    if (m->get_nu() != 0) {
+      us_try_[t] = us_[t] + steplength * dus_[t];
+      m->calc(d, xs_try_[t], us_try_[t]);
+    } else {
+      m->calc(d, xs_try_[t]);
+    }
+    m->get_state()->diff(xs_try_[t + 1], d->xnext, fs_try_[t + 1]);
+    if (raiseIfNaN(d->xnext.lpNorm<Eigen::Infinity>())) {
+      STOP_PROFILER("SolverFDDP::multiShootForwardPass");
+      throw_pretty("forward_error");
+    }
+  }
+  cost_try_ = 0.;
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    cost_try_ += d->cost;
+    if (raiseIfNaN(cost_try_)) {
+      STOP_PROFILER("SolverFDDP::multiShootForwardPass");
+      throw_pretty("forward_error");
+    }
+  }
+  const std::shared_ptr<ActionModelAbstract>& m =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+  m->calc(d, xs_try_.back());
+  cost_try_ += d->cost;
+  if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverFDDP::multiShootForwardPass");
+    throw_pretty("forward_error");
+  }
+  STOP_PROFILER("SolverFDDP::multiShootForwardPass");
+}
+
+void SolverFDDP::hybridShootForwardPass(const double steplength,
+                                        const bool recalc) {
+  START_PROFILER("SolverFDDP::hybridShootForwardPass");
+  if (steplength > 1. || steplength < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
+  }
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  if (recalc) {
+    const std::size_t T = problem_->get_T();
+    // Perform the linear rollout for the entire trajectory
+    dxs_[0] = fs_[0];
+    for (std::size_t t = 0; t < T; ++t) {  // in sequence
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+      dxs_[t + 1].noalias() = d->Fx * dxs_[t];
+      dxs_[t + 1] += fs_[t + 1];
+      if (m->get_nu() != 0) {
+        dus_[t] = -k_[t];
+        dus_[t].noalias() -= K_[t] * dxs_[t];
+        dxs_[t + 1].noalias() += d->Fu * dus_[t];
+      }
+    }
+  }
+  // Update the initial state of each shooting node
+  models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
+  for (std::size_t i = 1; i < Ts_.size();
+       ++i) {  // this can be executed in parallel
+    const std::size_t Ti = Ts_[i];
+    const std::shared_ptr<ActionModelAbstract>& m = models[Ti - 1];
+    m->get_state()->integrate(xs_[Ti], steplength * dxs_[Ti], xs_try_[Ti]);
+  }
+  // Perform the feasibility-driven nonlinear rollout for each shooting node
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(problem_->get_nthreads())
+#endif
+  for (std::size_t i = 1; i < Ts_.size(); ++i) {
+    for (std::size_t t = Ts_[i - 1]; t < Ts_[i]; ++t) {
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+      if (m->get_nu() != 0) {
+        m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+        us_try_[t] = us_[t] - k_[t] * steplength;
+        us_try_[t].noalias() -= K_[t] * dx_[t];
+        m->calc(d, xs_try_[t], us_try_[t]);
+      } else {
+        m->calc(d, xs_try_[t]);
+      }
+      if (t + 1 != Ts_[i]) {
+        fs_try_[t + 1] = fs_[t + 1] * (steplength - 1);
+        m->get_state()->integrate(d->xnext, fs_try_[t + 1], xs_try_[t + 1]);
+      }
+    }
+  }
+  cost_try_ = 0.;
+  for (std::size_t i = 1; i < Ts_.size(); ++i) {
+    for (std::size_t t = Ts_[i - 1]; t < Ts_[i]; ++t) {
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+      cost_try_ += d->cost;
+      if (raiseIfNaN(cost_try_)) {
+        STOP_PROFILER("SolverFDDP::hybridShootForwardPass");
+        throw_pretty("forward_error");
+      }
+    }
+  }
+  const std::shared_ptr<ActionModelAbstract>& m =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+  m->calc(d, xs_try_.back());
+  cost_try_ += d->cost;
+  if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverFDDP::hybridShootForwardPass");
+    throw_pretty("forward_error");
+  }
+  // Update the initial gap of each shooting node
+  models[0]->get_state()->diff(xs_try_[0], xs_[0], fs_try_[0]);
+  for (std::size_t i = 1; i < Ts_.size();
+       ++i) {  // this can be executed in parallel
+    const std::size_t Ti = Ts_[i];
+    const std::shared_ptr<ActionModelAbstract>& m = models[Ti - 1];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[Ti - 1];
+    m->get_state()->diff(xs_try_[Ti], d->xnext, fs_try_[Ti]);
+  }
+  STOP_PROFILER("SolverFDDP::hybridShootForwardPass");
+}
+
+void SolverFDDP::singleShootForwardPass(const double steplength) {
+  if (steplength > 1. || steplength < 0.) {
+    throw_pretty("Invalid argument: "
+                 << "invalid step length, value is between 0. to 1.");
+  }
+  START_PROFILER("SolverFDDP::singleShootForwardPass");
+  cost_try_ = 0.;
+  xnext_ = problem_->get_x0();
+  const std::size_t T = problem_->get_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    xs_try_[t] = xnext_;
+    if (m->get_nu() != 0) {
+      m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
+      us_try_[t] = us_[t] - k_[t] * steplength;
+      us_try_[t].noalias() -= K_[t] * dx_[t];
+      m->calc(d, xs_try_[t], us_try_[t]);
+    } else {
+      m->calc(d, xs_try_[t]);
+    }
+    xnext_ = d->xnext;
+    cost_try_ += d->cost;
+    if (raiseIfNaN(cost_try_)) {
+      STOP_PROFILER("SolverFDDP::singleShootForwardPass");
+      throw_pretty("forward_error");
+    }
+    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      STOP_PROFILER("SolverFDDP::singleShootForwardPass");
+      throw_pretty("forward_error");
+    }
+  }
+  const std::shared_ptr<ActionModelAbstract>& m =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+  xs_try_.back() = xnext_;
+  m->calc(d, xnext_);
+  cost_try_ += d->cost;
+  if (raiseIfNaN(cost_try_)) {
+    STOP_PROFILER("SolverFDDP::singleShootForwardPass");
+    throw_pretty("forward_error");
+  }
+  STOP_PROFILER("SolverFDDP::singleShootForwardPass");
+}
+
+void SolverFDDP::increaseRegularization() {
+  preg_ *= reg_incfactor_;
+  if (preg_ > reg_max_) {
+    preg_ = reg_max_;
+  }
+  dreg_ = preg_;
+}
+
+void SolverFDDP::decreaseRegularization() {
+  preg_ /= reg_decfactor_;
+  if (preg_ < reg_min_) {
+    preg_ = reg_min_;
+  }
+  dreg_ = preg_;
+}
+
+void SolverFDDP::allocateData() {
+  const std::size_t ndx = problem_->get_ndx();
+  const std::size_t T = problem_->get_T();
+  dImpr_ = 0.;
+  Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
+  xnext_ = Eigen::VectorXd::Zero(ndx);
+  Vxx_.resize(T + 1);
+  Vxx_f_.resize(T + 1);
+  Vx_.resize(T + 1);
+  Qxx_.resize(T);
+  Qxu_.resize(T);
+  Quu_.resize(T);
+  Qx_.resize(T);
+  Qu_.resize(T);
+  K_.resize(T);
+  k_.resize(T);
+  dx_.resize(T);
+  dxs_.resize(T + 1);
+  dus_.resize(T);
+  FxTVxx_p_.resize(T);
+  FuTVxx_p_.resize(T);
+  Quu_llt_.resize(T);
+  Quuk_.resize(T);
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    Vxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
+    Vxx_f_[t] = Eigen::VectorXd::Zero(ndx);
+    Vx_[t] = Eigen::VectorXd::Zero(ndx);
+    Qxx_[t] = Eigen::MatrixXd::Zero(ndx, ndx);
+    Qxu_[t] = Eigen::MatrixXd::Zero(ndx, nu);
+    Quu_[t] = Eigen::MatrixXd::Zero(nu, nu);
+    Qx_[t] = Eigen::VectorXd::Zero(ndx);
+    Qu_[t] = Eigen::VectorXd::Zero(nu);
+    K_[t] = MatrixXdRowMajor::Zero(nu, ndx);
+    k_[t] = Eigen::VectorXd::Zero(nu);
+    dx_[t] = Eigen::VectorXd::Zero(ndx);
+    dxs_[t] = Eigen::VectorXd::Zero(ndx);
+    dus_[t] = Eigen::VectorXd::Zero(nu);
+    FxTVxx_p_[t] = MatrixXdRowMajor::Zero(ndx, ndx);
+    FuTVxx_p_[t] = MatrixXdRowMajor::Zero(nu, ndx);
+    Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nu);
+    Quuk_[t] = Eigen::VectorXd(nu);
+  }
+  Vxx_.back() = Eigen::MatrixXd::Zero(ndx, ndx);
+  Vx_.back() = Eigen::VectorXd::Zero(ndx);
+  dxs_.back() = Eigen::VectorXd::Zero(ndx);
+  fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
+}
+
+void SolverFDDP::set_dynamics_solver(const DynamicsSolverType type,
+                                     const std::size_t Tshoot) {
+  dyn_solver_ = type;
+  switch (type) {
+    case HybridShoot:
+      if (Tshoot == 0) {
+        std::cerr << "Warning: the number of nodes per shooting cannot be "
+                     "zero. Ignoring this request."
+                  << std::endl;
+        return;
+      }
+      Ts_.clear();
+      Ts_.push_back(0);
+      for (std::size_t i = 0; i < problem_->get_T(); i += Tshoot) {
+        if (i + Tshoot < problem_->get_T()) {
+          Ts_.push_back(i + Tshoot);
+        } else {
+          Ts_.push_back(problem_->get_T());
+        }
+      }
+      break;
+    default:
+      if (Tshoot != 0) {
+        std::cerr << "Warning: the number of nodes per shooting is valid for "
+                     "hybrid shooting only. Ignoring this request."
+                  << std::endl;
+      }
+      break;
+  }
+}
+
+double SolverFDDP::computeFeasibility(const std::vector<Eigen::VectorXd>& fs) {
+  tmp_feas_ = 0.;
+  switch (feasnorm_) {
+    case LInf:
+      for (std::size_t t = 0; t < fs.size(); ++t) {
+        tmp_feas_ = std::max(tmp_feas_, fs[t].lpNorm<Eigen::Infinity>());
+      }
+      break;
+    case L1:
+      for (std::size_t t = 0; t < fs.size(); ++t) {
+        tmp_feas_ += fs_[t].lpNorm<1>();
+      }
+      break;
+  }
+  return tmp_feas_;
+}
+
+DynamicsSolverType SolverFDDP::get_dynamics_solver() const {
+  return dyn_solver_;
+}
+
+const std::vector<double>& SolverFDDP::get_alphas() const { return alphas_; }
+
+double SolverFDDP::get_reg_incfactor() const { return reg_incfactor_; }
+
+double SolverFDDP::get_reg_decfactor() const { return reg_decfactor_; }
+
+double SolverFDDP::get_reg_min() const { return reg_min_; }
+
+double SolverFDDP::get_reg_max() const { return reg_max_; }
+
+double SolverFDDP::get_th_grad() const { return th_grad_; }
+
+double SolverFDDP::get_th_stepdec() const { return th_stepdec_; }
+
+double SolverFDDP::get_th_stepinc() const { return th_stepinc_; }
+
+double SolverFDDP::get_th_minimprove() const { return th_minimprove_; }
+
 double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
+
+double SolverFDDP::get_th_acceptminstep() const { return th_acceptminstep_; }
+
+double SolverFDDP::get_rho() const { return rho_; }
+
+double SolverFDDP::get_th_minfeas() const { return th_minfeas_; }
+
+double SolverFDDP::get_upsilon() const { return upsilon_; }
+
+double SolverFDDP::get_upsilon_decfactor() const { return upsilon_decfactor_; }
+
+bool SolverFDDP::get_zero_upsilon() const { return zero_upsilon_; }
+
+const std::vector<std::size_t>& SolverFDDP::get_Ts() const { return Ts_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Vxx() const { return Vxx_; }
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_Vx() const { return Vx_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Qxx() const { return Qxx_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Qxu() const { return Qxu_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Quu() const { return Quu_; }
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_Qx() const { return Qx_; }
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_Qu() const { return Qu_; }
+
+const std::vector<typename MathBaseTpl<double>::MatrixXsRowMajor>&
+SolverFDDP::get_K() const {
+  return K_;
+}
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_k() const { return k_; }
+
+void SolverFDDP::set_alphas(const std::vector<double>& alphas) {
+  double prev_alpha = alphas[0];
+  if (prev_alpha != 1.) {
+    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
+  }
+  for (std::size_t i = 1; i < alphas.size(); ++i) {
+    double alpha = alphas[i];
+    if (0. >= alpha) {
+      throw_pretty("Invalid argument: "
+                   << "alpha values has to be positive.");
+    }
+    if (alpha >= prev_alpha) {
+      throw_pretty("Invalid argument: "
+                   << "alpha values are monotonously decreasing.");
+    }
+    prev_alpha = alpha;
+  }
+  alphas_ = alphas;
+}
+
+void SolverFDDP::set_reg_incfactor(const double regfactor) {
+  if (regfactor <= 1.) {
+    throw_pretty("Invalid argument: "
+                 << "reg_incfactor value is higher than 1.");
+  }
+  reg_incfactor_ = regfactor;
+}
+
+void SolverFDDP::set_reg_decfactor(const double regfactor) {
+  if (regfactor <= 1.) {
+    throw_pretty("Invalid argument: "
+                 << "reg_decfactor value is higher than 1.");
+  }
+  reg_decfactor_ = regfactor;
+}
+
+void SolverFDDP::set_reg_min(const double regmin) {
+  if (0. > regmin) {
+    throw_pretty("Invalid argument: "
+                 << "regmin value has to be positive.");
+  }
+  reg_min_ = regmin;
+}
+
+void SolverFDDP::set_reg_max(const double regmax) {
+  if (0. > regmax) {
+    throw_pretty("Invalid argument: "
+                 << "regmax value has to be positive.");
+  }
+  reg_max_ = regmax;
+}
+
+void SolverFDDP::set_th_grad(const double th_grad) {
+  if (0. > th_grad) {
+    throw_pretty("Invalid argument: "
+                 << "th_grad value has to be positive.");
+  }
+  th_grad_ = th_grad;
+}
+
+void SolverFDDP::set_th_stepdec(const double th_stepdec) {
+  if (0. >= th_stepdec || th_stepdec > 1.) {
+    throw_pretty("Invalid argument: "
+                 << "th_stepdec value should between 0 and 1.");
+  }
+  th_stepdec_ = th_stepdec;
+}
+
+void SolverFDDP::set_th_stepinc(const double th_stepinc) {
+  if (0. >= th_stepinc || th_stepinc > 1.) {
+    throw_pretty("Invalid argument: "
+                 << "th_stepinc value should between 0 and 1.");
+  }
+  th_stepinc_ = th_stepinc;
+}
+
+void SolverFDDP::set_th_minimprove(const double th_minimprove) {
+  if (0. >= th_minimprove || th_minimprove > 100.) {
+    throw_pretty("Invalid argument: "
+                 << "th_minimprove value should between 0 and 100.");
+  }
+  th_minimprove_ = th_minimprove;
+}
 
 void SolverFDDP::set_th_acceptnegstep(const double th_acceptnegstep) {
   if (0. > th_acceptnegstep) {
@@ -273,6 +993,38 @@ void SolverFDDP::set_th_acceptnegstep(const double th_acceptnegstep) {
         "Invalid argument: " << "th_acceptnegstep value has to be positive.");
   }
   th_acceptnegstep_ = th_acceptnegstep;
+}
+
+void SolverFDDP::set_th_acceptminstep(const double th_acceptminstep) {
+  if (0. > th_acceptminstep || th_acceptminstep > 1.) {
+    throw_pretty("Invalid argument: "
+                 << "th_acceptminstep value should be between 0 and 1.");
+  }
+  th_acceptminstep_ = th_acceptminstep;
+}
+
+void SolverFDDP::set_rho(const double rho) {
+  if (0. >= rho || rho > 1.) {
+    throw_pretty("Invalid argument: "
+                 << "rho value should between 0 and 1.");
+  }
+  rho_ = rho;
+}
+
+void SolverFDDP::set_th_minfeas(const double th_minfeas) {
+  th_minfeas_ = th_minfeas;
+}
+
+void SolverFDDP::set_upsilon_decfactor(const double upsilon_decfactor) {
+  if (0. >= upsilon_decfactor || upsilon_decfactor > 1.) {
+    throw_pretty("Invalid argument: "
+                 << "upsilon_decfactor value should between 0 and 1.");
+  }
+  upsilon_decfactor_ = upsilon_decfactor;
+}
+
+void SolverFDDP::set_zero_upsilon(const bool zero_upsilon) {
+  zero_upsilon_ = zero_upsilon;
 }
 
 }  // namespace crocoddyl

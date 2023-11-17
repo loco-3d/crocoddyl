@@ -1,3 +1,4 @@
+import copy
 import warnings
 
 import numpy as np
@@ -1691,202 +1692,457 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
         self.fJf_df = np.zeros((6, model.state.nv))
 
 
-class DDPDerived(crocoddyl.SolverAbstract):
-    def __init__(self, shootingProblem):
-        crocoddyl.SolverAbstract.__init__(self, shootingProblem)
+class SolverFDDP(crocoddyl.SolverAbstract):
+    def __init__(self, problem, dyn_solver=crocoddyl.DynamicsSolverType.FeasDriven):
+        crocoddyl.SolverAbstract.__init__(self, problem)
+        self.dImpr = 0.0
+        # Allocate data
         self.allocateData()
-
-        self.isFeasible = False
+        # Search and convergence parameters
+        Ts = int(self.problem.T / max(3, self.problem.nthreads))
+        self.setDynamicsSolver(dyn_solver, Ts)
         self.alphas = [2 ** (-n) for n in range(10)]
         self.th_grad = 1e-12
-
-        self.callbacks = None
-        self.preg = 0
-        self.dreg = 0
+        # Regularization parameters
         self.reg_incFactor = 10
-        self.reg_decFactor = 10
+        self.reg_decFactor = 5
         self.reg_max = 1e9
         self.reg_min = 1e-9
-        self.th_step = 0.5
+        self.th_stepDec = 0.25
+        self.th_stepInc = 0.25
+        self.th_minImprove = 1e-5  # [0, 100.]
+        # Constraint parameters
+        self.th_acceptNegStep = 8.0
+        self.th_acceptMinStep = 0.01  # [alpha_min, 0.02]
+        self.rho = 0.3
+        self.th_minffeas = np.sqrt(np.finfo(float).eps / (1 - self.rho))
+        self.upsilon = 0.0
+        self.upsilon_decFactor = 0.5
+        self.zero_upsilon = False
+        # Recalc parameters and acceptance
+        self._acceptStep = False
+        self._recalcDir = True
+        self._recalcStep = True
 
-    def solve(
-        self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None
-    ):
-        self.setCandidate(init_xs, init_us, isFeasible)
+    def solve(self, init_xs=[], init_us=[], maxiter=100, regInit=None):
+        self.setCandidate(
+            init_xs, init_us, False
+        )  # TODO: update Crocoddyl API (let's remove the feasibility boolean)
+        self.isFeasible = False
         self.preg = regInit if regInit is not None else self.reg_min
         self.dreg = regInit if regInit is not None else self.reg_min
-        self.wasFeasible = False
-        for i in range(maxiter):
-            recalc = True
+        if self.zero_upsilon:
+            self.upsilon = 0.0
+        # Start iteration
+        for iter in range(maxiter):
+            self.iter = iter
+            self._recalcDir = True
+            # Compute search direction
             while True:
                 try:
-                    self.computeDirection(recalc=recalc)
+                    self.computeDirection(recalc=self._recalcDir)
                 except ArithmeticError:
-                    recalc = False
+                    self._recalcDir = False
                     self.increaseRegularization()
                     if self.preg == self.reg_max:
-                        return self.xs, self.us, False
+                        return False
                     else:
                         continue
                 break
-            self.d = self.expectedImprovement()
-            d1, d2 = self.d[0], self.d[1]
-
+            # Estimate the expected improvement
+            self.expectedImprovement()
+            d0, d1 = self.d[0].item(), self.d[1].item()
+            # Update the penalty parameter for computing the merit function and its
+            # directional derivative For more details see Section 3.3 of "An Interior
+            # Point Algorithm for Large Scale Nonlinear Programming"
+            if (
+                self.feas >= self.th_minffeas
+                and self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot
+            ):
+                # We incorporate a barrier-reduction strategy that still maintains a
+                # the directional derivative be sufficiently negative (as explained
+                # in Nocedal's texbook page 542) while allowing for a reduction when
+                # it is possible.
+                self.upsilon = max(
+                    self.upsilon * self.upsilon_decFactor,
+                    (d0 + 0.5 * d1) / ((1 - self.rho) * self.feas),
+                )
+            # Try and evaluate the search direction
+            self._recalcStep = True
             for a in self.alphas:
+                self.stepLength = a
                 try:
-                    self.dV = self.tryStep(a)
+                    self.dV = self.tryStep(a, recalc=self._recalcStep)
+                    self._recalcStep = False
+                    # Using the expected reduction in the infeasibilities lead to higher convergence for
+                    # both feasibility-driven and classical multi-shooting approach.
+                    if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+                        self.ffeas = 0.0
+                        self.ffeas_try = 0.0
+                        self.dfeas = 0.0
+                    else:
+                        self.dfeas = self.ffeas - self.ffeas_try
+                    self.dfeas += self.gfeas - self.gfeas_try
+                    self.dfeas += self.hfeas - self.hfeas_try
+                    self.dPhi = self.dV + self.upsilon * self.dfeas
                 except ArithmeticError:
                     continue
-                self.dV_exp = a * (d1 + 0.5 * d2 * a)
-                if self.dV_exp >= 0:
-                    if (
-                        d1 < self.th_grad
-                        or not self.isFeasible
-                        or self.dV > self.th_acceptStep * self.dV_exp
+                self.dVexp = self.stepLength * (d0 + 0.5 * d1 * self.stepLength)
+                self.dPhiexp = self.dVexp + self.upsilon * self.stepLength * self.dfeas
+                # Check if we should accept or not the step. The criterio is as follows.
+                # When expected to decrease the merit function value (dPhiexp > 0), we analyse
+                # if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and define different
+                # criterio. For the first case (dPhi > 0), we use the Armijo condition with the
+                # merit function. Instead, for the second case, we use the Armijo condition with the
+                # cost function as this encourage progress and the possibility of increasing the cost
+                # when expectations are unrealistic. Moreover, when it is expected to increase the
+                # merit function, our strategy is to accept an increment in the cost function. This
+                # approach enables our solver to increase both infeasibility and cost in order to
+                # ensure convergence; it increases the algorithm's globalization. Finally, we accept
+                # any improvement for step lengths smaller than th_acceptMinStep. This ensures
+                # any possible progress in the iteration.
+                self._acceptStep = False
+                if self.dPhiexp >= 0.0:
+                    if self.dPhi > 0.0:
+                        if (
+                            self.dPhi > self.th_acceptStep * self.dPhiexp
+                            or abs(d0) < self.th_grad
+                        ):
+                            self._acceptStep = True
+                    elif (
+                        self.dV > self.th_acceptStep * self.dVexp
+                        or abs(d0) < self.th_grad
                     ):
-                        # Accept step
-                        self.wasFeasible = self.isFeasible
-                        self.setCandidate(self.xs_try, self.us_try, True)
-                        self.cost = self.cost_try
-                        break
-            if a > self.th_step:
+                        self._acceptStep = True
+                elif self.dV > self.th_acceptNegStep * self.dVexp:
+                    self._acceptStep = True
+                if self.stepLength <= self.th_acceptMinStep and self.dPhi > 0.0:
+                    self._acceptStep = True
+                # Set candidate guess, cost and feasibilities if we accept the step
+                if self._acceptStep:
+                    self.setCandidate(self.xs_try, self.us_try, False)
+                    self.cost = copy.deepcopy(self.cost_try)
+                    if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+                        self.ffeas = 0.0
+                    else:
+                        self.ffeas = copy.deepcopy(self.ffeas_try)
+                    self.gfeas = copy.deepcopy(self.gfeas_try)
+                    self.hfeas = copy.deepcopy(self.hfeas_try)
+                    self.merit = self.cost + self.upsilon * (
+                        self.ffeas + self.gfeas + self.hfeas
+                    )
+                    break
+            self.stoppingCriteria()
+            callbacks = self.getCallbacks()
+            if callbacks is not None:
+                [c(self) for c in callbacks]
+            self.dImpr = max(self.dV, self.dPhi)
+            if self.stepLength >= self.th_stepDec and self.dImpr > self.th_minImprove:
                 self.decreaseRegularization()
-            if a == self.alphas[-1]:
-                self.increaseRegularization()
+            if (
+                self.stepLength >= self.th_stepInc and self.dImpr <= self.th_minImprove
+            ) or not self._acceptStep:
                 if self.preg == self.reg_max:
-                    return self.xs, self.us, False
-            self.stepLength = a
-            self.iter = i
-            self.stop = self.stoppingCriteria()
-            if self.callbacks is not None:
-                [c(self) for c in self.callbacks]
-
-            if self.wasFeasible and self.stop < self.th_stop:
-                return self.xs, self.us, True
-        return self.xs, self.us, False
+                    return False
+                self.increaseRegularization()
+            if self.stop < self.th_stop:
+                return True
+        return False
 
     def computeDirection(self, recalc=True):
         if recalc:
-            self.calcDiff()
+            self.calcDir()
         self.backwardPass()
-        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
 
-    def tryStep(self, stepLength=1, recal=True):
-        self.forwardPass(stepLength)
+    def tryStep(self, stepLength=1, recalc=True):
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasDriven:
+            self.feasDrivenForwardPass(stepLength)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.MultiShoot:
+            self.multiShootForwardPass(stepLength, recalc)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.HybridShoot:
+            self.hybridShootForwardPass(stepLength, recalc)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+            self.singleShootForwardPass(stepLength)
+        else:
+            self.feasDrivenForwardPass(stepLength)
+        self.ffeas_try = self._computeFeasibility(self.fs_try)
+        self.gfeas_try = self.computeInequalityFeasibility()
+        self.hfeas_try = self.computeEqualityFeasibility()
         return self.cost - self.cost_try
 
     def stoppingCriteria(self):
-        return np.abs(self.d[0] + 0.5 * self.d[1])
+        d0, d1 = self.d[0].item(), self.d[1].item()
+        self.feas = self.ffeas + self.gfeas + self.hfeas
+        self.stop = max(self.feas, abs(d0 + 0.5 * d1))
+        return copy.deepcopy(self.stop)
 
     def expectedImprovement(self):
-        d1 = sum([np.dot(q.T, k) for q, k in zip(self.Qu, self.k)])
-        d2 = sum([-np.dot(k.T, np.dot(q, k)) for q, k in zip(self.Quu, self.k)])
-        return np.array([d1, d2])
+        # We define dVexp = Vexp - Vexptry as done for dV
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+            self.dV1 = 0.0
+            self.dV2 = 0.0
+            for t in range(self.problem.T):  # in parallel
+                nu = self.problem.runningModels[t].nu
+                if nu != 0:
+                    self.dV1 += self.k[t].T @ self.Qu[t]
+                    self.dV2 -= self.k[t].T @ self.Quuk[t]
+        else:
+            # The expected cost changes with the dynamics gaps.
+            self.dV1 = -self.fs[0].T @ self.Vx[0]
+            self.dV2 = -self.fs[-1].T @ self.Vxx_f[-1]
+            for t in range(self.problem.T):  # in parallel
+                nu = self.problem.runningModels[t].nu
+                if nu != 0:
+                    self.dV1 += self.k[t].T @ self.Qu[t]
+                    self.dV2 -= self.k[t].T @ self.Quuk[t]
+                dx = self.fs[t]
+                self.dV1 -= dx.T @ self.Vx[t]
+                self.dV2 -= dx.T @ self.Vxx_f[t]
+        self.d = np.array([self.dV1, self.dV2])
+        return copy.deepcopy(self.d)
 
-    def calcDiff(self):
-        if self.iter == 0:
+    # This is virtual function
+    def calcDir(self):
+        if self.iter == 0 or not self._acceptStep:
             self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
-        if not self.isFeasible:
-            self.fs[0] = self.problem.runningModels[0].state.diff(
-                self.xs[0], self.problem.x0
-            )
-            for i, (m, d, x) in enumerate(
-                zip(
-                    self.problem.runningModels,
-                    self.problem.runningDatas,
-                    self.xs.tolist()[1:],
-                )
-            ):
-                self.fs[i + 1] = m.state.diff(x, d.xnext)
-        return self.cost
+        self.ffeas = self.computeDynamicFeasibility()
+        self.gfeas = self.computeInequalityFeasibility()
+        self.hfeas = self.computeEqualityFeasibility()
+        self.feas = self.ffeas + self.gfeas + self.hfeas
 
     def backwardPass(self):
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx
-
-        if self.preg != 0:
+        if self.preg != 0.0:
             ndx = self.problem.terminalModel.state.ndx
             self.Vxx[-1][range(ndx), range(ndx)] += self.preg
-
         # Compute and store the Vx gradient at end of the interval (rollout state)
-        if not self.isFeasible:
-            self.Vx[-1] += np.dot(self.Vxx[-1], self.fs[-1])
-
+        self.Vxx_f[-1] = self.Vxx[-1] @ self.fs[-1]
+        self.Vx[-1] += self.Vxx_f[-1]
         for t, (model, data) in rev_enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):
-            self.Qxx[t][:, :] = data.Lxx + np.dot(
-                data.Fx.T, np.dot(self.Vxx[t + 1], data.Fx)
-            )
-            self.Qxu[t][:, :] = data.Lxu + np.dot(
-                data.Fx.T, np.dot(self.Vxx[t + 1], data.Fu)
-            )
-            self.Quu[t][:, :] = data.Luu + np.dot(
-                data.Fu.T, np.dot(self.Vxx[t + 1], data.Fu)
-            )
-            self.Qx[t][:] = data.Lx + np.dot(data.Fx.T, self.Vx[t + 1])
-            self.Qu[t][:] = data.Lu + np.dot(data.Fu.T, self.Vx[t + 1])
-
-            if self.preg != 0:
-                self.Quu[t][range(model.nu), range(model.nu)] += self.preg
-
-            self.computeGains(t)
-
-            self.Vx[t][:] = self.Qx[t] - np.dot(self.K[t].T, self.Qu[t])
-            self.Vxx[t][:, :] = self.Qxx[t] - np.dot(self.Qxu[t], self.K[t])
-            self.Vxx[t][:, :] = 0.5 * (
-                self.Vxx[t][:, :] + self.Vxx[t][:, :].T
-            )  # ensure symmetric
-
-            if self.preg != 0:
-                self.Vxx[t][range(model.state.ndx), range(model.state.ndx)] += self.preg
-
-            # Compute and store the Vx gradient at end of the interval (rollout state)
-            if not self.isFeasible:
-                self.Vx[t] += np.dot(self.Vxx[t], self.fs[t])
-
+            # Update control-action function
+            self.computeActionValueFunction(t, model, data)
+            # Update policy
+            self.computePolicy(t)
+            # Update value function
+            self.computeValueFunction(t, model)
             raiseIfNan(self.Vxx[t], ArithmeticError("backward error"))
             raiseIfNan(self.Vx[t], ArithmeticError("backward error"))
 
-    def forwardPass(self, stepLength, warning="ignore"):
-        xs, us = self.xs, self.us
-        xtry, utry = self.xs_try, self.us_try
-        ctry = 0
-        xtry[0] = self.problem.x0
-        for t, (m, d) in enumerate(
-            zip(self.problem.runningModels, self.problem.runningDatas)
-        ):
-            utry[t] = (
-                us[t]
-                - self.k[t] * stepLength
-                - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
-            )
-            with warnings.catch_warnings():
-                warnings.simplefilter(warning)
-                m.calc(d, xtry[t], utry[t])
-                xnext, cost = d.xnext, d.cost
-            xtry[t + 1] = xnext.copy()  # not sure copy helpful here.
-            ctry += cost
-            raiseIfNan([ctry, cost], ArithmeticError("forward error"))
-            raiseIfNan(xtry[t + 1], ArithmeticError("forward error"))
-        with warnings.catch_warnings():
-            warnings.simplefilter(warning)
-            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
-            ctry += self.problem.terminalData.cost
-        raiseIfNan(ctry, ArithmeticError("forward error"))
-        self.cost_try = ctry
+    # This is virtual function
+    def computeActionValueFunction(self, t, model, data):
+        ndx, nu = model.state.ndx, model.nu
+        Vx_p = self.Vx[t + 1]
+        Vxx_p = self.Vxx[t + 1]
+        FxTVxx_p = data.Fx.T @ Vxx_p
+        self.Qx[t][:] = data.Lx + data.Fx.T @ Vx_p
+        self.Qxx[t][:, :] = data.Lxx + FxTVxx_p @ data.Fx
+        if self.preg != 0.0:
+            self.Qxx[t][range(ndx), range(ndx)] += self.preg
+        if nu != 0:
+            FuTVxx_p = data.Fu.T @ Vxx_p
+            self.Qu[t][:] = data.Lu + data.Fu.T @ Vx_p
+            self.Quu[t][:, :] = data.Luu + FuTVxx_p @ data.Fu
+            self.Qxu[t][:, :] = (data.Lxu + FxTVxx_p @ data.Fu).reshape((ndx, nu))
+            if self.preg != 0.0:
+                self.Quu[t][range(nu), range(nu)] += self.preg
 
-    def computeGains(self, t):
+    # This is virtual function
+    def computePolicy(self, t):
+        nu = self.problem.runningModels[t].nu
         try:
-            if self.Quu[t].shape[0] > 0:
-                Lb = scl.cho_factor(self.Quu[t])
-                self.K[t][:, :] = scl.cho_solve(Lb, self.Qux[t])
-                self.k[t][:] = scl.cho_solve(Lb, self.Qu[t])
+            if nu > 0:
+                self.Quu_llt[t] = scl.cho_factor(self.Quu[t])
+                self.K[t][:, :] = scl.cho_solve(self.Quu_llt[t], self.Qxu[t].T)
+                self.k[t][:] = scl.cho_solve(self.Quu_llt[t], self.Qu[t])
             else:
                 pass
         except scl.LinAlgError:
             raise ArithmeticError("backward error")
+
+    # This is virtual function
+    def computeValueFunction(self, t, model):
+        nu = model.nu
+        self.Vx[t][:] = self.Qx[t]
+        self.Vxx[t][:, :] = self.Qxx[t]
+        if nu != 0:
+            self.Quuk[t][:] = self.Quu[t] @ self.k[t]
+            self.Vx[t][:] -= self.K[t].T @ self.Qu[t]
+            self.Vxx[t][:, :] -= self.Qxu[t] @ self.K[t]
+        self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)
+        # Compute and store the Vx gradient at end of the interval (rollout state)
+        self.Vxx_f[t] = self.Vxx[t] @ self.fs[t]
+        self.Vx[t] += self.Vxx_f[t]
+
+    def feasDrivenForwardPass(self, stepLength, warning="ignore"):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        self.cost_try = 0.0
+        xnext = self.problem.x0
+        for t, (m, d) in enumerate(
+            zip(self.problem.runningModels, self.problem.runningDatas)
+        ):
+            self.fs_try[t] = self.fs[t] * (stepLength - 1)
+            xtry[t] = m.state.integrate(xnext, self.fs_try[t])
+            self.dx[t] = m.state.diff(xs[t], xtry[t])
+            if m.nu != 0:
+                utry[t] = us[t] - self.k[t] * stepLength
+                utry[t] -= self.K[t] @ self.dx[t]
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t], utry[t])
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t])
+            xnext = d.xnext
+            self.cost_try += d.cost
+            raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+            raiseIfNan(xnext, ArithmeticError("forward error"))
+        self.fs_try[-1] = self.fs[-1] * (stepLength - 1)
+        xtry[-1] = self.problem.terminalModel.state.integrate(xnext, self.fs_try[-1])
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            self.cost_try += self.problem.terminalData.cost
+        raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+
+    def multiShootForwardPass(self, stepLength, recalc, warning="ignore"):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        dxs, dus = self.dxs, self.dus
+        if recalc:
+            # Perform the linear rollout for the entire trajectory
+            dxs[0] = self.fs[0]
+            for t, (m, d) in enumerate(
+                zip(self.problem.runningModels, self.problem.runningDatas)
+            ):  # in sequence
+                ndx, nu = m.state.ndx, m.nu
+                dxs[t + 1] = d.Fx @ dxs[t] + self.fs[t + 1]
+                if nu != 0:
+                    dus[t] = -self.k[t] - self.K[t] @ dxs[t]
+                    dxs[t + 1] += d.Fu.reshape((ndx, nu)) @ dus[t]
+        # Update the dynamics gap for each node
+        self.cost_try = 0.0
+        xtry[0] = self.problem.runningModels[0].state.integrate(
+            xs[0], stepLength * dxs[0]
+        )
+        self.fs_try[0] = self.problem.runningModels[0].state.diff(xtry[0], xs[0])
+        for t, (m) in enumerate(self.problem.runningModels):  # in parallel
+            xtry[t + 1] = m.state.integrate(xs[t + 1], stepLength * dxs[t + 1])
+        for t, (m, d) in enumerate(
+            zip(self.problem.runningModels, self.problem.runningDatas)
+        ):  # in parallel
+            if m.nu != 0:
+                utry[t] = us[t] + stepLength * dus[t]
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t], utry[t])
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t])
+            self.fs_try[t + 1] = m.state.diff(xtry[t + 1], d.xnext)
+            self.cost_try += d.cost
+            raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+            raiseIfNan(d.xnext, ArithmeticError("forward error"))
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            self.cost_try += self.problem.terminalData.cost
+        raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+
+    def hybridShootForwardPass(self, stepLength, recalc, warning="ignore"):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        dxs, dus = self.dxs, self.dus
+        if recalc:
+            # Perform the linear rollout for the entire trajectory
+            dxs[0] = self.fs[0]
+            for t, (m, d) in enumerate(
+                zip(self.problem.runningModels, self.problem.runningDatas)
+            ):  # in sequence
+                ndx, nu = m.state.ndx, m.nu
+                dxs[t + 1] = d.Fx @ dxs[t] + self.fs[t + 1]
+                if nu != 0:
+                    dus[t] = -self.k[t] - self.K[t] @ dxs[t]
+                    dxs[t + 1] += d.Fu.reshape((ndx, nu)) @ dus[t]
+        # Update the initial state of each shooting node
+        xtry[0] = self.problem.runningModels[0].state.integrate(
+            xs[0], stepLength * dxs[0]
+        )
+        for Ti in self.Ts[1:]:  # in parallel
+            m = self.problem.runningModels[Ti - 1]
+            xtry[Ti] = m.state.integrate(xs[Ti], stepLength * dxs[Ti])
+        # Perform the feasibility-driven nonlinear rollout for each shooting node
+        self.cost_try = 0.0
+        for i in range(len(self.Ts) - 1):  # in parallel
+            Tinit, Tend = self.Ts[i], self.Ts[i + 1]
+            for t in range(Tinit, Tend):  # in sequence
+                m = self.problem.runningModels[t]
+                d = self.problem.runningDatas[t]
+                if m.nu != 0:
+                    self.dx[t] = m.state.diff(xs[t], xtry[t])
+                    utry[t] = us[t] - self.k[t] * stepLength
+                    utry[t] -= self.K[t] @ self.dx[t]
+                    with warnings.catch_warnings():
+                        warnings.simplefilter(warning)
+                        m.calc(d, xtry[t], utry[t])
+                else:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter(warning)
+                        m.calc(d, xtry[t])
+                self.cost_try += d.cost
+                raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+                raiseIfNan(d.xnext, ArithmeticError("forward error"))
+                if t + 1 != Tend:
+                    self.fs_try[t + 1] = self.fs[t + 1] * (stepLength - 1)
+                    xtry[t + 1] = m.state.integrate(d.xnext, self.fs_try[t + 1])
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+        self.cost_try += self.problem.terminalData.cost
+        raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+        # Update the initial gap of each shooting node
+        self.fs_try[0] = self.problem.runningModels[0].state.diff(xtry[0], xs[0])
+        for Ti in self.Ts[1:]:  # in parallel
+            m = self.problem.runningModels[Ti - 1]
+            d = self.problem.runningDatas[Ti - 1]
+            self.fs_try[Ti] = m.state.diff(xtry[Ti], d.xnext)
+
+    def singleShootForwardPass(self, stepLength, warning="ignore"):
+        xs, us = self.xs, self.us
+        xtry, utry = self.xs_try, self.us_try
+        self.cost_try = 0.0
+        xnext = self.problem.x0
+        for t, (m, d) in enumerate(
+            zip(self.problem.runningModels, self.problem.runningDatas)
+        ):
+            xtry[t] = xnext.copy()
+            if m.nu != 0:
+                self.dx[t] = m.state.diff(xs[t], xtry[t])
+                utry[t] = us[t] - self.k[t] * stepLength
+                utry[t] -= self.K[t] @ self.dx[t]
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t], utry[t])
+            else:
+                with warnings.catch_warnings():
+                    warnings.simplefilter(warning)
+                    m.calc(d, xtry[t])
+            xnext = d.xnext
+            self.cost_try += d.cost
+            raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+            raiseIfNan(xnext, ArithmeticError("forward error"))
+        xtry[-1] = xnext.copy()
+        with warnings.catch_warnings():
+            warnings.simplefilter(warning)
+            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
+            self.cost_try += self.problem.terminalData.cost
+        raiseIfNan(self.cost_try, ArithmeticError("forward error"))
 
     def increaseRegularization(self):
         self.preg *= self.reg_incFactor
@@ -1900,198 +2156,52 @@ class DDPDerived(crocoddyl.SolverAbstract):
             self.preg = self.reg_min
         self.dreg = self.preg
 
+    # This is virtual function
     def allocateData(self):
         models = [*self.problem.runningModels.tolist(), self.problem.terminalModel]
+        # Value function data
         self.Vxx = [np.zeros([m.state.ndx, m.state.ndx]) for m in models]
         self.Vx = [np.zeros([m.state.ndx]) for m in models]
-
-        self.Q = [
-            np.zeros([m.state.ndx + m.nu, m.state.ndx + m.nu])
-            for m in self.problem.runningModels
-        ]
-        self.q = [np.zeros([m.state.ndx + m.nu]) for m in self.problem.runningModels]
+        self.Vxx_f = [np.zeros([m.state.ndx]) for m in models]
+        # Action-value function data
         self.Qxx = [
-            Q[: m.state.ndx, : m.state.ndx]
-            for m, Q in zip(self.problem.runningModels, self.Q)
+            np.zeros([m.state.ndx, m.state.ndx]) for m in self.problem.runningModels
         ]
-        self.Qxu = [
-            Q[: m.state.ndx, m.state.ndx :]
-            for m, Q in zip(self.problem.runningModels, self.Q)
-        ]
-        self.Qux = [Qxu.T for m, Qxu in zip(self.problem.runningModels, self.Qxu)]
-        self.Quu = [
-            Q[m.state.ndx :, m.state.ndx :]
-            for m, Q in zip(self.problem.runningModels, self.Q)
-        ]
-        self.Qx = [q[: m.state.ndx] for m, q in zip(self.problem.runningModels, self.q)]
-        self.Qu = [q[m.state.ndx :] for m, q in zip(self.problem.runningModels, self.q)]
-
+        self.Qxu = [np.zeros([m.state.ndx, m.nu]) for m in self.problem.runningModels]
+        self.Quu = [np.zeros([m.nu, m.nu]) for m in self.problem.runningModels]
+        self.Qx = [np.zeros([m.state.ndx]) for m in self.problem.runningModels]
+        self.Qu = [np.zeros([m.nu]) for m in self.problem.runningModels]
+        self.Quuk = [np.zeros(m.nu) for m in self.problem.runningModels]
+        self.Quu_llt = [None] * self.problem.T
+        # Policy data
         self.K = [np.zeros([m.nu, m.state.ndx]) for m in self.problem.runningModels]
         self.k = [np.zeros([m.nu]) for m in self.problem.runningModels]
+        # Next state, control and gaps data
+        self.dx = [np.zeros([m.state.ndx]) for m in self.problem.runningModels]
+        self.dxs = [np.zeros([m.state.ndx]) for m in models]
+        self.dus = [np.zeros([m.nu]) for m in self.problem.runningModels]
 
-
-class FDDPDerived(DDPDerived):
-    def __init__(self, shootingProblem):
-        DDPDerived.__init__(self, shootingProblem)
-
-        self.th_acceptNegStep = 2.0
-        self.dg = 0.0
-        self.dq = 0.0
-        self.dv = 0.0
-
-    def solve(
-        self, init_xs=[], init_us=[], maxiter=100, isFeasible=False, regInit=None
-    ):
-        self.setCandidate(init_xs, init_us, isFeasible)
-        self.preg = regInit if regInit is not None else self.reg_min
-        self.dreg = regInit if regInit is not None else self.reg_min
-        self.wasFeasible = False
-        for i in range(maxiter):
-            recalc = True
-            while True:
-                try:
-                    self.computeDirection(recalc=recalc)
-                except ArithmeticError:
-                    recalc = False
-                    self.increaseRegularization()
-                    if self.preg == self.reg_max:
-                        return self.xs, self.us, False
-                    else:
-                        continue
-                break
-            self.updateExpectedImprovement()
-
-            for a in self.alphas:
-                try:
-                    self.dV = self.tryStep(a)
-                except ArithmeticError:
-                    continue
-                self.d = self.expectedImprovement()
-                d1, d2 = self.d[0], self.d[1]
-
-                self.dV_exp = a * (d1 + 0.5 * d2 * a)
-                if self.dV_exp >= 0.0:  # descend direction
-                    if d1 < self.th_grad or self.dV > self.th_acceptStep * self.dV_exp:
-                        self.wasFeasible = self.isFeasible
-                        self.setCandidate(
-                            self.xs_try, self.us_try, (self.wasFeasible or a == 1)
-                        )
-                        self.cost = self.cost_try
-                        break
+    def setDynamicsSolver(self, type, Tshoot=0):
+        if type == crocoddyl.DynamicsSolverType.HybridShoot and Tshoot <= 0:
+            print(
+                "Invalid argument: the number of rollout nodes should be bigger than 0."
+            )
+            return
+        self.dyn_solver = type
+        if type == crocoddyl.DynamicsSolverType.HybridShoot:
+            self.Tshoot = Tshoot
+            self.Ts = [0]
+            for i in range(0, self.problem.T, self.Tshoot):
+                if i + self.Tshoot < self.problem.T:
+                    self.Ts.append(i + self.Tshoot)
                 else:
-                    # reducing the gaps by allowing a small increment in the cost value
-                    if self.dV > self.th_acceptNegStep * self.dV_exp:
-                        self.wasFeasible = self.isFeasible
-                        self.setCandidate(
-                            self.xs_try, self.us_try, (self.wasFeasible or a == 1)
-                        )
-                        self.cost = self.cost_try
-                        break
-            if a > self.th_step:
-                self.decreaseRegularization()
-            if a == self.alphas[-1]:
-                self.increaseRegularization()
-                if self.preg == self.reg_max:
-                    return self.xs, self.us, False
-            self.stepLength = a
-            self.iter = i
-            self.stop = self.stoppingCriteria()
-            if self.callbacks is not None:
-                [c(self) for c in self.callbacks]
+                    self.Ts.append(self.problem.T)
 
-            if self.wasFeasible and self.stop < self.th_stop:
-                return self.xs, self.us, True
-        return self.xs, self.us, False
-
-    def computeDirection(self, recalc=True):
-        if recalc:
-            self.calcDiff()
-        self.backwardPass()
-        return [np.nan] * (self.problem.T + 1), self.k, self.Vx
-
-    def tryStep(self, stepLength=1, recalc=True):
-        self.forwardPass(stepLength)
-        return self.cost - self.cost_try
-
-    def updateExpectedImprovement(self):
-        self.dg = 0.0
-        self.dq = 0.0
-        if not self.isFeasible:
-            self.dg -= np.dot(self.Vx[-1].T, self.fs[-1])
-            self.dq += np.dot(self.fs[-1].T, np.dot(self.Vxx[-1], self.fs[-1]))
-        for t in range(self.problem.T):
-            self.dg += np.dot(self.Qu[t].T, self.k[t])
-            self.dq -= np.dot(self.k[t].T, np.dot(self.Quu[t], self.k[t]))
-            if not self.isFeasible:
-                self.dg -= np.dot(self.Vx[t].T, self.fs[t])
-                self.dq += np.dot(self.fs[t].T, np.dot(self.Vxx[t], self.fs[t]))
-
-    def expectedImprovement(self):
-        self.dv = 0.0
-        if not self.isFeasible:
-            dx = self.problem.runningModels[-1].state.diff(self.xs_try[-1], self.xs[-1])
-            self.dv -= np.dot(self.fs[-1].T, np.dot(self.Vxx[-1], dx))
-            for t in range(self.problem.T):
-                dx = self.problem.runningModels[t].state.diff(
-                    self.xs_try[t], self.xs[t]
-                )
-                self.dv -= np.dot(self.fs[t].T, np.dot(self.Vxx[t], dx))
-        d1 = self.dg + self.dv
-        d2 = self.dq - 2 * self.dv
-        return np.array([d1, d2])
-
-    def calcDiff(self):
-        self.cost = self.problem.calc(self.xs, self.us)
-        self.cost = self.problem.calcDiff(self.xs, self.us)
-        if not self.isFeasible:
-            self.fs[0] = self.problem.runningModels[0].state.diff(
-                self.xs[0], self.problem.x0
-            )
-            for i, (m, d, x) in enumerate(
-                zip(
-                    self.problem.runningModels,
-                    self.problem.runningDatas,
-                    self.xs.tolist()[1:],
-                )
-            ):
-                self.fs[i + 1] = m.state.diff(x, d.xnext)
-        elif not self.wasFeasible:
-            self.fs[:] = [np.zeros_like(f) for f in self.fs]
-        return self.cost
-
-    def forwardPass(self, stepLength, warning="ignore"):
-        xs, us = self.xs, self.us
-        xtry, utry = self.xs_try, self.us_try
-        ctry = 0
-        xnext = self.problem.x0
-        for t, (m, d) in enumerate(
-            zip(self.problem.runningModels, self.problem.runningDatas)
-        ):
-            if self.isFeasible or stepLength == 1:
-                xtry[t] = xnext.copy()
-            else:
-                xtry[t] = m.state.integrate(xnext, self.fs[t] * (stepLength - 1))
-            utry[t] = (
-                us[t]
-                - self.k[t] * stepLength
-                - np.dot(self.K[t], m.state.diff(xs[t], xtry[t]))
-            )
-            with warnings.catch_warnings():
-                warnings.simplefilter(warning)
-                m.calc(d, xtry[t], utry[t])
-                xnext, cost = d.xnext, d.cost
-            ctry += cost
-            raiseIfNan([ctry, cost], ArithmeticError("forward error"))
-            raiseIfNan(xnext, ArithmeticError("forward error"))
-        if self.isFeasible or stepLength == 1:
-            xtry[-1] = xnext.copy()
-        else:
-            xtry[-1] = self.problem.terminalModel.state.integrate(
-                xnext, self.fs[-1] * (stepLength - 1)
-            )
-        with warnings.catch_warnings():
-            warnings.simplefilter(warning)
-            self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
-            ctry += self.problem.terminalData.cost
-        raiseIfNan(ctry, ArithmeticError("forward error"))
-        self.cost_try = ctry
+    def _computeFeasibility(self, fs):
+        self.tmp_feas = 0.0
+        for f in fs:
+            if self.feasNorm == crocoddyl.FeasibilityNorm.LInf:
+                self.tmp_feas = max(self.tmp_feas, np.linalg.norm(f, np.inf))
+            if self.feasNorm == crocoddyl.FeasibilityNorm.L1:
+                self.tmp_feas += np.linalh.norm(f, 1)
+        return copy.deepcopy(self.tmp_feas)

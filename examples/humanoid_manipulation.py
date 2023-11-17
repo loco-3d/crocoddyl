@@ -146,6 +146,8 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverFDDP(problem)
+solver.th_stop = 1e-7
+solver.th_minImprove = 1.0
 if WITHPLOT:
     solver.setCallbacks(
         [

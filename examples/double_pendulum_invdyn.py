@@ -74,7 +74,8 @@ else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the solver
-solver.solve()
+solver.th_minImprove = 1e-3
+solver.solve([], [], 200)
 
 # Plotting the entire motion
 if WITHPLOT:

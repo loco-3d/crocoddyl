@@ -19,50 +19,45 @@ class SolverIntro : public SolverFDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+  typedef typename MathBaseTpl<double>::MatrixXsRowMajor MatrixXdRowMajor;
+
   /**
    * @brief Initialize the INTRO solver
    *
    * @param[in] problem  Shooting problem
-   * @param[in] reduced  Use the reduced Schur-complement approach (default
+   * @param[in] eq_solver  Type of equality solver
    * true)
    */
-  explicit SolverIntro(std::shared_ptr<ShootingProblem> problem);
+  explicit SolverIntro(std::shared_ptr<ShootingProblem> problem,
+                       const DynamicsSolverType dyn_solver = FeasDriven,
+                       const EqualitySolverType eq_solver = LuNull);
   virtual ~SolverIntro();
 
-  virtual bool solve(
-      const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double init_reg = NAN);
-  virtual double tryStep(const double step_length = 1,
-                         const bool recalc = true);
-  virtual double stoppingCriteria();
+  /**
+   * @copybrief SolverAbstract::resizeData
+   */
   virtual void resizeData();
-  virtual double calcDiff();
+
+  /**
+   * @copybrief SolverFDDP::calcDir
+   */
+  virtual void calcDir();
+
+  /**
+   * @copybrief SolverFDDP::computePolicy
+   */
+  virtual void computePolicy(const std::size_t t);
+
+  /**
+   * @copybrief SolverFDDP::computeValueFunction
+   */
   virtual void computeValueFunction(
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
-  virtual void computeGains(const std::size_t t);
 
   /**
    * @brief Return the type of solver used for handling the equality constraints
    */
   EqualitySolverType get_equality_solver() const;
-
-  /**
-   * @brief Return the threshold for switching to feasibility
-   */
-  double get_th_feas() const;
-
-  /**
-   * @brief Return the rho parameter used in the merit function
-   */
-  double get_rho() const;
-
-  /**
-   * @brief Return the estimated penalty parameter that balances relative
-   * contribution of the cost function and equality constraints
-   */
-  double get_upsilon() const;
 
   /**
    * @brief Return the rank of control-equality constraints \f$\mathbf{H_u}\f
@@ -123,14 +118,6 @@ class SolverIntro : public SolverFDDP {
   const std::vector<Eigen::MatrixXd>& get_Ks() const;
 
   /**
-   * @brief Return the zero-upsilon label
-   *
-   * True if we set the estimated penalty parameter (upsilon) to zero when solve
-   * is called.
-   */
-  bool get_zero_upsilon() const;
-
-  /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
    * Note that the default solver is nullspace LU. When we enable
@@ -139,39 +126,19 @@ class SolverIntro : public SolverFDDP {
    */
   void set_equality_solver(const EqualitySolverType type);
 
-  /**
-   * @brief Modify the threshold for switching to feasibility
-   */
-  void set_th_feas(const double th_feas);
-
-  /**
-   * @brief Modify the rho parameter used in the merit function
-   */
-  void set_rho(const double rho);
-
-  /**
-   * @brief Modify the zero-upsilon label
-   *
-   * @param zero_upsilon  True if we set estimated penalty parameter (upsilon)
-   * to zero when solve is called.
-   */
-  void set_zero_upsilon(const bool zero_upsilon);
-
  protected:
+  void allocateData();
+  void calcLuNullDir();
+  void calcQrNullDir();
+  void computeNullPolicy(const std::size_t t);
+  void computeSchurPolicy(const std::size_t t);
+
   enum EqualitySolverType
-      eq_solver_;   //!< Strategy used for handling the equality constraints
-  double th_feas_;  //!< Threshold for switching to feasibility
-  double rho_;      //!< Parameter used in the merit function to predict the
-                    //!< expected reduction
-  double
-      upsilon_;  //!< Estimated penalty parameter that balances relative
-                 //!< contribution of the cost function and equality constraints
-  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
-                       //!< (upsilon) to zero when solve is called.
+      eq_solver_;  //!< Strategy used for handling the equality constraints
 
   std::vector<std::size_t>
       Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
-  std::vector<Eigen::MatrixXd> KQuu_tmp_;
+  std::vector<MatrixXdRowMajor> KQuu_2Qxu_;
   std::vector<Eigen::MatrixXd>
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel
             //!< \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the control-equality
