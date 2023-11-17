@@ -10,8 +10,9 @@
 
 namespace crocoddyl {
 
-SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem)
-    : SolverFDDP(problem),
+SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem,
+                             const DynamicsSolverType dyn_solver)
+    : SolverFDDP(problem, dyn_solver),
       qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
 
