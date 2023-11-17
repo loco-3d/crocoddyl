@@ -23,8 +23,12 @@ struct SolverTypes {
     SolverKKT,
     SolverFDDP_SingleShoot,
     SolverFDDP_FeasDriven,
+    SolverFDDP_MultiShoot,
+    SolverFDDP_HybridShoot,
     SolverBoxFDDP_SingleShoot,
     SolverBoxFDDP_FeasDriven,
+    SolverBoxFDDP_MultiShoot,
+    SolverBoxFDDP_HybridShoot,
     SolverIpopt,
     NbSolverTypes
   };
