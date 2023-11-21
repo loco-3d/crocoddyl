@@ -369,7 +369,8 @@ class SolverAbstract {
   /**
    * @brief Return the threshold for accepting a gap as non-zero
    */
-  double get_th_gaptol() const;
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             double get_th_gaptol() const;)
 
   /**
    * @brief Return the type of norm used to evaluate the dynamic and constraints
@@ -420,7 +421,8 @@ class SolverAbstract {
   /**
    * @brief Modify the threshold for accepting a gap as non-zero
    */
-  void set_th_gaptol(const double th_gaptol);
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             void set_th_gaptol(const double th_gaptol);)
 
   /**
    * @brief Modify the current norm used for computed the dynamic and constraint
@@ -436,10 +438,11 @@ class SolverAbstract {
 
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
   std::vector<std::shared_ptr<CallbackAbstract> >
-      callbacks_;                  //!< Callback functions
-  double th_acceptstep_;           //!< Threshold used for accepting step
-  double th_stop_;                 //!< Tolerance for stopping the algorithm
-  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
+      callbacks_;         //!< Callback functions
+  double th_acceptstep_;  //!< Threshold used for accepting step
+  double th_stop_;        //!< Tolerance for stopping the algorithm
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             double th_gaptol_;)   //!< Threshold limit to check non-zero gaps
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
                                    //!< dynamics and constraints feasibility
 
