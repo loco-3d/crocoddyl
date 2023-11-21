@@ -19,7 +19,7 @@ class SolverBoxFDDP : public SolverFDDP {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   explicit SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem,
-                         const DynamicsSolverType dyn_solver = FeasDriven);
+                         const DynamicsSolverType dyn_solver = FeasShoot);
   virtual ~SolverBoxFDDP();
 
   virtual void computePolicy(const std::size_t t);

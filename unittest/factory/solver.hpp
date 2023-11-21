@@ -22,11 +22,11 @@ struct SolverTypes {
   enum Type {
     SolverKKT,
     SolverFDDP_SingleShoot,
-    SolverFDDP_FeasDriven,
+    SolverFDDP_FeasShoot,
     SolverFDDP_MultiShoot,
     SolverFDDP_HybridShoot,
     SolverBoxFDDP_SingleShoot,
-    SolverBoxFDDP_FeasDriven,
+    SolverBoxFDDP_FeasShoot,
     SolverBoxFDDP_MultiShoot,
     SolverBoxFDDP_HybridShoot,
     SolverIpopt,

@@ -231,8 +231,8 @@ void SolverFDDP::computeDirection(const bool recalc) {
 double SolverFDDP::tryStep(const double steplength, const bool recalc) {
   START_PROFILER("SolverFDDP::tryStep");
   switch (dyn_solver_) {
-    case FeasDriven:
-      feasDrivenForwardPass(steplength);
+    case FeasShoot:
+      feasShootForwardPass(steplength);
       break;
     case MultiShoot:
       multiShootForwardPass(steplength, recalc);
@@ -244,7 +244,7 @@ double SolverFDDP::tryStep(const double steplength, const bool recalc) {
       singleShootForwardPass(steplength);
       break;
     default:
-      feasDrivenForwardPass(steplength);
+      feasShootForwardPass(steplength);
       break;
   }
   ffeas_try_ = computeFeasibility(fs_try_);
@@ -262,7 +262,7 @@ double SolverFDDP::stoppingCriteria() {
 
 const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
   // We define dVexp = Vexp - Vexptry as done for dV
-  const std::size_t T = this->problem_->get_T();
+  const std::size_t T = problem_->get_T();
   // The expected cost changes with the dynamics gaps.
   d_[0] = -fs_[0].dot(Vx_[0]);
   d_[1] = -fs_.back().dot(Vxx_f_.back());
@@ -448,8 +448,8 @@ void SolverFDDP::computeValueFunction(
   STOP_PROFILER("SolverFDDP::computeValueFunction");
 }
 
-void SolverFDDP::feasDrivenForwardPass(const double steplength) {
-  START_PROFILER("SolverFDDP::feasDrivenForwardPass");
+void SolverFDDP::feasShootForwardPass(const double steplength) {
+  START_PROFILER("SolverFDDP::feasShootForwardPass");
   if (steplength > 1. || steplength < 0.) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
@@ -478,11 +478,11 @@ void SolverFDDP::feasDrivenForwardPass(const double steplength) {
     xnext_ = d->xnext;
     cost_try_ += d->cost;
     if (raiseIfNaN(cost_try_)) {
-      STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
+      STOP_PROFILER("SolverFDDP::feasShootForwardPass");
       throw_pretty("forward_error");
     }
     if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
-      STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
+      STOP_PROFILER("SolverFDDP::feasShootForwardPass");
       throw_pretty("forward_error");
     }
   }
@@ -494,10 +494,10 @@ void SolverFDDP::feasDrivenForwardPass(const double steplength) {
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
   if (raiseIfNaN(cost_try_)) {
-    STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
+    STOP_PROFILER("SolverFDDP::feasShootForwardPass");
     throw_pretty("forward_error");
   }
-  STOP_PROFILER("SolverFDDP::feasDrivenForwardPass");
+  STOP_PROFILER("SolverFDDP::feasShootForwardPass");
 }
 
 void SolverFDDP::multiShootForwardPass(const double steplength,

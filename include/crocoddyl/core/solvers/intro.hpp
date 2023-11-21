@@ -29,7 +29,7 @@ class SolverIntro : public SolverFDDP {
    * true)
    */
   explicit SolverIntro(std::shared_ptr<ShootingProblem> problem,
-                       const DynamicsSolverType dyn_solver = FeasDriven,
+                       const DynamicsSolverType dyn_solver = FeasShoot,
                        const EqualitySolverType eq_solver = LuNull);
   virtual ~SolverIntro();
 

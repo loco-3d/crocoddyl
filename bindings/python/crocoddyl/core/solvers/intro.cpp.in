@@ -33,7 +33,7 @@ void exposeSolverIntro() {
           bp::args("self", "problem", "dyn_solver", "eq_solver"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasDriven).\n"
+          ":param dyn_solver: type of dynamic solver (default FeasShoot).\n"
           ":param eq_solver: type of dynamic solver (default LuNull)."))
       .def("calcDir", &SolverIntro::calcDir, bp::args("self"),
            "Update the Jacobian and Hessian of the optimal control problem\n\n"

@@ -31,7 +31,7 @@ void exposeSolverFDDP() {
   bp::register_ptr_to_python<std::shared_ptr<SolverFDDP> >();
 
   bp::enum_<DynamicsSolverType>("DynamicsSolverType")
-      .value("FeasDriven", FeasDriven)
+      .value("FeasShoot", FeasShoot)
       .value("MultiShoot", MultiShoot)
       .value("HybridShoot", HybridShoot)
       .value("SingleShoot", SingleShoot)
@@ -55,7 +55,7 @@ void exposeSolverFDDP() {
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasDriven)"))
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)"))
       .def("solve", &SolverFDDP::solve,
            SolverFDDP_solves(
                bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
@@ -143,7 +143,7 @@ void exposeSolverFDDP() {
            "local Hamiltonian.\n"
            ":param t: time instance\n"
            ":param model: action model in the given time instance")
-      .def("feasDrivenForwardPass", &SolverFDDP::feasDrivenForwardPass,
+      .def("feasShootForwardPass", &SolverFDDP::feasShootForwardPass,
            bp::args("self", "stepLength"),
            "Run the feasibility-driven rollout\n\n"
            "It rollouts the action model given the feasibility-driven approach "

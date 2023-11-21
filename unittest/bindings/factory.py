@@ -1693,7 +1693,7 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
 
 
 class SolverFDDP(crocoddyl.SolverAbstract):
-    def __init__(self, problem, dyn_solver=crocoddyl.DynamicsSolverType.FeasDriven):
+    def __init__(self, problem, dyn_solver=crocoddyl.DynamicsSolverType.FeasShoot):
         crocoddyl.SolverAbstract.__init__(self, problem)
         self.dImpr = 0.0
         # Allocate data
@@ -1855,8 +1855,8 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.backwardPass()
 
     def tryStep(self, stepLength=1, recalc=True):
-        if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasDriven:
-            self.feasDrivenForwardPass(stepLength)
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasShoot:
+            self.feasShootForwardPass(stepLength)
         elif self.dyn_solver == crocoddyl.DynamicsSolverType.MultiShoot:
             self.multiShootForwardPass(stepLength, recalc)
         elif self.dyn_solver == crocoddyl.DynamicsSolverType.HybridShoot:
@@ -1864,7 +1864,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         elif self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
             self.singleShootForwardPass(stepLength)
         else:
-            self.feasDrivenForwardPass(stepLength)
+            self.feasShootForwardPass(stepLength)
         self.ffeas_try = self._computeFeasibility(self.fs_try)
         self.gfeas_try = self.computeInequalityFeasibility()
         self.hfeas_try = self.computeEqualityFeasibility()
@@ -1968,7 +1968,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.Vxx_f[t] = self.Vxx[t] @ self.fs[t]
         self.Vx[t] += self.Vxx_f[t]
 
-    def feasDrivenForwardPass(self, stepLength, warning="ignore"):
+    def feasShootForwardPass(self, stepLength, warning="ignore"):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         self.cost_try = 0.0

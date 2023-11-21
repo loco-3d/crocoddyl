@@ -29,8 +29,8 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverFDDP_SingleShoot:
       os << "SolverFDDP_SingleShoot";
       break;
-    case SolverTypes::SolverFDDP_FeasDriven:
-      os << "SolverFDDP_FeasDriven";
+    case SolverTypes::SolverFDDP_FeasShoot:
+      os << "SolverFDDP_FeasShoot";
       break;
     case SolverTypes::SolverFDDP_MultiShoot:
       os << "SolverFDDP_MultiShoot";
@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverBoxFDDP_SingleShoot:
       os << "SolverBoxFDDP_SingleShoot";
       break;
-    case SolverTypes::SolverBoxFDDP_FeasDriven:
-      os << "SolverBoxFDDP_FeasDriven";
+    case SolverTypes::SolverBoxFDDP_FeasShoot:
+      os << "SolverBoxFDDP_FeasShoot";
       break;
     case SolverTypes::SolverBoxFDDP_MultiShoot:
       os << "SolverBoxFDDP_MultiShoot";
@@ -95,9 +95,9 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
           problem, crocoddyl::DynamicsSolverType::SingleShoot);
       break;
-    case SolverTypes::SolverFDDP_FeasDriven:
+    case SolverTypes::SolverFDDP_FeasShoot:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
-          problem, crocoddyl::DynamicsSolverType::FeasDriven);
+          problem, crocoddyl::DynamicsSolverType::FeasShoot);
       break;
     case SolverTypes::SolverFDDP_MultiShoot:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
@@ -111,9 +111,9 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
           problem, crocoddyl::DynamicsSolverType::SingleShoot);
       break;
-    case SolverTypes::SolverBoxFDDP_FeasDriven:
+    case SolverTypes::SolverBoxFDDP_FeasShoot:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
-          problem, crocoddyl::DynamicsSolverType::FeasDriven);
+          problem, crocoddyl::DynamicsSolverType::FeasShoot);
       break;
     case SolverTypes::SolverBoxFDDP_MultiShoot:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(

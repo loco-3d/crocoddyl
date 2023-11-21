@@ -116,7 +116,7 @@ class UnicycleFeasDriveFDDPTest(SolverAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
     SOLVER = crocoddyl.SolverFDDP
     SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.FeasDriven
+    DYN_SOLVER = crocoddyl.DynamicsSolverType.FeasShoot
 
 
 class UnicycleMultiShootFDDPTest(SolverAbstractTestCase):
@@ -173,7 +173,7 @@ class TalosArmFeasDriveFDDPTest(SolverAbstractTestCase):
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     SOLVER = crocoddyl.SolverFDDP
     SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.FeasDriven
+    DYN_SOLVER = crocoddyl.DynamicsSolverType.FeasShoot
 
 
 class TalosArmMultiShootFDDPTest(SolverAbstractTestCase):

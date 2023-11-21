@@ -16,10 +16,10 @@
 namespace crocoddyl {
 
 enum DynamicsSolverType {
-  FeasDriven = 0,  //!< Feasibility-driven DDP
-  MultiShoot,      //!< Classical multiple shooting but with Riccati solver
-  HybridShoot,     //!< Feasibility-driven multiple rollouts
-  SingleShoot      //!< Similar to classical DDP but with xs warmstart
+  FeasShoot = 0,  //!< Feasibility-driven DDP
+  MultiShoot,     //!< Classical multiple shooting but with Riccati solver
+  HybridShoot,    //!< Feasibility-driven multiple rollouts
+  SingleShoot     //!< Similar to classical DDP but with xs warmstart
 };
 
 /**
@@ -73,7 +73,7 @@ class SolverFDDP : public SolverAbstract {
    * @param[in] dyn_solver  Type of dynamic solver
    */
   explicit SolverFDDP(std::shared_ptr<ShootingProblem> problem,
-                      const DynamicsSolverType dyn_solver = FeasDriven);
+                      const DynamicsSolverType dyn_solver = FeasShoot);
   virtual ~SolverFDDP();
 
   /**
@@ -173,8 +173,8 @@ class SolverFDDP : public SolverAbstract {
    * @param[in] data   Action data in the given time instance
    */
   virtual void computeActionValueFunction(
-      const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model,
-      const boost::shared_ptr<ActionDataAbstract>& data);
+      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model,
+      const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief Compute the feedforward and feedback terms (control policy) computed
@@ -202,7 +202,7 @@ class SolverFDDP : public SolverAbstract {
    * @param[in] model  Action model in the given time instance
    */
   virtual void computeValueFunction(
-      const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model);
+      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
 
   /**
    * @brief Run the feasibility-driven nonlinear rollout
@@ -213,7 +213,7 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void feasDrivenForwardPass(const double steplength);
+  virtual void feasShootForwardPass(const double steplength);
 
   /**
    * @brief Run the multiple-shooting rollout

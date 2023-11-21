@@ -30,7 +30,7 @@ void exposeSolverBoxFDDP() {
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasDriven)"))
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)"))
       .add_property(
           "Quu_inv",
           make_function(&SolverBoxFDDP::get_Quu_inv,
