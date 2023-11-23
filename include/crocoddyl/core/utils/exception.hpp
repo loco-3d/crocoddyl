@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,6 +44,12 @@ class Exception : public std::exception {
   virtual ~Exception() NOEXCEPT;
   virtual const char *what() const NOEXCEPT;
 
+  std::string getMessage() const;
+  std::string getExtraData() const;
+
+ private:
+  std::string exception_msg_;
+  std::string extra_data_;
   std::string msg_;
 };
 
