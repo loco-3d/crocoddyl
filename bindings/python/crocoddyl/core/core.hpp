@@ -74,6 +74,7 @@ void exposeSolverIntro();
 void exposeSolverIpopt();
 #endif
 void exposeCallbacks();
+void exposeException();
 void exposeStopWatch();
 
 void exposeCore();

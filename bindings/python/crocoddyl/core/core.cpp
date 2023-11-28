@@ -72,6 +72,7 @@ void exposeCore() {
   exposeSolverIpopt();
 #endif
   exposeCallbacks();
+  exposeException();
   exposeStopWatch();
 }
 
