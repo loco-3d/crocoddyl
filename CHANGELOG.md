@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ## TODO
-- Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/XXXXX
+- Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/1188
+- Supported nu==0 in actuation models in https://github.com/loco-3d/crocoddyl/pull/1188
 
 ## [2.0.1] - 2023-06-17
 
