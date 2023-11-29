@@ -6,9 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## TODO
-- Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/1188
-- Supported nu==0 in actuation models in https://github.com/loco-3d/crocoddyl/pull/1188
+* Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/1188
+* Supported nu==0 in actuation models in https://github.com/loco-3d/crocoddyl/pull/1188
+* Included Python bindings for Crocoddyl exceptions by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1186
+* Updated cmake submodule update by @jcarpentier in https://github.com/loco-3d/crocoddyl/pull/1186
+* Fixed getters for contraints bounds by skleff1994 in https://github.com/loco-3d/crocoddyl/pull/1180
+* Extended solver abstract and callbacks for arbitrary solvers by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1179
+* Fixed the check of pair_id in collision residual by @ArthurH91 in https://github.com/loco-3d/crocoddyl/pull/1178
+* Exploited control-residual structure when computing Lu, Luu by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1176
+* Added LWA fram convention and introduced different axis for 1d contacts by @skleff1994 in https://github.com/loco-3d/crocoddyl/pull/1172
+* Python bindings for setting control bounds by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1171
+* Fixed missed scalar in cost sum and activation data by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1165
+* Added actuation unit tests by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1161
+* Introduced method for obtaining the dimension of floating-bases by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1160
+* Fixed set_reference in state residual by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1158
+* Enabled CONDA CI jobs with CppADCodeGen by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1156
+* Added other CI jobs by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1152
+* Fixed compiltation issue when building with CppADCodeGen by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1151
+* Fixed include order used in frames.cpp by @ManifoldFR in https://github.com/loco-3d/crocoddyl/pull/1150
 
 ## [2.0.1] - 2023-06-17
 
