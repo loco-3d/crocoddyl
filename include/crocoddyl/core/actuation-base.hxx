@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,9 +17,9 @@ template <typename Scalar>
 ActuationModelAbstractTpl<Scalar>::ActuationModelAbstractTpl(
     boost::shared_ptr<StateAbstract> state, const std::size_t nu)
     : nu_(nu), state_(state) {
-  if (nu_ == 0) {
+  if (nu_ < 0) {
     throw_pretty("Invalid argument: "
-                 << "nu cannot be zero");
+                 << "nu cannot be smaller than zero");
   }
 }
 
