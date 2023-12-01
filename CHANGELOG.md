@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [2.0.2] - 2023-11-30
-
 * Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/1188
 * Supported nu==0 in actuation models in https://github.com/loco-3d/crocoddyl/pull/1188
 * Included Python bindings for Crocoddyl exceptions by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1186
@@ -277,8 +275,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...HEAD
-[2.0.2]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...v2.0.2
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...HEAD
 [2.0.1]: https://github.com/loco-3d/crocoddyl/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/loco-3d/crocoddyl/compare/v1.9.0...v2.0.0
 [1.8.0]: https://github.com/loco-3d/crocoddyl/compare/v1.7.0...v1.8.0
