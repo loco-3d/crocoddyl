@@ -117,6 +117,8 @@ void exposeActionAbstract() {
            &ActionModelAbstract_wrap::default_quasiStatic,
            bp::args("self", "data", "u", "x", "maxiter", "tol"))
       .add_property("nu", bp::make_function(&ActionModelAbstract_wrap::get_nu),
+                    bp::make_setter(&ActionModelAbstract_wrap::nu_,
+                                    bp::return_internal_reference<>()),
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&ActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
