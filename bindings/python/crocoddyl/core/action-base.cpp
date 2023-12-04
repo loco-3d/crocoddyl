@@ -121,8 +121,12 @@ void exposeActionAbstract() {
       .add_property("nr", bp::make_function(&ActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .add_property("ng", bp::make_function(&ActionModelAbstract_wrap::get_ng),
+                    bp::make_setter(&ActionModelAbstract_wrap::ng_,
+                                    bp::return_internal_reference<>()),
                     "number of inequality constraints")
       .add_property("nh", bp::make_function(&ActionModelAbstract_wrap::get_nh),
+                    bp::make_setter(&ActionModelAbstract_wrap::nh_,
+                                    bp::return_internal_reference<>()),
                     "number of equality constraints")
       .add_property(
           "state",

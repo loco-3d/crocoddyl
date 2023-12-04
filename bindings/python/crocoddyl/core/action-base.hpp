@@ -20,6 +20,8 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
                                  public bp::wrapper<ActionModelAbstract> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  using ActionModelAbstract::ng_;
+  using ActionModelAbstract::nh_;
 
   ActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                            const std::size_t nu, const std::size_t nr = 1,
