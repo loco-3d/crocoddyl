@@ -20,7 +20,6 @@ set(${PROJECT_NAME}_EXAMPLES_PYTHON
 install(FILES __init__.py
         DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/examples)
 foreach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
-  python_build(. "${EXAMPLES}.py")
   install(FILES ${EXAMPLES}.py
           DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/examples)
   add_custom_target(
@@ -30,8 +29,7 @@ foreach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
     env
     PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH}
     ${PYTHON_EXECUTABLE}
-    -c
-    "import ${EXAMPLES}"
+    "${PROJECT_SOURCE_DIR}/examples/${EXAMPLES}.py"
     \${INPUT})
 
   # examples are too slow in Debug mode to be used as tests
