@@ -20,6 +20,11 @@ target_compile_options(${PYWRAP} PRIVATE "-Wno-conversion")
 # the errors for the wrapper:
 target_compile_options(${PYWRAP} PRIVATE "-Wno-deprecated-declarations")
 
+# Enforce the build of the pyc before the stub generation (stub generation
+# depend of PYWRAP)
+python_build_get_target(python_build_target)
+add_dependencies(${PYWRAP} ${python_build_target})
+
 if(UNIX)
   get_relative_rpath(${${PYWRAP}_INSTALL_DIR} ${PYWRAP}_INSTALL_RPATH)
   set_target_properties(${PYWRAP} PROPERTIES INSTALL_RPATH
