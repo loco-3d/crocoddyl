@@ -35,7 +35,7 @@ foreach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
     \${INPUT})
 
   # examples are too slow in Debug mode to be used as tests
-  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if((NOT CMAKE_BUILD_TYPE STREQUAL "Debug") OR ENABLE_COVERAGE)
     add_python_unit_test("example-python-${EXAMPLES}" "examples/${EXAMPLES}.py"
                          bindings/python)
   endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
