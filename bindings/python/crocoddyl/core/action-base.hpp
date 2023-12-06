@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,6 +21,9 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
                                  public bp::wrapper<ActionModelAbstract> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  using ActionModelAbstract::ng_;
+  using ActionModelAbstract::nh_;
+  using ActionModelAbstract::nu_;
 
   ActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                            const std::size_t nu, const std::size_t nr = 1,

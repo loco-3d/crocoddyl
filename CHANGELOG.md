@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Added nu, ng, and nh setters for Python bindings in https://github.com/loco-3d/crocoddyl/pull/1192
 * Added CHANGELOG.md in https://github.com/loco-3d/crocoddyl/pull/1188
 * Supported nu==0 in actuation models in https://github.com/loco-3d/crocoddyl/pull/1188
 * Included Python bindings for Crocoddyl exceptions by @cmastalli in https://github.com/loco-3d/crocoddyl/pull/1186
