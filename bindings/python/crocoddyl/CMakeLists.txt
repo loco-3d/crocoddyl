@@ -28,7 +28,8 @@ endif()
 
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${PYTHON_SITELIB})
+  generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/.. ${PROJECT_NAME}
+                 ${PYTHON_SITELIB} ${PYWRAP})
 endif(GENERATE_PYTHON_STUBS)
 
 install(TARGETS ${PYWRAP} DESTINATION ${${PYWRAP}_INSTALL_DIR})
