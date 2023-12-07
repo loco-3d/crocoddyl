@@ -282,6 +282,8 @@ Initial release
 [2.0.2]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/loco-3d/crocoddyl/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/loco-3d/crocoddyl/compare/v1.9.0...v2.0.0
+[1.9.0]: https://github.com/loco-3d/crocoddyl/compare/v1.8.1...v1.9.0
+[1.8.1]: https://github.com/loco-3d/crocoddyl/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/loco-3d/crocoddyl/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/loco-3d/crocoddyl/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/loco-3d/crocoddyl/compare/v1.5.0...v1.6.0
