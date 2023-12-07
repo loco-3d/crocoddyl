@@ -42,4 +42,4 @@ if(BUILD_PYTHON_INTERFACE)
       "from ${BENCHMARK_NAME} import *"
       \${INPUT})
   endforeach(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
-endif(BUILD_PYTHON_INTERFACE)
+endif()

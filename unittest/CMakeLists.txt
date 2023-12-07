@@ -1,6 +1,6 @@
 if(BUILD_PYTHON_INTERFACE)
   add_subdirectory(bindings)
-endif(BUILD_PYTHON_INTERFACE)
+endif()
 
 file(GLOB_RECURSE ${PROJECT_NAME}_FACTORY_TEST
      ${CMAKE_CURRENT_SOURCE_DIR}/factory/*.cpp)
@@ -14,7 +14,7 @@ if(UNIX)
   if(OPENMP_FOUND)
     target_link_libraries(${PROJECT_NAME}_unittest ${OpenMP_CXX_LIBRARIES})
   endif()
-endif(UNIX)
+endif()
 
 set(${PROJECT_NAME}_CPP_TESTS
     test_states

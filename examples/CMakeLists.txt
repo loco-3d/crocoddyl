@@ -36,7 +36,7 @@ foreach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   if((NOT CMAKE_BUILD_TYPE STREQUAL "Debug") OR ENABLE_COVERAGE)
     add_python_unit_test("example-python-${EXAMPLES}" "examples/${EXAMPLES}.py"
                          bindings/python)
-  endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  endif()
 endforeach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
 
 add_custom_target(
@@ -73,5 +73,5 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
       PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
       /bin/bash
       ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
-  endif(UNIX)
-endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  endif()
+endif()
