@@ -1,12 +1,9 @@
-import os
-import subprocess
 import sys
 import time
 
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils import LQRModelDerived
 
 NX = 37
 NU = 12
@@ -72,27 +69,20 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print("\033[1m")
-print("C++:")
-popen = subprocess.check_call(
-    [os.path.dirname(os.path.abspath(__file__)) + "/lqr-optctrl", str(T)]
-)
-
-print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.ActionModelLQR)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print("  DDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(
+    "  ShootingProblem.calc [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-
-print("Python:")
-xs, us, problem = createProblem(LQRModelDerived)
-avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(
+    "  ShootingProblem.calcDiff [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)

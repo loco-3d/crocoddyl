@@ -1,5 +1,3 @@
-import os
-import subprocess
 import sys
 import time
 
@@ -8,12 +6,9 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
-from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived
-
-crocoddyl.switchToNumpyMatrix()
 
 # First, let's load the Pinocchio model for the Talos arm.
-ROBOT = example_robot_data.loadTalosArm()
+ROBOT = example_robot_data.load("talos_arm")
 N = 100  # number of nodes
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
@@ -22,8 +17,8 @@ CALLBACKS = False
 
 def createProblem(model):
     robot_model = ROBOT.model
-    q0 = np.matrix([0.173046, 1.0, -0.52366, 0.0, 0.0, 0.1, -0.005]).T
-    x0 = np.vstack([q0, np.zeros((robot_model.nv, 1))])
+    q0 = np.array([0.173046, 1.0, -0.52366, 0.0, 0.0, 0.1, -0.005]).T
+    x0 = np.concatenate([q0, np.zeros(robot_model.nv)])
 
     # Note that we need to include a cost model (i.e. set of cost functions) in
     # order to fully define the action model for our optimal control problem.
@@ -36,7 +31,7 @@ def createProblem(model):
         crocoddyl.ResidualModelFramePlacement(
             state,
             robot_model.getFrameId("gripper_left_joint"),
-            pinocchio.SE3(np.eye(3), np.matrix([[0.0], [0.0], [0.4]])),
+            pinocchio.SE3(np.eye(3), np.array([0.0, 0.0, 0.4])),
         ),
     )
     xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
@@ -59,13 +54,11 @@ def createProblem(model):
     runningModel = crocoddyl.IntegratedActionModelEuler(
         model(state, actuation, runningCostModel), 1e-3
     )
-    runningModel.differential.armature = np.matrix(
-        [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]
-    ).T
+    runningModel.differential.armature = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]).T
     terminalModel = crocoddyl.IntegratedActionModelEuler(
         model(state, actuation, terminalCostModel), 1e-3
     )
-    terminalModel.differential.armature = np.matrix(
+    terminalModel.differential.armature = np.array(
         [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]
     ).T
 
@@ -125,27 +118,21 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print("\033[1m")
-print("C++:")
-popen = subprocess.check_call(
-    [os.path.dirname(os.path.abspath(__file__)) + "/arm-manipulation-optctrl", str(T)]
-)
-
-print("Python bindings:")
+np.set_printoptions(precision=2)
 xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print("  DDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(
+    "  ShootingProblem.calc [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-
-print("Python:")
-xs, us, problem = createProblem(DifferentialFreeFwdDynamicsModelDerived)
-avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(
+    "  ShootingProblem.calcDiff [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)

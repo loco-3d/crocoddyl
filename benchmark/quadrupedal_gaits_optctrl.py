@@ -1,5 +1,3 @@
-import os
-import subprocess
 import sys
 import time
 
@@ -38,7 +36,7 @@ if JUMPING:
 
 
 def createProblem(gait_phase):
-    robot_model = example_robot_data.loadHyQ().model
+    robot_model = example_robot_data.load("hyq").model
     lfFoot, rfFoot, lhFoot, rhFoot = "lf_foot", "rf_foot", "lh_foot", "rh_foot"
     gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
     q0 = robot_model.referenceConfigurations["standing"].copy()
@@ -200,18 +198,20 @@ elif GAIT == "jumping":
         }
     }
 
-print("\033[1m")
-print("C++:")
-popen = subprocess.check_call(
-    [os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits-optctrl", str(T)]
-)
-
-print("Python bindings:")
 xs, us, problem = createProblem(GAITPHASE)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print("  DDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(
+    "  ShootingProblem.calc [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(
+    "  ShootingProblem.calcDiff [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)

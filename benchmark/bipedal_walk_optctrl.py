@@ -14,7 +14,7 @@ GAIT = "walking"  # 55 nodes
 
 
 def createProblem(gait_phase):
-    robot_model = example_robot_data.loadTalosLegs().model
+    robot_model = example_robot_data.load("talos_legs").model
     rightFoot, leftFoot = "right_sole_link", "left_sole_link"
     gait = SimpleBipedGaitProblem(robot_model, rightFoot, leftFoot)
     q0 = robot_model.referenceConfigurations["half_sitting"].copy()
@@ -98,13 +98,20 @@ if GAIT == "walking":
         }
     }
 
-print("\033[1m")
-print("Python bindings:")
 xs, us, problem = createProblem(GAITPHASE)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print("  DDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(
+    "  ShootingProblem.calc [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(
+    "  ShootingProblem.calcDiff [ms]: {:.4f} ({:.4f}-{:.4f})".format(
+        avrg_dur, min_dur, max_dur
+    )
+)
