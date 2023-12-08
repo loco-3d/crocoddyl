@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/actions/unicycle.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
+#include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 
@@ -32,15 +32,15 @@ int main(int argc, char* argv[]) {
   // Formulating the optimal control problem
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
-  crocoddyl::SolverDDP ddp(problem);
+  crocoddyl::SolverDDP solver(problem);
   if (CALLBACKS) {
     std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
     cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
-    ddp.setCallbacks(cbs);
+    solver.setCallbacks(cbs);
   }
 
   std::cout << "NQ: "
-            << ddp.get_problem()->get_terminalModel()->get_state()->get_nq()
+            << solver.get_problem()->get_terminalModel()->get_state()->get_nq()
             << std::endl;
   std::cout << "Number of nodes: " << N << std::endl;
 
@@ -48,14 +48,14 @@ int main(int argc, char* argv[]) {
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.solve(xs, us, MAXITER);
+    solver.solve(xs, us, MAXITER);
     duration[i] = timer.get_duration();
   }
 
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration
+  std::cout << "  FDDP.solve [ms]: " << avrg_duration << " (" << min_duration
             << "-" << max_duration << ")" << std::endl;
 
   // Running calc

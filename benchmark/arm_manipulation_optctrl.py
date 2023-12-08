@@ -74,13 +74,13 @@ def createProblem(model):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    ddp = crocoddyl.SolverDDP(problem)
+    solver = crocoddyl.SolverFDDP(problem)
     if CALLBACKS:
-        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
+        solver.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for _ in range(T):
         c_start = time.time()
-        ddp.solve(xs, us, MAXITER, False, 0.1)
+        solver.solve(xs, us, MAXITER, False, 0.1)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
@@ -123,7 +123,7 @@ xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics
 print("NQ:", problem.terminalModel.state.nq)
 print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print("  DDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
+print("  FDDP.solve [ms]: {:.4f} ({:.4f}-{:.4f})".format(avrg_dur, min_dur, max_dur))
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
 print(
     "  ShootingProblem.calc [ms]: {:.4f} ({:.4f}-{:.4f})".format(

@@ -44,21 +44,21 @@ int main(int argc, char* argv[]) {
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots,
                                 supportKnots);
-  crocoddyl::SolverFDDP ddp(problem);
+  crocoddyl::SolverFDDP solver(problem);
   if (CALLBACKS) {
     std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
     cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
-    ddp.setCallbacks(cbs);
+    solver.setCallbacks(cbs);
   }
 
   // Initial State
-  const std::size_t N = ddp.get_problem()->get_T();
+  const std::size_t N = solver.get_problem()->get_T();
   std::vector<Eigen::VectorXd> xs(N, x0);
   std::vector<Eigen::VectorXd> us = problem->quasiStatic_xs(xs);
   xs.push_back(x0);
 
   std::cout << "NQ: "
-            << ddp.get_problem()->get_terminalModel()->get_state()->get_nq()
+            << solver.get_problem()->get_terminalModel()->get_state()->get_nq()
             << std::endl;
   std::cout << "Number of nodes: " << N << std::endl;
 
@@ -66,14 +66,14 @@ int main(int argc, char* argv[]) {
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.solve(xs, us, MAXITER, false, 0.1);
+    solver.solve(xs, us, MAXITER, false, 0.1);
     duration[i] = timer.get_duration();
   }
 
   double avrg_duration = duration.mean();
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration
+  std::cout << "  FDDP.solve [ms]: " << avrg_duration << " (" << min_duration
             << "-" << max_duration << ")" << std::endl;
 
   // Running calc
