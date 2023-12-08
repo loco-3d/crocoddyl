@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,9 +16,8 @@
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/integrator/rk.hpp"
 #include "crocoddyl/core/mathbase.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
-#include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
