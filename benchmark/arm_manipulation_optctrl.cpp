@@ -31,7 +31,8 @@ int main(int argc, char* argv[]) {
           runningModel->get_state());
   std::cout << "NQ: " << state->get_nq() << std::endl;
   std::cout << "Number of nodes: " << N << std::endl;
-  Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
+  Eigen::VectorXd q0 =
+      state->get_pinocchio()->referenceConfigurations["arm_up"];
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());
 

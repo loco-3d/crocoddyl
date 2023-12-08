@@ -8,7 +8,7 @@ import pinocchio
 import crocoddyl
 
 # First, let's load the Pinocchio model for the Talos arm.
-ROBOT = example_robot_data.load("talos_arm")
+ROBOT = example_robot_data.load("kinova")
 N = 100  # number of nodes
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
@@ -17,7 +17,7 @@ CALLBACKS = False
 
 def createProblem(model):
     robot_model = ROBOT.model
-    q0 = np.array([0.173046, 1.0, -0.52366, 0.0, 0.0, 0.1, -0.005]).T
+    q0 = robot_model.referenceConfigurations["arm_up"]
     x0 = np.concatenate([q0, np.zeros(robot_model.nv)])
 
     # Note that we need to include a cost model (i.e. set of cost functions) in
@@ -30,8 +30,8 @@ def createProblem(model):
         state,
         crocoddyl.ResidualModelFramePlacement(
             state,
-            robot_model.getFrameId("gripper_left_joint"),
-            pinocchio.SE3(np.eye(3), np.array([0.0, 0.0, 0.4])),
+            robot_model.getFrameId("j2s6s200_end_effector"),
+            pinocchio.SE3(np.eye(3), np.array([0.6, 0.2, 0.5])),
         ),
     )
     xRegCost = crocoddyl.CostModelResidual(state, crocoddyl.ResidualModelState(state))
@@ -43,24 +43,20 @@ def createProblem(model):
 
     # Then let's added the running and terminal cost functions
     runningCostModel.addCost("gripperPose", goalTrackingCost, 1)
-    runningCostModel.addCost("xReg", xRegCost, 1e-4)
-    runningCostModel.addCost("uReg", uRegCost, 1e-4)
-    terminalCostModel.addCost("gripperPose", goalTrackingCost, 1)
+    runningCostModel.addCost("xReg", xRegCost, 1e-1)
+    runningCostModel.addCost("uReg", uRegCost, 1e-1)
+    terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 
     # Next, we need to create an action model for running and terminal knots. The
     # forward dynamics (computed using ABA) are implemented
     # inside DifferentialActionModelFullyActuated.
     actuation = crocoddyl.ActuationModelFull(state)
     runningModel = crocoddyl.IntegratedActionModelEuler(
-        model(state, actuation, runningCostModel), 1e-3
+        model(state, actuation, runningCostModel), 1e-2
     )
-    runningModel.differential.armature = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]).T
     terminalModel = crocoddyl.IntegratedActionModelEuler(
-        model(state, actuation, terminalCostModel), 1e-3
+        model(state, actuation, terminalCostModel), 0.0
     )
-    terminalModel.differential.armature = np.array(
-        [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0]
-    ).T
 
     # For this optimal control problem, we define 100 knots (or running action
     # models) plus a terminal knot
