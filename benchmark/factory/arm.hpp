@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,6 @@ void build_arm_action_models(
       ResidualModelFramePlacement;
   typedef typename crocoddyl::ResidualModelControlTpl<Scalar>
       ResidualModelControl;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
@@ -59,13 +59,7 @@ void build_arm_action_models(
       modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
       false);
 
-  pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
-  std::vector<pinocchio::JointIndex> locked_joints;
-  locked_joints.push_back(5);
-  locked_joints.push_back(6);
-  locked_joints.push_back(7);
-  pinocchio::buildReducedModel(model_full, locked_joints,
-                               VectorXs::Zero(model_full.nq), model);
+  pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
 
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
