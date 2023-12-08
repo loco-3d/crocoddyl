@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ int main(int argc, char* argv[]) {
       boost::static_pointer_cast<crocoddyl::StateMultibody>(
           runningModel->get_state());
   std::cout << "NQ: " << state->get_nq() << std::endl;
-  std::cout << "Number of nodes: " << N << std::endl << std::endl;
+  std::cout << "Number of nodes: " << N << std::endl;
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
   x0 << q0, Eigen::VectorXd::Random(state->get_nv());

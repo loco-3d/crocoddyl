@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +43,11 @@ int main(int argc, char* argv[]) {
     ddp.setCallbacks(cbs);
   }
 
+  std::cout << "NQ: "
+            << ddp.get_problem()->get_terminalModel()->get_state()->get_nq()
+            << std::endl;
+  std::cout << "Number of nodes: " << N << std::endl;
+
   // Solving the optimal control problem
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
@@ -53,7 +59,7 @@ int main(int argc, char* argv[]) {
   double avrg_duration = duration.sum() / T;
   double min_duration = duration.minCoeff();
   double max_duration = duration.maxCoeff();
-  std::cout << "DDP.solve [ms]: " << avrg_duration << " (" << min_duration
+  std::cout << "  DDP.solve [ms]: " << avrg_duration << " (" << min_duration
             << "-" << max_duration << ")" << std::endl;
 
   // Running calc
@@ -66,7 +72,7 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "ShootingProblem.calc [ms]: " << avrg_duration << " ("
+  std::cout << "  ShootingProblem.calc [ms]: " << avrg_duration << " ("
             << min_duration << "-" << max_duration << ")" << std::endl;
 
   // Running calcDiff
@@ -79,6 +85,6 @@ int main(int argc, char* argv[]) {
   avrg_duration = duration.sum() / T;
   min_duration = duration.minCoeff();
   max_duration = duration.maxCoeff();
-  std::cout << "ShootingProblem.calcDiff [ms]: " << avrg_duration << " ("
+  std::cout << "  ShootingProblem.calcDiff [ms]: " << avrg_duration << " ("
             << min_duration << "-" << max_duration << ")" << std::endl;
 }

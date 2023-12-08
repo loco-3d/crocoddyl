@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2023, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,11 @@ int main(int argc, char* argv[]) {
     cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
     ddp.setCallbacks(cbs);
   }
+
+  std::cout << "NQ: "
+            << ddp.get_problem()->get_terminalModel()->get_state()->get_nq()
+            << std::endl;
+  std::cout << "Number of nodes: " << N << std::endl;
 
   // Solving the optimal control problem
   Eigen::ArrayXd duration(T);
