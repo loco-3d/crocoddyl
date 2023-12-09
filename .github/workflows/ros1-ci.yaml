@@ -6,6 +6,7 @@ on: [push, pull_request] # on all pushes and PRs
 jobs:
   CI:
     strategy:
+      fail-fast: false
       matrix:
         env:
           - {name: "(noetic)", ROS_DISTRO: noetic}

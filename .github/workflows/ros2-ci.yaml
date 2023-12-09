@@ -6,6 +6,7 @@ on: [push, pull_request]
 jobs:
   CI:
     strategy:
+      fail-fast: false
       matrix:
         env:
           - {name: "(humble, Release)", ROS_DISTRO: humble}
