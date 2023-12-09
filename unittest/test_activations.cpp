@@ -11,6 +11,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "factory/activation.hpp"
 #include "unittest_common.hpp"
@@ -89,6 +90,25 @@ void test_partial_derivatives_against_numdiff(
   // BOOST_CHECK((data->Arr - data_num_diff->Arr).isMuchSmallerThan(1.0, tol));
 }
 
+void test_activation_bounds_with_infinity() {
+  Eigen::VectorXd lb(1);
+  Eigen::VectorXd ub(1);
+  double beta;
+  beta = 0.1;
+  lb[0] = 0;
+  ub[0] = std::numeric_limits<double>::infinity();
+
+  Eigen::VectorXd m =
+      0.5 * (lb + Eigen::VectorXd::Constant(
+                      lb.size(), std::numeric_limits<double>::max()));
+  Eigen::VectorXd d =
+      0.5 * (Eigen::VectorXd::Constant(lb.size(),
+                                       std::numeric_limits<double>::max()) -
+             lb);
+  crocoddyl::ActivationBounds bounds(lb, ub, beta);
+  BOOST_CHECK(bounds.lb != m - beta * d);
+}
+
 //----------------------------------------------------------------------------//
 
 void register_unit_tests(ActivationModelTypes::Type activation_type) {
@@ -104,10 +124,22 @@ void register_unit_tests(ActivationModelTypes::Type activation_type) {
   framework::master_test_suite().add(ts);
 }
 
+bool register_bounds_unit_test() {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_"
+            << "ActivationBoundsInfinity";
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_activation_bounds_with_infinity)));
+  framework::master_test_suite().add(ts);
+  return true;
+}
+
 bool init_function() {
   for (size_t i = 0; i < ActivationModelTypes::all.size(); ++i) {
     register_unit_tests(ActivationModelTypes::all[i]);
   }
+  register_bounds_unit_test();
   return true;
 }
 
