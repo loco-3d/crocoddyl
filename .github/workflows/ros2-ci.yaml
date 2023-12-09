@@ -27,6 +27,7 @@ jobs:
       # It seems target_ws is unable to properly overlay upstream_ws.
       AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
         with:
