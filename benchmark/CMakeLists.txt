@@ -1,13 +1,13 @@
 set(${PROJECT_NAME}_BENCHMARK
     boxqp
-    unicycle-optctrl
-    lqr-optctrl
-    arm-manipulation-optctrl
-    arm-manipulation-timings
-    quadrupedal-gaits-optctrl
-    bipedal-timings)
+    unicycle_optctrl
+    lqr_optctrl
+    arm_manipulation_optctrl
+    quadrupedal_gaits_optctrl
+    arm_manipulation_timings
+    bipedal_timings)
 
-set(${PROJECT_NAME}_CODEGEN_BENCHMARK all-robots)
+set(${PROJECT_NAME}_CODEGEN_BENCHMARK all_robots)
 list(APPEND ${PROJECT_NAME}_BENCHMARK ${${PROJECT_NAME}_CODEGEN_BENCHMARK})
 
 foreach(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK})
@@ -42,4 +42,4 @@ if(BUILD_PYTHON_INTERFACE)
       "from ${BENCHMARK_NAME} import *"
       \${INPUT})
   endforeach(BENCHMARK_NAME ${${PROJECT_NAME}_BENCHMARK_PYTHON})
-endif(BUILD_PYTHON_INTERFACE)
+endif()

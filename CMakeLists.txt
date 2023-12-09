@@ -258,10 +258,10 @@ endif()
 if(BUILD_EXAMPLES)
   if(BUILD_PYTHON_INTERFACE)
     add_subdirectory(examples)
-  else(BUILD_PYTHON_INTERFACE)
+  else()
     message(
       WARNING "Python interface is not built, hence cannot build examples.")
-  endif(BUILD_PYTHON_INTERFACE)
+  endif()
 endif()
 
 # PkgConfig packaging of the project
