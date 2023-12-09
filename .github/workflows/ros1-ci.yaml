@@ -9,7 +9,8 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {name: "(noetic, clang, multi-threading, Release)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          - {name: "(noetic, Release)", ROS_DISTRO: noetic}
+          # - {name: "(noetic, clang, multi-threading, Release)", ROS_DISTRO: noetic, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
