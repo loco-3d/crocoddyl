@@ -22,7 +22,7 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.xs.append(state.rand())
         for _ in range(self.T):
             self.xs.append(state.rand())
-            self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
+            self.us.append(np.random.rand(self.MODEL.nu))
         self.PROBLEM = crocoddyl.ShootingProblem(
             self.xs[0], [self.MODEL] * self.T, self.MODEL
         )
