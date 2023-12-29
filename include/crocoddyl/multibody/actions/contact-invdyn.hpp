@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -512,7 +512,6 @@ class DifferentialActionModelContactInvDynamicsTpl
     using Base::nr_;
     using Base::nu_;
     using Base::state_;
-    using Base::unone_;
 
    private:
     pinocchio::FrameIndex id_;  //!< Reference frame id

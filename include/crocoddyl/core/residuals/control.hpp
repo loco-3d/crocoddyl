@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -151,7 +151,6 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
  protected:
   using Base::nu_;
   using Base::state_;
-  using Base::unone_;
 
  private:
   VectorXs uref_;  //!< Reference control input

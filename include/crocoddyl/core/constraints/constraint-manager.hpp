@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,7 +265,6 @@ class ConstraintModelManagerTpl {
   std::set<std::string> active_set_;  //!< Names of the active constraint items
   std::set<std::string>
       inactive_set_;  //!< Names of the inactive constraint items
-  VectorXs unone_;    //!< No control vector
 };
 
 template <typename _Scalar>

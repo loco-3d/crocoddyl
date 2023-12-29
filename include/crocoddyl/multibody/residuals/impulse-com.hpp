@@ -96,7 +96,6 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;
-  using Base::unone_;
 
  private:
   boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;

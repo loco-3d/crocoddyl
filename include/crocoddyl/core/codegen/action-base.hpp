@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, INRIA, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, INRIA, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,7 +244,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
 
   boost::shared_ptr<Base> model;
   boost::shared_ptr<ADBase> ad_model;

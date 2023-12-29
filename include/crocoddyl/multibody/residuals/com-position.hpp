@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2024, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +114,6 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;
-  using Base::unone_;
   using Base::v_dependent_;
 
  private:
