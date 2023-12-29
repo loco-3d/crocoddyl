@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,6 +22,7 @@ class DifferentialActionModelAbstract_wrap
       public bp::wrapper<DifferentialActionModelAbstract> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  using DifferentialActionModelAbstract::unone_;
 
   DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                                        const std::size_t nu,
@@ -28,7 +30,9 @@ class DifferentialActionModelAbstract_wrap
                                        const std::size_t ng = 0,
                                        const std::size_t nh = 0)
       : DifferentialActionModelAbstract(state, nu, nr, ng, nh),
-        bp::wrapper<DifferentialActionModelAbstract>() {}
+        bp::wrapper<DifferentialActionModelAbstract>() {
+    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  }
 
   void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -43,8 +47,13 @@ class DifferentialActionModelAbstract_wrap
                    << "u has wrong dimension (it should be " +
                           std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data,
-                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+      return bp::call<void>(this->get_override("calc").ptr(), data,
+                            (Eigen::VectorXd)x);
+    } else {
+      return bp::call<void>(this->get_override("calc").ptr(), data,
+                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    }
   }
 
   void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
@@ -60,8 +69,13 @@ class DifferentialActionModelAbstract_wrap
                    << "u has wrong dimension (it should be " +
                           std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+      return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                            (Eigen::VectorXd)x);
+    } else {
+      return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    }
   }
 
   boost::shared_ptr<DifferentialActionDataAbstract> createData() {
