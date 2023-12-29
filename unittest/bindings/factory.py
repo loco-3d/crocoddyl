@@ -469,7 +469,7 @@ class IntegratedActionModelEulerDerived(crocoddyl.ActionModelAbstract):
             dxnext_dx, _ = self.state.Jintegrate(x, data.dx)
             data.Fx[:, :] = dxnext_dx
             data.Lx[:] = data.differential.Lx
-            data.Lu[:] = data.differential.Lu
+            data.Lxx[:] = data.differential.Lxx
         else:
             nv, dt = self.state.nv, self.timeStep
             self.differential.calcDiff(data.differential, x, u)
@@ -521,8 +521,8 @@ class IntegratedActionModelRK4Derived(crocoddyl.ActionModelAbstract):
         if u is None:
             k0_data = data.differential[0]
             self.differential.calc(k0_data, x)
-            self.dx[:] *= 0.0
-            self.xnext[:] = x
+            data.dx[:] *= 0.0
+            data.xnext[:] = x
             data.cost = k0_data.cost
         else:
             nq, dt = self.nq, self.timeStep
@@ -706,7 +706,7 @@ class IntegratedActionDataRK4Derived(crocoddyl.ActionDataAbstract):
         self.Fu = self.F[:, ndx:]
 
         # Quantities for derivatives
-        self.dx = [np.zeros([ndx])] * 4
+        self.dx = np.zeros([ndx])
         self.y = [np.zeros([nx])] * 4
         self.acc = [np.zeros([nu])] * 4
 
