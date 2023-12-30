@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -153,7 +153,6 @@ class DifferentialActionModelNumDiffTpl
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
 
  private:
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);

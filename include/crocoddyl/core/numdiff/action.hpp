@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
-//                          Max Planck Gesellschaft, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,7 +146,6 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::state_;               //!< Model of the state
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
-  using Base::unone_;               //!< Neutral state
 
  private:
   /**

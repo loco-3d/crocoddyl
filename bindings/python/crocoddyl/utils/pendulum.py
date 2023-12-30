@@ -12,14 +12,14 @@ class CostModelDoublePendulum(crocoddyl.CostModelAbstract):
         )
         crocoddyl.CostModelAbstract.__init__(self, state, activation, nu=nu)
 
-    def calc(self, data, x, u):
+    def calc(self, data, x, u=None):
         c1, c2 = np.cos(x[0]), np.cos(x[1])
         s1, s2 = np.sin(x[0]), np.sin(x[1])
         data.residual.r[:] = np.array([s1, s2, 1 - c1, 1 - c2, x[2], x[3]])
         self.activation.calc(data.activation, data.residual.r)
         data.cost = data.activation.a_value
 
-    def calcDiff(self, data, x, u):
+    def calcDiff(self, data, x, u=None):
         c1, c2 = np.cos(x[0]), np.cos(x[1])
         s1, s2 = np.sin(x[0]), np.sin(x[1])
 
