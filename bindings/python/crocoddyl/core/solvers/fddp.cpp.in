@@ -119,6 +119,9 @@ void exposeSolverFDDP() {
            "These derivatives are computed around the guess state and control\n"
            "trajectory. These trajectory can be set by using setCandidate.\n"
            ":return the total cost around the guess trajectory.")
+      .def("linearRollout", &SolverFDDP::calcDir, bp::args("self"),
+           "Perform a linear rollout give the current control policy\n\n"
+           "The results of this linear rollout are stored in dxs and dus.")
       .def("backwardPass", &SolverFDDP::backwardPass, bp::args("self"),
            "Run the backward pass (Riccati sweep)\n\n"
            "It assumes that the Jacobian and Hessians of the optimal control "
@@ -304,6 +307,16 @@ void exposeSolverFDDP() {
           make_function(&SolverFDDP::get_k,
                         bp::return_value_policy<bp::reference_existing_object>()),
           "k")
+      .add_property(
+          "dxs",
+          make_function(&SolverFDDP::get_dxs,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "linear changes in the state trajectory.")
+      .add_property(
+          "dus",
+          make_function(&SolverFDDP::get_dus,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "linear changes in the control trajectory.")
       .def(CopyableVisitor<SolverFDDP>());
 #endif
 }

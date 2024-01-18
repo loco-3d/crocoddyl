@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -82,6 +82,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
   if (zero_upsilon_) {
     upsilon_ = 0.;
   }
+  acceptstep_ = false;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
     recalcdir_ = true;
     // Compute search direction
@@ -150,13 +151,14 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       // Armijo condition with the merit function. Instead, for the second case,
       // we use the Armijo condition with the cost function as this encourage
       // progress and the possibility of increasing the cost when expectations
-      // are unrealistic. Moreover, when it is expected to increase the merit
-      // function, our strategy is to accept an increment in the cost function.
-      // This approach enables our solver to increase both infeasibility and
-      // cost in order to ensure convergence; it increases the algorithm's
-      // globalization. Finally, we accept any improvement for step lengths
-      // smaller than th_acceptMinStep. This ensures any possible progress in
-      // the iteration.
+      // are unrealistic. Moreover, when it is expected to increase the merit if
+      // the feasibility passes our stopping criteria or in the cost function
+      // otherwise. This approach enables our solver to increase both
+      // infeasibility and cost in order to ensure convergence; it increases the
+      // algorithm's globalization. Finally, we accept any improvement for step
+      // lengths smaller than th_acceptMinStep. This ensures any possible
+      // progress in the iteration.
+      dImpr_ = std::max(dV_, dPhi_);
       acceptstep_ = false;
       if (dPhiexp_ >= 0.) {
         if (dPhi_ > 0.) {
@@ -167,11 +169,17 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
                    std::abs(d_[0]) < th_grad_) {
           acceptstep_ = true;
         }
-      } else if (dV_ > th_acceptnegstep_ * dVexp_) {
-        acceptstep_ = true;
+      } else {
+        if (feas_ <= th_stop_) {
+          if (dPhi_ > th_acceptnegstep_ * dPhiexp_) {
+            acceptstep_ = true;
+          }
+        } else if (dV_ > th_acceptnegstep_ * dVexp_) {
+          acceptstep_ = true;
+        }
       }
       // TODO: accept dPhi > 0 when allocated time has been reached (c++)
-      if (steplength_ <= th_acceptminstep_ && dPhi_ > 0.) {
+      if (steplength_ <= th_acceptminstep_ && dImpr_ > 0.) {
         acceptstep_ = true;
       }
       // Set candidate guess, cost and feasibilities if we accept the step
@@ -198,7 +206,6 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
-    dImpr_ = std::max(dV_, dPhi_);
     if (steplength_ >= th_stepdec_ && dImpr_ > th_minimprove_) {
       decreaseRegularization();
     }
@@ -306,7 +313,7 @@ void SolverFDDP::resizeData() {
 
 void SolverFDDP::calcDir() {
   START_PROFILER("SolverFDDP::calcDir");
-  if (iter_ == 0 || !acceptstep_) {
+  if (!acceptstep_) {
     problem_->calc(xs_, us_);
   }
   cost_ = problem_->calcDiff(xs_, us_);
@@ -315,6 +322,26 @@ void SolverFDDP::calcDir() {
   hfeas_ = computeEqualityFeasibility();
   feas_ = ffeas_ + gfeas_ + hfeas_;
   STOP_PROFILER("SolverFDDP::calcDir");
+}
+
+void SolverFDDP::linearRollout() {
+  const std::size_t T = problem_->get_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  dxs_[0] = fs_[0];
+  for (std::size_t t = 0; t < T; ++t) {  // in sequence
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    dxs_[t + 1].noalias() = d->Fx * dxs_[t];
+    dxs_[t + 1] += fs_[t + 1];
+    if (m->get_nu() != 0) {
+      dus_[t] = -k_[t];
+      dus_[t].noalias() -= K_[t] * dxs_[t];
+      dxs_[t + 1].noalias() += d->Fu * dus_[t];
+    }
+  }
 }
 
 void SolverFDDP::backwardPass() {
@@ -454,18 +481,19 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
-  cost_try_ = 0.;
-  xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
+  cost_try_ = 0.;
+  xnext_ = problem_->get_x0();
+  fs_try_[0] = fs_[0] * (steplength - 1);
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     const std::size_t nu = m->get_nu();
-    fs_try_[t] = fs_[t] * (steplength - 1);
+    fs_try_[t + 1] = fs_[t + 1] * (steplength - 1);
     m->get_state()->integrate(xnext_, fs_try_[t], xs_try_[t]);
     if (nu != 0) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -514,18 +542,7 @@ void SolverFDDP::multiShootForwardPass(const double steplength,
       problem_->get_runningDatas();
   if (recalc) {
     // Perform the linear rollout for the entire trajectory
-    dxs_[0] = fs_[0];
-    for (std::size_t t = 0; t < T; ++t) {  // in sequence
-      const std::shared_ptr<ActionModelAbstract>& m = models[t];
-      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-      dxs_[t + 1].noalias() = d->Fx * dxs_[t];
-      dxs_[t + 1] += fs_[t + 1];
-      if (m->get_nu() != 0) {
-        dus_[t] = -k_[t];
-        dus_[t].noalias() -= K_[t] * dxs_[t];
-        dxs_[t + 1].noalias() += d->Fu * dus_[t];
-      }
-    }
+    linearRollout();
   }
   // Update the dynamics gap for each node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -586,20 +603,8 @@ void SolverFDDP::hybridShootForwardPass(const double steplength,
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   if (recalc) {
-    const std::size_t T = problem_->get_T();
     // Perform the linear rollout for the entire trajectory
-    dxs_[0] = fs_[0];
-    for (std::size_t t = 0; t < T; ++t) {  // in sequence
-      const std::shared_ptr<ActionModelAbstract>& m = models[t];
-      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-      dxs_[t + 1].noalias() = d->Fx * dxs_[t];
-      dxs_[t + 1] += fs_[t + 1];
-      if (m->get_nu() != 0) {
-        dus_[t] = -k_[t];
-        dus_[t].noalias() -= K_[t] * dxs_[t];
-        dxs_[t + 1].noalias() += d->Fu * dus_[t];
-      }
-    }
+    linearRollout();
   }
   // Update the initial state of each shooting node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -884,6 +889,10 @@ SolverFDDP::get_K() const {
 }
 
 const std::vector<Eigen::VectorXd>& SolverFDDP::get_k() const { return k_; }
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_dxs() const { return dxs_; }
+
+const std::vector<Eigen::VectorXd>& SolverFDDP::get_dus() const { return dus_; }
 
 void SolverFDDP::set_alphas(const std::vector<double>& alphas) {
   double prev_alpha = alphas[0];

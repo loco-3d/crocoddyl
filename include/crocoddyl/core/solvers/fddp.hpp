@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -203,6 +203,13 @@ class SolverFDDP : public SolverAbstract {
    */
   virtual void computeValueFunction(
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
+
+  /**
+   * @brief Perform a linear rollout give the current control policy
+   *
+   * The results of this linear rollout are stored in dxs and dus.
+   */
+  void linearRollout();
 
   /**
    * @brief Run the feasibility-driven nonlinear rollout
@@ -422,6 +429,16 @@ class SolverFDDP : public SolverAbstract {
    * @brief Return the feedforward gains \f$\mathbf{k}_{s}\f$
    */
   const std::vector<Eigen::VectorXd>& get_k() const;
+
+  /**
+   * @brief Return the linear update in \f$\delta\mathbf{x}_s\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_dxs() const;
+
+  /**
+   * @brief Return the feedforward gains \f$\delta\mathbf{u}_s\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_dus() const;
 
   /**
    * @brief Modify the set of step lengths using by the line-search procedure
