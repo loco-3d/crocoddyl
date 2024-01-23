@@ -32,7 +32,35 @@ tau_f = np.array(
         [-cm / cf, cm / cf, -cm / cf, cm / cf],
     ]
 )
-actuation = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
+
+d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5.0, 0.1
+ps = [
+    crocoddyl.Propeller(
+        pinocchio.SE3(np.eye(3), np.array([d_cog, 0, 0])),
+        cf,
+        cm,
+        crocoddyl.PropellerType.CCW,
+    ),
+    crocoddyl.Propeller(
+        pinocchio.SE3(np.eye(3), np.array([0, d_cog, 0])),
+        cf,
+        cm,
+        crocoddyl.PropellerType.CW,
+    ),
+    crocoddyl.Propeller(
+        pinocchio.SE3(np.eye(3), np.array([-d_cog, 0, 0])),
+        cf,
+        cm,
+        crocoddyl.PropellerType.CCW,
+    ),
+    crocoddyl.Propeller(
+        pinocchio.SE3(np.eye(3), np.array([0, -d_cog, 0])),
+        cf,
+        cm,
+        crocoddyl.PropellerType.CW,
+    ),
+]
+actuation = crocoddyl.ActuationModelFloatingBasePropellers(state, ps)
 
 nu = actuation.nu
 runningCostModel = crocoddyl.CostModelSum(state, nu)
