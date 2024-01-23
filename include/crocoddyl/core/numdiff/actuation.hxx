@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,8 @@ void ActuationModelNumDiffTpl<Scalar>::commands(
   Data* d = static_cast<Data*>(data.get());
 
   model_->torqueTransform(d->data_x[0], x, tau);
-  data->u.noalias() = d->data_x[0]->Mtau * tau;
+  d->Mtau = d->data_x[0]->Mtau;
+  data->u.noalias() = d->Mtau * tau;
 }
 
 template <typename Scalar>
