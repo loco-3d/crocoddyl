@@ -138,10 +138,27 @@ void ActuationModelNumDiffTpl<Scalar>::commands(
                         std::to_string(model_->get_state()->get_nv()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
+  model_->commands(d->data_0, x, tau);
+  data->u = d->data_0->u;
+}
 
-  model_->torqueTransform(d->data_x[0], x, tau);
-  d->Mtau = d->data_x[0]->Mtau;
-  data->u.noalias() = d->Mtau * tau;
+template <typename Scalar>
+void ActuationModelNumDiffTpl<Scalar>::torqueTransform(
+    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+  if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(model_->get_state()->get_nx()) + ")");
+  }
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
+  }
+  Data* d = static_cast<Data*>(data.get());
+  model_->torqueTransform(d->data_0, x, u);
+  d->Mtau = d->data_0->Mtau;
 }
 
 template <typename Scalar>
