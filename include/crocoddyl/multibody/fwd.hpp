@@ -258,7 +258,9 @@ typedef ActuationModelFullTpl<double> ActuationModelFull;
 typedef PropellerTpl<double> Propeller;
 typedef ActuationModelFloatingBasePropellersTpl<double>
     ActuationModelFloatingBasePropellers;
-typedef ActuationModelMultiCopterBaseTpl<double> ActuationModelMultiCopterBase;
+DEPRECATED("Use ActuationModelFloatingBasePropellersTpl",
+           typedef ActuationModelMultiCopterBaseTpl<double>
+               ActuationModelMultiCopterBase;)
 
 typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 
