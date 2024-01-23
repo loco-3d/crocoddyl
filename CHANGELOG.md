@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Introduced floating base propeller actuation model in https://github.com/loco-3d/crocoddyl/pull/1213
+* Fixed quadruped and biped examples in https://github.com/loco-3d/crocoddyl/pull/1208
+* Fixed terminal computation in Python models in https://github.com/loco-3d/crocoddyl/pull/1204
 * Fixed handling of unbounded values for `ActivationBounds` in https://github.com/loco-3d/crocoddyl/pull/1191
 
 ## [2.0.2] - 2023-12-07
