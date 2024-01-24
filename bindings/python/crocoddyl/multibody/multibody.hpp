@@ -23,7 +23,7 @@ void exposeCoPSupport();
 void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
-void exposeActuationFloatingBasePropeller();
+void exposeActuationFloatingBaseThruster();
 void exposeActuationModelMultiCopterBase();
 void exposeForceAbstract();
 void exposeContactAbstract();

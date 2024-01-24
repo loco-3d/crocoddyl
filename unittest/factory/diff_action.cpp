@@ -151,7 +151,7 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelFreeFwdDynamics_Hector:
       action = create_freeFwdDynamics(
           StateModelTypes::StateMultibody_Hector,
-          ActuationModelTypes::ActuationModelFloatingBasePropellers, false);
+          ActuationModelTypes::ActuationModelFloatingBaseThrusters, false);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_TalosArm:
@@ -168,7 +168,7 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelFreeInvDynamics_Hector:
       action = create_freeInvDynamics(
           StateModelTypes::StateMultibody_Hector,
-          ActuationModelTypes::ActuationModelFloatingBasePropellers);
+          ActuationModelTypes::ActuationModelFloatingBaseThrusters);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeInvDynamics_TalosArm:

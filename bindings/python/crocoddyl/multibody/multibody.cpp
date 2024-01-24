@@ -18,7 +18,7 @@ void exposeMultibody() {
   exposeStateMultibody();
   exposeActuationFloatingBase();
   exposeActuationFull();
-  exposeActuationFloatingBasePropeller();
+  exposeActuationFloatingBaseThruster();
   exposeActuationModelMultiCopterBase();
   exposeForceAbstract();
   exposeContactAbstract();

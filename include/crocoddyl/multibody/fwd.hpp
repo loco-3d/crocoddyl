@@ -23,10 +23,10 @@ template <typename Scalar>
 class ActuationModelFullTpl;
 
 template <typename Scalar>
-struct PropellerTpl;
+struct ThrusterTpl;
 
 template <typename Scalar>
-class ActuationModelFloatingBasePropellersTpl;
+class ActuationModelFloatingBaseThrustersTpl;
 
 template <typename Scalar>
 class ActuationModelMultiCopterBaseTpl;
@@ -255,10 +255,10 @@ struct ImpulseDataMultipleTpl;
 
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
-typedef PropellerTpl<double> Propeller;
-typedef ActuationModelFloatingBasePropellersTpl<double>
-    ActuationModelFloatingBasePropellers;
-DEPRECATED("Use ActuationModelFloatingBasePropellersTpl",
+typedef ThrusterTpl<double> Thruster;
+typedef ActuationModelFloatingBaseThrustersTpl<double>
+    ActuationModelFloatingBaseThrusters;
+DEPRECATED("Use ActuationModelFloatingBaseThrustersTpl",
            typedef ActuationModelMultiCopterBaseTpl<double>
                ActuationModelMultiCopterBase;)
 

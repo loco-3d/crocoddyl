@@ -20,7 +20,7 @@ struct ActuationModelTypes {
   enum Type {
     ActuationModelFull,
     ActuationModelFloatingBase,
-    ActuationModelFloatingBasePropellers,
+    ActuationModelFloatingBaseThrusters,
     ActuationModelSquashingFull,
     NbActuationModelTypes
   };

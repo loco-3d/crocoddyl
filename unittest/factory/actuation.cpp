@@ -12,7 +12,7 @@
 #include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/actuation/squashing/smooth-sat.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/actuations/floating-base-propellers.hpp"
+#include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
 
@@ -30,8 +30,8 @@ std::ostream& operator<<(std::ostream& os, ActuationModelTypes::Type type) {
     case ActuationModelTypes::ActuationModelFloatingBase:
       os << "ActuationModelFloatingBase";
       break;
-    case ActuationModelTypes::ActuationModelFloatingBasePropellers:
-      os << "ActuationModelFloatingBasePropellers";
+    case ActuationModelTypes::ActuationModelFloatingBaseThrusters:
+      os << "ActuationModelFloatingBaseThrusters";
       break;
     case ActuationModelTypes::ActuationModelSquashingFull:
       os << "ActuationModelSquashingFull";
@@ -56,8 +56,8 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
   boost::shared_ptr<crocoddyl::StateAbstract> state =
       factory.create(state_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state_multibody;
-  // Propeller objects
-  std::vector<crocoddyl::Propeller> ps;
+  // Thruster objects
+  std::vector<crocoddyl::Thruster> ps;
   const double d_cog = 0.1525;
   const double cf = 6.6e-5;
   const double cm = 1e-6;
@@ -65,10 +65,10 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
   pinocchio::SE3 p2(Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, d_cog, 0));
   pinocchio::SE3 p3(Eigen::Matrix3d::Identity(), Eigen::Vector3d(-d_cog, 0, 0));
   pinocchio::SE3 p4(Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, -d_cog, 0));
-  ps.push_back(crocoddyl::Propeller(p1, cf, cm, crocoddyl::PropellerType::CCW));
-  ps.push_back(crocoddyl::Propeller(p2, cf, cm, crocoddyl::PropellerType::CW));
-  ps.push_back(crocoddyl::Propeller(p3, cf, cm, crocoddyl::PropellerType::CW));
-  ps.push_back(crocoddyl::Propeller(p4, cf, cm, crocoddyl::PropellerType::CCW));
+  ps.push_back(crocoddyl::Thruster(p1, cm / cf, crocoddyl::ThrusterType::CCW));
+  ps.push_back(crocoddyl::Thruster(p2, cm / cf, crocoddyl::ThrusterType::CW));
+  ps.push_back(crocoddyl::Thruster(p3, cm / cf, crocoddyl::ThrusterType::CW));
+  ps.push_back(crocoddyl::Thruster(p4, cm / cf, crocoddyl::ThrusterType::CCW));
   // Actuation Squashing objects
   boost::shared_ptr<crocoddyl::ActuationModelAbstract> act;
   boost::shared_ptr<crocoddyl::SquashingModelSmoothSat> squash;
@@ -87,11 +87,11 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
       actuation = boost::make_shared<crocoddyl::ActuationModelFloatingBase>(
           state_multibody);
       break;
-    case ActuationModelTypes::ActuationModelFloatingBasePropellers:
+    case ActuationModelTypes::ActuationModelFloatingBaseThrusters:
       state_multibody =
           boost::static_pointer_cast<crocoddyl::StateMultibody>(state);
       actuation =
-          boost::make_shared<crocoddyl::ActuationModelFloatingBasePropellers>(
+          boost::make_shared<crocoddyl::ActuationModelFloatingBaseThrusters>(
               state_multibody, ps);
       break;
     case ActuationModelTypes::ActuationModelSquashingFull:

@@ -23,32 +23,28 @@ state = crocoddyl.StateMultibody(robot_model)
 
 d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5.0, 0.1
 ps = [
-    crocoddyl.Propeller(
+    crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([d_cog, 0, 0])),
-        cf,
-        cm,
-        crocoddyl.PropellerType.CCW,
+        cm / cf,
+        crocoddyl.ThrusterType.CCW,
     ),
-    crocoddyl.Propeller(
+    crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, d_cog, 0])),
-        cf,
-        cm,
-        crocoddyl.PropellerType.CW,
+        cm / cf,
+        crocoddyl.ThrusterType.CW,
     ),
-    crocoddyl.Propeller(
+    crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([-d_cog, 0, 0])),
-        cf,
-        cm,
-        crocoddyl.PropellerType.CCW,
+        cm / cf,
+        crocoddyl.ThrusterType.CCW,
     ),
-    crocoddyl.Propeller(
+    crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, -d_cog, 0])),
-        cf,
-        cm,
-        crocoddyl.PropellerType.CW,
+        cm / cf,
+        crocoddyl.ThrusterType.CW,
     ),
 ]
-actuation = crocoddyl.ActuationModelFloatingBasePropellers(state, ps)
+actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
 
 nu = state.nv
 runningCostModel = crocoddyl.CostModelSum(state, nu)

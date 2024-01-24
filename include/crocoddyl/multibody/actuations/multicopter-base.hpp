@@ -59,7 +59,7 @@ class ActuationModelMultiCopterBaseTpl
    * @param[in] tau_f  Matrix that maps the thrust of each propeller to the net
    * force and torque
    */
-  DEPRECATED("Use constructor ActuationModelFloatingBasePropellersTpl",
+  DEPRECATED("Use constructor ActuationModelFloatingBaseThrustersTpl",
              ActuationModelMultiCopterBaseTpl(
                  boost::shared_ptr<StateMultibody> state,
                  const Eigen::Ref<const Matrix6xs>& tau_f));
@@ -166,7 +166,7 @@ ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
   }
   Mtau_ = pseudoInverse(MatrixXs(tau_f));
   std::cerr << "Deprecated ActuationModelMultiCopterBase: Use "
-               "ActuationModelFloatingBasePropellers"
+               "ActuationModelFloatingBaseThrusters"
             << std::endl;
 }
 

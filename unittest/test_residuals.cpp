@@ -300,7 +300,7 @@ bool init_function() {
       for (size_t actuation_type = 0;
            actuation_type < ActuationModelTypes::all.size(); ++actuation_type) {
         if (ActuationModelTypes::all[actuation_type] !=
-            ActuationModelTypes::ActuationModelFloatingBasePropellers) {
+            ActuationModelTypes::ActuationModelFloatingBaseThrusters) {
           register_residual_model_unit_tests(
               ResidualModelTypes::all[residual_type],
               StateModelTypes::all[state_type],

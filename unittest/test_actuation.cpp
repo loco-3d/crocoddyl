@@ -232,7 +232,7 @@ bool init_function() {
   }
 
   register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelFloatingBasePropellers,
+      ActuationModelTypes::ActuationModelFloatingBaseThrusters,
       StateModelTypes::StateMultibody_Hector);
   return true;
 }
