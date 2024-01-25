@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -23,6 +23,7 @@ void exposeCoPSupport();
 void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
+void exposeActuationFloatingBaseThruster();
 void exposeActuationModelMultiCopterBase();
 void exposeForceAbstract();
 void exposeContactAbstract();
@@ -62,7 +63,6 @@ void exposeContact3D();
 void exposeContact6D();
 void exposeImpulse3D();
 void exposeImpulse6D();
-
 void exposeMultibody();
 
 }  // namespace python

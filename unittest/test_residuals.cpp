@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,7 +300,7 @@ bool init_function() {
       for (size_t actuation_type = 0;
            actuation_type < ActuationModelTypes::all.size(); ++actuation_type) {
         if (ActuationModelTypes::all[actuation_type] !=
-            ActuationModelTypes::ActuationModelMultiCopterBase) {
+            ActuationModelTypes::ActuationModelFloatingBaseThrusters) {
           register_residual_model_unit_tests(
               ResidualModelTypes::all[residual_type],
               StateModelTypes::all[state_type],

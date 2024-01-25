@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -89,6 +89,13 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& tau);
+
+  /**
+   * @brief @copydoc Base::torqueTransform()
+   */
+  virtual void torqueTransform(
+      const boost::shared_ptr<ActuationDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::createData()

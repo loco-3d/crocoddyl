@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2024, University of Edinburgh, CTU, INRIA,
 //                          Heriot-Watt University, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -151,7 +151,7 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelFreeFwdDynamics_Hector:
       action = create_freeFwdDynamics(
           StateModelTypes::StateMultibody_Hector,
-          ActuationModelTypes::ActuationModelMultiCopterBase, false);
+          ActuationModelTypes::ActuationModelFloatingBaseThrusters, false);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_TalosArm:
@@ -168,7 +168,7 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelFreeInvDynamics_Hector:
       action = create_freeInvDynamics(
           StateModelTypes::StateMultibody_Hector,
-          ActuationModelTypes::ActuationModelMultiCopterBase);
+          ActuationModelTypes::ActuationModelFloatingBaseThrusters);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeInvDynamics_TalosArm:
