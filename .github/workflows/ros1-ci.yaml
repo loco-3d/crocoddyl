@@ -16,6 +16,7 @@ jobs:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
       UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
       CTEST_OUTPUT_ON_FAILURE: 1
+      BUILDER: catkin_tools
       # The following is a work-around for ROS tooling in conjunction with jrl-cmakemodules:
       #  - catkin_make_isolated has issues with Industrial-CI right now
       #  - colcon cannot find example-robot-data's python bindings due to ROS1 workspace integration hooks
@@ -24,7 +25,7 @@ jobs:
       # The work-around is thus to use catkin_tools for building and sourcing, and to manually specify execution of the test
       # target after completion of the regular test target. The output of this step does affect the output of the CI process.
       # Note, this does not affect projects that do not have pure CMake projects in their upstream_ws.
-      BUILDER: catkin_tools
+      AFTER_RUN_TARGET_TEST: 'source /root/target_ws/install/setup.bash && cd /root/target_ws/build/crocoddyl && env && make test'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
