@@ -80,120 +80,14 @@ class DisplayAbstract:
         datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
         for i, data in enumerate(datas):
             model = models[i]
-            if hasattr(data, "differential"):
-                if isinstance(
-                    data.differential,
-                    DifferentialActionDataContactFwdDynamics,
-                ) or isinstance(
-                    data.differential,
-                    DifferentialActionDataContactInvDynamics,
-                ):
-                    fc = []
-                    for (
-                        key,
-                        contact,
-                    ) in data.differential.multibody.contacts.contacts.todict().items():
-                        if model.differential.contacts.contacts[key].active:
-                            joint = model.differential.state.pinocchio.frames[
-                                contact.frame
-                            ].parent
-                            oMf = contact.pinocchio.oMi[joint] * contact.jMf
-                            fiMo = pinocchio.SE3(
-                                contact.pinocchio.oMi[joint].rotation.T,
-                                contact.jMf.translation,
-                            )
-                            force = fiMo.actInv(contact.fext)
-                            R = np.eye(3)
-                            mu = 0.7
-                            for k, c in model.differential.costs.costs.todict().items():
-                                if isinstance(
-                                    c.cost.residual,
-                                    ResidualModelContactFrictionCone,
-                                ):
-                                    if contact.frame == c.cost.residual.id:
-                                        R = c.cost.residual.reference.R
-                                        mu = c.cost.residual.reference.mu
-                                        continue
-                            fc.append(
-                                {
-                                    "key": str(joint),
-                                    "oMf": oMf,
-                                    "f": force,
-                                    "R": R,
-                                    "mu": mu,
-                                }
-                            )
-                    fs.append(fc)
-                elif isinstance(data.differential, StdVec_DiffActionData):
-                    fc = []
-                    for key, contact in (
-                        data.differential[0]
-                        .multibody.contacts.contacts.todict()
-                        .items()
-                    ):
-                        if model.differential.contacts.contacts[key].active:
-                            joint = model.differential.state.pinocchio.frames[
-                                contact.frame
-                            ].parent
-                            oMf = contact.pinocchio.oMi[joint] * contact.jMf
-                            fiMo = pinocchio.SE3(
-                                contact.pinocchio.oMi[joint].rotation.T,
-                                contact.jMf.translation,
-                            )
-                            force = fiMo.actInv(contact.fext)
-                            R = np.eye(3)
-                            mu = 0.7
-                            for k, c in model.differential.costs.costs.todict().items():
-                                if isinstance(
-                                    c.cost.residual,
-                                    ResidualModelContactFrictionCone,
-                                ):
-                                    if contact.frame == c.cost.residual.id:
-                                        R = c.cost.residual.reference.R
-                                        mu = c.cost.residual.reference.mu
-                                        continue
-                            fc.append(
-                                {
-                                    "key": str(joint),
-                                    "oMf": oMf,
-                                    "f": contact.fext,
-                                    "R": R,
-                                    "mu": mu,
-                                }
-                            )
-                    fs.append(fc)
-            elif isinstance(data, ActionDataImpulseFwdDynamics):
-                fc = []
-                for key, impulse in data.multibody.impulses.impulses.todict().items():
-                    if model.impulses.impulses[key].active:
-                        joint = model.state.pinocchio.frames[impulse.frame].parent
-                        oMf = impulse.pinocchio.oMi[joint] * impulse.jMf
-                        fiMo = pinocchio.SE3(
-                            impulse.pinocchio.oMi[joint].rotation.T,
-                            impulse.jMf.translation,
-                        )
-                        force = fiMo.actInv(impulse.f)
-                        R = np.eye(3)
-                        mu = 0.7
-                        for k, c in model.costs.costs.todict().items():
-                            if isinstance(
-                                c.cost.residual,
-                                ResidualModelContactFrictionCone,
-                            ):
-                                if impulse.frame == c.cost.residual.id:
-                                    R = c.cost.residual.reference.R
-                                    mu = c.cost.residual.reference.mu
-                                    continue
-                        fc.append(
-                            {
-                                "key": str(joint),
-                                "oMf": oMf,
-                                "f": force,
-                                "R": R,
-                                "mu": mu,
-                            }
-                        )
-                fs.append(fc)
+            if self._hasContacts(data):
+                contact_model, contact_data = self._getContactModelAndData(model, data)
+                cost_model = self._getCostModel(model)
+                fs.append(
+                    self._getForceInformation(
+                        model.state, contact_model, contact_data, cost_model
+                    )
+                )
         return fs
 
     def getFrameTrajectoryFromSolver(self, solver):
@@ -229,6 +123,88 @@ class DisplayAbstract:
                     pose = data.multibody.pinocchio.oMf[frameId]
                     p.append(np.asarray(pose.translation.T).reshape(-1).tolist())
         return ps
+
+    def _hasContacts(self, data):
+        if hasattr(data, "differential"):
+            if isinstance(
+                data.differential,
+                DifferentialActionDataContactFwdDynamics,
+            ) or isinstance(
+                data.differential,
+                DifferentialActionDataContactInvDynamics,
+            ):
+                return True
+        elif isinstance(data, ActionDataImpulseFwdDynamics):
+            return True
+
+    def _getContactModelAndData(self, model, data):
+        if hasattr(data, "differential"):
+            if isinstance(
+                data.differential,
+                DifferentialActionDataContactFwdDynamics,
+            ) or isinstance(
+                data.differential,
+                DifferentialActionDataContactInvDynamics,
+            ):
+                return (
+                    model.differential.contacts.contacts,
+                    data.differential.multibody.contacts.contacts,
+                )
+            elif isinstance(data.differential, StdVec_DiffActionData) and (
+                isinstance(
+                    data.differential,
+                    DifferentialActionDataContactFwdDynamics,
+                )
+                or isinstance(
+                    data.differential,
+                    DifferentialActionDataContactInvDynamics,
+                )
+            ):
+                return (
+                    model.differential[0].contacts.contacts,
+                    data.differential[0].multibody.contacts.contacts,
+                )
+        elif isinstance(data, ActionDataImpulseFwdDynamics):
+            return model.impulses.impulses, data.multibody.impulses.impulses
+
+    def _getCostModel(self, model):
+        if hasattr(model, "differential"):
+            return model.differential.costs.costs
+        elif isinstance(model, ActionModelImpulseFwdDynamics):
+            return model.costs.costs
+
+    def _getForceInformation(self, state, contact_model, contact_data, cost_model):
+        fc = []
+        for key, contact in contact_data.todict().items():
+            if contact_model[key].active:
+                joint = state.pinocchio.frames[contact.frame].parent
+                oMf = contact.pinocchio.oMi[joint] * contact.jMf
+                fiMo = pinocchio.SE3(
+                    contact.pinocchio.oMi[joint].rotation.T,
+                    contact.jMf.translation,
+                )
+                force = fiMo.actInv(contact.fext)
+                R = np.eye(3)
+                mu = 0.7
+                for c in cost_model.todict().values():
+                    if isinstance(
+                        c.cost.residual,
+                        ResidualModelContactFrictionCone,
+                    ):
+                        if contact.frame == c.cost.residual.id:
+                            R = c.cost.residual.reference.R
+                            mu = c.cost.residual.reference.mu
+                            continue
+                fc.append(
+                    {
+                        "key": str(joint),
+                        "oMf": oMf,
+                        "f": force,
+                        "R": R,
+                        "mu": mu,
+                    }
+                )
+        return fc
 
 
 class GepettoDisplay(DisplayAbstract):
