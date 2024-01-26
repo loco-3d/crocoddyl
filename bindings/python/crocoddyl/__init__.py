@@ -69,7 +69,43 @@ class DisplayAbstract:
         self.display(solver.xs, fs, ps, dts, factor)
 
     def display(self, xs, fs=[], ps=[], dts=[], factor=1.0):
-        """Display the state, force and frame trajectories"""
+        if ps:
+            self.displayFramePoses(ps)
+        if not dts:
+            dts = [0.0] * len(xs)
+        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
+        for i, x in enumerate(xs):
+            if not i % S:
+                if fs:
+                    self.activeContacts = {
+                        k: False for k, c in self.activeContacts.items()
+                    }
+                    for f in fs[i]:
+                        key = f["key"]
+                        # Display the contact forces
+                        self.displayContactForce(f)
+                        # Display the friction cones
+                        self.displayFrictionCone(f)
+                        self.activeContacts[key] = True
+                for key, c in self.activeContacts.items():
+                    if c is False:
+                        forceName = self.forceGroup + "/" + key
+                        coneName = self.frictionGroup + "/" + key
+                        self.setVisibility(forceName, False)
+                        self.setVisibility(coneName, False)
+                self.robot.display(x[: self.robot.nq])
+                time.sleep(dts[i] * factor)
+
+    def setVisibility(self, name, status):
+        """Display the frame pose"""
+        raise NotImplementedError("Not implemented yet.")
+
+    def displayFramePoses(self, ps):
+        """Display the frame pose"""
+        raise NotImplementedError("Not implemented yet.")
+
+    def displayContactForce(self, f):
+        """Display the contact force"""
         raise NotImplementedError("Not implemented yet.")
 
     def getForceTrajectoryFromSolver(self, solver):
@@ -240,55 +276,40 @@ class GepettoDisplay(DisplayAbstract):
         self._addFrameCurves()
         self._addFrictionCones()
 
-    def display(self, xs, fs=[], ps=[], dts=[], factor=1.0):
-        if ps:
-            for key, p in ps.items():
-                self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
-        if not dts:
-            dts = [0.0] * len(xs)
+    def setVisibility(self, name, status):
+        self.robot.viewer[name].set_property("visible", status)
+        if status:
+            self.robot.viewer.gui.setVisibility(name, "ON")
+        else:
+            self.robot.viewer.gui.setVisibility(name, "OFF")
 
-        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
-        for i, x in enumerate(xs):
-            if not i % S:
-                if fs:
-                    self.activeContacts = {
-                        k: False for k, c in self.activeContacts.items()
-                    }
-                    for f in fs[i]:
-                        key, pose, wrench = f["key"], f["oMf"], f["f"]
-                        # Display the contact forces
-                        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
-                        forcePose = pinocchio.SE3ToXYZQUATtuple(
-                            pinocchio.SE3(R, pose.translation)
-                        )
-                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
-                        forceName = self.forceGroup + "/" + key
-                        self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
-                        self.robot.viewer.gui.setVector3Property(
-                            forceName, "Scale", [1.0 * forceMagnitud, 1.0, 1.0]
-                        )
-                        self.robot.viewer.gui.setVisibility(forceName, "ON")
-                        # Display the friction cones
-                        position = pose
-                        position.rotation = f["R"]
-                        frictionName = self.frictionGroup + "/" + key
-                        self._setConeMu(key, f["mu"])
-                        self.robot.viewer.gui.applyConfiguration(
-                            frictionName,
-                            list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()),
-                        )
-                        self.robot.viewer.gui.setVisibility(frictionName, "ON")
-                        self.activeContacts[key] = True
-                for key, c in self.activeContacts.items():
-                    if c is False:
-                        self.robot.viewer.gui.setVisibility(
-                            self.forceGroup + "/" + key, "OFF"
-                        )
-                        self.robot.viewer.gui.setVisibility(
-                            self.frictionGroup + "/" + key, "OFF"
-                        )
-                self.robot.display(x[: self.robot.nq])
-                time.sleep(dts[i] * factor)
+    def displayFramePoses(self, ps):
+        for key, p in ps.items():
+            self.robot.viewer.gui.setCurvePoints(self.frameTrajGroup + "/" + key, p)
+
+    def displayContactForce(self, f):
+        key, pose, wrench = f["key"], f["oMf"], f["f"]
+        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+        R = rotationMatrixFromTwoVectors(self.x_axis, wrench.linear)
+        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+        forceName = self.forceGroup + "/" + key
+        self.robot.viewer.gui.applyConfiguration(forceName, forcePose)
+        self.robot.viewer.gui.setVector3Property(
+            forceName, "Scale", [1.0 * forceMagnitud, 1.0, 1.0]
+        )
+        self.robot.viewer.gui.setVisibility(forceName, "ON")
+
+    def displayFrictionCone(self, f):
+        key, pose, mu = f["key"], f["oMf"], f["mu"]
+        position = pose
+        position.rotation = f["R"]
+        frictionName = self.frictionGroup + "/" + key
+        self._setConeMu(key, mu)
+        self.robot.viewer.gui.applyConfiguration(
+            frictionName,
+            list(np.array(pinocchio.SE3ToXYZQUAT(position)).squeeze()),
+        )
+        self.robot.viewer.gui.setVisibility(frictionName, "ON")
 
     def _addRobot(self):
         # Spawn robot model
@@ -409,65 +430,44 @@ class MeshcatDisplay(DisplayAbstract):
         self._addForceArrows()
         self._addFrictionCones()
 
-    def display(self, xs, fs=[], ps=[], dts=[], factor=1.0):
-        if ps:
-            for key in ps.keys():
-                vertices = np.array(ps[key]).T
-                self._addFrameCurves(key, vertices)
-        if not dts:
-            dts = [0.0] * len(xs)
+    def setVisibility(self, name, status):
+        self.robot.viewer[name].set_property("visible", status)
 
-        S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
-        for i, x in enumerate(xs):
-            if not i % S:
-                if fs:
-                    self.activeContacts = {
-                        k: False for k, c in self.activeContacts.items()
-                    }
-                    for f in fs[i]:
-                        key, pose, wrench, mu = f["key"], f["oMf"], f["f"], f["mu"]
-                        # Display the contact forces
-                        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
-                        R = rotationMatrixFromTwoVectors(self.y_axis, wrench.linear)
-                        forcePose = pinocchio.SE3(
-                            R,
-                            pose.translation
-                            + np.dot(
-                                R,
-                                np.array(
-                                    [0.0, forceMagnitud * self.forceLength / 2, 0.0]
-                                ),
-                            ),
-                        ).homogeneous
-                        forceName = self.forceGroup + "/" + key
-                        self.robot.viewer[forceName].set_property("visible", False)
-                        self.robot.viewer[forceName].set_transform(forcePose)
-                        self.robot.viewer[forceName].set_property(
-                            "scale", [1.0, forceMagnitud, 1.0]
-                        )
-                        self.robot.viewer[forceName].set_property("visible", True)
-                        # Display the friction cones
-                        R = pinocchio.utils.rpyToMatrix(-np.pi / 2, 0.0, 0.0)  # f["R"]
-                        conePose = pinocchio.SE3(
-                            R,
-                            pose.translation
-                            + np.dot(
-                                R, np.array([0.0, -self.frictionConeScale / 2, 0.0])
-                            ),
-                        ).homogeneous
-                        coneName = self.frictionGroup + "/" + key
-                        self.robot.viewer[coneName].set_property("radiusBottom", mu)
-                        self.robot.viewer[coneName].set_transform(conePose)
-                        self.robot.viewer[coneName].set_property("visible", True)
-                        self.activeContacts[key] = True
-                for key, c in self.activeContacts.items():
-                    if c is False:
-                        forceName = self.forceGroup + "/" + key
-                        coneName = self.frictionGroup + "/" + key
-                        self.robot.viewer[forceName].set_property("visible", False)
-                        self.robot.viewer[coneName].set_property("visible", False)
-                self.robot.display(x[: self.robot.nq])
-                time.sleep(dts[i] * factor)
+    def displayFramePoses(self, ps):
+        for key in ps.keys():
+            vertices = np.array(ps[key]).T
+            self._addFrameCurves(key, vertices)
+
+    def displayContactForce(self, f):
+        key, pose, wrench = f["key"], f["oMf"], f["f"]
+        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+        R = rotationMatrixFromTwoVectors(self.y_axis, wrench.linear)
+        forcePose = pinocchio.SE3(
+            R,
+            pose.translation
+            + np.dot(
+                R,
+                np.array([0.0, forceMagnitud * self.forceLength / 2, 0.0]),
+            ),
+        )
+        forceName = self.forceGroup + "/" + key
+        self.robot.viewer[forceName].set_property("visible", False)
+        self.robot.viewer[forceName].set_transform(forcePose.homogeneous)
+        self.robot.viewer[forceName].set_property("scale", [1.0, forceMagnitud, 1.0])
+        self.robot.viewer[forceName].set_property("visible", True)
+
+    def displayFrictionCone(self, f):
+        key, pose, mu = f["key"], f["oMf"], f["mu"]
+        R = pinocchio.utils.rpyToMatrix(-np.pi / 2, 0.0, 0.0)
+        conePose = pinocchio.SE3(
+            R,
+            pose.translation
+            + np.dot(R, np.array([0.0, -self.frictionConeScale / 2, 0.0])),
+        ).homogeneous
+        coneName = self.frictionGroup + "/" + key
+        self.robot.viewer[coneName].set_property("radiusBottom", mu)
+        self.robot.viewer[coneName].set_transform(conePose)
+        self.robot.viewer[coneName].set_property("visible", True)
 
     def _addRobot(self, openWindow):
         self.robot.initViewer(open=openWindow)
