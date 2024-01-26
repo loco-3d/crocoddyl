@@ -24,7 +24,7 @@ def rotationMatrixFromTwoVectors(a, b):
 
 
 class DisplayAbstract:
-    def __init__(self, robot, rate=-1, freq=1, frameNames=[]):
+    def __init__(self, robot, rate=-1, freq=1):
         self.robot = robot
         self.rate = rate
         self.freq = freq
@@ -40,30 +40,21 @@ class DisplayAbstract:
         self.frictionConeColor = [0.0, 0.4, 0.79, 0.5]
         self.activeContacts = {}
         self.frictionMu = {}
-        for n in frameNames:
-            parentId = robot.model.frames[robot.model.getFrameId(n)].parent
-            self.activeContacts[str(parentId)] = True
-            self.frictionMu[str(parentId)] = 0.7
-        self.frameTrajNames = []
-        for n in frameNames:
-            self.frameTrajNames.append(str(robot.model.getFrameId(n)))
         self.frameTrajColor = {}
         self.frameTrajLineWidth = 10
-        for fr in self.frameTrajNames:
-            self.frameTrajColor[fr] = list(
-                np.hstack([np.random.choice(range(256), size=3) / 256.0, 1.0])
-            )
         self.x_axis = np.array([1.0, 0.0, 0.0])
         self.y_axis = np.array([0.0, 1.0, 0.0])
         self.z_axis = np.array([0.0, 0.0, 1.0])
         self.totalWeight = sum(
             m.mass for m in self.robot.model.inertias
         ) * np.linalg.norm(self.robot.model.gravity.linear)
+        self._init = False
 
     def displayFromSolver(self, solver, factor=1.0):
+        if not self._init:
+            self.init(solver)
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
-
         models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0.0 for m in models]
         self.display(solver.xs, fs, ps, dts, factor)
@@ -95,6 +86,37 @@ class DisplayAbstract:
                         self.setVisibility(coneName, False)
                 self.robot.display(x[: self.robot.nq])
                 time.sleep(dts[i] * factor)
+
+    def init(self, solver):
+        frameNames = []
+        self.frameTrajNames = []
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
+        for i, data in enumerate(datas):
+            model = models[i]
+            if self._hasContacts(data):
+                contact_model, _ = self._getContactModelAndData(model, data)
+                for c in contact_model.todict().values():
+                    if hasattr(c, "contact"):
+                        name = self.robot.model.frames[c.contact.id].name
+                    elif hasattr(c, "impact"):
+                        name = self.robot.model.frames[c.impact.id].name
+                    if not name in frameNames:
+                        frameNames.append(name)
+        for n in frameNames:
+            frameId = self.robot.model.getFrameId(n)
+            parentId = self.robot.model.frames[frameId].parent
+            self.activeContacts[str(parentId)] = True
+            self.frictionMu[str(parentId)] = 0.7
+            self.frameTrajNames.append(str(frameId))
+        for fr in self.frameTrajNames:
+            self.frameTrajColor[fr] = list(
+                np.hstack([np.random.choice(range(256), size=3) / 256.0, 1.0])
+            )
+        self._addForceArrows()
+        self._addFrameCurves()
+        self._addFrictionCones()
+        self._init = True
 
     def setVisibility(self, name, status):
         """Display the frame pose"""
@@ -251,10 +273,12 @@ class GepettoDisplay(DisplayAbstract):
         freq=1,
         cameraTF=None,
         floor=True,
-        frameNames=[],
+        frameNames=None,
         visibility=False,
     ):
-        DisplayAbstract.__init__(self, robot, rate, freq, frameNames)
+        DisplayAbstract.__init__(self, robot, rate, freq)
+        if frameNames != None:
+            print("Deprecated. Do not pass frameNames")
 
         # Visuals properties
         self.fullVisibility = visibility
@@ -411,10 +435,12 @@ class MeshcatDisplay(DisplayAbstract):
         freq=1,
         cameraTF=None,
         floor=True,
-        frameNames=[],
+        frameNames=None,
         visibility=True,
     ):
-        DisplayAbstract.__init__(self, robot, rate, freq, frameNames)
+        DisplayAbstract.__init__(self, robot, rate, freq)
+        if frameNames != None:
+            print("Deprecated. Do not pass frameNames")
         robot.setVisualizer(
             pinocchio.visualize.MeshcatVisualizer(
                 model=self.robot.model,
@@ -504,7 +530,9 @@ class MeshcatDisplay(DisplayAbstract):
                 meshColor,
             )
 
-    def _addFrameCurves(self, key, vertices):
+    def _addFrameCurves(self, key=None, vertices=None):
+        if key == None and vertices == None:
+            return
         import meshcat.geometry as g
 
         frameName = self.frameTrajGroup + "/" + key

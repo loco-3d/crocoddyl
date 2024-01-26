@@ -48,23 +48,6 @@ refGripper = rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation
 comRef = (rfPos0 + lfPos0) / 2
 comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
-# Initialize viewer
-display = None
-if WITHDISPLAY:
-    if display is None:
-        try:
-            import gepetto
-
-            gepetto.corbaserver.Client()
-            display = crocoddyl.GepettoDisplay(robot, frameNames=[rightFoot, leftFoot])
-            display.robot.viewer.gui.addSphere(
-                "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
-            )  # radius = .1, RGBA=1001
-            display.robot.viewer.gui.applyConfiguration(
-                "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
-            )  # xyz+quaternion
-        except Exception:
-            display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
 # Add contact to the model
 contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
 supportContactModelLeft = crocoddyl.ContactModel6D(
@@ -182,17 +165,22 @@ us = solver.problem.quasiStatic([x0] * solver.problem.T)
 solver.solve(xs, us, 500, False, 1e-9)
 
 # Visualizing the solution in gepetto-viewer
+display = None
 if WITHDISPLAY:
-    try:
-        import gepetto
+    if display is None:
+        try:
+            import gepetto
 
-        gepetto.corbaserver.Client()
-        cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
-        display = crocoddyl.GepettoDisplay(
-            robot, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
-        )
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
+            gepetto.corbaserver.Client()
+            display = crocoddyl.GepettoDisplay(robot)
+            display.robot.viewer.gui.addSphere(
+                "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
+            )  # radius = .1, RGBA=1001
+            display.robot.viewer.gui.applyConfiguration(
+                "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
+            )  # xyz+quaternion
+        except Exception:
+            display = crocoddyl.MeshcatDisplay(robot)
     display.rate = -1
     display.freq = 1
     while True:
