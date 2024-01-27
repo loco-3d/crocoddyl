@@ -28,10 +28,10 @@ class DisplayAbstract:
         self.robot = robot
         self.rate = rate
         self.freq = freq
-
         # Visual properties
         self.frameTrajGroup = "world/robot/frame_trajectory"
         self.forceGroup = "world/robot/contact_forces"
+        self.thrustGroup = "world/robot/thrust"
         self.frictionGroup = "world/robot/friction_cone"
         self.forceRadius = 0.015
         self.forceLength = 0.5
@@ -39,6 +39,7 @@ class DisplayAbstract:
         self.frictionConeScale = 0.2
         self.frictionConeColor = [0.0, 0.4, 0.79, 0.5]
         self.activeContacts = {}
+        self.activeThrust = {}
         self.frictionMu = {}
         self.frameTrajColor = {}
         self.frameTrajLineWidth = 10
@@ -55,11 +56,12 @@ class DisplayAbstract:
             self.init(solver)
         fs = self.getForceTrajectoryFromSolver(solver)
         ps = self.getFrameTrajectoryFromSolver(solver)
+        rs = self.getThrustTrajectoryFromSolver(solver)
         models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0.0 for m in models]
-        self.display(solver.xs, fs, ps, dts, factor)
+        self.display(solver.xs, rs, fs, ps, dts, factor)
 
-    def display(self, xs, fs=[], ps=[], dts=[], factor=1.0):
+    def display(self, xs, rs=[], fs=[], ps=[], dts=[], factor=1.0):
         if ps:
             self.displayFramePoses(ps)
         if not dts:
@@ -67,6 +69,15 @@ class DisplayAbstract:
         S = 1 if self.rate <= 0 else max(len(xs) / self.rate, 1)
         for i, x in enumerate(xs):
             if not i % S:
+                if rs:
+                    if i != len(xs) - 1:
+                        for r in rs[i]:
+                            # Display the thrust forces
+                            self.displayThrustForce(r)
+                    else:
+                        for key, _ in self.activeThrust.items():
+                            thrustName = self.thrustGroup + "/" + key
+                            self.setVisibility(thrustName, False)
                 if fs:
                     self.activeContacts = {
                         k: False for k, c in self.activeContacts.items()
@@ -88,7 +99,7 @@ class DisplayAbstract:
                 time.sleep(dts[i] * factor)
 
     def init(self, solver):
-        frameNames = []
+        frameNames, thrusters = [], []
         self.frameTrajNames = []
         models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
         datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
@@ -103,6 +114,11 @@ class DisplayAbstract:
                         name = self.robot.model.frames[c.impact.id].name
                     if not name in frameNames:
                         frameNames.append(name)
+            if hasattr(model, "differential"):
+                if isinstance(
+                    model.differential.actuation, ActuationModelFloatingBaseThrusters
+                ):
+                    thrusters.append(model.differential.actuation.thrusters)
         for n in frameNames:
             frameId = self.robot.model.getFrameId(n)
             parentId = self.robot.model.frames[frameId].parent
@@ -113,8 +129,14 @@ class DisplayAbstract:
             self.frameTrajColor[fr] = list(
                 np.hstack([np.random.choice(range(256), size=3) / 256.0, 1.0])
             )
+        for thrust in thrusters:
+            for i, _ in enumerate(thrust):
+                frameName = self.robot.model.frames[2].name
+                frameId = self.robot.model.getFrameId(frameName)
+                self.activeThrust[str(i)] = True
         self._addForceArrows()
         self._addFrameCurves()
+        self._addThrustArrows()
         self._addFrictionCones()
         self._init = True
 
@@ -128,6 +150,10 @@ class DisplayAbstract:
 
     def displayContactForce(self, f):
         """Display the contact force"""
+        raise NotImplementedError("Not implemented yet.")
+
+    def displayThrustForce(self, r):
+        """Display the thrust force"""
         raise NotImplementedError("Not implemented yet.")
 
     def getForceTrajectoryFromSolver(self, solver):
@@ -146,6 +172,38 @@ class DisplayAbstract:
                         model.state, contact_model, contact_data, cost_model
                     )
                 )
+        return fs
+
+    def getThrustTrajectoryFromSolver(self, solver):
+        fs = []
+        for i, model in enumerate(solver.problem.runningModels.tolist()):
+            data = solver.problem.runningDatas[i]
+            if hasattr(model, "differential"):
+                if isinstance(
+                    model.differential.actuation, ActuationModelFloatingBaseThrusters
+                ):
+                    fc = []
+                    ui = solver.us[i]
+                    for t, thrust in enumerate(model.differential.actuation.thrusters):
+                        frameName = self.robot.model.frames[2].name
+                        frameId = self.robot.model.getFrameId(frameName)
+                        pinocchio.updateFramePlacement(
+                            model.differential.state.pinocchio,
+                            data.differential.pinocchio,
+                            frameId,
+                        )
+                        oMb = data.differential.pinocchio.oMf[frameId]
+                        oMf = oMb.act(thrust.pose)
+                        force = ui[t]
+                        fc.append(
+                            {
+                                "key": str(t),
+                                "oMf": oMf,
+                                "f": force,
+                                "type": thrust.type,
+                            }
+                        )
+                    fs.append(fc)
         return fs
 
     def getFrameTrajectoryFromSolver(self, solver):
@@ -297,6 +355,7 @@ class GepettoDisplay(DisplayAbstract):
         self.robot.viewer.gui.createGroup(self.frictionGroup)
         self.robot.viewer.gui.createGroup(self.frameTrajGroup)
         self._addForceArrows()
+        self._addThrustArrows()
         self._addFrameCurves()
         self._addFrictionCones()
 
@@ -322,6 +381,17 @@ class GepettoDisplay(DisplayAbstract):
             forceName, "Scale", [1.0 * forceMagnitud, 1.0, 1.0]
         )
         self.robot.viewer.gui.setVisibility(forceName, "ON")
+
+    def displayThrustForce(self, f):
+        key, pose, thrust = f["key"], f["oMf"], f["f"]
+        wrench = pose.act(pinocchio.Force(np.array([0, 0, thrust]), np.zeros(3)))
+        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+        forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
+        thrustName = self.thrustGroup + "/" + key
+        self.robot.viewer.gui.applyConfiguration(thrustName, forcePose)
+        self.robot.viewer.gui.setVector3Property(
+            thrustName, "Scale", [1.0 * forceMagnitud, 1.0, 1.0]
+        )
 
     def displayFrictionCone(self, f):
         key, pose, mu = f["key"], f["oMf"], f["mu"]
@@ -454,6 +524,7 @@ class MeshcatDisplay(DisplayAbstract):
             )
         self._addRobot(visibility)
         self._addForceArrows()
+        self._addThrustArrows()
         self._addFrictionCones()
 
     def setVisibility(self, name, status):
@@ -482,6 +553,25 @@ class MeshcatDisplay(DisplayAbstract):
         self.robot.viewer[forceName].set_property("scale", [1.0, forceMagnitud, 1.0])
         self.robot.viewer[forceName].set_property("visible", True)
 
+    def displayThrustForce(self, f):
+        key, pose, thrust = f["key"], f["oMf"], f["f"]
+        wrench = pose.act(pinocchio.Force(np.array([0, 0, thrust]), np.zeros(3)))
+        forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+        R = rotationMatrixFromTwoVectors(self.y_axis, wrench.linear)
+        forcePose = pinocchio.SE3(
+            R,
+            pose.translation
+            + np.dot(
+                R,
+                np.array([0.0, forceMagnitud * self.forceLength / 2, 0.0]),
+            ),
+        )
+        thrustName = self.thrustGroup + "/" + key
+        self.robot.viewer[thrustName].set_property("visible", False)
+        self.robot.viewer[thrustName].set_transform(forcePose.homogeneous)
+        self.robot.viewer[thrustName].set_property("scale", [1.0, forceMagnitud, 1.0])
+        self.robot.viewer[thrustName].set_property("visible", True)
+
     def displayFrictionCone(self, f):
         key, pose, mu = f["key"], f["oMf"], f["mu"]
         R = pinocchio.utils.rpyToMatrix(-np.pi / 2, 0.0, 0.0)
@@ -508,6 +598,18 @@ class MeshcatDisplay(DisplayAbstract):
         for key in self.activeContacts:
             forceName = self.forceGroup + "/" + key
             self.robot.viewer[forceName].set_object(
+                g.Cylinder(self.forceLength, self.forceRadius), meshColor
+            )
+
+    def _addThrustArrows(self):
+        import meshcat.geometry as g
+
+        meshColor = g.MeshLambertMaterial(
+            color=self._rgbToHexColor(self.forceColor[:3]), reflectivity=0.8
+        )
+        for key in self.activeThrust:
+            thrustName = self.thrustGroup + "/" + key
+            self.robot.viewer[thrustName].set_object(
                 g.Cylinder(self.forceLength, self.forceRadius), meshColor
             )
 
