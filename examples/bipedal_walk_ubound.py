@@ -114,11 +114,9 @@ if WITHDISPLAY:
 
         gepetto.corbaserver.Client()
         cameraTF = [3.0, 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-        display = crocoddyl.GepettoDisplay(
-            talos_legs, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
-        )
+        display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF)
     except Exception:
-        display = crocoddyl.MeshcatDisplay(talos_legs, frameNames=[rightFoot, leftFoot])
+        display = crocoddyl.MeshcatDisplay(talos_legs)
     display.rate = -1
     display.freq = 1
     while True:

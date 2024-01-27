@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Enabled display of thrust and simplied displayers code in https://github.com/loco-3d/crocoddyl/pull/1215
 * Introduced floating base thruster actuation model in https://github.com/loco-3d/crocoddyl/pull/1213
 * Fixed quadruped and biped examples in https://github.com/loco-3d/crocoddyl/pull/1208
 * Fixed terminal computation in Python models in https://github.com/loco-3d/crocoddyl/pull/1204
