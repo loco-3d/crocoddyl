@@ -1,4 +1,5 @@
 # flake8: noqa: F405
+import os
 import time
 
 import numpy as np
@@ -651,6 +652,146 @@ class MeshcatDisplay(DisplayAbstract):
         return "0x{:02x}{:02x}{:02x}".format(
             *tuple(np.rint(255 * np.array(rgbColor)).astype(int))
         )
+
+
+class RvizDisplay(DisplayAbstract):
+    def __init__(
+        self,
+        robot,
+        urdf,
+        rate=-1,
+        freq=1,
+    ):
+        DisplayAbstract.__init__(self, robot, rate, freq)
+        # Import ROS modules
+        self.ROS_VERSION = int(os.environ["ROS_VERSION"])
+        if self.ROS_VERSION == 2:
+            import rclpy
+        else:
+            import rospy
+            from roslaunch.parent import ROSLaunchParent
+        import crocoddyl_ros
+        from urdf_parser_py.urdf import URDF
+
+        # Init the ROS node and publishers
+        if self.ROS_VERSION == 2:
+            if not rclpy.ok():
+                rclpy.init()
+        else:
+            self.roscore = ROSLaunchParent("crocoddyl_display", [], is_core=True)
+            self.roscore.start()
+            rospy.init_node("crocoddyl_display", anonymous=True)
+            rospy.set_param("use_sim_time", True)
+            rospy.set_param(
+                "robot_description", URDF.from_xml_file(urdf).to_xml_string()
+            )
+        self._wsPublisher = crocoddyl_ros.WholeBodyStateRosPublisher(
+            robot.model, "whole_body_state", "map"
+        )
+        self._wtPublisher = crocoddyl_ros.WholeBodyTrajectoryRosPublisher(
+            robot.model, "whole_body_trajectory", "map"
+        )
+        root_id = crocoddyl_ros.getRootJointId(self.robot.model)
+        self._nv_root = self.robot.model.joints[root_id].nv
+
+    def displayFromSolver(self, solver, factor=1.0):
+        xs = solver.xs
+        us = []
+        for i in range(solver.problem.T):
+            us.append(solver.us[i][self._nv_root :])
+        us.append(np.zeros(0))
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        dts = [m.dt if hasattr(m, "differential") else 0.0 for m in models]
+        ps, pds = self.getFrameTrajectoryFromSolver(solver)
+        fs, ss = self.getForceTrajectoryFromSolver(solver)
+        self.display(xs, us, [], ps, pds, fs, ss, dts, factor)
+
+    def display(
+        self, xs, us=[], rs=[], ps=[], pds=[], fs=[], ss=[], dts=[], factor=1.0
+    ):
+        nq = self.robot.model.nq
+        ts = [i * dt for i, dt in enumerate(dts)]
+        for i in range(len(xs) - 1):
+            t, x, u = ts[i], xs[i], us[i]
+            if len(ps) != 0:
+                p, pd = ps[i], pds[i]
+                f, s = fs[i], ss[i]
+                self._wsPublisher.publish(t, x[:nq], x[nq:], u, p, pd, f, s)
+            else:
+                self._wsPublisher.publish(t, x[:nq], x[nq:], u)
+            time.sleep(dts[i] * factor)
+        self._wtPublisher.publish(ts, xs, us, ps, pds, fs, ss)
+
+    def getForceTrajectoryFromSolver(self, solver):
+        fs, ss = [], []
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
+        for i, data in enumerate(datas):
+            model = models[i]
+            if self._hasContacts(data):
+                _, contact_data = self._getContactModelAndData(model, data)
+                fs.append(self._get_fc(contact_data))
+                ss.append(self._get_sc(contact_data))
+        return fs, ss
+
+    def getFrameTrajectoryFromSolver(self, solver):
+        ps, pds = [], []
+        models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
+        datas = [*solver.problem.runningDatas.tolist(), solver.problem.terminalData]
+        for i, data in enumerate(datas):
+            model = models[i]
+            if self._hasContacts(data):
+                pinocchio_data = self._getPinocchioData(data)
+                _, contact_data = self._getContactModelAndData(model, data)
+                ps.append(self._get_pc(pinocchio_data, contact_data))
+                pds.append(self._get_dpc(pinocchio_data, contact_data))
+        return ps, pds
+
+    def _getPinocchioData(self, data):
+        if hasattr(data, "differential"):
+            if hasattr(data.differential, "multibody"):
+                return data.differential.multibody.pinocchio
+            elif isinstance(data.differential, StdVec_DiffActionData):
+                if hasattr(data.differential[0], "multibody"):
+                    return data.differential[0].multibody.pinocchio
+        elif isinstance(data, ActionDataImpulseFwdDynamics):
+            return data.multibody.pinocchio
+
+    def get_pc(self, pinocchio_data, contact_data):
+        popt = dict()
+        for contact in contact_data:
+            name = contact.key()
+            frame_id = self._state.pinocchio.getFrameId(name)
+            popt[name] = pinocchio_data.oMf[frame_id]
+        return popt
+
+    def get_pdc(self, pinocchio_data, contact_data):
+        pdopt = dict()
+        for contact in contact_data:
+            name = contact.key()
+            frame_id = self._state.pinocchio.getFrameId(name)
+            v = pinocchio.getFrameVelocity(
+                self.robot.model,
+                pinocchio_data,
+                frame_id,
+                pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            pdopt[name] = v
+        return pdopt
+
+    def _get_fc(self, contact_data):
+        fc = dict()
+        for force in contact_data.todict().items():
+            name, f = force[0], force[1].f
+            fc[name] = [f, 0, 2]
+        return fc
+
+    def _get_sc(self, contact_data):
+        sc = dict()
+        self.mu = 0.7
+        for name in contact_data.todict().keys():
+            sc[name] = [np.array([0.0, 0.0, 1.0]), self.mu]
+        return sc
 
 
 class CallbackDisplay(CallbackAbstract):
