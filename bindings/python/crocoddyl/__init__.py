@@ -59,9 +59,11 @@ class DisplayAbstract:
         rs = self.getThrustTrajectoryFromSolver(solver)
         models = [*solver.problem.runningModels.tolist(), solver.problem.terminalModel]
         dts = [m.dt if hasattr(m, "differential") else 0.0 for m in models]
-        self.display(solver.xs, rs, fs, ps, dts, factor)
+        self.display(solver.xs, [], rs, ps, [], fs, [], dts, factor)
 
-    def display(self, xs, rs=[], fs=[], ps=[], dts=[], factor=1.0):
+    def display(
+        self, xs, us=[], rs=[], ps=[], pds=[], fs=[], ss=[], dts=[], factor=1.0
+    ):
         if ps:
             self.displayFramePoses(ps)
         if not dts:
