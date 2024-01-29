@@ -1,4 +1,5 @@
 # flake8: noqa: F405
+import inspect
 import os
 import time
 
@@ -668,7 +669,7 @@ class RvizDisplay(DisplayAbstract):
             import rclpy
         else:
             import rospy
-            from roslaunch.parent import ROSLaunchParent
+            import roslaunch
         import crocoddyl_ros
         from urdf_parser_py.urdf import URDF
 
@@ -677,13 +678,41 @@ class RvizDisplay(DisplayAbstract):
             if not rclpy.ok():
                 rclpy.init()
         else:
-            self.roscore = ROSLaunchParent("crocoddyl_display", [], is_core=True)
+            self.roscore = roslaunch.parent.ROSLaunchParent(
+                "crocoddyl_display", [], is_core=True
+            )
             self.roscore.start()
             rospy.init_node("crocoddyl_display", anonymous=True)
             rospy.set_param("use_sim_time", True)
             rospy.set_param(
                 "robot_description", URDF.from_xml_file(robot.urdf).to_xml_string()
             )
+            filename = os.path.join(
+                os.path.dirname(
+                    os.path.abspath(inspect.getfile(inspect.currentframe()))
+                ),
+                "crocoddyl.rviz",
+            )
+            rviz_args = [
+                os.path.join(
+                    os.path.dirname(
+                        os.path.abspath(inspect.getfile(inspect.currentframe()))
+                    ),
+                    "crocoddyl.launch",
+                ),
+                "filename:='{filename}'".format_map(locals()),
+            ]
+            roslaunch_args = rviz_args[1:]
+            roslaunch_file = [
+                (
+                    roslaunch.rlutil.resolve_launch_arguments(rviz_args)[0],
+                    roslaunch_args,
+                )
+            ]
+            self.rviz = roslaunch.parent.ROSLaunchParent(
+                "crocoddyl_display", roslaunch_file, is_core=False
+            )
+            self.rviz.start()
         self._wsPublisher = crocoddyl_ros.WholeBodyStateRosPublisher(
             robot.model, "whole_body_state", "map"
         )
