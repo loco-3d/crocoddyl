@@ -658,7 +658,6 @@ class RvizDisplay(DisplayAbstract):
     def __init__(
         self,
         robot,
-        urdf,
         rate=-1,
         freq=1,
     ):
@@ -683,7 +682,7 @@ class RvizDisplay(DisplayAbstract):
             rospy.init_node("crocoddyl_display", anonymous=True)
             rospy.set_param("use_sim_time", True)
             rospy.set_param(
-                "robot_description", URDF.from_xml_file(urdf).to_xml_string()
+                "robot_description", URDF.from_xml_file(robot.urdf).to_xml_string()
             )
         self._wsPublisher = crocoddyl_ros.WholeBodyStateRosPublisher(
             robot.model, "whole_body_state", "map"
