@@ -739,8 +739,11 @@ class RvizDisplay(DisplayAbstract):
     ):
         nq = self.robot.model.nq
         ts = [i * dt for i, dt in enumerate(dts)]
-        for i in range(len(xs) - 1):
-            t, x, u = ts[i], xs[i], us[i]
+        for i in range(len(xs)):
+            if i < len(xs) - 1:
+                t, x, u = ts[i], xs[i], us[i]
+            else:
+                t, x, u = ts[i], xs[i], np.zeros_like(us[0])
             if len(ps) != 0:
                 p, pd = ps[i], pds[i]
                 f, s = fs[i], ss[i]
