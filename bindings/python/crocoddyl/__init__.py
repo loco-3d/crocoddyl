@@ -2,6 +2,7 @@
 import inspect
 import os
 import time
+from abc import ABC, abstractmethod
 
 import numpy as np
 import pinocchio
@@ -25,7 +26,7 @@ def rotationMatrixFromTwoVectors(a, b):
     return np.eye(3) + ab_skew + np.dot(ab_skew, ab_skew) * (1 - c) / s**2
 
 
-class DisplayAbstract:
+class DisplayAbstract(ABC):
     def __init__(self, robot, rate=-1, freq=1):
         self.robot = robot
         self.rate = rate
@@ -144,18 +145,22 @@ class DisplayAbstract:
         self._addFrictionCones()
         self._init = True
 
+    @abstractmethod
     def setVisibility(self, name, status):
-        """Display the frame pose"""
+        """Display the frame pose."""
         raise NotImplementedError("Not implemented yet.")
 
+    @abstractmethod
     def displayFramePoses(self, ps):
         """Display the frame pose"""
         raise NotImplementedError("Not implemented yet.")
 
+    @abstractmethod
     def displayContactForce(self, f):
         """Display the contact force"""
         raise NotImplementedError("Not implemented yet.")
 
+    @abstractmethod
     def displayThrustForce(self, r):
         """Display the thrust force"""
         raise NotImplementedError("Not implemented yet.")
@@ -769,6 +774,30 @@ class RvizDisplay(DisplayAbstract):
                 fs.append(self._get_fc(contact_data))
                 ss.append(self._get_sc(contact_data))
         return fs, ss
+
+    def setVisibility(self, name, status):
+        pass
+
+    def displayFramePoses(self, ps):
+        pass
+
+    def displayContactForce(self, f):
+        pass
+
+    def displayThrustForce(self, r):
+        pass
+
+    def _addForceArrows(self):
+        pass
+
+    def _addThrustArrows(self):
+        pass
+
+    def _addFrameCurves(self):
+        pass
+
+    def _addFrictionCones(self):
+        pass
 
     def getFrameTrajectoryFromSolver(self, solver):
         ps, pds = [], []
