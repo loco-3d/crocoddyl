@@ -39,7 +39,7 @@ include("${JRL_CMAKE_MODULES}/python-helpers.cmake")
 # Print initial message
 message(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 message(
-  STATUS "Copyright (C) 2018-2023 CNRS-LAAS, University of Edinburgh, INRIA")
+  STATUS "Copyright (C) 2018-2024 CNRS-LAAS, University of Edinburgh, INRIA")
 message(STATUS "                        Heriot-Watt University")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
