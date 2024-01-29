@@ -722,6 +722,11 @@ class RvizDisplay(DisplayAbstract):
         root_id = crocoddyl_ros.getRootJointId(self.robot.model)
         self._nv_root = self.robot.model.joints[root_id].nv
 
+    def __del__(self):
+        if self.ROS_VERSION == 1:
+            self.roscore.shutdown()
+            self.rviz.shutdown()
+
     def displayFromSolver(self, solver, factor=1.0):
         xs = solver.xs
         us = []
