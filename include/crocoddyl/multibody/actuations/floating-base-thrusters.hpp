@@ -174,7 +174,7 @@ class ActuationModelFloatingBaseThrustersTpl
     W_thrust_.setZero();
     if (nu_ > n_thrusters_) {
       W_thrust_
-          .template bottomRightCorner(nu_ - n_thrusters_, nu_ - n_thrusters_)
+          .bottomRightCorner(nu_ - n_thrusters_, nu_ - n_thrusters_)
           .diagonal()
           .setOnes();
     }
