@@ -53,14 +53,15 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       # This step will fetch/store the directory used by ccache before/after the ci run
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-
       # Run industrial_ci
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
