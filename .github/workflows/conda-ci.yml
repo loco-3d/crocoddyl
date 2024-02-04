@@ -1,6 +1,32 @@
 name: CONDA
 
-on: [push, pull_request]
+# This determines when this workflow is run
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   crocoddyl-conda:
