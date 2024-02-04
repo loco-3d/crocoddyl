@@ -588,7 +588,6 @@ class SolverFDDP : public SolverAbstract {
       dx_;  //!< State error during the roll-out/forward-pass (size T)
   std::vector<Eigen::VectorXd> dxs_;  //!< Linear state direction (size T + 1)
   std::vector<Eigen::VectorXd> dus_;  //!< Linear control direction (size T)
-  Eigen::VectorXd xnext_;             //!< Next state \f$\mathbf{x}^{'}\f$
   std::vector<MatrixXdRowMajor>
       FxTVxx_p_;  //!< Store the value of
                   //!< \f$\mathbf{f_x}^T\mathbf{V_{xx}}^{'}\f$

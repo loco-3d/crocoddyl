@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,6 +35,7 @@ class SolverBoxFDDP : public SolverFDDP {
   std::vector<Eigen::MatrixXd> Quu_inv_;
   std::vector<Eigen::VectorXd> du_lb_;
   std::vector<Eigen::VectorXd> du_ub_;
+  Eigen::VectorXd xnext_;  //!< Next state \f$\mathbf{x}^{'}\f$
 };
 
 }  // namespace crocoddyl

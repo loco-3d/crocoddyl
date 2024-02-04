@@ -487,14 +487,12 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   cost_try_ = 0.;
-  xnext_ = problem_->get_x0();
   fs_try_[0] = fs_[0] * (steplength - 1);
+  models[0]->get_state()->integrate(problem_->get_x0(), fs_try_[0], xs_try_[0]);
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     const std::size_t nu = m->get_nu();
-    fs_try_[t + 1] = fs_[t + 1] * (steplength - 1);
-    m->get_state()->integrate(xnext_, fs_try_[t], xs_try_[t]);
     if (nu != 0) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t] = us_[t] - k_[t] * steplength;
@@ -503,13 +501,14 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
     } else {
       m->calc(d, xs_try_[t]);
     }
-    xnext_ = d->xnext;
+    fs_try_[t + 1] = fs_[t + 1] * (steplength - 1);
+    m->get_state()->integrate(d->xnext, fs_try_[t + 1], xs_try_[t + 1]);
     cost_try_ += d->cost;
     if (raiseIfNaN(cost_try_)) {
       STOP_PROFILER("SolverFDDP::feasShootForwardPass");
       throw_pretty("forward_error");
     }
-    if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
       STOP_PROFILER("SolverFDDP::feasShootForwardPass");
       throw_pretty("forward_error");
     }
@@ -517,8 +516,6 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
   const std::shared_ptr<ActionModelAbstract>& m =
       problem_->get_terminalModel();
   const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-  fs_try_.back() = fs_.back() * (steplength - 1);
-  m->get_state()->integrate(xnext_, fs_try_.back(), xs_try_.back());
   m->calc(d, xs_try_.back());
   cost_try_ += d->cost;
   if (raiseIfNaN(cost_try_)) {
@@ -736,7 +733,6 @@ void SolverFDDP::allocateData() {
   const std::size_t T = problem_->get_T();
   dImpr_ = 0.;
   Vxx_tmp_ = Eigen::MatrixXd::Zero(ndx, ndx);
-  xnext_ = Eigen::VectorXd::Zero(ndx);
   Vxx_.resize(T + 1);
   Vxx_f_.resize(T + 1);
   Vx_.resize(T + 1);
