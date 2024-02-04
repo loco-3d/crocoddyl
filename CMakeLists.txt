@@ -88,11 +88,11 @@ endif()
 
 # Add the different required and optional dependencies
 if(BUILD_PYTHON_INTERFACE)
-  add_project_dependency(eigenpy 3.1.4 REQUIRED PKG_CONFIG_REQUIRES
-                         "eigenpy >= 3.1.4")
+  add_project_dependency(eigenpy 3.1.0 REQUIRED PKG_CONFIG_REQUIRES
+                         "eigenpy >= 3.1.0")
 endif(BUILD_PYTHON_INTERFACE)
-add_project_dependency(pinocchio 2.6.21 REQUIRED PKG_CONFIG_REQUIRES
-                       "pinocchio >= 2.6.21")
+add_project_dependency(pinocchio 2.6.20 REQUIRED PKG_CONFIG_REQUIRES
+                       "pinocchio >= 2.6.20")
 if(BUILD_EXAMPLES
    OR BUILD_TESTING
    OR BUILD_BENCHMARK)
