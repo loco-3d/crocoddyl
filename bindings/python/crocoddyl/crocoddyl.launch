@@ -1,4 +1,3 @@
-<?xml version="1.0" ?>
 <launch>
 	<arg name="filename" default="$(eval env('PWD'))"/>
 
