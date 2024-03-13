@@ -272,8 +272,8 @@ double SolverFDDP::get_th_acceptnegstep() const { return th_acceptnegstep_; }
 
 void SolverFDDP::set_th_acceptnegstep(const double th_acceptnegstep) {
   if (0. > th_acceptnegstep) {
-    throw_pretty("Invalid argument: "
-                 << "th_acceptnegstep value has to be positive.");
+    throw_pretty(
+        "Invalid argument: " << "th_acceptnegstep value has to be positive.");
   }
   th_acceptnegstep_ = th_acceptnegstep;
 }

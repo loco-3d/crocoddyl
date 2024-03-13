@@ -194,9 +194,9 @@ class ActuationModelFloatingBaseThrustersTpl
                     const Eigen::Ref<const VectorXs>&,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " +
-                          std::to_string(nu_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "u has wrong dimension (it should be " +
+                                      std::to_string(nu_) + ")");
     }
     if (update_data_) {
       updateData(data);

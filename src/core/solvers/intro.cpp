@@ -449,8 +449,7 @@ void SolverIntro::set_th_feas(const double th_feas) { th_feas_ = th_feas; }
 
 void SolverIntro::set_rho(const double rho) {
   if (0. >= rho || rho > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "rho value should between 0 and 1.");
+    throw_pretty("Invalid argument: " << "rho value should between 0 and 1.");
   }
   rho_ = rho;
 }

@@ -40,8 +40,8 @@ struct ActivationBoundsTpl {
                           std::to_string(ub.size()) + ", respectively)");
     }
     if (beta < Scalar(0) || beta > Scalar(1.)) {
-      throw_pretty("Invalid argument: "
-                   << "The range of beta is between 0 and 1");
+      throw_pretty(
+          "Invalid argument: " << "The range of beta is between 0 and 1");
     }
     using std::isfinite;
     for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
@@ -116,9 +116,9 @@ class ActivationModelQuadraticBarrierTpl
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
@@ -132,9 +132,9 @@ class ActivationModelQuadraticBarrierTpl
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);

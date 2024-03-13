@@ -75,9 +75,9 @@ class ActuationModelMultiCopterBaseTpl
                     const Eigen::Ref<const VectorXs>&,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " +
-                          std::to_string(nu_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "u has wrong dimension (it should be " +
+                                      std::to_string(nu_) + ")");
     }
 
     data->tau.noalias() = tau_f_ * u;
@@ -153,8 +153,8 @@ ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
     : Base(state, state->get_nv() - 6 + tau_f.cols()), n_rotors_(tau_f.cols()) {
   pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
   if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
-    throw_pretty("Invalid argument: "
-                 << "the first joint has to be free-flyer");
+    throw_pretty(
+        "Invalid argument: " << "the first joint has to be free-flyer");
   }
 
   tau_f_ = MatrixXs::Zero(state_->get_nv(), nu_);
@@ -177,8 +177,8 @@ ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
     : Base(state, state->get_nv() - 6 + n_rotors), n_rotors_(n_rotors) {
   pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
   if (state->get_pinocchio()->joints[1].shortname() != ff_joint.shortname()) {
-    throw_pretty("Invalid argument: "
-                 << "the first joint has to be free-flyer");
+    throw_pretty(
+        "Invalid argument: " << "the first joint has to be free-flyer");
   }
 
   tau_f_ = MatrixXs::Zero(state_->get_nv(), nu_);
