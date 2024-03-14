@@ -50,7 +50,7 @@ jobs:
       BUILDER: colcon
       # This by-passes issues on importing example_robot_data module when running examples and unit tests.
       # It seems target_ws is unable to properly overlay upstream_ws.
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
+      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data --break-system-packages'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
