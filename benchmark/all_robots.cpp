@@ -162,15 +162,8 @@ void print_benchmark(RobotEENames robot) {
                                    std::to_string(state->get_nq()) +
                                    "DoF.bench";
   CsvStream csv(csv_filename);
-  csv << "fn_name"
-      << "nthreads"
-      << "with_cg"
-      << "mean"
-      << "stddev"
-      << "max"
-      << "min"
-      << "mean_per_nodes"
-      << "stddev_per_nodes" << csv.endl;
+  csv << "fn_name" << "nthreads" << "with_cg" << "mean" << "stddev" << "max"
+      << "min" << "mean_per_nodes" << "stddev_per_nodes" << csv.endl;
 
   /*******************************************************************************/
   /*********************************** TIMINGS

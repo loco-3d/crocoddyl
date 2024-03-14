@@ -122,8 +122,7 @@ const Scalar IntegratedActionModelAbstractTpl<Scalar>::get_dt() const {
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
   if (dt < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "dt has positive value");
+    throw_pretty("Invalid argument: " << "dt has positive value");
   }
   time_step_ = dt;
   time_step2_ = dt * dt;

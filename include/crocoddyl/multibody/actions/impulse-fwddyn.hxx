@@ -164,9 +164,9 @@ template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(
     Data* data, const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t nq = state_->get_nq();
@@ -211,9 +211,9 @@ template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(
     Data* data, const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t nv = state_->get_nv();
@@ -385,8 +385,8 @@ template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::set_damping_factor(
     const Scalar damping) {
   if (damping < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "The damping factor has to be positive");
+    throw_pretty(
+        "Invalid argument: " << "The damping factor has to be positive");
   }
   JMinvJt_damping_ = damping;
 }

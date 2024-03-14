@@ -347,8 +347,8 @@ std::size_t SolverAbstract::get_iter() const { return iter_; }
 void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
-    throw_pretty("Invalid argument: "
-                 << "xs list has to be of length " + std::to_string(T + 1));
+    throw_pretty("Invalid argument: " << "xs list has to be of length " +
+                                             std::to_string(T + 1));
   }
 
   const std::size_t nx = problem_->get_nx();
@@ -373,8 +373,8 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
 void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
   const std::size_t T = problem_->get_T();
   if (us.size() != T) {
-    throw_pretty("Invalid argument: "
-                 << "us list has to be of length " + std::to_string(T));
+    throw_pretty("Invalid argument: " << "us list has to be of length " +
+                                             std::to_string(T));
   }
 
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
@@ -394,16 +394,14 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
 
 void SolverAbstract::set_preg(const double preg) {
   if (preg < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "preg value has to be positive.");
+    throw_pretty("Invalid argument: " << "preg value has to be positive.");
   }
   preg_ = preg;
 }
 
 void SolverAbstract::set_dreg(const double dreg) {
   if (dreg < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "dreg value has to be positive.");
+    throw_pretty("Invalid argument: " << "dreg value has to be positive.");
   }
   dreg_ = dreg;
 }
@@ -412,8 +410,7 @@ DEPRECATED(
     "Use set_preg for gettting the primal-variable regularization",
     void SolverAbstract::set_xreg(const double xreg) {
       if (xreg < 0.) {
-        throw_pretty("Invalid argument: "
-                     << "xreg value has to be positive.");
+        throw_pretty("Invalid argument: " << "xreg value has to be positive.");
       }
       xreg_ = xreg;
       preg_ = xreg;
@@ -423,8 +420,7 @@ DEPRECATED(
     "Use set_preg for gettting the primal-variable regularization",
     void SolverAbstract::set_ureg(const double ureg) {
       if (ureg < 0.) {
-        throw_pretty("Invalid argument: "
-                     << "ureg value has to be positive.");
+        throw_pretty("Invalid argument: " << "ureg value has to be positive.");
       }
       ureg_ = ureg;
       preg_ = ureg;
@@ -432,24 +428,22 @@ DEPRECATED(
 
 void SolverAbstract::set_th_acceptstep(const double th_acceptstep) {
   if (0. >= th_acceptstep || th_acceptstep > 1) {
-    throw_pretty("Invalid argument: "
-                 << "th_acceptstep value should between 0 and 1.");
+    throw_pretty(
+        "Invalid argument: " << "th_acceptstep value should between 0 and 1.");
   }
   th_acceptstep_ = th_acceptstep;
 }
 
 void SolverAbstract::set_th_stop(const double th_stop) {
   if (th_stop <= 0.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stop value has to higher than 0.");
+    throw_pretty("Invalid argument: " << "th_stop value has to higher than 0.");
   }
   th_stop_ = th_stop;
 }
 
 void SolverAbstract::set_th_gaptol(const double th_gaptol) {
   if (0. > th_gaptol) {
-    throw_pretty("Invalid argument: "
-                 << "th_gaptol value has to be positive.");
+    throw_pretty("Invalid argument: " << "th_gaptol value has to be positive.");
   }
   th_gaptol_ = th_gaptol;
 }
