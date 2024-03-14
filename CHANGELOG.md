@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Tested Python stubs in Conda CI in https://github.com/loco-3d/crocoddyl/pull/1228
 * Improved CI, updated cmake and fixed launch file in https://github.com/loco-3d/crocoddyl/pull/1220
 * Introduced a Rviz display in https://github.com/loco-3d/crocoddyl/pull/1216
 * Enabled display of thrust and simplied displayers code in https://github.com/loco-3d/crocoddyl/pull/1215
