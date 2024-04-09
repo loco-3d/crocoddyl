@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed yapf reported errors in https://github.com/loco-3d/crocoddyl/pull/1238
 * Tested Python stubs in Conda CI in https://github.com/loco-3d/crocoddyl/pull/1228
 * Fixed Rviz display in https://github.com/loco-3d/crocoddyl/pull/1227
 * Improved CI, updated cmake and fixed launch file in https://github.com/loco-3d/crocoddyl/pull/1220
