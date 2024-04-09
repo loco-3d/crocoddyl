@@ -119,7 +119,7 @@ class DisplayAbstract(ABC):
                         name = self.robot.model.frames[c.contact.id].name
                     elif hasattr(c, "impact"):
                         name = self.robot.model.frames[c.impact.id].name
-                    if not name in frameNames:
+                    if name not in frameNames:
                         frameNames.append(name)
             if hasattr(model, "differential"):
                 if isinstance(
@@ -379,7 +379,7 @@ class GepettoDisplay(DisplayAbstract):
         visibility=False,
     ):
         DisplayAbstract.__init__(self, robot, rate, freq)
-        if frameNames != None:
+        if frameNames is not None:
             print("Deprecated. Do not pass frameNames")
 
         # Visuals properties
@@ -553,7 +553,7 @@ class MeshcatDisplay(DisplayAbstract):
         visibility=True,
     ):
         DisplayAbstract.__init__(self, robot, rate, freq)
-        if frameNames != None:
+        if frameNames is not None:
             print("Deprecated. Do not pass frameNames")
         robot.setVisualizer(
             pinocchio.visualize.MeshcatVisualizer(
@@ -677,7 +677,7 @@ class MeshcatDisplay(DisplayAbstract):
             )
 
     def _addFrameCurves(self, key=None, vertices=None):
-        if key == None and vertices == None:
+        if key is None and vertices is None:
             return
         import meshcat.geometry as g
 
