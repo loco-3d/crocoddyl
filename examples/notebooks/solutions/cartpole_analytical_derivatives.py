@@ -8,7 +8,7 @@ def cartpole_analytical_derivatives(model, data, x, u=None):
     f = u[0].item()
 
     # Shortname for system parameters
-    m1, m2, l, g = model.m1, model.m2, model.l, model.g
+    m1, m2, lcart, g = model.m1, model.m2, model.l, model.g
     s, c = np.sin(th), np.cos(th)
     m = m1 + m2
     mu = m1 + m2 * s**2
@@ -20,15 +20,15 @@ def cartpole_analytical_derivatives(model, data, x, u=None):
         [
             [
                 0.0,
-                (m2 * g * c * c - m2 * g * s * s - m2 * l * c * thdot) / mu,
+                (m2 * g * c * c - m2 * g * s * s - m2 * lcart * c * thdot) / mu,
                 0.0,
-                -m2 * l * s / mu,
+                -m2 * lcart * s / mu,
             ],
             [
                 0.0,
                 (
-                    (-s * f / l)
-                    + (m * g * c / l)
+                    (-s * f / lcart)
+                    + (m * g * c / lcart)
                     - (m2 * c * c * thdot**2)
                     + (m2 * s * s * thdot**2)
                 )
@@ -39,7 +39,7 @@ def cartpole_analytical_derivatives(model, data, x, u=None):
         ]
     )
     # derivative of xddot and thddot by f
-    data.Fu[:] = np.array([1 / mu, c / (l * mu)])
+    data.Fu[:] = np.array([1 / mu, c / (lcart * mu)])
     # first derivative of data.cost by x, theta, xdot, thetadot
     data.Lx[:] = np.array(
         [
