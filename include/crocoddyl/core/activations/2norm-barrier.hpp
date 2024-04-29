@@ -69,7 +69,7 @@ class ActivationModel2NormBarrierTpl
       throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModel2NormBarrierTpl(){};
+  virtual ~ActivationModel2NormBarrierTpl() {};
 
   /**
    * @brief Compute the 2-norm barrier function

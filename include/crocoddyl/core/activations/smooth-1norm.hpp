@@ -67,7 +67,7 @@ class ActivationModelSmooth1NormTpl
                 << std::endl;
     }
   };
-  virtual ~ActivationModelSmooth1NormTpl(){};
+  virtual ~ActivationModelSmooth1NormTpl() {};
 
   /**
    * @brief Compute the smooth-abs function

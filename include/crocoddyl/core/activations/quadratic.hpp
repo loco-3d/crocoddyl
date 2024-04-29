@@ -30,8 +30,8 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit ActivationModelQuadTpl(const std::size_t nr) : Base(nr){};
-  virtual ~ActivationModelQuadTpl(){};
+  explicit ActivationModelQuadTpl(const std::size_t nr) : Base(nr) {};
+  virtual ~ActivationModelQuadTpl() {};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {

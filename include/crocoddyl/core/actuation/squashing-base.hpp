@@ -34,7 +34,7 @@ class SquashingModelAbstractTpl {
       throw_pretty("Invalid argument: " << "ns cannot be zero");
     }
   };
-  virtual ~SquashingModelAbstractTpl(){};
+  virtual ~SquashingModelAbstractTpl() {};
 
   virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) = 0;

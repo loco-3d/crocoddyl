@@ -59,7 +59,7 @@ class ActivationModelSmooth2NormTpl
       throw_pretty("Invalid argument: " << "eps should be a positive value");
     }
   };
-  virtual ~ActivationModelSmooth2NormTpl(){};
+  virtual ~ActivationModelSmooth2NormTpl() {};
 
   /**
    * @brief Compute the smooth-2Norm function
