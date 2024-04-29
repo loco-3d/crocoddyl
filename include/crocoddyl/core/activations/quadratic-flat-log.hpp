@@ -59,7 +59,7 @@ class ActivationModelQuadFlatLogTpl
       throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatLogTpl(){};
+  virtual ~ActivationModelQuadFlatLogTpl() {};
 
   /*
    * @brief Compute the quadratic-flat-log function

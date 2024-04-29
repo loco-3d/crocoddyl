@@ -60,7 +60,7 @@ class ActivationModelQuadFlatExpTpl
       throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatExpTpl(){};
+  virtual ~ActivationModelQuadFlatExpTpl() {};
 
   /*
    * @brief Compute the quadratic-flat-exp function

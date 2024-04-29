@@ -110,8 +110,8 @@ class ActivationModelQuadraticBarrierTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelQuadraticBarrierTpl(const ActivationBounds& bounds)
-      : Base(bounds.lb.size()), bounds_(bounds){};
-  virtual ~ActivationModelQuadraticBarrierTpl(){};
+      : Base(bounds.lb.size()), bounds_(bounds) {};
+  virtual ~ActivationModelQuadraticBarrierTpl() {};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
