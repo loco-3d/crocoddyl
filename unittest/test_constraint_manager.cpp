@@ -389,7 +389,8 @@ void test_shareMemory(StateModelTypes::Type state_type) {
 
 void register_unit_tests(StateModelTypes::Type state_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_ConstraintModelManager" << "_" << state_type;
+  test_name << "test_ConstraintModelManager"
+            << "_" << state_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_constructor, state_type)));

@@ -84,8 +84,8 @@ template <typename Scalar>
 void ImpulseModel6DTpl<Scalar>::updateForce(
     const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 6) {
-    throw_pretty(
-        "Invalid argument: " << "lambda has wrong dimension (it should be 6)");
+    throw_pretty("Invalid argument: "
+                 << "lambda has wrong dimension (it should be 6)");
   }
   Data* d = static_cast<Data*>(data.get());
   data->f = pinocchio::ForceTpl<Scalar>(force);

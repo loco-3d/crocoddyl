@@ -219,8 +219,8 @@ int main(int argc, char* argv[]) {
   x0s.push_back(state->rand());
 
   /*********************State**********************************/
-  std::cout << std::left << std::setw(42) << "Function call" << "  "
-            << std::left << std::setw(15) << "AVG (us)" << std::left
+  std::cout << std::left << std::setw(42) << "Function call"
+            << "  " << std::left << std::setw(15) << "AVG (us)" << std::left
             << std::setw(15) << "STDDEV (us)" << std::left << std::setw(15)
             << "MAX (us)" << std::left << std::setw(15) << "MIN (us)"
             << std::endl;

@@ -190,12 +190,18 @@ void Stopwatch::report_all(int precision, std::ostream& output) {
   output << "\n"
          << std::setw(STOP_WATCH_MAX_NAME_LENGTH) << std::left
          << "*** PROFILING RESULTS [ms] ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "min" << " ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "avg" << " ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "max" << " ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "lastTime" << " ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "nSamples" << " ";
-  output << std::setw(STOP_WATCH_TIME_WIDTH) << "totalTime" << " ***\n";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "min"
+         << " ";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "avg"
+         << " ";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "max"
+         << " ";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "lastTime"
+         << " ";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "nSamples"
+         << " ";
+  output << std::setw(STOP_WATCH_TIME_WIDTH) << "totalTime"
+         << " ***\n";
   map<string, PerformanceData>::iterator it;
   for (it = records_of->begin(); it != records_of->end(); ++it) {
     if (it->second.stops > 0) report(it->first, precision, output);

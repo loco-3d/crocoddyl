@@ -361,53 +361,53 @@ struct ConstraintDataManagerTpl {
 
   void set_g(const VectorXs& _g) {
     if (g.size() != _g.size()) {
-      throw_pretty(
-          "Invalid argument: " << "g has wrong dimension (it should be " +
-                                      std::to_string(g.size()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "g has wrong dimension (it should be " +
+                          std::to_string(g.size()) + ")");
     }
     g = _g;
   }
   void set_Gx(const MatrixXs& _Gx) {
     if (Gx.rows() != _Gx.rows() || Gx.cols() != _Gx.cols()) {
-      throw_pretty(
-          "Invalid argument: " << "Gx has wrong dimension (it should be " +
-                                      std::to_string(Gx.rows()) + ", " +
-                                      std::to_string(Gx.cols()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "Gx has wrong dimension (it should be " +
+                          std::to_string(Gx.rows()) + ", " +
+                          std::to_string(Gx.cols()) + ")");
     }
     Gx = _Gx;
   }
   void set_Gu(const MatrixXs& _Gu) {
     if (Gu.rows() != _Gu.rows() || Gu.cols() != _Gu.cols()) {
-      throw_pretty(
-          "Invalid argument: " << "Gu has wrong dimension (it should be " +
-                                      std::to_string(Gu.rows()) + ", " +
-                                      std::to_string(Gu.cols()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "Gu has wrong dimension (it should be " +
+                          std::to_string(Gu.rows()) + ", " +
+                          std::to_string(Gu.cols()) + ")");
     }
     Gu = _Gu;
   }
   void set_h(const VectorXs& _h) {
     if (h.size() != _h.size()) {
-      throw_pretty(
-          "Invalid argument: " << "h has wrong dimension (it should be " +
-                                      std::to_string(h.size()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "h has wrong dimension (it should be " +
+                          std::to_string(h.size()) + ")");
     }
     h = _h;
   }
   void set_Hx(const MatrixXs& _Hx) {
     if (Hx.rows() != _Hx.rows() || Hx.cols() != _Hx.cols()) {
-      throw_pretty(
-          "Invalid argument: " << "Hx has wrong dimension (it should be " +
-                                      std::to_string(Hx.rows()) + ", " +
-                                      std::to_string(Hx.cols()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "Hx has wrong dimension (it should be " +
+                          std::to_string(Hx.rows()) + ", " +
+                          std::to_string(Hx.cols()) + ")");
     }
     Hx = _Hx;
   }
   void set_Hu(const MatrixXs& _Hu) {
     if (Hu.rows() != _Hu.rows() || Hu.cols() != _Hu.cols()) {
-      throw_pretty(
-          "Invalid argument: " << "Hu has wrong dimension (it should be " +
-                                      std::to_string(Hu.rows()) + ", " +
-                                      std::to_string(Hu.cols()) + ")");
+      throw_pretty("Invalid argument: "
+                   << "Hu has wrong dimension (it should be " +
+                          std::to_string(Hu.rows()) + ", " +
+                          std::to_string(Hu.cols()) + ")");
     }
     Hu = _Hu;
   }
