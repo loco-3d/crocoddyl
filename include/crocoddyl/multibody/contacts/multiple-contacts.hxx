@@ -208,9 +208,9 @@ void ContactModelMultipleTpl<Scalar>::updateAcceleration(
     const boost::shared_ptr<ContactDataMultiple>& data,
     const VectorXs& dv) const {
   if (static_cast<std::size_t>(dv.size()) != state_->get_nv()) {
-    throw_pretty(
-        "Invalid argument: " << "dv has wrong dimension (it should be " +
-                                    std::to_string(state_->get_nv()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "dv has wrong dimension (it should be " +
+                        std::to_string(state_->get_nv()) + ")");
   }
   data->dv = dv;
 }
@@ -288,10 +288,10 @@ void ContactModelMultipleTpl<Scalar>::updateAccelerationDiff(
     const MatrixXs& ddv_dx) const {
   if (static_cast<std::size_t>(ddv_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(ddv_dx.cols()) != state_->get_ndx()) {
-    throw_pretty(
-        "Invalid argument: " << "ddv_dx has wrong dimension (it should be " +
-                                    std::to_string(state_->get_nv()) + "," +
-                                    std::to_string(state_->get_ndx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "ddv_dx has wrong dimension (it should be " +
+                        std::to_string(state_->get_nv()) + "," +
+                        std::to_string(state_->get_ndx()) + ")");
   }
   data->ddv_dx = ddv_dx;
 }

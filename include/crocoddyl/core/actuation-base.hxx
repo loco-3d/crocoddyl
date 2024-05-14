@@ -18,7 +18,8 @@ ActuationModelAbstractTpl<Scalar>::ActuationModelAbstractTpl(
     boost::shared_ptr<StateAbstract> state, const std::size_t nu)
     : nu_(nu), state_(state) {
   if (nu_ < 0) {
-    throw_pretty("Invalid argument: " << "nu cannot be smaller than zero");
+    throw_pretty("Invalid argument: "
+                 << "nu cannot be smaller than zero");
   }
 }
 
@@ -47,14 +48,14 @@ void ActuationModelAbstractTpl<Scalar>::torqueTransform(
     const boost::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty(
-        "Invalid argument: " << "x has wrong dimension (it should be " +
-                                    std::to_string(state_->get_nx()) + ")");
+    throw_pretty("Invalid argument: "
+                 << "x has wrong dimension (it should be " +
+                        std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty(
-        "Invalid argument: " << "u has wrong dimension (it should be " +
-                                    std::to_string(nu_) + ")");
+    throw_pretty("Invalid argument: "
+                 << "u has wrong dimension (it should be " +
+                        std::to_string(nu_) + ")");
   }
   calc(data, x, u);
   calcDiff(data, x, u);
