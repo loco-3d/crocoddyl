@@ -755,9 +755,7 @@ class StateCostModelDerived(crocoddyl.CostModelAbstract):
         #     self.xref, x, crocoddyl.Jcomponent.second
         # )[0]
 
-        diff = self.state.Jdiff(
-            self.xref, x, crocoddyl.Jcomponent.second
-        )
+        diff = self.state.Jdiff(self.xref, x, crocoddyl.Jcomponent.second)
         data.residual.Rx[:] = diff[0]
         self.activation.calcDiff(data.activation, data.residual.r)
         data.Lx[:] = np.dot(data.residual.Rx.T, data.activation.Ar)
