@@ -7,7 +7,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pinocchio
 
-from .libcrocoddyl_pywrap import *  # noqa
+from .libcrocoddyl_pywrap import *
+from .libcrocoddyl_pywrap import __raw_version__, __version__
 
 
 def rotationMatrixFromTwoVectors(a, b):
