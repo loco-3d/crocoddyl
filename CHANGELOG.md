@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Exported version for Python in https://github.com/loco-3d/crocoddyl/pull/1254
 * Updated CMake packaging in https://github.com/loco-3d/crocoddyl/pull/1249
 * Fixed ruff reported error in https://github.com/loco-3d/crocoddyl/pull/1248
 * Fixed yapf reported errors in https://github.com/loco-3d/crocoddyl/pull/1238
