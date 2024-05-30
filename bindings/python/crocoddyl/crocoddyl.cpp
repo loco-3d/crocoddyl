@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, INRIA,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, INRIA,
+//                          Heriot-Watt University
 // University of Oxford Copyright note valid unless otherwise stated in
 // individual files. All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,7 +18,8 @@ namespace python {
 namespace bp = boost::python;
 
 BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
-  bp::scope().attr("__version__") = printVersion();
+  bp::scope().attr("__version__") = crocoddyl::printVersion();
+  bp::scope().attr("__raw_version__") = bp::str(CROCODDYL_VERSION);
 
   eigenpy::enableEigenPy();
 
