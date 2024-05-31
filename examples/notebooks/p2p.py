@@ -31,7 +31,7 @@ display = crocoddyl.GepettoDisplay(robot, cameraTF=cameraTF, floor=False)
 gv = display.robot.viewer.gui
 for i, p in enumerate(ps):
     gv.addSphere("world/point%d" % i, 0.05, colors[i])
-    gv.applyConfiguration("world/point%d" % i, p.tolist() + [0.0, 0.0, 0.0, 1.0])
+    gv.applyConfiguration("world/point%d" % i, [*p.tolist(), 0.0, 0.0, 0.0, 1.0])
 gv.refresh()
 
 # State and control regularization costs
@@ -82,7 +82,11 @@ seqs = [
     + [crocoddyl.IntegratedActionModelEuler(terminalModel)]
     for runningModel, terminalModel in zip(runningModels, terminalModels)
 ]
-problem = crocoddyl.ShootingProblem(x0, sum(seqs, [])[:-1], seqs[-1][-1])
+problem = crocoddyl.ShootingProblem(
+    x0,
+    sum(seqs, [])[:-1],  # noqa: RUF017
+    seqs[-1][-1],
+)
 
 # Creating the DDP solver for this OC problem, defining a logger
 ddp = crocoddyl.SolverDDP(problem)
@@ -101,7 +105,7 @@ for i in range(4, 6):
 display.displayFromSolver(ddp)
 
 robot_data = robot_model.createData()
-for i, s in enumerate(seqs + [1]):
+for i, s in enumerate([*seqs, 1]):
     xT = ddp.xs[i * T]
     pinocchio.forwardKinematics(robot_model, robot_data, xT[: state.nq])
     pinocchio.updateFramePlacements(robot_model, robot_data)

@@ -1,5 +1,3 @@
-import os
-import subprocess
 import sys
 import time
 
@@ -38,14 +36,14 @@ if JUMPING:
 
 
 def createProblem(gait_phase):
-    robot_model = example_robot_data.loadHyQ().model
+    robot_model = example_robot_data.load("hyq").model
     lfFoot, rfFoot, lhFoot, rhFoot = "lf_foot", "rf_foot", "lh_foot", "rh_foot"
     gait = SimpleQuadrupedalGaitProblem(robot_model, lfFoot, rfFoot, lhFoot, rhFoot)
     q0 = robot_model.referenceConfigurations["standing"].copy()
     v0 = pinocchio.utils.zero(robot_model.nv)
     x0 = np.concatenate([q0, v0])
 
-    type_of_gait = list(gait_phase.keys())[0]
+    type_of_gait = next(iter(gait_phase.keys()))
     value = gait_phase[type_of_gait]
     if type_of_gait == "walking":
         # Creating a walking problem
@@ -104,13 +102,13 @@ def createProblem(gait_phase):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    ddp = crocoddyl.SolverFDDP(problem)
+    solver = crocoddyl.SolverFDDP(problem)
     if CALLBACKS:
-        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
+        solver.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for _ in range(T):
         c_start = time.time()
-        ddp.solve(xs, us, MAXITER, False, 0.1)
+        solver.solve(xs, us, MAXITER, False, 0.1)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
@@ -200,18 +198,12 @@ elif GAIT == "jumping":
         }
     }
 
-print("\033[1m")
-print("C++:")
-popen = subprocess.check_call(
-    [os.path.dirname(os.path.abspath(__file__)) + "/quadrupedal-gaits-optctrl", str(T)]
-)
-
-print("Python bindings:")
 xs, us, problem = createProblem(GAITPHASE)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(f"  FDDP.solve [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(f"  ShootingProblem.calc [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")

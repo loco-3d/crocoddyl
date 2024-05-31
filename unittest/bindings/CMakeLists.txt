@@ -13,7 +13,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
 foreach(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
   python_build(. "test_${TEST}.py")
   add_python_unit_test("test_pybinds_${TEST}"
-                       "unittest/bindings/test_${TEST}.py" bindings/python)
+                       "unittest/bindings/test_${TEST}.py" "bindings/python")
   add_custom_target(
     "test_pybinds_${TEST}"
     ${CMAKE_COMMAND} -E env

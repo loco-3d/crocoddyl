@@ -70,7 +70,8 @@ class ImpulseModelAbstractTestCase(unittest.TestCase):
         # Run updateForce for both action models
         self.IMPULSE.calc(self.data, self.x)
         self.IMPULSE_DER.calc(self.data_der, self.x)
-        force = np.random.rand(self.IMPULSE.nc)
+        rng = np.random.default_rng()
+        force = rng.random(self.IMPULSE.nc)
         self.IMPULSE.updateForce(self.data, force)
         self.IMPULSE_DER.updateForce(self.data_der, force)
         self.assertTrue(

@@ -59,8 +59,8 @@ class ActuationModelFloatingBaseTpl
                          state->get_pinocchio()->existJointName("root_joint")
                              ? state->get_pinocchio()->getJointId("root_joint")
                              : 0)]
-                     .nv()){};
-  virtual ~ActuationModelFloatingBaseTpl(){};
+                     .nv()) {};
+  virtual ~ActuationModelFloatingBaseTpl() {};
 
   /**
    * @brief Compute the floating-base actuation signal from the joint-torque

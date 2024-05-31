@@ -60,7 +60,7 @@ class ActivationModelQuadFlatLogTpl
                    << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatLogTpl(){};
+  virtual ~ActivationModelQuadFlatLogTpl() {};
 
   /*
    * @brief Compute the quadratic-flat-log function

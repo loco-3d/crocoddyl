@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,10 @@ namespace python {
 class ResidualModelAbstract_wrap : public ResidualModelAbstract,
                                    public bp::wrapper<ResidualModelAbstract> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  using ResidualModelAbstract::nu_;
+  using ResidualModelAbstract::unone_;
+
   ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                              const std::size_t nr, const std::size_t nu,
                              const bool q_dependent = true,
@@ -26,7 +30,9 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
                              const bool u_dependent = true)
       : ResidualModelAbstract(state, nr, nu, q_dependent, v_dependent,
                               u_dependent),
-        bp::wrapper<ResidualModelAbstract>() {}
+        bp::wrapper<ResidualModelAbstract>() {
+    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  }
 
   ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                              const std::size_t nr,
@@ -34,7 +40,9 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
                              const bool v_dependent = true,
                              const bool u_dependent = true)
       : ResidualModelAbstract(state, nr, q_dependent, v_dependent, u_dependent),
-        bp::wrapper<ResidualModelAbstract>() {}
+        bp::wrapper<ResidualModelAbstract>() {
+    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  }
 
   void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
@@ -49,8 +57,13 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
                    << "u has wrong dimension (it should be " +
                           std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data,
-                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+      return bp::call<void>(this->get_override("calc").ptr(), data,
+                            (Eigen::VectorXd)x);
+    } else {
+      return bp::call<void>(this->get_override("calc").ptr(), data,
+                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    }
   }
 
   void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
@@ -66,8 +79,13 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
                    << "u has wrong dimension (it should be " +
                           std::to_string(nu_) + ")");
     }
-    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                          (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+      return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                            (Eigen::VectorXd)x);
+    } else {
+      return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+    }
   }
 
   boost::shared_ptr<ResidualDataAbstract> createData(

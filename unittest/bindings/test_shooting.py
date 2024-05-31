@@ -20,19 +20,16 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.xs = []
         self.us = []
         self.xs.append(state.rand())
+        rng = np.random.default_rng()
         for _ in range(self.T):
             self.xs.append(state.rand())
-            self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
+            self.us.append(rng.random(self.MODEL.nu))
         self.PROBLEM = crocoddyl.ShootingProblem(
             self.xs[0], [self.MODEL] * self.T, self.MODEL
         )
         self.PROBLEM_DER = crocoddyl.ShootingProblem(
             self.xs[0], [self.MODEL_DER] * self.T, self.MODEL_DER
         )
-        # TODO(cmastalli): Remove the following lines once Crocoddyl supports
-        # multithreading with Python-derived models.
-        self.PROBLEM.nthreads = 1
-        self.PROBLEM_DER.nthreads = 1
 
     def test_number_of_nodes(self):
         self.assertEqual(self.T, self.PROBLEM.T, "Wrong number of nodes")

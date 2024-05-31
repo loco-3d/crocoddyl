@@ -1,13 +1,42 @@
 name: CONDA
 
-on: [push, pull_request]
+# This determines when this workflow is run
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   crocoddyl-conda:
     name: (${{ matrix.os }}, clang, multi-threading, ipopt, ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
     env:
-      CCACHE_DIR: ${{ matrix.CCACHE_DIR }}
+      CCACHE_BASEDIR: "${GITHUB_WORKSPACE}"
+      CCACHE_DIR: "${GITHUB_WORKSPACE}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 5
 
     strategy:
       fail-fast: false
@@ -15,29 +44,31 @@ jobs:
         # os: ["ubuntu-latest", "macos-latest"]
         os: ["macos-latest"]
         build_type: [Release, Debug]
+        python-version: ["3.8", "3.12"]
         compiler: [clang]
 
         include:
           # - os: ubuntu-latest
-          #   CCACHE_DIR: /home/runner/.ccache
           - os: macos-latest
-            CCACHE_DIR: /Users/runner/.ccache
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ env.CCACHE_DIR }}
-        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}
+        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-${{ github.sha }}
+        restore-keys: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: crocoddyl
         auto-update-conda: true
         environment-file: .github/workflows/conda/conda-env.yml
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
 
     - name: Install conda dependencies
       shell: bash -l {0}
@@ -88,7 +119,8 @@ jobs:
           -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
-          -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DOpenMP_ROOT=$CONDA_PREFIX
+          -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DGENERATE_PYTHON_STUBS=ON \
+          -DOpenMP_ROOT=$CONDA_PREFIX
         make
 
     - name: Run unit tests

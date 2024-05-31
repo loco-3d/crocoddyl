@@ -386,10 +386,22 @@ class SimpleBipedGaitProblem:
         if self._integrator == "euler":
             model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
         elif self._integrator == "rk4":
-            model = crocoddyl.IntegratedActionModelRK4(dmodel, control, timeStep)
+            model = crocoddyl.IntegratedActionModelRK(
+                dmodel, control, crocoddyl.RKType.four, timeStep
+            )
+        elif self._integrator == "rk3":
+            model = crocoddyl.IntegratedActionModelRK(
+                dmodel, control, crocoddyl.RKType.three, timeStep
+            )
+        elif self._integrator == "rk2":
+            model = crocoddyl.IntegratedActionModelRK(
+                dmodel, control, crocoddyl.RKType.two, timeStep
+            )
+        else:
+            model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
         return model
 
-    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=True):
+    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=False):
         """Action model for a foot switch phase.
 
         :param supportFootIds: Ids of the constrained feet
@@ -512,15 +524,15 @@ class SimpleBipedGaitProblem:
             )
         if self._integrator == "euler":
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
-        elif self.integrator == "rk4":
+        elif self._integrator == "rk4":
             model = crocoddyl.IntegratedActionModelRK(
                 dmodel, crocoddyl.RKType.four, 0.0
             )
-        elif self.integrator == "rk3":
+        elif self._integrator == "rk3":
             model = crocoddyl.IntegratedActionModelRK(
                 dmodel, crocoddyl.RKType.three, 0.0
             )
-        elif self.integrator == "rk2":
+        elif self._integrator == "rk2":
             model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.two, 0.0)
         else:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)

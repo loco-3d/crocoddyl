@@ -61,7 +61,7 @@ class ActivationModelQuadFlatExpTpl
                    << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatExpTpl(){};
+  virtual ~ActivationModelQuadFlatExpTpl() {};
 
   /*
    * @brief Compute the quadratic-flat-exp function

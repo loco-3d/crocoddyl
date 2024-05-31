@@ -116,7 +116,6 @@ class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
  protected:
   using Base::nu_;
   using Base::state_;
-  using Base::unone_;
   using Base::v_dependent_;
 
  private:

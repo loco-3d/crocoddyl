@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>crocoddyl</name>
-  <version>2.0.2</version>
+  <version>2.1.0</version>
   <description>Crocoddyl optimal control library</description>
   <!-- The maintainers listed here are for receiving emails e.g. from the ROS buildfarm.
   Please check the README.md at the repository URL for additional detail. -->
@@ -20,13 +20,10 @@
   <!-- The following tag is recommended by REP-136 -->
   <exec_depend condition="$ROS_VERSION == 1">catkin</exec_depend>
   <exec_depend condition="$ROS_VERSION == 2">ament_cmake</exec_depend>
-  <depend condition="$ROS_PYTHON_VERSION == 2">python</depend>
-  <depend condition="$ROS_PYTHON_VERSION == 2">python-numpy</depend>
-  <depend condition="$ROS_PYTHON_VERSION == 3">python3</depend>
-  <depend condition="$ROS_PYTHON_VERSION == 3">python3-numpy</depend>
+  <depend>python3</depend>
+  <depend>python3-numpy</depend>
   <depend>coinor-libipopt-dev</depend>
-  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-scipy</test_depend>
-  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-scipy</test_depend>
+  <test_depend>python3-scipy</test_depend>
   <depend>boost</depend>
   <depend>eigenpy</depend>
   <depend>example-robot-data</depend>

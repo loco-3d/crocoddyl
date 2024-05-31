@@ -1,19 +1,47 @@
 name: ROS
 
 # This determines when this workflow is run
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '.gitlab-ci.yml'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '*.md'
+      - 'LICENSE'
+      - 'pyproject.toml'
+      - 'package.xml'
+      - 'dependencies.rosintall'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   CI:
     strategy:
+      fail-fast: false
       matrix:
         env:
           - {name: "(humble, Release)", ROS_DISTRO: humble}
-          # - {name: "humble, multi-threading", ROS_DISTRO: humble, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
-          # - {name: "humble, Debug", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
           - {name: "(rolling, Release)", ROS_DISTRO: rolling}
-          # - {name: "rolling, multi-threading", ROS_DISTRO: rolling, ADDITIONAL_DEBS: "libomp-dev", CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
-          # - {name: "rolling, Debug", ROS_DISTRO: rolling, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
+          - {name: "(iron, Release)", ROS_DISTRO: iron}
+          # - {name: "(humble, clang, multi-threading, Release)", ROS_DISTRO: humble, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # - {name: "(rolling, clang, multi-threading, Release)", ROS_DISTRO: rolling, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # - {name: "(iron, clang, multi-threading, Release)", ROS_DISTRO: iron, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
+          # - {name: "(humble, Debug)", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
+          # - {name: "(rolling, Debug)", ROS_DISTRO: rolling, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
@@ -22,16 +50,18 @@ jobs:
       BUILDER: colcon
       # This by-passes issues on importing example_robot_data module when running examples and unit tests.
       # It seems target_ws is unable to properly overlay upstream_ws.
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
+      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data --break-system-packages'
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       # This step will fetch/store the directory used by ccache before/after the ci run
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}

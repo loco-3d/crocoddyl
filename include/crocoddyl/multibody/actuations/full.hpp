@@ -43,8 +43,8 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the dynamical system
    */
   explicit ActuationModelFullTpl(boost::shared_ptr<StateAbstract> state)
-      : Base(state, state->get_nv()){};
-  virtual ~ActuationModelFullTpl(){};
+      : Base(state, state->get_nv()) {};
+  virtual ~ActuationModelFullTpl() {};
 
   /**
    * @brief Compute the full actuation

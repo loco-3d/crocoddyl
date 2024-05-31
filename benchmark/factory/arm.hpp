@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,26 +47,20 @@ void build_arm_action_models(
       ResidualModelFramePlacement;
   typedef typename crocoddyl::ResidualModelControlTpl<Scalar>
       ResidualModelControl;
-  typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Matrix3s Matrix3s;
 
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR
-                              "/talos_data/robots/talos_left_arm.urdf",
+                              "/kinova_description/robots/kinova.urdf",
                               modeld);
   pinocchio::srdf::loadReferenceConfigurations(
-      modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
+      modeld,
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf",
       false);
 
-  pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
-  std::vector<pinocchio::JointIndex> locked_joints;
-  locked_joints.push_back(5);
-  locked_joints.push_back(6);
-  locked_joints.push_back(7);
-  pinocchio::buildReducedModel(model_full, locked_joints,
-                               VectorXs::Zero(model_full.nq), model);
+  pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
 
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
@@ -74,10 +69,10 @@ void build_arm_action_models(
   boost::shared_ptr<CostModelAbstract> goalTrackingCost =
       boost::make_shared<CostModelResidual>(
           state, boost::make_shared<ResidualModelFramePlacement>(
-                     state, model.getFrameId("gripper_left_joint"),
+                     state, model.getFrameId("j2s6s200_end_effector"),
                      pinocchio::SE3Tpl<Scalar>(
                          Matrix3s::Identity(),
-                         Vector3s(Scalar(0), Scalar(0), Scalar(.4)))));
+                         Vector3s(Scalar(0.6), Scalar(0.2), Scalar(0.5)))));
   boost::shared_ptr<CostModelAbstract> xRegCost =
       boost::make_shared<CostModelResidual>(
           state, boost::make_shared<ResidualModelState>(state));
@@ -93,9 +88,9 @@ void build_arm_action_models(
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
-  runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
-  terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
+  runningCostModel->addCost("xReg", xRegCost, Scalar(1e-1));
+  runningCostModel->addCost("uReg", uRegCost, Scalar(1e-1));
+  terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1e3));
 
   // We define an actuation model
   boost::shared_ptr<ActuationModelFull> actuation =
@@ -108,12 +103,8 @@ void build_arm_action_models(
       boost::make_shared<DifferentialActionModelFreeFwdDynamics>(
           state, actuation, runningCostModel);
 
-  // VectorXs armature(state->get_nq());
-  // armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  // runningDAM->set_armature(armature);
-  // terminalDAM->set_armature(armature);
   runningModel =
-      boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
+      boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-2));
   terminalModel =
       boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
 }

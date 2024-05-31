@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ struct ActuationModelTypes {
   enum Type {
     ActuationModelFull,
     ActuationModelFloatingBase,
-    ActuationModelMultiCopterBase,
+    ActuationModelFloatingBaseThrusters,
     ActuationModelSquashingFull,
     NbActuationModelTypes
   };

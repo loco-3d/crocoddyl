@@ -12,11 +12,23 @@ option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
-  if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
+if(EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
+  message(STATUS "JRL cmakemodules found in 'cmake/' git submodule")
+else()
+  find_package(jrl-cmakemodules QUIET CONFIG)
+  if(jrl-cmakemodules_FOUND)
+    get_property(
+      JRL_CMAKE_MODULES
+      TARGET jrl-cmakemodules::jrl-cmakemodules
+      PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "JRL cmakemodules found on system at ${JRL_CMAKE_MODULES}")
+  elseif(${CMAKE_VERSION} VERSION_LESS "3.14.0")
     message(
       FATAL_ERROR
-        "\nPlease run the following command first:\ngit submodule update --init\n"
+        "\nCan't find jrl-cmakemodules. Please either:\n"
+        "  - use git submodule: 'git submodule update --init'\n"
+        "  - or install https://github.com/jrl-umi3218/jrl-cmakemodules\n"
+        "  - or upgrade your CMake version to >= 3.14 to allow automatic fetching\n"
     )
   else()
     message(STATUS "JRL cmakemodules not found. Let's fetch it.")
@@ -34,11 +46,12 @@ include("${JRL_CMAKE_MODULES}/base.cmake")
 include("${JRL_CMAKE_MODULES}/boost.cmake")
 include("${JRL_CMAKE_MODULES}/apple.cmake")
 include("${JRL_CMAKE_MODULES}/stubs.cmake")
+include("${JRL_CMAKE_MODULES}/python-helpers.cmake")
 
 # Print initial message
 message(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 message(
-  STATUS "Copyright (C) 2018-2023 CNRS-LAAS, University of Edinburgh, INRIA")
+  STATUS "Copyright (C) 2018-2024 CNRS-LAAS, University of Edinburgh, INRIA")
 message(STATUS "                        Heriot-Watt University")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
@@ -87,11 +100,11 @@ endif()
 
 # Add the different required and optional dependencies
 if(BUILD_PYTHON_INTERFACE)
-  add_project_dependency(eigenpy 3.1.4 REQUIRED PKG_CONFIG_REQUIRES
-                         "eigenpy >= 3.1.4")
+  add_project_dependency(eigenpy 3.1.0 REQUIRED PKG_CONFIG_REQUIRES
+                         "eigenpy >= 3.1.0")
 endif(BUILD_PYTHON_INTERFACE)
-add_project_dependency(pinocchio 2.6.21 REQUIRED PKG_CONFIG_REQUIRES
-                       "pinocchio >= 2.6.21")
+add_project_dependency(pinocchio 2.6.20 REQUIRED PKG_CONFIG_REQUIRES
+                       "pinocchio >= 2.6.20")
 if(BUILD_EXAMPLES
    OR BUILD_TESTING
    OR BUILD_BENCHMARK)
@@ -220,6 +233,8 @@ if(UNIX)
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
   target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::system
                         Boost::serialization)
+  target_compile_definitions(
+    ${PROJECT_NAME} PUBLIC PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2)
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
@@ -257,10 +272,10 @@ endif()
 if(BUILD_EXAMPLES)
   if(BUILD_PYTHON_INTERFACE)
     add_subdirectory(examples)
-  else(BUILD_PYTHON_INTERFACE)
+  else()
     message(
       WARNING "Python interface is not built, hence cannot build examples.")
-  endif(BUILD_PYTHON_INTERFACE)
+  endif()
 endif()
 
 # PkgConfig packaging of the project

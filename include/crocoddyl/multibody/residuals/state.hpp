@@ -158,7 +158,6 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
   using Base::u_dependent_;
-  using Base::unone_;
 
  private:
   VectorXs xref_;  //!< Reference state

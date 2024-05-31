@@ -70,7 +70,7 @@ class ActivationModel2NormBarrierTpl
                    << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModel2NormBarrierTpl(){};
+  virtual ~ActivationModel2NormBarrierTpl() {};
 
   /**
    * @brief Compute the 2-norm barrier function

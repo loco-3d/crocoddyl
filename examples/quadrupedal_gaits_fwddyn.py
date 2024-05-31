@@ -166,13 +166,9 @@ if WITHDISPLAY:
 
         gepetto.corbaserver.Client()
         cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-        display = crocoddyl.GepettoDisplay(
-            anymal, 4, 4, cameraTF, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-        )
+        display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF)
     except Exception:
-        display = crocoddyl.MeshcatDisplay(
-            anymal, frameNames=[lfFoot, rfFoot, lhFoot, rhFoot]
-        )
+        display = crocoddyl.MeshcatDisplay(anymal)
     display.rate = -1
     display.freq = 1
     while True:
@@ -185,7 +181,7 @@ if WITHPLOT:
     plotSolution(solver, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
-        title = list(phase.keys())[0] + " (phase " + str(i) + ")"
+        title = next(iter(phase.keys())) + " (phase " + str(i) + ")"
         log = solver[i].getCallbacks()[1]
         crocoddyl.plotConvergence(
             log.costs,

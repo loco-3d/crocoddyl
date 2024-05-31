@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -207,7 +207,6 @@ class ResidualModelContactFrictionConeTpl
  protected:
   using Base::nu_;
   using Base::state_;
-  using Base::unone_;
 
  private:
   bool fwddyn_;  //!< Indicates if we are using this function for forward

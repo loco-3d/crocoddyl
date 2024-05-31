@@ -30,7 +30,7 @@ def animateCartpole(xs, sleep=50, show=False):
         y_pole = np.cumsum([y_cart, pole_length * cos(theta)])
         line.set_data(x_pole, y_pole)
         time = i * sleep / 1000.0
-        time_text.set_text("time = %.1f sec" % time)
+        time_text.set_text(f"time = {time:.1f} sec")
         return patch, line, time_text
 
     anim = animation.FuncAnimation(

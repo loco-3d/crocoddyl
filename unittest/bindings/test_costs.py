@@ -72,6 +72,19 @@ class CostModelAbstractTestCase(unittest.TestCase):
             "Wrong cost residuals.",
         )
 
+    def test_calc_x(self):
+        # Run calc for both action models
+        self.COST.calc(self.data, self.x)
+        self.COST_DER.calc(self.data_der, self.x)
+        # Checking the cost value and its residual
+        self.assertAlmostEqual(
+            self.data.cost, self.data_der.cost, 10, "Wrong cost value."
+        )
+        self.assertTrue(
+            np.allclose(self.data.residual.r, self.data_der.residual.r, atol=1e-9),
+            "Wrong cost residuals.",
+        )
+
     def test_calcDiff(self):
         # Run calc for both action models
         self.COST.calc(self.data, self.x, self.u)
@@ -102,6 +115,29 @@ class CostModelAbstractTestCase(unittest.TestCase):
         )
         self.assertTrue(
             np.allclose(self.data.Luu, self.data_der.Luu, atol=1e-9), "Wrong Luu."
+        )
+
+    def test_calcDiff_x(self):
+        # Run calc for both action models
+        self.COST.calc(self.data, self.x)
+        self.COST.calcDiff(self.data, self.x)
+
+        self.COST_DER.calc(self.data_der, self.x)
+        self.COST_DER.calcDiff(self.data_der, self.x)
+        # Checking the cost value and its residual
+        self.assertAlmostEqual(
+            self.data.cost, self.data_der.cost, 10, "Wrong cost value."
+        )
+        self.assertTrue(
+            np.allclose(self.data.residual.r, self.data_der.residual.r, atol=1e-9),
+            "Wrong cost residuals.",
+        )
+        # Checking the Jacobians and Hessians of the cost
+        self.assertTrue(
+            np.allclose(self.data.Lx, self.data_der.Lx, atol=1e-9), "Wrong Lx."
+        )
+        self.assertTrue(
+            np.allclose(self.data.Lxx, self.data_der.Lxx, atol=1e-9), "Wrong Lxx."
         )
 
 

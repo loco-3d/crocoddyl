@@ -62,10 +62,16 @@ struct ActivationBoundsTpl {
     }
 
     if (beta >= Scalar(0) && beta <= Scalar(1.)) {
-      VectorXs m = Scalar(0.5) * (lb + ub);
-      VectorXs d = Scalar(0.5) * (ub - lb);
-      lb = m - beta * d;
-      ub = m + beta * d;
+      for (std::size_t i = 0; i < static_cast<std::size_t>(lb.size()); ++i) {
+        // do not use beta when one of the bounds is inf
+        if (lb(i) != (-std::numeric_limits<Scalar>::max()) &&
+            ub(i) != (std::numeric_limits<Scalar>::max())) {
+          Scalar m = Scalar(0.5) * (lb(i) + ub(i));
+          Scalar d = Scalar(0.5) * (ub(i) - lb(i));
+          lb(i) = m - beta * d;
+          ub(i) = m + beta * d;
+        }
+      }
     } else {
       beta = Scalar(1.);
     }
@@ -104,8 +110,8 @@ class ActivationModelQuadraticBarrierTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelQuadraticBarrierTpl(const ActivationBounds& bounds)
-      : Base(bounds.lb.size()), bounds_(bounds){};
-  virtual ~ActivationModelQuadraticBarrierTpl(){};
+      : Base(bounds.lb.size()), bounds_(bounds) {};
+  virtual ~ActivationModelQuadraticBarrierTpl() {};
 
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {

@@ -3,7 +3,8 @@ file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_HEADERS
 file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py)
+set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py
+                                          crocoddyl.launch crocoddyl.rviz)
 
 set(PYWRAP "${PROJECT_NAME}_pywrap")
 set(${PYWRAP}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
@@ -20,6 +21,11 @@ target_compile_options(${PYWRAP} PRIVATE "-Wno-conversion")
 # the errors for the wrapper:
 target_compile_options(${PYWRAP} PRIVATE "-Wno-deprecated-declarations")
 
+# Enforce the build of the pyc before the stub generation (stub generation
+# depend of PYWRAP)
+python_build_get_target(python_build_target)
+add_dependencies(${PYWRAP} ${python_build_target})
+
 if(UNIX)
   get_relative_rpath(${${PYWRAP}_INSTALL_DIR} ${PYWRAP}_INSTALL_RPATH)
   set_target_properties(${PYWRAP} PROPERTIES INSTALL_RPATH
@@ -28,8 +34,9 @@ endif()
 
 if(GENERATE_PYTHON_STUBS)
   load_stubgen()
-  generate_stubs(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_NAME} ${PYTHON_SITELIB})
-endif(GENERATE_PYTHON_STUBS)
+  generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/.. ${PROJECT_NAME}
+                 ${PYTHON_SITELIB} ${PYWRAP})
+endif()
 
 install(TARGETS ${PYWRAP} DESTINATION ${${PYWRAP}_INSTALL_DIR})
 

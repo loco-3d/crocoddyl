@@ -45,24 +45,6 @@ refGripper = rdata.oMf[rmodel.getFrameId("gripper_left_joint")].translation
 comRef = (rfPos0 + lfPos0) / 2
 comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
-# Initialize viewer
-display = None
-if WITHDISPLAY:
-    if display is None:
-        try:
-            import gepetto
-
-            gepetto.corbaserver.Client()
-            display = crocoddyl.GepettoDisplay(robot, frameNames=[rightFoot, leftFoot])
-            display.robot.viewer.gui.addSphere(
-                "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
-            )  # radius = .1, RGBA=1001
-            display.robot.viewer.gui.applyConfiguration(
-                "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
-            )  # xyz+quaternion
-        except Exception:
-            display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
-
 # Add contact to the model
 contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
 supportContactModelLeft = crocoddyl.ContactModel6D(
@@ -180,17 +162,22 @@ us = solver.problem.quasiStatic([x0] * solver.problem.T)
 solver.solve(xs, us, 500, False, 0.1)
 
 # Visualizing the solution in gepetto-viewer
+display = None
 if WITHDISPLAY:
-    try:
-        import gepetto
+    if display is None:
+        try:
+            import gepetto
 
-        gepetto.corbaserver.Client()
-        cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
-        display = crocoddyl.GepettoDisplay(
-            robot, 4, 4, cameraTF, frameNames=[rightFoot, leftFoot]
-        )
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(robot, frameNames=[rightFoot, leftFoot])
+            gepetto.corbaserver.Client()
+            display = crocoddyl.GepettoDisplay(robot)
+            display.robot.viewer.gui.addSphere(
+                "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
+            )  # radius = .1, RGBA=1001
+            display.robot.viewer.gui.applyConfiguration(
+                "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
+            )  # xyz+quaternion
+        except Exception:
+            display = crocoddyl.MeshcatDisplay(robot)
     display.rate = -1
     display.freq = 1
     while True:
@@ -207,11 +194,7 @@ finalPosEff = np.array(
 )
 
 print("Finally reached = ({:.3f}, {:.3f}, {:.3f})".format(*finalPosEff))
-print(
-    "Distance between hand and target = {:.3E}".format(
-        np.linalg.norm(finalPosEff - target)
-    )
-)
+print(f"Distance between hand and target = {np.linalg.norm(finalPosEff - target):.3E}")
 print(f"Distance to default state = {np.linalg.norm(x0 - np.array(xT.flat)):.3E}")
 print(f"XY distance to CoM reference = {np.linalg.norm(com[:2] - comRef[:2]):.3E}")
 

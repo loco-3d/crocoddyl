@@ -46,7 +46,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     a_ = d_.array() * d_.array();
   }
 
-  virtual ~SquashingModelSmoothSatTpl(){};
+  virtual ~SquashingModelSmoothSatTpl() {};
 
   virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) {

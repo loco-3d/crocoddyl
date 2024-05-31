@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,7 +232,7 @@ bool init_function() {
   }
 
   register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelMultiCopterBase,
+      ActuationModelTypes::ActuationModelFloatingBaseThrusters,
       StateModelTypes::StateMultibody_Hector);
   return true;
 }

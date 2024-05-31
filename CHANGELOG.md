@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2024-05-31
+
+* Updated black + isort + flake8 to ruff in https://github.com/loco-3d/crocoddyl/pull/1256
+* Exported version for Python in https://github.com/loco-3d/crocoddyl/pull/1254
+* Added pinocchio 3 preliminary support in https://github.com/loco-3d/crocoddyl/pull/1253
+* Updated CMake packaging in https://github.com/loco-3d/crocoddyl/pull/1249
+* Fixed ruff reported error in https://github.com/loco-3d/crocoddyl/pull/1248
+* Fixed yapf reported errors in https://github.com/loco-3d/crocoddyl/pull/1238
+* Tested Python stubs in Conda CI in https://github.com/loco-3d/crocoddyl/pull/1228
+* Fixed Rviz display in https://github.com/loco-3d/crocoddyl/pull/1227
+* Improved CI, updated cmake and fixed launch file in https://github.com/loco-3d/crocoddyl/pull/1220
+* Introduced a Rviz display in https://github.com/loco-3d/crocoddyl/pull/1216
+* Enabled display of thrust and simplied displayers code in https://github.com/loco-3d/crocoddyl/pull/1215
+* Introduced floating base thruster actuation model in https://github.com/loco-3d/crocoddyl/pull/1213
+* Fixed quadruped and biped examples in https://github.com/loco-3d/crocoddyl/pull/1208
+* Fixed terminal computation in Python models in https://github.com/loco-3d/crocoddyl/pull/1204
+* Fixed handling of unbounded values for `ActivationBounds` in https://github.com/loco-3d/crocoddyl/pull/1191
+
 ## [2.0.2] - 2023-12-07
 
 * Added nu, ng, and nh setters for Python bindings in https://github.com/loco-3d/crocoddyl/pull/1192
@@ -278,7 +296,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...v2.1.0
 [2.0.2]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/loco-3d/crocoddyl/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/loco-3d/crocoddyl/compare/v1.9.0...v2.0.0

@@ -1,0 +1,13 @@
+<launch>
+	<arg name="filename" default="$(eval env('PWD'))"/>
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher"
+		type="robot_state_publisher" respawn="true">
+		<remap from="robot_description" to="robot_description" />
+		<param name="publish_frequency" value="200" />
+		<param name="rate" value="200" />
+	</node>
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(arg filename)"/>
+
+</launch>

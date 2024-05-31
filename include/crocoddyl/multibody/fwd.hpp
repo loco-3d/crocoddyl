@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, INRIA
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,6 +21,12 @@ class ActuationModelFloatingBaseTpl;
 
 template <typename Scalar>
 class ActuationModelFullTpl;
+
+template <typename Scalar>
+struct ThrusterTpl;
+
+template <typename Scalar>
+class ActuationModelFloatingBaseThrustersTpl;
 
 template <typename Scalar>
 class ActuationModelMultiCopterBaseTpl;
@@ -244,12 +251,16 @@ class ImpulseModelMultipleTpl;
 template <typename Scalar>
 struct ImpulseDataMultipleTpl;
 
-/*******************************Template
- * Instantiation**************************/
+/**** Template Instantiation ****/
 
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
-typedef ActuationModelMultiCopterBaseTpl<double> ActuationModelMultiCopterBase;
+typedef ThrusterTpl<double> Thruster;
+typedef ActuationModelFloatingBaseThrustersTpl<double>
+    ActuationModelFloatingBaseThrusters;
+DEPRECATED("Use ActuationModelFloatingBaseThrustersTpl",
+           typedef ActuationModelMultiCopterBaseTpl<double>
+               ActuationModelMultiCopterBase;)
 
 typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 

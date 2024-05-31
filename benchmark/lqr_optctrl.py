@@ -1,12 +1,9 @@
-import os
-import subprocess
 import sys
 import time
 
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils import LQRModelDerived
 
 NX = 37
 NU = 12
@@ -28,13 +25,13 @@ def createProblem(model):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    ddp = crocoddyl.SolverDDP(problem)
+    solver = crocoddyl.SolverFDDP(problem)
     if CALLBACKS:
-        ddp.setCallbacks([crocoddyl.CallbackVerbose()])
+        solver.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for i in range(T):
         c_start = time.time()
-        ddp.solve(xs, us, MAXITER)
+        solver.solve(xs, us, MAXITER)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 
@@ -72,27 +69,12 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
     return avrg_duration, min_duration, max_duration
 
 
-print("\033[1m")
-print("C++:")
-popen = subprocess.check_call(
-    [os.path.dirname(os.path.abspath(__file__)) + "/lqr-optctrl", str(T)]
-)
-
-print("Python bindings:")
 xs, us, problem = createProblem(crocoddyl.ActionModelLQR)
+print("NQ:", problem.terminalModel.state.nq)
+print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(f"  FDDP.solve [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")
 avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
+print(f"  ShootingProblem.calc [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")
 avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-
-print("Python:")
-xs, us, problem = createProblem(LQRModelDerived)
-avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)
-print(f"  DDP.solve [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calc [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-avrg_dur, min_dur, max_dur = runShootingProblemCalcDiffBenchmark(xs, us, problem)
-print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur} ({min_dur}, {max_dur})")
-print("\033[0m")
+print(f"  ShootingProblem.calcDiff [ms]: {avrg_dur:.4f} ({min_dur:.4f}-{max_dur:.4f})")
