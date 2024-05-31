@@ -1,5 +1,3 @@
-# flake8: noqa: E203
-# ref. https://github.com/PyCQA/pycodestyle/issues/373, remove this for ruff
 import warnings
 
 import numpy as np
@@ -40,7 +38,8 @@ class StateVectorDerived(crocoddyl.StateAbstract):
         return np.matrix(np.zeros(self.nx)).T
 
     def rand(self):
-        return np.matrix(np.random.rand(self.nx)).T
+        rng = np.random.default_rng()
+        return np.matrix(rng.random(self.nx)).T
 
     def diff(self, x0, x1):
         return x1 - x0

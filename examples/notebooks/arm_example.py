@@ -17,7 +17,7 @@ robot.viewer.gui.addSphere(
     "world/point", 0.05, [1.0, 0.0, 0.0, 1.0]
 )  # radius = .1, RGBA=1001
 robot.viewer.gui.applyConfiguration(
-    "world/point", target.tolist() + [0.0, 0.0, 0.0, 1.0]
+    "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
 )  # xyz+quaternion
 robot.viewer.gui.refresh()
 

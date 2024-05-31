@@ -22,9 +22,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL_DER = None
 
     def setUp(self):
+        rng = np.random.default_rng()
         state = self.MODEL.state
         self.x = state.rand()
-        self.u = np.random.rand(self.MODEL.nu)
+        self.u = rng.random(self.MODEL.nu)
         self.DATA = self.MODEL.createData()
         self.DATA_DER = self.MODEL_DER.createData()
 

@@ -1,4 +1,4 @@
-# flake8: noqa: F405
+# ruff: noqa: F405
 import inspect
 import os
 import time
@@ -7,8 +7,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pinocchio
 
-from .libcrocoddyl_pywrap import *
-from .libcrocoddyl_pywrap import __raw_version__, __version__
+from .libcrocoddyl_pywrap import *  # noqa: F403
+from .libcrocoddyl_pywrap import __raw_version__, __version__  # noqa: F401
 
 
 def rotationMatrixFromTwoVectors(a, b):
@@ -133,9 +133,10 @@ class DisplayAbstract(ABC):
             self.activeContacts[str(parentId)] = True
             self.frictionMu[str(parentId)] = 0.7
             self.frameTrajNames.append(str(frameId))
+        rng = np.random.default_rng()
         for fr in self.frameTrajNames:
             self.frameTrajColor[fr] = list(
-                np.hstack([np.random.choice(range(256), size=3) / 256.0, 1.0])
+                np.hstack([rng.choice(range(256), size=3) / 256.0, 1.0])
             )
         for thrust in thrusters:
             for i, _ in enumerate(thrust):

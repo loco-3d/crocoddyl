@@ -73,7 +73,8 @@ class ContactModelAbstractTestCase(unittest.TestCase):
         # Run updateForce for both action models
         self.CONTACT.calc(self.data, self.x)
         self.CONTACT_DER.calc(self.data_der, self.x)
-        force = np.random.rand(self.CONTACT.nc)
+        rng = np.random.default_rng()
+        force = rng.random(self.CONTACT.nc)
         self.CONTACT.updateForce(self.data, force)
         self.CONTACT_DER.updateForce(self.data_der, force)
         self.assertTrue(
