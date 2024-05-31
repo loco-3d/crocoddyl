@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Updated black + isort + flake8 to ruff in https://github.com/loco-3d/crocoddyl/pull/1256
 * Exported version for Python in https://github.com/loco-3d/crocoddyl/pull/1254
 * Added pinocchio 3 preliminary support in https://github.com/loco-3d/crocoddyl/pull/1253
 * Updated CMake packaging in https://github.com/loco-3d/crocoddyl/pull/1249
