@@ -194,11 +194,7 @@ finalPosEff = np.array(
 )
 
 print("Finally reached = ({:.3f}, {:.3f}, {:.3f})".format(*finalPosEff))
-print(
-    "Distance between hand and target = {:.3E}".format(
-        np.linalg.norm(finalPosEff - target)
-    )
-)
+print(f"Distance between hand and target = {np.linalg.norm(finalPosEff - target):.3E}")
 print(f"Distance to default state = {np.linalg.norm(x0 - np.array(xT.flat)):.3E}")
 print(f"XY distance to CoM reference = {np.linalg.norm(com[:2] - comRef[:2]):.3E}")
 

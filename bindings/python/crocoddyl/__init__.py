@@ -713,8 +713,8 @@ class RvizDisplay(DisplayAbstract):
         if self.ROS_VERSION == 2:
             import rclpy
         else:
-            import rospy
             import roslaunch
+            import rospy
         import crocoddyl_ros
         from urdf_parser_py.urdf import URDF
 
