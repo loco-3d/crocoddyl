@@ -747,9 +747,16 @@ class StateCostModelDerived(crocoddyl.CostModelAbstract):
         data.cost = data.activation.a_value
 
     def calcDiff(self, data, x, u=None):
-        data.residual.Rx[:] = self.state.Jdiff(
-            self.xref, x, crocoddyl.Jcomponent.second
-        )[0]
+        # The old code was looking like this.
+        # But, the std::vector<Eigen::MatrixXd> returned by Jdiff is destroyed
+        # before the assignment.
+        # To avoid this issue, we store the std::vector in a variable.
+        # data.residual.Rx[:] = self.state.Jdiff(
+        #     self.xref, x, crocoddyl.Jcomponent.second
+        # )[0]
+
+        diff = self.state.Jdiff(self.xref, x, crocoddyl.Jcomponent.second)
+        data.residual.Rx[:] = diff[0]
         self.activation.calcDiff(data.activation, data.residual.r)
         data.Lx[:] = np.dot(data.residual.Rx.T, data.activation.Ar)
         data.Lxx[:, :] = np.dot(

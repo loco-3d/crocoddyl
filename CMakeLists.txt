@@ -233,6 +233,8 @@ if(UNIX)
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
   target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::system
                         Boost::serialization)
+  target_compile_definitions(
+    ${PROJECT_NAME} PUBLIC PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2)
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
