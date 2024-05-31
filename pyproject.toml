@@ -2,8 +2,8 @@
 extend-exclude = ["cmake"]
 
 [tool.ruff.lint]
-extend-select = ["I", "NPY", "RUF", "UP", "W"]
 extend-ignore = ["RUF012"]
+extend-select = ["I", "NPY", "RUF", "UP", "W"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["crocoddyl"]

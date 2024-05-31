@@ -83,7 +83,9 @@ seqs = [
     for runningModel, terminalModel in zip(runningModels, terminalModels)
 ]
 problem = crocoddyl.ShootingProblem(
-    x0, sum(seqs, [])[:-1], seqs[-1][-1]  # noqa: RUF017
+    x0,
+    sum(seqs, [])[:-1],
+    seqs[-1][-1],  # noqa: RUF017
 )
 
 # Creating the DDP solver for this OC problem, defining a logger
