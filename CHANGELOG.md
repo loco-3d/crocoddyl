@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.1.0] - 2024-05-31
 
+* Print log with grad absolute + updated logs with Pinocchio 3 in https://github.com/loco-3d/crocoddyl/pull/1260
 * Updated black + isort + flake8 to ruff in https://github.com/loco-3d/crocoddyl/pull/1256
 * Exported version for Python in https://github.com/loco-3d/crocoddyl/pull/1254
 * Added pinocchio 3 preliminary support in https://github.com/loco-3d/crocoddyl/pull/1253
