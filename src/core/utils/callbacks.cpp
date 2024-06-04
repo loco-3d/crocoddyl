@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -63,7 +63,7 @@ void CallbackVerbose::update_header() {
     case _0: {
       header_ += center_string("cost", columnwidth) + separator_;
       header_ += center_string("stop", columnwidth) + separator_;
-      header_ += center_string("grad", columnwidth) + separator_;
+      header_ += center_string("|grad|", columnwidth) + separator_;
       header_ += center_string("preg", columnwidth) + separator_;
       header_ += center_string("step", 6) + separator_;
       header_ += center_string("dV-exp", columnwidth) + separator_;
@@ -74,7 +74,7 @@ void CallbackVerbose::update_header() {
       header_ += center_string("cost", columnwidth) + separator_;
       header_ += center_string("merit", columnwidth) + separator_;
       header_ += center_string("stop", columnwidth) + separator_;
-      header_ += center_string("grad", columnwidth) + separator_;
+      header_ += center_string("|grad|", columnwidth) + separator_;
       header_ += center_string("preg", columnwidth) + separator_;
       header_ += center_string("step", 6) + separator_;
       header_ += center_string("||ffeas||", columnwidth) + separator_;
@@ -86,7 +86,7 @@ void CallbackVerbose::update_header() {
       header_ += center_string("cost", columnwidth) + separator_;
       header_ += center_string("merit", columnwidth) + separator_;
       header_ += center_string("stop", columnwidth) + separator_;
-      header_ += center_string("grad", columnwidth) + separator_;
+      header_ += center_string("|grad|", columnwidth) + separator_;
       header_ += center_string("preg", columnwidth) + separator_;
       header_ += center_string("dreg", columnwidth) + separator_;
       header_ += center_string("step", 6) + separator_;
@@ -99,7 +99,7 @@ void CallbackVerbose::update_header() {
       header_ += center_string("cost", columnwidth) + separator_;
       header_ += center_string("merit", columnwidth) + separator_;
       header_ += center_string("stop", columnwidth) + separator_;
-      header_ += center_string("grad", columnwidth) + separator_;
+      header_ += center_string("|grad|", columnwidth) + separator_;
       header_ += center_string("preg", columnwidth) + separator_;
       header_ += center_string("dreg", columnwidth) + separator_;
       header_ += center_string("step", 6) + separator_;
@@ -114,7 +114,7 @@ void CallbackVerbose::update_header() {
       header_ += center_string("cost", columnwidth) + separator_;
       header_ += center_string("merit", columnwidth) + separator_;
       header_ += center_string("stop", columnwidth) + separator_;
-      header_ += center_string("grad", columnwidth) + separator_;
+      header_ += center_string("|grad|", columnwidth) + separator_;
       header_ += center_string("preg", columnwidth) + separator_;
       header_ += center_string("dreg", columnwidth) + separator_;
       header_ += center_string("step", 6) + separator_;
@@ -151,10 +151,10 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
   switch (level_) {
     case _0: {
       std::cout << std::scientific << std::setprecision(precision_)
-                << solver.get_cost() << separator_;                     // cost
-      std::cout << solver.get_stop() << separator_;                     // stop
-      std::cout << space_sign(-solver.get_d()[1]) << separator_short_;  // grad
-      std::cout << solver.get_preg() << separator_;                     // preg
+                << solver.get_cost() << separator_;       // cost
+      std::cout << solver.get_stop() << separator_;       // stop
+      std::cout << abs(solver.get_d()[0]) << separator_;  // grad
+      std::cout << solver.get_preg() << separator_;       // preg
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
                 << separator_short_;                                    // step
       std::cout << space_sign(solver.get_dVexp()) << separator_short_;  // dVexp
@@ -165,8 +165,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(precision_)
                 << solver.get_cost() << separator_short_;         // cost
       std::cout << space_sign(solver.get_merit()) << separator_;  // merit
-      std::cout << solver.get_stop() << separator_short_;         // stop
-      std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
+      std::cout << solver.get_stop() << separator_;               // stop
+      std::cout << abs(solver.get_d()[0]) << separator_;          // grad
       std::cout << solver.get_preg() << separator_;               // preg
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
                 << separator_;  // step
@@ -180,8 +180,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(precision_)
                 << solver.get_cost() << separator_short_;         // cost
       std::cout << space_sign(solver.get_merit()) << separator_;  // merit
-      std::cout << solver.get_stop() << separator_short_;         // stop
-      std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
+      std::cout << solver.get_stop() << separator_;               // stop
+      std::cout << abs(solver.get_d()[0]) << separator_;          // grad
       std::cout << solver.get_preg() << separator_;               // preg
       std::cout << solver.get_dreg() << separator_;               // dreg
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
@@ -196,8 +196,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(precision_)
                 << solver.get_cost() << separator_short_;         // cost
       std::cout << space_sign(solver.get_merit()) << separator_;  // merit
-      std::cout << solver.get_stop() << separator_short_;         // stop
-      std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
+      std::cout << solver.get_stop() << separator_;               // stop
+      std::cout << abs(solver.get_d()[0]) << separator_;          // grad
       std::cout << solver.get_preg() << separator_;               // preg
       std::cout << solver.get_dreg() << separator_;               // dreg
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
@@ -214,8 +214,8 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
       std::cout << std::scientific << std::setprecision(precision_)
                 << solver.get_cost() << separator_short_;         // cost
       std::cout << space_sign(solver.get_merit()) << separator_;  // merit
-      std::cout << solver.get_stop() << separator_short_;         // stop
-      std::cout << space_sign(-solver.get_d()[1]) << separator_;  // grad
+      std::cout << solver.get_stop() << separator_;               // stop
+      std::cout << abs(solver.get_d()[0]) << separator_;          // grad
       std::cout << solver.get_preg() << separator_;               // preg
       std::cout << solver.get_dreg() << separator_;               // dreg
       std::cout << std::fixed << std::setprecision(4) << solver.get_steplength()
