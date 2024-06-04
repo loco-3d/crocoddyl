@@ -52,25 +52,44 @@ class DifferentialActionModelLQRTpl
   virtual bool checkData(
       const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
-  const MatrixXs& get_Fq() const;
-  const MatrixXs& get_Fv() const;
-  const MatrixXs& get_Fu() const;
-  const VectorXs& get_f0() const;
-  const VectorXs& get_lx() const;
-  const VectorXs& get_lu() const;
-  const MatrixXs& get_Lxx() const;
-  const MatrixXs& get_Lxu() const;
-  const MatrixXs& get_Luu() const;
+  const MatrixXs& get_Aq() const;
+  const MatrixXs& get_Av() const;
+  const MatrixXs& get_B() const;
+  const VectorXs& get_f() const;
+  const VectorXs& get_q() const;
+  const VectorXs& get_r() const;
+  const MatrixXs& get_Q() const;
+  const MatrixXs& get_R() const;
+  const MatrixXs& get_N() const;
 
-  void set_Fq(const MatrixXs& Fq);
-  void set_Fv(const MatrixXs& Fv);
-  void set_Fu(const MatrixXs& Fu);
-  void set_f0(const VectorXs& f0);
-  void set_lx(const VectorXs& lx);
-  void set_lu(const VectorXs& lu);
-  void set_Lxx(const MatrixXs& Lxx);
-  void set_Lxu(const MatrixXs& Lxu);
-  void set_Luu(const MatrixXs& Luu);
+  void set_Aq(const MatrixXs& Aq);
+  void set_Av(const MatrixXs& Av);
+  void set_B(const MatrixXs& B);
+  void set_f(const VectorXs& f);
+  void set_Q(const MatrixXs& Q);
+  void set_R(const MatrixXs& R);
+  void set_N(const MatrixXs& N);
+  void set_q(const VectorXs& q);
+  void set_r(const VectorXs& r);
+
+  DEPRECATED("Use get_Aq", const MatrixXs& get_Fq() const { return get_Aq(); })
+  DEPRECATED("Use get_Av", const MatrixXs& get_Fv() const { return get_Av(); })
+  DEPRECATED("Use get_B", const MatrixXs& get_Fu() const { return get_B(); })
+  DEPRECATED("Use get_f", const VectorXs& get_f0() const { return get_f(); })
+  DEPRECATED("Use get_q", const VectorXs& get_lx() const { return get_q(); })
+  DEPRECATED("Use get_r", const VectorXs& get_lu() const { return get_r(); })
+  DEPRECATED("Use get_Q", const MatrixXs& get_Lxx() const { return get_Q(); })
+  DEPRECATED("Use get_N", const MatrixXs& get_Lxu() const { return get_N(); })
+  DEPRECATED("Use get_R", const MatrixXs& get_Luu() const { return get_R(); })
+  DEPRECATED("Use set_Aq", void set_Fq(const MatrixXs& Aq) { set_Aq(Aq); })
+  DEPRECATED("Use set_Av", void set_Fv(const MatrixXs& Av) { set_Av(Av); })
+  DEPRECATED("Use set_B", void set_Fu(const MatrixXs& B) { set_B(B); })
+  DEPRECATED("Use set_f", void set_f0(const VectorXs& f) { set_f(f); })
+  DEPRECATED("Use set_q", void set_lx(const VectorXs& q) { set_q(q); })
+  DEPRECATED("Use set_r", void set_lu(const VectorXs& r) { set_r(r); })
+  DEPRECATED("Use set_Q", void set_Lxx(const MatrixXs& Q) { set_Q(Q); })
+  DEPRECATED("Use set_N", void set_Lxu(const MatrixXs& N) { set_N(N); })
+  DEPRECATED("Use set_R", void set_Luu(const MatrixXs& R) { set_R(R); })
 
   /**
    * @brief Print relevant information of the LQR model
@@ -110,12 +129,12 @@ struct DifferentialActionDataLQRTpl
       : Base(model) {
     // Setting the linear model and quadratic cost here because they are
     // constant
-    Fx.leftCols(model->get_state()->get_nq()) = model->get_Fq();
-    Fx.rightCols(model->get_state()->get_nv()) = model->get_Fv();
-    Fu = model->get_Fu();
-    Lxx = model->get_Lxx();
-    Luu = model->get_Luu();
-    Lxu = model->get_Lxu();
+    Fx.leftCols(model->get_state()->get_nq()) = model->get_Aq();
+    Fx.rightCols(model->get_state()->get_nv()) = model->get_Av();
+    Fu = model->get_B();
+    Lxx = model->get_Q();
+    Luu = model->get_R();
+    Lxu = model->get_N();
   }
 
   using Base::cost;

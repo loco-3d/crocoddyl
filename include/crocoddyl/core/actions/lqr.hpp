@@ -47,23 +47,40 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
-  const MatrixXs& get_Fx() const;
-  const MatrixXs& get_Fu() const;
-  const VectorXs& get_f0() const;
-  const VectorXs& get_lx() const;
-  const VectorXs& get_lu() const;
-  const MatrixXs& get_Lxx() const;
-  const MatrixXs& get_Lxu() const;
-  const MatrixXs& get_Luu() const;
+  const MatrixXs& get_A() const;
+  const MatrixXs& get_B() const;
+  const VectorXs& get_f() const;
+  const MatrixXs& get_Q() const;
+  const MatrixXs& get_R() const;
+  const MatrixXs& get_N() const;
+  const VectorXs& get_q() const;
+  const VectorXs& get_r() const;
 
-  void set_Fx(const MatrixXs& Fx);
-  void set_Fu(const MatrixXs& Fu);
-  void set_f0(const VectorXs& f0);
-  void set_lx(const VectorXs& lx);
-  void set_lu(const VectorXs& lu);
-  void set_Lxx(const MatrixXs& Lxx);
-  void set_Lxu(const MatrixXs& Lxu);
-  void set_Luu(const MatrixXs& Luu);
+  void set_A(const MatrixXs& A);
+  void set_B(const MatrixXs& B);
+  void set_f(const VectorXs& f);
+  void set_Q(const MatrixXs& Q);
+  void set_R(const MatrixXs& R);
+  void set_N(const MatrixXs& N);
+  void set_q(const VectorXs& q);
+  void set_r(const VectorXs& r);
+
+  DEPRECATED("Use get_A", const MatrixXs& get_Fx() const { return get_A(); })
+  DEPRECATED("Use get_B", const MatrixXs& get_Fu() const { return get_B(); })
+  DEPRECATED("Use get_f", const VectorXs& get_f0() const { return get_f(); })
+  DEPRECATED("Use get_q", const VectorXs& get_lx() const { return get_q(); })
+  DEPRECATED("Use get_r", const VectorXs& get_lu() const { return get_r(); })
+  DEPRECATED("Use get_Q", const MatrixXs& get_Lxx() const { return get_Q(); })
+  DEPRECATED("Use get_R", const MatrixXs& get_Lxu() const { return get_R(); })
+  DEPRECATED("Use get_N", const MatrixXs& get_Luu() const { return get_N(); })
+  DEPRECATED("Use set_A", void set_Fx(const MatrixXs& A) { set_A(A); })
+  DEPRECATED("Use set_B", void set_Fu(const MatrixXs& B) { set_B(B); })
+  DEPRECATED("Use set_f", void set_f0(const VectorXs& f) { set_f(f); })
+  DEPRECATED("Use set_q", void set_lx(const VectorXs& q) { set_q(q); })
+  DEPRECATED("Use set_r", void set_lu(const VectorXs& r) { set_r(r); })
+  DEPRECATED("Use set_Q", void set_Lxx(const MatrixXs& Q) { set_Q(Q); })
+  DEPRECATED("Use set_R", void set_Luu(const MatrixXs& R) { set_R(R); })
+  DEPRECATED("Use set_N", void set_Lxu(const MatrixXs& N) { set_N(N); })
 
   /**
    * @brief Print relevant information of the LQR model
@@ -103,11 +120,11 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
             static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
     // Setting the linear model and quadratic cost here because they are
     // constant
-    Fx = model->get_Fx();
-    Fu = model->get_Fu();
-    Lxx = model->get_Lxx();
-    Luu = model->get_Luu();
-    Lxu = model->get_Lxu();
+    Fx = model->get_A();
+    Fu = model->get_B();
+    Lxx = model->get_Q();
+    Luu = model->get_R();
+    Lxu = model->get_N();
   }
 
   using Base::cost;
