@@ -137,7 +137,6 @@ class DifferentialActionModelLQRTpl
   using Base::state_;  //!< Model of the state
 
  private:
-  bool drift_free_;
   MatrixXs Aq_;
   MatrixXs Av_;
   MatrixXs B_;
@@ -147,6 +146,7 @@ class DifferentialActionModelLQRTpl
   VectorXs f_;
   VectorXs q_;
   VectorXs r_;
+  bool drift_free_;
 };
 
 template <typename _Scalar>

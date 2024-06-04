@@ -249,7 +249,7 @@ class LQRModelDerived(crocoddyl.ActionModelAbstract):
         self.B = np.eye(self.state.nx)[:, : self.nu]
         self.Q = np.eye(self.state.nx)
         self.R = np.eye(self.nu)
-        self.N = np.eye(self.state.nx)[:, : self.nu]
+        self.N = np.zeros((self.state.nx, self.nu))
         self.f = [np.zeros(self.state.nx) if driftFree else np.ones(self.state.nx)]
         self.q = np.ones(self.state.nx)
         self.r = np.ones(self.nu)
@@ -299,7 +299,7 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
         self.f = [np.zeros(nq) if driftFree else np.ones(nq)]
         self.Q = np.eye(self.state.nx)
         self.R = np.eye(self.nu)
-        self.N = np.eye(self.state.nx)[:, : self.nu]
+        self.N = np.zeros((self.state.nx, self.nu))
         self.q = np.ones(self.state.nx)
         self.r = np.ones(self.nu)
 

@@ -16,17 +16,17 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
                                              const std::size_t nu,
                                              const bool drift_free)
     : Base(boost::make_shared<StateVector>(nx), nu, 0),
+      A_(MatrixXs::Identity(nx, nx)),
+      B_(MatrixXs::Identity(nx, nu)),
+      Q_(MatrixXs::Identity(nx, nx)),
+      R_(MatrixXs::Identity(nu, nu)),
+      N_(MatrixXs::Zero(nx, nu)),
+      f_(drift_free ? VectorXs::Zero(nx) : VectorXs::Ones(nx)),
+      q_(VectorXs::Ones(nx)),
+      r_(VectorXs::Ones(nu)),
       drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
   // (matrices)
-  A_ = MatrixXs::Identity(nx, nx);
-  B_ = MatrixXs::Identity(nx, nu);
-  Q_ = MatrixXs::Identity(nx, nx);
-  R_ = MatrixXs::Identity(nu, nu);
-  N_ = MatrixXs::Identity(nx, nu);
-  f_ = VectorXs::Ones(nx);
-  q_ = VectorXs::Ones(nx);
-  r_ = VectorXs::Ones(nu);
 }
 
 template <typename Scalar>
@@ -48,14 +48,9 @@ void ActionModelLQRTpl<Scalar>::calc(
   }
   Data* d = static_cast<Data*>(data.get());
 
-  if (drift_free_) {
-    data->xnext.noalias() = A_ * x;
-    data->xnext.noalias() += B_ * u;
-  } else {
-    data->xnext.noalias() = A_ * x;
-    data->xnext.noalias() += B_ * u;
-    data->xnext += f_;
-  }
+  data->xnext.noalias() = A_ * x;
+  data->xnext.noalias() += B_ * u;
+  data->xnext += f_;
 
   // cost = 0.5 * x^T * Q * x + 0.5 * u^T * R * u + x^T * N * u + q^T * x + r^T
   // * u

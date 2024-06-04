@@ -124,7 +124,6 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::state_;  //!< Model of the state
 
  private:
-  bool drift_free_;
   MatrixXs A_;
   MatrixXs B_;
   MatrixXs Q_;
@@ -133,6 +132,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   VectorXs f_;
   VectorXs q_;
   VectorXs r_;
+  bool drift_free_;
 };
 
 template <typename _Scalar>

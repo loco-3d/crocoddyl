@@ -16,18 +16,18 @@ template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const std::size_t nq, const std::size_t nu, const bool drift_free)
     : Base(boost::make_shared<StateVector>(2 * nq), nu),
+      Aq_(MatrixXs::Identity(nq, nq)),
+      Av_(MatrixXs::Identity(nq, nq)),
+      B_(MatrixXs::Identity(nq, nu)),
+      Q_(MatrixXs::Identity(2 * nq, 2 * nq)),
+      R_(MatrixXs::Identity(nu, nu)),
+      N_(MatrixXs::Zero(2 * nq, nu)),
+      f_(drift_free ? VectorXs::Zero(nq) : VectorXs::Ones(nq)),
+      q_(VectorXs::Ones(2 * nq)),
+      r_(VectorXs::Ones(nu)),
       drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
   // (matrices)
-  Aq_ = MatrixXs::Identity(state_->get_nq(), state_->get_nq());
-  Av_ = MatrixXs::Identity(state_->get_nv(), state_->get_nv());
-  B_ = MatrixXs::Identity(state_->get_nq(), nu_);
-  Q_ = MatrixXs::Identity(state_->get_nx(), state_->get_nx());
-  R_ = MatrixXs::Identity(nu_, nu_);
-  N_ = MatrixXs::Identity(state_->get_nx(), nu_);
-  f_ = VectorXs::Ones(state_->get_nv());
-  q_ = VectorXs::Ones(state_->get_nx());
-  r_ = VectorXs::Ones(nu_);
 }
 
 template <typename Scalar>
@@ -52,16 +52,11 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  if (drift_free_) {
-    data->xout.noalias() = Aq_ * q;
-    data->xout.noalias() += Av_ * v;
-    data->xout.noalias() += B_ * u;
-  } else {
-    data->xout.noalias() = Aq_ * q;
-    data->xout.noalias() += Av_ * v;
-    data->xout.noalias() += B_ * u;
-    data->xout += f_;
-  }
+  data->xout.noalias() = Aq_ * q;
+  data->xout.noalias() += Av_ * v;
+  data->xout.noalias() += B_ * u;
+  data->xout += f_;
+
   // cost = 0.5 * x^T * Q * x + 0.5 * u^T * R * u + x^T * N * u + q^T * x + r^T
   // * u
   data->cost = Scalar(0.5) * x.dot(Q_ * x);
