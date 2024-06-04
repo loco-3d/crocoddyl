@@ -47,22 +47,52 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
+  /** @brief Return the state matrix */
   const MatrixXs& get_A() const;
+
+  /** @brief Return the input matrix */
   const MatrixXs& get_B() const;
+
+  /** @brief Return the dynamics drift */
   const VectorXs& get_f() const;
+
+  /** @brief Return the state weight matrix */
   const MatrixXs& get_Q() const;
+
+  /** @brief Return the input weight matrix */
   const MatrixXs& get_R() const;
+
+  /** @brief Return the state-input weight matrix */
   const MatrixXs& get_N() const;
+
+  /** @brief Return the state weight vector */
   const VectorXs& get_q() const;
+
+  /** @brief Return the input weight vector */
   const VectorXs& get_r() const;
 
+  /** @brief Modify the state matrix */
   void set_A(const MatrixXs& A);
+
+  /** @brief Modify the input matrix */
   void set_B(const MatrixXs& B);
+
+  /** @brief Modify the dynamics drift */
   void set_f(const VectorXs& f);
+
+  /** @brief Modify the state weight matrix */
   void set_Q(const MatrixXs& Q);
+
+  /** @brief Modify the input weight matrix */
   void set_R(const MatrixXs& R);
+
+  /** @brief Modify the state-input weight matrix */
   void set_N(const MatrixXs& N);
+
+  /** @brief Modify the state weigth vector */
   void set_q(const VectorXs& q);
+
+  /** @brief Modify the input weight vector */
   void set_r(const VectorXs& r);
 
   DEPRECATED("Use get_A", const MatrixXs& get_Fx() const { return get_A(); })

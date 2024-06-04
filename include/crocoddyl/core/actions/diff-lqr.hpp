@@ -52,24 +52,58 @@ class DifferentialActionModelLQRTpl
   virtual bool checkData(
       const boost::shared_ptr<DifferentialActionDataAbstract>& data);
 
+  /** @brief Return the position matrix */
   const MatrixXs& get_Aq() const;
+
+  /** @brief Return the velocity matrix */
   const MatrixXs& get_Av() const;
+
+  /** @brief Return the input matrix */
   const MatrixXs& get_B() const;
+
+  /** @brief Return the dynamics drift */
   const VectorXs& get_f() const;
-  const VectorXs& get_q() const;
-  const VectorXs& get_r() const;
+
+  /** @brief Return the state weight matrix */
   const MatrixXs& get_Q() const;
+
+  /** @brief Return the input weight matrix */
   const MatrixXs& get_R() const;
+
+  /** @brief Return the state-input weight matrix */
   const MatrixXs& get_N() const;
 
+  /** @brief Return the state weight vector */
+  const VectorXs& get_q() const;
+
+  /** @brief Return the input weight vector */
+  const VectorXs& get_r() const;
+
+  /** @brief Modify the position matrix */
   void set_Aq(const MatrixXs& Aq);
+
+  /** @brief Modify the velocity matrix */
   void set_Av(const MatrixXs& Av);
+
+  /** @brief Modify the input matrix */
   void set_B(const MatrixXs& B);
+
+  /** @brief Modify the dynamics drift */
   void set_f(const VectorXs& f);
+
+  /** @brief Modify the state weight matrix */
   void set_Q(const MatrixXs& Q);
+
+  /** @brief Modify the input weight matrix */
   void set_R(const MatrixXs& R);
+
+  /** @brief Modify the state-input weight matrix */
   void set_N(const MatrixXs& N);
+
+  /** @brief Modify the state weight vector */
   void set_q(const VectorXs& q);
+
+  /** @brief Modify the input weight vector */
   void set_r(const VectorXs& r);
 
   DEPRECATED("Use get_Aq", const MatrixXs& get_Fq() const { return get_Aq(); })
