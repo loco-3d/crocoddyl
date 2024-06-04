@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,15 +19,15 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
   // (matrices)
-  Fq_ = MatrixXs::Identity(state_->get_nq(), state_->get_nq());
-  Fv_ = MatrixXs::Identity(state_->get_nv(), state_->get_nv());
-  Fu_ = MatrixXs::Identity(state_->get_nq(), nu_);
-  f0_ = VectorXs::Ones(state_->get_nv());
-  Lxx_ = MatrixXs::Identity(state_->get_nx(), state_->get_nx());
-  Lxu_ = MatrixXs::Identity(state_->get_nx(), nu_);
-  Luu_ = MatrixXs::Identity(nu_, nu_);
-  lx_ = VectorXs::Ones(state_->get_nx());
-  lu_ = VectorXs::Ones(nu_);
+  Aq_ = MatrixXs::Identity(state_->get_nq(), state_->get_nq());
+  Av_ = MatrixXs::Identity(state_->get_nv(), state_->get_nv());
+  B_ = MatrixXs::Identity(state_->get_nq(), nu_);
+  Q_ = MatrixXs::Identity(state_->get_nx(), state_->get_nx());
+  R_ = MatrixXs::Identity(nu_, nu_);
+  N_ = MatrixXs::Identity(state_->get_nx(), nu_);
+  f_ = VectorXs::Ones(state_->get_nv());
+  q_ = VectorXs::Ones(state_->get_nx());
+  r_ = VectorXs::Ones(nu_);
 }
 
 template <typename Scalar>
@@ -52,17 +53,22 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
       x.tail(state_->get_nv());
 
   if (drift_free_) {
-    data->xout.noalias() = Fq_ * q;
-    data->xout.noalias() += Fv_ * v;
-    data->xout.noalias() += Fu_ * u;
+    data->xout.noalias() = Aq_ * q;
+    data->xout.noalias() += Av_ * v;
+    data->xout.noalias() += B_ * u;
   } else {
-    data->xout.noalias() = Fq_ * q;
-    data->xout.noalias() += Fv_ * v;
-    data->xout.noalias() += Fu_ * u;
-    data->xout += f0_;
+    data->xout.noalias() = Aq_ * q;
+    data->xout.noalias() += Av_ * v;
+    data->xout.noalias() += B_ * u;
+    data->xout += f_;
   }
-  data->cost = Scalar(0.5) * x.dot(Lxx_ * x) + Scalar(0.5) * u.dot(Luu_ * u) +
-               x.dot(Lxu_ * u) + lx_.dot(x) + lu_.dot(u);
+  // cost = 0.5 * x^T * Q * x + 0.5 * u^T * R * u + x^T * N * u + q^T * x + r^T
+  // * u
+  data->cost = Scalar(0.5) * x.dot(Q_ * x);
+  data->cost += Scalar(0.5) * u.dot(R_ * u);
+  data->cost += x.dot(N_ * u);
+  data->cost += q_.dot(x);
+  data->cost += r_.dot(u);
 }
 
 template <typename Scalar>
@@ -75,7 +81,9 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
                         std::to_string(state_->get_nx()) + ")");
   }
 
-  data->cost = Scalar(0.5) * x.dot(Lxx_ * x) + lx_.dot(x);
+  // cost = 0.5 * x^T * Q * x + q^T * x
+  data->cost = Scalar(0.5) * x.dot(Q_ * x);
+  data->cost += q_.dot(x);
 }
 
 template <typename Scalar>
@@ -93,18 +101,18 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(nu_) + ")");
   }
 
-  data->Lx = lx_;
-  data->Lx.noalias() += Lxx_ * x;
-  data->Lx.noalias() += Lxu_ * u;
-  data->Lu = lu_;
-  data->Lu.noalias() += Lxu_.transpose() * x;
-  data->Lu.noalias() += Luu_ * u;
-  data->Fx.leftCols(state_->get_nq()) = Fq_;
-  data->Fx.rightCols(state_->get_nv()) = Fv_;
-  data->Fu = Fu_;
-  data->Lxx = Lxx_;
-  data->Lxu = Lxu_;
-  data->Luu = Luu_;
+  data->Fx.leftCols(state_->get_nq()) = Aq_;
+  data->Fx.rightCols(state_->get_nv()) = Av_;
+  data->Fu = B_;
+  data->Lxx = Q_;
+  data->Luu = R_;
+  data->Lxu = N_;
+  data->Lx = q_;
+  data->Lx.noalias() += Q_ * x;
+  data->Lx.noalias() += N_ * u;
+  data->Lu = r_;
+  data->Lu.noalias() += N_.transpose() * x;
+  data->Lu.noalias() += R_ * u;
 }
 
 template <typename Scalar>
@@ -117,9 +125,9 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(state_->get_nx()) + ")");
   }
 
-  data->Lx = lx_;
-  data->Lx.noalias() += Lxx_ * x;
-  data->Lxx = Lxx_;
+  data->Lxx = Q_;
+  data->Lx = q_;
+  data->Lx.noalias() += Q_ * x;
 }
 
 template <typename Scalar>
@@ -148,55 +156,55 @@ void DifferentialActionModelLQRTpl<Scalar>::print(std::ostream& os) const {
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Fq() const {
-  return Fq_;
+  return Aq_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Fv() const {
-  return Fv_;
+  return Av_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Fu() const {
-  return Fu_;
+  return B_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 DifferentialActionModelLQRTpl<Scalar>::get_f0() const {
-  return f0_;
+  return f_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 DifferentialActionModelLQRTpl<Scalar>::get_lx() const {
-  return lx_;
+  return q_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 DifferentialActionModelLQRTpl<Scalar>::get_lu() const {
-  return lu_;
+  return r_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Lxx() const {
-  return Lxx_;
+  return Q_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Lxu() const {
-  return Lxu_;
+  return N_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 DifferentialActionModelLQRTpl<Scalar>::get_Luu() const {
-  return Luu_;
+  return R_;
 }
 
 template <typename Scalar>
@@ -208,7 +216,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Fq(const MatrixXs& Fq) {
                         std::to_string(state_->get_nq()) + "," +
                         std::to_string(state_->get_nq()) + ")");
   }
-  Fq_ = Fq;
+  Aq_ = Fq;
 }
 
 template <typename Scalar>
@@ -220,7 +228,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Fv(const MatrixXs& Fv) {
                         std::to_string(state_->get_nv()) + "," +
                         std::to_string(state_->get_nv()) + ")");
   }
-  Fv_ = Fv;
+  Av_ = Fv;
 }
 
 template <typename Scalar>
@@ -232,7 +240,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Fu(const MatrixXs& Fu) {
                         std::to_string(state_->get_nq()) + "," +
                         std::to_string(nu_) + ")");
   }
-  Fu_ = Fu;
+  B_ = Fu;
 }
 
 template <typename Scalar>
@@ -242,7 +250,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_f0(const VectorXs& f0) {
                  << "f0 has wrong dimension (it should be " +
                         std::to_string(state_->get_nv()) + ")");
   }
-  f0_ = f0;
+  f_ = f0;
 }
 
 template <typename Scalar>
@@ -252,7 +260,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_lx(const VectorXs& lx) {
                  << "lx has wrong dimension (it should be " +
                         std::to_string(state_->get_nx()) + ")");
   }
-  lx_ = lx;
+  q_ = lx;
 }
 
 template <typename Scalar>
@@ -262,7 +270,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_lu(const VectorXs& lu) {
                  << "lu has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
-  lu_ = lu;
+  r_ = lu;
 }
 
 template <typename Scalar>
@@ -274,7 +282,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Lxx(const MatrixXs& Lxx) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(state_->get_nx()) + ")");
   }
-  Lxx_ = Lxx;
+  Q_ = Lxx;
 }
 
 template <typename Scalar>
@@ -286,7 +294,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Lxu(const MatrixXs& Lxu) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(nu_) + ")");
   }
-  Lxu_ = Lxu;
+  N_ = Lxu;
 }
 
 template <typename Scalar>
@@ -297,7 +305,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_Luu(const MatrixXs& Luu) {
                  << "Fq has wrong dimension (it should be " +
                         std::to_string(nu_) + "," + std::to_string(nu_) + ")");
   }
-  Luu_ = Luu;
+  R_ = Luu;
 }
 
 }  // namespace crocoddyl

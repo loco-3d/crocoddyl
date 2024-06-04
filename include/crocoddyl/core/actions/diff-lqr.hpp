@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,15 +85,15 @@ class DifferentialActionModelLQRTpl
 
  private:
   bool drift_free_;
-  MatrixXs Fq_;
-  MatrixXs Fv_;
-  MatrixXs Fu_;
-  VectorXs f0_;
-  MatrixXs Lxx_;
-  MatrixXs Lxu_;
-  MatrixXs Luu_;
-  VectorXs lx_;
-  VectorXs lu_;
+  MatrixXs Aq_;
+  MatrixXs Av_;
+  MatrixXs B_;
+  MatrixXs Q_;
+  MatrixXs R_;
+  MatrixXs N_;
+  VectorXs f_;
+  VectorXs q_;
+  VectorXs r_;
 };
 
 template <typename _Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -19,14 +19,14 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
       drift_free_(drift_free) {
   // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
   // (matrices)
-  Fx_ = MatrixXs::Identity(nx, nx);
-  Fu_ = MatrixXs::Identity(nx, nu);
-  f0_ = VectorXs::Ones(nx);
-  Lxx_ = MatrixXs::Identity(nx, nx);
-  Lxu_ = MatrixXs::Identity(nx, nu);
-  Luu_ = MatrixXs::Identity(nu, nu);
-  lx_ = VectorXs::Ones(nx);
-  lu_ = VectorXs::Ones(nu);
+  A_ = MatrixXs::Identity(nx, nx);
+  B_ = MatrixXs::Identity(nx, nu);
+  Q_ = MatrixXs::Identity(nx, nx);
+  R_ = MatrixXs::Identity(nu, nu);
+  N_ = MatrixXs::Identity(nx, nu);
+  f_ = VectorXs::Ones(nx);
+  q_ = VectorXs::Ones(nx);
+  r_ = VectorXs::Ones(nu);
 }
 
 template <typename Scalar>
@@ -49,23 +49,24 @@ void ActionModelLQRTpl<Scalar>::calc(
   Data* d = static_cast<Data*>(data.get());
 
   if (drift_free_) {
-    data->xnext.noalias() = Fx_ * x;
-    data->xnext.noalias() += Fu_ * u;
+    data->xnext.noalias() = A_ * x;
+    data->xnext.noalias() += B_ * u;
   } else {
-    data->xnext.noalias() = Fx_ * x;
-    data->xnext.noalias() += Fu_ * u;
-    data->xnext += f0_;
+    data->xnext.noalias() = A_ * x;
+    data->xnext.noalias() += B_ * u;
+    data->xnext += f_;
   }
 
-  // cost = 0.5 * x^T*Lxx*x + 0.5 * u^T*Luu*u + x^T*Lxu*u + lx^T*x + lu^T*u
-  d->Lxx_x_tmp.noalias() = Lxx_ * x;
-  data->cost = Scalar(0.5) * x.dot(d->Lxx_x_tmp);
-  d->Luu_u_tmp.noalias() = Luu_ * u;
-  data->cost += Scalar(0.5) * u.dot(d->Luu_u_tmp);
-  d->Lxx_x_tmp.noalias() = Lxu_ * u;
-  data->cost += x.dot(d->Lxx_x_tmp);
-  data->cost += lx_.transpose() * x;
-  data->cost += lu_.transpose() * u;
+  // cost = 0.5 * x^T * Q * x + 0.5 * u^T * R * u + x^T * N * u + q^T * x + r^T
+  // * u
+  d->Q_x_tmp.noalias() = Q_ * x;
+  data->cost = Scalar(0.5) * x.dot(d->Q_x_tmp);
+  d->R_u_tmp.noalias() = R_ * u;
+  data->cost += Scalar(0.5) * u.dot(d->R_u_tmp);
+  d->Q_x_tmp.noalias() = N_ * u;
+  data->cost += x.dot(d->Q_x_tmp);
+  data->cost += q_.dot(x);
+  data->cost += r_.dot(u);
 }
 
 template <typename Scalar>
@@ -80,10 +81,10 @@ void ActionModelLQRTpl<Scalar>::calc(
   Data* d = static_cast<Data*>(data.get());
 
   d->xnext = x;
-  // cost = 0.5 * x^T*Lxx*x + lx^T*x
-  d->Lxx_x_tmp.noalias() = Lxx_ * x;
-  data->cost = Scalar(0.5) * x.dot(d->Lxx_x_tmp);
-  data->cost += lx_.dot(x);
+  // cost = 0.5 * x^T * Q * x + q^T * x
+  d->Q_x_tmp.noalias() = Q_ * x;
+  data->cost = Scalar(0.5) * x.dot(d->Q_x_tmp);
+  data->cost += q_.dot(x);
 }
 
 template <typename Scalar>
@@ -101,17 +102,17 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(nu_) + ")");
   }
 
-  data->Lx = lx_;
-  data->Lx.noalias() += Lxx_ * x;
-  data->Lx.noalias() += Lxu_ * u;
-  data->Lu = lu_;
-  data->Lu.noalias() += Lxu_.transpose() * x;
-  data->Lu.noalias() += Luu_ * u;
-  data->Fx = Fx_;
-  data->Fu = Fu_;
-  data->Lxx = Lxx_;
-  data->Lxu = Lxu_;
-  data->Luu = Luu_;
+  data->Fx = A_;
+  data->Fu = B_;
+  data->Lxx = Q_;
+  data->Luu = R_;
+  data->Lxu = N_;
+  data->Lx = q_;
+  data->Lx.noalias() += Q_ * x;
+  data->Lx.noalias() += N_ * u;
+  data->Lu = r_;
+  data->Lu.noalias() += N_.transpose() * x;
+  data->Lu.noalias() += R_ * u;
 }
 
 template <typename Scalar>
@@ -124,9 +125,9 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(state_->get_nx()) + ")");
   }
 
-  data->Lx = lx_;
-  data->Lx.noalias() += Lxx_ * x;
-  data->Lxx = Lxx_;
+  data->Lxx = Q_;
+  data->Lx = q_;
+  data->Lx.noalias() += Q_ * x;
 }
 
 template <typename Scalar>
@@ -155,49 +156,49 @@ void ActionModelLQRTpl<Scalar>::print(std::ostream& os) const {
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 ActionModelLQRTpl<Scalar>::get_Fx() const {
-  return Fx_;
+  return A_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 ActionModelLQRTpl<Scalar>::get_Fu() const {
-  return Fu_;
+  return B_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 ActionModelLQRTpl<Scalar>::get_f0() const {
-  return f0_;
+  return f_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 ActionModelLQRTpl<Scalar>::get_lx() const {
-  return lx_;
+  return q_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 ActionModelLQRTpl<Scalar>::get_lu() const {
-  return lu_;
+  return r_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 ActionModelLQRTpl<Scalar>::get_Lxx() const {
-  return Lxx_;
+  return Q_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 ActionModelLQRTpl<Scalar>::get_Lxu() const {
-  return Lxu_;
+  return N_;
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs&
 ActionModelLQRTpl<Scalar>::get_Luu() const {
-  return Luu_;
+  return R_;
 }
 
 template <typename Scalar>
@@ -209,7 +210,7 @@ void ActionModelLQRTpl<Scalar>::set_Fx(const MatrixXs& Fx) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(state_->get_nx()) + ")");
   }
-  Fx_ = Fx;
+  A_ = Fx;
 }
 
 template <typename Scalar>
@@ -221,7 +222,7 @@ void ActionModelLQRTpl<Scalar>::set_Fu(const MatrixXs& Fu) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(nu_) + ")");
   }
-  Fu_ = Fu;
+  B_ = Fu;
 }
 
 template <typename Scalar>
@@ -231,7 +232,7 @@ void ActionModelLQRTpl<Scalar>::set_f0(const VectorXs& f0) {
                  << "f0 has wrong dimension (it should be " +
                         std::to_string(state_->get_nx()) + ")");
   }
-  f0_ = f0;
+  f_ = f0;
 }
 
 template <typename Scalar>
@@ -241,7 +242,7 @@ void ActionModelLQRTpl<Scalar>::set_lx(const VectorXs& lx) {
                  << "lx has wrong dimension (it should be " +
                         std::to_string(state_->get_nx()) + ")");
   }
-  lx_ = lx;
+  q_ = lx;
 }
 
 template <typename Scalar>
@@ -251,7 +252,7 @@ void ActionModelLQRTpl<Scalar>::set_lu(const VectorXs& lu) {
                  << "lu has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
-  lu_ = lu;
+  r_ = lu;
 }
 
 template <typename Scalar>
@@ -263,7 +264,7 @@ void ActionModelLQRTpl<Scalar>::set_Lxx(const MatrixXs& Lxx) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(state_->get_nx()) + ")");
   }
-  Lxx_ = Lxx;
+  Q_ = Lxx;
 }
 
 template <typename Scalar>
@@ -275,7 +276,7 @@ void ActionModelLQRTpl<Scalar>::set_Lxu(const MatrixXs& Lxu) {
                         std::to_string(state_->get_nx()) + "," +
                         std::to_string(nu_) + ")");
   }
-  Lxu_ = Lxu;
+  N_ = Lxu;
 }
 
 template <typename Scalar>
@@ -286,7 +287,7 @@ void ActionModelLQRTpl<Scalar>::set_Luu(const MatrixXs& Luu) {
                  << "Fq has wrong dimension (it should be " +
                         std::to_string(nu_) + "," + std::to_string(nu_) + ")");
   }
-  Luu_ = Luu;
+  R_ = Luu;
 }
 
 }  // namespace crocoddyl

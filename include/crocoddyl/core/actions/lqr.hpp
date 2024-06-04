@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,14 +78,14 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
 
  private:
   bool drift_free_;
-  MatrixXs Fx_;
-  MatrixXs Fu_;
-  VectorXs f0_;
-  MatrixXs Lxx_;
-  MatrixXs Lxu_;
-  MatrixXs Luu_;
-  VectorXs lx_;
-  VectorXs lu_;
+  MatrixXs A_;
+  MatrixXs B_;
+  MatrixXs Q_;
+  MatrixXs R_;
+  MatrixXs N_;
+  VectorXs f_;
+  VectorXs q_;
+  VectorXs r_;
 };
 
 template <typename _Scalar>
@@ -97,8 +98,8 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   explicit ActionDataLQRTpl(Model<Scalar>* const model)
       : Base(model),
-        Luu_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
-        Lxx_x_tmp(VectorXs::Zero(
+        R_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
+        Q_x_tmp(VectorXs::Zero(
             static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
     // Setting the linear model and quadratic cost here because they are
     // constant
@@ -119,10 +120,10 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
-  VectorXs Luu_u_tmp;  // Temporary variable for storing Hessian-vector product
-                       // (size: nu)
-  VectorXs Lxx_x_tmp;  // Temporary variable for storing Hessian-vector product
-                       // (size: nx)
+  VectorXs R_u_tmp;  // Temporary variable for storing Hessian-vector product
+                     // (size: nu)
+  VectorXs Q_x_tmp;  // Temporary variable for storing Hessian-vector product
+                     // (size: nx)
 };
 
 }  // namespace crocoddyl
