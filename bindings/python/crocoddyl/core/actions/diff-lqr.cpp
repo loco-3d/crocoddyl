@@ -17,6 +17,9 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(DifferentialActionModelLQR_Random_wrap,
+                                DifferentialActionModelLQR::Random, 2, 4)
+
 void exposeDifferentialActionLQR() {
 // TODO: Remove once the deprecated update call has been removed in a future
 // release
@@ -30,17 +33,19 @@ void exposeDifferentialActionLQR() {
              bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelLQR",
       "Differential action model for linear dynamics and quadratic cost.\n\n"
-      "This class implements a linear dynamics, and quadratic costs (i.e.\n"
-      "LQR action). Since the DAM is a second order system, and the "
-      "integrated\n"
-      "action models are implemented as being second order integrators. This\n"
-      "class implements a second order linear system given by\n"
+      "This class implements a linear dynamics, quadratic costs, and linear "
+      "constraints (i.e. LQR action). Since the DAM is a second order system, "
+      "and the integrated action models are implemented as being second order "
+      "integrators. This class implements a second order linear system given "
+      "by\n"
       "  x = [q, v]\n"
       "  dv = Fq q + Fv v + Fu u + f0\n"
-      "where Fq, Fv, Fu and f are randomly chosen constant terms. On the "
-      "other\n"
-      "hand the cost function is given by\n"
-      "  l(x,u) = 1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u].",
+      "where Fq, Fv, Fu and f are randomly chosen constant terms. On the other "
+      "hand, the cost function is given by\n"
+      "  l(x,u) = 1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u],\n"
+      "and the linear equality and inequality constraints has the form:\n"
+      "  g(x,u) = G [x,u] + g\n"
+      "  h(x,u) = H [x,u] + h<=0.",
       bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
                Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd>(
           bp::args("self", "Aq",
@@ -118,9 +123,14 @@ void exposeDifferentialActionLQR() {
       .def("createData", &DifferentialActionModelLQR::createData,
            bp::args("self"), "Create the differential LQR action data.")
       .def("Random", &DifferentialActionModelLQR::Random,
-           "Create a random LQR model.\n\n"
-           ":param: nq: position dimension\n"
-           ":param nu: control dimension")
+           DifferentialActionModelLQR_Random_wrap(
+               bp::args("nq", "nu", "ng", "nh"),
+               "Create a random LQR model.\n\n"
+               ":param: nq: position dimension\n"
+               ":param nu: control dimension\n"
+               ":param ng: equality constraint dimension (default 0)\n"
+               ":param nh: inequality constraint dimension (default 0)"))
+      .staticmethod("Random")
       .def("setLQR", &DifferentialActionModelLQR::set_LQR,
            bp::args("self", "Aq", "Av", "B", "Q", "R", "N", "f", "q", "r"),
            "Modify the LQR action model.\n\n"
@@ -161,6 +171,14 @@ void exposeDifferentialActionLQR() {
                     bp::make_function(&DifferentialActionModelLQR::get_N,
                                       bp::return_internal_reference<>()),
                     "state-input weight matrix")
+      .add_property("G",
+                    bp::make_function(&DifferentialActionModelLQR::get_G,
+                                      bp::return_internal_reference<>()),
+                    "state-input equality constraint matrix")
+      .add_property("H",
+                    bp::make_function(&DifferentialActionModelLQR::get_H,
+                                      bp::return_internal_reference<>()),
+                    "state-input inequality constraint matrix")
       .add_property("q",
                     bp::make_function(&DifferentialActionModelLQR::get_q,
                                       bp::return_internal_reference<>()),
@@ -169,6 +187,14 @@ void exposeDifferentialActionLQR() {
                     bp::make_function(&DifferentialActionModelLQR::get_r,
                                       bp::return_internal_reference<>()),
                     "input weight vector")
+      .add_property("g",
+                    bp::make_function(&DifferentialActionModelLQR::get_g,
+                                      bp::return_internal_reference<>()),
+                    "state-input equality constraint bias")
+      .add_property("h",
+                    bp::make_function(&DifferentialActionModelLQR::get_h,
+                                      bp::return_internal_reference<>()),
+                    "state-input inequality constraint bias")
       // deprecated function
       .add_property(
           "Fq",

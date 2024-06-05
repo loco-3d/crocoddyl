@@ -17,6 +17,9 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(ActionModelLQR_Random_wrap,
+                                ActionModelLQR::Random, 2, 4)
+
 void exposeActionLQR() {
 // TODO: Remove once the deprecated update call has been removed in a future
 // release
@@ -28,10 +31,14 @@ void exposeActionLQR() {
   bp::class_<ActionModelLQR, bp::bases<ActionModelAbstract> >(
       "ActionModelLQR",
       "LQR action model.\n\n"
-      "A Linear-Quadratic Regulator problem has a transition model of the "
+      "A linear-quadratic regulator (LQR) action has a transition model of the "
       "form\n"
-      "xnext(x,u) = A x + B u + f. Its cost function is quadratic of the\n"
-      "form: 1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u].",
+      "  xnext(x,u) = A x + B u + f.\n"
+      "Its cost function is quadratic of the form:\n"
+      "  1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u],\n"
+      "and the linear equality and inequality constraints has the form:\n"
+      "  g(x,u) = G [x,u] + g\n"
+      "  h(x,u) = H [x,u] + h<=0.",
       bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
                Eigen::MatrixXd, Eigen::MatrixXd>(
           bp::args("self", "A", "B", "Q", "R", "N"),
@@ -42,18 +49,24 @@ void exposeActionLQR() {
           ":param R: input weight matrix\n"
           ":param N: state-input weight matrix"))
       .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
-                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::VectorXd,
-                    Eigen::VectorXd, Eigen::VectorXd>(
-          bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::VectorXd, Eigen::VectorXd,
+                    Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd>(
+          bp::args("self", "A", "B", "Q", "R", "N", "G", "H", "f", "q", "r",
+                   "g", "h"),
           "Initialize the LQR action model.\n\n"
           ":param A: state matrix\n"
           ":param B: input matrix\n"
           ":param Q: state weight matrix\n"
           ":param R: input weight matrix\n"
           ":param N: state-input weight matrix\n"
+          ":param G: state-input equality constraint matrix\n"
+          ":param H: state-input equality constraint matrix\n"
           ":param f: dynamics drift\n"
           ":param q: state weight vector\n"
-          ":param r: input weight vector"))
+          ":param r: input weight vector\n"
+          ":param g: state-input equality constraint bias\n"
+          ":param h: state-input inequality constraint bias"))
       .def(bp::init<int, int, bp::optional<bool> >(
           bp::args("self", "nx", "nu", "driftFree"),
           "Initialize the LQR action model.\n\n"
@@ -100,20 +113,30 @@ void exposeActionLQR() {
       .def("createData", &ActionModelLQR::createData, bp::args("self"),
            "Create the LQR action data.")
       .def("Random", &ActionModelLQR::Random,
-           "Create a random LQR model.\n\n"
-           ":param: nx: state dimension\n"
-           ":param nu: control dimension")
+           ActionModelLQR_Random_wrap(
+               bp::args("nx", "nu", "ng", "nh"),
+               "Create a random LQR model.\n\n"
+               ":param nx: state dimension\n"
+               ":param nu: control dimension\n"
+               ":param ng: equality constraint dimension (default 0)\n"
+               ":param nh: inequality constraint dimension (default 0)"))
+      .staticmethod("Random")
       .def("setLQR", &ActionModelLQR::set_LQR,
-           bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
+           bp::args("self", "A", "B", "Q", "R", "N", "G", "H", "f", "q", "r",
+                    "g", "h"),
            "Modify the LQR action model.\n\n"
            ":param A: state matrix\n"
            ":param B: input matrix\n"
            ":param Q: state weight matrix\n"
            ":param R: input weight matrix\n"
            ":param N: state-input weight matrix\n"
+           ":param G: state-input equality constraint matrix\n"
+           ":param H: state-input equality constraint matrix\n"
            ":param f: dynamics drift\n"
            ":param q: state weight vector\n"
-           ":param r: input weight vector")
+           ":param r: input weight vector\n"
+           ":param g: state-input equality constraint bias\n"
+           ":param h: state-input inequality constraint bias")
       .add_property("A",
                     bp::make_function(&ActionModelLQR::get_A,
                                       bp::return_internal_reference<>()),
@@ -138,6 +161,14 @@ void exposeActionLQR() {
                     bp::make_function(&ActionModelLQR::get_N,
                                       bp::return_internal_reference<>()),
                     "state-input weight matrix")
+      .add_property("G",
+                    bp::make_function(&ActionModelLQR::get_G,
+                                      bp::return_internal_reference<>()),
+                    "state-input equality constraint matrix")
+      .add_property("H",
+                    bp::make_function(&ActionModelLQR::get_H,
+                                      bp::return_internal_reference<>()),
+                    "state-input inequality constraint matrix")
       .add_property("q",
                     bp::make_function(&ActionModelLQR::get_q,
                                       bp::return_internal_reference<>()),
@@ -146,6 +177,14 @@ void exposeActionLQR() {
                     bp::make_function(&ActionModelLQR::get_r,
                                       bp::return_internal_reference<>()),
                     "input weight vector")
+      .add_property("g",
+                    bp::make_function(&ActionModelLQR::get_g,
+                                      bp::return_internal_reference<>()),
+                    "state-input equality constraint bias")
+      .add_property("h",
+                    bp::make_function(&ActionModelLQR::get_h,
+                                      bp::return_internal_reference<>()),
+                    "state-input inequality constraint bias")
       // deprecated function
       .add_property(
           "Fx",

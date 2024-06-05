@@ -20,10 +20,14 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const MatrixXs& A,
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
       drift_free_(true) {
   const std::size_t nx = state_->get_nx();
+  MatrixXs G = MatrixXs::Zero(ng_, nx + nu_);
+  MatrixXs H = MatrixXs::Zero(nh_, nx + nu_);
   VectorXs f = VectorXs::Zero(nx);
   VectorXs q = VectorXs::Zero(nx);
   VectorXs r = VectorXs::Zero(nu_);
-  set_LQR(A, B, Q, R, N, f, q, r);
+  VectorXs g = VectorXs::Zero(ng_);
+  VectorXs h = VectorXs::Zero(nh_);
+  set_LQR(A, B, Q, R, N, G, H, f, q, r, g, h);
 }
 
 template <typename Scalar>
@@ -32,7 +36,23 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const MatrixXs& N, const VectorXs& f, const VectorXs& q, const VectorXs& r)
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
       drift_free_(false) {
-  set_LQR(A, B, Q, R, N, f, q, r);
+  const std::size_t nx = state_->get_nx();
+  MatrixXs G = MatrixXs::Zero(ng_, nx + nu_);
+  MatrixXs H = MatrixXs::Zero(ng_, nx + nu_);
+  VectorXs g = VectorXs::Zero(ng_);
+  VectorXs h = VectorXs::Zero(nh_);
+  set_LQR(A, B, Q, R, N, G, H, f, q, r, g, h);
+}
+
+template <typename Scalar>
+ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
+    const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q, const MatrixXs& R,
+    const MatrixXs& N, const MatrixXs& G, const MatrixXs& H, const VectorXs& f,
+    const VectorXs& q, const VectorXs& r, const VectorXs& g, const VectorXs& h)
+    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0, G.rows(),
+           H.rows()),
+      drift_free_(false) {
+  set_LQR(A, B, Q, R, N, G, H, f, q, r, g, h);
 }
 
 template <typename Scalar>
@@ -45,18 +65,23 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
       Q_(MatrixXs::Identity(nx, nx)),
       R_(MatrixXs::Identity(nu, nu)),
       N_(MatrixXs::Zero(nx, nu)),
+      G_(MatrixXs::Zero(0, nx + nu)),
+      H_(MatrixXs::Zero(0, nx + nu)),
       f_(drift_free ? VectorXs::Zero(nx) : VectorXs::Ones(nx)),
       q_(VectorXs::Ones(nx)),
       r_(VectorXs::Ones(nu)),
+      g_(VectorXs::Zero(0)),
+      h_(VectorXs::Zero(0)),
       drift_free_(drift_free) {}
 
 template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
     : Base(boost::make_shared<StateVector>(copy.get_A().cols()),
-           copy.get_B().cols(), 0),
+           copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows()),
       drift_free_(false) {
   set_LQR(copy.get_A(), copy.get_B(), copy.get_Q(), copy.get_R(), copy.get_N(),
-          copy.get_f(), copy.get_q(), copy.get_r());
+          copy.get_G(), copy.get_H(), copy.get_f(), copy.get_q(), copy.get_r(),
+          copy.get_g(), copy.get_h());
 }
 
 template <typename Scalar>
@@ -92,6 +117,15 @@ void ActionModelLQRTpl<Scalar>::calc(
   data->cost += x.dot(d->Q_x_tmp);
   data->cost += q_.dot(x);
   data->cost += r_.dot(u);
+
+  // constraints
+  const std::size_t nx = state_->get_nx();
+  data->g.noalias() = G_.leftCols(nx) * x;
+  data->g.noalias() += G_.rightCols(nu_) * u;
+  data->g += g_;
+  data->h.noalias() = H_.leftCols(nx) * x;
+  data->h.noalias() += H_.rightCols(nu_) * u;
+  data->h += g_;
 }
 
 template <typename Scalar>
@@ -106,10 +140,18 @@ void ActionModelLQRTpl<Scalar>::calc(
   Data* d = static_cast<Data*>(data.get());
 
   d->xnext = x;
+
   // cost = 0.5 * x^T * Q * x + q^T * x
   d->Q_x_tmp.noalias() = Q_ * x;
   data->cost = Scalar(0.5) * x.dot(d->Q_x_tmp);
   data->cost += q_.dot(x);
+
+  // constraints
+  const std::size_t nx = state_->get_nx();
+  data->g.noalias() = G_.leftCols(nx) * x;
+  data->g += g_;
+  data->h.noalias() = H_.leftCols(nx) * x;
+  data->h += g_;
 }
 
 template <typename Scalar>
@@ -127,6 +169,7 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(nu_) + ")");
   }
 
+  const std::size_t nx = state_->get_nx();
   data->Fx = A_;
   data->Fu = B_;
   data->Lxx = Q_;
@@ -138,6 +181,10 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
   data->Lu = r_;
   data->Lu.noalias() += N_.transpose() * x;
   data->Lu.noalias() += R_ * u;
+  data->Gx = G_.leftCols(nx);
+  data->Gu = G_.rightCols(nu_);
+  data->Hx = H_.leftCols(nx);
+  data->Hu = H_.rightCols(nu_);
 }
 
 template <typename Scalar>
@@ -150,9 +197,12 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
                         std::to_string(state_->get_nx()) + ")");
   }
 
+  const std::size_t nx = state_->get_nx();
   data->Lxx = Q_;
   data->Lx = q_;
   data->Lx.noalias() += Q_ * x;
+  data->Gx = G_.leftCols(nx);
+  data->Hx = H_.leftCols(nx);
 }
 
 template <typename Scalar>
@@ -174,24 +224,30 @@ bool ActionModelLQRTpl<Scalar>::checkData(
 
 template <typename Scalar>
 ActionModelLQRTpl<Scalar> ActionModelLQRTpl<Scalar>::Random(
-    const std::size_t nx, const std::size_t nu) {
+    const std::size_t nx, const std::size_t nu, const std::size_t ng,
+    const std::size_t nh) {
   MatrixXs A = MatrixXs::Random(nx, nx);
   MatrixXs B = MatrixXs::Random(nx, nu);
-  MatrixXs H_tmp = MatrixXs::Random(nx + nu, nx + nu);
-  MatrixXs H = H_tmp.transpose() * H_tmp;
-  const Eigen::Block<MatrixXs> Q = H.topLeftCorner(nx, nx);
-  const Eigen::Block<MatrixXs> R = H.bottomRightCorner(nu, nu);
-  const Eigen::Block<MatrixXs> N = H.topRightCorner(nx, nu);
+  MatrixXs L_tmp = MatrixXs::Random(nx + nu, nx + nu);
+  MatrixXs L = L_tmp.transpose() * L_tmp;
+  const Eigen::Block<MatrixXs> Q = L.topLeftCorner(nx, nx);
+  const Eigen::Block<MatrixXs> R = L.bottomRightCorner(nu, nu);
+  const Eigen::Block<MatrixXs> N = L.topRightCorner(nx, nu);
+  MatrixXs G = MatrixXs::Random(ng, nx + nu);
+  MatrixXs H = MatrixXs::Random(nh, nx + nu);
   VectorXs f = VectorXs::Random(nx);
   VectorXs q = VectorXs::Random(nx);
   VectorXs r = VectorXs::Random(nu);
-  return ActionModelLQRTpl<Scalar>(A, B, Q, R, N, f, q, r);
+  VectorXs g = VectorXs::Random(ng);
+  VectorXs h = VectorXs::Random(nh);
+  return ActionModelLQRTpl<Scalar>(A, B, Q, R, N, G, H, f, q, r, g, h);
 }
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::print(std::ostream& os) const {
   os << "ActionModelLQR {nx=" << state_->get_nx() << ", nu=" << nu_
-     << ", drift_free=" << drift_free_ << "}";
+     << ", ng=" << ng_ << ", nh=" << nh_ << ", drift_free=" << drift_free_
+     << "}";
 }
 
 template <typename Scalar>
@@ -231,6 +287,18 @@ const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_N()
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_G()
+    const {
+  return G_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& ActionModelLQRTpl<Scalar>::get_H()
+    const {
+  return H_;
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_q()
     const {
   return q_;
@@ -243,10 +311,24 @@ const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_r()
 }
 
 template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_g()
+    const {
+  return g_;
+}
+
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& ActionModelLQRTpl<Scalar>::get_h()
+    const {
+  return h_;
+}
+
+template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
                                         const MatrixXs& Q, const MatrixXs& R,
-                                        const MatrixXs& N, const VectorXs& f,
-                                        const VectorXs& q, const VectorXs& r) {
+                                        const MatrixXs& N, const MatrixXs& G,
+                                        const MatrixXs& H, const VectorXs& f,
+                                        const VectorXs& q, const VectorXs& r,
+                                        const VectorXs& g, const VectorXs& h) {
   const std::size_t nx = state_->get_nx();
   if (static_cast<std::size_t>(A.rows()) != nx) {
     throw_pretty("Invalid argument: "
@@ -262,19 +344,34 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
       static_cast<std::size_t>(Q.cols()) != nx) {
     throw_pretty("Invalid argument: "
                  << "Q has wrong dimension (it should be " +
-                        std::to_string(nx) + "x " + std::to_string(nx) + ")");
+                        std::to_string(nx) + " x " + std::to_string(nx) + ")");
   }
   if (static_cast<std::size_t>(R.rows()) != nu_ ||
       static_cast<std::size_t>(R.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "R has wrong dimension (it should be " +
-                        std::to_string(nu_) + "x " + std::to_string(nu_) + ")");
+                        std::to_string(nu_) + " x " + std::to_string(nu_) +
+                        ")");
   }
   if (static_cast<std::size_t>(N.rows()) != nx ||
       static_cast<std::size_t>(N.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "N has wrong dimension (it should be " +
-                        std::to_string(nx) + "x " + std::to_string(nu_) + ")");
+                        std::to_string(nx) + " x " + std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(G.rows()) != ng_ ||
+      static_cast<std::size_t>(G.cols()) != nx + nu_) {
+    throw_pretty("Invalid argument: "
+                 << "G has wrong dimension (it should be " +
+                        std::to_string(ng_) + " x " + std::to_string(nx + nu_) +
+                        ")");
+  }
+  if (static_cast<std::size_t>(H.rows()) != nh_ ||
+      static_cast<std::size_t>(H.cols()) != nx + nu_) {
+    throw_pretty("Invalid argument: "
+                 << "H has wrong dimension (it should be " +
+                        std::to_string(nh_) + " x " + std::to_string(nx + nu_) +
+                        ")");
   }
   if (static_cast<std::size_t>(f.size()) != nx) {
     throw_pretty("Invalid argument: "
@@ -291,10 +388,20 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
                  << "r has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
-  H_ = MatrixXs::Zero(nx + nu_, nx + nu_);
-  H_ << Q, N, N.transpose(), R;
-  Eigen::LLT<MatrixXs> H_llt(H_);
-  if (!H_.isApprox(H_.transpose()) || H_llt.info() == Eigen::NumericalIssue) {
+  if (static_cast<std::size_t>(g.size()) != ng_) {
+    throw_pretty("Invalid argument: "
+                 << "g has wrong dimension (it should be " +
+                        std::to_string(ng_) + ")");
+  }
+  if (static_cast<std::size_t>(h.size()) != nh_) {
+    throw_pretty("Invalid argument: "
+                 << "h has wrong dimension (it should be " +
+                        std::to_string(nh_) + ")");
+  }
+  L_ = MatrixXs::Zero(nx + nu_, nx + nu_);
+  L_ << Q, N, N.transpose(), R;
+  Eigen::LLT<MatrixXs> L_llt(H_);
+  if (!L_.isApprox(L_.transpose()) || L_llt.info() == Eigen::NumericalIssue) {
     throw_pretty("Invalid argument "
                  << "[Q, N; N.T, R] is not semi-positive definite");
   }
@@ -305,8 +412,12 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   Q_ = Q;
   R_ = R;
   N_ = N;
+  G_ = G;
+  H_ = H;
   q_ = q;
   r_ = r;
+  g_ = g;
+  h_ = h;
 }
 
 }  // namespace crocoddyl
