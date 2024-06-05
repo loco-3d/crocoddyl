@@ -30,9 +30,31 @@ void exposeActionLQR() {
       "LQR action model.\n\n"
       "A Linear-Quadratic Regulator problem has a transition model of the "
       "form\n"
-      "xnext(x,u) = Fx*x + Fu*u + f0. Its cost function is quadratic of the\n"
-      "form: 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(
+      "xnext(x,u) = A x + B u + f. Its cost function is quadratic of the\n"
+      "form: 1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u].",
+      bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+               Eigen::MatrixXd, Eigen::MatrixXd>(
+          bp::args("self", "A", "B", "Q", "R", "N"),
+          "Initialize the LQR action model.\n\n"
+          ":param A: state matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix"))
+      .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::VectorXd,
+                    Eigen::VectorXd, Eigen::VectorXd>(
+          bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
+          "Initialize the LQR action model.\n\n"
+          ":param A: state matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix\n"
+          ":param f: dynamics drift\n"
+          ":param q: state weight vector\n"
+          ":param r: input weight vector"))
+      .def(bp::init<int, int, bp::optional<bool> >(
           bp::args("self", "nx", "nu", "driftFree"),
           "Initialize the LQR action model.\n\n"
           ":param nx: dimension of the state vector\n"
@@ -77,6 +99,10 @@ void exposeActionLQR() {
           bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"),
            "Create the LQR action data.")
+      .def("Random", &ActionModelLQR::Random,
+           "Create a random LQR model.\n\n"
+           ":param: nx: state dimension\n"
+           ":param nu: control dimension")
       .def("setLQR", &ActionModelLQR::set_LQR,
            bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
            "Modify the LQR action model.\n\n"

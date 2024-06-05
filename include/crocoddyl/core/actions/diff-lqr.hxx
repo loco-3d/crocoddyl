@@ -14,6 +14,29 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
+    const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
+    const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N)
+    : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
+      drift_free_(true) {
+  const std::size_t nq = state_->get_nq();
+  VectorXs f = VectorXs::Zero(nq);
+  VectorXs q = VectorXs::Zero(2 * nq);
+  VectorXs r = VectorXs::Zero(nu_);
+  set_LQR(Aq, Av, B, Q, R, N, f, q, r);
+}
+
+template <typename Scalar>
+DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
+    const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
+    const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
+    const VectorXs& q, const VectorXs& r)
+    : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
+      drift_free_(false) {
+  set_LQR(Aq, Av, B, Q, R, N, f, q, r);
+}
+
+template <typename Scalar>
+DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const std::size_t nq, const std::size_t nu, const bool drift_free)
     : Base(boost::make_shared<StateVector>(2 * nq), nu),
       Aq_(MatrixXs::Identity(nq, nq)),
@@ -25,10 +48,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       f_(drift_free ? VectorXs::Zero(nq) : VectorXs::Ones(nq)),
       q_(VectorXs::Ones(2 * nq)),
       r_(VectorXs::Ones(nu)),
-      drift_free_(drift_free) {
-  // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
-  // (matrices)
-}
+      drift_free_(drift_free) {}
 
 template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::~DifferentialActionModelLQRTpl() {}
@@ -140,6 +160,24 @@ bool DifferentialActionModelLQRTpl<Scalar>::checkData(
   } else {
     return false;
   }
+}
+
+template <typename Scalar>
+DifferentialActionModelLQRTpl<Scalar>
+DifferentialActionModelLQRTpl<Scalar>::Random(const std::size_t nq,
+                                              const std::size_t nu) {
+  MatrixXs Aq = MatrixXs::Random(nq, nq);
+  MatrixXs Av = MatrixXs::Random(nq, nq);
+  MatrixXs B = MatrixXs::Random(nq, nu);
+  MatrixXs H_tmp = MatrixXs::Random(2 * nq + nu, 2 * nq + nu);
+  MatrixXs H = H_tmp.transpose() * H_tmp;
+  const Eigen::Block<MatrixXs> Q = H.topLeftCorner(2 * nq, 2 * nq);
+  const Eigen::Block<MatrixXs> R = H.bottomRightCorner(nu, nu);
+  const Eigen::Block<MatrixXs> N = H.topRightCorner(2 * nq, nu);
+  VectorXs f = VectorXs::Random(nq);
+  VectorXs q = VectorXs::Random(2 * nq);
+  VectorXs r = VectorXs::Random(nu);
+  return DifferentialActionModelLQRTpl<Scalar>(Aq, Av, B, Q, R, N, f, q, r);
 }
 
 template <typename Scalar>

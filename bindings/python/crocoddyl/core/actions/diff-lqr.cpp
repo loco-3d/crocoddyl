@@ -37,11 +37,38 @@ void exposeDifferentialActionLQR() {
       "class implements a second order linear system given by\n"
       "  x = [q, v]\n"
       "  dv = Fq q + Fv v + Fu u + f0\n"
-      "where Fq, Fv, Fu and f0 are randomly chosen constant terms. On the "
+      "where Fq, Fv, Fu and f are randomly chosen constant terms. On the "
       "other\n"
       "hand the cost function is given by\n"
-      "  l(x,u) = 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(
+      "  l(x,u) = 1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u].",
+      bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+               Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd>(
+          bp::args("self", "Aq",
+                   "Av,"
+                   "B",
+                   "Q", "R", "N"),
+          "Initialize the differential LQR action model.\n\n"
+          ":param Aq: position matrix\n"
+          ":param Av: velocity matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix"))
+      .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd>(
+          bp::args("self", "Aq", "Av", "B", "Q", "R", "N", "f", "q", "r"),
+          "Initialize the differential LQR action model.\n\n"
+          ":param Aq: position matrix\n"
+          ":param Av: velocity matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix\n"
+          ":param f: dynamics drift\n"
+          ":param q: state weight vector\n"
+          ":param r: input weight vector"))
+      .def(bp::init<int, int, bp::optional<bool> >(
           bp::args("self", "nq", "nu", "driftFree"),
           "Initialize the differential LQR action model.\n\n"
           ":param nx: dimension of the state vector\n"
@@ -90,6 +117,10 @@ void exposeDifferentialActionLQR() {
           bp::args("self", "data", "x"))
       .def("createData", &DifferentialActionModelLQR::createData,
            bp::args("self"), "Create the differential LQR action data.")
+      .def("Random", &DifferentialActionModelLQR::Random,
+           "Create a random LQR model.\n\n"
+           ":param: nq: position dimension\n"
+           ":param nu: control dimension")
       .def("setLQR", &DifferentialActionModelLQR::set_LQR,
            bp::args("self", "Aq", "Av", "B", "Q", "R", "N", "f", "q", "r"),
            "Modify the LQR action model.\n\n"

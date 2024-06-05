@@ -32,8 +32,50 @@ class DifferentialActionModelLQRTpl
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] Aq  Position matrix
+   * @param[in] Av  Velocity matrix
+   * @param[in] B   Input matrix
+   * @param[in] Q   State weight matrix
+   * @param[in] R   Input weight matrix
+   * @param[in] N   State-input weight matrix
+   */
+  DifferentialActionModelLQRTpl(const MatrixXs& Aq, const MatrixXs& Av,
+                                const MatrixXs& B, const MatrixXs& Q,
+                                const MatrixXs& R, const MatrixXs& N);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] Aq  Position matrix
+   * @param[in] Av  Velocity matrix
+   * @param[in] B   Input matrix
+   * @param[in] Q   State weight matrix
+   * @param[in] R   Input weight matrix
+   * @param[in] N   State-input weight matrix
+   * @param[in] f   Dynamics drift
+   * @param[in] q   State weight vector
+   * @param[in] r   Input weight vector
+   */
+  DifferentialActionModelLQRTpl(const MatrixXs& Aq, const MatrixXs& Av,
+                                const MatrixXs& B, const MatrixXs& Q,
+                                const MatrixXs& R, const MatrixXs& N,
+                                const VectorXs& f, const VectorXs& q,
+                                const VectorXs& r);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] nq         Dimension of position vector
+   * @param[in] nu         Dimension of control vector
+   * @param[in] drif_free  Enable / disable the bias term of the linear dynamics
+   * (default true)
+   */
   DifferentialActionModelLQRTpl(const std::size_t nq, const std::size_t nu,
                                 const bool drift_free = true);
+
   virtual ~DifferentialActionModelLQRTpl();
 
   virtual void calc(
@@ -51,6 +93,15 @@ class DifferentialActionModelLQRTpl
   virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
   virtual bool checkData(
       const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+
+  /**
+   * @brief Create a random LQR model
+   *
+   * @param[in] nq  Position dimension
+   * @param[in] nu  Control dimension
+   */
+  static DifferentialActionModelLQRTpl Random(const std::size_t nq,
+                                              const std::size_t nu);
 
   /** @brief Return the position matrix */
   const MatrixXs& get_Aq() const;

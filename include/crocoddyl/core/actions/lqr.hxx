@@ -12,6 +12,30 @@
 namespace crocoddyl {
 
 template <typename Scalar>
+ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const MatrixXs& A,
+                                             const MatrixXs& B,
+                                             const MatrixXs& Q,
+                                             const MatrixXs& R,
+                                             const MatrixXs& N)
+    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
+      drift_free_(true) {
+  const std::size_t nx = state_->get_nx();
+  VectorXs f = VectorXs::Zero(nx);
+  VectorXs q = VectorXs::Zero(nx);
+  VectorXs r = VectorXs::Zero(nu_);
+  set_LQR(A, B, Q, R, N, f, q, r);
+}
+
+template <typename Scalar>
+ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
+    const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q, const MatrixXs& R,
+    const MatrixXs& N, const VectorXs& f, const VectorXs& q, const VectorXs& r)
+    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
+      drift_free_(false) {
+  set_LQR(A, B, Q, R, N, f, q, r);
+}
+
+template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
                                              const std::size_t nu,
                                              const bool drift_free)
@@ -24,10 +48,7 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
       f_(drift_free ? VectorXs::Zero(nx) : VectorXs::Ones(nx)),
       q_(VectorXs::Ones(nx)),
       r_(VectorXs::Ones(nu)),
-      drift_free_(drift_free) {
-  // TODO(cmastalli): substitute by random (vectors) and random-orthogonal
-  // (matrices)
-}
+      drift_free_(drift_free) {}
 
 template <typename Scalar>
 ActionModelLQRTpl<Scalar>::~ActionModelLQRTpl() {}
@@ -140,6 +161,22 @@ bool ActionModelLQRTpl<Scalar>::checkData(
   } else {
     return false;
   }
+}
+
+template <typename Scalar>
+ActionModelLQRTpl<Scalar> ActionModelLQRTpl<Scalar>::Random(
+    const std::size_t nx, const std::size_t nu) {
+  MatrixXs A = MatrixXs::Random(nx, nx);
+  MatrixXs B = MatrixXs::Random(nx, nu);
+  MatrixXs H_tmp = MatrixXs::Random(nx + nu, nx + nu);
+  MatrixXs H = H_tmp.transpose() * H_tmp;
+  const Eigen::Block<MatrixXs> Q = H.topLeftCorner(nx, nx);
+  const Eigen::Block<MatrixXs> R = H.bottomRightCorner(nu, nu);
+  const Eigen::Block<MatrixXs> N = H.topRightCorner(nx, nu);
+  VectorXs f = VectorXs::Random(nx);
+  VectorXs q = VectorXs::Random(nx);
+  VectorXs r = VectorXs::Random(nu);
+  return ActionModelLQRTpl<Scalar>(A, B, Q, R, N, f, q, r);
 }
 
 template <typename Scalar>

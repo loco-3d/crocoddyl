@@ -30,8 +30,45 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   */
+  ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+                    const MatrixXs& R, const MatrixXs& N);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   * @param[in] f  Dynamics drift
+   * @param[in] q  State weight vector
+   * @param[in] r  Input weight vector
+   */
+  ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+                    const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
+                    const VectorXs& q, const VectorXs& r);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] nx         Dimension of state vector
+   * @param[in] nu         Dimension of control vector
+   * @param[in] drif_free  Enable / disable the bias term of the linear dynamics
+   * (default true)
+   */
   ActionModelLQRTpl(const std::size_t nx, const std::size_t nu,
                     const bool drift_free = true);
+
   virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
@@ -46,6 +83,14 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& x);
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+
+  /**
+   * @brief Create a random LQR model
+   *
+   * @param[in] nx  State dimension
+   * @param[in] nu  Control dimension
+   */
+  static ActionModelLQRTpl Random(const std::size_t nx, const std::size_t nu);
 
   /** @brief Return the state matrix */
   const MatrixXs& get_A() const;
