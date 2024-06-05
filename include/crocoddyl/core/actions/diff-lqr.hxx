@@ -51,6 +51,16 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       drift_free_(drift_free) {}
 
 template <typename Scalar>
+DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
+    const DifferentialActionModelLQRTpl& copy)
+    : Base(boost::make_shared<StateVector>(2 * copy.get_Aq().cols()),
+           copy.get_B().cols(), 0),
+      drift_free_(false) {
+  set_LQR(copy.get_Aq(), copy.get_Av(), copy.get_B(), copy.get_Q(),
+          copy.get_R(), copy.get_N(), copy.get_f(), copy.get_q(), copy.get_r());
+}
+
+template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::~DifferentialActionModelLQRTpl() {}
 
 template <typename Scalar>

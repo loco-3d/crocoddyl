@@ -51,6 +51,15 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
       drift_free_(drift_free) {}
 
 template <typename Scalar>
+ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
+    : Base(boost::make_shared<StateVector>(copy.get_A().cols()),
+           copy.get_B().cols(), 0),
+      drift_free_(false) {
+  set_LQR(copy.get_A(), copy.get_B(), copy.get_Q(), copy.get_R(), copy.get_N(),
+          copy.get_f(), copy.get_q(), copy.get_r());
+}
+
+template <typename Scalar>
 ActionModelLQRTpl<Scalar>::~ActionModelLQRTpl() {}
 
 template <typename Scalar>

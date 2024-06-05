@@ -69,6 +69,9 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelLQRTpl(const std::size_t nx, const std::size_t nu,
                     const bool drift_free = true);
 
+  /** @brief Copy constructor */
+  ActionModelLQRTpl(const ActionModelLQRTpl& copy);
+
   virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,

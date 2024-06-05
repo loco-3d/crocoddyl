@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2024, University of Edinburgh, CTU, INRIA,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -29,6 +29,7 @@ struct DifferentialActionModelTypes {
   enum Type {
     DifferentialActionModelLQR,
     DifferentialActionModelLQRDriftFree,
+    DifferentialActionModelRandomLQR,
     DifferentialActionModelFreeFwdDynamics_Hector,
     DifferentialActionModelFreeFwdDynamics_TalosArm,
     DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed,

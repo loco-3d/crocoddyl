@@ -42,6 +42,9 @@ std::ostream& operator<<(std::ostream& os,
     case DifferentialActionModelTypes::DifferentialActionModelLQRDriftFree:
       os << "DifferentialActionModelLQRDriftFree";
       break;
+    case DifferentialActionModelTypes::DifferentialActionModelRandomLQR:
+      os << "DifferentialActionModelRandomLQR";
+      break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_Hector:
       os << "DifferentialActionModelFreeFwdDynamics_Hector";
@@ -146,6 +149,10 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
     case DifferentialActionModelTypes::DifferentialActionModelLQRDriftFree:
       action = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(40, 40,
                                                                          true);
+      break;
+    case DifferentialActionModelTypes::DifferentialActionModelRandomLQR:
+      action = boost::make_shared<crocoddyl::DifferentialActionModelLQR>(
+          crocoddyl::DifferentialActionModelLQR::Random(40, 40));
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_Hector:

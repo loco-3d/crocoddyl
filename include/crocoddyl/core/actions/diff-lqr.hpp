@@ -76,6 +76,9 @@ class DifferentialActionModelLQRTpl
   DifferentialActionModelLQRTpl(const std::size_t nq, const std::size_t nu,
                                 const bool drift_free = true);
 
+  /** @brief Copy constructor */
+  DifferentialActionModelLQRTpl(const DifferentialActionModelLQRTpl& copy);
+
   virtual ~DifferentialActionModelLQRTpl();
 
   virtual void calc(

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -41,6 +41,9 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
     case ActionModelTypes::ActionModelLQR:
       os << "ActionModelLQR";
       break;
+    case ActionModelTypes::ActionModelRandomLQR:
+      os << "ActionModelRandomLQR";
+      break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
       os << "ActionModelImpulseFwdDynamics_HyQ";
       break;
@@ -78,6 +81,15 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(
         action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, false);
       } else {
         action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, false);
+      }
+      break;
+    case ActionModelTypes::ActionModelRandomLQR:
+      if (secondInstance) {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(
+            crocoddyl::ActionModelLQR::Random(8, 4));
+      } else {
+        action = boost::make_shared<crocoddyl::ActionModelLQR>(
+            crocoddyl::ActionModelLQR::Random(8, 2));
       }
       break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
