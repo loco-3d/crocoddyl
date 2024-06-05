@@ -254,6 +254,19 @@ class LQRModelDerived(crocoddyl.ActionModelAbstract):
         self.q = np.ones(self.state.nx)
         self.r = np.ones(self.nu)
 
+    @classmethod
+    def fromLQR(cls, A, B, Q, R, N, f, q, r):
+        model = cls(A.shape[1], B.shape[1], False)
+        model.A = A
+        model.B = B
+        model.Q = Q
+        model.R = R
+        model.N = N
+        model.f = f
+        model.q = q
+        model.r = r
+        return model
+
     def calc(self, data, x, u=None):
         if u is None:
             data.xnext[:] = x
@@ -302,6 +315,20 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
         self.N = np.zeros((self.state.nx, self.nu))
         self.q = np.ones(self.state.nx)
         self.r = np.ones(self.nu)
+
+    @classmethod
+    def fromLQR(cls, Aq, Av, B, Q, R, N, f, q, r):
+        model = cls(Aq.shape[1], B.shape[1], False)
+        model.Aq = Aq
+        model.Av = Av
+        model.B = B
+        model.Q = Q
+        model.R = R
+        model.N = N
+        model.f = f
+        model.q = q
+        model.r = r
+        return model
 
     def calc(self, data, x, u=None):
         if u is None:
