@@ -79,32 +79,22 @@ class DifferentialActionModelLQRTpl
   /** @brief Return the input weight vector */
   const VectorXs& get_r() const;
 
-  /** @brief Modify the position matrix */
-  void set_Aq(const MatrixXs& Aq);
-
-  /** @brief Modify the velocity matrix */
-  void set_Av(const MatrixXs& Av);
-
-  /** @brief Modify the input matrix */
-  void set_B(const MatrixXs& B);
-
-  /** @brief Modify the dynamics drift */
-  void set_f(const VectorXs& f);
-
-  /** @brief Modify the state weight matrix */
-  void set_Q(const MatrixXs& Q);
-
-  /** @brief Modify the input weight matrix */
-  void set_R(const MatrixXs& R);
-
-  /** @brief Modify the state-input weight matrix */
-  void set_N(const MatrixXs& N);
-
-  /** @brief Modify the state weight vector */
-  void set_q(const VectorXs& q);
-
-  /** @brief Modify the input weight vector */
-  void set_r(const VectorXs& r);
+  /**
+   * @brief Modify the LQR action model
+   *
+   * @param[in] Aq  Position matrix
+   * @param[in] Av  Velocity matrix
+   * @param[in] B   Input matrix
+   * @param[in] Q   State weight matrix
+   * @param[in] R   Input weight matrix
+   * @param[in] N   State-input weight matrix
+   * @param[in] f   Dynamics drift
+   * @param[in] q   State weight vector
+   * @param[in] r   Input weight vector
+   */
+  void set_LQR(const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
+               const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N,
+               const VectorXs& f, const VectorXs& q, const VectorXs& r);
 
   DEPRECATED("Use get_Aq", const MatrixXs& get_Fq() const { return get_Aq(); })
   DEPRECATED("Use get_Av", const MatrixXs& get_Fv() const { return get_Av(); })
@@ -115,15 +105,42 @@ class DifferentialActionModelLQRTpl
   DEPRECATED("Use get_Q", const MatrixXs& get_Lxx() const { return get_Q(); })
   DEPRECATED("Use get_N", const MatrixXs& get_Lxu() const { return get_N(); })
   DEPRECATED("Use get_R", const MatrixXs& get_Luu() const { return get_R(); })
-  DEPRECATED("Use set_Aq", void set_Fq(const MatrixXs& Aq) { set_Aq(Aq); })
-  DEPRECATED("Use set_Av", void set_Fv(const MatrixXs& Av) { set_Av(Av); })
-  DEPRECATED("Use set_B", void set_Fu(const MatrixXs& B) { set_B(B); })
-  DEPRECATED("Use set_f", void set_f0(const VectorXs& f) { set_f(f); })
-  DEPRECATED("Use set_q", void set_lx(const VectorXs& q) { set_q(q); })
-  DEPRECATED("Use set_r", void set_lu(const VectorXs& r) { set_r(r); })
-  DEPRECATED("Use set_Q", void set_Lxx(const MatrixXs& Q) { set_Q(Q); })
-  DEPRECATED("Use set_N", void set_Lxu(const MatrixXs& N) { set_N(N); })
-  DEPRECATED("Use set_R", void set_Luu(const MatrixXs& R) { set_R(R); })
+  DEPRECATED(
+      "Use set_LQR", void set_Fq(const MatrixXs& Aq) {
+        set_LQR(Aq, Av_, B_, Q_, R_, N_, f_, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Fv(const MatrixXs& Av) {
+        set_LQR(Aq_, Av, B_, Q_, R_, N_, f_, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Fu(const MatrixXs& B) {
+        set_LQR(Aq_, Av_, B, Q_, R_, N_, f_, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_f0(const VectorXs& f) {
+        set_LQR(Aq_, Av_, B_, Q_, R_, N_, f, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_lx(const VectorXs& q) {
+        set_LQR(Aq_, Av_, B_, Q_, R_, N_, f_, q, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_lu(const VectorXs& r) {
+        set_LQR(Aq_, Av_, B_, Q_, R_, N_, f_, q_, r);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Lxx(const MatrixXs& Q) {
+        set_LQR(Aq_, Av_, B_, Q, R_, N_, f_, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Lxu(const MatrixXs& N) {
+        set_LQR(Aq_, Av_, B_, Q_, R_, N, f_, q_, r_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Luu(const MatrixXs& R) {
+        set_LQR(Aq_, Av_, B_, Q_, R, N_, f_, q_, r_);
+      })
 
   /**
    * @brief Print relevant information of the LQR model
@@ -146,6 +163,7 @@ class DifferentialActionModelLQRTpl
   VectorXs f_;
   VectorXs q_;
   VectorXs r_;
+  MatrixXs H_;
   bool drift_free_;
 };
 

@@ -77,100 +77,111 @@ void exposeActionLQR() {
           bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"),
            "Create the LQR action data.")
+      .def("setLQR", &ActionModelLQR::set_LQR,
+           bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
+           "Modify the LQR action model.\n\n"
+           ":param A: state matrix\n"
+           ":param B: input matrix\n"
+           ":param Q: state weight matrix\n"
+           ":param R: input weight matrix\n"
+           ":param N: state-input weight matrix\n"
+           ":param f: dynamics drift\n"
+           ":param q: state weight vector\n"
+           ":param r: input weight vector")
       .add_property("A",
                     bp::make_function(&ActionModelLQR::get_A,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_A, "state matrix")
+                    "state matrix")
       .add_property("B",
                     bp::make_function(&ActionModelLQR::get_B,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_B, "input matrix")
+                    "input matrix")
       .add_property("f",
                     bp::make_function(&ActionModelLQR::get_f,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_f, "dynamics drift")
+                    "dynamics drift")
       .add_property("Q",
                     bp::make_function(&ActionModelLQR::get_Q,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Q, "state weight matrix")
+                    "state weight matrix")
       .add_property("R",
                     bp::make_function(&ActionModelLQR::get_R,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_R, "input weight matrix")
+                    "input weight matrix")
       .add_property("N",
                     bp::make_function(&ActionModelLQR::get_N,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_N, "state-input weight matrix")
+                    "state-input weight matrix")
       .add_property("q",
                     bp::make_function(&ActionModelLQR::get_q,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_q, "state weight vector")
+                    "state weight vector")
       .add_property("r",
                     bp::make_function(&ActionModelLQR::get_r,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_r, "input weight vector")
+                    "input weight vector")
       // deprecated function
       .add_property(
           "Fx",
           bp::make_function(&ActionModelLQR::get_A,
                             deprecated<bp::return_internal_reference<> >(
-                                "Deprecated. Use A.")),
-          &ActionModelLQR::set_A, "state matrix")
+                                "Deprecated. Use set_LQR.")),
+          &ActionModelLQR::set_Fx, "state matrix")
       .add_property(
           "Fu",
           bp::make_function(&ActionModelLQR::get_B,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use B.")),
-          bp::make_function(&ActionModelLQR::set_B,
-                            deprecated<>("Deprecated. Use B.")),
+          bp::make_function(&ActionModelLQR::set_Fu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "input matrix")
       .add_property(
           "f0",
           bp::make_function(&ActionModelLQR::get_f,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use f.")),
-          bp::make_function(&ActionModelLQR::set_f,
-                            deprecated<>("Deprecated. Use f.")),
+          bp::make_function(&ActionModelLQR::set_f0,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "dynamics drift")
       .add_property(
           "lx",
           bp::make_function(&ActionModelLQR::get_q,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use q.")),
-          bp::make_function(&ActionModelLQR::set_q,
-                            deprecated<>("Deprecated. Use q.")),
+          bp::make_function(&ActionModelLQR::set_lx,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "state weight vector")
       .add_property(
           "lu",
           bp::make_function(&ActionModelLQR::get_r,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use r.")),
-          bp::make_function(&ActionModelLQR::set_r,
-                            deprecated<>("Deprecated. Use r.")),
+          bp::make_function(&ActionModelLQR::set_lu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "input weight vector")
       .add_property(
           "Lxx",
           bp::make_function(&ActionModelLQR::get_Q,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use Q.")),
-          bp::make_function(&ActionModelLQR::set_Q,
-                            deprecated<>("Deprecated. Use Q.")),
+          bp::make_function(&ActionModelLQR::set_Lxx,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "state weight matrix")
       .add_property(
           "Lxu",
           bp::make_function(&ActionModelLQR::get_N,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use N.")),
-          bp::make_function(&ActionModelLQR::set_N,
-                            deprecated<>("Deprecated. Use N.")),
+          bp::make_function(&ActionModelLQR::set_Lxu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "state-input weight matrix")
       .add_property(
           "Luu",
           bp::make_function(&ActionModelLQR::get_R,
                             deprecated<bp::return_internal_reference<> >(
                                 "Deprecated. Use R.")),
-          bp::make_function(&ActionModelLQR::set_R,
-                            deprecated<>("Deprecated. Use R.")),
+          bp::make_function(&ActionModelLQR::set_Luu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
           "input weight matrix")
       .def(CopyableVisitor<ActionModelLQR>());
 

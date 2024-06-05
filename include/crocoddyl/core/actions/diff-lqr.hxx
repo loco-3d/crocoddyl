@@ -203,103 +203,77 @@ DifferentialActionModelLQRTpl<Scalar>::get_r() const {
 }
 
 template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_Aq(const MatrixXs& Aq) {
-  if (static_cast<std::size_t>(Aq.rows()) != state_->get_nq() ||
-      static_cast<std::size_t>(Aq.cols()) != state_->get_nq()) {
+void DifferentialActionModelLQRTpl<Scalar>::set_LQR(
+    const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
+    const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
+    const VectorXs& q, const VectorXs& r) {
+  const std::size_t nq = state_->get_nq();
+  if (static_cast<std::size_t>(Aq.rows()) != nq) {
     throw_pretty("Invalid argument: "
-                 << "Aq has wrong dimension (it should be " +
-                        std::to_string(state_->get_nq()) + "," +
-                        std::to_string(state_->get_nq()) + ")");
+                 << "Aq should be a squared matrix with size " +
+                        std::to_string(nq));
   }
-  Aq_ = Aq;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_Av(const MatrixXs& Av) {
-  if (static_cast<std::size_t>(Av.rows()) != state_->get_nv() ||
-      static_cast<std::size_t>(Av.cols()) != state_->get_nv()) {
+  if (static_cast<std::size_t>(Av.rows()) != nq) {
     throw_pretty("Invalid argument: "
-                 << "Av has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + "," +
-                        std::to_string(state_->get_nv()) + ")");
+                 << "Av should be a squared matrix with size " +
+                        std::to_string(nq));
   }
-  Av_ = Av;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_B(const MatrixXs& B) {
-  if (static_cast<std::size_t>(B.rows()) != state_->get_nv() ||
-      static_cast<std::size_t>(B.cols()) != nu_) {
+  if (static_cast<std::size_t>(B.rows()) != nq) {
     throw_pretty("Invalid argument: "
-                 << "B has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + "," +
-                        std::to_string(nu_) + ")");
+                 << "B has wrong dimension (it should have " +
+                        std::to_string(nq) + " rows)");
   }
-  B_ = B;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_f(const VectorXs& f) {
-  if (static_cast<std::size_t>(f.size()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "f has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + ")");
-  }
-  f_ = f;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_Q(const MatrixXs& Q) {
-  if (static_cast<std::size_t>(Q.rows()) != state_->get_nx() ||
-      static_cast<std::size_t>(Q.cols()) != state_->get_nx()) {
+  if (static_cast<std::size_t>(Q.rows()) != 2 * nq ||
+      static_cast<std::size_t>(Q.cols()) != 2 * nq) {
     throw_pretty("Invalid argument: "
                  << "Q has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + "," +
-                        std::to_string(state_->get_nx()) + ")");
+                        std::to_string(2 * nq) + "x " + std::to_string(2 * nq) +
+                        ")");
   }
-  Q_ = Q;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_R(const MatrixXs& R) {
   if (static_cast<std::size_t>(R.rows()) != nu_ ||
       static_cast<std::size_t>(R.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "R has wrong dimension (it should be " +
-                        std::to_string(nu_) + "," + std::to_string(nu_) + ")");
+                        std::to_string(nu_) + "x " + std::to_string(nu_) + ")");
   }
-  R_ = R;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_N(const MatrixXs& N) {
-  if (static_cast<std::size_t>(N.rows()) != state_->get_nx() ||
+  if (static_cast<std::size_t>(N.rows()) != 2 * nq ||
       static_cast<std::size_t>(N.cols()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "N has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + "," +
-                        std::to_string(nu_) + ")");
+                        std::to_string(2 * nq) + "x " + std::to_string(nu_) +
+                        ")");
   }
-  N_ = N;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_q(const VectorXs& q) {
-  if (static_cast<std::size_t>(q.size()) != state_->get_nx()) {
+  if (static_cast<std::size_t>(f.size()) != nq) {
+    throw_pretty("Invalid argument: "
+                 << "f has wrong dimension (it should be " +
+                        std::to_string(nq) + ")");
+  }
+  if (static_cast<std::size_t>(q.size()) != 2 * nq) {
     throw_pretty("Invalid argument: "
                  << "q has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+                        std::to_string(2 * nq) + ")");
   }
-  q_ = q;
-}
-
-template <typename Scalar>
-void DifferentialActionModelLQRTpl<Scalar>::set_r(const VectorXs& r) {
   if (static_cast<std::size_t>(r.size()) != nu_) {
     throw_pretty("Invalid argument: "
                  << "r has wrong dimension (it should be " +
                         std::to_string(nu_) + ")");
   }
+  H_ = MatrixXs::Zero(2 * nq + nu_, 2 * nq + nu_);
+  H_ << Q, N, N.transpose(), R;
+  Eigen::LLT<MatrixXs> H_llt(H_);
+  if (!H_.isApprox(H_.transpose()) || H_llt.info() == Eigen::NumericalIssue) {
+    throw_pretty("Invalid argument "
+                 << "[Q, N; N.T, R] is not semi-positive definite");
+  }
+
+  Aq_ = Aq;
+  Av_ = Av;
+  B_ = B;
+  f_ = f;
+  Q_ = Q;
+  R_ = R;
+  N_ = N;
+  q_ = q;
   r_ = r;
 }
 
