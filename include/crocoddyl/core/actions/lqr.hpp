@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,6 +18,31 @@
 
 namespace crocoddyl {
 
+/**
+ * @brief Linear-quadratic regulator (LQR) action model
+ *
+ * A linear-quadratic regulator (LQR) action has a transition model of the form
+ * \f[ \begin{equation}
+ *   \mathbf{x}^' = \mathbf{A x + B u + f}.
+ * \end{equation} \f]
+ * Its cost function is quadratic of the form:
+ * \f[ \begin{equation}
+ * \ell(\mathbf{x},\mathbf{u}) = \begin{bmatrix}1
+ * \\ \mathbf{x} \\ \mathbf{u}\end{bmatrix}^T \begin{bmatrix}0 &
+ * \mathbf{q}^T & \mathbf{r}^T \\ \mathbf{q} & \mathbf{Q}
+ * &
+ * \mathbf{N}^T \\
+ * \mathbf{r} & \mathbf{N} & \mathbf{R}\end{bmatrix}
+ * \begin{bmatrix}1 \\ \mathbf{x} \\
+ * \mathbf{u}\end{bmatrix}
+ * \end{equation} \f]
+ * and the linear equality and inequality constraints has the form:
+ * \f[ \begin{aligned}
+ * \mathbf{g(x,u)} =  \mathbf{G}\begin{bmatrix} \mathbf{x} \\ \mathbf{u}
+ * \end{bmatrix} [x,u] + \mathbf{g}
+ * &\mathbf{h(x,u)} = \mathbf{H}\begin{bmatrix} \mathbf{x} \\ \mathbf{u}
+ * \end{bmatrix} [x,u] + \mathbf{h} \leq \mathbf{0} \end{aligned} \f]
+ */
 template <typename _Scalar>
 class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
@@ -29,8 +55,69 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   */
+  ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+                    const MatrixXs& R, const MatrixXs& N);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   * @param[in] f  Dynamics drift
+   * @param[in] q  State weight vector
+   * @param[in] r  Input weight vector
+   */
+  ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+                    const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
+                    const VectorXs& q, const VectorXs& r);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   * @param[in] H  State-input equality constraint matrix
+   * @param[in] G  State-input inequality constraint matrix
+   * @param[in] f  Dynamics drift
+   * @param[in] q  State weight vector
+   * @param[in] r  Input weight vector
+   * @param[in] g  State-input equality constraint bias
+   * @param[in] h  State-input inequality constraint bias
+   */
+  ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+                    const MatrixXs& R, const MatrixXs& N, const MatrixXs& G,
+                    const MatrixXs& H, const VectorXs& f, const VectorXs& q,
+                    const VectorXs& r, const VectorXs& g, const VectorXs& h);
+
+  /**
+   * @brief Initialize the LQR action model
+   *
+   * @param[in] nx         Dimension of state vector
+   * @param[in] nu         Dimension of control vector
+   * @param[in] drif_free  Enable / disable the bias term of the linear dynamics
+   * (default true)
+   */
   ActionModelLQRTpl(const std::size_t nx, const std::size_t nu,
                     const bool drift_free = true);
+
+  /** @brief Copy constructor */
+  ActionModelLQRTpl(const ActionModelLQRTpl& copy);
+
   virtual ~ActionModelLQRTpl();
 
   virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
@@ -46,23 +133,115 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual boost::shared_ptr<ActionDataAbstract> createData();
   virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
 
-  const MatrixXs& get_Fx() const;
-  const MatrixXs& get_Fu() const;
-  const VectorXs& get_f0() const;
-  const VectorXs& get_lx() const;
-  const VectorXs& get_lu() const;
-  const MatrixXs& get_Lxx() const;
-  const MatrixXs& get_Lxu() const;
-  const MatrixXs& get_Luu() const;
+  /**
+   * @brief Create a random LQR model
+   *
+   * @param[in] nx  State dimension
+   * @param[in] nu  Control dimension
+   * @param[in] ng  Equality constraint dimension (default 0)
+   * @param[in] nh  Inequality constraint dimension (defaul 0)
+   */
+  static ActionModelLQRTpl Random(const std::size_t nx, const std::size_t nu,
+                                  const std::size_t ng = 0,
+                                  const std::size_t nh = 0);
 
-  void set_Fx(const MatrixXs& Fx);
-  void set_Fu(const MatrixXs& Fu);
-  void set_f0(const VectorXs& f0);
-  void set_lx(const VectorXs& lx);
-  void set_lu(const VectorXs& lu);
-  void set_Lxx(const MatrixXs& Lxx);
-  void set_Lxu(const MatrixXs& Lxu);
-  void set_Luu(const MatrixXs& Luu);
+  /** @brief Return the state matrix */
+  const MatrixXs& get_A() const;
+
+  /** @brief Return the input matrix */
+  const MatrixXs& get_B() const;
+
+  /** @brief Return the dynamics drift */
+  const VectorXs& get_f() const;
+
+  /** @brief Return the state weight matrix */
+  const MatrixXs& get_Q() const;
+
+  /** @brief Return the input weight matrix */
+  const MatrixXs& get_R() const;
+
+  /** @brief Return the state-input weight matrix */
+  const MatrixXs& get_N() const;
+
+  /** @brief Return the state-input equality constraint matrix */
+  const MatrixXs& get_G() const;
+
+  /** @brief Return the state-input inequality constraint matrix */
+  const MatrixXs& get_H() const;
+
+  /** @brief Return the state weight vector */
+  const VectorXs& get_q() const;
+
+  /** @brief Return the input weight vector */
+  const VectorXs& get_r() const;
+
+  /** @brief Return the state-input equality constraint bias */
+  const VectorXs& get_g() const;
+
+  /** @brief Return the state-input inequality constraint bias */
+  const VectorXs& get_h() const;
+
+  /**
+   * @brief Modify the LQR action model
+   *
+   * @param[in] A  State matrix
+   * @param[in] B  Input matrix
+   * @param[in] Q  State weight matrix
+   * @param[in] R  Input weight matrix
+   * @param[in] N  State-input weight matrix
+   * @param[in] G  State-input equality constraint matrix
+   * @param[in] H  State-input inequality constraint matrix
+   * @param[in] f  Dynamics drift
+   * @param[in] q  State weight vector
+   * @param[in] r  Input weight vector
+   * @param[in] g  State-input equality constraint bias
+   * @param[in] h  State-input inequality constraint bias
+   */
+  void set_LQR(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
+               const MatrixXs& R, const MatrixXs& N, const MatrixXs& G,
+               const MatrixXs& H, const VectorXs& f, const VectorXs& q,
+               const VectorXs& r, const VectorXs& g, const VectorXs& h);
+
+  DEPRECATED("Use get_A", const MatrixXs& get_Fx() const { return get_A(); })
+  DEPRECATED("Use get_B", const MatrixXs& get_Fu() const { return get_B(); })
+  DEPRECATED("Use get_f", const VectorXs& get_f0() const { return get_f(); })
+  DEPRECATED("Use get_q", const VectorXs& get_lx() const { return get_q(); })
+  DEPRECATED("Use get_r", const VectorXs& get_lu() const { return get_r(); })
+  DEPRECATED("Use get_Q", const MatrixXs& get_Lxx() const { return get_Q(); })
+  DEPRECATED("Use get_R", const MatrixXs& get_Lxu() const { return get_R(); })
+  DEPRECATED("Use get_N", const MatrixXs& get_Luu() const { return get_N(); })
+  DEPRECATED(
+      "Use set_LQR", void set_Fx(const MatrixXs& A) {
+        set_LQR(A, B_, Q_, R_, N_, G_, H_, f_, q_, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Fu(const MatrixXs& B) {
+        set_LQR(A_, B, Q_, R_, N_, G_, H_, f_, q_, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_f0(const VectorXs& f) {
+        set_LQR(A_, B_, Q_, R_, N_, G_, H_, f, q_, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_lx(const VectorXs& q) {
+        set_LQR(A_, B_, Q_, R_, N_, G_, H_, f_, q, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_lu(const VectorXs& r) {
+        set_LQR(A_, B_, Q_, R_, N_, G_, H_, f_, q_, r, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Lxx(const MatrixXs& Q) {
+        set_LQR(A_, B_, Q, R_, N_, G_, H_, f_, q_, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Luu(const MatrixXs& R) {
+        set_LQR(A_, B_, Q_, R, N_, G_, H_, f_, q_, r_, g_, h_);
+      })
+  DEPRECATED(
+      "Use set_LQR", void set_Lxu(const MatrixXs& N) {
+        set_LQR(A_, B_, Q_, R_, N, G_, H_, f_, q_, r_, g_, h_);
+      })
 
   /**
    * @brief Print relevant information of the LQR model
@@ -72,19 +251,27 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  protected:
+  using Base::ng_;     //!< Equality constraint dimension
+  using Base::nh_;     //!< Inequality constraint dimension
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
  private:
+  MatrixXs A_;
+  MatrixXs B_;
+  MatrixXs Q_;
+  MatrixXs R_;
+  MatrixXs N_;
+  MatrixXs G_;
+  MatrixXs H_;
+  VectorXs f_;
+  VectorXs q_;
+  VectorXs r_;
+  VectorXs g_;
+  VectorXs h_;
+  MatrixXs L_;
   bool drift_free_;
-  MatrixXs Fx_;
-  MatrixXs Fu_;
-  VectorXs f0_;
-  MatrixXs Lxx_;
-  MatrixXs Lxu_;
-  MatrixXs Luu_;
-  VectorXs lx_;
-  VectorXs lu_;
+  bool updated_lqr_;
 };
 
 template <typename _Scalar>
@@ -97,21 +284,30 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   explicit ActionDataLQRTpl(Model<Scalar>* const model)
       : Base(model),
-        Luu_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
-        Lxx_x_tmp(VectorXs::Zero(
+        R_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
+        Q_x_tmp(VectorXs::Zero(
             static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
-    // Setting the linear model and quadratic cost here because they are
-    // constant
-    Fx = model->get_Fx();
-    Fu = model->get_Fu();
-    Lxx = model->get_Lxx();
-    Luu = model->get_Luu();
-    Lxu = model->get_Lxu();
+    // Setting the linear model and quadratic cost as they are constant
+    const std::size_t nq = model->get_state()->get_nq();
+    const std::size_t nu = model->get_nu();
+    Fx = model->get_A();
+    Fu = model->get_B();
+    Lxx = model->get_Q();
+    Luu = model->get_R();
+    Lxu = model->get_N();
+    Gx = model->get_G().leftCols(2 * nq);
+    Gu = model->get_G().rightCols(nu);
+    Hx = model->get_H().leftCols(2 * nq);
+    Hu = model->get_H().rightCols(nu);
   }
 
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
+  using Base::Gu;
+  using Base::Gx;
+  using Base::Hu;
+  using Base::Hx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
@@ -119,10 +315,11 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
-  VectorXs Luu_u_tmp;  // Temporary variable for storing Hessian-vector product
-                       // (size: nu)
-  VectorXs Lxx_x_tmp;  // Temporary variable for storing Hessian-vector product
-                       // (size: nx)
+
+  VectorXs R_u_tmp;  // Temporary variable for storing Hessian-vector product
+                     // (size: nu)
+  VectorXs Q_x_tmp;  // Temporary variable for storing Hessian-vector product
+                     // (size: nx)
 };
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,21 +12,62 @@
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(ActionModelLQR_Random_wrap,
+                                ActionModelLQR::Random, 2, 4)
+
 void exposeActionLQR() {
+// TODO: Remove once the deprecated update call has been removed in a future
+// release
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
   boost::python::register_ptr_to_python<boost::shared_ptr<ActionModelLQR> >();
 
   bp::class_<ActionModelLQR, bp::bases<ActionModelAbstract> >(
       "ActionModelLQR",
       "LQR action model.\n\n"
-      "A Linear-Quadratic Regulator problem has a transition model of the "
+      "A linear-quadratic regulator (LQR) action has a transition model of the "
       "form\n"
-      "xnext(x,u) = Fx*x + Fu*u + f0. Its cost function is quadratic of the\n"
-      "form: 1/2 [x,u].T [Lxx Lxu; Lxu.T Luu] [x,u] + [lx,lu].T [x,u].",
-      bp::init<int, int, bp::optional<bool> >(
+      "  xnext(x,u) = A x + B u + f.\n"
+      "Its cost function is quadratic of the form:\n"
+      "  1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u],\n"
+      "and the linear equality and inequality constraints has the form:\n"
+      "  g(x,u) = G [x,u] + g\n"
+      "  h(x,u) = H [x,u] + h<=0.",
+      bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+               Eigen::MatrixXd, Eigen::MatrixXd>(
+          bp::args("self", "A", "B", "Q", "R", "N"),
+          "Initialize the LQR action model.\n\n"
+          ":param A: state matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix"))
+      .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::VectorXd, Eigen::VectorXd,
+                    Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd>(
+          bp::args("self", "A", "B", "Q", "R", "N", "G", "H", "f", "q", "r",
+                   "g", "h"),
+          "Initialize the LQR action model.\n\n"
+          ":param A: state matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix\n"
+          ":param G: state-input equality constraint matrix\n"
+          ":param H: state-input equality constraint matrix\n"
+          ":param f: dynamics drift\n"
+          ":param q: state weight vector\n"
+          ":param r: input weight vector\n"
+          ":param g: state-input equality constraint bias\n"
+          ":param h: state-input inequality constraint bias"))
+      .def(bp::init<int, int, bp::optional<bool> >(
           bp::args("self", "nx", "nu", "driftFree"),
           "Initialize the LQR action model.\n\n"
           ":param nx: dimension of the state vector\n"
@@ -71,38 +112,142 @@ void exposeActionLQR() {
           bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"),
            "Create the LQR action data.")
-      .add_property("Fx",
-                    bp::make_function(&ActionModelLQR::get_Fx,
+      .def("Random", &ActionModelLQR::Random,
+           ActionModelLQR_Random_wrap(
+               bp::args("nx", "nu", "ng", "nh"),
+               "Create a random LQR model.\n\n"
+               ":param nx: state dimension\n"
+               ":param nu: control dimension\n"
+               ":param ng: equality constraint dimension (default 0)\n"
+               ":param nh: inequality constraint dimension (default 0)"))
+      .staticmethod("Random")
+      .def("setLQR", &ActionModelLQR::set_LQR,
+           bp::args("self", "A", "B", "Q", "R", "N", "G", "H", "f", "q", "r",
+                    "g", "h"),
+           "Modify the LQR action model.\n\n"
+           ":param A: state matrix\n"
+           ":param B: input matrix\n"
+           ":param Q: state weight matrix\n"
+           ":param R: input weight matrix\n"
+           ":param N: state-input weight matrix\n"
+           ":param G: state-input equality constraint matrix\n"
+           ":param H: state-input equality constraint matrix\n"
+           ":param f: dynamics drift\n"
+           ":param q: state weight vector\n"
+           ":param r: input weight vector\n"
+           ":param g: state-input equality constraint bias\n"
+           ":param h: state-input inequality constraint bias")
+      .add_property("A",
+                    bp::make_function(&ActionModelLQR::get_A,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Fx, "Jacobian of the dynamics")
-      .add_property("Fu",
-                    bp::make_function(&ActionModelLQR::get_Fu,
+                    "state matrix")
+      .add_property("B",
+                    bp::make_function(&ActionModelLQR::get_B,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Fu, "Jacobian of the dynamics")
-      .add_property("f0",
-                    bp::make_function(&ActionModelLQR::get_f0,
+                    "input matrix")
+      .add_property("f",
+                    bp::make_function(&ActionModelLQR::get_f,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_f0, "dynamics drift")
-      .add_property("lx",
-                    bp::make_function(&ActionModelLQR::get_lx,
+                    "dynamics drift")
+      .add_property("Q",
+                    bp::make_function(&ActionModelLQR::get_Q,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_lx, "Jacobian of the cost")
-      .add_property("lu",
-                    bp::make_function(&ActionModelLQR::get_lu,
+                    "state weight matrix")
+      .add_property("R",
+                    bp::make_function(&ActionModelLQR::get_R,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_lu, "Jacobian of the cost")
-      .add_property("Lxx",
-                    bp::make_function(&ActionModelLQR::get_Lxx,
+                    "input weight matrix")
+      .add_property("N",
+                    bp::make_function(&ActionModelLQR::get_N,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Lxx, "Hessian of the cost")
-      .add_property("Lxu",
-                    bp::make_function(&ActionModelLQR::get_Lxu,
+                    "state-input weight matrix")
+      .add_property("G",
+                    bp::make_function(&ActionModelLQR::get_G,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Lxu, "Hessian of the cost")
-      .add_property("Luu",
-                    bp::make_function(&ActionModelLQR::get_Luu,
+                    "state-input equality constraint matrix")
+      .add_property("H",
+                    bp::make_function(&ActionModelLQR::get_H,
                                       bp::return_internal_reference<>()),
-                    &ActionModelLQR::set_Luu, "Hessian of the cost")
+                    "state-input inequality constraint matrix")
+      .add_property("q",
+                    bp::make_function(&ActionModelLQR::get_q,
+                                      bp::return_internal_reference<>()),
+                    "state weight vector")
+      .add_property("r",
+                    bp::make_function(&ActionModelLQR::get_r,
+                                      bp::return_internal_reference<>()),
+                    "input weight vector")
+      .add_property("g",
+                    bp::make_function(&ActionModelLQR::get_g,
+                                      bp::return_internal_reference<>()),
+                    "state-input equality constraint bias")
+      .add_property("h",
+                    bp::make_function(&ActionModelLQR::get_h,
+                                      bp::return_internal_reference<>()),
+                    "state-input inequality constraint bias")
+      // deprecated function
+      .add_property(
+          "Fx",
+          bp::make_function(&ActionModelLQR::get_A,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use set_LQR.")),
+          &ActionModelLQR::set_Fx, "state matrix")
+      .add_property(
+          "Fu",
+          bp::make_function(&ActionModelLQR::get_B,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use B.")),
+          bp::make_function(&ActionModelLQR::set_Fu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "input matrix")
+      .add_property(
+          "f0",
+          bp::make_function(&ActionModelLQR::get_f,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use f.")),
+          bp::make_function(&ActionModelLQR::set_f0,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "dynamics drift")
+      .add_property(
+          "lx",
+          bp::make_function(&ActionModelLQR::get_q,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use q.")),
+          bp::make_function(&ActionModelLQR::set_lx,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "state weight vector")
+      .add_property(
+          "lu",
+          bp::make_function(&ActionModelLQR::get_r,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use r.")),
+          bp::make_function(&ActionModelLQR::set_lu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "input weight vector")
+      .add_property(
+          "Lxx",
+          bp::make_function(&ActionModelLQR::get_Q,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use Q.")),
+          bp::make_function(&ActionModelLQR::set_Lxx,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "state weight matrix")
+      .add_property(
+          "Lxu",
+          bp::make_function(&ActionModelLQR::get_N,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use N.")),
+          bp::make_function(&ActionModelLQR::set_Lxu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "state-input weight matrix")
+      .add_property(
+          "Luu",
+          bp::make_function(&ActionModelLQR::get_R,
+                            deprecated<bp::return_internal_reference<> >(
+                                "Deprecated. Use R.")),
+          bp::make_function(&ActionModelLQR::set_Luu,
+                            deprecated<>("Deprecated. Use set_LQR.")),
+          "input weight matrix")
       .def(CopyableVisitor<ActionModelLQR>());
 
   boost::python::register_ptr_to_python<boost::shared_ptr<ActionDataLQR> >();
@@ -113,6 +258,8 @@ void exposeActionLQR() {
                                 "Create LQR data.\n\n"
                                 ":param model: LQR action model"))
       .def(CopyableVisitor<ActionDataLQR>());
+
+#pragma GCC diagnostic pop
 }
 
 }  // namespace python

@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
-//                          Max Planck Gesellschaft, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,13 +60,10 @@ SolverFactory::SolverFactory() {}
 SolverFactory::~SolverFactory() {}
 
 boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
-    SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-    size_t T) const {
+    SolverTypes::Type solver_type,
+    boost::shared_ptr<crocoddyl::ActionModelAbstract> model,
+    boost::shared_ptr<crocoddyl::ActionModelAbstract> model2, size_t T) const {
   boost::shared_ptr<crocoddyl::SolverAbstract> solver;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
-      ActionModelFactory().create(action_type);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
       running_models;
   const size_t halfway = T / 2;

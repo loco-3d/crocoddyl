@@ -245,33 +245,46 @@ class UnicycleDataDerived(crocoddyl.ActionDataAbstract):
 class LQRModelDerived(crocoddyl.ActionModelAbstract):
     def __init__(self, nx, nu, driftFree=True):
         crocoddyl.ActionModelAbstract.__init__(self, crocoddyl.StateVector(nx), nu)
-        self.Fx = np.eye(self.state.nx)
-        self.Fu = np.eye(self.state.nx)[:, : self.nu]
-        self.f0 = np.zeros(self.state.nx)
-        self.Lxx = np.eye(self.state.nx)
-        self.Lxu = np.eye(self.state.nx)[:, : self.nu]
-        self.Luu = np.eye(self.nu)
-        self.lx = np.ones(self.state.nx)
-        self.lu = np.ones(self.nu)
+        self.A = np.eye(self.state.nx)
+        self.B = np.eye(self.state.nx)[:, : self.nu]
+        self.Q = np.eye(self.state.nx)
+        self.R = np.eye(self.nu)
+        self.N = np.zeros((self.state.nx, self.nu))
+        self.f = [np.zeros(self.state.nx) if driftFree else np.ones(self.state.nx)]
+        self.q = np.ones(self.state.nx)
+        self.r = np.ones(self.nu)
+
+    @classmethod
+    def fromLQR(cls, A, B, Q, R, N, f, q, r):
+        model = cls(A.shape[1], B.shape[1], False)
+        model.A = A
+        model.B = B
+        model.Q = Q
+        model.R = R
+        model.N = N
+        model.f = f
+        model.q = q
+        model.r = r
+        return model
 
     def calc(self, data, x, u=None):
         if u is None:
             data.xnext[:] = x
-            data.cost = 0.5 * np.dot(x.T, np.dot(self.Lxx, x))
-            data.cost += np.dot(self.lx.T, x)
+            data.cost = 0.5 * np.dot(x.T, np.dot(self.Q, x))
+            data.cost += np.dot(self.q.T, x)
         else:
-            data.xnext[:] = np.dot(self.Fx, x) + np.dot(self.Fu, u) + self.f0
-            data.cost = 0.5 * np.dot(x.T, np.dot(self.Lxx, x))
-            data.cost += 0.5 * np.dot(u.T, np.dot(self.Luu, u))
-            data.cost += np.dot(x.T, np.dot(self.Lxu, u))
-            data.cost += np.dot(self.lx.T, x) + np.dot(self.lu.T, u)
+            data.xnext[:] = np.dot(self.A, x) + np.dot(self.B, u) + self.f
+            data.cost = 0.5 * np.dot(x.T, np.dot(self.Q, x))
+            data.cost += 0.5 * np.dot(u.T, np.dot(self.R, u))
+            data.cost += np.dot(x.T, np.dot(self.N, u))
+            data.cost += np.dot(self.q.T, x) + np.dot(self.r.T, u)
 
     def calcDiff(self, data, x, u=None):
         if u is None:
-            data.Lx[:] = self.lx + np.dot(self.Lxx, x)
+            data.Lx[:] = self.q + np.dot(self.Q, x)
         else:
-            data.Lx[:] = self.lx + np.dot(self.Lxx, x) + np.dot(self.Lxu, u)
-            data.Lu[:] = self.lu + np.dot(self.Lxu.T, x) + np.dot(self.Luu, u)
+            data.Lx[:] = self.q + np.dot(self.Q, x) + np.dot(self.N, u)
+            data.Lu[:] = self.r + np.dot(self.R, u) + np.dot(self.N.T, x)
 
     def createData(self):
         data = LQRDataDerived(self)
@@ -281,11 +294,11 @@ class LQRModelDerived(crocoddyl.ActionModelAbstract):
 class LQRDataDerived(crocoddyl.ActionDataAbstract):
     def __init__(self, model):
         crocoddyl.ActionDataAbstract.__init__(self, model)
-        self.Fx[:, :] = model.Fx
-        self.Fu[:, :] = model.Fu
-        self.Lxx[:, :] = model.Lxx
-        self.Luu[:, :] = model.Luu
-        self.Lxu[:, :] = model.Lxu
+        self.Fx[:, :] = model.A
+        self.Fu[:, :] = model.B
+        self.Lxx[:, :] = model.Q
+        self.Luu[:, :] = model.R
+        self.Lxu[:, :] = model.N
 
 
 class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
@@ -293,36 +306,50 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
         crocoddyl.DifferentialActionModelAbstract.__init__(
             self, crocoddyl.StateVector(2 * nq), nu
         )
-        self.Fq = np.eye(self.state.nq)
-        self.Fv = np.eye(self.state.nv)
-        self.Fu = np.eye(self.state.nq)[:, : self.nu]
-        self.f0 = np.zeros(self.state.nq)
-        self.Lxx = np.eye(self.state.nx)
-        self.Lxu = np.eye(self.state.nx)[:, : self.nu]
-        self.Luu = np.eye(self.nu)
-        self.lx = np.ones(self.state.nx)
-        self.lu = np.ones(self.nu)
+        self.Aq = np.eye(self.state.nq)
+        self.Av = np.eye(self.state.nv)
+        self.B = np.eye(self.state.nq)[:, : self.nu]
+        self.f = [np.zeros(nq) if driftFree else np.ones(nq)]
+        self.Q = np.eye(self.state.nx)
+        self.R = np.eye(self.nu)
+        self.N = np.zeros((self.state.nx, self.nu))
+        self.q = np.ones(self.state.nx)
+        self.r = np.ones(self.nu)
+
+    @classmethod
+    def fromLQR(cls, Aq, Av, B, Q, R, N, f, q, r):
+        model = cls(Aq.shape[1], B.shape[1], False)
+        model.Aq = Aq
+        model.Av = Av
+        model.B = B
+        model.Q = Q
+        model.R = R
+        model.N = N
+        model.f = f
+        model.q = q
+        model.r = r
+        return model
 
     def calc(self, data, x, u=None):
         if u is None:
-            data.cost = 0.5 * np.dot(x.T, np.dot(self.Lxx, x))
-            data.cost += np.dot(self.lx.T, x)
+            data.cost = 0.5 * np.dot(x.T, np.dot(self.Q, x))
+            data.cost += np.dot(self.q.T, x)
         else:
             q, v = x[: self.state.nq], x[self.state.nq :]
             data.xout[:] = (
-                np.dot(self.Fq, q) + np.dot(self.Fv, v) + np.dot(self.Fu, u) + self.f0
+                np.dot(self.Aq, q) + np.dot(self.Av, v) + np.dot(self.B, u) + self.f
             )
-            data.cost = 0.5 * np.dot(x.T, np.dot(self.Lxx, x))
-            data.cost += 0.5 * np.dot(u.T, np.dot(self.Luu, u))
-            data.cost += np.dot(x.T, np.dot(self.Lxu, u))
-            data.cost += np.dot(self.lx.T, x) + np.dot(self.lu.T, u)
+            data.cost = 0.5 * np.dot(x.T, np.dot(self.Q, x))
+            data.cost += 0.5 * np.dot(u.T, np.dot(self.R, u))
+            data.cost += np.dot(x.T, np.dot(self.N, u))
+            data.cost += np.dot(self.q.T, x) + np.dot(self.r.T, u)
 
     def calcDiff(self, data, x, u=None):
         if u is None:
-            data.Lx[:] = self.lx + np.dot(self.Lxx, x)
+            data.Lx[:] = self.q + np.dot(self.Q, x)
         else:
-            data.Lx[:] = self.lx + np.dot(self.Lxx, x) + np.dot(self.Lxu, u)
-            data.Lu[:] = self.lu + np.dot(self.Lxu.T, x) + np.dot(self.Luu, u)
+            data.Lx[:] = self.q + np.dot(self.Q, x) + np.dot(self.N, u)
+            data.Lu[:] = self.r + np.dot(self.R, u) + np.dot(self.N.T, x)
 
     def createData(self):
         data = DifferentialLQRDataDerived(self)
@@ -332,11 +359,11 @@ class DifferentialLQRModelDerived(crocoddyl.DifferentialActionModelAbstract):
 class DifferentialLQRDataDerived(crocoddyl.DifferentialActionDataAbstract):
     def __init__(self, model):
         crocoddyl.DifferentialActionDataAbstract.__init__(self, model)
-        self.Lxx[:, :] = model.Lxx
-        self.Luu[:, :] = model.Luu
-        self.Lxu[:, :] = model.Lxu
-        self.Fx[:, :] = np.hstack([model.Fq, model.Fv])
-        self.Fu[:, :] = model.Fu
+        self.Fx[:, :] = np.hstack([model.Aq, model.Av])
+        self.Fu[:, :] = model.B
+        self.Lxx[:, :] = model.Q
+        self.Luu[:, :] = model.R
+        self.Lxu[:, :] = model.N
 
 
 class DifferentialFreeFwdDynamicsModelDerived(
