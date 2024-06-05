@@ -18,7 +18,8 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const MatrixXs& A,
                                              const MatrixXs& R,
                                              const MatrixXs& N)
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
-      drift_free_(true) {
+      drift_free_(true),
+      updated_lqr_(false) {
   const std::size_t nx = state_->get_nx();
   MatrixXs G = MatrixXs::Zero(ng_, nx + nu_);
   MatrixXs H = MatrixXs::Zero(nh_, nx + nu_);
@@ -35,7 +36,8 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q, const MatrixXs& R,
     const MatrixXs& N, const VectorXs& f, const VectorXs& q, const VectorXs& r)
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   const std::size_t nx = state_->get_nx();
   MatrixXs G = MatrixXs::Zero(ng_, nx + nu_);
   MatrixXs H = MatrixXs::Zero(ng_, nx + nu_);
@@ -51,7 +53,8 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const VectorXs& q, const VectorXs& r, const VectorXs& g, const VectorXs& h)
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0, G.rows(),
            H.rows()),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   set_LQR(A, B, Q, R, N, G, H, f, q, r, g, h);
 }
 
@@ -78,7 +81,8 @@ template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
     : Base(boost::make_shared<StateVector>(copy.get_A().cols()),
            copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows()),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   set_LQR(copy.get_A(), copy.get_B(), copy.get_Q(), copy.get_R(), copy.get_N(),
           copy.get_G(), copy.get_H(), copy.get_f(), copy.get_q(), copy.get_r(),
           copy.get_g(), copy.get_h());
@@ -170,21 +174,24 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
   }
 
   const std::size_t nx = state_->get_nx();
-  data->Fx = A_;
-  data->Fu = B_;
-  data->Lxx = Q_;
-  data->Luu = R_;
-  data->Lxu = N_;
+  if (!updated_lqr_) {
+    data->Fx = A_;
+    data->Fu = B_;
+    data->Lxx = Q_;
+    data->Luu = R_;
+    data->Lxu = N_;
+    data->Gx = G_.leftCols(nx);
+    data->Gu = G_.rightCols(nu_);
+    data->Hx = H_.leftCols(nx);
+    data->Hu = H_.rightCols(nu_);
+    updated_lqr_ = true;
+  }
   data->Lx = q_;
   data->Lx.noalias() += Q_ * x;
   data->Lx.noalias() += N_ * u;
   data->Lu = r_;
   data->Lu.noalias() += N_.transpose() * x;
   data->Lu.noalias() += R_ * u;
-  data->Gx = G_.leftCols(nx);
-  data->Gu = G_.rightCols(nu_);
-  data->Hx = H_.leftCols(nx);
-  data->Hu = H_.rightCols(nu_);
 }
 
 template <typename Scalar>
@@ -198,11 +205,14 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
   }
 
   const std::size_t nx = state_->get_nx();
-  data->Lxx = Q_;
+  if (!updated_lqr_) {
+    data->Lxx = Q_;
+    data->Gx = G_.leftCols(nx);
+    data->Hx = H_.leftCols(nx);
+    updated_lqr_ = true;
+  }
   data->Lx = q_;
   data->Lx.noalias() += Q_ * x;
-  data->Gx = G_.leftCols(nx);
-  data->Hx = H_.leftCols(nx);
 }
 
 template <typename Scalar>
@@ -418,6 +428,7 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   r_ = r;
   g_ = g;
   h_ = h;
+  updated_lqr_ = false;
 }
 
 }  // namespace crocoddyl

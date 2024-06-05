@@ -271,6 +271,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   VectorXs h_;
   MatrixXs L_;
   bool drift_free_;
+  bool updated_lqr_;
 };
 
 template <typename _Scalar>
@@ -286,18 +287,27 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
         R_u_tmp(VectorXs::Zero(static_cast<Eigen::Index>(model->get_nu()))),
         Q_x_tmp(VectorXs::Zero(
             static_cast<Eigen::Index>(model->get_state()->get_ndx()))) {
-    // Setting the linear model and quadratic cost here because they are
-    // constant
+    // Setting the linear model and quadratic cost as they are constant
+    const std::size_t nq = model->get_state()->get_nq();
+    const std::size_t nu = model->get_nu();
     Fx = model->get_A();
     Fu = model->get_B();
     Lxx = model->get_Q();
     Luu = model->get_R();
     Lxu = model->get_N();
+    Gx = model->get_G().leftCols(2 * nq);
+    Gu = model->get_G().rightCols(nu);
+    Hx = model->get_H().leftCols(2 * nq);
+    Hu = model->get_H().rightCols(nu);
   }
 
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
+  using Base::Gu;
+  using Base::Gx;
+  using Base::Hu;
+  using Base::Hx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
@@ -305,6 +315,7 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::Lxx;
   using Base::r;
   using Base::xnext;
+
   VectorXs R_u_tmp;  // Temporary variable for storing Hessian-vector product
                      // (size: nu)
   VectorXs Q_x_tmp;  // Temporary variable for storing Hessian-vector product

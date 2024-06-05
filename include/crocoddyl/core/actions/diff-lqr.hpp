@@ -297,6 +297,7 @@ class DifferentialActionModelLQRTpl
   VectorXs h_;
   MatrixXs L_;
   bool drift_free_;
+  bool updated_lqr_;
 };
 
 template <typename _Scalar>
@@ -311,19 +312,28 @@ struct DifferentialActionDataLQRTpl
   template <template <typename Scalar> class Model>
   explicit DifferentialActionDataLQRTpl(Model<Scalar>* const model)
       : Base(model) {
-    // Setting the linear model and quadratic cost here because they are
-    // constant
-    Fx.leftCols(model->get_state()->get_nq()) = model->get_Aq();
-    Fx.rightCols(model->get_state()->get_nv()) = model->get_Av();
+    // Setting the linear model and quadratic cost as they are constant
+    const std::size_t nq = model->get_state()->get_nq();
+    const std::size_t nu = model->get_nu();
+    Fx.leftCols(nq) = model->get_Aq();
+    Fx.rightCols(nq) = model->get_Av();
     Fu = model->get_B();
     Lxx = model->get_Q();
     Luu = model->get_R();
     Lxu = model->get_N();
+    Gx = model->get_G().leftCols(2 * nq);
+    Gu = model->get_G().rightCols(nu);
+    Hx = model->get_H().leftCols(2 * nq);
+    Hu = model->get_H().rightCols(nu);
   }
 
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
+  using Base::Gu;
+  using Base::Gx;
+  using Base::Hu;
+  using Base::Hx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;

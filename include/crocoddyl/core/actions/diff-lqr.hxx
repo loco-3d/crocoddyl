@@ -17,7 +17,8 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
     const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N)
     : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
-      drift_free_(true) {
+      drift_free_(true),
+      updated_lqr_(false) {
   const std::size_t nq = state_->get_nq();
   MatrixXs G = MatrixXs::Zero(ng_, 2 * nq + nu_);
   MatrixXs H = MatrixXs::Zero(nh_, 2 * nq + nu_);
@@ -35,7 +36,8 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
     const VectorXs& q, const VectorXs& r)
     : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   const std::size_t nq = state_->get_nq();
   MatrixXs G = MatrixXs::Zero(ng_, 2 * nq + nu_);
   MatrixXs H = MatrixXs::Zero(ng_, 2 * nq + nu_);
@@ -52,7 +54,8 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const VectorXs& g, const VectorXs& h)
     : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0,
            G.rows(), H.rows()),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   set_LQR(Aq, Av, B, Q, R, N, G, H, f, q, r, g, h);
 }
 
@@ -73,14 +76,16 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       r_(VectorXs::Ones(nu)),
       g_(VectorXs::Zero(0)),
       h_(VectorXs::Zero(0)),
-      drift_free_(drift_free) {}
+      drift_free_(drift_free),
+      updated_lqr_(false) {}
 
 template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const DifferentialActionModelLQRTpl& copy)
     : Base(boost::make_shared<StateVector>(2 * copy.get_Aq().cols()),
            copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows()),
-      drift_free_(false) {
+      drift_free_(false),
+      updated_lqr_(false) {
   set_LQR(copy.get_Aq(), copy.get_Av(), copy.get_B(), copy.get_Q(),
           copy.get_R(), copy.get_N(), copy.get_G(), copy.get_H(), copy.get_f(),
           copy.get_q(), copy.get_r(), copy.get_g(), copy.get_h());
@@ -177,22 +182,25 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
   }
 
   const std::size_t nq = state_->get_nq();
-  data->Fx.leftCols(nq) = Aq_;
-  data->Fx.rightCols(nq) = Av_;
-  data->Fu = B_;
-  data->Lxx = Q_;
-  data->Luu = R_;
-  data->Lxu = N_;
+  if (!updated_lqr_) {
+    data->Fx.leftCols(nq) = Aq_;
+    data->Fx.rightCols(nq) = Av_;
+    data->Fu = B_;
+    data->Lxx = Q_;
+    data->Luu = R_;
+    data->Lxu = N_;
+    data->Gx = G_.leftCols(2 * nq);
+    data->Gu = G_.rightCols(nu_);
+    data->Hx = H_.leftCols(2 * nq);
+    data->Hu = H_.rightCols(nu_);
+    updated_lqr_ = true;
+  }
   data->Lx = q_;
   data->Lx.noalias() += Q_ * x;
   data->Lx.noalias() += N_ * u;
   data->Lu = r_;
   data->Lu.noalias() += N_.transpose() * x;
   data->Lu.noalias() += R_ * u;
-  data->Gx = G_.leftCols(2 * nq);
-  data->Gu = G_.rightCols(nu_);
-  data->Hx = H_.leftCols(2 * nq);
-  data->Hu = H_.rightCols(nu_);
 }
 
 template <typename Scalar>
@@ -206,11 +214,14 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
   }
 
   const std::size_t nq = state_->get_nq();
-  data->Lxx = Q_;
+  if (!updated_lqr_) {
+    data->Lxx = Q_;
+    data->Gx = G_.leftCols(2 * nq);
+    data->Hx = H_.leftCols(2 * nq);
+    updated_lqr_ = true;
+  }
   data->Lx = q_;
   data->Lx.noalias() += Q_ * x;
-  data->Gx = G_.leftCols(2 * nq);
-  data->Hx = H_.leftCols(2 * nq);
 }
 
 template <typename Scalar>
@@ -443,6 +454,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_LQR(
   r_ = r;
   g_ = g;
   h_ = h;
+  updated_lqr_ = false;
 }
 
 }  // namespace crocoddyl
