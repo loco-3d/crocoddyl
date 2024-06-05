@@ -48,10 +48,7 @@ void exposeDifferentialActionLQR() {
       "  h(x,u) = H [x,u] + h<=0.",
       bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
                Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd>(
-          bp::args("self", "Aq",
-                   "Av,"
-                   "B",
-                   "Q", "R", "N"),
+          bp::args("self", "Aq", "Av", "B", "Q", "R", "N"),
           "Initialize the differential LQR action model.\n\n"
           ":param Aq: position matrix\n"
           ":param Av: velocity matrix\n"
