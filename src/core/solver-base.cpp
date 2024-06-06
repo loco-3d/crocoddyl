@@ -78,42 +78,35 @@ void SolverAbstract::resizeData() {
 
 double SolverAbstract::computeDynamicFeasibility() {
   tmp_feas_ = 0.;
-  if (!is_feasible_) {
-    const std::size_t T = problem_->get_T();
-    const Eigen::VectorXd& x0 = problem_->get_x0();
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
-        problem_->get_runningModels();
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
-        problem_->get_runningDatas();
+  const std::size_t T = problem_->get_T();
+  const Eigen::VectorXd& x0 = problem_->get_x0();
+  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
 
-    models[0]->get_state()->diff(xs_[0], x0, fs_[0]);
+  models[0]->get_state()->diff(xs_[0], x0, fs_[0]);
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
-    for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
-      m->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
-    }
-    switch (feasnorm_) {
-      case LInf:
-        tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
-        for (std::size_t t = 0; t < T; ++t) {
-          tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
-        }
-        break;
-      case L1:
-        tmp_feas_ = fs_[0].lpNorm<1>();
-        for (std::size_t t = 0; t < T; ++t) {
-          tmp_feas_ += fs_[t + 1].lpNorm<1>();
-        }
-        break;
-    }
-  } else if (!was_feasible_) {  // closing the gaps
-    for (std::vector<Eigen::VectorXd>::iterator it = fs_.begin();
-         it != fs_.end(); ++it) {
-      it->setZero();
-    }
+  for (std::size_t t = 0; t < T; ++t) {
+    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
+    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+    m->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
+  }
+  switch (feasnorm_) {
+    case LInf:
+      tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
+      for (std::size_t t = 0; t < T; ++t) {
+        tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
+      }
+      break;
+    case L1:
+      tmp_feas_ = fs_[0].lpNorm<1>();
+      for (std::size_t t = 0; t < T; ++t) {
+        tmp_feas_ += fs_[t + 1].lpNorm<1>();
+      }
+      break;
   }
   return tmp_feas_;
 }
