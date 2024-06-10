@@ -49,6 +49,19 @@ void exposeActionLQR() {
           ":param R: input weight matrix\n"
           ":param N: state-input weight matrix"))
       .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::VectorXd,
+                    Eigen::VectorXd, Eigen::VectorXd>(
+          bp::args("self", "A", "B", "Q", "R", "N", "f", "q", "r"),
+          "Initialize the differential LQR action model.\n\n"
+          ":param A: state matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix\n"
+          ":param f: dynamics drift\n"
+          ":param q: state weight vector\n"
+          ":param r: input weight vector"))
+      .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
                     Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
                     Eigen::MatrixXd, Eigen::VectorXd, Eigen::VectorXd,
                     Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd>(

@@ -70,6 +70,27 @@ void exposeDifferentialActionLQR() {
           ":param f: dynamics drift\n"
           ":param q: state weight vector\n"
           ":param r: input weight vector"))
+      .def(bp::init<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd,
+                    Eigen::MatrixXd, Eigen::MatrixXd, Eigen::VectorXd,
+                    Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd,
+                    Eigen::VectorXd>(
+          bp::args("self", "Aq", "Av", "B", "Q", "R", "N", "G", "H", "f", "q",
+                   "r", "g", "h"),
+          "Initialize the differential LQR action model.\n\n"
+          ":param Aq: position matrix\n"
+          ":param Av: velocity matrix\n"
+          ":param B: input matrix\n"
+          ":param Q: state weight matrix\n"
+          ":param R: input weight matrix\n"
+          ":param N: state-input weight matrix\n"
+          ":param G: state-input inequality constraint matrix\n"
+          ":param H: state-input equality constraint matrix\n"
+          ":param f: dynamics drift\n"
+          ":param q: state weight vector\n"
+          ":param r: input weight vector\n"
+          ":param g: state-input inequality constraint bias\n"
+          ":param h: state-input equality constraint bias"))
       .def(bp::init<int, int, bp::optional<bool> >(
           bp::args("self", "nq", "nu", "driftFree"),
           "Initialize the differential LQR action model.\n\n"
