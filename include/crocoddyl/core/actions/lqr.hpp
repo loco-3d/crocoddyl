@@ -39,9 +39,9 @@ namespace crocoddyl {
  * and the linear equality and inequality constraints has the form:
  * \f[ \begin{aligned}
  * \mathbf{g(x,u)} =  \mathbf{G}\begin{bmatrix} \mathbf{x} \\ \mathbf{u}
- * \end{bmatrix} [x,u] + \mathbf{g}
+ * \end{bmatrix} [x,u] + \mathbf{g} \leq \mathbf{0}
  * &\mathbf{h(x,u)} = \mathbf{H}\begin{bmatrix} \mathbf{x} \\ \mathbf{u}
- * \end{bmatrix} [x,u] + \mathbf{h} \leq \mathbf{0} \end{aligned} \f]
+ * \end{bmatrix} [x,u] + \mathbf{h} \end{aligned} \f]
  */
 template <typename _Scalar>
 class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
@@ -91,13 +91,13 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] Q  State weight matrix
    * @param[in] R  Input weight matrix
    * @param[in] N  State-input weight matrix
-   * @param[in] H  State-input equality constraint matrix
    * @param[in] G  State-input inequality constraint matrix
+   * @param[in] H  State-input equality constraint matrix
    * @param[in] f  Dynamics drift
    * @param[in] q  State weight vector
    * @param[in] r  Input weight vector
-   * @param[in] g  State-input equality constraint bias
-   * @param[in] h  State-input inequality constraint bias
+   * @param[in] g  State-input inequality constraint bias
+   * @param[in] h  State-input equality constraint bias
    */
   ActionModelLQRTpl(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
                     const MatrixXs& R, const MatrixXs& N, const MatrixXs& G,
@@ -138,8 +138,8 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param[in] nx  State dimension
    * @param[in] nu  Control dimension
-   * @param[in] ng  Equality constraint dimension (default 0)
-   * @param[in] nh  Inequality constraint dimension (defaul 0)
+   * @param[in] ng  Inequality constraint dimension (default 0)
+   * @param[in] nh  Equality constraint dimension (defaul 0)
    */
   static ActionModelLQRTpl Random(const std::size_t nx, const std::size_t nu,
                                   const std::size_t ng = 0,
@@ -163,10 +163,10 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   /** @brief Return the state-input weight matrix */
   const MatrixXs& get_N() const;
 
-  /** @brief Return the state-input equality constraint matrix */
+  /** @brief Return the state-input inequality constraint matrix */
   const MatrixXs& get_G() const;
 
-  /** @brief Return the state-input inequality constraint matrix */
+  /** @brief Return the state-input equality constraint matrix */
   const MatrixXs& get_H() const;
 
   /** @brief Return the state weight vector */
@@ -175,10 +175,10 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   /** @brief Return the input weight vector */
   const VectorXs& get_r() const;
 
-  /** @brief Return the state-input equality constraint bias */
+  /** @brief Return the state-input inequality constraint bias */
   const VectorXs& get_g() const;
 
-  /** @brief Return the state-input inequality constraint bias */
+  /** @brief Return the state-input equality constraint bias */
   const VectorXs& get_h() const;
 
   /**
@@ -189,13 +189,13 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] Q  State weight matrix
    * @param[in] R  Input weight matrix
    * @param[in] N  State-input weight matrix
-   * @param[in] G  State-input equality constraint matrix
-   * @param[in] H  State-input inequality constraint matrix
+   * @param[in] G  State-input inequality constraint matrix
+   * @param[in] H  State-input equality constraint matrix
    * @param[in] f  Dynamics drift
    * @param[in] q  State weight vector
    * @param[in] r  Input weight vector
-   * @param[in] g  State-input equality constraint bias
-   * @param[in] h  State-input inequality constraint bias
+   * @param[in] g  State-input inequality constraint bias
+   * @param[in] h  State-input equality constraint bias
    */
   void set_LQR(const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q,
                const MatrixXs& R, const MatrixXs& N, const MatrixXs& G,
