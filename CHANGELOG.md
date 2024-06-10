@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed issues in LQR extensions in https://github.com/loco-3d/crocoddyl/pull/1263
 * Computed dynamic feasibility everytime in https://github.com/loco-3d/crocoddyl/pull/1262
 * Extend LQR actions in https://github.com/loco-3d/crocoddyl/pull/1261
 * Print log with grad absolute + updated logs with Pinocchio 3 in https://github.com/loco-3d/crocoddyl/pull/1260
