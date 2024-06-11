@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* General clean ups about std::size_t in https://github.com/loco-3d/crocoddyl/pull/1265
 * Fixed issues in LQR extensions in https://github.com/loco-3d/crocoddyl/pull/1263
 * Computed dynamic feasibility everytime in https://github.com/loco-3d/crocoddyl/pull/1262
 * Extend LQR actions in https://github.com/loco-3d/crocoddyl/pull/1261
