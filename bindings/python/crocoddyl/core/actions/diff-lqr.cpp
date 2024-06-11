@@ -91,7 +91,7 @@ void exposeDifferentialActionLQR() {
           ":param r: input weight vector\n"
           ":param g: state-input inequality constraint bias\n"
           ":param h: state-input equality constraint bias"))
-      .def(bp::init<int, int, bp::optional<bool> >(
+      .def(bp::init<std::size_t, std::size_t, bp::optional<bool> >(
           bp::args("self", "nq", "nu", "driftFree"),
           "Initialize the differential LQR action model.\n\n"
           ":param nx: dimension of the state vector\n"

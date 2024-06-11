@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -28,7 +28,7 @@ void exposeActuationAbstract() {
       "The computation of the actuation signal and its partial derivatives are "
       "mainly carried out\n"
       "inside calc() and calcDiff(), respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, int>(
+      bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the actuation model.\n\n"
           ":param state: state description,\n"

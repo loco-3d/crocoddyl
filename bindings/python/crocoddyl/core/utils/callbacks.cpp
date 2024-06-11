@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -27,7 +27,7 @@ void exposeCallbacks() {
 
   bp::class_<CallbackVerbose, bp::bases<CallbackAbstract> >(
       "CallbackVerbose", "Callback function for printing the solver values.",
-      bp::init<bp::optional<VerboseLevel, int> >(
+      bp::init<bp::optional<VerboseLevel, std::size_t> >(
           bp::args("self", "level", "precision"),
           "Initialize the differential verbose callback.\n\n"
           ":param level: verbose level (default _4)\n"

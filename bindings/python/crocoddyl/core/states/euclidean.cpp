@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -29,9 +29,9 @@ void exposeStateEuclidean() {
       "point and its velocity lie in the same space, all Jacobians are "
       "described throught\n"
       "the identity matrix.",
-      bp::init<int>(bp::args("self", "nx"),
-                    "Initialize the vector dimension.\n\n"
-                    ":param nx: dimension of state"))
+      bp::init<std::size_t>(bp::args("self", "nx"),
+                            "Initialize the vector dimension.\n\n"
+                            ":param nx: dimension of state"))
       .def("zero", &StateVector::zero, bp::args("self"),
            "Return a zero reference state.\n\n"
            ":return zero reference state")

@@ -78,9 +78,9 @@ void exposeActionLQR() {
           ":param f: dynamics drift\n"
           ":param q: state weight vector\n"
           ":param r: input weight vector\n"
-          ":param g: state-input inequality constraint bias\n"
-          ":param h: state-input equality constraint bias"))
-      .def(bp::init<int, int, bp::optional<bool> >(
+          ":param g: state-input equality constraint bias\n"
+          ":param h: state-input inequality constraint bias"))
+      .def(bp::init<std::size_t, std::size_t, bp::optional<bool> >(
           bp::args("self", "nx", "nu", "driftFree"),
           "Initialize the LQR action model.\n\n"
           ":param nx: dimension of the state vector\n"

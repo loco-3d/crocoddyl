@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -44,10 +44,11 @@ void exposeStateAbstract() {
       "Therefore the points x, x0 and x1 belong to the manifold M; and dx or "
       "x1 [-] x0 lie\n"
       "on its tangential space.",
-      bp::init<int, int>(bp::args("self", "nx", "ndx"),
-                         "Initialize the state dimensions.\n\n"
-                         ":param nx: dimension of state configuration tuple\n"
-                         ":param ndx: dimension of state tangent vector"))
+      bp::init<std::size_t, std::size_t>(
+          bp::args("self", "nx", "ndx"),
+          "Initialize the state dimensions.\n\n"
+          ":param nx: dimension of state configuration tuple\n"
+          ":param ndx: dimension of state tangent vector"))
       .def("zero", pure_virtual(&StateAbstract_wrap::zero), bp::args("self"),
            "Generate a zero reference state.\n\n"
            ":return zero reference state")

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2024, University of Edinburgh, IRI: CSIC-UPC
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -21,7 +21,7 @@ void exposeSquashingSmoothSat() {
 
   bp::class_<SquashingModelSmoothSat, bp::bases<SquashingModelAbstract> >(
       "SquashingModelSmoothSat", "Smooth Sat squashing model",
-      bp::init<Eigen::VectorXd, Eigen::VectorXd, int>(
+      bp::init<Eigen::VectorXd, Eigen::VectorXd, std::size_t>(
           bp::args("self", "u_lb", "u_ub", "ns"),
           "Initialize the squashing model. \n\n"
           ":param u_lb: output lower bound"
