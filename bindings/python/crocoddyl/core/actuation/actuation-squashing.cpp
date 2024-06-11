@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2024, University of Edinburgh, IRI: CSIC-UPC
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,7 +22,7 @@ void exposeActuationSquashing() {
   bp::class_<ActuationSquashingModel, bp::bases<ActuationModelAbstract> >(
       "ActuationSquashingModel", "Class for squashing an actuation model.\n\n",
       bp::init<boost::shared_ptr<ActuationModelAbstract>,
-               boost::shared_ptr<SquashingModelAbstract>, int>(
+               boost::shared_ptr<SquashingModelAbstract>, std::size_t>(
           bp::args("self", "actuation", "squashing", "nu"),
           "Initialize the actuation model with squashing function.\n\n"
           ":param actuation: actuation model to be squashed,\n"

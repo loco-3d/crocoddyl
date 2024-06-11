@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -26,9 +26,9 @@ void exposeActivationAbstract() {
       "value and its derivatives from it. Activation value and its derivatives "
       "are computed by\n"
       "calc() and calcDiff(), respectively.",
-      bp::init<int>(bp::args("self", "nr"),
-                    "Initialize the activation model.\n\n"
-                    ":param nr: dimension of the cost-residual vector"))
+      bp::init<std::size_t>(bp::args("self", "nr"),
+                            "Initialize the activation model.\n\n"
+                            ":param nr: dimension of the cost-residual vector"))
       .def("calc", pure_virtual(&ActivationModelAbstract_wrap::calc),
            bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2024, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -26,10 +26,11 @@ void exposeActivationQuadFlatExp() {
       "A quadratic flat action describes a quadratic flat function that "
       "depends on the residual, i.e.\n"
       "1 - exp(-||r||^2 / alpha).",
-      bp::init<int, double>(bp::args("self", "nr", "alpha"),
-                            "Initialize the activation model.\n\n"
-                            ":param nr: dimension of the cost-residual vector"
-                            "param alpha: width of quadratic basin near zero"))
+      bp::init<std::size_t, double>(
+          bp::args("self", "nr", "alpha"),
+          "Initialize the activation model.\n\n"
+          ":param nr: dimension of the cost-residual vector"
+          "param alpha: width of quadratic basin near zero"))
       .def("calc", &ActivationModelQuadFlatExp::calc,
            bp::args("self", "data", "r"),
            "Compute the 1 - exp(-||r||^2 / alpha).\n\n"

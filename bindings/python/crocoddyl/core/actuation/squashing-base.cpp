@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, IRI: CSIC-UPC,
+// Copyright (C) 2019-2024, University of Edinburgh, IRI: CSIC-UPC,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -27,9 +27,9 @@ void exposeSquashingAbstract() {
       "The computation of the output value is done using calc() while its "
       "derivative is computed using calcDiff(), "
       "respectively.",
-      bp::init<int>(bp::args("self", "ns"),
-                    "Initialize the squashing model. \n\n"
-                    ":param ns: dimension of the input vector"))
+      bp::init<std::size_t>(bp::args("self", "ns"),
+                            "Initialize the squashing model. \n\n"
+                            ":param ns: dimension of the input vector"))
       .def("calc", pure_virtual(&SquashingModelAbstract_wrap::calc),
            bp::args("self", "data", "s"),
            "Compute the squashing value for a given value of u, "
