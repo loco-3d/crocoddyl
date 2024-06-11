@@ -129,7 +129,7 @@ void ActionModelLQRTpl<Scalar>::calc(
   data->g += g_;
   data->h.noalias() = H_.leftCols(nx) * x;
   data->h.noalias() += H_.rightCols(nu_) * u;
-  data->h += g_;
+  data->h += h_;
 }
 
 template <typename Scalar>
@@ -155,7 +155,7 @@ void ActionModelLQRTpl<Scalar>::calc(
   data->g.noalias() = G_.leftCols(nx) * x;
   data->g += g_;
   data->h.noalias() = H_.leftCols(nx) * x;
-  data->h += g_;
+  data->h += h_;
 }
 
 template <typename Scalar>

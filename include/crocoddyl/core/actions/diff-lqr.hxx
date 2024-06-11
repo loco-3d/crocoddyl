@@ -135,7 +135,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
   data->h.noalias() = H_.leftCols(nq) * q;
   data->h.noalias() += H_.middleCols(nq, nq) * v;
   data->h.noalias() += H_.rightCols(nu_) * u;
-  data->h += g_;
+  data->h += h_;
 }
 
 template <typename Scalar>
@@ -163,7 +163,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
   data->g += g_;
   data->h.noalias() = H_.leftCols(nq) * q;
   data->h.noalias() += H_.middleCols(nq, nq) * v;
-  data->h += g_;
+  data->h += h_;
 }
 
 template <typename Scalar>
