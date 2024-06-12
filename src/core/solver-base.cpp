@@ -338,6 +338,18 @@ const std::vector<Eigen::VectorXd>& SolverAbstract::get_fs() const {
   return fs_;
 }
 
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs_try() const {
+  return xs_try_;
+}
+
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_us_try() const {
+  return us_try_;
+}
+
+const std::vector<Eigen::VectorXd>& SolverAbstract::get_fs_try() const {
+  return fs_try_;
+}
+
 bool SolverAbstract::get_is_feasible() const { return is_feasible_; }
 
 double SolverAbstract::get_cost() const { return cost_; }

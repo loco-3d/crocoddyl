@@ -248,6 +248,21 @@ class SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_fs() const;
 
   /**
+   * @brief Return the trial state trajectory \f$\mathbf{x}_s\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_xs_try() const;
+
+  /**
+   * @brief Return the trial control trajectory \f$\mathbf{u}_s\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_us_try() const;
+
+  /**
+   * @brief Return the trail dynamic infeasibility \f$\mathbf{f}_{s}\f$
+   */
+  const std::vector<Eigen::VectorXd>& get_fs_try() const;
+
+  /**
    * @brief Return the feasibility status of the
    * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ trajectory
    */
