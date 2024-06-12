@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,6 @@ void SolverIntro::computeValueFunction(
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
   Vxx_f_[t].noalias() = Vxx_[t] * fs_[t];
-  Vx_[t].noalias() += Vxx_f_[t];
   STOP_PROFILER("SolverIntro::computeValueFunction");
 }
 

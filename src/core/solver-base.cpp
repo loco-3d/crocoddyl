@@ -285,9 +285,15 @@ void SolverAbstract::allocateData() {
   merit_ = 0.;
   stop_ = 0.;
   // Expected reduction and improvement
+  DV_.setZero();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: remove d_
   d_.setZero();
+#pragma GCC diagnostic pop
   dV_ = 0.;
   dPhi_ = 0.;
+  dVexp_full_ = 0.;
   dVexp_ = 0.;
   dPhiexp_ = 0.;
   dfeas_ = 0.;
@@ -340,7 +346,7 @@ double SolverAbstract::get_merit() const { return merit_; }
 
 double SolverAbstract::get_stop() const { return stop_; }
 
-const Eigen::Vector2d& SolverAbstract::get_d() const { return d_; }
+const Eigen::Vector3d& SolverAbstract::get_DV() const { return DV_; }
 
 double SolverAbstract::get_dV() const { return dV_; }
 

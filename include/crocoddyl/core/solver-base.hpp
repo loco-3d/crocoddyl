@@ -123,10 +123,9 @@ class SolverAbstract {
    * \f$dV\f$ along the predefined step length \f$\alpha\f$.
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
-   * @param[in] recalc  true for recalculating part of the step evaluation
    * @return  the cost improvement
    */
-  virtual double tryStep(const double steplength, const bool recalc) = 0;
+  virtual double tryStep(const double steplength) = 0;
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -270,9 +269,13 @@ class SolverAbstract {
   double get_stop() const;
 
   /**
-   * @brief Return the linear and quadratic terms of the expected improvement
+   * @brief Return the constant, linear, and quadratic terms of the expected
+   * improvement
    */
-  const Eigen::Vector2d& get_d() const;
+  const Eigen::Vector3d& get_DV() const;
+
+  DEPRECATED(
+      "Used get_DV()", const Eigen::Vector2d& get_d() const { return d_; })
 
   /**
    * @brief Return the reduction in the cost function \f$\Delta V\f$
@@ -457,19 +460,26 @@ class SolverAbstract {
   std::vector<Eigen::VectorXd>
       fs_try_;  //!< Dynamics gaps in each node computed by the line-search
                 //!< procedure
-  bool is_feasible_;   //!< Label that indicates is the iteration is feasible
-  bool was_feasible_;  //!< Label that indicates in the previous iterate was
-                       //!< feasible
-  double cost_;        //!< Cost for the current guess
-  double cost_try_;    //!< Total cost computed by line-search procedure
-  double merit_;       //!< Merit for the current guess
-  double stop_;        //!< Value computed by `stoppingCriteria()`
-  std::size_t iter_;   //!< Number of iteration performed by the solver
-  Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
-  double dV_;       //!< Reduction in the cost function computed by `tryStep()`
-  double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
-  double dVexp_;    //!< Expected reduction in the cost function
-  double dPhiexp_;  //!< Expected reduction in the merit function
+  bool is_feasible_;    //!< Label that indicates is the iteration is feasible
+  bool was_feasible_;   //!< Label that indicates in the previous iterate was
+                        //!< feasible
+  double cost_;         //!< Cost for the current guess
+  double cost_try_;     //!< Total cost computed by line-search procedure
+  double merit_;        //!< Merit for the current guess
+  double stop_;         //!< Value computed by `stoppingCriteria()`
+  std::size_t iter_;    //!< Number of iteration performed by the solver
+  Eigen::Vector3d DV_;  //!< LQ approximation of the expected improvement
+  DEPRECATED(
+      "Use DV_",
+      Eigen::Vector2d d_;)  //!< LQ approximation of the expected improvement
+  double dV_;    //!< Reduction in the cost function computed by `tryStep()`
+  double dPhi_;  //!< Reduction in the merit function computed by `tryStep()`
+  double dVexp_full_;  //!< Expected reduction in the cost function for a full
+                       //!< step length
+  double dVexp_;  //!< Expected reduction in the cost function for the selected
+                  //!< step length
+  double dPhiexp_;  //!< Expected reduction in the merit function for the
+                    //!< selected step length
   double dfeas_;    //!< Reduction in the feasibility
   double feas_;     //!< Total feasibility for the current guess
   double

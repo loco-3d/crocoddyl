@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -28,7 +28,7 @@ class SolverKKT : public SolverAbstract {
       const std::size_t maxiter = 100, const bool is_feasible = false,
       const double regInit = 1e-9);
   virtual void computeDirection(const bool recalc = true);
-  virtual double tryStep(const double steplength = 1, const bool recalc = true);
+  virtual double tryStep(const double steplength = 1);
   virtual double stoppingCriteria();
   virtual const Eigen::Vector2d& expectedImprovement();
 

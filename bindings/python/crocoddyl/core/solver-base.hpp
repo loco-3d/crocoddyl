@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -26,8 +26,10 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::dfeas_;
   using SolverAbstract::dPhi_;
   using SolverAbstract::dPhiexp_;
+  using SolverAbstract::DV_;
   using SolverAbstract::dV_;
   using SolverAbstract::dVexp_;
+  using SolverAbstract::dVexp_full_;
   using SolverAbstract::feas_;
   using SolverAbstract::ffeas_;
   using SolverAbstract::ffeas_try_;
@@ -63,9 +65,8 @@ class SolverAbstract_wrap : public SolverAbstract,
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(const double step_length = 1, const bool recalc = true) {
-    return bp::call<double>(this->get_override("tryStep").ptr(), step_length,
-                            recalc);
+  double tryStep(const double step_length = 1) {
+    return bp::call<double>(this->get_override("tryStep").ptr(), step_length);
   }
 
   double stoppingCriteria() {

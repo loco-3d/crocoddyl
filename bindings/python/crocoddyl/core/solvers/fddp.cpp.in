@@ -22,7 +22,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, SolverFDDP::solve, 0,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                        SolverFDDP::computeDirection, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep,
-                                       0, 2)
+                                       0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setDynamicsSolver,
                                        SolverFDDP::set_dynamics_solver, 1, 2)
 
@@ -98,7 +98,7 @@ void exposeSolverFDDP() {
                "lists of T+1, T and T+1 lengths."))
       .def("tryStep", &SolverFDDP::tryStep,
            SolverFDDP_trySteps(
-               bp::args("self", "stepLength", "recalc"),
+               bp::args("self", "stepLength"),
                "Rollout the system with a predefined step length.\n\n"
                ":param stepLength: step length (default 1)\n"
                ":param recalc: recomputed part of the step\n"
@@ -106,14 +106,15 @@ void exposeSolverFDDP() {
       .def("stoppingCriteria", &SolverFDDP::stoppingCriteria, bp::args("self"),
            "Return a sum of positive parameters whose sum quantifies the FDDP "
            "termination.")
-      .def("expectedImprovement", &SolverFDDP::expectedImprovement,
-           bp::return_value_policy<bp::reference_existing_object>(),
-           bp::args("self"),
-           "Return two scalars denoting the quadratic improvement model\n\n"
-           "For computing the expected improvement, you need to compute first\n"
-           "the search direction by running computeDirection. The quadratic\n"
-           "improvement model is described as dV = f_0 - f_+ = d1*a + "
-           "d2*a**2/2.")
+      .def(
+          "expectedImprovement", &SolverFDDP::expectedImprovement,
+          bp::return_value_policy<bp::reference_existing_object>(), bp::args("self"),
+          "Return two scalars denoting the quadratic improvement model\n\n"
+          "For computing the expected improvement, you need to compute first\n"
+          "the search direction by running computeDirection. The quadratic\n"
+          "improvement model is described as dV = DV_0 + DV_1 + 0.5 * DV_2,"
+          "where DV_0, DV_1, and DV_2 are the constant, linear, and quadratic\n"
+          "terms, respectively")
       .def("calcDir", &SolverFDDP::calcDir, bp::args("self"),
            "Update the Jacobian and Hessian of the optimal control problem\n\n"
            "These derivatives are computed around the guess state and control\n"
@@ -156,23 +157,21 @@ void exposeSolverFDDP() {
            "We can define different step lengths\n"
            ":param stepLength: applied step length (<= 1. and >= 0.)")
       .def("multiShootForwardPass", &SolverFDDP::multiShootForwardPass,
-           bp::args("self", "stepLength", "recalc"),
+           bp::args("self", "stepLength"),
            "Run the multiple-shooting rollout\n\n"
            "It rollouts the action model given the classical multiple-shooting "
            "approach described in"
            "`TODO:`.\n"
            "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)\n"
-           ":param recal: recompute the linear rollout")
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
       .def("hybridShootForwardPass", &SolverFDDP::hybridShootForwardPass,
-           bp::args("self", "stepLength", "recalc"),
+           bp::args("self", "stepLength"),
            "Run the multiple-shooting rollout\n\n"
            "It rollouts the action model given the classical hybrid-shooting "
            "approach described in"
            "`TODO:`.\n"
            "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)\n"
-           ":param recal: recompute the linear rollout")
+           ":param stepLength: applied step length (<= 1. and >= 0.)")
       .def("singleShootForwardPass", &SolverFDDP::singleShootForwardPass,
            bp::args("self", "stepLength"),
            "Run the classical DDP rollout\n\n"

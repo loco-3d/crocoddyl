@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -93,15 +93,13 @@ void exposeSolverAbstract() {
            "of T+1, T and T+1 lengths.")
       .def(
           "tryStep", pure_virtual(&SolverAbstract_wrap::tryStep),
-          bp::args("self", "stepLength", "recalc"),
+          bp::args("self", "stepLength"),
           "Try a predefined step length and compute its cost improvement.\n\n"
           "It uses the search direction found by computeDirection to try a\n"
           "determined step length; so you need to first run computeDirection.\n"
           "Additionally it returns the cost improvement along the predefined\n"
           "step length.\n"
           ":param stepLength: step length (default 1).\n"
-          ":params recalc: true for recalculating the part of the step "
-          "evaluation (default true).\n"
           ":returns the cost improvement.")
       .def(
           "stoppingCriteria",
@@ -199,16 +197,22 @@ void exposeSolverAbstract() {
                      "merit for the current guess")
       .def_readwrite("stop", &SolverAbstract_wrap::stop_,
                      "stopping criteria value")
-      .def_readwrite("d", &SolverAbstract_wrap::d_,
-                     "linear and quadratic terms of the expected improvement")
+      .def_readwrite(
+          "DV", &SolverAbstract_wrap::DV_,
+          "constant, linear and quadratic terms of the expected improvement")
       .def_readwrite("dV", &SolverAbstract_wrap::dV_,
                      "reduction in the cost function computed by `tryStep()`")
       .def_readwrite("dPhi", &SolverAbstract_wrap::dPhi_,
                      "reduction in the merit function computed by `tryStep()`")
-      .def_readwrite("dVexp", &SolverAbstract_wrap::dVexp_,
-                     "expected reduction in the cost function")
-      .def_readwrite("dPhiexp", &SolverAbstract_wrap::dPhiexp_,
-                     "expected reduction in the merit function")
+      .def_readwrite(
+          "dVexp_full", &SolverAbstract_wrap::dVexp_full_,
+          "expected reduction in the cost function for a full step length")
+      .def_readwrite(
+          "dVexp", &SolverAbstract_wrap::dVexp_,
+          "expected reduction in the cost function for a selected step length")
+      .def_readwrite(
+          "dPhiexp", &SolverAbstract_wrap::dPhiexp_,
+          "expected reduction in the merit function for a selected step length")
       .def_readwrite("dfeas", &SolverAbstract_wrap::dfeas_,
                      "reduction in the feasibility")
       .def_readwrite("feas", &SolverAbstract_wrap::feas_,

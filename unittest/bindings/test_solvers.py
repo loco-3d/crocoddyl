@@ -105,7 +105,7 @@ class SolverAbstractTestCase(unittest.TestCase):
         self.solver.solve([], [], 2)
         self.solver_der.solve([], [], 2)
         expImp = self.solver.expectedImprovement()
-        expImpDer = self.solver_der.expectedImprovement()
+        expImpDer = self.solver_der.expectedImprovement()[1:]
         self.assertTrue(
             np.allclose(expImp, expImpDer, atol=1e-9),
             "Expected improvement doesn't match.",

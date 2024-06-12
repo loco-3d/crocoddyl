@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -90,10 +90,10 @@ bool SolverDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         continue;
       }
-      dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
+      dVexp_ = steplength_ * (DV_[1] + 0.5 * steplength_ * DV_[2]);
 
       if (dVexp_ >= 0) {  // descend direction
-        if (std::abs(d_[0]) < th_grad_ || !is_feasible_ ||
+        if (std::abs(DV_[1]) < th_grad_ || !is_feasible_ ||
             dV_ > th_acceptstep_ * dVexp_) {
           was_feasible_ = is_feasible_;
           setCandidate(xs_try_, us_try_, true);
@@ -140,7 +140,7 @@ void SolverDDP::computeDirection(const bool recalcDiff) {
   STOP_PROFILER("SolverDDP::computeDirection");
 }
 
-double SolverDDP::tryStep(const double steplength, const bool) {
+double SolverDDP::tryStep(const double steplength) {
   START_PROFILER("SolverDDP::tryStep");
   forwardPass(steplength);
   STOP_PROFILER("SolverDDP::tryStep");
@@ -152,23 +152,32 @@ double SolverDDP::stoppingCriteria() {
   // function. If this reduction is less than a certain threshold, then the
   // algorithm reaches the local minimum. For more details, see C. Mastalli et
   // al. "Inverse-dynamics MPC via Nullspace Resolution".
-  stop_ = std::abs(d_[0] + 0.5 * d_[1]);
+  stop_ = std::abs(DV_[1] + 0.5 * DV_[2]);
   return stop_;
 }
 
 const Eigen::Vector2d& SolverDDP::expectedImprovement() {
-  d_.fill(0);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  DV_.setZero();
+#pragma GCC diagnostic pop
   const std::size_t T = this->problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
     if (nu != 0) {
-      d_[0] += Qu_[t].dot(k_[t]);
-      d_[1] -= k_[t].dot(Quuk_[t]);
+      DV_[1] += Qu_[t].dot(k_[t]);
+      DV_[2] -= k_[t].dot(Quuk_[t]);
     }
   }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: remove d_
+  d_[0] = DV_[1];
+  d_[1] = DV_[2];
   return d_;
+#pragma GCC diagnostic pop
 }
 
 void SolverDDP::resizeData() {

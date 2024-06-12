@@ -351,7 +351,7 @@ void print_benchmark(RobotEENames robot) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.multiShootForwardPass(0.005, true);
+    ddp.multiShootForwardPass(0.005);
     duration[i] = timer.get_us_duration();
   }
   avg_fp = AVG(duration);
@@ -368,7 +368,7 @@ void print_benchmark(RobotEENames robot) {
   duration.setZero();
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    ddp.hybridShootForwardPass(0.005, true);
+    ddp.hybridShootForwardPass(0.005);
     duration[i] = timer.get_us_duration();
   }
   avg_fp = AVG(duration);

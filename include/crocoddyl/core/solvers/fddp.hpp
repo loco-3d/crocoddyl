@@ -93,7 +93,7 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @copybrief SolverAbstract::tryStep
    */
-  virtual double tryStep(const double steplength = 1, const bool recalc = true);
+  virtual double tryStep(const double steplength = 1);
 
   /**
    * @copybrief SolverAbstract::stoppingCriteria
@@ -229,10 +229,8 @@ class SolverFDDP : public SolverAbstract {
    * in (TODO: add paper title)
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
-   * @param[in] recalc  recompute the linear rollout
    */
-  virtual void multiShootForwardPass(const double steplength,
-                                     const bool recalc);
+  virtual void multiShootForwardPass(const double steplength);
 
   /**
    * @brief Run the multiple-shooting rollout with intervals of
@@ -242,10 +240,8 @@ class SolverFDDP : public SolverAbstract {
    * in (TODO: add paper title)
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
-   * @param[in] recalc  recompute the linear rollout
    */
-  virtual void hybridShootForwardPass(const double steplength,
-                                      const bool recalc);
+  virtual void hybridShootForwardPass(const double steplength);
 
   /**
    * @brief Run the classical nonlinear rollout
@@ -572,6 +568,15 @@ class SolverFDDP : public SolverAbstract {
                //!< \f$\mathbf{V_{xx} \bar{f}}\f$
   std::vector<Eigen::VectorXd>
       Vx_;  //!< Gradient of the Value function \f$\mathbf{V_x}\f$
+  std::vector<Eigen::VectorXd>
+      Lxx_dx_;  //!< Second-order change of the cost function
+                //!< \f$\boldsymbol{\ell}_{\mathbf{{xx}}}\delta\mathbf{x}\f$
+  std::vector<Eigen::VectorXd>
+      Luu_du_;  //!< Second-order change of the cost function
+                //!< \f$\boldsymbol{\ell}_{\mathbf{{uu}}}\delta\mathbf{u}\f$
+  std::vector<Eigen::VectorXd>
+      Lxu_du_;  //!< Second-order change of the cost function
+                //!< \f$\boldsymbol{\ell}_{\mathbf{{xu}}}\delta\mathbf{u}\f$
   std::vector<Eigen::MatrixXd>
       Qxx_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xx}}\f$
   std::vector<Eigen::MatrixXd>
@@ -616,7 +621,6 @@ class SolverFDDP : public SolverAbstract {
   double computeFeasibility(const std::vector<Eigen::VectorXd>& fs);
   bool acceptstep_;
   bool recalcdir_;
-  bool recalcstep_;
 };
 
 }  // namespace crocoddyl

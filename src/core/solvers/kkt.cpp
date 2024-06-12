@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University, Max Planck
+// Copyright (C) 2019-2024, LAAS-CNRS, New York University, Max Planck
 // Gesellschaft,
-//                          University of Edinburgh
+//                          University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,8 +63,8 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         continue;
       }
-      dVexp_ = steplength_ * d_[0] + 0.5 * steplength_ * steplength_ * d_[1];
-      if (d_[0] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
+      dVexp_ = steplength_ * DV_[1] + 0.5 * steplength_ * steplength_ * DV_[2];
+      if (DV_[1] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
         was_feasible_ = is_feasible_;
         setCandidate(xs_try_, us_try_, true);
         cost_ = cost_try_;
@@ -116,7 +116,7 @@ void SolverKKT::computeDirection(const bool recalc) {
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
 
-double SolverKKT::tryStep(const double steplength, const bool) {
+double SolverKKT::tryStep(const double steplength) {
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -163,13 +163,19 @@ double SolverKKT::stoppingCriteria() {
 }
 
 const Eigen::Vector2d& SolverKKT::expectedImprovement() {
-  d_ = Eigen::Vector2d::Zero();
+  DV_.setZero();
   // -grad^T.primal
-  d_(0) = -kktref_.segment(0, ndx_ + nu_).dot(primal_);
+  DV_[1] = -kktref_.segment(0, ndx_ + nu_).dot(primal_);
   // -(hessian.primal)^T.primal
   kkt_primal_.noalias() = kkt_.block(0, 0, ndx_ + nu_, ndx_ + nu_) * primal_;
-  d_(1) = -kkt_primal_.dot(primal_);
+  DV_[2] = -kkt_primal_.dot(primal_);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: remove d_
+  d_[0] = DV_[1];
+  d_[1] = DV_[2];
   return d_;
+#pragma GCC diagnostic pop
 }
 
 const Eigen::MatrixXd& SolverKKT::get_kkt() const { return kkt_; }
