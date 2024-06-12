@@ -29,6 +29,10 @@ struct SolverTypes {
     SolverBoxFDDP_FeasShoot,
     SolverBoxFDDP_MultiShoot,
     SolverBoxFDDP_HybridShoot,
+    SolverIntro_SingleShoot,
+    SolverIntro_FeasShoot,
+    SolverIntro_MultiShoot,
+    SolverIntro_HybridShoot,
     SolverIpopt,
     NbSolverTypes
   };

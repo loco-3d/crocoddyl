@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/solvers/box-fddp.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
+#include "crocoddyl/core/solvers/intro.hpp"
 #ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
 #endif
@@ -49,6 +50,18 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
       break;
     case SolverTypes::SolverBoxFDDP_HybridShoot:
       os << "SolverBoxFDDP_HybridShoot";
+      break;
+    case SolverTypes::SolverIntro_SingleShoot:
+      os << "SolverIntro_SingleShoot";
+      break;
+    case SolverTypes::SolverIntro_FeasShoot:
+      os << "SolverIntro_FeasShoot";
+      break;
+    case SolverTypes::SolverIntro_MultiShoot:
+      os << "SolverIntro_MultiShoot";
+      break;
+    case SolverTypes::SolverIntro_HybridShoot:
+      os << "SolverIntro_HybridShoot";
       break;
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
@@ -121,6 +134,22 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
       break;
     case SolverTypes::SolverBoxFDDP_HybridShoot:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot);
+      break;
+    case SolverTypes::SolverIntro_SingleShoot:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot);
+      break;
+    case SolverTypes::SolverIntro_FeasShoot:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot);
+      break;
+    case SolverTypes::SolverIntro_MultiShoot:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot);
+      break;
+    case SolverTypes::SolverIntro_HybridShoot:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
           problem, crocoddyl::DynamicsSolverType::HybridShoot);
       break;
 #ifdef CROCODDYL_WITH_IPOPT

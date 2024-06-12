@@ -20,6 +20,140 @@ using namespace crocoddyl::unittest;
 
 //____________________________________________________________________________//
 
+void test_solver_gaps_evolution(SolverTypes::Type solver_type,
+                                ActionModelTypes::Type action_type, size_t T) {
+  // Create action models
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, true);
+
+  // Create the testing and KKT solvers
+  SolverFactory solver_factory;
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, model, model2, T);
+
+  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+
+  // One step optimization with alpha=1. This case the dynamics gaps are fully
+  // closed.
+  double alpha = 1;
+  solver->computeDirection(true);
+  solver->expectedImprovement();
+  solver->tryStep(alpha);
+  for (unsigned int t = 0; t < T + 1; ++t) {
+    BOOST_CHECK(solver->get_fs_try()[t].isZero(1e-9));
+  }
+
+  // One step optimization with a random alpha. This case the dynamics gaps are
+  // closed by (1 - alpha) factor.
+  if (solver_type != SolverTypes::SolverFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverIntro_SingleShoot) {
+    alpha = random_real_in_range<double>(0.25, 0.75);
+    solver->computeDirection(true);
+    solver->expectedImprovement();
+    solver->tryStep(alpha);
+    for (unsigned int t = 0; t < T + 1; ++t) {
+      BOOST_CHECK((solver->get_fs_try()[t] - (1 - alpha) * solver->get_fs()[t])
+                      .isZero(1e-9));
+    }
+  }
+
+  // One step optimization with a random alpha and regularization. This case the
+  // dynamics gaps are closed by (1 - alpha) factor.
+  if (solver_type != SolverTypes::SolverFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverIntro_SingleShoot) {
+    alpha = random_real_in_range<double>(0.25, 0.75);
+    solver->set_preg(random_real_in_range<double>(10., 100.));
+    solver->computeDirection(true);
+    solver->expectedImprovement();
+    solver->tryStep(alpha);
+    for (unsigned int t = 0; t < T + 1; ++t) {
+      BOOST_CHECK((solver->get_fs_try()[t] - (1 - alpha) * solver->get_fs()[t])
+                      .isZero(1e-9));
+    }
+  }
+}
+
+//____________________________________________________________________________//
+
+void test_solver_expected_improvement(SolverTypes::Type solver_type,
+                                      ActionModelTypes::Type action_type,
+                                      size_t T) {
+  // Create action models
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, true);
+
+  // Create the testing and KKT solvers
+  SolverFactory solver_factory;
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, model, model2, T);
+
+  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+
+  // One step optimization with alpha=1.
+  double alpha = 1;
+  solver->computeDirection(true);
+  solver->expectedImprovement();
+  solver->tryStep(alpha);
+  BOOST_CHECK_CLOSE(solver->get_dVexp(), solver->get_dV(), 1e-9);
+
+  // One step optimization with a random alpha. This case the dynamics gaps are
+  // closed by (1 - alpha) factor.
+  alpha = random_real_in_range<double>(0.25, 0.75);
+  solver->tryStep(alpha);
+  BOOST_CHECK_CLOSE(solver->get_dVexp(), solver->get_dV(), 1e-9);
+
+  // One step optimization with a random alpha and regularization. This case the
+  // dynamics gaps are closed by (1 - alpha) factor.
+  if (solver_type != SolverTypes::SolverFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverIntro_SingleShoot) {
+    alpha = random_real_in_range<double>(0.25, 0.75);
+    solver->set_preg(random_real_in_range<double>(10., 100.));
+    solver->computeDirection(true);
+    solver->expectedImprovement();
+    solver->tryStep(alpha);
+    BOOST_CHECK_CLOSE(solver->get_dVexp(), solver->get_dV(), 1e-9);
+  }
+}
+
+//____________________________________________________________________________//
+
 void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   // Create action models
   std::shared_ptr<crocoddyl::ActionModelAbstract> model =
@@ -173,6 +307,22 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
 
 //____________________________________________________________________________//
 
+void register_solvers_againt_lqr_actions_unit_tests(
+    SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+    const std::size_t T) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << solver_type << "_against_lqr_action_" << action_type;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  std::cout << "Running " << test_name.str() << std::endl;
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_solver_gaps_evolution, solver_type, action_type, T)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_expected_improvement,
+                                      solver_type, action_type, T)));
+  framework::master_test_suite().add(ts);
+}
+
+//____________________________________________________________________________//
+
 void register_kkt_solver_unit_tests(ActionModelTypes::Type action_type,
                                     const std::size_t T) {
   boost::test_tools::output_test_stream test_name;
@@ -201,6 +351,16 @@ void register_solvers_againt_kkt_unit_tests(SolverTypes::Type solver_type,
 
 bool init_function() {
   std::size_t T = 10;
+
+  for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
+    for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
+         i < ActionModelTypes::ActionModelRandomLQR; ++i) {
+      if (SolverTypes::all[s] != SolverTypes::SolverIpopt) {
+        register_solvers_againt_lqr_actions_unit_tests(
+            SolverTypes::all[s], ActionModelTypes::all[i], T);
+      }
+    }
+  }
 
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
     register_kkt_solver_unit_tests(ActionModelTypes::all[i], T);
