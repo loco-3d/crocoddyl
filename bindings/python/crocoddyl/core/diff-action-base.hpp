@@ -28,8 +28,10 @@ class DifferentialActionModelAbstract_wrap
                                        const std::size_t nu,
                                        const std::size_t nr = 1,
                                        const std::size_t ng = 0,
-                                       const std::size_t nh = 0)
-      : DifferentialActionModelAbstract(state, nu, nr, ng, nh),
+                                       const std::size_t nh = 0,
+                                       const std::size_t ng_T = 0,
+                                       const std::size_t nh_T = 0)
+      : DifferentialActionModelAbstract(state, nu, nr, ng, nh, ng_T, nh_T),
         bp::wrapper<DifferentialActionModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }

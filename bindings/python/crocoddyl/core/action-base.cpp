@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -40,15 +40,18 @@ void exposeActionAbstract() {
       "and calcDiff(),\n"
       "respectively.",
       bp::init<boost::shared_ptr<StateAbstract>, std::size_t,
-               bp::optional<std::size_t, std::size_t, std::size_t> >(
-          bp::args("self", "state", "nu", "nr", "ng", "nh"),
+               bp::optional<std::size_t, std::size_t, std::size_t, std::size_t,
+                            std::size_t> >(
+          bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T"),
           "Initialize the action model.\n\n"
           "We can also describe autonomous systems by setting nu = 0.\n"
           ":param state: state description,\n"
           ":param nu: dimension of control vector,\n"
           ":param nr: dimension of the cost-residual vector (default 1)\n"
           ":param ng: number of inequality constraints (default 0)\n"
-          ":param nh: number of equality constraints (default 0)\n"))
+          ":param nh: number of equality constraints (default 0)\n"
+          ":param ng_T: number of inequality terminal constraints (default 0)\n"
+          ":param nh_T: number of equality terminal constraints (default 0)"))
       .def("calc", pure_virtual(&ActionModelAbstract_wrap::calc),
            bp::args("self", "data", "x", "u"),
            "Compute the next state and cost value.\n\n"
@@ -130,6 +133,16 @@ void exposeActionAbstract() {
                     bp::make_setter(&ActionModelAbstract_wrap::nh_,
                                     bp::return_internal_reference<>()),
                     "number of equality constraints")
+      .add_property("ng_T",
+                    bp::make_function(&ActionModelAbstract_wrap::get_ng_T),
+                    bp::make_setter(&ActionModelAbstract_wrap::ng_T_,
+                                    bp::return_internal_reference<>()),
+                    "number of inequality terminal constraints")
+      .add_property("nh_T",
+                    bp::make_function(&ActionModelAbstract_wrap::get_nh_T),
+                    bp::make_setter(&ActionModelAbstract_wrap::nh_T_,
+                                    bp::return_internal_reference<>()),
+                    "number of equality terminal constraints")
       .add_property(
           "state",
           bp::make_function(&ActionModelAbstract_wrap::get_state,

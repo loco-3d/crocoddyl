@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,15 +18,20 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
     boost::shared_ptr<StateAbstract> state, const std::size_t nu,
-    const std::size_t nr, const std::size_t ng, const std::size_t nh)
+    const std::size_t nr, const std::size_t ng, const std::size_t nh,
+    const std::size_t ng_T, const std::size_t nh_T)
     : nu_(nu),
       nr_(nr),
       ng_(ng),
       nh_(nh),
+      ng_T_(ng_T),
+      nh_T_(nh_T),
       state_(state),
       unone_(VectorXs::Zero(nu)),
-      g_lb_(VectorXs::Constant(ng, -std::numeric_limits<Scalar>::infinity())),
-      g_ub_(VectorXs::Constant(ng, std::numeric_limits<Scalar>::infinity())),
+      g_lb_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
+                               -std::numeric_limits<Scalar>::infinity())),
+      g_ub_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
+                               std::numeric_limits<Scalar>::infinity())),
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
@@ -132,6 +137,16 @@ std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh() const {
 }
 
 template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_ng_T() const {
+  return ng_T_;
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelAbstractTpl<Scalar>::get_nh_T() const {
+  return nh_T_;
+}
+
+template <typename Scalar>
 const boost::shared_ptr<StateAbstractTpl<Scalar> >&
 DifferentialActionModelAbstractTpl<Scalar>::get_state() const {
   return state_;
@@ -170,11 +185,12 @@ bool DifferentialActionModelAbstractTpl<Scalar>::get_has_control_limits()
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::set_g_lb(
     const VectorXs& g_lb) {
-  if (static_cast<std::size_t>(g_lb.size()) != ng_) {
+  const std::size_t ng = ng_ > ng_T_ ? ng_ : ng_T_;
+  if (static_cast<std::size_t>(g_lb.size()) != ng) {
     throw_pretty(
         "Invalid argument: "
         << "inequality lower bound has wrong dimension (it should be " +
-               std::to_string(ng_) + ")");
+               std::to_string(ng) + ")");
   }
   g_lb_ = g_lb;
 }
@@ -182,7 +198,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_g_lb(
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::set_g_ub(
     const VectorXs& g_ub) {
-  if (static_cast<std::size_t>(g_ub.size()) != ng_) {
+  const std::size_t ng = ng_ > ng_T_ ? ng_ : ng_T_;
+  if (static_cast<std::size_t>(g_ub.size()) != ng) {
     throw_pretty(
         "Invalid argument: "
         << "inequality upper bound has wrong dimension (it should be " +
