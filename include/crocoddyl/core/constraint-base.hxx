@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,9 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(residual->get_nu()),
       ng_(ng),
       nh_(nh),
+      T_constraint_(residual->get_q_dependent() || residual->get_v_dependent()
+                        ? true
+                        : false),
       unone_(VectorXs::Zero(residual->get_nu())) {
   if (nh_ > residual_->get_nr()) {
     throw_pretty("Invalid argument: "
@@ -46,7 +49,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     boost::shared_ptr<StateAbstract> state, const std::size_t nu,
-    const std::size_t ng, const std::size_t nh)
+    const std::size_t ng, const std::size_t nh, const bool T_const)
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
@@ -59,12 +62,13 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(nu),
       ng_(ng),
       nh_(nh),
+      T_constraint_(T_const),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     boost::shared_ptr<StateAbstract> state, const std::size_t ng,
-    const std::size_t nh)
+    const std::size_t nh, const bool T_const)
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
@@ -77,6 +81,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(state->get_nv()),
       ng_(ng),
       nh_(nh),
+      T_constraint_(T_const),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -196,6 +201,11 @@ std::size_t ConstraintModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
+}
+
+template <typename Scalar>
+bool ConstraintModelAbstractTpl<Scalar>::get_T_constraint() const {
+  return T_constraint_;
 }
 
 template <class Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,19 +42,28 @@ void exposeConstraintAbstract() {
                             ":param ng: number of inequality constraints\n"
                             ":param nh: number of equality constraints"))
       .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t,
-                    std::size_t>(
-          bp::args("self", "state", "nu", "ng", "nh"),
+                    std::size_t, bp::optional<bool> >(
+          bp::args("self", "state", "nu", "ng", "nh", "T_const"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector (default state.nv)\n"
           ":param ng: number of inequality constraints\n"
-          ":param nh: number of equality constraints"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
-          bp::args("self", "state", "ng", "nh"),
+          ":param nh: number of equality constraints\n"
+          ":param T_const: True if this is a constraint in both running and "
+          "terminal nodes.\n"
+          "                False if it is a constraint on running nodes only "
+          "(default true)"))
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t,
+                    bp::optional<bool> >(
+          bp::args("self", "state", "ng", "nh", "T_const"),
           "Initialize the constraint model.\n\n"
           ":param state: state description\n"
           ":param ng: number of inequality constraints\n"
-          ":param nh: number of equality constraints"))
+          ":param nh: number of equality constraints\n"
+          ":param T_const: True if this is a constraint in both running and "
+          "terminal nodes.\n"
+          "                False if it is a constraint on running nodes only "
+          "(default true)"))
       .def("calc", pure_virtual(&ConstraintModelAbstract_wrap::calc),
            bp::args("self", "data", "x", "u"),
            "Compute the constraint value.\n\n"
@@ -141,6 +150,10 @@ void exposeConstraintAbstract() {
       .add_property("nh",
                     bp::make_function(&ConstraintModelAbstract_wrap::get_nh),
                     "number of equality constraints")
+      .add_property(
+          "T_constraint",
+          bp::make_function(&ConstraintModelAbstract_wrap::get_T_constraint),
+          "True if the constraint is imposed in terminal nodes as well")
       .def(PrintableVisitor<ConstraintModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();

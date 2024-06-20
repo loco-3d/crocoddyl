@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,6 +169,12 @@ void exposeConstraintManager() {
                     "number of active inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelManager::get_nh),
                     "number of active equality constraints")
+      .add_property("ng_T",
+                    bp::make_function(&ConstraintModelManager::get_ng_T),
+                    "number of active inequality terminal constraints")
+      .add_property("nh_T",
+                    bp::make_function(&ConstraintModelManager::get_nh_T),
+                    "number of active equality terminal constraints")
       .add_property(
           "active_set",
           bp::make_function(&ConstraintModelManager::get_active_set,

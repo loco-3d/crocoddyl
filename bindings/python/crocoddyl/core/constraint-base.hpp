@@ -35,15 +35,16 @@ class ConstraintModelAbstract_wrap
 
   ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                                const std::size_t nu, const std::size_t ng,
-                               const std::size_t nh)
-      : ConstraintModelAbstract(state, nu, ng, nh),
+                               const std::size_t nh, const bool T_const = true)
+      : ConstraintModelAbstract(state, nu, ng, nh, T_const),
         bp::wrapper<ConstraintModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
   ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                               const std::size_t ng, const std::size_t nh)
-      : ConstraintModelAbstract(state, ng, nh) {
+                               const std::size_t ng, const std::size_t nh,
+                               const bool T_const = true)
+      : ConstraintModelAbstract(state, ng, nh, T_const) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
