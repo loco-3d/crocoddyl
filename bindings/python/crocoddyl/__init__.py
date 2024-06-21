@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pinocchio
+from pinocchio.visualize import MeshcatVisualizer
 
 from .libcrocoddyl_pywrap import *  # noqa: F403
 from .libcrocoddyl_pywrap import __raw_version__, __version__  # noqa: F401
@@ -558,7 +559,7 @@ class MeshcatDisplay(DisplayAbstract):
         if frameNames is not None:
             print("Deprecated. Do not pass frameNames")
         robot.setVisualizer(
-            pinocchio.visualize.MeshcatVisualizer(
+            MeshcatVisualizer(
                 model=self.robot.model,
                 collision_model=self.robot.collision_model,
                 visual_model=self.robot.visual_model,
