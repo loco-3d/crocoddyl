@@ -80,6 +80,8 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
+  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
@@ -100,6 +102,8 @@ void test_partial_derivatives_against_numdiff(
   model->calcDiff(data, x);
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
+  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
+  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
