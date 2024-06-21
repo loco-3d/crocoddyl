@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, University of
-// Oxford,
-//                          University of Trento, Heriot-Watt University
+// Copyright (C) 2021-2024, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,6 +88,16 @@ std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh() const {
   return differential_->get_nh();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng_T() const {
+  return differential_->get_ng_T();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh_T() const {
+  return differential_->get_nh_T();
 }
 
 template <typename Scalar>
