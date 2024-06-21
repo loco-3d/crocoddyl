@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,8 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
         boost::shared_ptr<CostModelSum> costs,
         boost::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, state->get_nv(), costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh() + state->get_nv() - actuation->get_nu()),
+           constraints->get_nh() + state->get_nv() - actuation->get_nu(),
+           constraints->get_ng_T(), constraints->get_nh_T()),
       actuation_(actuation),
       costs_(costs),
       constraints_(constraints),
@@ -72,12 +73,13 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(
 
   if (state->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
-        "tau",
-        boost::make_shared<ConstraintModelResidual>(
-            state_, boost::make_shared<
-                        typename DifferentialActionModelFreeInvDynamicsTpl<
-                            Scalar>::ResidualModelActuation>(
-                        state, actuation_->get_nu())));
+        "tau", boost::make_shared<ConstraintModelResidual>(
+                   state_,
+                   boost::make_shared<
+                       typename DifferentialActionModelFreeInvDynamicsTpl<
+                           Scalar>::ResidualModelActuation>(
+                       state, actuation_->get_nu()),
+                   false));
   }
 }
 
@@ -139,7 +141,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  d->constraints->resize(this, d);
+  d->constraints->resize(this, d, false);
   constraints_->calc(d->constraints, x);
 }
 

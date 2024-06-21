@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -37,7 +37,8 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
     boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
     const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh()),
+           constraints->get_nh(), constraints->get_ng_T(),
+           constraints->get_nh_T()),
       impulses_(impulses),
       costs_(costs),
       constraints_(constraints),
@@ -99,7 +100,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
+    d->constraints->resize(this, d, false);
     constraints_->calc(d->constraints, x);
   }
 }

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -52,7 +52,8 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::
         boost::shared_ptr<ConstraintModelManager> constraints,
         const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, actuation->get_nu(), costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh()),
+           constraints->get_nh(), constraints->get_ng_T(),
+           constraints->get_nh_T()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -174,7 +175,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
-    d->constraints->resize(this, d);
+    d->constraints->resize(this, d, false);
     constraints_->calc(d->constraints, x);
   }
 }
