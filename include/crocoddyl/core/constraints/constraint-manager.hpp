@@ -221,6 +221,16 @@ class ConstraintModelManagerTpl {
   std::size_t get_nh() const;
 
   /**
+   * @brief Return the number of active inequality terminal constraints
+   */
+  std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of active equality terminal constraints
+   */
+  std::size_t get_nh_T() const;
+
+  /**
    * @brief Return the names of the set of active constraints
    */
   const std::set<std::string>& get_active_set() const;
@@ -260,8 +270,10 @@ class ConstraintModelManagerTpl {
   VectorXs lb_;                             //!< Lower bound of the constraint
   VectorXs ub_;                             //!< Upper bound of the constraint
   std::size_t nu_;                          //!< Dimension of the control input
-  std::size_t ng_;  //!< Number of the active inequality constraints
-  std::size_t nh_;  //!< Number of the active equality constraints
+  std::size_t ng_;    //!< Number of the active inequality constraints
+  std::size_t nh_;    //!< Number of the active equality constraints
+  std::size_t ng_T_;  //!< Number of the active inequality terminal constraints
+  std::size_t nh_T_;  //!< Number of the active equality terminal constraints
   std::set<std::string> active_set_;  //!< Names of the active constraint items
   std::set<std::string>
       inactive_set_;  //!< Names of the inactive constraint items
@@ -332,12 +344,27 @@ struct ConstraintDataManagerTpl {
         Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
   }
 
-  template <class ActionModel, class ActionData>
-  void resize(ActionModel* const model, ActionData* const data) {
+  template <class Model>
+  void resize(Model* const model, const bool running_node = true) {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nu = model->get_nu();
-    const std::size_t ng = model->get_ng();
-    const std::size_t nh = model->get_nh();
+    const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
+    const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
+    new (&g) Eigen::Map<VectorXs>(g_internal.data(), ng);
+    new (&Gx) Eigen::Map<MatrixXs>(Gx_internal.data(), ng, ndx);
+    new (&Gu) Eigen::Map<MatrixXs>(Gu_internal.data(), ng, nu);
+    new (&h) Eigen::Map<VectorXs>(h_internal.data(), nh);
+    new (&Hx) Eigen::Map<MatrixXs>(Hx_internal.data(), nh, ndx);
+    new (&Hu) Eigen::Map<MatrixXs>(Hu_internal.data(), nh, nu);
+  }
+
+  template <class ActionModel, class ActionData>
+  void resize(ActionModel* const model, ActionData* const data,
+              const bool running_node = true) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
+    const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
     data->g.conservativeResize(ng);
     data->Gx.conservativeResize(ng, ndx);
     data->Gu.conservativeResize(ng, nu);

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,25 +59,30 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the residual constraint model as an inequality constraint
    *
-   * @param[in] state       State of the multibody system
-   * @param[in] residual    Residual model
-   * @param[in] lower       Lower bound (dimension of the residual vector)
-   * @param[in] upper       Upper bound (dimension of the residual vector)
+   * @param[in] state     State of the multibody system
+   * @param[in] residual  Residual model
+   * @param[in] lower     Lower bound (dimension of the residual vector)
+   * @param[in] upper     Upper bound (dimension of the residual vector)
+   * @param[in] T_act     False if we want to deactivate the residual at the
+   * terminal node (default true)
    */
   ConstraintModelResidualTpl(
       boost::shared_ptr<typename Base::StateAbstract> state,
       boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
-      const VectorXs& upper);
+      const VectorXs& upper, const bool T_act = true);
 
   /**
    * @brief Initialize the residual constraint model as an equality constraint
    *
-   * @param[in] state       State of the multibody system
-   * @param[in] residual    Residual model
+   * @param[in] state     State of the multibody system
+   * @param[in] residual  Residual model
+   * @param[in] T_act     False if we want to deactivate the residual at the
+   * terminal node (default true)
    */
   ConstraintModelResidualTpl(
       boost::shared_ptr<typename Base::StateAbstract> state,
-      boost::shared_ptr<ResidualModelAbstract> residual);
+      boost::shared_ptr<ResidualModelAbstract> residual,
+      const bool T_act = true);
   virtual ~ConstraintModelResidualTpl();
 
   /**
@@ -152,6 +157,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::residual_;
   using Base::state_;
+  using Base::T_constraint_;
   using Base::type_;
   using Base::ub_;
   using Base::unone_;

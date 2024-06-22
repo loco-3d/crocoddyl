@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     boost::shared_ptr<typename Base::StateAbstract> state,
     boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
-    const VectorXs& upper)
+    const VectorXs& upper, const bool T_act)
     : Base(state, residual, residual->get_nr(), 0) {
   lb_ = lower;
   ub_ = upper;
@@ -41,13 +41,20 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
         "Invalid argument: the lower bound cannot contain a negative "
         "infinity/max value");
   }
+  if (!T_act) {
+    T_constraint_ = false;
+  }
 }
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     boost::shared_ptr<typename Base::StateAbstract> state,
-    boost::shared_ptr<ResidualModelAbstract> residual)
-    : Base(state, residual, 0, residual->get_nr()) {}
+    boost::shared_ptr<ResidualModelAbstract> residual, const bool T_act)
+    : Base(state, residual, 0, residual->get_nr()) {
+  if (!T_act) {
+    T_constraint_ = false;
+  }
+}
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::~ConstraintModelResidualTpl() {}

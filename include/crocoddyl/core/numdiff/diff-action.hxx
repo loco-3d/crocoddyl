@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Heriot-Watt University
 // Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
@@ -17,7 +17,8 @@ template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(
     boost::shared_ptr<Base> model, const bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr(),
-           model->get_ng(), model->get_nh()),
+           model->get_ng(), model->get_nh(), model->get_ng_T(),
+           model->get_nh_T()),
       model_(model),
       with_gauss_approx_(with_gauss_approx),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {
@@ -95,10 +96,10 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
   const std::size_t nu = model_->get_nu();
   const std::size_t ng = model_->get_ng();
   const std::size_t nh = model_->get_nh();
-  d->Gx.resize(ng, ndx);
-  d->Gu.resize(ng, nu);
-  d->Hx.resize(nh, ndx);
-  d->Hu.resize(nh, nu);
+  d->Gx.conservativeResize(ng, ndx);
+  d->Gu.conservativeResize(ng, nu);
+  d->Hx.conservativeResize(nh, ndx);
+  d->Hu.conservativeResize(nh, nu);
   d->du.setZero();
 
   assertStableStateFD(x);
@@ -249,8 +250,8 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
   const std::size_t ndx = state_->get_ndx();
-  d->Gx.resize(model_->get_ng(), ndx);
-  d->Hx.resize(model_->get_nh(), ndx);
+  d->Gx.conservativeResize(model_->get_ng_T(), ndx);
+  d->Hx.conservativeResize(model_->get_nh_T(), ndx);
 
   assertStableStateFD(x);
 

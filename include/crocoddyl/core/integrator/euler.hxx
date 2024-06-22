@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Pisa,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -130,8 +130,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
   d->Luu *= time_step_;
   d->Gx = d->differential->Gx;
   d->Hx = d->differential->Hx;
-  d->Gu.resize(differential_->get_ng(), nu_);
-  d->Hu.resize(differential_->get_nh(), nu_);
+  d->Gu.conservativeResize(differential_->get_ng(), nu_);
+  d->Hu.conservativeResize(differential_->get_nh(), nu_);
   control_->multiplyByJacobian(d->control, d->differential->Gu, d->Gu);
   control_->multiplyByJacobian(d->control, d->differential->Hu, d->Hu);
 }

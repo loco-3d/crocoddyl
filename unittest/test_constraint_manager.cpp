@@ -43,8 +43,12 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   model.addConstraint("random_constraint_1", rand_constraint_1);
   std::size_t ng = rand_constraint_1->get_ng();
   std::size_t nh = rand_constraint_1->get_nh();
+  std::size_t ng_T = rand_constraint_1->get_T_constraint() ? ng : 0;
+  std::size_t nh_T = rand_constraint_1->get_T_constraint() ? nh : 0;
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ng_T() == ng_T);
+  BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // add an inactive constraint
   boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 =
@@ -52,20 +56,34 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   model.addConstraint("random_constraint_2", rand_constraint_2, false);
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ng_T() == ng_T);
+  BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // change the random constraint 2 status
   model.changeConstraintStatus("random_constraint_2", true);
   ng += rand_constraint_2->get_ng();
   nh += rand_constraint_2->get_nh();
+  if (rand_constraint_2->get_T_constraint()) {
+    ng_T += rand_constraint_2->get_ng();
+    nh_T += rand_constraint_2->get_nh();
+  }
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ng_T() == ng_T);
+  BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // change the random constraint 1 status
   model.changeConstraintStatus("random_constraint_1", false);
   ng -= rand_constraint_1->get_ng();
   nh -= rand_constraint_1->get_nh();
+  if (rand_constraint_1->get_T_constraint()) {
+    ng_T -= rand_constraint_1->get_ng();
+    nh_T -= rand_constraint_1->get_nh();
+  }
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ng_T() == ng_T);
+  BOOST_CHECK(model.get_nh_T() == nh_T);
 }
 
 void test_addConstraint_error_message(StateModelTypes::Type state_type) {
@@ -114,13 +132,19 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   model.addConstraint("random_constraint", rand_constraint);
   std::size_t ng = rand_constraint->get_ng();
   std::size_t nh = rand_constraint->get_nh();
+  std::size_t ng_T = rand_constraint->get_T_constraint() ? ng : 0;
+  std::size_t nh_T = rand_constraint->get_T_constraint() ? nh : 0;
   BOOST_CHECK(model.get_ng() == ng);
   BOOST_CHECK(model.get_nh() == nh);
+  BOOST_CHECK(model.get_ng_T() == ng_T);
+  BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // remove the constraint
   model.removeConstraint("random_constraint");
   BOOST_CHECK(model.get_ng() == 0);
   BOOST_CHECK(model.get_nh() == 0);
+  BOOST_CHECK(model.get_ng_T() == 0);
+  BOOST_CHECK(model.get_nh_T() == 0);
 }
 
 void test_removeConstraint_error_message(StateModelTypes::Type state_type) {
@@ -269,30 +293,35 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   x1 = state->rand();
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
                                           x1);
+  data->resize(&model, false);
   model.calc(data, x1);
   model.calcDiff(data, x1);
 
+  const std::size_t ng_T = model.get_ng_T();
+  const std::size_t nh_T = model.get_nh_T();
   ng_i = 0;
   nh_i = 0;
-  g.setZero();
-  h.setZero();
-  Gx.setZero();
-  Gu.setZero();
-  Hx.setZero();
-  Hu.setZero();
+  g.conservativeResize(ng_T);
+  h.conservativeResize(nh_T);
+  Gx.conservativeResize(ng_T, ndx);
+  Gu.conservativeResize(ng_T, nu);
+  Hx.conservativeResize(nh_T, ndx);
+  Hu.conservativeResize(nh_T, nu);
   for (std::size_t i = 0; i < 5; ++i) {
-    models[i]->calc(datas[i], x1);
-    models[i]->calcDiff(datas[i], x1);
-    const std::size_t ng = models[i]->get_ng();
-    const std::size_t nh = models[i]->get_nh();
-    g.segment(ng_i, ng) = datas[i]->g;
-    h.segment(nh_i, nh) = datas[i]->h;
-    Gx.block(ng_i, 0, ng, ndx) = datas[i]->Gx;
-    Gu.block(ng_i, 0, ng, nu) = datas[i]->Gu;
-    Hx.block(nh_i, 0, nh, ndx) = datas[i]->Hx;
-    Hu.block(nh_i, 0, nh, nu) = datas[i]->Hu;
-    ng_i += ng;
-    nh_i += nh;
+    if (models[i]->get_T_constraint()) {
+      models[i]->calc(datas[i], x1);
+      models[i]->calcDiff(datas[i], x1);
+      const std::size_t ng = models[i]->get_ng();
+      const std::size_t nh = models[i]->get_nh();
+      g.segment(ng_i, ng) = datas[i]->g;
+      h.segment(nh_i, nh) = datas[i]->h;
+      Gx.block(ng_i, 0, ng, ndx) = datas[i]->Gx;
+      Gu.block(ng_i, 0, ng, nu) = datas[i]->Gu;
+      Hx.block(nh_i, 0, nh, ndx) = datas[i]->Hx;
+      Hu.block(nh_i, 0, nh, nu) = datas[i]->Hu;
+      ng_i += ng;
+      nh_i += nh;
+    }
   }
   BOOST_CHECK(data->g.isApprox(g, 1e-9));
   BOOST_CHECK(data->h.isApprox(h, 1e-9));

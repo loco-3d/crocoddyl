@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,26 +74,33 @@ class ConstraintModelAbstractTpl {
   /**
    * @copybrief Initialize the constraint model
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] nu     Dimension of control vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state    State of the multibody system
+   * @param[in] nu       Dimension of control vector
+   * @param[in] ng       Number of inequality constraints
+   * @param[in] nh       Number of equality constraints
+   * @param[in] T_const  True if this is a constraint in both running and
+   * terminal nodes. False if it is a constraint on running nodes only (default
+   * true)
    */
   ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                              const std::size_t nu, const std::size_t ng,
-                             const std::size_t nh);
+                             const std::size_t nh, const bool T_const = true);
 
   /**
    * @copybrief ConstraintModelAbstractTpl()
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state    State of the multibody system
+   * @param[in] ng       Number of inequality constraints
+   * @param[in] nh       Number of equality constraints
+   * @param[in] T_const  True if this is a constraint in both running and
+   * terminal nodes. False if it is a constraint on running nodes only (default
+   * true)
    */
   ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                             const std::size_t ng, const std::size_t nh);
+                             const std::size_t ng, const std::size_t nh,
+                             const bool T_const = true);
   virtual ~ConstraintModelAbstractTpl();
 
   /**
@@ -213,6 +220,11 @@ class ConstraintModelAbstractTpl {
   std::size_t get_nh() const;
 
   /**
+   * @brief Return true if the constraint is imposed in terminal nodes as well.
+   */
+  bool get_T_constraint() const;
+
+  /**
    * @brief Print information on the constraint model
    */
   template <class Scalar>
@@ -236,13 +248,15 @@ class ConstraintModelAbstractTpl {
   boost::shared_ptr<StateAbstract> state_;             //!< State description
   boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
   ConstraintType
-      type_;        //!< Type of constraint: inequality=0, equality=1, both=2
-  VectorXs lb_;     //!< Lower bound of the constraint
-  VectorXs ub_;     //!< Upper bound of the constraint
-  std::size_t nu_;  //!< Control dimension
-  std::size_t ng_;  //!< Number of inequality constraints
-  std::size_t nh_;  //!< Number of equality constraints
-  VectorXs unone_;  //!< No control vector
+      type_;           //!< Type of constraint: inequality=0, equality=1, both=2
+  VectorXs lb_;        //!< Lower bound of the constraint
+  VectorXs ub_;        //!< Upper bound of the constraint
+  std::size_t nu_;     //!< Control dimension
+  std::size_t ng_;     //!< Number of inequality constraints
+  std::size_t nh_;     //!< Number of equality constraints
+  bool T_constraint_;  //!< Label that indicates if the constraint is imposed in
+                       //!< terminal nodes as well
+  VectorXs unone_;     //!< No control vector
 };
 
 template <typename _Scalar>

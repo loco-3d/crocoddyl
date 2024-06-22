@@ -52,7 +52,7 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const MatrixXs& N, const MatrixXs& G, const MatrixXs& H, const VectorXs& f,
     const VectorXs& q, const VectorXs& r, const VectorXs& g, const VectorXs& h)
     : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0, G.rows(),
-           H.rows()),
+           H.rows(), G.rows(), H.rows()),
       drift_free_(false),
       updated_lqr_(false) {
   set_LQR(A, B, Q, R, N, G, H, f, q, r, g, h);
@@ -80,7 +80,8 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
 template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
     : Base(boost::make_shared<StateVector>(copy.get_A().cols()),
-           copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows()),
+           copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows(),
+           copy.get_G().rows(), copy.get_H().rows()),
       drift_free_(false),
       updated_lqr_(false) {
   set_LQR(copy.get_A(), copy.get_B(), copy.get_Q(), copy.get_R(), copy.get_N(),

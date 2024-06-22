@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,21 +23,26 @@ void exposeConstraintResidual() {
       "vector and its bounds.",
       bp::init<boost::shared_ptr<StateAbstract>,
                boost::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
-               Eigen::VectorXd>(
-          bp::args("self", "state", "residual", "lower", "upper"),
+               Eigen::VectorXd, bp::optional<bool> >(
+          bp::args("self", "state", "residual", "lower", "upper", "T_act"),
           "Initialize the residual constraint model as an inequality "
           "constraint.\n\n"
           ":param state: state description\n"
           ":param residual: residual model\n"
           ":param lower: lower bound\n"
-          ":param upper: upper bound"))
+          ":param upper: upper bound\n"
+          ":param T_act: false if we want to deactivate the residual at the "
+          "terminal node (default true)"))
       .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ResidualModelAbstract> >(
-          bp::args("self", "state", "residual"),
+                    boost::shared_ptr<ResidualModelAbstract>,
+                    bp::optional<bool> >(
+          bp::args("self", "state", "residual", "T_act"),
           "Initialize the residual constraint model as an equality "
           "constraint.\n\n"
           ":param state: state description\n"
-          ":param residual: residual model"))
+          ":param residual: residual model\n"
+          ":param T_act: false if we want to deactivate the residual at the "
+          "terminal node (default true)"))
       .def<void (ConstraintModelResidual::*)(
           const boost::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,

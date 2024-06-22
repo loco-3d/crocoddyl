@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -108,12 +108,16 @@ class ActionModelAbstractTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] ng     Number of inequality constraints (default 0)
+   * @param[in] nh     Number of equality constraints (default 0)
+   * @param[in] ng_T   Number of inequality terminal constraints (default 0)
+   * @param[in] nh_T   Number of equality terminal constraints (default 0)
    */
   ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                          const std::size_t nu, const std::size_t nr = 0,
-                         const std::size_t ng = 0, const std::size_t nh = 0);
+                         const std::size_t ng = 0, const std::size_t nh = 0,
+                         const std::size_t ng_T = 0,
+                         const std::size_t nh_T = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -238,6 +242,16 @@ class ActionModelAbstractTpl {
   virtual std::size_t get_nh() const;
 
   /**
+   * @brief Return the number of inequality terminal constraints
+   */
+  virtual std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_nh_T() const;
+
+  /**
    * @brief Return the state
    */
   const boost::shared_ptr<StateAbstract>& get_state() const;
@@ -302,10 +316,12 @@ class ActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  std::size_t nu_;  //!< Control dimension
-  std::size_t nr_;  //!< Dimension of the cost residual
-  std::size_t ng_;  //!< Number of inequality constraints
-  std::size_t nh_;  //!< Number of equality constraints
+  std::size_t nu_;    //!< Control dimension
+  std::size_t nr_;    //!< Dimension of the cost residual
+  std::size_t ng_;    //!< Number of inequality constraints
+  std::size_t nh_;    //!< Number of equality constraints
+  std::size_t ng_T_;  //!< Number of inequality terminal constraints
+  std::size_t nh_T_;  //!< Number of equality terminal constraints
   boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
   VectorXs unone_;                          //!< Neutral state
   VectorXs g_lb_;            //!< Lower bound of the inequality constraints
@@ -346,12 +362,22 @@ struct ActionDataAbstractTpl {
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
-        g(model->get_ng()),
-        Gx(model->get_ng(), model->get_state()->get_ndx()),
-        Gu(model->get_ng(), model->get_nu()),
-        h(model->get_nh()),
-        Hx(model->get_nh(), model->get_state()->get_ndx()),
-        Hu(model->get_nh(), model->get_nu()) {
+        g(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                              : model->get_ng_T()),
+        Gx(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                               : model->get_ng_T(),
+           model->get_state()->get_ndx()),
+        Gu(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                               : model->get_ng_T(),
+           model->get_nu()),
+        h(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                              : model->get_nh_T()),
+        Hx(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                               : model->get_nh_T(),
+           model->get_state()->get_ndx()),
+        Hu(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                               : model->get_nh_T(),
+           model->get_nu()) {
     xnext.setZero();
     Fx.setZero();
     Fu.setZero();

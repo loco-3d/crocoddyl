@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,8 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
     : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
            constraints->get_ng(),
            state->get_nv() - actuation->get_nu() + contacts->get_nc_total() +
-               constraints->get_nh()),
+               constraints->get_nh(),
+           constraints->get_ng_T(), constraints->get_nh_T()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -90,11 +91,12 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
 
   if (state_->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
-        "tau",
-        boost::make_shared<ConstraintModelResidual>(
-            state_, boost::make_shared<
-                        typename DifferentialActionModelContactInvDynamicsTpl<
-                            Scalar>::ResidualModelActuation>(state, nu, nc)));
+        "tau", boost::make_shared<ConstraintModelResidual>(
+                   state_,
+                   boost::make_shared<
+                       typename DifferentialActionModelContactInvDynamicsTpl<
+                           Scalar>::ResidualModelActuation>(state, nu, nc),
+                   false));
   }
   if (contacts_->get_nc_total() != 0) {
     typename ContactModelMultiple::ContactModelContainer contact_list;
@@ -113,14 +115,17 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
               state_,
               boost::make_shared<
                   typename DifferentialActionModelContactInvDynamicsTpl<
-                      Scalar>::ResidualModelContact>(state, id, nc_i, nc)),
+                      Scalar>::ResidualModelContact>(state, id, nc_i, nc),
+              false),
           active);
       constraints_->addConstraint(
           name + "_force",
           boost::make_shared<ConstraintModelResidual>(
-              state_, boost::make_shared<ResidualModelContactForceTpl<Scalar> >(
-                          state, id, pinocchio::ForceTpl<Scalar>::Zero(), nc_i,
-                          nu_, false)),
+              state_,
+              boost::make_shared<ResidualModelContactForceTpl<Scalar> >(
+                  state, id, pinocchio::ForceTpl<Scalar>::Zero(), nc_i, nu_,
+                  false),
+              false),
           !active);
     }
   }
@@ -199,7 +204,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
-  d->constraints->resize(this, d);
+  d->constraints->resize(this, d, false);
   constraints_->calc(d->constraints, x);
 }
 

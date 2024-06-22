@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2024, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -307,8 +307,8 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
   }
   d->Gx = k0_data->Gx;
   d->Hx = k0_data->Hx;
-  d->Gu.resize(differential_->get_ng(), nu_);
-  d->Hu.resize(differential_->get_nh(), nu_);
+  d->Gu.conservativeResize(differential_->get_ng(), nu_);
+  d->Hu.conservativeResize(differential_->get_nh(), nu_);
   control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
   control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 

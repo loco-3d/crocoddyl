@@ -22,14 +22,18 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   using ActionModelAbstract::ng_;
+  using ActionModelAbstract::ng_T_;
   using ActionModelAbstract::nh_;
+  using ActionModelAbstract::nh_T_;
   using ActionModelAbstract::nu_;
   using ActionModelAbstract::unone_;
 
   ActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
                            const std::size_t nu, const std::size_t nr = 1,
-                           const std::size_t ng = 0, const std::size_t nh = 0)
-      : ActionModelAbstract(state, nu, nr, ng, nh),
+                           const std::size_t ng = 0, const std::size_t nh = 0,
+                           const std::size_t ng_T = 0,
+                           const std::size_t nh_T = 0)
+      : ActionModelAbstract(state, nu, nr, ng, nh, ng_T, nh_T),
         bp::wrapper<ActionModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }

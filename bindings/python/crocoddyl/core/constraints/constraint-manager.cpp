@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,10 @@ namespace python {
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
     ConstraintModelManager_addConstraint_wrap,
     ConstraintModelManager::addConstraint, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConstraintDataManager_resizeConst_wrap,
+                                       ConstraintDataManager::resize, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConstraintDataManager_resize_wrap,
+                                       ConstraintDataManager::resize, 2, 3)
 
 void exposeConstraintManager() {
   // Register custom converters between std::map and Python dict
@@ -169,6 +173,12 @@ void exposeConstraintManager() {
                     "number of active inequality constraints")
       .add_property("nh", bp::make_function(&ConstraintModelManager::get_nh),
                     "number of active equality constraints")
+      .add_property("ng_T",
+                    bp::make_function(&ConstraintModelManager::get_ng_T),
+                    "number of active inequality terminal constraints")
+      .add_property("nh_T",
+                    bp::make_function(&ConstraintModelManager::get_nh_T),
+                    "number of active equality terminal constraints")
       .add_property(
           "active_set",
           bp::make_function(&ConstraintModelManager::get_active_set,
@@ -214,23 +224,41 @@ void exposeConstraintManager() {
            bp::args("self", "data"),
            "Share memory with a given action data\n\n"
            ":param model: action data that we want to share memory")
+      .def("resize", &ConstraintDataManager::resize<ConstraintModelManager>,
+           bp::with_custodian_and_ward_postcall<0, 1>(),
+           ConstraintDataManager_resizeConst_wrap(
+               bp::args("self", "model", "running_node"),
+               "Resize the data given differential action data\n\n"
+               ":param model: constraint manager model that defines how to "
+               "resize "
+               "the data\n"
+               ":param running_node: true if we are resizing for a running "
+               "node, false for terminal ones (default true)"))
       .def("resize",
            &ConstraintDataManager::resize<DifferentialActionModelAbstract,
                                           DifferentialActionDataAbstract>,
            bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "model", "data"),
-           "Resize the data given differential action data\n\n"
-           ":param model: differential action model that defines how to resize "
-           "the data\n"
-           ":param data: differential action data that we want to resize")
-      .def("resize",
-           &ConstraintDataManager::resize<ActionModelAbstract,
-                                          ActionDataAbstract>,
-           bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "model", "data"),
-           "Resize the data given action data\n\n"
-           ":param model: action model that defines how to resize the data\n"
-           ":param data: action data that we want to resize")
+           ConstraintDataManager_resize_wrap(
+               bp::args("self", "model", "data", "running_node"),
+               "Resize the data given differential action data\n\n"
+               ":param model: differential action model that defines how to "
+               "resize "
+               "the data\n"
+               ":param data: differential action data that we want to resize\n"
+               ":param running_node: true if we are resizing for a running "
+               "node, false for terminal ones (default true)"))
+      .def(
+          "resize",
+          &ConstraintDataManager::resize<ActionModelAbstract,
+                                         ActionDataAbstract>,
+          bp::with_custodian_and_ward_postcall<0, 2>(),
+          ConstraintDataManager_resize_wrap(
+              bp::args("self", "model", "data", "running_node"),
+              "Resize the data given action data\n\n"
+              ":param model: action model that defines how to resize the data\n"
+              ":param data: action data that we want to resize\n"
+              ":param running_node: true if we are resizing for a running "
+              "node, false for terminal ones (default true)"))
       .add_property(
           "constraints",
           bp::make_getter(&ConstraintDataManager::constraints,
