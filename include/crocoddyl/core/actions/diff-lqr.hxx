@@ -53,7 +53,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& H, const VectorXs& f, const VectorXs& q, const VectorXs& r,
     const VectorXs& g, const VectorXs& h)
     : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0,
-           G.rows(), H.rows()),
+           G.rows(), H.rows(), G.rows(), H.rows()),
       drift_free_(false),
       updated_lqr_(false) {
   set_LQR(Aq, Av, B, Q, R, N, G, H, f, q, r, g, h);
@@ -83,7 +83,8 @@ template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const DifferentialActionModelLQRTpl& copy)
     : Base(boost::make_shared<StateVector>(2 * copy.get_Aq().cols()),
-           copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows()),
+           copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows(),
+           copy.get_G().rows(), copy.get_H().rows()),
       drift_free_(false),
       updated_lqr_(false) {
   set_LQR(copy.get_Aq(), copy.get_Av(), copy.get_B(), copy.get_Q(),
