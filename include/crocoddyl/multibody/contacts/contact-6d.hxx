@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -110,7 +110,7 @@ void ContactModel6DTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
+      state_->get_pinocchio()->frames[d->frame].parentJoint;
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
