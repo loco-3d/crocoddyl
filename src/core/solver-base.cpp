@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -126,7 +126,7 @@ double SolverAbstract::computeInequalityFeasibility() {
               std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
         }
       }
-      if (problem_->get_terminalModel()->get_ng() > 0) {
+      if (problem_->get_terminalModel()->get_ng_T() > 0) {
         tmp_feas_ =
             std::max(tmp_feas_,
                      problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
@@ -138,7 +138,7 @@ double SolverAbstract::computeInequalityFeasibility() {
           tmp_feas_ += datas[t]->g.lpNorm<1>();
         }
       }
-      if (problem_->get_terminalModel()->get_ng() > 0) {
+      if (problem_->get_terminalModel()->get_ng_T() > 0) {
         tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
       }
       break;
@@ -161,7 +161,7 @@ double SolverAbstract::computeEqualityFeasibility() {
               std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
         }
       }
-      if (problem_->get_terminalModel()->get_nh() > 0) {
+      if (problem_->get_terminalModel()->get_nh_T() > 0) {
         tmp_feas_ =
             std::max(tmp_feas_,
                      problem_->get_terminalData()->h.lpNorm<Eigen::Infinity>());
@@ -173,7 +173,7 @@ double SolverAbstract::computeEqualityFeasibility() {
           tmp_feas_ += datas[t]->h.lpNorm<1>();
         }
       }
-      if (problem_->get_terminalModel()->get_nh() > 0) {
+      if (problem_->get_terminalModel()->get_nh_T() > 0) {
         tmp_feas_ += problem_->get_terminalData()->h.lpNorm<1>();
       }
       break;
