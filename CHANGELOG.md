@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Replaced parent by parentJoint (which was introduced in Pinocchio 3) in https://github.com/loco-3d/crocoddyl/pull/1271
 * Introduced the notion of terminal dimension, residuals and constraints in https://github.com/loco-3d/crocoddyl/pull/1269
 * General clean ups about std::size_t in https://github.com/loco-3d/crocoddyl/pull/1265
 * Fixed issues in LQR extensions in https://github.com/loco-3d/crocoddyl/pull/1263
