@@ -135,8 +135,7 @@ template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
   if (disturbance < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "Disturbance constant is positive");
+    throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
 }

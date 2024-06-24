@@ -56,8 +56,7 @@ class ActivationModelSmooth2NormTpl
                                          const Scalar eps = Scalar(1.))
       : Base(nr), eps_(eps) {
     if (eps < Scalar(0.)) {
-      throw_pretty("Invalid argument: "
-                   << "eps should be a positive value");
+      throw_pretty("Invalid argument: " << "eps should be a positive value");
     }
   };
   virtual ~ActivationModelSmooth2NormTpl() {};
@@ -71,9 +70,9 @@ class ActivationModelSmooth2NormTpl
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
     using std::sqrt;
     data->a_value = sqrt(r.squaredNorm() + eps_);
@@ -88,9 +87,9 @@ class ActivationModelSmooth2NormTpl
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
 
     data->Ar = r / data->a_value;

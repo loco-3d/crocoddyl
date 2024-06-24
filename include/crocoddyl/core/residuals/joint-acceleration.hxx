@@ -17,9 +17,9 @@ ResidualModelJointAccelerationTpl<Scalar>::ResidualModelJointAccelerationTpl(
     const std::size_t nu)
     : Base(state, state->get_nv(), nu, true, true, true), aref_(aref) {
   if (static_cast<std::size_t>(aref_.size()) != state->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "aref has wrong dimension (it should be " +
-                        std::to_string(state->get_nv()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "aref has wrong dimension (it should be " +
+                                    std::to_string(state->get_nv()) + ")");
   }
 }
 
@@ -29,9 +29,9 @@ ResidualModelJointAccelerationTpl<Scalar>::ResidualModelJointAccelerationTpl(
     : Base(state, state->get_nv(), state->get_nv(), true, true, true),
       aref_(aref) {
   if (static_cast<std::size_t>(aref_.size()) != state->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "aref has wrong dimension (it should be " +
-                        std::to_string(state->get_nv()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "aref has wrong dimension (it should be " +
+                                    std::to_string(state->get_nv()) + ")");
   }
 }
 

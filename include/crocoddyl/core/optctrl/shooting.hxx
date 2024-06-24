@@ -38,9 +38,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     }
   }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x0 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   for (std::size_t i = 1; i < T_; ++i) {
     const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
@@ -100,9 +100,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     }
   }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x0 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   const std::size_t Td = running_datas.size();
   if (Td != T_) {
@@ -164,14 +164,14 @@ template <typename Scalar>
 Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
                                         const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
-    throw_pretty("Invalid argument: "
-                 << "xs has wrong dimension (it should be " +
-                        std::to_string(T_ + 1) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xs has wrong dimension (it should be " +
+                                    std::to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw_pretty("Invalid argument: "
-                 << "us has wrong dimension (it should be " +
-                        std::to_string(T_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "us has wrong dimension (it should be " +
+                                    std::to_string(T_) + ")");
   }
   START_PROFILER("ShootingProblem::calc");
 
@@ -199,14 +199,14 @@ template <typename Scalar>
 Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs,
                                             const std::vector<VectorXs>& us) {
   if (xs.size() != T_ + 1) {
-    throw_pretty("Invalid argument: "
-                 << "xs has wrong dimension (it should be " +
-                        std::to_string(T_ + 1) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xs has wrong dimension (it should be " +
+                                    std::to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw_pretty("Invalid argument: "
-                 << "us has wrong dimension (it should be " +
-                        std::to_string(T_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "us has wrong dimension (it should be " +
+                                    std::to_string(T_) + ")");
   }
   START_PROFILER("ShootingProblem::calcDiff");
 
@@ -235,14 +235,14 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us,
                                          std::vector<VectorXs>& xs) {
   if (xs.size() != T_ + 1) {
-    throw_pretty("Invalid argument: "
-                 << "xs has wrong dimension (it should be " +
-                        std::to_string(T_ + 1) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xs has wrong dimension (it should be " +
+                                    std::to_string(T_ + 1) + ")");
   }
   if (us.size() != T_) {
-    throw_pretty("Invalid argument: "
-                 << "us has wrong dimension (it should be " +
-                        std::to_string(T_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "us has wrong dimension (it should be " +
+                                    std::to_string(T_) + ")");
   }
   START_PROFILER("ShootingProblem::rollout");
 
@@ -269,14 +269,14 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us,
                                              const std::vector<VectorXs>& xs) {
   if (xs.size() != T_) {
-    throw_pretty("Invalid argument: "
-                 << "xs has wrong dimension (it should be " +
-                        std::to_string(T_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xs has wrong dimension (it should be " +
+                                    std::to_string(T_) + ")");
   }
   if (us.size() != T_) {
-    throw_pretty("Invalid argument: "
-                 << "us has wrong dimension (it should be " +
-                        std::to_string(T_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "us has wrong dimension (it should be " +
+                                    std::to_string(T_) + ")");
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
@@ -308,8 +308,8 @@ void ShootingProblemTpl<Scalar>::circularAppend(
                  << "action data is not consistent with the action model")
   }
   if (model->get_state()->get_nx() != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "nx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "nx is not consistent with the other nodes")
   }
   if (model->get_state()->get_ndx() != ndx_) {
     throw_pretty("Invalid argument: "
@@ -328,8 +328,8 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(
     boost::shared_ptr<ActionModelAbstract> model) {
   if (model->get_state()->get_nx() != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "nx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "nx is not consistent with the other nodes")
   }
   if (model->get_state()->get_ndx() != ndx_) {
     throw_pretty("Invalid argument: "
@@ -359,8 +359,8 @@ void ShootingProblemTpl<Scalar>::updateNode(
                  << "action data is not consistent with the action model")
   }
   if (model->get_state()->get_nx() != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "nx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "nx is not consistent with the other nodes")
   }
   if (model->get_state()->get_ndx() != ndx_) {
     throw_pretty("Invalid argument: "
@@ -386,12 +386,12 @@ void ShootingProblemTpl<Scalar>::updateModel(
                std::to_string(T_ + 1) + ")");
   }
   if (model->get_state()->get_nx() != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "nx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "nx is not consistent with the other nodes")
   }
   if (model->get_state()->get_ndx() != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "ndx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "ndx is not consistent with the other nodes")
   }
   is_updated_ = true;
   if (i == T_) {
@@ -490,12 +490,12 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_terminalModel(
     boost::shared_ptr<ActionModelAbstract> model) {
   if (model->get_state()->get_nx() != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "nx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "nx is not consistent with the other nodes")
   }
   if (model->get_state()->get_ndx() != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "ndx is not consistent with the other nodes")
+    throw_pretty(
+        "Invalid argument: " << "ndx is not consistent with the other nodes")
   }
   is_updated_ = true;
   terminal_model_ = model;

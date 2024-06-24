@@ -28,9 +28,9 @@ class ControlParametrizationModelAbstract_wrap
   void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
             double t, const Eigen::Ref<const Eigen::VectorXd>& u) const {
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " +
-                          std::to_string(nu_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "u has wrong dimension (it should be " +
+                                      std::to_string(nu_) + ")");
     }
     return bp::call<void>(this->get_override("calc").ptr(), data, t,
                           (Eigen::VectorXd)u);
@@ -40,9 +40,9 @@ class ControlParametrizationModelAbstract_wrap
       const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
       double t, const Eigen::Ref<const Eigen::VectorXd>& u) const {
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " +
-                          std::to_string(nu_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "u has wrong dimension (it should be " +
+                                      std::to_string(nu_) + ")");
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data, t,
                           (Eigen::VectorXd)u);
@@ -51,9 +51,9 @@ class ControlParametrizationModelAbstract_wrap
   void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
               double t, const Eigen::Ref<const Eigen::VectorXd>& w) const {
     if (static_cast<std::size_t>(w.size()) != nw_) {
-      throw_pretty("Invalid argument: "
-                   << "w has wrong dimension (it should be " +
-                          std::to_string(nw_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "w has wrong dimension (it should be " +
+                                      std::to_string(nw_) + ")");
     }
     return bp::call<void>(this->get_override("params").ptr(), data, t,
                           (Eigen::VectorXd)w);

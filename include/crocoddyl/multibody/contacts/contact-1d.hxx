@@ -179,8 +179,8 @@ template <typename Scalar>
 void ContactModel1DTpl<Scalar>::updateForce(
     const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 1) {
-    throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be 1)");
+    throw_pretty(
+        "Invalid argument: " << "lambda has wrong dimension (it should be 1)");
   }
   Data* d = static_cast<Data*>(data.get());
   const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();

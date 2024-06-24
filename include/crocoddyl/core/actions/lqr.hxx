@@ -97,14 +97,14 @@ void ActionModelLQRTpl<Scalar>::calc(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -138,9 +138,9 @@ void ActionModelLQRTpl<Scalar>::calc(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -164,14 +164,14 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
 
   const std::size_t nx = state_->get_nx();
@@ -200,9 +200,9 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   const std::size_t nx = state_->get_nx();
@@ -342,14 +342,14 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
                                         const VectorXs& g, const VectorXs& h) {
   const std::size_t nx = state_->get_nx();
   if (static_cast<std::size_t>(A.rows()) != nx) {
-    throw_pretty("Invalid argument: "
-                 << "A should be a squared matrix with size " +
-                        std::to_string(nx));
+    throw_pretty(
+        "Invalid argument: " << "A should be a squared matrix with size " +
+                                    std::to_string(nx));
   }
   if (static_cast<std::size_t>(B.rows()) != nx) {
-    throw_pretty("Invalid argument: "
-                 << "B has wrong dimension (it should have " +
-                        std::to_string(nx) + " rows)");
+    throw_pretty(
+        "Invalid argument: " << "B has wrong dimension (it should have " +
+                                    std::to_string(nx) + " rows)");
   }
   if (static_cast<std::size_t>(Q.rows()) != nx ||
       static_cast<std::size_t>(Q.cols()) != nx) {
@@ -359,10 +359,10 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   }
   if (static_cast<std::size_t>(R.rows()) != nu_ ||
       static_cast<std::size_t>(R.cols()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "R has wrong dimension (it should be " +
-                        std::to_string(nu_) + " x " + std::to_string(nu_) +
-                        ")");
+    throw_pretty(
+        "Invalid argument: " << "R has wrong dimension (it should be " +
+                                    std::to_string(nu_) + " x " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(N.rows()) != nx ||
       static_cast<std::size_t>(N.cols()) != nu_) {
@@ -372,42 +372,42 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   }
   if (static_cast<std::size_t>(G.rows()) != ng_ ||
       static_cast<std::size_t>(G.cols()) != nx + nu_) {
-    throw_pretty("Invalid argument: "
-                 << "G has wrong dimension (it should be " +
-                        std::to_string(ng_) + " x " + std::to_string(nx + nu_) +
-                        ")");
+    throw_pretty(
+        "Invalid argument: " << "G has wrong dimension (it should be " +
+                                    std::to_string(ng_) + " x " +
+                                    std::to_string(nx + nu_) + ")");
   }
   if (static_cast<std::size_t>(H.rows()) != nh_ ||
       static_cast<std::size_t>(H.cols()) != nx + nu_) {
-    throw_pretty("Invalid argument: "
-                 << "H has wrong dimension (it should be " +
-                        std::to_string(nh_) + " x " + std::to_string(nx + nu_) +
-                        ")");
+    throw_pretty(
+        "Invalid argument: " << "H has wrong dimension (it should be " +
+                                    std::to_string(nh_) + " x " +
+                                    std::to_string(nx + nu_) + ")");
   }
   if (static_cast<std::size_t>(f.size()) != nx) {
-    throw_pretty("Invalid argument: "
-                 << "f has wrong dimension (it should be " +
-                        std::to_string(nx) + ")");
+    throw_pretty(
+        "Invalid argument: " << "f has wrong dimension (it should be " +
+                                    std::to_string(nx) + ")");
   }
   if (static_cast<std::size_t>(q.size()) != nx) {
-    throw_pretty("Invalid argument: "
-                 << "q has wrong dimension (it should be " +
-                        std::to_string(nx) + ")");
+    throw_pretty(
+        "Invalid argument: " << "q has wrong dimension (it should be " +
+                                    std::to_string(nx) + ")");
   }
   if (static_cast<std::size_t>(r.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "r has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "r has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(g.size()) != ng_) {
-    throw_pretty("Invalid argument: "
-                 << "g has wrong dimension (it should be " +
-                        std::to_string(ng_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "g has wrong dimension (it should be " +
+                                    std::to_string(ng_) + ")");
   }
   if (static_cast<std::size_t>(h.size()) != nh_) {
-    throw_pretty("Invalid argument: "
-                 << "h has wrong dimension (it should be " +
-                        std::to_string(nh_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "h has wrong dimension (it should be " +
+                                    std::to_string(nh_) + ")");
   }
   L_ = MatrixXs::Zero(nx + nu_, nx + nu_);
   L_ << Q, N, N.transpose(), R;

@@ -57,8 +57,7 @@ class ActivationModelQuadFlatExpTpl
                                          const Scalar &alpha = Scalar(1.))
       : Base(nr), alpha_(alpha) {
     if (alpha < Scalar(0.)) {
-      throw_pretty("Invalid argument: "
-                   << "alpha should be a positive value");
+      throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
   virtual ~ActivationModelQuadFlatExpTpl() {};
@@ -72,9 +71,9 @@ class ActivationModelQuadFlatExpTpl
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
                     const Eigen::Ref<const VectorXs> &r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -91,9 +90,9 @@ class ActivationModelQuadFlatExpTpl
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
                         const Eigen::Ref<const VectorXs> &r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 

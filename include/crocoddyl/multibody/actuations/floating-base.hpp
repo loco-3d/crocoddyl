@@ -74,9 +74,9 @@ class ActuationModelFloatingBaseTpl
                     const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
-      throw_pretty("Invalid argument: "
-                   << "u has wrong dimension (it should be " +
-                          std::to_string(nu_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "u has wrong dimension (it should be " +
+                                      std::to_string(nu_) + ")");
     }
     data->tau.tail(nu_) = u;
   };
@@ -107,9 +107,9 @@ class ActuationModelFloatingBaseTpl
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>& tau) {
     if (static_cast<std::size_t>(tau.size()) != state_->get_nv()) {
-      throw_pretty("Invalid argument: "
-                   << "tau has wrong dimension (it should be " +
-                          std::to_string(state_->get_nv()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "tau has wrong dimension (it should be " +
+                                      std::to_string(state_->get_nv()) + ")");
     }
     data->u = tau.tail(nu_);
   }

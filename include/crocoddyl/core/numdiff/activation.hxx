@@ -26,9 +26,9 @@ void ActivationModelNumDiffTpl<Scalar>::calc(
     const boost::shared_ptr<ActivationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
-    throw_pretty("Invalid argument: "
-                 << "r has wrong dimension (it should be " +
-                        std::to_string(model_->get_nr()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "r has wrong dimension (it should be " +
+                                    std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, r);
@@ -40,9 +40,9 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ActivationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& r) {
   if (static_cast<std::size_t>(r.size()) != model_->get_nr()) {
-    throw_pretty("Invalid argument: "
-                 << "r has wrong dimension (it should be " +
-                        std::to_string(model_->get_nr()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "r has wrong dimension (it should be " +
+                                    std::to_string(model_->get_nr()) + ")");
   }
   boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
 
@@ -86,8 +86,7 @@ template <typename Scalar>
 void ActivationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
   if (disturbance < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "Disturbance constant is positive");
+    throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
 }

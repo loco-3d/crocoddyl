@@ -143,9 +143,9 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocity(
     const boost::shared_ptr<ImpulseDataMultiple>& data,
     const VectorXs& vnext) const {
   if (static_cast<std::size_t>(vnext.size()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "vnext has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "vnext has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nv()) + ")");
   }
   data->vnext = vnext;
 }
@@ -154,9 +154,9 @@ template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForce(
     const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != nc_) {
-    throw_pretty("Invalid argument: "
-                 << "force has wrong dimension (it should be " +
-                        std::to_string(nc_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "force has wrong dimension (it should be " +
+                                    std::to_string(nc_) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw_pretty("Invalid argument: "
@@ -198,10 +198,10 @@ void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(
     const MatrixXs& dvnext_dx) const {
   if (static_cast<std::size_t>(dvnext_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(dvnext_dx.cols()) != state_->get_ndx()) {
-    throw_pretty("Invalid argument: "
-                 << "dvnext_dx has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + "," +
-                        std::to_string(state_->get_ndx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dvnext_dx has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nv()) + "," +
+                                    std::to_string(state_->get_ndx()) + ")");
   }
   data->dvnext_dx = dvnext_dx;
 }

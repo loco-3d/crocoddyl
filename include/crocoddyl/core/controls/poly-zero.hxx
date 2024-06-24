@@ -22,9 +22,9 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   data->w = u;
 }
@@ -58,9 +58,9 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
     const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   data->u = w;
 }
@@ -71,24 +71,24 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(
     const Eigen::Ref<const VectorXs>& w_ub, Eigen::Ref<VectorXs> u_lb,
     Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u_lb has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u_lb has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u_ub has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u_ub has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(w_lb.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w_lb has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w_lb has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   if (static_cast<std::size_t>(w_ub.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w_ub has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w_ub has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   u_lb = w_lb;
   u_ub = w_ub;
@@ -103,12 +103,12 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(
                 ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have wrong dimensions (" +
-                        std::to_string(A.rows()) + "," +
-                        std::to_string(A.cols()) + " and " +
-                        std::to_string(out.rows()) + "," +
-                        std::to_string(out.cols()) + ")");
+    throw_pretty("Invalid argument: " << "A and out have wrong dimensions (" +
+                                             std::to_string(A.rows()) + "," +
+                                             std::to_string(A.cols()) +
+                                             " and " +
+                                             std::to_string(out.rows()) + "," +
+                                             std::to_string(out.cols()) + ")");
   }
   switch (op) {
     case setto:
@@ -136,12 +136,12 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::
                 ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have wrong dimensions (" +
-                        std::to_string(A.rows()) + "," +
-                        std::to_string(A.cols()) + " and " +
-                        std::to_string(out.rows()) + "," +
-                        std::to_string(out.cols()) + ")");
+    throw_pretty("Invalid argument: " << "A and out have wrong dimensions (" +
+                                             std::to_string(A.rows()) + "," +
+                                             std::to_string(A.cols()) +
+                                             " and " +
+                                             std::to_string(out.rows()) + "," +
+                                             std::to_string(out.cols()) + ")");
   }
   switch (op) {
     case setto:

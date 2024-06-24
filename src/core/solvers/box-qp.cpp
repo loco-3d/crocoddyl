@@ -78,24 +78,24 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
                         std::to_string(nx_) + "," + std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(q.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "q has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "q has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(lb.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "lb has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "lb has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(ub.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "ub has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "ub has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(xinit.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "xinit has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xinit has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
 
   // We need to enforce feasible warm-starting of the algorithm
@@ -222,24 +222,22 @@ void BoxQP::set_maxiter(const std::size_t maxiter) { maxiter_ = maxiter; }
 
 void BoxQP::set_th_acceptstep(const double th_acceptstep) {
   if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
-    throw_pretty("Invalid argument: "
-                 << "th_acceptstep value should between 0 and 0.5");
+    throw_pretty(
+        "Invalid argument: " << "th_acceptstep value should between 0 and 0.5");
   }
   th_acceptstep_ = th_acceptstep;
 }
 
 void BoxQP::set_th_grad(const double th_grad) {
   if (0. > th_grad) {
-    throw_pretty("Invalid argument: "
-                 << "th_grad value has to be positive.");
+    throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
 }
 
 void BoxQP::set_reg(const double reg) {
   if (0. > reg) {
-    throw_pretty("Invalid argument: "
-                 << "reg value has to be positive.");
+    throw_pretty("Invalid argument: " << "reg value has to be positive.");
   }
   reg_ = reg;
 }
@@ -252,12 +250,11 @@ void BoxQP::set_alphas(const std::vector<double>& alphas) {
   for (std::size_t i = 1; i < alphas.size(); ++i) {
     double alpha = alphas[i];
     if (0. >= alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values has to be positive.");
+      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
     }
     if (alpha >= prev_alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values are monotonously decreasing.");
+      throw_pretty(
+          "Invalid argument: " << "alpha values are monotonously decreasing.");
     }
     prev_alpha = alpha;
   }
