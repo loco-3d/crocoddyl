@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -251,7 +251,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
         const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
+            state_->get_pinocchio()->frames[d_i->frame].parentJoint;
         data->fext[joint] = d_i->fext;
       } else {
         m_i->contact->setZeroForce(d_i);
@@ -272,7 +272,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
         const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
+            state_->get_pinocchio()->frames[d_i->frame].parentJoint;
         data->fext[joint] = d_i->fext;
         nc += nc_i;
       } else {

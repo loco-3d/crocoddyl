@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -54,7 +54,7 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
+      state_->get_pinocchio()->frames[d->frame].parentJoint;
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);

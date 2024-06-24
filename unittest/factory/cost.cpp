@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -229,14 +229,14 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
-          state->get_pinocchio()->frames[frame_index].parent,
+          state->get_pinocchio()->frames[frame_index].parentJoint,
           CollisionGeometryPtr(new hpp::fcl::Capsule(0, alpha)), frame_SE3));
   pinocchio::GeomIndex ig_obs =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "obs", state->get_pinocchio()->getFrameId("universe"),
           state->get_pinocchio()
               ->frames[state->get_pinocchio()->getFrameId("universe")]
-              .parent,
+              .parentJoint,
           CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)),
           frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
@@ -247,7 +247,7 @@ boost::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
           state, boost::make_shared<crocoddyl::ActivationModelQuad>(3),
           boost::make_shared<crocoddyl::ResidualModelPairCollision>(
               state, nu, geometry, 0,
-              state->get_pinocchio()->frames[frame_index].parent));
+              state->get_pinocchio()->frames[frame_index].parentJoint));
       break;
     default:
       throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2021-2024, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,14 +92,14 @@ ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
-          state->get_pinocchio()->frames[frame_index].parent,
+          state->get_pinocchio()->frames[frame_index].parentJoint,
           std::make_shared<hpp::fcl::Sphere>(0), frame_SE3));
   pinocchio::GeomIndex ig_obs =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "obs", state->get_pinocchio()->getFrameId("universe"),
           state->get_pinocchio()
               ->frames[state->get_pinocchio()->getFrameId("universe")]
-              .parent,
+              .parentJoint,
           std::make_shared<hpp::fcl::Sphere>(0), frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
 #endif  // PINOCCHIO_WITH_HPP_FCL
@@ -148,7 +149,7 @@ ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
     case ResidualModelTypes::ResidualModelPairCollision:
       residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(
           state, nu, geometry, 0,
-          state->get_pinocchio()->frames[frame_index].parent);
+          state->get_pinocchio()->frames[frame_index].parentJoint);
       break;
 #endif  // PINOCCHIO_WITH_HPP_FCL
     default:
