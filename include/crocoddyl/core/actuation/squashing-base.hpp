@@ -31,8 +31,7 @@ class SquashingModelAbstractTpl {
 
   SquashingModelAbstractTpl(const std::size_t ns) : ns_(ns) {
     if (ns_ == 0) {
-      throw_pretty("Invalid argument: "
-                   << "ns cannot be zero");
+      throw_pretty("Invalid argument: " << "ns cannot be zero");
     }
   };
   virtual ~SquashingModelAbstractTpl() {};

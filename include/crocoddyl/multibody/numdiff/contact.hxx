@@ -96,8 +96,7 @@ const Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
   if (disturbance < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "Disturbance constant is positive");
+    throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
 }

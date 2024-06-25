@@ -356,44 +356,44 @@ struct CostDataSumTpl {
 
   void set_Lx(const VectorXs& _Lx) {
     if (Lx.size() != _Lx.size()) {
-      throw_pretty("Invalid argument: "
-                   << "Lx has wrong dimension (it should be " +
-                          std::to_string(Lx.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lx has wrong dimension (it should be " +
+                                      std::to_string(Lx.size()) + ")");
     }
     Lx = _Lx;
   }
   void set_Lu(const VectorXs& _Lu) {
     if (Lu.size() != _Lu.size()) {
-      throw_pretty("Invalid argument: "
-                   << "Lu has wrong dimension (it should be " +
-                          std::to_string(Lu.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lu has wrong dimension (it should be " +
+                                      std::to_string(Lu.size()) + ")");
     }
     Lu = _Lu;
   }
   void set_Lxx(const MatrixXs& _Lxx) {
     if (Lxx.rows() != _Lxx.rows() || Lxx.cols() != _Lxx.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Lxx has wrong dimension (it should be " +
-                          std::to_string(Lxx.rows()) + ", " +
-                          std::to_string(Lxx.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lxx has wrong dimension (it should be " +
+                                      std::to_string(Lxx.rows()) + ", " +
+                                      std::to_string(Lxx.cols()) + ")");
     }
     Lxx = _Lxx;
   }
   void set_Lxu(const MatrixXs& _Lxu) {
     if (Lxu.rows() != _Lxu.rows() || Lxu.cols() != _Lxu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Lxu has wrong dimension (it should be " +
-                          std::to_string(Lxu.rows()) + ", " +
-                          std::to_string(Lxu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lxu has wrong dimension (it should be " +
+                                      std::to_string(Lxu.rows()) + ", " +
+                                      std::to_string(Lxu.cols()) + ")");
     }
     Lxu = _Lxu;
   }
   void set_Luu(const MatrixXs& _Luu) {
     if (Luu.rows() != _Luu.rows() || Luu.cols() != _Luu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Luu has wrong dimension (it should be " +
-                          std::to_string(Luu.rows()) + ", " +
-                          std::to_string(Luu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Luu has wrong dimension (it should be " +
+                                      std::to_string(Luu.rows()) + ", " +
+                                      std::to_string(Luu.cols()) + ")");
     }
     Luu = _Luu;
   }

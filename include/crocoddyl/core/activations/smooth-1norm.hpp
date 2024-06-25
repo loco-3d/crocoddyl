@@ -59,8 +59,7 @@ class ActivationModelSmooth1NormTpl
                                          const Scalar eps = Scalar(1.))
       : Base(nr), eps_(eps) {
     if (eps < Scalar(0.)) {
-      throw_pretty("Invalid argument: "
-                   << "eps should be a positive value");
+      throw_pretty("Invalid argument: " << "eps should be a positive value");
     }
     if (eps == Scalar(0.)) {
       std::cerr << "Warning: eps=0 leads to derivatives discontinuities in the "
@@ -79,9 +78,9 @@ class ActivationModelSmooth1NormTpl
   virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
@@ -98,9 +97,9 @@ class ActivationModelSmooth1NormTpl
   virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
 
     boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);

@@ -519,24 +519,23 @@ const std::vector<Eigen::VectorXd>& SolverDDP::get_k() const { return k_; }
 
 void SolverDDP::set_reg_incfactor(const double regfactor) {
   if (regfactor <= 1.) {
-    throw_pretty("Invalid argument: "
-                 << "reg_incfactor value is higher than 1.");
+    throw_pretty(
+        "Invalid argument: " << "reg_incfactor value is higher than 1.");
   }
   reg_incfactor_ = regfactor;
 }
 
 void SolverDDP::set_reg_decfactor(const double regfactor) {
   if (regfactor <= 1.) {
-    throw_pretty("Invalid argument: "
-                 << "reg_decfactor value is higher than 1.");
+    throw_pretty(
+        "Invalid argument: " << "reg_decfactor value is higher than 1.");
   }
   reg_decfactor_ = regfactor;
 }
 
 void SolverDDP::set_regfactor(const double regfactor) {
   if (regfactor <= 1.) {
-    throw_pretty("Invalid argument: "
-                 << "regfactor value is higher than 1.");
+    throw_pretty("Invalid argument: " << "regfactor value is higher than 1.");
   }
   set_reg_incfactor(regfactor);
   set_reg_decfactor(regfactor);
@@ -544,32 +543,28 @@ void SolverDDP::set_regfactor(const double regfactor) {
 
 void SolverDDP::set_reg_min(const double regmin) {
   if (0. > regmin) {
-    throw_pretty("Invalid argument: "
-                 << "regmin value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
   }
   reg_min_ = regmin;
 }
 
 void SolverDDP::set_regmin(const double regmin) {
   if (0. > regmin) {
-    throw_pretty("Invalid argument: "
-                 << "regmin value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
   }
   reg_min_ = regmin;
 }
 
 void SolverDDP::set_reg_max(const double regmax) {
   if (0. > regmax) {
-    throw_pretty("Invalid argument: "
-                 << "regmax value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
   }
   reg_max_ = regmax;
 }
 
 void SolverDDP::set_regmax(const double regmax) {
   if (0. > regmax) {
-    throw_pretty("Invalid argument: "
-                 << "regmax value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
   }
   reg_max_ = regmax;
 }
@@ -582,12 +577,11 @@ void SolverDDP::set_alphas(const std::vector<double>& alphas) {
   for (std::size_t i = 1; i < alphas.size(); ++i) {
     double alpha = alphas[i];
     if (0. >= alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values has to be positive.");
+      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
     }
     if (alpha >= prev_alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values are monotonously decreasing.");
+      throw_pretty(
+          "Invalid argument: " << "alpha values are monotonously decreasing.");
     }
     prev_alpha = alpha;
   }
@@ -596,24 +590,23 @@ void SolverDDP::set_alphas(const std::vector<double>& alphas) {
 
 void SolverDDP::set_th_stepdec(const double th_stepdec) {
   if (0. >= th_stepdec || th_stepdec > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stepdec value should between 0 and 1.");
+    throw_pretty(
+        "Invalid argument: " << "th_stepdec value should between 0 and 1.");
   }
   th_stepdec_ = th_stepdec;
 }
 
 void SolverDDP::set_th_stepinc(const double th_stepinc) {
   if (0. >= th_stepinc || th_stepinc > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stepinc value should between 0 and 1.");
+    throw_pretty(
+        "Invalid argument: " << "th_stepinc value should between 0 and 1.");
   }
   th_stepinc_ = th_stepinc;
 }
 
 void SolverDDP::set_th_grad(const double th_grad) {
   if (0. > th_grad) {
-    throw_pretty("Invalid argument: "
-                 << "th_grad value has to be positive.");
+    throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
 }

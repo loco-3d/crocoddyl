@@ -38,14 +38,14 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   const std::size_t nv = state_->get_nv();
   Data* d = static_cast<Data*>(data.get());
@@ -104,9 +104,9 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -128,14 +128,14 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
@@ -322,9 +322,9 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -365,14 +365,14 @@ void IntegratedActionModelRKTpl<Scalar>::quasiStatic(
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,
     const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   Data* d = static_cast<Data*>(data.get());

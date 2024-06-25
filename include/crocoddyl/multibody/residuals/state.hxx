@@ -18,9 +18,9 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
     const std::size_t nu)
     : Base(state, state->get_ndx(), nu, true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xref has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   // Define the pinocchio model for the multibody state case
   const boost::shared_ptr<StateMultibody>& s =
@@ -35,9 +35,9 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
     boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref)
     : Base(state, state->get_ndx(), true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "xref has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xref has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   // Define the pinocchio model for the multibody state case
   const boost::shared_ptr<StateMultibody>& s =
@@ -80,9 +80,9 @@ void ResidualModelStateTpl<Scalar>::calc(
     const boost::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   state_->diff(xref_, x, data->r);
@@ -93,9 +93,9 @@ void ResidualModelStateTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   state_->Jdiff(xref_, x, data->Rx, data->Rx, second);
