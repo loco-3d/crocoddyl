@@ -299,6 +299,7 @@ void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
+  mu_ = mu;
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
     std::cerr << "Warning: mu has to be a positive value, set to 1."
