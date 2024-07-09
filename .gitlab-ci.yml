@@ -1,1 +1,1 @@
-include: http://rainboard.laas.fr/project/crocoddyl/.gitlab-ci.yml
+include: https://rainboard.laas.fr/project/crocoddyl/.gitlab-ci.yml
