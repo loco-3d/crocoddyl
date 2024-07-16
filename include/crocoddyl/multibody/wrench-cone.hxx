@@ -299,6 +299,7 @@ void WrenchConeTpl<Scalar>::set_box(const Vector2s& box) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_mu(const Scalar mu) {
+  mu_ = mu;
   if (mu < Scalar(0.)) {
     mu_ = Scalar(1.);
     std::cerr << "Warning: mu has to be a positive value, set to 1."
@@ -313,6 +314,7 @@ void WrenchConeTpl<Scalar>::set_inner_appr(const bool inner_appr) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
+  min_nforce_ = min_nforce;
   if (min_nforce < Scalar(0.)) {
     min_nforce_ = Scalar(0.);
     std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
@@ -322,6 +324,7 @@ void WrenchConeTpl<Scalar>::set_min_nforce(const Scalar min_nforce) {
 
 template <typename Scalar>
 void WrenchConeTpl<Scalar>::set_max_nforce(const Scalar max_nforce) {
+  max_nforce_ = max_nforce;
   if (max_nforce < Scalar(0.)) {
     max_nforce_ = std::numeric_limits<Scalar>::infinity();
     std::cerr << "Warning: max_nforce has to be a positive value, set to "
