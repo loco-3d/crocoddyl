@@ -121,6 +121,13 @@ class CostModelSumTpl {
                const Scalar weight, const bool active = true);
 
   /**
+   * @brief Add a cost item
+   *
+   * @param[in] cost_item Cost item
+   */
+  void addCost(const boost::shared_ptr<CostItem>& cost_item);
+
+  /**
    * @brief Remove a cost item
    *
    * @param[in] name    Cost name
