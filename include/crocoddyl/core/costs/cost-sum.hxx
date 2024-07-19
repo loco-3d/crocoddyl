@@ -58,11 +58,11 @@ void CostModelSumTpl<Scalar>::addCost(const boost::shared_ptr<CostItem>& cost_it
   }
   costs_.insert(std::make_pair(cost_item->name, cost_item));
   if (cost_item->active) {
-    nr_ += cost_item->get_activation()->get_nr();
-    nr_total_ += cost_item->get_activation()->get_nr();
+    nr_ += cost_item->cost->get_activation()->get_nr();
+    nr_total_ += cost_item->cost->get_activation()->get_nr();
     active_set_.insert(cost_item->name);
   } else {
-    nr_total_ += cost_item->get_activation()->get_nr();
+    nr_total_ += cost_item->cost->get_activation()->get_nr();
     inactive_set_.insert(cost_item->name);
   }
 }
