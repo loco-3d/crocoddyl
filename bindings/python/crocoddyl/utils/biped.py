@@ -74,14 +74,12 @@ class SimpleBipedGaitProblem:
         lfPos0 = self.rdata.oMf[self.lfId].translation
         comRef = (rfPos0 + lfPos0) / 2
         comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2]
-
         # Defining the action models along the time instances
         loco3dModel = []
         doubleSupport = [
             self.createSwingFootModel(timeStep, [self.rfId, self.lfId])
-            for k in range(supportKnots)
+            for _ in range(supportKnots)
         ]
-
         # Creating the action models for three steps
         if self.firstStep is True:
             rStep = self.createFootstepModels(
@@ -116,23 +114,13 @@ class SimpleBipedGaitProblem:
             [self.rfId],
             [self.lfId],
         )
-
         # We defined the problem as:
         loco3dModel += doubleSupport + rStep
         loco3dModel += doubleSupport + lStep
-
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
-        return problem
+        return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createJumpingProblem(
-        self,
-        x0,
-        jumpHeight,
-        jumpLength,
-        timeStep,
-        groundKnots,
-        flyingKnots,
-        final=False,
+        self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots
     ):
         q0 = x0[: self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
@@ -144,21 +132,26 @@ class SimpleBipedGaitProblem:
         lfFootPos0[2] = 0.0
         comRef = (rfFootPos0 + lfFootPos0) / 2
         comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2]
-
-        self.rWeight = 1e1
+        # Create locomotion problem
         loco3dModel = []
         takeOff = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfId, self.rfId],
             )
-            for k in range(groundKnots)
+            for _ in range(groundKnots)
         ]
         flyingUpPhase = [
             self.createSwingFootModel(
                 timeStep,
                 [],
-                np.array([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight])
+                np.array(
+                    [
+                        jumpLength[0] / 2.0,
+                        jumpLength[1] / 2.0,
+                        jumpLength[2] / 2.0 + jumpHeight,
+                    ]
+                )
                 * (k + 1)
                 / flyingKnots
                 + comRef,
@@ -166,39 +159,29 @@ class SimpleBipedGaitProblem:
             for k in range(flyingKnots)
         ]
         flyingDownPhase = []
-        for k in range(flyingKnots):
+        for _ in range(flyingKnots):
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
-
         f0 = jumpLength
         footTask = [
-            [self.lfId, pinocchio.SE3(np.eye(3), self.lfId + f0)],
-            [self.rfId, pinocchio.SE3(np.eye(3), self.rfId + f0)],
+            [self.lfId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
+            [self.rfId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
         ]
         landingPhase = [
             self.createFootSwitchModel([self.lfId, self.rfId], footTask, False)
         ]
         f0[2] = df
-        if final is True:
-            self.rWeight = 1e4
         landed = [
             self.createSwingFootModel(
                 timeStep, [self.lfId, self.rfId], comTask=comRef + f0
             )
-            for k in range(groundKnots)
+            for _ in range(int(groundKnots / 2))
         ]
         loco3dModel += takeOff
         loco3dModel += flyingUpPhase
         loco3dModel += flyingDownPhase
         loco3dModel += landingPhase
         loco3dModel += landed
-
-        # Rescaling the terminal weights
-        costs = loco3dModel[-1].differential.costs.costs.todict()
-        for c in costs.values():
-            c.weight *= timeStep
-
-        problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
-        return problem
+        return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createFootstepModels(
         self,
@@ -225,7 +208,6 @@ class SimpleBipedGaitProblem:
         """
         numLegs = len(supportFootIds) + len(swingFootIds)
         comPercentage = float(len(swingFootIds)) / numLegs
-
         # Action models for the foot swing
         footSwingModel = []
         for k in range(numKnots):
@@ -252,9 +234,7 @@ class SimpleBipedGaitProblem:
                         ]
                     )
                 tref = p + dp
-
                 swingFootTask += [[i, pinocchio.SE3(np.eye(3), tref)]]
-
             comTask = (
                 np.array([stepLength * (k + 1) / numKnots, 0.0, 0.0]) * comPercentage
                 + comPos0
@@ -267,10 +247,8 @@ class SimpleBipedGaitProblem:
                     swingFootTask=swingFootTask,
                 )
             ]
-
         # Action model for the foot switch
         footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
-
         # Updating the current foot position for next step
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
         for p in feetPos0:
@@ -302,12 +280,11 @@ class SimpleBipedGaitProblem:
                 pinocchio.SE3.Identity(),
                 pinocchio.LOCAL_WORLD_ALIGNED,
                 nu,
-                np.array([0.0, 50.0]),
+                np.array([0.0, 30.0]),
             )
             contactModel.addContact(
                 self.rmodel.frames[i].name + "_contact", supportContactModel
             )
-
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         if isinstance(comTask, np.ndarray):
@@ -328,7 +305,6 @@ class SimpleBipedGaitProblem:
             costModel.addCost(
                 self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1
             )
-
         if swingFootTask is not None:
             for i in swingFootTask:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
@@ -340,7 +316,6 @@ class SimpleBipedGaitProblem:
                 costModel.addCost(
                     self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6
                 )
-
         stateWeights = np.array(
             [0] * 3 + [500.0] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv
         )
@@ -360,7 +335,6 @@ class SimpleBipedGaitProblem:
         ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-1)
-
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
@@ -423,7 +397,6 @@ class SimpleBipedGaitProblem:
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
         """
-
         # Creating a 6D multi-contact model, and then including the supporting
         # foot
         if self._fwddyn:
@@ -443,7 +416,6 @@ class SimpleBipedGaitProblem:
             contactModel.addContact(
                 self.rmodel.frames[i].name + "_contact", supportContactModel
             )
-
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         for i in supportFootIds:
@@ -460,7 +432,6 @@ class SimpleBipedGaitProblem:
             costModel.addCost(
                 self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1
             )
-
         if swingFootTask is not None:
             for i in swingFootTask:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
@@ -487,7 +458,6 @@ class SimpleBipedGaitProblem:
                     impulseFootVelCost,
                     1e6,
                 )
-
         stateWeights = np.array(
             [0.0] * 3
             + [500.0] * 3
@@ -503,15 +473,13 @@ class SimpleBipedGaitProblem:
         )
         if self._fwddyn:
             ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         else:
             ctrlResidual = crocoddyl.ResidualModelJointEffort(
                 self.state, self.actuation, nu
             )
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
-
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
@@ -538,7 +506,9 @@ class SimpleBipedGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
         return model
 
-    def createImpulseModel(self, supportFootIds, swingFootTask):
+    def createImpulseModel(
+        self, supportFootIds, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0
+    ):
         """Action model for impulse models.
 
         An impulse model consists of describing the impulse dynamics against a set of
@@ -556,21 +526,19 @@ class SimpleBipedGaitProblem:
             impulseModel.addImpulse(
                 self.rmodel.frames[i].name + "_impulse", supportContactModel
             )
-
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
-                    self.state, i[0], i[1].translation, 0
+                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
+                    self.state, i[0], i[1], 0
                 )
                 footTrack = crocoddyl.CostModelResidual(
-                    self.state, frameTranslationResidual
+                    self.state, framePlacementResidual
                 )
                 costModel.addCost(
                     self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8
                 )
-
         stateWeights = np.array(
             [1.0] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv
         )
@@ -582,12 +550,13 @@ class SimpleBipedGaitProblem:
             self.state, stateActivation, stateResidual
         )
         costModel.addCost("stateReg", stateReg, 1e1)
-
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         model = crocoddyl.ActionModelImpulseFwdDynamics(
             self.state, impulseModel, costModel
         )
+        model.JMinvJt_damping = JMinvJt_damping
+        model.r_coeff = r_coeff
         return model
 
 

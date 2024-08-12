@@ -31,8 +31,8 @@ update_logfile() {
 
 update_logfile "arm_manipulation_fwddyn"
 update_logfile "arm_manipulation_invdyn"
-update_logfile "bipedal_walk_fwddyn"
-update_logfile "bipedal_walk_invdyn"
+update_logfile "bipedal_gaits_fwddyn"
+update_logfile "bipedal_gaits_invdyn"
 update_logfile "bipedal_walk_ubound"
 update_logfile "boxfddp_vs_boxddp"
 update_logfile "double_pendulum_fwddyn"
