@@ -481,20 +481,26 @@ class SimpleQuadrupedalGaitProblem:
         lhFootPos0[2] = 0.0
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
-
+        # Create locomotion problem
         loco3dModel = []
         takeOff = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
             )
-            for k in range(groundKnots)
+            for _ in range(groundKnots)
         ]
         flyingUpPhase = [
             self.createSwingFootModel(
                 timeStep,
                 [],
-                np.array([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight])
+                np.array(
+                    [
+                        jumpLength[0] / 2.0,
+                        jumpLength[1] / 2.0,
+                        jumpLength[2] / 2.0 + jumpHeight,
+                    ]
+                )
                 * (k + 1)
                 / flyingKnots
                 + comRef,
@@ -502,9 +508,8 @@ class SimpleQuadrupedalGaitProblem:
             for k in range(flyingKnots)
         ]
         flyingDownPhase = []
-        for k in range(flyingKnots):
+        for _ in range(flyingKnots):
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
-
         f0 = jumpLength
         footTask = [
             [self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
@@ -526,14 +531,13 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
                 comTask=comRef + f0,
             )
-            for k in range(groundKnots)
+            for _ in range(groundKnots)
         ]
         loco3dModel += takeOff
         loco3dModel += flyingUpPhase
         loco3dModel += flyingDownPhase
         loco3dModel += landingPhase
         loco3dModel += landed
-
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 

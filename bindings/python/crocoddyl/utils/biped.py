@@ -125,14 +125,7 @@ class SimpleBipedGaitProblem:
         return problem
 
     def createJumpingProblem(
-        self,
-        x0,
-        jumpHeight,
-        jumpLength,
-        timeStep,
-        groundKnots,
-        flyingKnots,
-        final=False,
+        self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots
     ):
         q0 = x0[: self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
@@ -144,21 +137,26 @@ class SimpleBipedGaitProblem:
         lfFootPos0[2] = 0.0
         comRef = (rfFootPos0 + lfFootPos0) / 2
         comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2]
-
-        self.rWeight = 1e1
+        # Create locomotion problem
         loco3dModel = []
         takeOff = [
             self.createSwingFootModel(
                 timeStep,
                 [self.lfId, self.rfId],
             )
-            for k in range(groundKnots)
+            for _ in range(groundKnots)
         ]
         flyingUpPhase = [
             self.createSwingFootModel(
                 timeStep,
                 [],
-                np.array([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight])
+                np.array(
+                    [
+                        jumpLength[0] / 2.0,
+                        jumpLength[1] / 2.0,
+                        jumpLength[2] / 2.0 + jumpHeight,
+                    ]
+                )
                 * (k + 1)
                 / flyingKnots
                 + comRef,
@@ -166,37 +164,28 @@ class SimpleBipedGaitProblem:
             for k in range(flyingKnots)
         ]
         flyingDownPhase = []
-        for k in range(flyingKnots):
+        for _ in range(flyingKnots):
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
-
         f0 = jumpLength
         footTask = [
-            [self.lfId, pinocchio.SE3(np.eye(3), self.lfId + f0)],
-            [self.rfId, pinocchio.SE3(np.eye(3), self.rfId + f0)],
+            [self.lfId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
+            [self.rfId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
         ]
         landingPhase = [
             self.createFootSwitchModel([self.lfId, self.rfId], footTask, False)
         ]
         f0[2] = df
-        if final is True:
-            self.rWeight = 1e4
         landed = [
             self.createSwingFootModel(
                 timeStep, [self.lfId, self.rfId], comTask=comRef + f0
             )
-            for k in range(groundKnots)
+            for _ in range(int(groundKnots / 2))
         ]
         loco3dModel += takeOff
         loco3dModel += flyingUpPhase
         loco3dModel += flyingDownPhase
         loco3dModel += landingPhase
         loco3dModel += landed
-
-        # Rescaling the terminal weights
-        costs = loco3dModel[-1].differential.costs.costs.todict()
-        for c in costs.values():
-            c.weight *= timeStep
-
         problem = crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
         return problem
 
@@ -302,7 +291,7 @@ class SimpleBipedGaitProblem:
                 pinocchio.SE3.Identity(),
                 pinocchio.LOCAL_WORLD_ALIGNED,
                 nu,
-                np.array([0.0, 50.0]),
+                np.array([0.0, 30.0]),
             )
             contactModel.addContact(
                 self.rmodel.frames[i].name + "_contact", supportContactModel
@@ -503,12 +492,11 @@ class SimpleBipedGaitProblem:
         )
         if self._fwddyn:
             ctrlResidual = crocoddyl.ResidualModelControl(self.state, nu)
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         else:
             ctrlResidual = crocoddyl.ResidualModelJointEffort(
                 self.state, self.actuation, nu
             )
-            ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
+        ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
         costModel.addCost("stateReg", stateReg, 1e1)
         costModel.addCost("ctrlReg", ctrlReg, 1e-3)
 
@@ -561,11 +549,11 @@ class SimpleBipedGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
-                    self.state, i[0], i[1].translation, 0
+                framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
+                    self.state, i[0], i[1], 0
                 )
                 footTrack = crocoddyl.CostModelResidual(
-                    self.state, frameTranslationResidual
+                    self.state, framePlacementResidual
                 )
                 costModel.addCost(
                     self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8
