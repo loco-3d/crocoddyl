@@ -249,6 +249,9 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(
   Eigen::Block<MatrixXs> f_partial_da = data->Kinv.bottomRightCorner(nc, nc);
 
   data->pinocchio.dtau_dq -= data->dgrav_dq;
+  data->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
+      data->pinocchio.M.transpose()
+          .template triangularView<Eigen::StrictlyLower>();
   data->Fx.topLeftCorner(nv, nv).setIdentity();
   data->Fx.topRightCorner(nv, nv).setZero();
   data->Fx.bottomLeftCorner(nv, nv).noalias() =
@@ -256,8 +259,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(
   data->Fx.bottomLeftCorner(nv, nv).noalias() -=
       a_partial_da * data->multibody.impulses->dv0_dq.topRows(nc);
   data->Fx.bottomRightCorner(nv, nv).noalias() =
-      a_partial_dtau *
-      data->pinocchio.M.template selfadjointView<Eigen::Upper>();
+      a_partial_dtau * data->pinocchio.M;
 
   // Computing the cost derivatives
   if (enable_force_) {
