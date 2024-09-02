@@ -52,7 +52,7 @@ void exposeSolverFDDP() {
       "trajectory.)",
       bp::init<std::shared_ptr<ShootingProblem>,
                bp::optional<DynamicsSolverType> >(
-          bp::args("self", "problem"),
+          bp::args("self", "problem", "dyn_solver"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
           ":param dyn_solver: type of dynamic solver (default FeasShoot)"))
