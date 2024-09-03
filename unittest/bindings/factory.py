@@ -1992,8 +1992,8 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.hc[:] = d.h
         self.hc[:] += d.Hx @ self.dxs[-1]
         if (
-            self.term_solver == crocoddyl.TerminalSolverType.LuNull
-            or self.term_solver == crocoddyl.TerminalSolverType.QrNull
+            self.term_solver == crocoddyl.EqualitySolverType.LuNull
+            or self.term_solver == crocoddyl.EqualitySolverType.QrNull
         ):
             # Resizing dHc-related data
             self.dHc_rank = np.linalg.matrix_rank(self.dHc)
