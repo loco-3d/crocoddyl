@@ -20,12 +20,6 @@ void exposeSolverIntro() {
 #ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverIntro> >();
 
-  bp::enum_<EqualitySolverType>("EqualitySolverType")
-      .value("LuNull", LuNull)
-      .value("QrNull", QrNull)
-      .value("Schur", Schur)
-      .export_values();
-
   bp::class_<SolverIntro, bp::bases<SolverFDDP> >(
       "SolverIntro",
       bp::init<std::shared_ptr<ShootingProblem>,
@@ -111,17 +105,21 @@ void exposeSolverIntro() {
               bp::return_value_policy<bp::reference_existing_object>()),
           "kz")
       .add_property(
+          "ks",
+          make_function(&SolverIntro::get_ks,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "ks")
+      .add_property(
           "Ks",
           make_function(
               &SolverIntro::get_Ks,
               bp::return_value_policy<bp::reference_existing_object>()),
           "Ks")
       .add_property(
-          "ks",
-          make_function(
-              &SolverIntro::get_ks,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "ks")
+          "Qzc",
+          make_function(&SolverIntro::get_Qzc,
+                        bp::return_value_policy<bp::reference_existing_object>()),
+          "Qzc")
       .def(CopyableVisitor<SolverIntro>());
 #endif
 }

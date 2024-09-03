@@ -16,8 +16,10 @@
 namespace crocoddyl {
 
 SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
-                       const DynamicsSolverType dyn_solver)
+                       const DynamicsSolverType dyn_solver,
+                       const EqualitySolverType term_solver)
     : SolverAbstract(problem),
+      term_solver_(term_solver),
       reg_incfactor_(10.),
       reg_decfactor_(5.),
       reg_min_(1e-9),
@@ -209,10 +211,23 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
 
 void SolverFDDP::computeDirection(const bool recalc) {
   START_PROFILER("SolverFDDP::computeDirection");
+  // Update the batch's derivatives
   if (recalc) {
     calcDir();
   }
+  // Update the search direction associated with the batch's internal
+  // constraints
   backwardPass();
+  // Update search direction associated with the batch's constraint-to-go
+  // conditions
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  if (nh_T != 0) {
+    linearRollout();
+    batchPass();
+    updateDir();
+  } else if (dyn_solver_ != DynamicsSolverType::SingleShoot) {
+    linearRollout();
+  }
   STOP_PROFILER("SolverFDDP::computeDirection");
 }
 
@@ -265,7 +280,7 @@ double SolverFDDP::tryStep(const double steplength) {
 
 double SolverFDDP::stoppingCriteria() {
   feas_ = ffeas_ + gfeas_ + hfeas_;
-  stop_ = std::max(feas_, std::abs(dVexp_full_));
+  stop_ = std::max(feas_, std::abs(dVexp_full_) / (1. + std::abs(cost_)));
   return stop_;
 }
 
@@ -290,7 +305,6 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
     case FeasShoot:
     case MultiShoot:
     case HybridShoot:
-      linearRollout();
       const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
           problem_->get_runningDatas();
       for (std::size_t t = 0; t < T; ++t) {
@@ -325,6 +339,7 @@ void SolverFDDP::resizeData() {
   SolverAbstract::resizeData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
@@ -344,7 +359,23 @@ void SolverFDDP::resizeData() {
     if (nu != 0) {
       FuTVxx_p_[t].setZero();
     }
+    // Terminal constraint data
+    Vxc_[t].conservativeResize(ndx, nh_T);
+    Qxc_[t].conservativeResize(ndx, nh_T);
+    Quc_[t].conservativeResize(nu, nh_T);
+    dXc_[t].conservativeResize(ndx, nh_T);
+    dUc_[t].conservativeResize(nu, nh_T);
+    Kc_[t].conservativeResize(nu, nh_T);
   }
+  Vxc_.back().conservativeResize(ndx, nh_T);
+  dXc_.back().conservativeResize(ndx, nh_T);
+  dHc_.conservativeResize(nh_T, nh_T);
+  hc_.conservativeResize(nh_T);
+  YZc_.conservativeResize(nh_T, nh_T);
+  Yhc_.conservativeResize(nh_T);
+  dHcY_.conservativeResize(nh_T, nh_T);
+  YdHcY_.conservativeResize(nh_T, nh_T);
+  beta_plus_.conservativeResize(nh_T);
   STOP_PROFILER("SolverFDDP::resizeData");
 }
 
@@ -399,7 +430,7 @@ void SolverFDDP::backwardPass() {
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-    // Update control-action function
+    // Update action-value function
     computeActionValueFunction(t, m, d);
     // Update policy
     computePolicy(t);
@@ -413,6 +444,91 @@ void SolverFDDP::backwardPass() {
     }
   }
   STOP_PROFILER("SolverFDDP::backwardPass");
+}
+
+void SolverFDDP::batchPass() {
+  START_PROFILER("SolverFDDP::batchPass");
+  const std::shared_ptr<ActionDataAbstract>& d_T =
+      problem_->get_terminalData();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  Vxc_.back() = -d_T->Hx.transpose();
+  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    // Update action-value function associated with the batch's constraint-to-go
+    // conditions
+    computeBatchActionValueFunction(t, d);
+    // Update feed-forward policy associated with the batch's constraint-to-go
+    // conditions
+    computeBatchPolicy(t);
+    // Update value function associated with the batch's constraint-to-go
+    // conditions
+    computeBatchValueFunction(t);
+  }
+  for (std::size_t t = 0; t < problem_->get_T(); ++t) {  // sequence
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    dUc_[t] = -Kc_[t];
+    dUc_[t].noalias() -= K_[t] * dXc_[t];
+    dXc_[t + 1].noalias() = d->Fx * dXc_[t];
+    dXc_[t + 1].noalias() += d->Fu * dUc_[t];
+  }
+  STOP_PROFILER("SolverFDDP::batchPass");
+}
+
+void SolverFDDP::updateDir() {
+  START_PROFILER("SolverFDDP::updateDir");
+  const std::shared_ptr<ActionDataAbstract>& d_T =
+      problem_->get_terminalData();
+  dHc_.noalias() = d_T->Hx * dXc_.back();
+  hc_ = d_T->h;
+  hc_.noalias() += d_T->Hx * dxs_.back();
+  switch (term_solver_) {
+    case LuNull: {
+      dHc_lu_.compute(dHc_);
+      YZc_ << dHc_lu_.matrixLU().transpose(), dHc_lu_.kernel();
+      dHc_rank_ = dHc_lu_.rank();
+    }
+    case QrNull: {
+      dHc_qr_.compute(dHc_);
+      YZc_ = dHc_qr_.householderQ();
+      dHc_rank_ = dHc_qr_.rank();
+      // Compute epsilon using nullspace parametrization. Instead of
+      // parametrizing Hx, we opt to equivalent parametrize dHc. This approach
+      // is much efficient.
+      const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                         Eigen::RowMajor>
+          Yc = YZc_.leftCols(dHc_rank_);
+      Yhc_.noalias() = Yc.transpose() * hc_;
+      dHcY_.noalias() = dHc_ * Yc;
+      YdHcY_.noalias() = Yc.transpose() * dHcY_;
+      YdHcY_llt_.compute(YdHcY_);
+      const Eigen::ComputationInfo& info = YdHcY_llt_.info();
+      if (info != Eigen::Success) {
+        throw_pretty("backward_error");
+      }
+      YdHcY_llt_.solveInPlace(Yhc_);
+      beta_plus_.noalias() = Yc * Yhc_;
+      break;
+    }
+    case Schur: {
+      YdHcY_llt_.compute(dHc_);
+      const Eigen::ComputationInfo& info = YdHcY_llt_.info();
+      if (info != Eigen::Success) {
+        throw_pretty("backward_error");
+      }
+      beta_plus_ = hc_;
+      YdHcY_llt_.solveInPlace(beta_plus_);
+      break;
+    }
+  }
+  // Finally, we update the feed-forward term and search direction.
+  for (std::size_t t = 0; t < problem_->get_T(); ++t) {  // parallel
+    dus_[t].noalias() -= dUc_[t] * beta_plus_;
+    dxs_[t + 1].noalias() -= dXc_[t + 1] * beta_plus_;
+    k_[t].noalias() -= Kc_[t] * beta_plus_;
+    Quuk_[t].noalias() = Quu_[t] * k_[t];
+  }
+  STOP_PROFILER("SolverFDDP::updateDir");
 }
 
 void SolverFDDP::computeActionValueFunction(
@@ -462,6 +578,14 @@ void SolverFDDP::computeActionValueFunction(
   STOP_PROFILER("SolverFDDP::computeActionValueFunction");
 }
 
+void SolverFDDP::computeBatchActionValueFunction(
+    const std::size_t t, const std::shared_ptr<ActionDataAbstract>& data) {
+  START_PROFILER("SolverFDDP::computeBatchActionValueFunction");
+  Quc_[t].noalias() = data->Fu.transpose() * Vxc_[t + 1];
+  Qxc_[t].noalias() = data->Fx.transpose() * Vxc_[t + 1];
+  STOP_PROFILER("SolverFDDP::computeBatchActionValueFunction");
+}
+
 void SolverFDDP::computePolicy(const std::size_t t) {
   START_PROFILER("SolverFDDP::computePolicy");
   assert_pretty(t < problem_->get_T(),
@@ -489,6 +613,13 @@ void SolverFDDP::computePolicy(const std::size_t t) {
   STOP_PROFILER("SolverFDDP::computePolicy");
 }
 
+void SolverFDDP::computeBatchPolicy(const std::size_t t) {
+  START_PROFILER("SolverFDDP::computeBatchPolicy");
+  Kc_[t] = Quc_[t];
+  Quu_llt_[t].solveInPlace(Kc_[t]);
+  STOP_PROFILER("SolverFDDP::computeBatchPolicy");
+}
+
 void SolverFDDP::computeValueFunction(
     const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
   START_PROFILER("SolverFDDP::computeValueFunction");
@@ -509,9 +640,15 @@ void SolverFDDP::computeValueFunction(
   }
   Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
-  // Compute and store the Vxx_f
   Vxx_f_[t].noalias() = Vxx_[t] * fs_[t];
   STOP_PROFILER("SolverFDDP::computeValueFunction");
+}
+
+void SolverFDDP::computeBatchValueFunction(const std::size_t t) {
+  START_PROFILER("SolverFDDP::computeBatchValueFunction");
+  Vxc_[t] = Qxc_[t];
+  Vxc_[t].noalias() -= Qxu_[t] * Kc_[t];
+  STOP_PROFILER("SolverFDDP::computeBatchValueFunction");
 }
 
 void SolverFDDP::feasShootForwardPass(const double steplength) {
@@ -818,6 +955,36 @@ void SolverFDDP::allocateData() {
   Lxx_dx_.back() = Eigen::VectorXd::Zero(ndx);
   dxs_.back() = Eigen::VectorXd::Zero(ndx);
   fTVxx_p_ = Eigen::VectorXd::Zero(ndx);
+  // Terminal constraint data
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  Vxc_.resize(T + 1);
+  Qxc_.resize(T);
+  Quc_.resize(T);
+  dXc_.resize(T + 1);
+  dUc_.resize(T);
+  Kc_.resize(T);
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    Vxc_[t] = Eigen::MatrixXd::Zero(ndx, nh_T);
+    Qxc_[t] = Eigen::MatrixXd::Zero(ndx, nh_T);
+    Quc_[t] = Eigen::MatrixXd::Zero(nu, nh_T);
+    dXc_[t] = Eigen::MatrixXd::Zero(ndx, nh_T);
+    dUc_[t] = Eigen::MatrixXd::Zero(nu, nh_T);
+    Kc_[t] = Eigen::MatrixXd::Zero(nu, nh_T);
+  }
+  Vxc_.back() = Eigen::MatrixXd::Zero(ndx, nh_T);
+  dXc_.back() = Eigen::MatrixXd::Zero(ndx, nh_T);
+  dHc_ = Eigen::MatrixXd::Zero(nh_T, nh_T);
+  hc_ = Eigen::VectorXd::Zero(nh_T);
+  YZc_ = Eigen::MatrixXd::Zero(nh_T, nh_T);
+  Yhc_ = Eigen::VectorXd::Zero(nh_T);
+  dHcY_ = Eigen::MatrixXd::Zero(nh_T, nh_T);
+  YdHcY_ = Eigen::MatrixXd::Zero(nh_T, nh_T);
+  beta_plus_ = Eigen::VectorXd::Zero(nh_T);
+  YdHcY_llt_ = Eigen::LLT<Eigen::MatrixXd>(nh_T);
+  dHc_lu_ = Eigen::FullPivLU<Eigen::MatrixXd>(nh_T, nh_T);
+  dHc_qr_ = Eigen::ColPivHouseholderQR<Eigen::MatrixXd>(nh_T, nh_T);
 }
 
 void SolverFDDP::set_dynamics_solver(const DynamicsSolverType type,
@@ -851,6 +1018,10 @@ void SolverFDDP::set_dynamics_solver(const DynamicsSolverType type,
   }
 }
 
+void SolverFDDP::set_terminal_solver(const EqualitySolverType type) {
+  term_solver_ = type;
+}
+
 double SolverFDDP::computeFeasibility(const std::vector<Eigen::VectorXd>& fs) {
   tmp_feas_ = 0.;
   switch (feasnorm_) {
@@ -870,6 +1041,10 @@ double SolverFDDP::computeFeasibility(const std::vector<Eigen::VectorXd>& fs) {
 
 DynamicsSolverType SolverFDDP::get_dynamics_solver() const {
   return dyn_solver_;
+}
+
+EqualitySolverType SolverFDDP::get_terminal_solver() const {
+  return term_solver_;
 }
 
 const std::vector<double>& SolverFDDP::get_alphas() const { return alphas_; }
@@ -931,6 +1106,24 @@ const std::vector<Eigen::VectorXd>& SolverFDDP::get_dxs() const { return dxs_; }
 
 const std::vector<Eigen::VectorXd>& SolverFDDP::get_dus() const { return dus_; }
 
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Vxc() const { return Vxc_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Qxc() const { return Qxc_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Quc() const { return Quc_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_dXc() const { return dXc_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_dUc() const { return dUc_; }
+
+const std::vector<Eigen::MatrixXd>& SolverFDDP::get_Kc() const { return Kc_; }
+
+const Eigen::MatrixXd& SolverFDDP::get_dHc() const { return dHc_; }
+
+const Eigen::VectorXd& SolverFDDP::get_hc() const { return hc_; }
+
+const Eigen::VectorXd& SolverFDDP::get_beta_plus() const { return beta_plus_; }
+
 void SolverFDDP::set_alphas(const std::vector<double>& alphas) {
   double prev_alpha = alphas[0];
   if (prev_alpha != 1.) {
@@ -939,12 +1132,11 @@ void SolverFDDP::set_alphas(const std::vector<double>& alphas) {
   for (std::size_t i = 1; i < alphas.size(); ++i) {
     double alpha = alphas[i];
     if (0. >= alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values has to be positive.");
+      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
     }
     if (alpha >= prev_alpha) {
-      throw_pretty("Invalid argument: "
-                   << "alpha values are monotonously decreasing.");
+      throw_pretty(
+          "Invalid argument: " << "alpha values are monotonously decreasing.");
     }
     prev_alpha = alpha;
   }
@@ -953,56 +1145,53 @@ void SolverFDDP::set_alphas(const std::vector<double>& alphas) {
 
 void SolverFDDP::set_reg_incfactor(const double regfactor) {
   if (regfactor <= 1.) {
-    throw_pretty("Invalid argument: "
-                 << "reg_incfactor value is higher than 1.");
+    throw_pretty(
+        "Invalid argument: " << "reg_incfactor value is higher than 1.");
   }
   reg_incfactor_ = regfactor;
 }
 
 void SolverFDDP::set_reg_decfactor(const double regfactor) {
   if (regfactor <= 1.) {
-    throw_pretty("Invalid argument: "
-                 << "reg_decfactor value is higher than 1.");
+    throw_pretty(
+        "Invalid argument: " << "reg_decfactor value is higher than 1.");
   }
   reg_decfactor_ = regfactor;
 }
 
 void SolverFDDP::set_reg_min(const double regmin) {
   if (0. > regmin) {
-    throw_pretty("Invalid argument: "
-                 << "regmin value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
   }
   reg_min_ = regmin;
 }
 
 void SolverFDDP::set_reg_max(const double regmax) {
   if (0. > regmax) {
-    throw_pretty("Invalid argument: "
-                 << "regmax value has to be positive.");
+    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
   }
   reg_max_ = regmax;
 }
 
 void SolverFDDP::set_th_grad(const double th_grad) {
   if (0. > th_grad) {
-    throw_pretty("Invalid argument: "
-                 << "th_grad value has to be positive.");
+    throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
 }
 
 void SolverFDDP::set_th_stepdec(const double th_stepdec) {
   if (0. >= th_stepdec || th_stepdec > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stepdec value should between 0 and 1.");
+    throw_pretty(
+        "Invalid argument: " << "th_stepdec value should between 0 and 1.");
   }
   th_stepdec_ = th_stepdec;
 }
 
 void SolverFDDP::set_th_stepinc(const double th_stepinc) {
   if (0. >= th_stepinc || th_stepinc > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stepinc value should between 0 and 1.");
+    throw_pretty(
+        "Invalid argument: " << "th_stepinc value should between 0 and 1.");
   }
   th_stepinc_ = th_stepinc;
 }
@@ -1033,8 +1222,7 @@ void SolverFDDP::set_th_acceptminstep(const double th_acceptminstep) {
 
 void SolverFDDP::set_rho(const double rho) {
   if (0. >= rho || rho > 1.) {
-    throw_pretty("Invalid argument: "
-                 << "rho value should between 0 and 1.");
+    throw_pretty("Invalid argument: " << "rho value should between 0 and 1.");
   }
   rho_ = rho;
 }

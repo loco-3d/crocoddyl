@@ -26,16 +26,16 @@ void exposeSolverBoxFDDP() {
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
       bp::init<std::shared_ptr<ShootingProblem>,
-               bp::optional<DynamicsSolverType> >(
-          bp::args("self", "problem"),
+               bp::optional<DynamicsSolverType, EqualitySolverType> >(
+          bp::args("self", "problem", "dyn_solver", "term_solver"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasShoot)"))
-      .add_property(
-          "Quu_inv",
-          make_function(&SolverBoxFDDP::get_Quu_inv,
-                        bp::return_value_policy<bp::reference_existing_object>()),
-          "inverse of the Quu computed by the box QP")
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"
+          ":param term_solver: type of terminal solver (default LuNull)"))
+      .add_property("Quu_inv",
+                    make_function(&SolverBoxFDDP::get_Quu_inv,
+                                  bp::return_value_policy<bp::reference_existing_object>()),
+                    "inverse of the Quu computed by the box QP")
       .def(CopyableVisitor<SolverBoxFDDP>());
 #endif
 }

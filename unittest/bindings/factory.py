@@ -1693,7 +1693,12 @@ class Impulse6DDataDerived(crocoddyl.ImpulseDataAbstract):
 
 
 class SolverFDDP(crocoddyl.SolverAbstract):
-    def __init__(self, problem, dyn_solver=crocoddyl.DynamicsSolverType.FeasShoot):
+    def __init__(
+        self,
+        problem,
+        dyn_solver=crocoddyl.DynamicsSolverType.FeasShoot,
+        term_solver=crocoddyl.EqualitySolverType.LuNull,
+    ):
         crocoddyl.SolverAbstract.__init__(self, problem)
         self.dImpr = 0.0
         # Allocate data
@@ -1701,6 +1706,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         # Search and convergence parameters
         Ts = int(self.problem.T / max(3, self.problem.nthreads))
         self.setDynamicsSolver(dyn_solver, Ts)
+        self.term_solver = term_solver
         self.alphas = [2 ** (-n) for n in range(10)]
         self.th_grad = 1e-12
         # Regularization parameters
@@ -1733,6 +1739,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         if self.zero_upsilon:
             self.upsilon = 0.0
         # Start iteration
+        self._acceptStep = False
         for iter in range(maxiter):
             self.iter = iter
             self._recalcDir = True
@@ -1780,11 +1787,13 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 # merit function. Instead, for the second case, we use the Armijo condition with the
                 # cost function as this encourage progress and the possibility of increasing the cost
                 # when expectations are unrealistic. Moreover, when it is expected to increase the
-                # merit function, our strategy is to accept an increment in the cost function. This
+                # merit function, our strategy is to accept an increment in the merit function if
+                # the feasibility passes our stopping criteria or in the cost function otherwise. This
                 # approach enables our solver to increase both infeasibility and cost in order to
                 # ensure convergence; it increases the algorithm's globalization. Finally, we accept
                 # any improvement for step lengths smaller than th_acceptMinStep. This ensures
                 # any possible progress in the iteration.
+                self.dImpr = max(self.dV, self.dPhi)
                 self._acceptStep = False
                 if self.dPhiexp >= 0.0:
                     if self.dPhi > 0.0:
@@ -1798,9 +1807,14 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                         or abs(self.DV[1]) < self.th_grad
                     ):
                         self._acceptStep = True
-                elif self.dV > self.th_acceptNegStep * self.dVexp:
-                    self._acceptStep = True
-                if self.stepLength <= self.th_acceptMinStep and self.dPhi > 0.0:
+                else:
+                    if self.feas <= self.th_stop:
+                        if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
+                            self._acceptStep = True
+                    elif self.dV > self.th_acceptNegStep * self.dVexp:
+                        self._acceptStep = True
+                # TODO: accept dImpr > 0 when allocated time has been reached (c++)
+                if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
                     self._acceptStep = True
                 # Set candidate guess, cost and feasibilities if we accept the step
                 if self._acceptStep:
@@ -1820,7 +1834,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             callbacks = self.getCallbacks()
             if callbacks is not None:
                 [c(self) for c in callbacks]
-            self.dImpr = max(self.dV, self.dPhi)
             if self.stepLength >= self.th_stepDec and self.dImpr > self.th_minImprove:
                 self.decreaseRegularization()
             if (
@@ -1834,9 +1847,18 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         return False
 
     def computeDirection(self, recalc=True):
+        # Update the batch's derivatives
         if recalc:
             self.calcDir()
+        # Update the search direction associated with the batch's internal constraints
         self.backwardPass()
+        # Update search direction associated with the batch's constraint-to-go conditions
+        if self.problem.terminalModel.nh_T != 0:
+            self.linearRollout()
+            self.batchPass()
+            self.updateDir()
+        elif self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot:
+            self.linearRollout()
 
     def tryStep(self, stepLength=1):
         if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasShoot:
@@ -1874,7 +1896,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     def stoppingCriteria(self):
         self.feas = self.ffeas + self.gfeas + self.hfeas
-        self.stop = max(self.feas, abs(self.dVexp_full))
+        self.stop = max(self.feas, abs(self.dVexp_full) / (1.0 + abs(self.cost)))
         return copy.deepcopy(self.stop)
 
     def expectedImprovement(self):
@@ -1892,7 +1914,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 self.DV[0] -= self.fs[t].T @ self.Vx[t]
                 self.DV[0] -= 0.5 * self.fs[t].T @ self.Vxx_f[t]
         else:
-            self.linearRollout()
             for t in range(self.problem.T):  # in parallel
                 m = self.problem.runningModels[t]
                 d = self.problem.runningDatas[t]
@@ -1913,7 +1934,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     # This is virtual function
     def calcDir(self):
-        if self.iter == 0 or not self._acceptStep:
+        if not self._acceptStep:
             self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         self.ffeas = self.computeDynamicFeasibility()
@@ -1929,17 +1950,76 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.Vxx[-1][range(ndx), range(ndx)] += self.preg
         # Compute and store the Vxx_f gradient
         self.Vxx_f[-1] = self.Vxx[-1] @ self.fs[-1]
-        for t, (model, data) in rev_enumerate(
+        for t, (m, d) in rev_enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):
-            # Update control-action function
-            self.computeActionValueFunction(t, model, data)
+            # Update action-value function
+            self.computeActionValueFunction(t, m, d)
             # Update policy
             self.computePolicy(t)
             # Update value function
-            self.computeValueFunction(t, model)
+            self.computeValueFunction(t, m)
             raiseIfNan(self.Vxx[t], ArithmeticError("backward error"))
             raiseIfNan(self.Vx[t], ArithmeticError("backward error"))
+
+    def batchPass(self):
+        # Update the direction and feed-forward term to account for the terminal constraint.
+        # To do so, we first compute the unscaled search direction accounting for
+        # the terminal constraint as follows
+        m = self.problem.terminalModel
+        ndx, nh_T = m.state.ndx, m.nh_T
+        self.Vxc[-1][:, :] = -self.problem.terminalData.Hx.reshape(nh_T, ndx).T
+        for t, d in rev_enumerate(self.problem.runningDatas):
+            # Update action-value function associated with the batch's constraint-to-go conditions
+            self.computeBatchActionValueFunction(t, d)
+            # Update feed-forward policy associated with the batch's constraint-to-go conditions
+            self.computeBatchPolicy(t)
+            # Update value function associated with the batch's constraint-to-go conditions
+            self.computeBatchValueFunction(t)
+        for t, (m, d) in enumerate(
+            zip(self.problem.runningModels, self.problem.runningDatas)
+        ):  # sequence
+            ndx, nu = m.state.ndx, m.nu
+            self.dUc[t][:, :] = -self.Kc[t]
+            self.dUc[t][:, :] -= self.K[t] @ self.dXc[t]
+            self.dXc[t + 1][:, :] = d.Fx @ self.dXc[t]
+            self.dXc[t + 1][:, :] += d.Fu.reshape(ndx, nu) @ self.dUc[t]
+
+    def updateDir(self):
+        d = self.problem.terminalData
+        nh_T = self.problem.terminalModel.nh_T
+        self.dHc[:, :] = d.Hx @ self.dXc[-1]
+        self.hc[:] = d.h
+        self.hc[:] += d.Hx @ self.dxs[-1]
+        if (
+            self.term_solver == crocoddyl.TerminalSolverType.LuNull
+            or self.term_solver == crocoddyl.TerminalSolverType.QrNull
+        ):
+            # Resizing dHc-related data
+            self.dHc_rank = np.linalg.matrix_rank(self.dHc)
+            self.Yc = np.resize(self.Yc, (nh_T, self.dHc_rank))
+            self.Yhc = np.resize(self.Yhc, self.dHc_rank)
+            self.dHcY = np.resize(self.Yc, (nh_T, self.dHc_rank))
+            self.YdHcY = np.resize(self.Yc, (self.dHc_rank, self.dHc_rank))
+            self.YdHcY_inv_YHc = np.resize(self.Yhc, self.dHc_rank)
+            # Compute epsilon using nullspace parametrization. Instead of parametrizing Hx,
+            # we opt to equivalent parametrize dHc. This approach is much efficient.
+            self.Yc[:, :] = scl.orth(self.dHc)
+            self.Yhc[:] = self.Yc.T @ self.hc
+            self.dHcY[:, :] = self.dHc @ self.Yc
+            self.YdHcY[:, :] = self.Yc.T @ self.dHcY
+            self.YdHcY_llt = scl.cho_factor(self.YdHcY)
+            self.YdHcY_inv_YHc[:] = scl.cho_solve(self.YdHcY_llt, self.Yhc)
+            self.beta_plus[:] = self.Yc @ self.YdHcY_inv_YHc
+        else:
+            self.YdHcY_llt = scl.cho_factor(self.dHc)
+            self.beta_plus[:] = scl.cho_solve(self.YdHcY_llt, self.hc)
+        # Finally, we update the feed-forward term and search direction.
+        for t in range(self.problem.T):  # in parallel
+            self.dus[t][:] -= self.dUc[t] @ self.beta_plus
+            self.dxs[t + 1][:] -= self.dXc[t + 1] @ self.beta_plus
+            self.k[t] -= self.Kc[t] @ self.beta_plus
+            self.Quuk[t] = self.Quu[t] @ self.k[t]
 
     # This is virtual function
     def computeActionValueFunction(self, t, model, data):
@@ -1964,6 +2044,13 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         Vx_p -= self.Vxx_f[t + 1]
 
     # This is virtual function
+    def computeBatchActionValueFunction(self, t, data):
+        model = self.problem.runningModels[t]
+        ndx, nu = model.state.ndx, model.nu
+        self.Quc[t][:, :] = data.Fu.reshape(ndx, nu).T @ self.Vxc[t + 1]
+        self.Qxc[t][:, :] = data.Fx.T @ self.Vxc[t + 1]
+
+    # This is virtual function
     def computePolicy(self, t):
         nu = self.problem.runningModels[t].nu
         try:
@@ -1977,6 +2064,10 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             raise ArithmeticError("backward error")
 
     # This is virtual function
+    def computeBatchPolicy(self, t):
+        self.Kc[t][:] = scl.cho_solve(self.Quu_llt[t], self.Quc[t])
+
+    # This is virtual function
     def computeValueFunction(self, t, model):
         nu = model.nu
         self.Vx[t][:] = self.Qx[t]
@@ -1986,8 +2077,12 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.Vx[t][:] -= self.K[t].T @ self.Qu[t]
             self.Vxx[t][:, :] -= self.Qxu[t] @ self.K[t]
         self.Vxx[t][:, :] = 0.5 * (self.Vxx[t][:, :] + self.Vxx[t][:, :].T)
-        # Compute and store the Vx gradient at end of the interval (rollout state)
         self.Vxx_f[t] = self.Vxx[t] @ self.fs[t]
+
+    # This is virtual function
+    def computeBatchValueFunction(self, t):
+        self.Vxc[t][:, :] = self.Qxc[t]
+        self.Vxc[t][:, :] -= self.Qxu[t] @ self.Kc[t]
 
     def linearRollout(self):
         self.dxs[0][:] = self.fs[0]
@@ -2000,21 +2095,22 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             if nu != 0:
                 self.dus[t][:] = -self.k[t]
                 self.dus[t][:] -= self.K[t] @ self.dxs[t]
-            self.dxs[t + 1][:] += d.Fu.reshape(ndx, nu) @ self.dus[t]
+                self.dxs[t + 1][:] += d.Fu.reshape(ndx, nu) @ self.dus[t]
 
     def feasShootForwardPass(self, stepLength, warning="ignore"):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         self.cost_try = 0.0
-        xnext = self.problem.x0
+        self.fs_try[0] = self.fs[0] * (1 - stepLength)
+        xtry[0] = self.problem.runningModels[0].state.integrate(
+            self.problem.x0, -self.fs_try[0]
+        )
         for t, (m, d) in enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):
-            self.fs_try[t] = self.fs[t] * (1 - stepLength)
-            xtry[t] = m.state.integrate(xnext, -self.fs_try[t])
             self.dx[t] = m.state.diff(xs[t], xtry[t])
             if m.nu != 0:
-                utry[t] = us[t] - self.k[t] * stepLength
+                utry[t] = us[t] - stepLength * self.k[t]
                 utry[t] -= self.K[t] @ self.dx[t]
                 with warnings.catch_warnings():
                     warnings.simplefilter(warning)
@@ -2023,12 +2119,11 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 with warnings.catch_warnings():
                     warnings.simplefilter(warning)
                     m.calc(d, xtry[t])
-            xnext = d.xnext
+            self.fs_try[t + 1] = self.fs[t + 1] * (1 - stepLength)
+            xtry[t + 1] = m.state.integrate(d.xnext, -self.fs_try[t + 1])
             self.cost_try += d.cost
             raiseIfNan(self.cost_try, ArithmeticError("forward error"))
-            raiseIfNan(xnext, ArithmeticError("forward error"))
-        self.fs_try[-1] = self.fs[-1] * (1 - stepLength)
-        xtry[-1] = self.problem.terminalModel.state.integrate(xnext, -self.fs_try[-1])
+            raiseIfNan(xtry[t + 1], ArithmeticError("forward error"))
         with warnings.catch_warnings():
             warnings.simplefilter(warning)
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
@@ -2038,22 +2133,21 @@ class SolverFDDP(crocoddyl.SolverAbstract):
     def multiShootForwardPass(self, stepLength, warning="ignore"):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
-        dxs, dus = self.dxs, self.dus
         # Update the dynamics gap for each node
         self.cost_try = 0.0
         xtry[0] = self.problem.runningModels[0].state.integrate(
-            xs[0], stepLength * dxs[0]
+            xs[0], stepLength * self.dxs[0]
         )
         self.fs_try[0] = self.problem.runningModels[0].state.diff(
             xtry[0], self.problem.x0
         )
         for t, (m) in enumerate(self.problem.runningModels):  # in parallel
-            xtry[t + 1] = m.state.integrate(xs[t + 1], stepLength * dxs[t + 1])
+            xtry[t + 1] = m.state.integrate(xs[t + 1], stepLength * self.dxs[t + 1])
         for t, (m, d) in enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):  # in parallel
             if m.nu != 0:
-                utry[t] = us[t] + stepLength * dus[t]
+                utry[t] = us[t] + stepLength * self.dus[t]
                 with warnings.catch_warnings():
                     warnings.simplefilter(warning)
                     m.calc(d, xtry[t], utry[t])
@@ -2189,6 +2283,23 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.dx = [np.zeros([m.state.ndx]) for m in self.problem.runningModels]
         self.dxs = [np.zeros([m.state.ndx]) for m in models]
         self.dus = [np.zeros([m.nu]) for m in self.problem.runningModels]
+        # Terminal constraint data
+        nh_T = self.problem.terminalModel.nh_T
+        self.Qxc = [np.zeros([m.state.ndx, nh_T]) for m in self.problem.runningModels]
+        self.Quc = [np.zeros([m.nu, nh_T]) for m in self.problem.runningModels]
+        self.Vxc = [np.zeros([m.state.ndx, nh_T]) for m in models]
+        self.dXc = [np.zeros([m.state.ndx, nh_T]) for m in models]
+        self.dUc = [np.zeros([m.nu, nh_T]) for m in self.problem.runningModels]
+        self.Kc = [np.zeros([m.nu, nh_T]) for m in self.problem.runningModels]
+        self.dHc = np.zeros((nh_T, nh_T))
+        self.hc = np.zeros(nh_T)
+        self.Yc = np.zeros((nh_T, nh_T))
+        self.Yhc = np.zeros(nh_T)
+        self.dHcY = np.zeros((nh_T, nh_T))
+        self.YdHcY = np.zeros((nh_T, nh_T))
+        self.YdHcY_llt = None
+        self.YdHcY_inv_YHc = np.zeros((nh_T, nh_T))
+        self.beta_plus = np.zeros(nh_T)
 
     def setDynamicsSolver(self, type, Tshoot=0):
         if type == crocoddyl.DynamicsSolverType.HybridShoot and Tshoot <= 0:

@@ -14,8 +14,9 @@ namespace crocoddyl {
 
 SolverIntro::SolverIntro(std::shared_ptr<ShootingProblem> problem,
                          const DynamicsSolverType dyn_solver,
-                         const EqualitySolverType eq_solver)
-    : SolverFDDP(problem, dyn_solver), eq_solver_(eq_solver) {
+                         const EqualitySolverType eq_solver,
+                         const EqualitySolverType term_solver)
+    : SolverFDDP(problem, dyn_solver, term_solver), eq_solver_(eq_solver) {
   allocateData();
 }
 
@@ -26,6 +27,7 @@ void SolverIntro::resizeData() {
   SolverFDDP::resizeData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
@@ -44,6 +46,10 @@ void SolverIntro::resizeData() {
     ks_[t].conservativeResize(nh);
     Ks_[t].conservativeResize(nh, ndx);
     QuuinvHuT_[t].conservativeResize(nu, nh);
+    // Terminal constraint data
+    Kcs_[t].conservativeResize(nh, nh_T);
+    QuuKc_Quc_[t].conservativeResize(nu, nh_T);
+    Qzc_[t].conservativeResize(nh, nh_T);
   }
   STOP_PROFILER("SolverIntro::resizeData");
 }
@@ -78,6 +84,20 @@ void SolverIntro::computePolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computePolicy");
 }
 
+void SolverIntro::computeBatchPolicy(const std::size_t t) {
+  START_PROFILER("SolverIntro::computeBatchPolicy");
+  switch (eq_solver_) {
+    case LuNull:
+    case QrNull:
+      computeNullBatchPolicy(t);
+      break;
+    case Schur:
+      computeSchurBatchPolicy(t);
+      break;
+  }
+  STOP_PROFILER("SolverIntro::computeBatchPolicy");
+}
+
 void SolverIntro::computeValueFunction(
     const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
   START_PROFILER("SolverIntro::computeValueFunction");
@@ -91,8 +111,8 @@ void SolverIntro::computeValueFunction(
     START_PROFILER("SolverIntro::Vx");
     Quuk_[t].noalias() = Quu_[t] * k_[t];
     Quuk_[t] -= Qu_[t];
-    Vx_[t].noalias() -= Qxu_[t] * k_[t];
     Vx_[t].noalias() += K_[t].transpose() * Quuk_[t];
+    Vx_[t].noalias() -= Qxu_[t] * k_[t];
     Quuk_[t] += Qu_[t];
     STOP_PROFILER("SolverIntro::Vx");
     START_PROFILER("SolverIntro::Vxx");
@@ -105,6 +125,15 @@ void SolverIntro::computeValueFunction(
   Vxx_[t] = Vxx_tmp_;
   Vxx_f_[t].noalias() = Vxx_[t] * fs_[t];
   STOP_PROFILER("SolverIntro::computeValueFunction");
+}
+
+void SolverIntro::computeBatchValueFunction(const std::size_t t) {
+  START_PROFILER("SolverIntro::computeBatchValueFunction");
+  SolverFDDP::computeBatchValueFunction(t);
+  QuuKc_Quc_[t].noalias() = Quu_[t] * Kc_[t];
+  QuuKc_Quc_[t] -= Quc_[t];
+  Vxc_[t].noalias() += K_[t].transpose() * QuuKc_Quc_[t];
+  STOP_PROFILER("SolverIntro::computeBatchValueFunction");
 }
 
 void SolverIntro::allocateData() {
@@ -150,6 +179,19 @@ void SolverIntro::allocateData() {
     Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
     Hu_qr_[t] = Eigen::ColPivHouseholderQR<Eigen::MatrixXd>(nu, nh);
     Hy_lu_[t] = Eigen::PartialPivLU<Eigen::MatrixXd>(nh);
+  }
+  // Terminal constraint data
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  Kcs_.resize(T);
+  QuuKc_Quc_.resize(T);
+  Qzc_.resize(T);
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t nh = model->get_nh();
+    Kcs_[t] = Eigen::MatrixXd::Zero(nh, nh_T);
+    QuuKc_Quc_[t] = Eigen::MatrixXd::Zero(nu, nh_T);
+    Qzc_[t] = Eigen::MatrixXd::Zero(nh, nh_T);
   }
 }
 
@@ -223,14 +265,12 @@ void SolverIntro::computeNullPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeNullPolicy");
   const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
-  const std::shared_ptr<ActionDataAbstract>& data =
-      problem_->get_runningDatas()[t];
   const std::size_t nu = model->get_nu();
   const std::size_t nh = model->get_nh();
   if (nu > 0 && nh > 0) {
     START_PROFILER("SolverIntro::Qzz_inv");
     const std::size_t rank = Hu_rank_[t];
-    const std::size_t nullity = data->Hu.cols() - rank;
+    const std::size_t nullity = nu - rank;
     const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
                        Eigen::RowMajor>
         Z = YZ_[t].rightCols(nullity);
@@ -259,6 +299,28 @@ void SolverIntro::computeNullPolicy(const std::size_t t) {
     SolverFDDP::computePolicy(t);
   }
   STOP_PROFILER("SolverIntro::computeNullPolicy");
+}
+
+void SolverIntro::computeNullBatchPolicy(const std::size_t t) {
+  START_PROFILER("SolverIntro::computeNullBatchPolicy");
+  const std::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_runningModels()[t];
+  const std::size_t nu = model->get_nu();
+  const std::size_t nh = model->get_nh();
+  if (nu > 0 && nh > 0) {
+    const std::size_t rank = Hu_rank_[t];
+    const std::size_t nullity = nu - rank;
+    const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                       Eigen::RowMajor>
+        Z = YZ_[t].rightCols(nullity);
+    Qzc_[t].noalias() = Z.transpose() * Quc_[t];
+    Qzz_llt_[t].solveInPlace(Qzc_[t]);
+    Kc_[t].noalias() = Z * Qzc_[t];
+  } else if (nu > 0) {
+    // Unconstrained policy
+    SolverFDDP::computeBatchPolicy(t);
+  }
+  STOP_PROFILER("SolverIntro::computeNullBatchPolicy");
 }
 
 void SolverIntro::computeSchurPolicy(const std::size_t t) {
@@ -295,6 +357,24 @@ void SolverIntro::computeSchurPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeSchurPolicy");
 }
 
+void SolverIntro::computeSchurBatchPolicy(const std::size_t t) {
+  START_PROFILER("SolverIntro::computeSchurBatchPolicy");
+  const std::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_runningModels()[t];
+  const std::shared_ptr<ActionDataAbstract>& data =
+      problem_->get_runningDatas()[t];
+  const std::size_t nu = model->get_nu();
+  const std::size_t nh = model->get_nh();
+  if (nu > 0) {
+    SolverFDDP::computeBatchPolicy(t);
+  }
+  if (nu > 0 && nh > 0) {
+    Kcs_[t].noalias() = -data->Hu * Kc_[t];
+    Kc_[t].noalias() += QuuinvHuT_[t] * Kcs_[t];
+  }
+  STOP_PROFILER("SolverIntro::computeSchurBatchPolicy");
+}
+
 EqualitySolverType SolverIntro::get_equality_solver() const {
   return eq_solver_;
 }
@@ -328,6 +408,10 @@ const std::vector<Eigen::MatrixXd>& SolverIntro::get_Kz() const { return Kz_; }
 const std::vector<Eigen::VectorXd>& SolverIntro::get_ks() const { return ks_; }
 
 const std::vector<Eigen::MatrixXd>& SolverIntro::get_Ks() const { return Ks_; }
+
+const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzc() const {
+  return Qzc_;
+}
 
 void SolverIntro::set_equality_solver(const EqualitySolverType type) {
   eq_solver_ = type;

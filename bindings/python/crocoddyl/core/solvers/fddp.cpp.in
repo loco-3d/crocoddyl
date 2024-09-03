@@ -37,6 +37,12 @@ void exposeSolverFDDP() {
       .value("SingleShoot", SingleShoot)
       .export_values();
 
+  bp::enum_<EqualitySolverType>("EqualitySolverType")
+      .value("LuNull", LuNull)
+      .value("QrNull", QrNull)
+      .value("Schur", Schur)
+      .export_values();
+
   bp::class_<SolverFDDP, bp::bases<SolverAbstract> >(
       "SolverFDDP",
       "Feasibility-driven DDP (FDDP) solver.\n\n"
@@ -51,11 +57,12 @@ void exposeSolverFDDP() {
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
       bp::init<std::shared_ptr<ShootingProblem>,
-               bp::optional<DynamicsSolverType> >(
-          bp::args("self", "problem", "dyn_solver"),
+               bp::optional<DynamicsSolverType, EqualitySolverType> >(
+          bp::args("self", "problem", "dyn_solver", "term_solver"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasShoot)"))
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"
+          ":param term_solver: type of terminal solver (defaul LuNull)"))
       .def("solve", &SolverFDDP::solve,
            SolverFDDP_solves(
                bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
@@ -128,12 +135,26 @@ void exposeSolverFDDP() {
            "It assumes that the Jacobian and Hessians of the optimal control "
            "problem have been\n"
            "compute. These terms are computed by running calc.")
+      .def("batchPass", &SolverFDDP::batchPass, bp::args("self"),
+           "Run the batch pass to account for its constraints\n\n"
+           "Update the direction and feed-forward term to account for the "
+           "terminal constraint. To do so, we first compute the unscaled "
+           "search direction accounting for the terminal constraint.")
+      .def("updateDir", &SolverFDDP::updateDir, bp::args("self"),
+           "Update search direction associated with the batch's constraints")
       .def("computeActionValueFunction",
            &SolverFDDP::computeActionValueFunction,
            bp::args("self", "t", "model", "data"),
            "Compute the linear-quadratic model of the control Hamiltonian\n\n"
            ":param t: time instance\n"
            ":param model: action model in the given time instance\n"
+           ":param data: action data in the given time instance")
+      .def("computeBatchActionValueFunction",
+           &SolverFDDP::computeBatchActionValueFunction,
+           bp::args("self", "t", "data"),
+           "Compute the linear-quadratic approximation of the control "
+           "action-value function associated to the batch's constraints\n\n"
+           ":param t: time instance\n"
            ":param data: action data in the given time instance")
       .def("computePolicy", &SolverFDDP::computePolicy, bp::args("self", "t"),
            "Compute the local policy.\n\n"
@@ -147,6 +168,13 @@ void exposeSolverFDDP() {
            "local Hamiltonian.\n"
            ":param t: time instance\n"
            ":param model: action model in the given time instance")
+      .def("computeBatchValueFunction", &SolverFDDP::computeBatchValueFunction,
+           bp::args("self", "t"),
+           "Compute the linear-quadratic approximation of the value function "
+           "associated to the batch's constraints.\n\n"
+           "This function is called in the backward pass after updating the "
+           "local Hamiltonian.\n"
+           ":param t: time instance")
       .def("feasShootForwardPass", &SolverFDDP::feasShootForwardPass,
            bp::args("self", "stepLength"),
            "Run the feasibility-driven rollout\n\n"
@@ -184,6 +212,10 @@ void exposeSolverFDDP() {
       .add_property(
           "dyn_solver", bp::make_function(&SolverFDDP::get_dynamics_solver),
           "type of solver used for handling the dynamics constraints.")
+      .add_property(
+          "term_solver", bp::make_function(&SolverFDDP::get_terminal_solver),
+          bp::make_function(&SolverFDDP::set_terminal_solver),
+          "type of solver used for handling the terminal constraints.")
       .def("setDynamicsSolver", &SolverFDDP::set_dynamics_solver,
            SolverFDDP_setDynamicsSolver(
                bp::args("self", "type", "Tshoot"),
@@ -316,6 +348,51 @@ void exposeSolverFDDP() {
           make_function(&SolverFDDP::get_dus,
                         bp::return_value_policy<bp::copy_const_reference>()),
           "linear changes in the control trajectory.")
+      .add_property(
+          "Vxc",
+          make_function(&SolverFDDP::get_Vxc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "Vxc")
+      .add_property(
+          "Qxc",
+          make_function(&SolverFDDP::get_Qxc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "Qxc")
+      .add_property(
+          "Quc",
+          make_function(&SolverFDDP::get_Quc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "Quc")
+      .add_property(
+          "dXc",
+          make_function(&SolverFDDP::get_dXc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "dXc")
+      .add_property(
+          "dUc",
+          make_function(&SolverFDDP::get_dUc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "dUc")
+      .add_property(
+          "Kc",
+          make_function(&SolverFDDP::get_Kc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "Kc")
+      .add_property(
+          "dHc",
+          make_function(&SolverFDDP::get_dHc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "dHc")
+      .add_property(
+          "hc",
+          make_function(&SolverFDDP::get_hc,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "hc")
+      .add_property(
+          "beta_plus",
+          make_function(&SolverFDDP::get_beta_plus,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+          "beta_plus")
       .def(CopyableVisitor<SolverFDDP>());
 #endif
 }

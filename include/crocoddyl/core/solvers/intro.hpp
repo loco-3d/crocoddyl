@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,6 @@
 
 namespace crocoddyl {
 
-enum EqualitySolverType { LuNull = 0, QrNull, Schur };
-
 class SolverIntro : public SolverFDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -24,13 +22,14 @@ class SolverIntro : public SolverFDDP {
   /**
    * @brief Initialize the INTRO solver
    *
-   * @param[in] problem  Shooting problem
-   * @param[in] eq_solver  Type of equality solver
-   * true)
+   * @param[in] problem      Shooting problem
+   * @param[in] eq_solver    Type of equality solver
+   * @param[in] term_solver  Type of terminal solver
    */
   explicit SolverIntro(std::shared_ptr<ShootingProblem> problem,
                        const DynamicsSolverType dyn_solver = FeasShoot,
-                       const EqualitySolverType eq_solver = LuNull);
+                       const EqualitySolverType eq_solver = LuNull,
+                       const EqualitySolverType term_solver = LuNull);
   virtual ~SolverIntro();
 
   /**
@@ -49,10 +48,20 @@ class SolverIntro : public SolverFDDP {
   virtual void computePolicy(const std::size_t t);
 
   /**
+   * @copybrief SolverFDDP::computeBatchPolicy
+   */
+  virtual void computeBatchPolicy(const std::size_t t);
+
+  /**
    * @copybrief SolverFDDP::computeValueFunction
    */
   virtual void computeValueFunction(
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
+
+  /**
+   * @copybrief SolverFDDP::computeBatchValueFunction
+   */
+  virtual void computeBatchValueFunction(const std::size_t t);
 
   /**
    * @brief Return the type of solver used for handling the equality constraints
@@ -118,6 +127,11 @@ class SolverIntro : public SolverFDDP {
   const std::vector<Eigen::MatrixXd>& get_Ks() const;
 
   /**
+   * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zc}}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Qzc() const;
+
+  /**
    * @brief Modify the type of solver used for handling the equality constraints
    *
    * Note that the default solver is nullspace LU. When we enable
@@ -131,7 +145,9 @@ class SolverIntro : public SolverFDDP {
   void calcLuNullDir();
   void calcQrNullDir();
   void computeNullPolicy(const std::size_t t);
+  void computeNullBatchPolicy(const std::size_t t);
   void computeSchurPolicy(const std::size_t t);
+  void computeSchurBatchPolicy(const std::size_t t);
 
   enum EqualitySolverType
       eq_solver_;  //!< Strategy used for handling the equality constraints
@@ -173,6 +189,11 @@ class SolverIntro : public SolverFDDP {
   std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
       Hy_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward
                //!< and feedback gain related to the equality constraint
+
+  std::vector<Eigen::MatrixXd> Kcs_;
+  std::vector<Eigen::MatrixXd> QuuKc_Quc_;
+  std::vector<Eigen::MatrixXd>
+      Qzc_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zc}}\f$
 };
 
 }  // namespace crocoddyl

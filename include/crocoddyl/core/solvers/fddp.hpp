@@ -22,6 +22,12 @@ enum DynamicsSolverType {
   SingleShoot     //!< Similar to classical DDP but with xs warmstart
 };
 
+enum EqualitySolverType {
+  LuNull = 0,  //!< Nullspace factorization using LU decomposition
+  QrNull,      //!< Nullspace factorization using QR decomposition
+  Schur,       //!< Schur-complement factorization
+};
+
 /**
  * @brief Feasibility-driven Differential Dynamic Programming (FDDP) solver
  *
@@ -69,11 +75,13 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @brief Initialize the FDDP solver
    *
-   * @param[in] problem     Shooting problem
-   * @param[in] dyn_solver  Type of dynamic solver
+   * @param[in] problem      Shooting problem
+   * @param[in] dyn_solver   Type of dynamic solver
+   * @param[in] term_solver  Type of terminal solver
    */
   explicit SolverFDDP(std::shared_ptr<ShootingProblem> problem,
-                      const DynamicsSolverType dyn_solver = FeasShoot);
+                      const DynamicsSolverType dyn_solver = FeasShoot,
+                      const EqualitySolverType term_solver = LuNull);
   virtual ~SolverFDDP();
 
   /**
@@ -165,6 +173,20 @@ class SolverFDDP : public SolverAbstract {
   virtual void backwardPass();
 
   /**
+   * @brief Run the batch pass to account for its constraints
+   *
+   * Update the direction and feed-forward term to account for the terminal
+   * constraint. To do so, we first compute the unscaled search direction
+   * accounting for the terminal constraint.
+   */
+  void batchPass();
+
+  /**
+   * @brief Update search direction associated with the batch's constraints
+   */
+  void updateDir();
+
+  /**
    * @brief Compute the linear-quadratic approximation of the control
    * action-value function
    *
@@ -175,6 +197,16 @@ class SolverFDDP : public SolverAbstract {
   virtual void computeActionValueFunction(
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model,
       const std::shared_ptr<ActionDataAbstract>& data);
+
+  /**
+   * @brief Compute the linear-quadratic approximation of the control
+   * action-value function associated to the batch's constraints
+   *
+   * @param[in] t      Time instance
+   * @param[in] data   Action data in the given time instance
+   */
+  virtual void computeBatchActionValueFunction(
+      const std::size_t t, const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief Compute the feedforward and feedback terms (control policy) computed
@@ -193,6 +225,15 @@ class SolverFDDP : public SolverAbstract {
   virtual void computePolicy(const std::size_t t);
 
   /**
+   * @brief Compute the feedforward and feedback terms (control policy)
+   * associated to the batch's constraints.
+   *
+   * Note that if the Cholesky decomposition fails, then we re-start the
+   * backward pass and increase the state and control regularization values.
+   */
+  virtual void computeBatchPolicy(const std::size_t t);
+
+  /**
    * @brief Compute the linear-quadratic approximation of the value function
    *
    * This function is called in the backward pass after updating the local
@@ -203,6 +244,17 @@ class SolverFDDP : public SolverAbstract {
    */
   virtual void computeValueFunction(
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
+
+  /**
+   * @brief Compute the linear-quadratic approximation of the value function
+   * associated to the batch's constraints
+   *
+   * This function is called in the backward pass after updating the local
+   * action-value and policy functions.
+   *
+   * @param[in] t  Time instance
+   */
+  virtual void computeBatchValueFunction(const std::size_t t);
 
   /**
    * @brief Perform a linear rollout give the current control policy
@@ -267,22 +319,14 @@ class SolverFDDP : public SolverAbstract {
   void decreaseRegularization();
 
   /**
-   * @brief Set the dynamic solver used for handling the dynamics constraints
-   *
-   * It is worth noting that the default solver is the Feasibility-Driven DDP.
-   * When we enable parallelization, this strategy is not necessarily the faster
-   * one for medium to large systems.
-   *
-   * @param[in] type  Type of dynamics solver
-   * @param[in] Tshoot  Number of nodes per each shooting interval
-   */
-  void set_dynamics_solver(const DynamicsSolverType type,
-                           const std::size_t Tshoot = 0);
-
-  /**
    * @brief Return the type of solver used for handling the dynamics constraints
    */
   DynamicsSolverType get_dynamics_solver() const;
+
+  /**
+   * @brief Return the type of solver used for handling the terminal constraints
+   */
+  EqualitySolverType get_terminal_solver() const;
 
   /**
    * @brief Return the set of step lengths using by the line-search procedure
@@ -437,6 +481,76 @@ class SolverFDDP : public SolverAbstract {
   const std::vector<Eigen::VectorXd>& get_dus() const;
 
   /**
+   * @brief Return the Hessian of the Value function \f$V_{\mathbf{xc}_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Vxc() const;
+
+  /**
+   * @brief Return the Hessian of the Hamiltonian function
+   * \f$\mathbf{Q}_{\mathbf{xc}_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Qxc() const;
+
+  /**
+   * @brief Return the Hessian of the Hamiltonian function
+   * \f$\mathbf{Q}_{\mathbf{uc}_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Quc() const;
+
+  /**
+   * @brief Return the linear update in \f$\delta\mathbf{X}_{c_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_dXc() const;
+
+  /**
+   * @brief Return the linear update in \f$\delta\mathbf{U}_{c_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_dUc() const;
+
+  /**
+   * @brief Return the feedforward gains \f$\mathbf{K}_{c_s}\f$
+   */
+  const std::vector<Eigen::MatrixXd>& get_Kc() const;
+
+  /**
+   * @brief Return the Jacobian of the terminal constraint gains
+   * \f$\delta\mathbf{H}_{c}\f$
+   */
+  const Eigen::MatrixXd& get_dHc() const;
+
+  /**
+   * @brief Return the bias term of the terminal constraint gains
+   * \f$\mathbf{h}_{c}\f$
+   */
+  const Eigen::VectorXd& get_hc() const;
+
+  /**
+   * @brief Return the next terminal-constraint multiplier
+   * \f$\boldsymbol{\beta}^+\f$
+   */
+  const Eigen::VectorXd& get_beta_plus() const;
+
+  /**
+   * @brief Set the dynamic solver used for handling the dynamics constraints
+   *
+   * It is worth noting that the default solver is the Feasibility-Driven DDP.
+   * When we enable parallelization, this strategy is not necessarily the faster
+   * one for medium to large systems.
+   *
+   * @param[in] type  Type of dynamics solver
+   * @param[in] Tshoot  Number of nodes per each shooting interval
+   */
+  void set_dynamics_solver(const DynamicsSolverType type,
+                           const std::size_t Tshoot = 0);
+
+  /**
+   * @brief Set the type of solver used for handling the terminal constraints
+   *
+   * @param[in] type  Type of terminal solver
+   */
+  void set_terminal_solver(const EqualitySolverType type);
+
+  /**
    * @brief Modify the set of step lengths using by the line-search procedure
    */
   void set_alphas(const std::vector<double>& alphas);
@@ -523,7 +637,8 @@ class SolverFDDP : public SolverAbstract {
    */
   void allocateData();
 
-  DynamicsSolverType dyn_solver_;  //!< Type of dynamics solver
+  DynamicsSolverType dyn_solver_;   //!< Type of dynamics solver
+  EqualitySolverType term_solver_;  //!< Type of terminal solver
   std::vector<double>
       alphas_;  //!< Set of step lengths using by the line-search procedure
   double reg_incfactor_;  //!< Regularization factor used to increase the
@@ -606,6 +721,39 @@ class SolverFDDP : public SolverAbstract {
   std::vector<Eigen::VectorXd>
       Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each
               //!< running node
+
+  std::size_t dHc_rank_;  //!< Rank of the Jacobian of the terminal constraint
+  std::vector<Eigen::MatrixXd>
+      Vxc_;  //!< Gradient of the Value function \f$\mathbf{V_{xc}}\f$
+             //!< associated to the terminal constraint
+  std::vector<Eigen::MatrixXd>
+      Qxc_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xc}}\f$ associated to
+             //!< the terminal constraint
+  std::vector<Eigen::MatrixXd>
+      Quc_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{uc}}\f$ associated to
+             //!< the terminal constraint
+  std::vector<Eigen::MatrixXd> dXc_;  //!< Linear state direction (size T + 1)
+                                      //!< associated to the terminal constraint
+  std::vector<Eigen::MatrixXd> dUc_;  //!< Linear control direction (size T)
+                                      //!< associated to the terminal constraint
+  std::vector<Eigen::MatrixXd> Kc_;   //!< Feed-forward terms \f$\mathbf{K_c}\f$
+                                      //!< associated to the terminal constraint
+  Eigen::MatrixXd dHc_;               //!< Jacobian of the terminal constraint
+  Eigen::VectorXd hc_;                //!< Bias term of the terminal constraint
+  Eigen::MatrixXd YZc_;
+  Eigen::VectorXd Yhc_;
+  Eigen::MatrixXd dHcY_;
+  Eigen::MatrixXd YdHcY_;
+  Eigen::VectorXd
+      beta_plus_;  //!< Next value of the terminal-constraint multiplier
+  Eigen::LLT<Eigen::MatrixXd>
+      YdHcY_llt_;  //!< Cholesky LLT solver for the terminal constraint
+  Eigen::FullPivLU<Eigen::MatrixXd>
+      dHc_lu_;  //!< Full-pivot LU solvers used for computing the span and
+                //!< nullspace matrices of the terminal constraint
+  Eigen::ColPivHouseholderQR<Eigen::MatrixXd>
+      dHc_qr_;  //!< Column-pivot QR solvers used for computing the span and
+                //!< nullspace matrices of the terminal constraint
 
   DEPRECATED(
       "Do not use this member",
