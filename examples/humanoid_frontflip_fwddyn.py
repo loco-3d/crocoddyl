@@ -57,7 +57,6 @@ for i in range(solver.problem.T):
         )
     )
 us = solver.problem.quasiStatic(xs[:-1])
-# us = solver.problem.quasiStatic([np.concatenate([q0, np.zeros(robot_model.nv)])] * solver.problem.T)
 
 # print("*** SOLVE (FeasShoot) ***")
 # solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)

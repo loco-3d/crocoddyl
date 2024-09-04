@@ -87,9 +87,11 @@ print("Terminal state:", solver.xs[-1])
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(
-        log.xs, [u[state.nv :] for u in log.us], figIndex=1, show=False
+    xs, us = (
+        solver.xs,
+        [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
     )
+    crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )

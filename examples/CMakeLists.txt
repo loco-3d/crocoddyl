@@ -17,9 +17,9 @@ set(${PROJECT_NAME}_EXAMPLES_PYTHON
     humanoid_frontflip_invdyn
     humanoid_manipulation_ubound
     humanoid_manipulation
+    humanoid_taichi
     humanoid_monkey_bar_fwddyn
     humanoid_monkey_bar_invdyn
-    humanoid_taichi
     humanoid_walking_on_hands_fwddyn
     humanoid_walking_on_hands_invdyn
     lqr_fwddyn

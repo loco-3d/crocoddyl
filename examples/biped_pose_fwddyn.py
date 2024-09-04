@@ -130,6 +130,7 @@ if WITHPLOT:
         log.grads,
         log.stops,
         log.steps,
+        figTitle="CoM tracking",
         figIndex=3,
         show=True,
     )

@@ -89,6 +89,7 @@ problem = crocoddyl.ShootingProblem(
     np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel
 )
 solver = crocoddyl.SolverIntro(problem)
+
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:

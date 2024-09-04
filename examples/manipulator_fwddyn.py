@@ -75,7 +75,6 @@ T = 100
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverFDDP(problem)
 
-
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
