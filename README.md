@@ -55,6 +55,13 @@ If you want to learn more about **Crocoddyl** and its solvers, we suggest readin
 
 **Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.). Below, there are different ways to install Crocoddyl.
 
+### <img src="https://aur.archlinux.org/static/images/favicon.ico" height="18" /> On ArchLinux
+
+With your favorite AUR helper, eg. paru:
+```bash
+    paru -Syu crocoddyl
+```
+
 ### :dragon: From <img src="https://s3.amazonaws.com/conda-dev/conda_logo.svg" height="18">
 
 Just run the following command in the terminal:
