@@ -1,5 +1,5 @@
 [tool.ruff]
-extend-exclude = ["cmake"]
+extend-exclude = ["*.ipynb", "cmake"]
 
 [tool.ruff.lint]
 extend-ignore = ["RUF012", "UP036"]
