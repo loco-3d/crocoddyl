@@ -70,6 +70,16 @@ Just run the following command in the terminal:
 ```
 Conda installation supports [![conda install](https://anaconda.org/conda-forge/crocoddyl/badges/platforms.svg)](https://anaconda.org/conda-forge/crocoddyl).
 
+### <img src="https://avatars.githubusercontent.com/u/487568" height="18" /> From Nix
+
+`crocoddyl` & `python3Packages.crocoddyl` are available in [nixpkgs](https://github.com/NixOS/nixpkgs/).
+
+This repository is also a flake, so you may:
+- run a python shell with crocoddyl: `nix run github:loco-3d/crocoddyl`
+- use it in your own flake: `crocoddyl.url = "github:loco-3d/crocoddyl";`
+
+The build cache use by CI and developers is [gepetto.cachix.org](https://app.cachix.org/cache/gepetto)
+
 ### :snake: From <img src="https://res.cloudinary.com/practicaldev/image/fetch/s--4-K6Sjm4--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://cdn-images-1.medium.com/max/1600/1%2A_Wkc-WkNu6GJAAQ26jXZOg.png" height="22">
 
 Just run the following command in the terminal:
