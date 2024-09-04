@@ -7,6 +7,7 @@
 <a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/"><img src="https://img.shields.io/badge/docs-online-brightgreen" alt="Documentation"/></a>
 <a href="https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel"><img src="https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg">
 <a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/"><img src="https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg">
+<a href="https://repology.org/project/crocoddyl/versions"><img src="https://repology.org/badge/version-for-repo/aur/crocoddyl.svg" alt="AUR package"></a>
 <a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg">
 <a href="https://pypi.org/project/crocoddyl/"><img src="https://badge.fury.io/py/crocoddyl.svg">
 <a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg">
