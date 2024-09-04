@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Ignore ruff issues in ipython notebook files in https://github.com/loco-3d/crocoddyl/pull/1297
 * Improved efficiency for computing impulse-dynamics derivatives in https://github.com/loco-3d/crocoddyl/pull/1294
 * Fixed bug of wrench cone fields not being updated with setters in https://github.com/loco-3d/crocoddyl/pull/1274
 * Replaced parent by parentJoint (which was introduced in Pinocchio 3) in https://github.com/loco-3d/crocoddyl/pull/1271
