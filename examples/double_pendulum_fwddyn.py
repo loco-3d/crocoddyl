@@ -7,10 +7,7 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils.pendulum import (
-    ActuationModelDoublePendulum,
-    CostModelDoublePendulum,
-)
+from crocoddyl.utils.pendulum import ActuationModelDoublePendulum
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
@@ -18,44 +15,42 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the double pendulum model
 pendulum = example_robot_data.load("double_pendulum")
-model = pendulum.model
 
-state = crocoddyl.StateMultibody(model)
+# Creating the state and actuaction models
+state = crocoddyl.StateMultibody(pendulum.model)
 actuation = ActuationModelDoublePendulum(state, actLink=1)
+nu, dt = actuation.nu, 1e-2
 
-nu = actuation.nu
-runningCostModel = crocoddyl.CostModelSum(state, nu)
-terminalCostModel = crocoddyl.CostModelSum(state, nu)
-
-xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
+# Defining the residuals, costs, and constraints
+target_state = state.zero()
+goalResidual = crocoddyl.ResidualModelState(state, target_state, nu)
+xResidual = crocoddyl.ResidualModelState(state, target_state, nu)
 xActivation = crocoddyl.ActivationModelQuad(state.ndx)
-uResidual = crocoddyl.ResidualModelControl(state, nu)
+uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
-xPendCost = CostModelDoublePendulum(
-    state, crocoddyl.ActivationModelWeightedQuad(np.array([1.0] * 4 + [0.1] * 2)), nu
-)
+xGoalConstraint = crocoddyl.ConstraintModelResidual(state, goalResidual)
 
-dt = 1e-2
+# Adding the costs and constraints
+runningCosts = crocoddyl.CostModelSum(state, nu)
+terminalCosts = crocoddyl.CostModelSum(state, nu)
+terminalConstraints = crocoddyl.ConstraintModelManager(state, nu)
+runningCosts.addCost("uReg", uRegCost, 1e-4 / dt)
+runningCosts.addCost("xGoal", xRegCost, 1e-5 / dt)
+terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
-runningCostModel.addCost("uReg", uRegCost, 1e-4 / dt)
-runningCostModel.addCost("xGoal", xPendCost, 1e-5 / dt)
-terminalCostModel.addCost("xGoal", xPendCost, 100.0)
-
+# Creating the running and terminal models
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, runningCostModel
-    ),
-    dt,
+    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCostModel
+        state, actuation, terminalCosts, terminalConstraints
     ),
     dt,
 )
 
-# Creating the shooting problem and the FDDP solver
+# Creating the shooting problem and the OC solver
 T = 100
 x0 = np.array([3.14, 0.0, 0.0, 0.0])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
@@ -70,9 +65,22 @@ if WITHPLOT:
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-# Solving the problem with the FDDP solver
-solver.th_minImprove = 1e-3
-solver.solve([], [], 200)
+# Solving the problem with the OC solver
+print("*** SOLVE (FeasShoot) ***")
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
+solver.solve([], [], 300)
+print("*** SOLVE (MultiShoot) ***")
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
+solver.solve([], [], 300)
+Ts = int(solver.problem.T / 3)
+print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
+solver.solve([], [], 300)
+
+# Printing the terminal state
+np.set_printoptions(precision=4, suppress=True)
+print("Target state:", target_state)
+print("Terminal state:", solver.xs[-1])
 
 # Plotting the entire motion
 if WITHPLOT:

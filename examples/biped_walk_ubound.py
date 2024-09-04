@@ -16,6 +16,9 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Creating the lower-body part of Talos
 talos_legs = example_robot_data.load("talos_legs")
+lims = talos_legs.model.effortLimit
+lims *= 0.5  # reduced artificially the torque limits
+talos_legs.model.effortLimit = lims
 
 # Defining the initial state of the robot
 q0 = talos_legs.model.referenceConfigurations["half_sitting"].copy()
@@ -25,7 +28,7 @@ x0 = np.concatenate([q0, v0])
 # Setting up the 3d walking problem
 rightFoot = "right_sole_link"
 leftFoot = "left_sole_link"
-gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot, fwddyn=False)
+gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
 
 # Setting up all tasks
 GAITPHASES = [
@@ -34,17 +37,8 @@ GAITPHASES = [
             "stepLength": 0.6,
             "stepHeight": 0.1,
             "timeStep": 0.03,
-            "stepKnots": 15,
-            "supportKnots": 4,
-        }
-    },
-    {
-        "jumping": {
-            "jumpHeight": 0.1,
-            "jumpLength": [0.0, 0.3, 0.0],
-            "timeStep": 0.03,
-            "groundKnots": 9,
-            "flyingKnots": 6,
+            "stepKnots": 35,
+            "supportKnots": 10,
         }
     },
     {
@@ -52,8 +46,26 @@ GAITPHASES = [
             "stepLength": 0.6,
             "stepHeight": 0.1,
             "timeStep": 0.03,
-            "stepKnots": 15,
-            "supportKnots": 2,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
+        }
+    },
+    {
+        "walking": {
+            "stepLength": 0.6,
+            "stepHeight": 0.1,
+            "timeStep": 0.03,
+            "stepKnots": 35,
+            "supportKnots": 10,
         }
     },
 ]
@@ -63,7 +75,7 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == "walking":
             # Creating a walking problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverBoxFDDP(
                 gait.createWalkingProblem(
                     x0,
                     value["stepLength"],
@@ -73,22 +85,9 @@ for i, phase in enumerate(GAITPHASES):
                     value["supportKnots"],
                 )
             )
-        elif key == "jumping":
-            # Creating a jumping problem
-            solver[i] = crocoddyl.SolverIntro(
-                gait.createJumpingProblem(
-                    x0,
-                    value["jumpHeight"],
-                    value["jumpLength"],
-                    value["timeStep"],
-                    value["groundKnots"],
-                    value["flyingKnots"],
-                )
-            )
-        solver[i].th_stop = 1e-7
+            solver[i].th_stop = 1e-7
 
     # Added the callback functions
-    print("*** SOLVE " + key + " ***")
     if WITHPLOT:
         solver[i].setCallbacks(
             [
@@ -99,10 +98,21 @@ for i, phase in enumerate(GAITPHASES):
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
-    # Solving the problem with the solver
+    # Solving the problem with the OC solver
     xs = [x0] * (solver[i].problem.T + 1)
     us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
+    print("*** SOLVE {key} (FeasShoot) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
     solver[i].solve(xs, us, 100, False)
+    print("*** SOLVE {key} (MultiShoot) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
+    solver[i].solve(xs, us, 100, False)
+    Ts = int(solver[i].problem.T / 3)
+    print("*** SOLVE {key} (HybridShoot: {Ts}) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
+    solver[i].solve(xs, us, 100, False)
+    if i != len(GAITPHASES) - 1:
+        print()
 
     # Defining the final state as initial one for the next phase
     x0 = solver[i].xs[-1]

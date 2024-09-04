@@ -24,9 +24,7 @@ x0 = np.concatenate([q0, v0])
 
 # Setting up the 3d walking problem
 lfFoot, rfFoot, lhFoot, rhFoot = "LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"
-gait = SimpleQuadrupedalGaitProblem(
-    anymal.model, lfFoot, rfFoot, lhFoot, rhFoot, fwddyn=False
-)
+gait = SimpleQuadrupedalGaitProblem(anymal.model, lfFoot, rfFoot, lhFoot, rhFoot)
 
 # Setting up all tasks
 GAITPHASES = [
@@ -82,7 +80,7 @@ for i, phase in enumerate(GAITPHASES):
     for key, value in phase.items():
         if key == "walking":
             # Creating a walking problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createWalkingProblem(
                     x0,
                     value["stepLength"],
@@ -94,7 +92,7 @@ for i, phase in enumerate(GAITPHASES):
             )
         elif key == "trotting":
             # Creating a trotting problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createTrottingProblem(
                     x0,
                     value["stepLength"],
@@ -106,7 +104,7 @@ for i, phase in enumerate(GAITPHASES):
             )
         elif key == "pacing":
             # Creating a pacing problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createPacingProblem(
                     x0,
                     value["stepLength"],
@@ -118,7 +116,7 @@ for i, phase in enumerate(GAITPHASES):
             )
         elif key == "bounding":
             # Creating a bounding problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createBoundingProblem(
                     x0,
                     value["stepLength"],
@@ -130,7 +128,7 @@ for i, phase in enumerate(GAITPHASES):
             )
         elif key == "jumping":
             # Creating a jumping problem
-            solver[i] = crocoddyl.SolverIntro(
+            solver[i] = crocoddyl.SolverFDDP(
                 gait.createJumpingProblem(
                     x0,
                     value["jumpHeight"],
@@ -142,7 +140,6 @@ for i, phase in enumerate(GAITPHASES):
             )
 
     # Added the callback functions
-    print("*** SOLVE " + key + " ***")
     if WITHPLOT:
         solver[i].setCallbacks(
             [
@@ -153,24 +150,28 @@ for i, phase in enumerate(GAITPHASES):
     else:
         solver[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
-    # Solving the problem with the solver
+    # Solving the problem with the OC solver
     xs = [x0] * (solver[i].problem.T + 1)
     us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
+    print("*** SOLVE {key} (FeasShoot) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
     solver[i].solve(xs, us, 100, False)
+    print("*** SOLVE {key} (MultiShoot) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
+    solver[i].solve(xs, us, 100, False)
+    Ts = int(solver[i].problem.T / 3)
+    print("*** SOLVE {key} (HybridShoot: {Ts}) ***".format_map(locals()))
+    solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
+    solver[i].solve(xs, us, 100, False)
+    if i != len(GAITPHASES) - 1:
+        print()
 
     # Defining the final state as initial one for the next phase
     x0 = solver[i].xs[-1]
 
 # Display the entire motion
 if WITHDISPLAY:
-    try:
-        import gepetto
-
-        gepetto.corbaserver.Client()
-        cameraTF = [2.0, 2.68, 0.84, 0.2, 0.62, 0.72, 0.22]
-        display = crocoddyl.GepettoDisplay(anymal, 4, 4, cameraTF)
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(anymal)
+    display = crocoddyl.MeshcatDisplay(anymal)
     display.rate = -1
     display.freq = 1
     while True:

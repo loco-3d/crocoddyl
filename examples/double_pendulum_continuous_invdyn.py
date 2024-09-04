@@ -14,21 +14,22 @@ WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the double pendulum model
-pendulum = example_robot_data.load("double_pendulum")
+pendulum = example_robot_data.load("double_pendulum_continuous")
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(pendulum.model)
 actuation = ActuationModelDoublePendulum(state, actLink=1)
+# actuation = crocoddyl.ActuationModelFull(state)
 nu, dt = state.nv, 1e-2
 
 # Defining the residuals, costs, and constraints
 target_state = state.zero()
 goalResidual = crocoddyl.ResidualModelState(state, target_state, nu)
 xResidual = crocoddyl.ResidualModelState(state, target_state, nu)
-xActivation = crocoddyl.ActivationModelQuad(state.ndx)
 uResidual = crocoddyl.ResidualModelJointEffort(
     state, actuation, np.zeros(actuation.nu), nu, False
 )
+xActivation = crocoddyl.ActivationModelQuad(state.ndx)
 xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
 uRegCost = crocoddyl.CostModelResidual(state, uResidual)
 xGoalConstraint = crocoddyl.ConstraintModelResidual(state, goalResidual)
@@ -42,6 +43,7 @@ runningCosts.addCost("xGoal", xRegCost, 1e-5 / dt)
 terminalCosts.addCost("xGoal", xRegCost, 1e4)
 terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
+# Creating the running and terminal models
 runningModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCosts), dt
 )
@@ -54,7 +56,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the OC solver
 T = 100
-x0 = np.array([3.14, 0.0, 0.0, 0.0])
+x0 = np.array([0.0, -1.0, 0.0, -1.0, 0.0, 0.0])
 problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 solver = crocoddyl.SolverIntro(problem)
 if WITHPLOT:
@@ -67,7 +69,7 @@ if WITHPLOT:
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
-# Solving the problem with the OC solver
+# Solving the problem with the solver
 print("*** SOLVE (FeasShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
 solver.solve([], [], 300)
@@ -87,9 +89,7 @@ print("Terminal state:", solver.xs[-1])
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(
-        log.xs, [u[state.nv :] for u in log.us], figIndex=1, show=False
-    )
+    crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )
