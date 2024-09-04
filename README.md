@@ -9,6 +9,8 @@
 <a href="https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/"><img src="https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg">
 <a href="https://repology.org/project/crocoddyl/versions"><img src="https://repology.org/badge/version-for-repo/aur/crocoddyl.svg" alt="AUR package"></a>
 <a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://img.shields.io/conda/vn/conda-forge/crocoddyl.svg">
+<a href="https://repology.org/project/crocoddyl/versions"><img src="https://repology.org/badge/version-for-repo/nix_stable_24_05/crocoddyl.svg" alt="nixpkgs stable 24.05 package"></a>
+<a href="https://repology.org/project/crocoddyl/versions"><img src="https://repology.org/badge/version-for-repo/nix_unstable/crocoddyl.svg" alt="nixpkgs unstable package"></a>
 <a href="https://pypi.org/project/crocoddyl/"><img src="https://badge.fury.io/py/crocoddyl.svg">
 <a href="https://anaconda.org/conda-forge/crocoddyl"><img src="https://anaconda.org/conda-forge/crocoddyl/badges/downloads.svg">
 <a href="https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext"><img src="https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat">
