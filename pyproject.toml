@@ -2,7 +2,7 @@
 extend-exclude = ["cmake"]
 
 [tool.ruff.lint]
-extend-ignore = ["RUF012"]
+extend-ignore = ["RUF012", "UP036"]
 extend-select = ["I", "NPY", "RUF", "UP", "W"]
 
 [tool.ruff.lint.isort]

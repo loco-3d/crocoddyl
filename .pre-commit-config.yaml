@@ -8,8 +8,6 @@ repos:
     args:
     - --fix
     - --exit-non-zero-on-fix
-    - --ignore
-    - UP036
   - id: ruff-format
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: v0.6.13
