@@ -130,7 +130,10 @@ class DisplayAbstract(ABC):
                     thrusters.append(model.differential.actuation.thrusters)
         for n in frameNames:
             frameId = self.robot.model.getFrameId(n)
-            parentId = self.robot.model.frames[frameId].parentJoint
+            if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+                parentId = self.robot.model.frames[frameId].parentJoint
+            else:
+                parentId = self.robot.model.frames[frameId].parent
             self.activeContacts[str(parentId)] = True
             self.frictionMu[str(parentId)] = 0.7
             self.frameTrajNames.append(str(frameId))
@@ -340,7 +343,10 @@ class DisplayAbstract(ABC):
         fc = []
         for key, contact in contact_data.todict().items():
             if contact_model[key].active:
-                joint = state.pinocchio.frames[contact.frame].parentJoint
+                if tuple(map(int, pinocchio.__version__.split("."))) >= (3, 0, 0):
+                    joint = state.pinocchio.frames[contact.frame].parentJoint
+                else:
+                    joint = state.pinocchio.frames[contact.frame].parent
                 oMf = contact.pinocchio.oMi[joint] * contact.jMf
                 fiMo = pinocchio.SE3(
                     contact.pinocchio.oMi[joint].rotation.T,

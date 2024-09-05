@@ -51,8 +51,13 @@ void ImpulseModel6DTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ImpulseDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parentJoint;
+#else
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parent;
+#endif
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);

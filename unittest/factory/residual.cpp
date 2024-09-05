@@ -89,6 +89,7 @@ ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   boost::shared_ptr<pinocchio::GeometryModel> geometry =
       boost::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
@@ -102,6 +103,21 @@ ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
               .parentJoint,
           std::make_shared<hpp::fcl::Sphere>(0), frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
+#else
+  pinocchio::GeomIndex ig_frame =
+      geometry->addGeometryObject(pinocchio::GeometryObject(
+          "frame", frame_index,
+          state->get_pinocchio()->frames[frame_index].parent,
+          std::make_shared<hpp::fcl::Sphere>(0), frame_SE3));
+  pinocchio::GeomIndex ig_obs =
+      geometry->addGeometryObject(pinocchio::GeometryObject(
+          "obs", state->get_pinocchio()->getFrameId("universe"),
+          state->get_pinocchio()
+              ->frames[state->get_pinocchio()->getFrameId("universe")]
+              .parent,
+          std::make_shared<hpp::fcl::Sphere>(0), frame_SE3_obstacle));
+  geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
+#endif
 #endif  // PINOCCHIO_WITH_HPP_FCL
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
@@ -147,9 +163,15 @@ ResidualModelFactory::create(ResidualModelTypes::Type residual_type,
       break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
     case ResidualModelTypes::ResidualModelPairCollision:
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
       residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(
           state, nu, geometry, 0,
           state->get_pinocchio()->frames[frame_index].parentJoint);
+#else
+      residual = boost::make_shared<crocoddyl::ResidualModelPairCollision>(
+          state, nu, geometry, 0,
+          state->get_pinocchio()->frames[frame_index].parent);
+#endif
       break;
 #endif  // PINOCCHIO_WITH_HPP_FCL
     default:

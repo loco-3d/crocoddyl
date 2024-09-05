@@ -109,8 +109,13 @@ void ContactModel1DTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parentJoint;
+#else
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parent;
+#endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
