@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Run Python code to get the version of pinocchio
+VERSION=$(python -c "import pinocchio; print(pinocchio.__version__)" 2>/dev/null)
+# Check if the version matches
+EXPECTED_VERSION="3.2.0"
+if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+    # Print warning message in yellow
+    echo -e "\033[33mWarning: Pinocchio version is $VERSION, but it is expected $EXPECTED_VERSION.\033[0m"
+else
+    echo "pinocchio version: $VERSION"
+fi
+
 LOGPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 EXAMPLEPATH=${LOGPATH}/..
 

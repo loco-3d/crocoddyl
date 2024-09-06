@@ -1101,7 +1101,10 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
         self.fXj = (
             model.state.pinocchio.frames[model._frame_id].placement.inverse().action
         )
-        self.joint = model.state.pinocchio.frames[model._frame_id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            self.joint = model.state.pinocchio.frames[model._frame_id].parentJoint
+        else:
+            self.joint = model.state.pinocchio.frames[model._frame_id].parent
 
 
 class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
@@ -1151,7 +1154,10 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
             data.a0[0] = np.dot(np.dot(self.Raxis, oRf), data.a0_local)[2]
 
     def calcDiff(self, data, x):
-        joint = self.state.pinocchio.frames[self.id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            joint = self.state.pinocchio.frames[self.id].parentJoint
+        else:
+            joint = self.state.pinocchio.frames[self.id].parent
         (
             v_partial_dq,
             a_partial_dq,
@@ -1271,7 +1277,10 @@ class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
             data.a0[:] = np.dot(oRf, data.a0_local)
 
     def calcDiff(self, data, x):
-        joint = self.state.pinocchio.frames[self.id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            joint = self.state.pinocchio.frames[self.id].parentJoint
+        else:
+            joint = self.state.pinocchio.frames[self.id].parent
         (
             v_partial_dq,
             a_partial_dq,
@@ -1425,7 +1434,10 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
             data.a0[:] = data.lwaMl.act(data.a0_local).vector
 
     def calcDiff(self, data, x):
-        joint = self.state.pinocchio.frames[self.id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            joint = self.state.pinocchio.frames[self.id].parentJoint
+        else:
+            joint = self.state.pinocchio.frames[self.id].parent
         (
             v_partial_dq,
             a_partial_dq,
@@ -1536,7 +1548,10 @@ class Impulse3DModelDerived(crocoddyl.ImpulseModelAbstract):
             )
 
     def calcDiff(self, data, x):
-        joint = self.state.pinocchio.frames[self.id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            joint = self.state.pinocchio.frames[self.id].parentJoint
+        else:
+            joint = self.state.pinocchio.frames[self.id].parent
         v_partial_dq, _ = pinocchio.getJointVelocityDerivatives(
             self.state.pinocchio, data.pinocchio, joint, pinocchio.ReferenceFrame.LOCAL
         )
@@ -1613,7 +1628,10 @@ class Impulse6DModelDerived(crocoddyl.ImpulseModelAbstract):
             data.Jc[:, :] = np.dot(data.lwaMl.toActionMatrix(), data.fJf)
 
     def calcDiff(self, data, x):
-        joint = self.state.pinocchio.frames[self.id].parentJoint
+        if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
+            joint = self.state.pinocchio.frames[self.id].parentJoint
+        else:
+            joint = self.state.pinocchio.frames[self.id].parent
         v_partial_dq, _ = pinocchio.getJointVelocityDerivatives(
             self.state.pinocchio, data.pinocchio, joint, pinocchio.ReferenceFrame.LOCAL
         )
