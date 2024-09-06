@@ -26,12 +26,14 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
   // Create the testing and KKT solvers
   SolverFactory solver_factory;
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-      solver_factory.create(solver_type, model, model2, T);
+      solver_factory.create(solver_type, model, model2, modelT, T);
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
@@ -101,12 +103,14 @@ void test_solver_expected_improvement(SolverTypes::Type solver_type,
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
   // Create the testing and KKT solvers
   SolverFactory solver_factory;
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-      solver_factory.create(solver_type, model, model2, T);
+      solver_factory.create(solver_type, model, model2, modelT, T);
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
@@ -354,7 +358,7 @@ bool init_function() {
 
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
-         i < ActionModelTypes::ActionModelRandomLQR; ++i) {
+         i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
       if (SolverTypes::all[s] != SolverTypes::SolverIpopt) {
         register_solvers_againt_lqr_actions_unit_tests(
             SolverTypes::all[s], ActionModelTypes::all[i], T);
