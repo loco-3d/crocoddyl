@@ -27,17 +27,77 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverKKT:
       os << "SolverKKT";
       break;
-    case SolverTypes::SolverFDDP_SingleShoot:
-      os << "SolverFDDP_SingleShoot";
+    case SolverTypes::SolverFDDP_SingleShoot_LuNullTerm:
+      os << "SolverFDDP_SingleShoot_LuNullTerm";
       break;
-    case SolverTypes::SolverFDDP_FeasShoot:
-      os << "SolverFDDP_FeasShoot";
+    case SolverTypes::SolverFDDP_SingleShoot_QrNullTerm:
+      os << "SolverFDDP_SingleShoot_QrNullTerm";
       break;
-    case SolverTypes::SolverFDDP_MultiShoot:
-      os << "SolverFDDP_MultiShoot";
+    case SolverTypes::SolverFDDP_SingleShoot_SchurTerm:
+      os << "SolverFDDP_SingleShoot_SchurTerm";
       break;
-    case SolverTypes::SolverFDDP_HybridShoot:
-      os << "SolverFDDP_HybridShoot";
+    case SolverTypes::SolverFDDP_FeasShoot_LuNullTerm:
+      os << "SolverFDDP_FeasShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_FeasShoot_QrNullTerm:
+      os << "SolverFDDP_FeasShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_FeasShoot_SchurTerm:
+      os << "SolverFDDP_FeasShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_LuNullTerm:
+      os << "SolverFDDP_MultiShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_QrNullTerm:
+      os << "SolverFDDP_MultiShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_SchurTerm:
+      os << "SolverFDDP_MultiShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_LuNullTerm:
+      os << "SolverFDDP_HybridShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_QrNullTerm:
+      os << "SolverFDDP_HybridShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_SchurTerm:
+      os << "SolverFDDP_HybridShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_LuNullTerm:
+      os << "SolverIntro_SingleShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_QrNullTerm:
+      os << "SolverIntro_SingleShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_SchurTerm:
+      os << "SolverIntro_SingleShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_LuNullTerm:
+      os << "SolverIntro_FeasShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_QrNullTerm:
+      os << "SolverIntro_FeasShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_SchurTerm:
+      os << "SolverIntro_FeasShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_LuNullTerm:
+      os << "SolverIntro_MultiShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_QrNullTerm:
+      os << "SolverIntro_MultiShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_SchurTerm:
+      os << "SolverIntro_MultiShoot_SchurTerm";
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_LuNullTerm:
+      os << "SolverIntro_HybridShoot_LuNullTerm";
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_QrNullTerm:
+      os << "SolverIntro_HybridShoot_QrNullTerm";
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_SchurTerm:
+      os << "SolverIntro_HybridShoot_SchurTerm";
       break;
     case SolverTypes::SolverBoxFDDP_SingleShoot:
       os << "SolverBoxFDDP_SingleShoot";
@@ -50,18 +110,6 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
       break;
     case SolverTypes::SolverBoxFDDP_HybridShoot:
       os << "SolverBoxFDDP_HybridShoot";
-      break;
-    case SolverTypes::SolverIntro_SingleShoot:
-      os << "SolverIntro_SingleShoot";
-      break;
-    case SolverTypes::SolverIntro_FeasShoot:
-      os << "SolverIntro_FeasShoot";
-      break;
-    case SolverTypes::SolverIntro_MultiShoot:
-      os << "SolverIntro_MultiShoot";
-      break;
-    case SolverTypes::SolverIntro_HybridShoot:
-      os << "SolverIntro_HybridShoot";
       break;
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
@@ -104,21 +152,125 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
     case SolverTypes::SolverKKT:
       solver = std::make_shared<crocoddyl::SolverKKT>(problem);
       break;
-    case SolverTypes::SolverFDDP_SingleShoot:
+    case SolverTypes::SolverFDDP_SingleShoot_LuNullTerm:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
-          problem, crocoddyl::DynamicsSolverType::SingleShoot);
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::LuNull);
       break;
-    case SolverTypes::SolverFDDP_FeasShoot:
+    case SolverTypes::SolverFDDP_SingleShoot_QrNullTerm:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
-          problem, crocoddyl::DynamicsSolverType::FeasShoot);
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::QrNull);
       break;
-    case SolverTypes::SolverFDDP_MultiShoot:
+    case SolverTypes::SolverFDDP_SingleShoot_SchurTerm:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
-          problem, crocoddyl::DynamicsSolverType::MultiShoot);
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::Schur);
       break;
-    case SolverTypes::SolverFDDP_HybridShoot:
+    case SolverTypes::SolverFDDP_FeasShoot_LuNullTerm:
       solver = boost::make_shared<crocoddyl::SolverFDDP>(
-          problem, crocoddyl::DynamicsSolverType::HybridShoot);
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverFDDP_FeasShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverFDDP_FeasShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverFDDP_MultiShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverFDDP_HybridShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverFDDP>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverIntro_SingleShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::SingleShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverIntro_FeasShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::FeasShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverIntro_MultiShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::MultiShoot,
+          crocoddyl::EqualitySolverType::Schur);
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_LuNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::LuNull);
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_QrNullTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::QrNull);
+      break;
+    case SolverTypes::SolverIntro_HybridShoot_SchurTerm:
+      solver = boost::make_shared<crocoddyl::SolverIntro>(
+          problem, crocoddyl::DynamicsSolverType::HybridShoot,
+          crocoddyl::EqualitySolverType::Schur);
       break;
     case SolverTypes::SolverBoxFDDP_SingleShoot:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
@@ -134,22 +286,6 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
       break;
     case SolverTypes::SolverBoxFDDP_HybridShoot:
       solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(
-          problem, crocoddyl::DynamicsSolverType::HybridShoot);
-      break;
-    case SolverTypes::SolverIntro_SingleShoot:
-      solver = boost::make_shared<crocoddyl::SolverIntro>(
-          problem, crocoddyl::DynamicsSolverType::SingleShoot);
-      break;
-    case SolverTypes::SolverIntro_FeasShoot:
-      solver = boost::make_shared<crocoddyl::SolverIntro>(
-          problem, crocoddyl::DynamicsSolverType::FeasShoot);
-      break;
-    case SolverTypes::SolverIntro_MultiShoot:
-      solver = boost::make_shared<crocoddyl::SolverIntro>(
-          problem, crocoddyl::DynamicsSolverType::MultiShoot);
-      break;
-    case SolverTypes::SolverIntro_HybridShoot:
-      solver = boost::make_shared<crocoddyl::SolverIntro>(
           problem, crocoddyl::DynamicsSolverType::HybridShoot);
       break;
 #ifdef CROCODDYL_WITH_IPOPT

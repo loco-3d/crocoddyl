@@ -21,18 +21,34 @@ namespace unittest {
 struct SolverTypes {
   enum Type {
     SolverKKT,
-    SolverFDDP_SingleShoot,
-    SolverFDDP_FeasShoot,
-    SolverFDDP_MultiShoot,
-    SolverFDDP_HybridShoot,
+    SolverFDDP_SingleShoot_LuNullTerm,
+    SolverFDDP_SingleShoot_QrNullTerm,
+    SolverFDDP_SingleShoot_SchurTerm,
+    SolverFDDP_FeasShoot_LuNullTerm,
+    SolverFDDP_FeasShoot_QrNullTerm,
+    SolverFDDP_FeasShoot_SchurTerm,
+    SolverFDDP_MultiShoot_LuNullTerm,
+    SolverFDDP_MultiShoot_QrNullTerm,
+    SolverFDDP_MultiShoot_SchurTerm,
+    SolverFDDP_HybridShoot_LuNullTerm,
+    SolverFDDP_HybridShoot_QrNullTerm,
+    SolverFDDP_HybridShoot_SchurTerm,
+    SolverIntro_SingleShoot_LuNullTerm,
+    SolverIntro_SingleShoot_QrNullTerm,
+    SolverIntro_SingleShoot_SchurTerm,
+    SolverIntro_FeasShoot_LuNullTerm,
+    SolverIntro_FeasShoot_QrNullTerm,
+    SolverIntro_FeasShoot_SchurTerm,
+    SolverIntro_MultiShoot_LuNullTerm,
+    SolverIntro_MultiShoot_QrNullTerm,
+    SolverIntro_MultiShoot_SchurTerm,
+    SolverIntro_HybridShoot_LuNullTerm,
+    SolverIntro_HybridShoot_QrNullTerm,
+    SolverIntro_HybridShoot_SchurTerm,
     SolverBoxFDDP_SingleShoot,
     SolverBoxFDDP_FeasShoot,
     SolverBoxFDDP_MultiShoot,
     SolverBoxFDDP_HybridShoot,
-    SolverIntro_SingleShoot,
-    SolverIntro_FeasShoot,
-    SolverIntro_MultiShoot,
-    SolverIntro_HybridShoot,
     SolverIpopt,
     NbSolverTypes
   };
@@ -50,6 +66,23 @@ struct SolverTypes {
     return v;
   }
   static const std::vector<Type> all;
+
+  static bool isSingleShoot(Type type) {
+    switch (type) {
+      case SolverFDDP_SingleShoot_LuNullTerm:
+      case SolverFDDP_SingleShoot_QrNullTerm:
+      case SolverFDDP_SingleShoot_SchurTerm:
+      case SolverIntro_SingleShoot_LuNullTerm:
+      case SolverIntro_SingleShoot_QrNullTerm:
+      case SolverIntro_SingleShoot_SchurTerm:
+      case SolverBoxFDDP_SingleShoot:
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, SolverTypes::Type type);

@@ -40,6 +40,17 @@ struct ActionModelTypes {
     return v;
   }
   static const std::vector<Type> all;
+
+  static bool hasTerminalConstraints(Type type) {
+    switch (type) {
+      case ActionModelRandomLQRwithTerminalConstraint:
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type);
