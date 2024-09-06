@@ -25,13 +25,15 @@ void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
   // Create the kkt solver
   SolverFactory factory;
   boost::shared_ptr<crocoddyl::SolverKKT> kkt =
       boost::static_pointer_cast<crocoddyl::SolverKKT>(
-          factory.create(SolverTypes::SolverKKT, model, model2, T));
+          factory.create(SolverTypes::SolverKKT, model, model2, modelT, T));
 
   // define some aliases
   const std::size_t ndx = kkt->get_ndx();
@@ -53,13 +55,15 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
   // Create the kkt solver
   SolverFactory factory;
   boost::shared_ptr<crocoddyl::SolverKKT> kkt =
       boost::static_pointer_cast<crocoddyl::SolverKKT>(
-          factory.create(SolverTypes::SolverKKT, model, model2, T));
+          factory.create(SolverTypes::SolverKKT, model, model2, modelT, T));
 
   // Generate the different state along the trajectory
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
@@ -104,14 +108,16 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
   // Create the testing and KKT solvers
   SolverFactory solver_factory;
   boost::shared_ptr<crocoddyl::SolverAbstract> solver =
-      solver_factory.create(solver_type, model, model2, T);
+      solver_factory.create(solver_type, model, model2, modelT, T);
   boost::shared_ptr<crocoddyl::SolverAbstract> kkt =
-      solver_factory.create(SolverTypes::SolverKKT, model, model2, T);
+      solver_factory.create(SolverTypes::SolverKKT, model, model2, modelT, T);
 
   // Get the pointer to the problem so we can create the equivalent kkt solver.
   const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =

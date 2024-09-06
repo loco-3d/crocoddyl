@@ -62,7 +62,8 @@ SolverFactory::~SolverFactory() {}
 boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
     SolverTypes::Type solver_type,
     boost::shared_ptr<crocoddyl::ActionModelAbstract> model,
-    boost::shared_ptr<crocoddyl::ActionModelAbstract> model2, size_t T) const {
+    boost::shared_ptr<crocoddyl::ActionModelAbstract> model2,
+    boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const {
   boost::shared_ptr<crocoddyl::SolverAbstract> solver;
   std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
       running_models;
@@ -76,7 +77,7 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
 
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(),
-                                                     running_models, model);
+                                                     running_models, modelT);
 
   switch (solver_type) {
     case SolverTypes::SolverKKT:
