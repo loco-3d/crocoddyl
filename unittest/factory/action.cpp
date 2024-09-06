@@ -44,6 +44,9 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
     case ActionModelTypes::ActionModelRandomLQR:
       os << "ActionModelRandomLQR";
       break;
+    case ActionModelTypes::ActionModelRandomLQRwithTerminalConstraint:
+      os << "ActionModelRandomLQRwithTerminalConstraint";
+      break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
       os << "ActionModelImpulseFwdDynamics_HyQ";
       break;
@@ -100,6 +103,22 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(
         case Terminal:
           action = boost::make_shared<crocoddyl::ActionModelLQR>(
               crocoddyl::ActionModelLQR::Random(8, 4));
+          break;
+      }
+      break;
+    case ActionModelTypes::ActionModelRandomLQRwithTerminalConstraint:
+      switch (instance) {
+        case First:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 2));
+          break;
+        case Second:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 4));
+          break;
+        case Terminal:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 4, 0, 2));
           break;
       }
       break;

@@ -26,6 +26,7 @@ struct ActionModelTypes {
     ActionModelLQRDriftFree,
     ActionModelLQR,
     ActionModelRandomLQR,
+    ActionModelRandomLQRwithTerminalConstraint,
     ActionModelImpulseFwdDynamics_HyQ,
     ActionModelImpulseFwdDynamics_Talos,
     NbActionModelTypes
