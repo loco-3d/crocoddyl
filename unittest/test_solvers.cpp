@@ -251,6 +251,64 @@ void test_solver_expected_improvement(SolverTypes::Type solver_type,
 
 //____________________________________________________________________________//
 
+void test_solver_convergence(SolverTypes::Type solver_type,
+                             ActionModelTypes::Type action_type, size_t T) {
+  // Create action models
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
+
+  // Create the testing and KKT solvers
+  SolverFactory solver_factory;
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, model, model2, modelT, T);
+
+  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+
+  // // Define the callback function
+  // std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+  // cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
+
+  // // Print the name of the action model for introspection
+  // solver->setCallbacks(cbs);
+  // std::cout << ActionModelTypes::all[action_type] << std::endl;
+
+  // Compute solve and check expected convergence and step lenght
+  solver->solve();
+  BOOST_CHECK_EQUAL(solver->get_iter(), 1);
+  BOOST_CHECK_EQUAL(solver->get_steplength(), 1.);
+
+  // Compute solve with random warmstarting and check expected convergence and
+  // step length
+  solver->solve(xs, us);
+  BOOST_CHECK_EQUAL(solver->get_iter(), 1);
+  BOOST_CHECK_EQUAL(solver->get_steplength(), 1.);
+
+  // Compute solve with regularization and check expected convergence
+  solver->solve(xs, us, 10, false, random_real_in_range<double>(10., 100.));
+  BOOST_CHECK_EQUAL(solver->get_steplength(), 1.);
+}
+
+//____________________________________________________________________________//
+
 void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   // Create action models
   std::shared_ptr<crocoddyl::ActionModelAbstract> model =
@@ -417,6 +475,8 @@ void register_solvers_againt_lqr_actions_unit_tests(
       boost::bind(&test_solver_gaps_evolution, solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_expected_improvement,
                                       solver_type, action_type, T)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_solver_convergence, solver_type, action_type, T)));
   framework::master_test_suite().add(ts);
 }
 
