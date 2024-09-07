@@ -20,8 +20,9 @@ using namespace crocoddyl::unittest;
 
 //____________________________________________________________________________//
 
-void test_search_direction(SolverTypes::Type solver_type,
-                           ActionModelTypes::Type action_type, size_t T) {
+void test_solver_compute_direction(SolverTypes::Type solver_type,
+                                   ActionModelTypes::Type action_type,
+                                   size_t T) {
   // Create action models
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
@@ -410,8 +411,8 @@ void register_solvers_againt_lqr_actions_unit_tests(
   test_name << "test_" << solver_type << "_against_lqr_action_" << action_type;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   std::cout << "Running " << test_name.str() << std::endl;
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_search_direction, solver_type, action_type, T)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_compute_direction,
+                                      solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(
       boost::bind(&test_solver_gaps_evolution, solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_expected_improvement,
