@@ -56,7 +56,8 @@ class SolverFactory {
   boost::shared_ptr<crocoddyl::SolverAbstract> create(
       SolverTypes::Type solver_type,
       boost::shared_ptr<crocoddyl::ActionModelAbstract> model,
-      boost::shared_ptr<crocoddyl::ActionModelAbstract> model2, size_t T) const;
+      boost::shared_ptr<crocoddyl::ActionModelAbstract> model2,
+      boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const;
 };
 
 }  // namespace unittest

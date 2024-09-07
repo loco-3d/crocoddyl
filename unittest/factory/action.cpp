@@ -44,6 +44,9 @@ std::ostream& operator<<(std::ostream& os, ActionModelTypes::Type type) {
     case ActionModelTypes::ActionModelRandomLQR:
       os << "ActionModelRandomLQR";
       break;
+    case ActionModelTypes::ActionModelRandomLQRwithTerminalConstraint:
+      os << "ActionModelRandomLQRwithTerminalConstraint";
+      break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:
       os << "ActionModelImpulseFwdDynamics_HyQ";
       break;
@@ -63,33 +66,60 @@ ActionModelFactory::ActionModelFactory() {}
 ActionModelFactory::~ActionModelFactory() {}
 
 boost::shared_ptr<crocoddyl::ActionModelAbstract> ActionModelFactory::create(
-    ActionModelTypes::Type type, bool secondInstance) const {
+    ActionModelTypes::Type type, Instance instance) const {
   boost::shared_ptr<crocoddyl::ActionModelAbstract> action;
   switch (type) {
     case ActionModelTypes::ActionModelUnicycle:
       action = boost::make_shared<crocoddyl::ActionModelUnicycle>();
       break;
     case ActionModelTypes::ActionModelLQRDriftFree:
-      if (secondInstance) {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, true);
-      } else {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, true);
+      switch (instance) {
+        case First:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, true);
+          break;
+        case Second:
+        case Terminal:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, true);
+          break;
       }
-      break;
     case ActionModelTypes::ActionModelLQR:
-      if (secondInstance) {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, false);
-      } else {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, false);
+      switch (instance) {
+        case First:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 2, false);
+          break;
+        case Second:
+        case Terminal:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(8, 4, false);
+          break;
       }
       break;
     case ActionModelTypes::ActionModelRandomLQR:
-      if (secondInstance) {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(
-            crocoddyl::ActionModelLQR::Random(8, 4));
-      } else {
-        action = boost::make_shared<crocoddyl::ActionModelLQR>(
-            crocoddyl::ActionModelLQR::Random(8, 2));
+      switch (instance) {
+        case First:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 2));
+          break;
+        case Second:
+        case Terminal:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 4));
+          break;
+      }
+      break;
+    case ActionModelTypes::ActionModelRandomLQRwithTerminalConstraint:
+      switch (instance) {
+        case First:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 2));
+          break;
+        case Second:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 4));
+          break;
+        case Terminal:
+          action = boost::make_shared<crocoddyl::ActionModelLQR>(
+              crocoddyl::ActionModelLQR::Random(8, 4, 0, 2));
+          break;
       }
       break;
     case ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ:

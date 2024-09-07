@@ -26,6 +26,7 @@ struct ActionModelTypes {
     ActionModelLQRDriftFree,
     ActionModelLQR,
     ActionModelRandomLQR,
+    ActionModelRandomLQRwithTerminalConstraint,
     ActionModelImpulseFwdDynamics_HyQ,
     ActionModelImpulseFwdDynamics_Talos,
     NbActionModelTypes
@@ -50,8 +51,10 @@ class ActionModelFactory {
   explicit ActionModelFactory();
   ~ActionModelFactory();
 
+  enum Instance { First, Second, Terminal };
+
   boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
-      ActionModelTypes::Type type, bool secondInstance = false) const;
+      ActionModelTypes::Type type, Instance instance = Instance::First) const;
 
   boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
   create_impulseFwdDynamics(StateModelTypes::Type state_type) const;
