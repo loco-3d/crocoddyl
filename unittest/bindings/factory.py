@@ -1709,6 +1709,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.term_solver = term_solver
         self.alphas = [2 ** (-n) for n in range(10)]
         self.th_grad = 1e-12
+        self.th_noImprovement = np.finfo(float).eps ** 0.8
         # Regularization parameters
         self.reg_incFactor = 10
         self.reg_decFactor = 5
@@ -1795,7 +1796,12 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 # any possible progress in the iteration.
                 self.dImpr = max(self.dV, self.dPhi)
                 self._acceptStep = False
-                if self.dPhiexp >= 0.0:
+                if (
+                    abs(self.dPhi) <= self.th_noImprovement
+                    and abs(self.dPhiexp) <= self.th_noImprovement
+                ):
+                    self._acceptStep = True
+                elif self.dPhiexp >= 0.0:
                     if self.dPhi > 0.0:
                         if (
                             self.dPhi > self.th_acceptStep * self.dPhiexp

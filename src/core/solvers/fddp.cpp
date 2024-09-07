@@ -25,6 +25,7 @@ SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
       reg_min_(1e-9),
       reg_max_(1e9),
       th_grad_(1e-12),
+      th_noimprovement_(std::pow(std::numeric_limits<double>::epsilon(), 0.8)),
       th_stepdec_(0.25),
       th_stepinc_(0.25),
       th_minimprove_(1e-5),
@@ -142,7 +143,10 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       // progress in the iteration.
       dImpr_ = std::max(dV_, dPhi_);
       acceptstep_ = false;
-      if (dPhiexp_ >= 0.) {
+      if ((std::abs(dPhi_) <= th_noimprovement_) &&
+          (std::abs(dPhiexp_) <= th_noimprovement_)) {
+        acceptstep_ = true;  // we can't make further improvement
+      } else if (dPhiexp_ >= 0.) {
         if (dPhi_ > 0.) {
           if (dPhi_ > th_acceptstep_ * dPhiexp_ ||
               std::abs(DV_[1]) < th_grad_) {

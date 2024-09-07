@@ -649,6 +649,8 @@ class SolverFDDP : public SolverAbstract {
   double reg_max_;        //!< Maximum allowed regularization value
   double th_grad_;  //!< Tolerance of the expected gradient used for testing the
                     //!< step
+  double th_noimprovement_;  //!< Threshold used to accept steps that cannot be
+                             //!< be improved due to numerical errors
   double
       th_stepdec_;  //!< Step-length threshold used to decrease regularization
   double
