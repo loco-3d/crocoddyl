@@ -821,17 +821,13 @@ void SolverFDDP::hybridShootForwardPass(const double steplength) {
     throw_pretty("forward_error");
   }
   // Update the initial gap of each shooting node
-  models[0]->get_state()->diff(xs_try_[0], xs_[0], fs_try_[0]);
+  models[0]->get_state()->diff(xs_try_[0], problem_->get_x0(), fs_try_[0]);
   for (std::size_t i = 1; i < Ts_.size();
        ++i) {  // this can be executed in parallel
     const std::size_t Ti = Ts_[i];
     const std::shared_ptr<ActionModelAbstract>& m = models[Ti - 1];
     const std::shared_ptr<ActionDataAbstract>& d = datas[Ti - 1];
-    if (Ti == 0) {
-      m->get_state()->diff(xs_try_[Ti], problem_->get_x0(), fs_try_[Ti]);
-    } else {
-      m->get_state()->diff(xs_try_[Ti], d->xnext, fs_try_[Ti]);
-    }
+    m->get_state()->diff(xs_try_[Ti], d->xnext, fs_try_[Ti]);
   }
   STOP_PROFILER("SolverFDDP::hybridShootForwardPass");
 }

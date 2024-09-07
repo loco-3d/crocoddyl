@@ -131,6 +131,7 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
   // One step optimization with alpha=1. This case the dynamics gaps are fully
   // closed.
   double alpha = 1;
+  solver->setCandidate(xs, us);
   solver->computeDirection(true);
   solver->expectedImprovement();
   solver->tryStep(alpha);
