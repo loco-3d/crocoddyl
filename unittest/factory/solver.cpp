@@ -300,5 +300,52 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
   return solver;
 }
 
+const std::vector<Eigen::MatrixXd>& SolverFactory::get_Vxx(
+    SolverTypes::Type solver_type,
+    const boost::shared_ptr<crocoddyl::SolverAbstract>& solver) const {
+  if (SolverTypes::isSolverFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverFDDP>(solver)->get_Vxx();
+  } else if (SolverTypes::isSolverIntro(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverIntro>(solver)
+        ->get_Vxx();
+  } else if (SolverTypes::isSolverBoxFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverBoxFDDP>(solver)
+        ->get_Vxx();
+  } else {
+    throw_pretty("Invalid argument: this solver has Vxx");
+  }
+}
+
+const std::vector<Eigen::VectorXd>& SolverFactory::get_Vx(
+    SolverTypes::Type solver_type,
+    const boost::shared_ptr<crocoddyl::SolverAbstract>& solver) const {
+  if (SolverTypes::isSolverFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverFDDP>(solver)->get_Vx();
+  } else if (SolverTypes::isSolverIntro(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverIntro>(solver)->get_Vx();
+  } else if (SolverTypes::isSolverBoxFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverBoxFDDP>(solver)
+        ->get_Vx();
+  } else {
+    throw_pretty("Invalid argument: this solver has Vx");
+  }
+}
+
+const Eigen::MatrixXd& SolverFactory::get_dHc(
+    SolverTypes::Type solver_type,
+    const boost::shared_ptr<crocoddyl::SolverAbstract>& solver) const {
+  if (SolverTypes::isSolverFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverFDDP>(solver)->get_dHc();
+  } else if (SolverTypes::isSolverIntro(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverIntro>(solver)
+        ->get_dHc();
+  } else if (SolverTypes::isSolverBoxFDDP(solver_type)) {
+    return boost::static_pointer_cast<crocoddyl::SolverBoxFDDP>(solver)
+        ->get_dHc();
+  } else {
+    throw_pretty("Invalid argument: this solver has dHc");
+  }
+}
+
 }  // namespace unittest
 }  // namespace crocoddyl

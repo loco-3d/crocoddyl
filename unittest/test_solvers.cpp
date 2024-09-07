@@ -20,6 +20,82 @@ using namespace crocoddyl::unittest;
 
 //____________________________________________________________________________//
 
+void test_search_direction(SolverTypes::Type solver_type,
+                           ActionModelTypes::Type action_type, size_t T) {
+  // Create action models
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
+
+  // Create the testing and KKT solvers
+  SolverFactory solver_factory;
+  boost::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, model, model2, modelT, T);
+
+  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  const boost::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  // Generate the different state along the trajectory
+  const boost::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+
+  // Compute search direction
+  solver->set_preg(random_real_in_range<double>(10., 100.));
+  solver->setCandidate(xs, us);
+  solver->computeDirection(true);
+
+  // Check that Vxx is a symmetric matrix
+  std::vector<Eigen::MatrixXd> Vxx =
+      solver_factory.get_Vxx(solver_type, solver);
+  std::vector<Eigen::VectorXd> Vx = solver_factory.get_Vx(solver_type, solver);
+  for (std::size_t i = 0; i < problem->get_T() + 1; ++i) {
+    BOOST_CHECK(Vxx[i].isApprox(Vxx[i].transpose()));
+  }
+
+  // Check the search direction and Lagrange multiplier for nodes
+  const std::size_t ndx = problem->get_ndx();
+  Eigen::MatrixXd A = Eigen::MatrixXd::Zero(2 * ndx, 2 * ndx);
+  Eigen::VectorXd a = Eigen::VectorXd::Zero(2 * ndx);
+  A.topRightCorner(ndx, ndx).diagonal().array() = -1.;
+  A.bottomLeftCorner(ndx, ndx).diagonal().array() = -1.;
+  for (std::size_t i = 0; i < problem->get_T(); ++i) {
+    const Eigen::VectorXd& f = solver->get_fs()[i];
+    A.bottomRightCorner(ndx, ndx) = Vxx[i];
+    a.head(ndx) = f;
+    a.tail(ndx) = Vx[i];
+    const Eigen::VectorXd& w = -A.inverse() * a;
+    BOOST_CHECK((w - (Vx[i] + Vxx[i] * f)).isZero(1e-9));
+    BOOST_CHECK((w.tail(ndx) - f).isZero(1e-9));
+  }
+  // Check the Schur-complement of terminal-constraint direction is Hermite
+  if (problem->get_terminalModel()->get_nh_T() != 0) {
+    const Eigen::MatrixXd& dHc = solver_factory.get_dHc(solver_type, solver);
+    // Check that dHc is a symmetric matrix
+    BOOST_CHECK(dHc.isApprox(dHc.transpose()));
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigen_solver(dHc);
+    const Eigen::VectorXd& eigenvalues = eigen_solver.eigenvalues();
+    // Check that all real parts of the eigenvalues are positive
+    for (int i = 0; i < eigenvalues.size(); ++i) {
+      BOOST_CHECK_GT(eigenvalues[i], 0.0);
+    }
+  }
+}
+
+//____________________________________________________________________________//
+
 void test_solver_gaps_evolution(SolverTypes::Type solver_type,
                                 ActionModelTypes::Type action_type, size_t T) {
   // Create action models
@@ -333,6 +409,8 @@ void register_solvers_againt_lqr_actions_unit_tests(
   test_name << "test_" << solver_type << "_against_lqr_action_" << action_type;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   std::cout << "Running " << test_name.str() << std::endl;
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_search_direction, solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(
       boost::bind(&test_solver_gaps_evolution, solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_expected_improvement,

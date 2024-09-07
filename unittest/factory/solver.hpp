@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          New York University, Max Planck Gesellschaft,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -67,6 +67,64 @@ struct SolverTypes {
   }
   static const std::vector<Type> all;
 
+  static bool isSolverFDDP(Type type) {
+    switch (type) {
+      case SolverFDDP_SingleShoot_LuNullTerm:
+      case SolverFDDP_SingleShoot_QrNullTerm:
+      case SolverFDDP_SingleShoot_SchurTerm:
+      case SolverFDDP_FeasShoot_LuNullTerm:
+      case SolverFDDP_FeasShoot_QrNullTerm:
+      case SolverFDDP_FeasShoot_SchurTerm:
+      case SolverFDDP_MultiShoot_LuNullTerm:
+      case SolverFDDP_MultiShoot_QrNullTerm:
+      case SolverFDDP_MultiShoot_SchurTerm:
+      case SolverFDDP_HybridShoot_LuNullTerm:
+      case SolverFDDP_HybridShoot_QrNullTerm:
+      case SolverFDDP_HybridShoot_SchurTerm:
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
+
+  static bool isSolverIntro(Type type) {
+    switch (type) {
+      case SolverIntro_SingleShoot_LuNullTerm:
+      case SolverIntro_SingleShoot_QrNullTerm:
+      case SolverIntro_SingleShoot_SchurTerm:
+      case SolverIntro_FeasShoot_LuNullTerm:
+      case SolverIntro_FeasShoot_QrNullTerm:
+      case SolverIntro_FeasShoot_SchurTerm:
+      case SolverIntro_MultiShoot_LuNullTerm:
+      case SolverIntro_MultiShoot_QrNullTerm:
+      case SolverIntro_MultiShoot_SchurTerm:
+      case SolverIntro_HybridShoot_LuNullTerm:
+      case SolverIntro_HybridShoot_QrNullTerm:
+      case SolverIntro_HybridShoot_SchurTerm:
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
+
+  static bool isSolverBoxFDDP(Type type) {
+    switch (type) {
+      case SolverBoxFDDP_SingleShoot:
+      case SolverBoxFDDP_FeasShoot:
+      case SolverBoxFDDP_MultiShoot:
+      case SolverBoxFDDP_HybridShoot:
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
+
   static bool isSingleShoot(Type type) {
     switch (type) {
       case SolverFDDP_SingleShoot_LuNullTerm:
@@ -99,6 +157,16 @@ class SolverFactory {
       std::shared_ptr<crocoddyl::ActionModelAbstract> model,
       std::shared_ptr<crocoddyl::ActionModelAbstract> model2,
       std::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const;
+
+  const std::vector<Eigen::MatrixXd>& get_Vxx(
+      SolverTypes::Type solver_type,
+      const std::shared_ptr<crocoddyl::SolverAbstract>& solver) const;
+  const std::vector<Eigen::VectorXd>& get_Vx(
+      SolverTypes::Type solver_type,
+      const std::shared_ptr<crocoddyl::SolverAbstract>& solver) const;
+  const Eigen::MatrixXd& get_dHc(
+      SolverTypes::Type solver_type,
+      const std::shared_ptr<crocoddyl::SolverAbstract>& solver) const;
 };
 
 }  // namespace unittest
