@@ -391,6 +391,26 @@ std::size_t DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_nh()
 }
 
 template <typename Scalar>
+std::size_t DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_ng_T()
+    const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_ng_T();
+  } else {
+    return Base::get_ng_T();
+  }
+}
+
+template <typename Scalar>
+std::size_t DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_nh_T()
+    const {
+  if (constraints_ != nullptr) {
+    return constraints_->get_nh_T();
+  } else {
+    return Base::get_nh_T();
+  }
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_g_lb() const {
   if (constraints_ != nullptr) {

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -153,6 +153,16 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * @brief Return the number of equality constraints
    */
   virtual std::size_t get_nh() const;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_nh_T() const;
 
   /**
    * @brief Return the lower bound of the inequality constraints

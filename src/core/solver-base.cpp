@@ -66,6 +66,7 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
 SolverAbstract::~SolverAbstract() {}
 
 void SolverAbstract::resizeData() {
+  START_PROFILER("SolverAbstract::resizeData");
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -74,6 +75,7 @@ void SolverAbstract::resizeData() {
     const std::size_t nu = model->get_nu();
     us_[t].conservativeResize(nu);
   }
+  STOP_PROFILER("SolverAbstract::resizeData");
 }
 
 double SolverAbstract::computeDynamicFeasibility() {
