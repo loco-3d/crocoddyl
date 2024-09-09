@@ -31,9 +31,9 @@ SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem,
 
 SolverBoxFDDP::~SolverBoxFDDP() {}
 
-void SolverBoxFDDP::resizeData() {
-  START_PROFILER("SolverBoxFDDP::resizeData");
-  SolverFDDP::resizeData();
+void SolverBoxFDDP::resizeRunningData() {
+  START_PROFILER("SolverBoxFDDP::resizeRunningData");
+  SolverFDDP::resizeRunningData();
 
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -45,7 +45,7 @@ void SolverBoxFDDP::resizeData() {
     du_lb_[t].conservativeResize(nu);
     du_ub_[t].conservativeResize(nu);
   }
-  STOP_PROFILER("SolverBoxFDDP::resizeData");
+  STOP_PROFILER("SolverBoxFDDP::resizeRunningData");
 }
 
 void SolverBoxFDDP::allocateData() {

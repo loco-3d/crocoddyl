@@ -29,6 +29,13 @@ SolverAbstract::~SolverAbstract() {}
 
 void SolverAbstract::resizeData() {
   START_PROFILER("SolverAbstract::resizeData");
+  resizeRunningData();
+  resizeTerminalData();
+  STOP_PROFILER("SolverAbstract::resizeData");
+}
+
+void SolverAbstract::resizeRunningData() {
+  START_PROFILER("SolverAbstract::resizeRunningData");
   const std::size_t T = problem_->get_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -41,11 +48,11 @@ void SolverAbstract::resizeData() {
     us_try_[t].conservativeResize(nu);
     g_adj_[t].conservativeResize(ng);
   }
-
   g_adj_.back().conservativeResize(ng_T);
-
-  STOP_PROFILER("SolverAbstract::resizeData");
+  STOP_PROFILER("SolverAbstract::resizeRunningData");
 }
+
+void SolverAbstract::resizeTerminalData() {}
 
 double SolverAbstract::computeDynamicFeasibility() {
   START_PROFILER("SolverAbstract::computeDynamicFeasibility");

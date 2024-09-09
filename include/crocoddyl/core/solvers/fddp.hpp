@@ -125,11 +125,6 @@ class SolverFDDP : public SolverAbstract {
   virtual const Eigen::Vector2d& expectedImprovement();
 
   /**
-   * @copybrief SolverAbstract::resizeData
-   */
-  virtual void resizeData();
-
-  /**
    * @brief Update the Jacobian, Hessian and feasibility of the optimal control
    * problem
    *
@@ -637,6 +632,16 @@ class SolverFDDP : public SolverAbstract {
    */
   void allocateData();
 
+  /**
+   * @copybrief SolverAbstract::resizeRunningData
+   */
+  virtual void resizeRunningData();
+
+  /**
+   * @copybrief SolverAbstract::resizeTerminalData
+   */
+  virtual void resizeTerminalData();
+
   DynamicsSolverType dyn_solver_;   //!< Type of dynamics solver
   EqualitySolverType term_solver_;  //!< Type of terminal solver
   std::vector<double>
@@ -724,6 +729,7 @@ class SolverFDDP : public SolverAbstract {
       Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each
               //!< running node
 
+  std::size_t nh_T_;      //!< Dimension of terminal constraints
   std::size_t dHc_rank_;  //!< Rank of the Jacobian of the terminal constraint
   std::vector<Eigen::MatrixXd>
       Vxc_;  //!< Gradient of the Value function \f$\mathbf{V_{xc}}\f$

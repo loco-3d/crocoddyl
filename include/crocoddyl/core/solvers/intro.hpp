@@ -33,11 +33,6 @@ class SolverIntro : public SolverFDDP {
   virtual ~SolverIntro();
 
   /**
-   * @copybrief SolverAbstract::resizeData
-   */
-  virtual void resizeData();
-
-  /**
    * @copybrief SolverFDDP::calcDir
    */
   virtual void calcDir();
@@ -142,6 +137,17 @@ class SolverIntro : public SolverFDDP {
 
  protected:
   void allocateData();
+
+  /**
+   * @copybrief SolverAbstract::resizeRunningData
+   */
+  virtual void resizeRunningData();
+
+  /**
+   * @copybrief SolverAbstract::resizeTerminalData
+   */
+  virtual void resizeTerminalData();
+
   void calcLuNullDir();
   void calcQrNullDir();
   void computeNullPolicy(const std::size_t t);

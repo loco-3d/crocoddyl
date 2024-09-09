@@ -453,6 +453,8 @@ class SolverAbstract {
    * @brief Allocate all the basic data needed in solvers
    */
   void allocateData();
+  virtual void resizeRunningData();
+  virtual void resizeTerminalData();
 
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
   std::vector<std::shared_ptr<CallbackAbstract> >

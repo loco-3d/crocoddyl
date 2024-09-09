@@ -37,6 +37,7 @@ SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
       upsilon_(0.),
       upsilon_decfactor_(0.5),
       zero_upsilon_(false),
+      nh_T_(problem->get_terminalModel()->get_nh_T()),
       acceptstep_(false),
       recalcdir_(true) {
   allocateData();
@@ -68,8 +69,12 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
                        const std::size_t maxiter, const bool,
                        const double init_reg) {
   START_PROFILER("SolverFDDP::solve");
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   if (problem_->is_updated()) {
     resizeData();
+  } else if (nh_T_ != nh_T && nh_T != 0) {  // we need to update terminal data
+    nh_T_ = nh_T;
+    resizeTerminalData();
   }
   // TODO: Deprecate isfeasible_. Update setCandidate API.
   setCandidate(init_xs, init_us, false);
@@ -338,12 +343,11 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
 #pragma GCC diagnostic pop
 }
 
-void SolverFDDP::resizeData() {
-  START_PROFILER("SolverFDDP::resizeData");
-  SolverAbstract::resizeData();
+void SolverFDDP::resizeRunningData() {
+  START_PROFILER("SolverFDDP::resizeRunningData");
+  SolverAbstract::resizeRunningData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
@@ -363,7 +367,20 @@ void SolverFDDP::resizeData() {
     if (nu != 0) {
       FuTVxx_p_[t].setZero();
     }
-    // Terminal constraint data
+  }
+  STOP_PROFILER("SolverFDDP::resizeRunningData");
+}
+
+void SolverFDDP::resizeTerminalData() {
+  START_PROFILER("SolverFDDP::resizeTerminalData");
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
     Vxc_[t].conservativeResize(ndx, nh_T);
     Qxc_[t].conservativeResize(ndx, nh_T);
     Quc_[t].conservativeResize(nu, nh_T);
@@ -380,7 +397,7 @@ void SolverFDDP::resizeData() {
   dHcY_.conservativeResize(nh_T, nh_T);
   YdHcY_.conservativeResize(nh_T, nh_T);
   beta_plus_.conservativeResize(nh_T);
-  STOP_PROFILER("SolverFDDP::resizeData");
+  STOP_PROFILER("SolverFDDP::resizeTerminalData");
 }
 
 void SolverFDDP::calcDir() {

@@ -22,12 +22,11 @@ SolverIntro::SolverIntro(std::shared_ptr<ShootingProblem> problem,
 
 SolverIntro::~SolverIntro() {}
 
-void SolverIntro::resizeData() {
-  START_PROFILER("SolverIntro::resizeData");
-  SolverFDDP::resizeData();
+void SolverIntro::resizeRunningData() {
+  START_PROFILER("SolverIntro::resizeRunningData");
+  SolverFDDP::resizeRunningData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
@@ -46,12 +45,25 @@ void SolverIntro::resizeData() {
     ks_[t].conservativeResize(nh);
     Ks_[t].conservativeResize(nh, ndx);
     QuuinvHuT_[t].conservativeResize(nu, nh);
-    // Terminal constraint data
+  }
+  STOP_PROFILER("SolverIntro::resizeRunningData");
+}
+
+void SolverIntro::resizeTerminalData() {
+  START_PROFILER("SolverIntro::resizeTerminalData");
+  const std::size_t T = problem_->get_T();
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t nh = model->get_nh();
     Kcs_[t].conservativeResize(nh, nh_T);
     QuuKc_Quc_[t].conservativeResize(nu, nh_T);
     Qzc_[t].conservativeResize(nh, nh_T);
   }
-  STOP_PROFILER("SolverIntro::resizeData");
+  STOP_PROFILER("SolverIntro::resizeTerminalData");
 }
 
 void SolverIntro::calcDir() {
