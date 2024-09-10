@@ -247,6 +247,17 @@ void test_solver_expected_improvement(SolverTypes::Type solver_type,
     solver->tryStep(alpha);
     BOOST_CHECK_CLOSE(solver->get_dVexp(), solver->get_dV(), 1e-9);
   }
+
+  // One step optimization when closing the gaps with random alpha and
+  // regularization
+  solver->get_problem()->rollout(us, xs);
+  solver->setCandidate(xs, us);
+  solver->computeDynamicFeasibility();
+  alpha = random_real_in_range<double>(0.25, 0.75);
+  solver->computeDirection(true);
+  solver->expectedImprovement();
+  solver->tryStep(alpha);
+  BOOST_CHECK_CLOSE(solver->get_dVexp(), solver->get_dV(), 1e-9);
 }
 
 //____________________________________________________________________________//
