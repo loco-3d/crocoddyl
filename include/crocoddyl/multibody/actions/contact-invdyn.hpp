@@ -188,6 +188,16 @@ class DifferentialActionModelContactInvDynamicsTpl
   virtual std::size_t get_nh() const;
 
   /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_nh_T() const;
+
+  /**
    * @brief Return the lower bound of the inequality constraints
    */
   virtual const VectorXs& get_g_lb() const;
