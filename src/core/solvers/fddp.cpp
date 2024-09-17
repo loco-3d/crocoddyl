@@ -201,7 +201,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
     if (steplength_ >= th_stepdec_ && dImpr_ > th_minimprove_) {
       decreaseRegularization();
     }
-    if ((steplength_ >= th_stepinc_ && dImpr_ <= th_minimprove_) ||
+    if ((steplength_ >= th_stepinc_ && std::abs(dImpr_) <= th_minimprove_) ||
         !acceptstep_) {
       if (preg_ == reg_max_) {
         STOP_PROFILER("SolverFDDP::solve");
@@ -506,8 +506,12 @@ void SolverFDDP::updateDir() {
   switch (term_solver_) {
     case LuNull: {
       dHc_lu_.compute(dHc_);
-      YZc_ << dHc_lu_.matrixLU().transpose(), dHc_lu_.kernel();
       dHc_rank_ = dHc_lu_.rank();
+      YZc_.leftCols(dHc_rank_) << dHc_lu_.matrixLU().transpose();
+      const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+      if (dHc_rank_ < nh_T) {
+        YZc_.rightCols(nh_T - dHc_rank_) << dHc_lu_.kernel();
+      }
     }
     case QrNull: {
       dHc_qr_.compute(dHc_);
@@ -637,7 +641,12 @@ void SolverFDDP::computePolicy(const std::size_t t) {
 void SolverFDDP::computeBatchPolicy(const std::size_t t) {
   START_PROFILER("SolverFDDP::computeBatchPolicy");
   Kc_[t] = Quc_[t];
-  Quu_llt_[t].solveInPlace(Kc_[t]);
+  const boost::shared_ptr<ActionModelAbstract>& model =
+      problem_->get_runningModels()[t];
+  const std::size_t nu = model->get_nu();
+  if (nu > 0) {
+    Quu_llt_[t].solveInPlace(Kc_[t]);
+  }
   STOP_PROFILER("SolverFDDP::computeBatchPolicy");
 }
 

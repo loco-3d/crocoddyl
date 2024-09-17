@@ -51,6 +51,7 @@ void SolverIntro::resizeRunningData() {
 
 void SolverIntro::resizeTerminalData() {
   START_PROFILER("SolverIntro::resizeTerminalData");
+  SolverFDDP::resizeTerminalData();
   const std::size_t T = problem_->get_T();
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
