@@ -198,7 +198,7 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
-    if (steplength_ >= th_stepdec_ && dImpr_ > th_minimprove_) {
+    if (steplength_ >= th_stepdec_ && std::abs(dImpr_) > th_minimprove_) {
       decreaseRegularization();
     }
     if ((steplength_ >= th_stepinc_ && std::abs(dImpr_) <= th_minimprove_) ||
@@ -512,27 +512,14 @@ void SolverFDDP::updateDir() {
       if (dHc_rank_ < nh_T) {
         YZc_.rightCols(nh_T - dHc_rank_) << dHc_lu_.kernel();
       }
+      computeNullTerminalMultiplier();
+      break;
     }
     case QrNull: {
       dHc_qr_.compute(dHc_);
       YZc_ = dHc_qr_.householderQ();
       dHc_rank_ = dHc_qr_.rank();
-      // Compute epsilon using nullspace parametrization. Instead of
-      // parametrizing Hx, we opt to equivalent parametrize dHc. This approach
-      // is much efficient.
-      const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
-                         Eigen::RowMajor>
-          Yc = YZc_.leftCols(dHc_rank_);
-      Yhc_.noalias() = Yc.transpose() * hc_;
-      dHcY_.noalias() = dHc_ * Yc;
-      YdHcY_.noalias() = Yc.transpose() * dHcY_;
-      YdHcY_llt_.compute(YdHcY_);
-      const Eigen::ComputationInfo& info = YdHcY_llt_.info();
-      if (info != Eigen::Success) {
-        throw_pretty("backward_error");
-      }
-      YdHcY_llt_.solveInPlace(Yhc_);
-      beta_plus_.noalias() = Yc * Yhc_;
+      computeNullTerminalMultiplier();
       break;
     }
     case Schur: {
@@ -907,6 +894,25 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
     throw_pretty("forward_error");
   }
   STOP_PROFILER("SolverFDDP::singleShootForwardPass");
+}
+
+void SolverFDDP::computeNullTerminalMultiplier() {
+  // Compute multiplier using nullspace parametrization. Instead of
+  // parametrizing Hx, we opt to equivalent parametrize dHc. This approach
+  // is much efficient.
+  const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+                     Eigen::RowMajor>
+      Yc = YZc_.leftCols(dHc_rank_);
+  Yhc_.noalias() = Yc.transpose() * hc_;
+  dHcY_.noalias() = dHc_ * Yc;
+  YdHcY_.noalias() = Yc.transpose() * dHcY_;
+  YdHcY_llt_.compute(YdHcY_);
+  const Eigen::ComputationInfo& info = YdHcY_llt_.info();
+  if (info != Eigen::Success) {
+    throw_pretty("backward_error");
+  }
+  YdHcY_llt_.solveInPlace(Yhc_);
+  beta_plus_.noalias() = Yc * Yhc_;
 }
 
 void SolverFDDP::increaseRegularization() {

@@ -642,6 +642,11 @@ class SolverFDDP : public SolverAbstract {
    */
   virtual void resizeTerminalData();
 
+  /**
+   * @brief compute the multiplier associated to the terminal constraint
+   */
+  void computeNullTerminalMultiplier();
+
   DynamicsSolverType dyn_solver_;   //!< Type of dynamics solver
   EqualitySolverType term_solver_;  //!< Type of terminal solver
   std::vector<double>
