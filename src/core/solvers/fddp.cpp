@@ -703,10 +703,6 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
       STOP_PROFILER("SolverFDDP::feasShootForwardPass");
       throw_pretty("forward_error");
     }
-    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
-      STOP_PROFILER("SolverFDDP::feasShootForwardPass");
-      throw_pretty("forward_error");
-    }
   }
   const std::shared_ptr<ActionModelAbstract>& m =
       problem_->get_terminalModel();
@@ -752,10 +748,6 @@ void SolverFDDP::multiShootForwardPass(const double steplength) {
       m->calc(d, xs_try_[t]);
     }
     m->get_state()->diff(xs_try_[t + 1], d->xnext, fs_try_[t + 1]);
-    if (raiseIfNaN(d->xnext.lpNorm<Eigen::Infinity>())) {
-      STOP_PROFILER("SolverFDDP::multiShootForwardPass");
-      throw_pretty("forward_error");
-    }
   }
   cost_try_ = 0.;
   for (std::size_t t = 0; t < T; ++t) {
@@ -877,10 +869,6 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
     xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;
     if (raiseIfNaN(cost_try_)) {
-      STOP_PROFILER("SolverFDDP::singleShootForwardPass");
-      throw_pretty("forward_error");
-    }
-    if (raiseIfNaN(xs_try_[t + 1].lpNorm<Eigen::Infinity>())) {
       STOP_PROFILER("SolverFDDP::singleShootForwardPass");
       throw_pretty("forward_error");
     }
