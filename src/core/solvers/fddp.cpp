@@ -486,6 +486,7 @@ void SolverFDDP::batchPass() {
     // conditions
     computeBatchValueFunction(t);
   }
+  dXc_[0].setZero();
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {  // sequence
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     dUc_[t] = -Kc_[t];
