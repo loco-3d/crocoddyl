@@ -115,33 +115,47 @@ double SolverAbstract::computeDynamicFeasibility() {
 
 double SolverAbstract::computeInequalityFeasibility() {
   tmp_feas_ = 0.;
+  Eigen::VectorXd g_adj;
+
   const std::size_t T = problem_->get_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
+
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          tmp_feas_ =
-              std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
+          g_adj = datas[t]
+                      ->g.cwiseMax(models[t]->get_g_lb())
+                      .cwiseMin(models[t]->get_g_ub());
+          tmp_feas_ = std::max(tmp_feas_,
+                               (datas[t]->g - g_adj).lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ =
-            std::max(tmp_feas_,
-                     problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
+        g_adj = problem_->get_terminalData()
+                    ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
+                    .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+        tmp_feas_ +=
+            (problem_->get_terminalData()->g - g_adj).lpNorm<Eigen::Infinity>();
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          tmp_feas_ += datas[t]->g.lpNorm<1>();
+          g_adj = datas[t]
+                      ->g.cwiseMax(models[t]->get_g_lb())
+                      .cwiseMin(models[t]->get_g_ub());
+          tmp_feas_ = std::max(tmp_feas_, (datas[t]->g - g_adj).lpNorm<1>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
+        g_adj = problem_->get_terminalData()
+                    ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
+                    .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+        tmp_feas_ += (problem_->get_terminalData()->g - g_adj).lpNorm<1>();
       }
       break;
   }
