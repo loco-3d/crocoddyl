@@ -47,20 +47,25 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   // Allocate common data
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
+  const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   xs_.resize(T + 1);
   us_.resize(T);
   fs_.resize(T + 1);
+  g_adj_.resize(T + 1);
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
+    const std::size_t ng = model->get_ng();
     xs_[t] = model->get_state()->zero();
     us_[t] = Eigen::VectorXd::Zero(nu);
     fs_[t] = Eigen::VectorXd::Zero(ndx);
+    g_adj_[t] = Eigen::VectorXd::Zero(ng);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   fs_.back() = Eigen::VectorXd::Zero(ndx);
+  g_adj_.back() = Eigen::VectorXd::Zero(ng_T);
 }
 
 SolverAbstract::~SolverAbstract() {}
@@ -68,13 +73,19 @@ SolverAbstract::~SolverAbstract() {}
 void SolverAbstract::resizeData() {
   START_PROFILER("SolverAbstract::resizeData");
   const std::size_t T = problem_->get_T();
+  const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const boost::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
+    const std::size_t ng = model->get_ng();
     us_[t].conservativeResize(nu);
+    g_adj_[t].conservativeResize(ng);
   }
+
+  g_adj_.back().conservativeResize(ng_T);
+
   STOP_PROFILER("SolverAbstract::resizeData");
 }
 
@@ -120,28 +131,44 @@ double SolverAbstract::computeInequalityFeasibility() {
       problem_->get_runningModels();
   const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
+
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          tmp_feas_ =
-              std::max(tmp_feas_, datas[t]->g.lpNorm<Eigen::Infinity>());
+          g_adj_[t] = datas[t]
+                          ->g.cwiseMax(models[t]->get_g_lb())
+                          .cwiseMin(models[t]->get_g_ub());
+          tmp_feas_ = std::max(
+              tmp_feas_, (datas[t]->g - g_adj_[t]).lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ =
-            std::max(tmp_feas_,
-                     problem_->get_terminalData()->g.lpNorm<Eigen::Infinity>());
+        g_adj_.back() =
+            problem_->get_terminalData()
+                ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
+                .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+        tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
+                         .lpNorm<Eigen::Infinity>();
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          tmp_feas_ += datas[t]->g.lpNorm<1>();
+          g_adj_[t] = datas[t]
+                          ->g.cwiseMax(models[t]->get_g_lb())
+                          .cwiseMin(models[t]->get_g_ub());
+          tmp_feas_ =
+              std::max(tmp_feas_, (datas[t]->g - g_adj_[t]).lpNorm<1>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ += problem_->get_terminalData()->g.lpNorm<1>();
+        g_adj_.back() =
+            problem_->get_terminalData()
+                ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
+                .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+        tmp_feas_ +=
+            (problem_->get_terminalData()->g - g_adj_.back()).lpNorm<1>();
       }
       break;
   }

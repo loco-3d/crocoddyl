@@ -474,6 +474,7 @@ class SolverAbstract {
                                    //!< dynamics and constraints feasibility
   std::size_t iter_;  //!< Number of iteration performed by the solver
   double tmp_feas_;   //!< Temporal variables used for computed the feasibility
+  std::vector<Eigen::VectorXd> g_adj_;  //!< Adjusted inequality bound
 };
 
 /**
