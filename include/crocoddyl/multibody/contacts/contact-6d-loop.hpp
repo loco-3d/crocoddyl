@@ -226,6 +226,9 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     f1af1 = Motion::Zero();
     f2af2 = Motion::Zero();
     f1af2 = Motion::Zero();
+    //
+    joint1_f = Force::Zero();
+    joint2_f = Force::Zero();
   }
 
   using Base::a0;
@@ -269,6 +272,12 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Motion f1af1;
   Motion f2af2;
   Motion f1af2;
+  // Force related data
+  Force joint1_f;
+  Force joint2_f;
+  Force f_local;
+
+  Matrix6s f_cross;
 };
 
 }  // namespace crocoddyl
