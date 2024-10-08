@@ -98,8 +98,6 @@ void exposeContact6DLoop() {
           "contact gains")
       .def(CopyableVisitor<ContactModel6DLoop>());
 
-#pragma GCC diagnostic pop
-
   bp::register_ptr_to_python<boost::shared_ptr<ContactData6DLoop> >();
 
   bp::class_<ContactData6DLoop, bp::bases<ContactDataAbstract> >(
