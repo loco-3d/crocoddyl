@@ -97,6 +97,13 @@ void ContactModel6DLoopTpl<Scalar>::calc(
   d->f1af2 = d->f1Mf2.act(d->f2af2);
   d->a0 =
       (d->f1af1 - d->f1Mf2.act(d->f2af2) + d->f1vf1.cross(d->f1vf2)).toVector();
+
+  if (gains_[0] != 0.) {
+    d->a0 += gains_[0] * (-pinocchio::log6(d->f1Mf2).toVector());
+  }
+  if (gains_[1] != 0.) {
+    d->a0 += gains_[1] * (d->f1vf1 - d->f1vf2).toVector();
+  }
 }
 
 template <typename Scalar>
@@ -104,9 +111,6 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ContactDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
-  if (gains_[0] != 0. || gains_[1] != 0.) {
-    throw_pretty("Baumgarte stabilization is not implemented yet");
-  }
   const std::size_t nv = state_->get_nv();
 
   if (joint1_id_ > 0) {
@@ -151,6 +155,24 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
           (joint2_placement_.toActionMatrixInverse() * d->a2_partial_dv) -
       d->f1vf2.toActionMatrix() * d->f1Jf1 +
       d->f1vf1.toActionMatrix() * d->f1Xf2 * d->f2Jf2;
+  if (gains_[0] != 0.) {
+    Matrix6s f1Mf2_log6;
+    pinocchio::Jlog6(d->f1Mf2, f1Mf2_log6);
+    d->da0_dx.leftCols(nv) +=
+        gains_[0] * (-f1Mf2_log6 * (-d->oMf2.toActionMatrixInverse() *
+                                        d->oMf1.toActionMatrix() * d->f1Jf1 +
+                                    d->f2Jf2));
+  }
+  if (gains_[1] != 0.) {
+    d->da0_dx.leftCols(nv) +=
+        gains_[1] *
+        (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq -
+         d->f1Mf2.act(d->f2vf2).toActionMatrix() *
+             (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) -
+         d->f1Xf2 * joint2_placement_.toActionMatrixInverse() *
+             d->v2_partial_dq);
+    d->da0_dx.rightCols(nv) += gains_[1] * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2);
+  }
 }
 
 template <typename Scalar>
