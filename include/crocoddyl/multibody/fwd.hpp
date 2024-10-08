@@ -191,6 +191,11 @@ class ContactModel6DTpl;
 template <typename Scalar>
 struct ContactData6DTpl;
 
+template <typename Scalar>
+class ContactModel6DLoopTpl;
+template <typename Scalar>
+struct ContactData6DLoopTpl;
+
 // friction
 template <typename Scalar>
 class FrictionConeTpl;
@@ -362,6 +367,8 @@ typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
 typedef ContactData6DTpl<double> ContactData6D;
+typedef ContactModel6DLoopTpl<double> ContactModel6DLoop;
+typedef ContactData6DLoopTpl<double> ContactData6DLoop;
 
 typedef StateMultibodyTpl<double> StateMultibody;
 

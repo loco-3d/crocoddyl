@@ -399,14 +399,7 @@ void ContactModelMultipleTpl<Scalar>::updateRneaDiff(
     assert_pretty(it_m->first == it_d->first,
                   "it doesn't match the contact name between data and model");
     if (m_i->active) {
-      switch (m_i->contact->get_type()) {
-        case pinocchio::ReferenceFrame::LOCAL:
-          break;
-        case pinocchio::ReferenceFrame::WORLD:
-        case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-          pinocchio.dtau_dq += d_i->dtau_dq;
-          break;
-      }
+      pinocchio.dtau_dq += d_i->dtau_dq;
     }
   }
 }
