@@ -27,7 +27,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
-      joint2_placement_(joint2_placement){
+      joint2_placement_(joint2_placement) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame LOCAL is supported for 6D loop "
                  "contacts\n";
@@ -45,7 +45,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
-      joint2_placement_(joint2_placement){
+      joint2_placement_(joint2_placement) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame LOCAL is supported for 6D loop "
                  "contacts\n";

@@ -163,7 +163,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   int joint2_id_;         //!< Reference joint id of the second contact
   SE3 joint2_placement_;  //!< Placement of the second contact with respect to
                           //!< the joint
-  Vector2s gains_;  //!< Baumgarte stabilization gains
+  Vector2s gains_;        //!< Baumgarte stabilization gains
 };
 
 template <typename _Scalar>
