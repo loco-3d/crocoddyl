@@ -37,6 +37,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6s Matrix6s;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the 6d contact model from joint and placements
@@ -110,6 +111,19 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
    */
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
                            const VectorXs &force);
+
+
+  /**
+   * @brief Updates the force differential for the given contact data.
+   *
+   * This function updates the force differential matrices with respect to the state and control variables.
+   *
+   * @param[in] data  Shared pointer to the contact data abstract.
+   * @param[in] df_dx Matrix representing the differential of the force with respect to the state variables.
+   * @param[in] df_du Matrix representing the differential of the force with respect to the control variables.
+   */
+  virtual void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+                               const MatrixXs& df_dx, const MatrixXs& df_du);
 
   /**
    * @brief Create the 6d contact data

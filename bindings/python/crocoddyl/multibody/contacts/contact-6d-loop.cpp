@@ -61,6 +61,12 @@ void exposeContact6DLoop() {
            "Convert the Lagrangian into a stack of spatial forces.\n\n"
            ":param data: cost data\n"
            ":param force: force vector (dimension 6)")
+      .def("updateForceDiff", &ContactModel6DLoop::updateForceDiff,
+              bp::args("self", "data", "df_dx", "df_du"),
+              "Update the force derivatives.\n\n"
+              ":param data: cost data\n"
+              ":param df_dx: Jacobian of the force with respect to the state\n"
+              ":param df_du: Jacobian of the force with respect to the control")
       .def("createData", &ContactModel6DLoop::createData,
            bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
