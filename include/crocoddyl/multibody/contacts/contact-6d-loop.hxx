@@ -29,8 +29,9 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       joint2_placement_(joint2_placement),
       gains_(gains) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
-    std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported for 6D loop "
-                "contacts\n"
+    std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
+                 "for 6D loop "
+                 "contacts\n"
               << std::endl;
   }
 }
@@ -45,11 +46,12 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
-      joint2_placement_(joint2_placement), 
+      joint2_placement_(joint2_placement),
       gains_(gains) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
-    std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported for 6D loop "
-                "contacts\n"
+    std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
+                 "for 6D loop "
+                 "contacts\n"
               << std::endl;
   }
 }
@@ -126,19 +128,17 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
       pinocchio::LOCAL, d->v2_partial_dq, d->a2_partial_dq, d->a2_partial_dv,
       d->a2_partial_da);
 
-  d->da0_dq_t1 =
-      joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;  
+  d->da0_dq_t1 = joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;
   d->da0_dq_t2 = (d->f1af2.toActionMatrix() * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) +
                   d->f1Xf2 * (joint2_placement_.toActionMatrixInverse() *
-                              d->a2_partial_dq));  
+                              d->a2_partial_dq));
   d->da0_dq_t3 =
-      -d->f1vf2.toActionMatrix() * (joint1_placement_.toActionMatrixInverse() *
-                                    d->v1_partial_dq)  
-      + d->f1vf1.toActionMatrix() * d->f1vf2.toActionMatrix() *
-            (d->f1Jf1 - d->f1Xf2 * d->f2Jf2)  
-      + d->f1vf1.toActionMatrix() * d->f1Xf2 *
-            (joint2_placement_.toActionMatrixInverse() *
-            d->v2_partial_dq);  
+      -d->f1vf2.toActionMatrix() *
+          (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq) +
+      d->f1vf1.toActionMatrix() * d->f1vf2.toActionMatrix() *
+          (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) +
+      d->f1vf1.toActionMatrix() * d->f1Xf2 *
+          (joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq);
 
   d->da0_dx.leftCols(nv).noalias() = d->da0_dq_t1 - d->da0_dq_t2 + d->da0_dq_t3;
   d->da0_dx.rightCols(nv) =
@@ -151,20 +151,20 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     Matrix6s f1Mf2_log6;
     pinocchio::Jlog6(d->f1Mf2, f1Mf2_log6);
     d->da0_dx.leftCols(nv).noalias() +=
-      gains_[0] * f1Mf2_log6 * (d->oMf2.toActionMatrixInverse() *
-                                  d->oMf1.toActionMatrix() * d->f1Jf1 -
-                                  d->f2Jf2);
+        gains_[0] * f1Mf2_log6 *
+        (d->oMf2.toActionMatrixInverse() * d->oMf1.toActionMatrix() * d->f1Jf1 -
+         d->f2Jf2);
   }
   if (std::abs<Scalar>(gains_[1]) > std::numeric_limits<Scalar>::epsilon()) {
     d->da0_dx.leftCols(nv).noalias() +=
-      gains_[1] *
-      (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq -
-        d->f1Mf2.act(d->f2vf2).toActionMatrix() *
-            (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) -
-        d->f1Xf2 * joint2_placement_.toActionMatrixInverse() *
-            d->v2_partial_dq);
-    d->da0_dx.rightCols(nv).noalias() += 
-      gains_[1] * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2);
+        gains_[1] *
+        (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq -
+         d->f1Mf2.act(d->f2vf2).toActionMatrix() *
+             (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) -
+         d->f1Xf2 * joint2_placement_.toActionMatrixInverse() *
+             d->v2_partial_dq);
+    d->da0_dx.rightCols(nv).noalias() +=
+        gains_[1] * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2);
   }
 }
 
@@ -184,9 +184,12 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
       d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->f);
 
       Matrix6s f_cross = Matrix6s::Zero(6, 6);
-      f_cross.template topRightCorner<3, 3>() = pinocchio::skew(d->joint2_f.linear());
-      f_cross.template bottomLeftCorner<3, 3>() = pinocchio::skew(d->joint2_f.linear());
-      f_cross.template bottomRightCorner<3, 3>() = pinocchio::skew(d->joint2_f.angular());
+      f_cross.template topRightCorner<3, 3>() =
+          pinocchio::skew(d->joint2_f.linear());
+      f_cross.template bottomLeftCorner<3, 3>() =
+          pinocchio::skew(d->joint2_f.linear());
+      f_cross.template bottomRightCorner<3, 3>() =
+          pinocchio::skew(d->joint2_f.angular());
 
       SE3 j2Mj1 =
           joint2_placement_.act(d->f1Mf2.actInv(joint1_placement_.inverse()));
@@ -197,11 +200,14 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
       break;
     }
     case pinocchio::ReferenceFrame::WORLD:
-      throw_pretty("Reference frame pinocchio::WORLD is not implemented, please use pinocchio::LOCAL");
+      throw_pretty(
+          "Reference frame pinocchio::WORLD is not implemented, please use "
+          "pinocchio::LOCAL");
       break;
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       throw_pretty(
-          "Reference frame pinocchio::LOCAL_WORLD_ALIGNED is not implemented, please use pinocchio::LOCAL");
+          "Reference frame pinocchio::LOCAL_WORLD_ALIGNED is not implemented, "
+          "please use pinocchio::LOCAL");
       break;
   }
 }
