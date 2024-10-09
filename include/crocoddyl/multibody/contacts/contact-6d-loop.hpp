@@ -235,6 +235,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::da0_dx;
   using Base::df_du;
   using Base::df_dx;
+  using Base::dtau_dq;
   using Base::f;
   using Base::Jc;
   using Base::pinocchio;
@@ -276,8 +277,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Force joint1_f;
   Force joint2_f;
   Force f_local;
-
-  Matrix6s f_cross;
 };
 
 }  // namespace crocoddyl

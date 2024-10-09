@@ -251,10 +251,10 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-        ContactModel6DLoopTpl<Scalar>* c =
+        const ContactModel6DLoopTpl<Scalar>* c =
             dynamic_cast<ContactModel6DLoopTpl<Scalar>*>(m_i->contact.get());
         if (c != nullptr) {
-          ContactData6DLoopTpl<Scalar>* dc =
+          const ContactData6DLoopTpl<Scalar>* dc =
               static_cast<ContactData6DLoopTpl<Scalar>*>(d_i.get());
           const pinocchio::JointIndex joint1 = c->get_joint1_id();
           const pinocchio::JointIndex joint2 = c->get_joint2_id();
@@ -288,10 +288,10 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-        ContactModel6DLoopTpl<Scalar>* c =
+        const ContactModel6DLoopTpl<Scalar>* c =
             dynamic_cast<ContactModel6DLoopTpl<Scalar>*>(m_i->contact.get());
         if (c != nullptr) {
-          ContactData6DLoopTpl<Scalar>* dc =
+          const ContactData6DLoopTpl<Scalar>* dc =
               static_cast<ContactData6DLoopTpl<Scalar>*>(d_i.get());
           const pinocchio::JointIndex joint1 = c->get_joint1_id();
           const pinocchio::JointIndex joint2 = c->get_joint2_id();
