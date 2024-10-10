@@ -143,6 +143,31 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   const Vector2s &get_gains() const;
 
   /**
+   * @brief Set the reference the first contact frame parent joint
+   */
+  void set_joint1_id(const int joint1_id);
+
+  /**
+   * @brief Set the reference the first contact frame placement
+   */
+  void set_joint1_placement(const SE3 &joint1_placement);
+
+  /**
+   * @brief Set the reference the second contact frame parent joint
+   */
+  void set_joint2_id(const int joint2_id);
+
+  /**
+   * @brief Set the reference the second contact frame placement
+   */
+  void set_joint2_placement(const SE3 &joint2_placement);
+
+  /**
+   * @brief Set the Baumgarte stabilization gains
+   */
+  void set_gains(const Vector2s &gains);
+
+  /**
    * @brief Print relevant information of the 6d contact model
    *
    * @param[out] os  Output stream object
@@ -187,37 +212,50 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
                        pinocchio::DataTpl<Scalar> *const data)
       : Base(model, data),
         v1_partial_dq(6, model->get_state()->get_nv()),
+        f1_v1_partial_dq(6, model->get_state()->get_nv()),
         a1_partial_dq(6, model->get_state()->get_nv()),
         a1_partial_dv(6, model->get_state()->get_nv()),
         a1_partial_da(6, model->get_state()->get_nv()),
         v2_partial_dq(6, model->get_state()->get_nv()),
         a2_partial_dq(6, model->get_state()->get_nv()),
+        f2_a2_partial_dq(6, model->get_state()->get_nv()),
         a2_partial_dv(6, model->get_state()->get_nv()),
         a2_partial_da(6, model->get_state()->get_nv()),
         da0_dq_t1(6, model->get_state()->get_nv()),
         da0_dq_t2(6, model->get_state()->get_nv()),
-        da0_dq_t3(6, model->get_state()->get_nv()) {
+        da0_dq_t2_tmp(6, model->get_state()->get_nv()),
+        da0_dq_t3(6, model->get_state()->get_nv()),
+        da0_dq_t3_tmp(6, model->get_state()->get_nv()),
+        f1Jf1(6, model->get_state()->get_nv()),
+        f2Jf2(6, model->get_state()->get_nv()),
+        f1Jf2(6, model->get_state()->get_nv()),
+        j1Jj1(6, model->get_state()->get_nv()),
+        j2Jj2(6, model->get_state()->get_nv()) {
     v1_partial_dq.setZero();
+    f1_v1_partial_dq.setZero();
     a1_partial_dq.setZero();
     a1_partial_dv.setZero();
     a1_partial_da.setZero();
     v2_partial_dq.setZero();
     a2_partial_dq.setZero();
+    f2_a2_partial_dq.setZero();
     a2_partial_dv.setZero();
     a2_partial_da.setZero();
     da0_dq_t1.setZero();
     da0_dq_t2.setZero();
+    da0_dq_t2_tmp.setZero();
     da0_dq_t3.setZero();
+    da0_dq_t3_tmp.setZero();
+    f1Jf1.setZero();
+    f2Jf2.setZero();
+    f1Jf2.setZero();
+    j1Jj1.setZero();
+    j2Jj2.setZero();
     //
     j1Xf1 = SE3ActionMatrix::Identity();
     j2Xf2 = SE3ActionMatrix::Identity();
     f1Mf2 = SE3::Identity();
     f1Xf2 = SE3ActionMatrix::Identity();
-    //
-    f1Jf1 = MatrixXs::Zero(6, model->get_state()->get_nv());
-    f2Jf2 = MatrixXs::Zero(6, model->get_state()->get_nv());
-    j1Jj1 = MatrixXs::Zero(6, model->get_state()->get_nv());
-    j2Jj2 = MatrixXs::Zero(6, model->get_state()->get_nv());
     //
     f1vf1 = Motion::Zero();
     f2vf2 = Motion::Zero();
@@ -241,17 +279,21 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   using Base::pinocchio;
 
   Matrix6xs v1_partial_dq;
+  Matrix6xs f1_v1_partial_dq;
   Matrix6xs a1_partial_dq;
   Matrix6xs a1_partial_dv;
   Matrix6xs a1_partial_da;
   Matrix6xs v2_partial_dq;
   Matrix6xs a2_partial_dq;
+  Matrix6xs f2_a2_partial_dq;
   Matrix6xs a2_partial_dv;
   Matrix6xs a2_partial_da;
 
   Matrix6xs da0_dq_t1;
   Matrix6xs da0_dq_t2;
+  Matrix6xs da0_dq_t2_tmp;
   Matrix6xs da0_dq_t3;
+  Matrix6xs da0_dq_t3_tmp;
 
   // Placement related data
   SE3 oMf1;   // Placement of the first contact frame in the world frame
@@ -261,10 +303,11 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   SE3ActionMatrix j2Xf2;
   SE3ActionMatrix f1Xf2;
   // Jacobian related data
-  MatrixXs f1Jf1;
-  MatrixXs f2Jf2;
-  MatrixXs j1Jj1;
-  MatrixXs j2Jj2;
+  Matrix6xs f1Jf1;
+  Matrix6xs f2Jf2;
+  Matrix6xs f1Jf2;
+  Matrix6xs j1Jj1;
+  Matrix6xs j2Jj2;
   // Velocity related data
   Motion f1vf1;
   Motion f2vf2;

@@ -30,8 +30,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       gains_(gains) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
-                 "for 6D loop "
-                 "contacts\n"
+              "for 6D loop contacts"
               << std::endl;
   }
 }
@@ -50,8 +49,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
       gains_(gains) {
   if (ref != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
-                 "for 6D loop "
-                 "contacts\n"
+                 "for 6D loop contacts"
               << std::endl;
   }
 }
@@ -100,7 +98,7 @@ void ContactModel6DLoopTpl<Scalar>::calc(
     d->a0.noalias() -= gains_[0] * pinocchio::log6(d->f1Mf2).toVector();
   }
   if (std::abs<Scalar>(gains_[1]) > std::numeric_limits<Scalar>::epsilon()) {
-    d->a0 += gains_[1] * (d->f1vf1 - d->f1vf2).toVector();
+    d->a0.noalias() += gains_[1] * (d->f1vf1 - d->f1vf2).toVector();
   }
 }
 
@@ -128,20 +126,22 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
       pinocchio::LOCAL, d->v2_partial_dq, d->a2_partial_dq, d->a2_partial_dv,
       d->a2_partial_da);
 
-  d->da0_dq_t1 = joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;
-  d->da0_dq_t2 = (d->f1af2.toActionMatrix() * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) +
-                  d->f1Xf2 * (joint2_placement_.toActionMatrixInverse() *
-                              d->a2_partial_dq));
-  d->da0_dq_t3 =
-      -d->f1vf2.toActionMatrix() *
-          (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq) +
-      d->f1vf1.toActionMatrix() * d->f1vf2.toActionMatrix() *
-          (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) +
-      d->f1vf1.toActionMatrix() * d->f1Xf2 *
-          (joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq);
+  d->da0_dq_t1.noalias() = joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;
 
+  d->da0_dq_t2.noalias() = d->f1af2.toActionMatrix() * d->Jc;
+  d->f2_a2_partial_dq.noalias() = joint2_placement_.toActionMatrixInverse() *
+                              d->a2_partial_dq;
+  d->da0_dq_t2.noalias() += d->f1Xf2 * d->f2_a2_partial_dq;
+  
+  d->f1_v1_partial_dq.noalias() = joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq;
+  d->da0_dq_t3.noalias() = - d->f1vf2.toActionMatrix() * d->f1_v1_partial_dq;
+  d->da0_dq_t3_tmp.noalias() = d->f1vf2.toActionMatrix() * d->Jc;
+  d->da0_dq_t3.noalias() += d->f1vf1.toActionMatrix() * d->da0_dq_t3_tmp;
+  d->da0_dq_t3_tmp.noalias() = joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq;
+  d->da0_dq_t3.noalias() += d->f1vf1.toActionMatrix() * d->f1Xf2 * d->da0_dq_t3_tmp;
   d->da0_dx.leftCols(nv).noalias() = d->da0_dq_t1 - d->da0_dq_t2 + d->da0_dq_t3;
-  d->da0_dx.rightCols(nv) =
+
+  d->da0_dx.rightCols(nv).noalias() =
       joint1_placement_.toActionMatrixInverse() * d->a1_partial_dv -
       d->f1Xf2 *
           (joint2_placement_.toActionMatrixInverse() * d->a2_partial_dv) -
@@ -177,39 +177,24 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
   }
   Data *d = static_cast<Data *>(data.get());
   d->f = pinocchio::ForceTpl<Scalar>(-force);
-  switch (type_) {
-    case pinocchio::ReferenceFrame::LOCAL: {
-      d->fext = joint1_placement_.act(d->f);
-      d->joint1_f = -joint1_placement_.act(d->f);
-      d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->f);
+  d->fext = joint1_placement_.act(d->f);
+  d->joint1_f = -joint1_placement_.act(d->f);
+  d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->f);
 
-      Matrix6s f_cross = Matrix6s::Zero(6, 6);
-      f_cross.template topRightCorner<3, 3>() =
-          pinocchio::skew(d->joint2_f.linear());
-      f_cross.template bottomLeftCorner<3, 3>() =
-          pinocchio::skew(d->joint2_f.linear());
-      f_cross.template bottomRightCorner<3, 3>() =
-          pinocchio::skew(d->joint2_f.angular());
+  Matrix6s f_cross = Matrix6s::Zero(6, 6);
+  f_cross.template topRightCorner<3, 3>() =
+      pinocchio::skew(d->joint2_f.linear());
+  f_cross.template bottomLeftCorner<3, 3>() =
+      pinocchio::skew(d->joint2_f.linear());
+  f_cross.template bottomRightCorner<3, 3>() =
+      pinocchio::skew(d->joint2_f.angular());
 
-      SE3 j2Mj1 =
-          joint2_placement_.act(d->f1Mf2.actInv(joint1_placement_.inverse()));
+  SE3 j2Mj1 =
+      joint2_placement_.act(d->f1Mf2.actInv(joint1_placement_.inverse()));
 
-      d->dtau_dq.noalias() =
-          d->j2Jj2.transpose() *
-          (-f_cross * (d->j2Jj2 - j2Mj1.toActionMatrix() * d->j1Jj1));
-      break;
-    }
-    case pinocchio::ReferenceFrame::WORLD:
-      throw_pretty(
-          "Reference frame pinocchio::WORLD is not implemented, please use "
-          "pinocchio::LOCAL");
-      break;
-    case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      throw_pretty(
-          "Reference frame pinocchio::LOCAL_WORLD_ALIGNED is not implemented, "
-          "please use pinocchio::LOCAL");
-      break;
-  }
+  d->dtau_dq.noalias() =
+      d->j2Jj2.transpose() *
+      (-f_cross * (d->j2Jj2 - j2Mj1.toActionMatrix() * d->j1Jj1));
 }
 
 template <typename Scalar>
@@ -252,6 +237,34 @@ template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s &
 ContactModel6DLoopTpl<Scalar>::get_gains() const {
   return gains_;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_joint1_id(const int joint1_id) {
+  joint1_id_ = joint1_id;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_joint2_id(const int joint2_id) {
+  joint2_id_ = joint2_id;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_joint1_placement(
+    const typename pinocchio::SE3Tpl<Scalar> &joint1_placement) {
+  joint1_placement_ = joint1_placement;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_joint2_placement(
+    const typename pinocchio::SE3Tpl<Scalar> &joint2_placement) {
+  joint2_placement_ = joint2_placement;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_gains(
+    const typename MathBaseTpl<Scalar>::Vector2s &gains) {
+  gains_ = gains;
 }
 
 }  // namespace crocoddyl
