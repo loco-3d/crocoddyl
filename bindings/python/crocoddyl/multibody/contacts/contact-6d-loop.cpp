@@ -224,10 +224,6 @@ void exposeContact6DLoop() {
           bp::make_getter(&ContactData6DLoop::f1af2,
                           bp::return_internal_reference<>()),
           "Acceleration of the second contact frame in the first contact frame")
-      .add_property("f_cross",
-                    bp::make_getter(&ContactData6DLoop::f_cross,
-                                    bp::return_internal_reference<>()),
-                    "Cross product matrix")
       .add_property("joint1_f",
                     bp::make_getter(&ContactData6DLoop::joint1_f,
                                     bp::return_internal_reference<>()),
