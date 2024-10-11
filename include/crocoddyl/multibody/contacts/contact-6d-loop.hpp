@@ -112,18 +112,21 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
                            const VectorXs &force);
 
-
   /**
    * @brief Updates the force differential for the given contact data.
    *
-   * This function updates the force differential matrices with respect to the state and control variables.
+   * This function updates the force differential matrices with respect to the
+   * state and control variables.
    *
    * @param[in] data  Shared pointer to the contact data abstract.
-   * @param[in] df_dx Matrix representing the differential of the force with respect to the state variables.
-   * @param[in] df_du Matrix representing the differential of the force with respect to the control variables.
+   * @param[in] df_dx Matrix representing the differential of the force with
+   * respect to the state variables.
+   * @param[in] df_du Matrix representing the differential of the force with
+   * respect to the control variables.
    */
-  virtual void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                               const MatrixXs& df_dx, const MatrixXs& df_du);
+  virtual void updateForceDiff(
+      const boost::shared_ptr<ContactDataAbstract> &data, const MatrixXs &df_dx,
+      const MatrixXs &df_du);
 
   /**
    * @brief Create the 6d loop-contact data
@@ -137,7 +140,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   const int get_joint1_id() const;
 
   /**
-   * @brief Return the first contact frame placement with respect to the parent joint
+   * @brief Return the first contact frame placement with respect to the parent
+   * joint
    */
   const SE3 &get_joint1_placement() const;
 
@@ -147,7 +151,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   const int get_joint2_id() const;
 
   /**
-   * @brief Return the second contact frame placement with respect to the parent joint
+   * @brief Return the second contact frame placement with respect to the parent
+   * joint
    */
   const SE3 &get_joint2_placement() const;
 
@@ -162,7 +167,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   void set_joint1_id(const int joint1_id);
 
   /**
-   * @brief Set the first contact frame placement with respect to the parent joint
+   * @brief Set the first contact frame placement with respect to the parent
+   * joint
    */
   void set_joint1_placement(const SE3 &joint1_placement);
 
@@ -172,7 +178,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   void set_joint2_id(const int joint2_id);
 
   /**
-   * @brief Set the second contact frame placement with respect to the parent joint
+   * @brief Set the second contact frame placement with respect to the parent
+   * joint
    */
   void set_joint2_placement(const SE3 &joint2_placement);
 
@@ -327,7 +334,8 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   // Placement related data
   SE3 oMf1;   // Placement of the first contact frame in the world frame
   SE3 oMf2;   // Placement of the second contact frame in the world frame
-  SE3 f1Mf2;  // Relative placement of the contact frames in the first contact frame
+  SE3 f1Mf2;  // Relative placement of the contact frames in the first contact
+              // frame
   SE3ActionMatrix j1Xf1;
   SE3ActionMatrix j2Xf2;
   SE3ActionMatrix f1Xf2;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University, 
+// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University,
 //                          LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,10 +22,7 @@ namespace crocoddyl {
 namespace unittest {
 
 struct ContactLoopModelTypes {
-  enum Type {
-    ContactModel6DLoop_LOCAL,
-    NbContactModelTypes
-  };
+  enum Type { ContactModel6DLoop_LOCAL, NbContactModelTypes };
   static std::vector<Type> init_all() {
     std::vector<Type> v;
     v.reserve(NbContactModelTypes);
@@ -37,7 +34,8 @@ struct ContactLoopModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream& operator<<(std::ostream& os, const ContactLoopModelTypes::Type& type);
+std::ostream& operator<<(std::ostream& os,
+                         const ContactLoopModelTypes::Type& type);
 
 class ContactLoopModelFactory {
  public:
@@ -48,10 +46,9 @@ class ContactLoopModelFactory {
 
   boost::shared_ptr<crocoddyl::ContactModelAbstract> create(
       ContactLoopModelTypes::Type contact_type,
-      PinocchioModelTypes::Type model_type,
-      const int joint1_id, const pinocchio::SE3 &joint1_placement,
-      const int joint2_id, const pinocchio::SE3 &joint2_placement,
-      Eigen::Vector2d gains,
+      PinocchioModelTypes::Type model_type, const int joint1_id,
+      const pinocchio::SE3& joint1_placement, const int joint2_id,
+      const pinocchio::SE3& joint2_placement, Eigen::Vector2d gains,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 

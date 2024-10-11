@@ -36,13 +36,14 @@ std::ostream& operator<<(std::ostream& os,
 ContactLoopModelFactory::ContactLoopModelFactory() {}
 ContactLoopModelFactory::~ContactLoopModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactLoopModelFactory::create(
-      ContactLoopModelTypes::Type contact_type,
-      PinocchioModelTypes::Type model_type,
-      const int joint1_id, const pinocchio::SE3 &joint1_placement,
-      const int joint2_id, const pinocchio::SE3 &joint2_placement,
-      Eigen::Vector2d gains,
-      std::size_t nu ) const {
+boost::shared_ptr<crocoddyl::ContactModelAbstract>
+ContactLoopModelFactory::create(ContactLoopModelTypes::Type contact_type,
+                                PinocchioModelTypes::Type model_type,
+                                const int joint1_id,
+                                const pinocchio::SE3& joint1_placement,
+                                const int joint2_id,
+                                const pinocchio::SE3& joint2_placement,
+                                Eigen::Vector2d gains, std::size_t nu) const {
   PinocchioModelFactory model_factory(model_type);
   boost::shared_ptr<crocoddyl::StateMultibody> state =
       boost::make_shared<crocoddyl::StateMultibody>(model_factory.create());
@@ -53,8 +54,7 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactLoopModelFactory::crea
   switch (contact_type) {
     case ContactLoopModelTypes::ContactModel6DLoop_LOCAL:
       contact = boost::make_shared<crocoddyl::ContactModel6DLoop>(
-          state, joint1_id, joint1_placement, 
-          joint2_id, joint2_placement,
+          state, joint1_id, joint1_placement, joint2_id, joint2_placement,
           pinocchio::ReferenceFrame::LOCAL, nu, gains);
       break;
     default:
@@ -64,20 +64,24 @@ boost::shared_ptr<crocoddyl::ContactModelAbstract> ContactLoopModelFactory::crea
   return contact;
 }
 
-boost::shared_ptr<crocoddyl::ContactModelAbstract> create_random_loop_contact() {
+boost::shared_ptr<crocoddyl::ContactModelAbstract>
+create_random_loop_contact() {
   static bool once = true;
   if (once) {
     srand((unsigned)time(NULL));
     once = false;
   }
   boost::shared_ptr<crocoddyl::ContactModelAbstract> contact;
-  ContactLoopModelFactory factory;;
+  ContactLoopModelFactory factory;
+  ;
   if (rand() % 1 == 0) {
-    contact = factory.create(ContactLoopModelTypes::ContactModel6DLoop_LOCAL,
-                            PinocchioModelTypes::RandomHumanoid,
-                            0, pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d::Random()),
-                            1, pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d::Random()),
-                            Eigen::Vector2d::Random());
+    contact = factory.create(
+        ContactLoopModelTypes::ContactModel6DLoop_LOCAL,
+        PinocchioModelTypes::RandomHumanoid, 0,
+        pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d::Random()),
+        1,
+        pinocchio::SE3(Eigen::Matrix3d::Identity(), Eigen::Vector3d::Random()),
+        Eigen::Vector2d::Random());
   }
   return contact;
 }

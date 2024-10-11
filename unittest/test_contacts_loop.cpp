@@ -28,10 +28,8 @@ void test_construct_data(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        0, pinocchio::SE3::Identity(),
-        0, pinocchio::SE3::Identity(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+                     pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
 
   // Run the print function
   std::ostringstream tmp;
@@ -50,10 +48,8 @@ void test_calc_fetch_jacobians(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        1, pinocchio::SE3::Random(),
-        2, pinocchio::SE3::Random(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
 
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -88,10 +84,8 @@ void test_calc_diff_fetch_derivatives(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        1, pinocchio::SE3::Random(),
-        2, pinocchio::SE3::Random(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
 
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -128,10 +122,8 @@ void test_update_force(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        1, pinocchio::SE3::Random(),
-        2, pinocchio::SE3::Random(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
 
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -160,10 +152,8 @@ void test_update_force_diff(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        1, pinocchio::SE3::Random(),
-        2, pinocchio::SE3::Random(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
 
   // create the corresponding data object
   const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -198,10 +188,8 @@ void test_partial_derivatives_against_numdiff(
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 
-        0, pinocchio::SE3::Identity(),
-        0, pinocchio::SE3::Identity(),
-        Eigen::Vector2d::Random());
+      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+                     pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
 
   // create the corresponding data object
   pinocchio::Model& pinocchio_model =
@@ -262,15 +250,16 @@ void register_contact_model_unit_tests(ContactLoopModelTypes::Type contact_type,
 }
 
 bool init_function() {
-  for (size_t contact_type = 0; contact_type < ContactLoopModelTypes::all.size();
-       ++contact_type) {
+  for (size_t contact_type = 0;
+       contact_type < ContactLoopModelTypes::all.size(); ++contact_type) {
     for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size();
          ++model_type) {
-            if (model_type == PinocchioModelTypes::Hector) {
-                continue;
-            }
-            register_contact_model_unit_tests(ContactLoopModelTypes::all[contact_type],
-                                        PinocchioModelTypes::all[model_type]);
+      if (model_type == PinocchioModelTypes::Hector) {
+        continue;
+      }
+      register_contact_model_unit_tests(
+          ContactLoopModelTypes::all[contact_type],
+          PinocchioModelTypes::all[model_type]);
     }
   }
   return true;

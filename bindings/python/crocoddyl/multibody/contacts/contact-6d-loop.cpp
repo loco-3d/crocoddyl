@@ -34,12 +34,15 @@ void exposeContact6DLoop() {
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param joint1_id: Parent joint id of the first contact frame\n"
-          ":param joint1_placement: Placement of the first contact frame with respect to the parent joint\n"
+          ":param joint1_placement: Placement of the first contact frame with "
+          "respect to the parent joint\n"
           ":param joint2_id: Parent joint id of the second contact frames\n"
-          ":param joint2_placement: Placement of the second contact frame with respect to the parent joint\n"
+          ":param joint2_placement: Placement of the second contact frame with "
+          "respect to the parent joint\n"
           ":param ref: reference frame of contact (must be pinocchio::LOCAL)\n"
           ":param nu: dimension of control vector\n"
-          ":param gains: gains of the contact model (default np.matrix([0.,0.]))"))
+          ":param gains: gains of the contact model (default "
+          "np.matrix([0.,0.]))"))
       .def("calc", &ContactModel6DLoop::calc, bp::args("self", "data", "x"),
            "Compute the 6D loop-contact Jacobian and drift.\n\n"
            "The rigid contact model throught acceleration-base holonomic "
@@ -49,7 +52,8 @@ void exposeContact6DLoop() {
            ":param x: state point (dim. state.nx)")
       .def("calcDiff", &ContactModel6DLoop::calcDiff,
            bp::args("self", "data", "x"),
-           "Compute the derivatives of the 6D loop-contact holonomic constraint.\n\n"
+           "Compute the derivatives of the 6D loop-contact holonomic "
+           "constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic "
            "constraint\n"
            "of the contact frame placement.\n"
@@ -62,11 +66,11 @@ void exposeContact6DLoop() {
            ":param data: cost data\n"
            ":param force: force vector (dimension 6)")
       .def("updateForceDiff", &ContactModel6DLoop::updateForceDiff,
-              bp::args("self", "data", "df_dx", "df_du"),
-              "Update the force derivatives.\n\n"
-              ":param data: cost data\n"
-              ":param df_dx: Jacobian of the force with respect to the state\n"
-              ":param df_du: Jacobian of the force with respect to the control")
+           bp::args("self", "data", "df_dx", "df_du"),
+           "Update the force derivatives.\n\n"
+           ":param data: cost data\n"
+           ":param df_dx: Jacobian of the force with respect to the state\n"
+           ":param df_du: Jacobian of the force with respect to the control")
       .def("createData", &ContactModel6DLoop::createData,
            bp::with_custodian_and_ward_postcall<0, 2>(),
            bp::args("self", "data"),
@@ -85,7 +89,8 @@ void exposeContact6DLoop() {
           "joint1_placement",
           bp::make_function(&ContactModel6DLoop::get_joint1_placement,
                             bp::return_value_policy<bp::return_by_value>()),
-          "Placement of the first contact frame with respect to the parent joint")
+          "Placement of the first contact frame with respect to the parent "
+          "joint")
       .add_property(
           "joint2_id",
           bp::make_function(&ContactModel6DLoop::get_joint2_id,
@@ -95,7 +100,8 @@ void exposeContact6DLoop() {
           "joint2_placement",
           bp::make_function(&ContactModel6DLoop::get_joint2_placement,
                             bp::return_value_policy<bp::return_by_value>()),
-          "Placement of the second contact frame with respect to the parent joint")
+          "Placement of the second contact frame with respect to the parent "
+          "joint")
       .add_property(
           "gains",
           bp::make_function(&ContactModel6DLoop::get_gains,
