@@ -40,7 +40,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
-   * @brief Initialize the 6d contact model from joint and placements
+   * @brief Initialize the 6d loop-contact model from joint and placements
    *
    *
    * @param[in] state             State of the multibody system
@@ -62,7 +62,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
                         const Vector2s &gains = Vector2s::Zero());
 
   /**
-   * @brief Initialize the 6d contact model from joint and placements
+   * @brief Initialize the 6d loop-contact model from joint and placements
    *
    *
    * @param[in] state             State of the multibody system
@@ -84,9 +84,9 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   virtual ~ContactModel6DLoopTpl();
 
   /**
-   * @brief Compute the 3d contact Jacobian and drift
+   * @brief Compute the 6d loop-contact Jacobian and drift
    *
-   * @param[in] data  3d contact data
+   * @param[in] data  6d loop-contact data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -94,9 +94,9 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
                     const Eigen::Ref<const VectorXs> &x);
 
   /**
-   * @brief Compute the derivatives of the 6d contact holonomic constraint
+   * @brief Compute the derivatives of the 6d loop-contact holonomic constraint
    *
-   * @param[in] data  6d contact data
+   * @param[in] data  6d loop-contact data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
@@ -106,7 +106,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Convert the force into a stack of spatial forces
    *
-   * @param[in] data   6d contact data
+   * @param[in] data   6d loop-contact data
    * @param[in] force  6d force
    */
   virtual void updateForce(const boost::shared_ptr<ContactDataAbstract> &data,
@@ -126,7 +126,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
                                const MatrixXs& df_dx, const MatrixXs& df_du);
 
   /**
-   * @brief Create the 6d contact data
+   * @brief Create the 6d loop-contact data
    */
   virtual boost::shared_ptr<ContactDataAbstract> createData(
       pinocchio::DataTpl<Scalar> *const data);
@@ -250,7 +250,19 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         f2Jf2(6, model->get_state()->get_nv()),
         f1Jf2(6, model->get_state()->get_nv()),
         j1Jj1(6, model->get_state()->get_nv()),
-        j2Jj2(6, model->get_state()->get_nv()) {
+        j2Jj2(6, model->get_state()->get_nv()),
+        j1Xf1(SE3ActionMatrix::Identity()),
+        j2Xf2(SE3ActionMatrix::Identity()),
+        f1Mf2(SE3::Identity()),
+        f1Xf2(SE3ActionMatrix::Identity()),
+        f1vf1(Motion::Zero()),
+        f2vf2(Motion::Zero()),
+        f1vf2(Motion::Zero()),
+        f1af1(Motion::Zero()),
+        f2af2(Motion::Zero()),
+        f1af2(Motion::Zero()),
+        joint1_f(Force::Zero()),
+        joint2_f(Force::Zero()) {
     v1_partial_dq.setZero();
     f1_v1_partial_dq.setZero();
     a1_partial_dq.setZero();
@@ -278,22 +290,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     j1Jj1.setZero();
     j2Jj2.setZero();
     j2Jj1.setZero();
-    //
-    j1Xf1 = SE3ActionMatrix::Identity();
-    j2Xf2 = SE3ActionMatrix::Identity();
-    f1Mf2 = SE3::Identity();
-    f1Xf2 = SE3ActionMatrix::Identity();
-    //
-    f1vf1 = Motion::Zero();
-    f2vf2 = Motion::Zero();
-    f1vf2 = Motion::Zero();
-    //
-    f1af1 = Motion::Zero();
-    f2af2 = Motion::Zero();
-    f1af2 = Motion::Zero();
-    //
-    joint1_f = Force::Zero();
-    joint2_f = Force::Zero();
   }
 
   using Base::a0;
@@ -353,7 +349,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   // Force related data
   Force joint1_f;
   Force joint2_f;
-  Force f_local;
 };
 
 }  // namespace crocoddyl
