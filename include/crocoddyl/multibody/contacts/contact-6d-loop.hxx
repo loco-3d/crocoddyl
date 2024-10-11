@@ -57,6 +57,11 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
                  "for 6D loop contacts"
               << std::endl;
   }
+  if (joint1_id == 0 || joint2_id == 0) {
+    std::cerr << "Warning: At least one of the parents joints id is zero"
+              "you should use crocoddyl::ContactModel6D instead"
+              << std::endl;
+  }
 }
 
 template <typename Scalar>
@@ -193,10 +198,9 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
 
   SE3 j2Mj1 =
       joint2_placement_.act(d->f1Mf2.actInv(joint1_placement_.inverse()));
-
-  d->dtau_dq.noalias() =
-      d->j2Jj2.transpose() *
-      (-f_cross * (d->j2Jj2 - j2Mj1.toActionMatrix() * d->j1Jj1));
+  d->j2Jj1.noalias() = j2Mj1.toActionMatrix() * d->j1Jj1;
+  d->dtau_dq_tmp.noalias() = -f_cross * (d->j2Jj2 - d->j2Jj1);
+  d->dtau_dq.noalias() = d->j2Jj2.transpose() * d->dtau_dq_tmp;
 }
 
 template <typename Scalar>

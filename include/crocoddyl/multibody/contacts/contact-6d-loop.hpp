@@ -245,6 +245,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         da0_dq_t3_tmp(6, model->get_state()->get_nv()),
         dpos_dq(6, model->get_state()->get_nv()),
         dvel_dq(6, model->get_state()->get_nv()),
+        dtau_dq_tmp(model->get_state()->get_nv(), model->get_state()->get_nv()),
         f1Jf1(6, model->get_state()->get_nv()),
         f2Jf2(6, model->get_state()->get_nv()),
         f1Jf2(6, model->get_state()->get_nv()),
@@ -270,11 +271,13 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     da0_dq_t3_tmp.setZero();
     dpos_dq.setZero();
     dvel_dq.setZero();
+    dtau_dq_tmp.setZero();
     f1Jf1.setZero();
     f2Jf2.setZero();
     f1Jf2.setZero();
     j1Jj1.setZero();
     j2Jj2.setZero();
+    j2Jj1.setZero();
     //
     j1Xf1 = SE3ActionMatrix::Identity();
     j2Xf2 = SE3ActionMatrix::Identity();
@@ -324,6 +327,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
 
   Matrix6xs dpos_dq;
   Matrix6xs dvel_dq;
+  MatrixXs dtau_dq_tmp;
   // Placement related data
   SE3 oMf1;   // Placement of the first contact frame in the world frame
   SE3 oMf2;   // Placement of the second contact frame in the world frame
@@ -337,6 +341,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs f1Jf2;
   Matrix6xs j1Jj1;
   Matrix6xs j2Jj2;
+  Matrix6xs j2Jj1;
   // Velocity related data
   Motion f1vf1;
   Motion f2vf2;
