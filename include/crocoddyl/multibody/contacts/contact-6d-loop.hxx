@@ -33,6 +33,11 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
               "for 6D loop contacts"
               << std::endl;
   }
+  if (joint1_id == 0 || joint2_id == 0) {
+    std::cerr << "Warning: At least one of the parents joints id is zero"
+              "you should use crocoddyl::ContactModel6D instead"
+              << std::endl;
+  }
 }
 
 template <typename Scalar>
@@ -92,7 +97,7 @@ void ContactModel6DLoopTpl<Scalar>::calc(
     d->f1af2 = d->f1Mf2.act(d->f2af2);
   }
   d->a0.noalias() =
-      (d->f1af1 - d->f1Mf2.act(d->f2af2) + d->f1vf1.cross(d->f1vf2)).toVector();
+      (d->f1af1 - d->f1af2 + d->f1vf1.cross(d->f1vf2)).toVector();
 
   if (std::abs<Scalar>(gains_[0]) > std::numeric_limits<Scalar>::epsilon()) {
     d->a0.noalias() -= gains_[0] * pinocchio::log6(d->f1Mf2).toVector();
@@ -108,7 +113,6 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
   const std::size_t nv = state_->get_nv();
-
   if (joint1_id_ > 0) {
     d->f1af1 = joint1_placement_.actInv(d->pinocchio->a[joint1_id_]);
   }
@@ -141,30 +145,28 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
   d->da0_dq_t3.noalias() += d->f1vf1.toActionMatrix() * d->f1Xf2 * d->da0_dq_t3_tmp;
   d->da0_dx.leftCols(nv).noalias() = d->da0_dq_t1 - d->da0_dq_t2 + d->da0_dq_t3;
 
-  d->da0_dx.rightCols(nv).noalias() =
-      joint1_placement_.toActionMatrixInverse() * d->a1_partial_dv -
-      d->f1Xf2 *
-          (joint2_placement_.toActionMatrixInverse() * d->a2_partial_dv) -
-      d->f1vf2.toActionMatrix() * d->f1Jf1 +
-      d->f1vf1.toActionMatrix() * d->f1Xf2 * d->f2Jf2;
+  d->f2_a2_partial_dv.noalias() = joint2_placement_.toActionMatrixInverse() * d->a2_partial_dv;
+  d->f1Jf2.noalias() = d->f1Xf2 * d->f2Jf2;
+  d->da0_dx.rightCols(nv).noalias() = joint1_placement_.toActionMatrixInverse() * d->a1_partial_dv;
+  d->da0_dx.rightCols(nv).noalias() -= d->f1Xf2 * d->f2_a2_partial_dv;
+  d->da0_dx.rightCols(nv).noalias() -= d->f1vf2.toActionMatrix() * d->f1Jf1;
+  d->da0_dx.rightCols(nv).noalias() += d->f1vf1.toActionMatrix() * d->f1Jf2;
+
   if (std::abs<Scalar>(gains_[0]) > std::numeric_limits<Scalar>::epsilon()) {
     Matrix6s f1Mf2_log6;
     pinocchio::Jlog6(d->f1Mf2, f1Mf2_log6);
-    d->da0_dx.leftCols(nv).noalias() +=
-        gains_[0] * f1Mf2_log6 *
-        (d->oMf2.toActionMatrixInverse() * d->oMf1.toActionMatrix() * d->f1Jf1 -
-         d->f2Jf2);
+    d->dpos_dq.noalias() = d->oMf2.toActionMatrixInverse() * d->oMf1.toActionMatrix() * d->f1Jf1;
+    d->dpos_dq.noalias() -= d->f2Jf2;
+    d->da0_dx.leftCols(nv).noalias() += gains_[0] * f1Mf2_log6 * d->dpos_dq;
   }
   if (std::abs<Scalar>(gains_[1]) > std::numeric_limits<Scalar>::epsilon()) {
-    d->da0_dx.leftCols(nv).noalias() +=
-        gains_[1] *
-        (joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq -
-         d->f1Mf2.act(d->f2vf2).toActionMatrix() *
-             (d->f1Jf1 - d->f1Xf2 * d->f2Jf2) -
-         d->f1Xf2 * joint2_placement_.toActionMatrixInverse() *
-             d->v2_partial_dq);
-    d->da0_dx.rightCols(nv).noalias() +=
-        gains_[1] * (d->f1Jf1 - d->f1Xf2 * d->f2Jf2);
+    d->f2_v2_partial_dq.noalias() = joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq;
+    d->f1_v2_partial_dq.noalias() = d->f1Xf2 * d->f2_v2_partial_dq;
+    d->dvel_dq.noalias() = d->f1_v1_partial_dq;
+    d->dvel_dq.noalias() -= d->f1vf2.toActionMatrix() * d->Jc;
+    d->dvel_dq.noalias() -= d->f1_v2_partial_dq;
+    d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->dvel_dq;
+    d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->Jc;
   }
 }
 
@@ -173,7 +175,7 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
     const boost::shared_ptr<ContactDataAbstract> &data, const VectorXs &force) {
   if (force.size() != 6) {
     throw_pretty(
-        "Invalid argument: " << "lambda has wrong dimension (it should be 6)");
+        "Contact force vector has wrong dimension (expected 6 got " << force.size() << ")");
   }
   Data *d = static_cast<Data *>(data.get());
   d->f = pinocchio::ForceTpl<Scalar>(-force);

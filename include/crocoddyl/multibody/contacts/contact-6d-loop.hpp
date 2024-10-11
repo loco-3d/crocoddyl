@@ -42,37 +42,37 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
    * @brief Initialize the 6d contact model from joint and placements
    *
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] joint1_id     Reference joint id of the first contact
-   * @param[in] joint1_placement     Placement of the first contact with respect
-   * to the joint
-   * @param[in] joint2_id     Reference joint id of the second contact
-   * @param[in] joint2_placement     Placement of the second contact with
-   * respect to the joint
-   * @param[in] ref    Reference frame of contact
-   * @param[in] nu     Dimension of the control vector
-   * @param[in] gains  Baumgarte stabilization gains
+   * @param[in] state             State of the multibody system
+   * @param[in] joint1_id         Parent joint id of the first contact
+   * @param[in] joint1_placement  Placement of the first contact with
+   *                                  respect to the parent joint
+   * @param[in] joint2_id         Parent joint id of the second contact
+   * @param[in] joint2_placement  Placement of the second contact with
+   *                                  respect to the parent joint
+   * @param[in] ref               Reference frame of contact
+   * @param[in] nu                Dimension of the control vector
+   * @param[in] gains             Baumgarte stabilization gains
    */
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
                         const int joint2_id, const SE3 &joint2_placement,
                         const pinocchio::ReferenceFrame ref,
                         const std::size_t nu,
-                        const Vector2s &gains = Vector2s());
+                        const Vector2s &gains = Vector2s::Zero());
 
   /**
    * @brief Initialize the 6d contact model from joint and placements
    *
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] joint1_id     Reference joint id of the first contact
-   * @param[in] joint1_placement     Placement of the first contact with respect
-   * to the joint
-   * @param[in] joint2_id     Reference joint id of the second contact
-   * @param[in] joint2_placement     Placement of the second contact with
-   * respect to the joint
-   * @param[in] ref    Reference frame of contact
-   * @param[in] gains  Baumgarte stabilization gains
+   * @param[in] state             State of the multibody system
+   * @param[in] joint1_id         Parent joint id of the first contact
+   * @param[in] joint1_placement  Placement of the first contact with
+   *                                  respect to the parent joint
+   * @param[in] joint2_id         Parent joint id of the second contact
+   * @param[in] joint2_placement  Placement of the second contact with
+   *                                  respect to the parent joint
+   * @param[in] ref               Reference frame of contact
+   * @param[in] gains             Baumgarte stabilization gains
    */
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
@@ -118,22 +118,22 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
       pinocchio::DataTpl<Scalar> *const data);
 
   /**
-   * @brief Return the reference the first contact frame parent joint
+   * @brief Return the first contact frame parent joint
    */
   const int get_joint1_id() const;
 
   /**
-   * @brief Return the reference the first contact frame placement
+   * @brief Return the first contact frame placement with respect to the parent joint
    */
   const SE3 &get_joint1_placement() const;
 
   /**
-   * @brief Return the reference the second contact frame parent joint
+   * @brief Return the second contact frame parent joint
    */
   const int get_joint2_id() const;
 
   /**
-   * @brief Return the reference the second contact frame placement
+   * @brief Return the second contact frame placement with respect to the parent joint
    */
   const SE3 &get_joint2_placement() const;
 
@@ -143,22 +143,22 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   const Vector2s &get_gains() const;
 
   /**
-   * @brief Set the reference the first contact frame parent joint
+   * @brief Set the first contact frame parent joint
    */
   void set_joint1_id(const int joint1_id);
 
   /**
-   * @brief Set the reference the first contact frame placement
+   * @brief Set the first contact frame placement with respect to the parent joint
    */
   void set_joint1_placement(const SE3 &joint1_placement);
 
   /**
-   * @brief Set the reference the second contact frame parent joint
+   * @brief Set the second contact frame parent joint
    */
   void set_joint2_id(const int joint2_id);
 
   /**
-   * @brief Set the reference the second contact frame placement
+   * @brief Set the second contact frame placement with respect to the parent joint
    */
   void set_joint2_placement(const SE3 &joint2_placement);
 
@@ -168,7 +168,7 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   void set_gains(const Vector2s &gains);
 
   /**
-   * @brief Print relevant information of the 6d contact model
+   * @brief Print relevant information of the 6D loop-contact model
    *
    * @param[out] os  Output stream object
    */
@@ -182,12 +182,12 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::type_;
 
  private:
-  int joint1_id_;         //!< Reference joint id of the first contact
+  int joint1_id_;         //!< Parent joint id of the first contact
   SE3 joint1_placement_;  //!< Placement of the first contact with respect to
-                          //!< the joint
-  int joint2_id_;         //!< Reference joint id of the second contact
+                          //!< the parent joint
+  int joint2_id_;         //!< Parent joint id of the second contact
   SE3 joint2_placement_;  //!< Placement of the second contact with respect to
-                          //!< the joint
+                          //!< the parent joint
   Vector2s gains_;        //!< Baumgarte stabilization gains
 };
 
@@ -217,8 +217,11 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         a1_partial_dv(6, model->get_state()->get_nv()),
         a1_partial_da(6, model->get_state()->get_nv()),
         v2_partial_dq(6, model->get_state()->get_nv()),
+        f2_v2_partial_dq(6, model->get_state()->get_nv()),
+        f1_v2_partial_dq(6, model->get_state()->get_nv()),
         a2_partial_dq(6, model->get_state()->get_nv()),
         f2_a2_partial_dq(6, model->get_state()->get_nv()),
+        f2_a2_partial_dv(6, model->get_state()->get_nv()),
         a2_partial_dv(6, model->get_state()->get_nv()),
         a2_partial_da(6, model->get_state()->get_nv()),
         da0_dq_t1(6, model->get_state()->get_nv()),
@@ -226,6 +229,8 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         da0_dq_t2_tmp(6, model->get_state()->get_nv()),
         da0_dq_t3(6, model->get_state()->get_nv()),
         da0_dq_t3_tmp(6, model->get_state()->get_nv()),
+        dpos_dq(6, model->get_state()->get_nv()),
+        dvel_dq(6, model->get_state()->get_nv()),
         f1Jf1(6, model->get_state()->get_nv()),
         f2Jf2(6, model->get_state()->get_nv()),
         f1Jf2(6, model->get_state()->get_nv()),
@@ -237,8 +242,11 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     a1_partial_dv.setZero();
     a1_partial_da.setZero();
     v2_partial_dq.setZero();
+    f2_v2_partial_dq.setZero();
+    f1_v2_partial_dq.setZero();
     a2_partial_dq.setZero();
     f2_a2_partial_dq.setZero();
+    f2_a2_partial_dv.setZero();
     a2_partial_dv.setZero();
     a2_partial_da.setZero();
     da0_dq_t1.setZero();
@@ -246,6 +254,8 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     da0_dq_t2_tmp.setZero();
     da0_dq_t3.setZero();
     da0_dq_t3_tmp.setZero();
+    dpos_dq.setZero();
+    dvel_dq.setZero();
     f1Jf1.setZero();
     f2Jf2.setZero();
     f1Jf2.setZero();
@@ -284,8 +294,11 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs a1_partial_dv;
   Matrix6xs a1_partial_da;
   Matrix6xs v2_partial_dq;
+  Matrix6xs f2_v2_partial_dq;
+  Matrix6xs f1_v2_partial_dq;
   Matrix6xs a2_partial_dq;
   Matrix6xs f2_a2_partial_dq;
+  Matrix6xs f2_a2_partial_dv;
   Matrix6xs a2_partial_dv;
   Matrix6xs a2_partial_da;
 
@@ -295,10 +308,12 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs da0_dq_t3;
   Matrix6xs da0_dq_t3_tmp;
 
+  Matrix6xs dpos_dq;
+  Matrix6xs dvel_dq;
   // Placement related data
   SE3 oMf1;   // Placement of the first contact frame in the world frame
   SE3 oMf2;   // Placement of the second contact frame in the world frame
-  SE3 f1Mf2;  // Relative placement of the contact frames in f1 frame
+  SE3 f1Mf2;  // Relative placement of the contact frames in the first contact frame
   SE3ActionMatrix j1Xf1;
   SE3ActionMatrix j2Xf2;
   SE3ActionMatrix f1Xf2;
