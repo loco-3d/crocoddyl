@@ -59,6 +59,7 @@ class HumanoidLocoManipulation:
         handsTarget=dict(),
         feetTarget=dict(),
         switch=False,
+        constraint=False,
     ):
         if self._fwddyn:
             nu = self.actuation.nu if switch is False else 0
@@ -69,6 +70,7 @@ class HumanoidLocoManipulation:
                 else 0
             )
         costs = crocoddyl.CostModelSum(self.state, nu)
+        constraints = crocoddyl.ConstraintModelManager(self.state, nu)
         if not switch:
             contacts = crocoddyl.ContactModelMultiple(self.state, nu)
         else:
@@ -156,34 +158,52 @@ class HumanoidLocoManipulation:
             frame_id = self.robot_model.getFrameId(name)
             # Cost for target reaching: hands
             handTrackingWeights = np.array([1.0] * 3 + [0.1, 0.1, 0.1])
-            costs.addCost(
-                name + "_pose",
-                self._createFramePlacementCost(name, Mref, handTrackingWeights, nu),
-                1e3,
-            )
+            if constraint:
+                hposeResidual = crocoddyl.ResidualModelFramePlacement(
+                    self.state, frame_id, Mref, nu
+                )
+                hposeConstraint = crocoddyl.ConstraintModelResidual(
+                    self.state, hposeResidual
+                )
+                constraints.addConstraint(name + "_pose", hposeConstraint)
+            else:
+                costs.addCost(
+                    name + "_pose",
+                    self._createFramePlacementCost(name, Mref, handTrackingWeights, nu),
+                    1e3,
+                )
         for name, Mref in feetTarget.items():
             frame_id = self.robot_model.getFrameId(name)
-            # Cost for target reaching: hands
+            # Cost for target reaching: feet
             footTrackingWeights = np.array([1, 1, 1] + [1.0] * 3)
-            costs.addCost(
-                name + "_pose",
-                self._createFramePlacementCost(name, Mref, footTrackingWeights, nu),
-                1e3,
-            )
+            if constraint:
+                fposeResidual = crocoddyl.ResidualModelFramePlacement(
+                    self.state, frame_id, Mref, nu
+                )
+                fposeConstraint = crocoddyl.ConstraintModelResidual(
+                    self.state, fposeResidual
+                )
+                constraints.addConstraint(name + "_pose", fposeConstraint)
+            else:
+                costs.addCost(
+                    name + "_pose",
+                    self._createFramePlacementCost(name, Mref, footTrackingWeights, nu),
+                    1e3,
+                )
         # Create the differential action model
         if switch is False:
             if self._fwddyn:
                 dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                    self.state, self.actuation, contacts, costs, 0.0, True
+                    self.state, self.actuation, contacts, costs, constraints, 0.0, True
                 )
             else:
                 dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                    self.state, self.actuation, contacts, costs
+                    self.state, self.actuation, contacts, costs, constraints
                 )
             model = crocoddyl.IntegratedActionModelEuler(dmodel, self.dt)
         else:
             model = crocoddyl.ActionModelImpulseFwdDynamics(
-                self.state, impulses, costs, 0.0, 0.0, True
+                self.state, impulses, costs, constraints, 0.0, 0.0, True
             )
         return model
 
@@ -254,6 +274,17 @@ class HumanoidLocoManipulation:
             [restModel] * int(Tstand / 2) + [restSwitch] + [restModel] * int(Tstand / 2)
         )
         terminalModel = self.createModel(footContacts=[self.LF_name, self.RF_name])
+        return crocoddyl.ShootingProblem(self.x0, models, terminalModel)
+
+    def createMonkeyOneBarProblem(self, RH_pose, LH_pose, RF_pose, LF_pose):
+        # Problem definition
+        Tstand, Treach = 50, 8
+        # Model for reaching the bars
+        handsTarget = {self.LH_name: LH_pose[0], self.RH_name: RH_pose[0]}
+        standModel = self.createModel(footContacts=[self.LF_name, self.RF_name])
+        jumpBarModel = self.createModel()
+        models = [standModel] * Tstand + [jumpBarModel] * Treach
+        terminalModel = self.createModel(handsTarget=handsTarget, constraint=True)
         return crocoddyl.ShootingProblem(self.x0, models, terminalModel)
 
     def createHandstandProblem(self, RH_pose, LH_pose, RF_pose, LF_pose):
@@ -394,6 +425,55 @@ class HumanoidLocoManipulation:
             [restModel] * int(Tstand / 2) + [restSwitch] + [restModel] * int(Tstand / 2)
         )
         terminalModel = self.createModel(footContacts=[self.LF_name, self.RF_name])
+        return crocoddyl.ShootingProblem(self.x0, models, terminalModel)
+
+    def createHandstandEquilibriumProblem(self, RH_pose, LH_pose, RF_pose, LF_pose):
+        # Problem definition
+        Tstand, Trotate = 50, 15
+        # Model for reaching the bars
+        handsTarget = {self.LH_name: LH_pose[0], self.RH_name: RH_pose[0]}
+        standModel = self.createModel(footContacts=[self.LF_name, self.RF_name])
+        standSwitch = self.createModel(
+            footContacts=[self.LF_name, self.RF_name],
+            handsTarget=handsTarget,
+            switch=True,
+        )
+        # Model for handstanding on the first bar
+        Rfoot = pinocchio.utils.rpyToMatrix(0, np.pi, 0.0)
+        LF_pose0 = pinocchio.SE3(
+            Rfoot,
+            np.array(
+                [
+                    LH_pose[0].translation[0],
+                    LF_pose.translation[1],
+                    LH_pose[0].translation[2] + 2.0,
+                ]
+            ),
+        )
+        RF_pose0 = pinocchio.SE3(
+            Rfoot,
+            np.array(
+                [
+                    RH_pose[0].translation[0],
+                    RF_pose.translation[1],
+                    RH_pose[0].translation[2] + 2.0,
+                ]
+            ),
+        )
+        feetTarget = {self.LF_name: LF_pose0, self.RF_name: RF_pose0}
+        Mref = pinocchio.SE3(pinocchio.utils.rpyToMatrix(0, np.pi, 0.0), np.zeros(3))
+        qref = np.concatenate([pinocchio.SE3ToXYZQUAT(Mref), self.q0[7:]])
+        rotateBodyModel = self.createModel(
+            qref=qref, handContacts=[self.LH_name, self.RH_name]
+        )
+        models = [standModel] * Tstand + [standSwitch]
+        models += [rotateBodyModel] * Trotate
+        terminalModel = self.createModel(
+            qref=qref,
+            handContacts=[self.LH_name, self.RH_name],
+            feetTarget=feetTarget,
+            constraint=True,
+        )
         return crocoddyl.ShootingProblem(self.x0, models, terminalModel)
 
     def createFlipProblem(self, distance, front=True):

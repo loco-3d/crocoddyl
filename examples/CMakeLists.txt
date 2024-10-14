@@ -13,8 +13,12 @@ set(${PROJECT_NAME}_EXAMPLES_PYTHON
     double_pendulum_continuous_invdyn
     humanoid_backflip_fwddyn
     humanoid_backflip_invdyn
+    humanoid_bar_fwddyn
+    humanoid_bar_invdyn
     humanoid_frontflip_fwddyn
     humanoid_frontflip_invdyn
+    humanoid_handstanding_fwddyn
+    humanoid_handstanding_invdyn
     humanoid_manipulation_ubound
     humanoid_manipulation
     humanoid_taichi
