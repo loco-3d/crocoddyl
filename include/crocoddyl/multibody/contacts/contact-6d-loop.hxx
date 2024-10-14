@@ -128,11 +128,11 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint1_id_,
       pinocchio::LOCAL, d->v1_partial_dq, d->a1_partial_dq, d->a1_partial_dv,
-      d->a1_partial_da);
+      d->__partial_da);
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint2_id_,
       pinocchio::LOCAL, d->v2_partial_dq, d->a2_partial_dq, d->a2_partial_dv,
-      d->a2_partial_da);
+      d->__partial_da);
 
   d->da0_dq_t1.noalias() =
       joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;

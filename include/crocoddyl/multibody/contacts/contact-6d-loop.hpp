@@ -236,7 +236,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         f1_v1_partial_dq(6, model->get_state()->get_nv()),
         a1_partial_dq(6, model->get_state()->get_nv()),
         a1_partial_dv(6, model->get_state()->get_nv()),
-        a1_partial_da(6, model->get_state()->get_nv()),
         v2_partial_dq(6, model->get_state()->get_nv()),
         f2_v2_partial_dq(6, model->get_state()->get_nv()),
         f1_v2_partial_dq(6, model->get_state()->get_nv()),
@@ -244,7 +243,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         f2_a2_partial_dq(6, model->get_state()->get_nv()),
         f2_a2_partial_dv(6, model->get_state()->get_nv()),
         a2_partial_dv(6, model->get_state()->get_nv()),
-        a2_partial_da(6, model->get_state()->get_nv()),
+        __partial_da(6, model->get_state()->get_nv()),
         da0_dq_t1(6, model->get_state()->get_nv()),
         da0_dq_t2(6, model->get_state()->get_nv()),
         da0_dq_t2_tmp(6, model->get_state()->get_nv()),
@@ -274,7 +273,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     f1_v1_partial_dq.setZero();
     a1_partial_dq.setZero();
     a1_partial_dv.setZero();
-    a1_partial_da.setZero();
     v2_partial_dq.setZero();
     f2_v2_partial_dq.setZero();
     f1_v2_partial_dq.setZero();
@@ -282,7 +280,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     f2_a2_partial_dq.setZero();
     f2_a2_partial_dv.setZero();
     a2_partial_dv.setZero();
-    a2_partial_da.setZero();
+    __partial_da.setZero();
     da0_dq_t1.setZero();
     da0_dq_t2.setZero();
     da0_dq_t2_tmp.setZero();
@@ -312,7 +310,6 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs f1_v1_partial_dq;
   Matrix6xs a1_partial_dq;
   Matrix6xs a1_partial_dv;
-  Matrix6xs a1_partial_da;
   Matrix6xs v2_partial_dq;
   Matrix6xs f2_v2_partial_dq;
   Matrix6xs f1_v2_partial_dq;
@@ -320,7 +317,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs f2_a2_partial_dq;
   Matrix6xs f2_a2_partial_dv;
   Matrix6xs a2_partial_dv;
-  Matrix6xs a2_partial_da;
+  Matrix6xs __partial_da;
 
   Matrix6xs da0_dq_t1;
   Matrix6xs da0_dq_t2;
