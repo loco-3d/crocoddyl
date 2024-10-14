@@ -22,8 +22,7 @@ SolverAbstract::SolverAbstract(std::shared_ptr<ShootingProblem> problem)
       th_gaptol_(1e-16),
       feasnorm_(LInf),
       iter_(0),
-      tmp_feas_(0.) {
-}
+      tmp_feas_(0.) {}
 
 SolverAbstract::~SolverAbstract() {}
 
@@ -99,7 +98,6 @@ double SolverAbstract::computeInequalityFeasibility() {
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
-
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {

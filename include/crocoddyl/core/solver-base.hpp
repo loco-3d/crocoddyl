@@ -517,8 +517,8 @@ class SolverAbstract {
   DEPRECATED("Use preg_ for primal-variable regularization",
              double xreg_;)  //!< Current state regularization value
   DEPRECATED("Use dreg_ for primal-variable regularization",
-             double ureg_;)        //!< Current control regularization values
-  double steplength_;              //!< Current applied step length
+             double ureg_;)  //!< Current control regularization values
+  double steplength_;        //!< Current applied step length
   std::vector<Eigen::VectorXd> g_adj_;  //!< Adjusted inequality bound
 };
 
