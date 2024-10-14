@@ -22,7 +22,9 @@ SolverAbstract::SolverAbstract(std::shared_ptr<ShootingProblem> problem)
       th_gaptol_(1e-16),
       feasnorm_(LInf),
       iter_(0),
-      tmp_feas_(0.) {}
+      tmp_feas_(0.) {
+  allocateData();
+}
 
 SolverAbstract::~SolverAbstract() {}
 
