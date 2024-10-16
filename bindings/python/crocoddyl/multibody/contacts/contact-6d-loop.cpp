@@ -134,11 +134,6 @@ void exposeContact6DLoop() {
                                     bp::return_internal_reference<>()),
                     "Jacobian of the spatial acceleration of the first contact "
                     "frame wrt v")
-      .add_property("a1_partial_da",
-                    bp::make_getter(&ContactData6DLoop::a1_partial_da,
-                                    bp::return_internal_reference<>()),
-                    "Jacobian of the spatial acceleration of the first contact "
-                    "frame wrt a")
       .add_property(
           "v2_partial_dq",
           bp::make_getter(&ContactData6DLoop::v2_partial_dq,
@@ -154,11 +149,6 @@ void exposeContact6DLoop() {
                                     bp::return_internal_reference<>()),
                     "Jacobian of the spatial acceleration of the second "
                     "contact frame wrt v")
-      .add_property("a2_partial_da",
-                    bp::make_getter(&ContactData6DLoop::a2_partial_da,
-                                    bp::return_internal_reference<>()),
-                    "Jacobian of the spatial acceleration of the second "
-                    "contact frame wrt a")
       .add_property("da0_dx",
                     bp::make_getter(&ContactData6DLoop::da0_dx,
                                     bp::return_internal_reference<>()),

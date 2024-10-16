@@ -174,9 +174,8 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     d->f2_v2_partial_dq.noalias() =
         joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq;
     d->f1_v2_partial_dq.noalias() = d->f1Xf2 * d->f2_v2_partial_dq;
-    d->dvel_dq.noalias() = d->f1_v1_partial_dq;
+    d->dvel_dq.noalias() = d->f1_v1_partial_dq - d->f1_v2_partial_dq;
     d->dvel_dq.noalias() -= d->f1vf2.toActionMatrix() * d->Jc;
-    d->dvel_dq.noalias() -= d->f1_v2_partial_dq;
     d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->dvel_dq;
     d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->Jc;
   }
