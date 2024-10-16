@@ -61,6 +61,7 @@ void exposeContact1D();
 void exposeContact2D();
 void exposeContact3D();
 void exposeContact6D();
+void exposeContact6DLoop();
 void exposeImpulse3D();
 void exposeImpulse6D();
 void exposeMultibody();
