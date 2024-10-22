@@ -40,8 +40,9 @@ SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
       nh_T_(problem->get_terminalModel()->get_nh_T()),
       acceptstep_(false),
       recalcdir_(true) {
+  // Allocating the solver's data
   allocateData();
-
+  // Setting the dynamics solver
   switch (dyn_solver) {
     case HybridShoot: {
       const std::size_t Tshoot =
@@ -54,7 +55,7 @@ SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem,
       set_dynamics_solver(dyn_solver, 0);
       break;
   }
-
+  // Defining the list of step lengths used in the linear search routine
   const std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
@@ -413,26 +414,6 @@ void SolverFDDP::calcDir() {
   STOP_PROFILER("SolverFDDP::calcDir");
 }
 
-void SolverFDDP::linearRollout() {
-  const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
-      problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
-      problem_->get_runningDatas();
-  dxs_[0] = fs_[0];
-  for (std::size_t t = 0; t < T; ++t) {  // in sequence
-    const std::shared_ptr<ActionModelAbstract>& m = models[t];
-    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-    dxs_[t + 1].noalias() = d->Fx * dxs_[t];
-    dxs_[t + 1] += fs_[t + 1];
-    if (m->get_nu() != 0) {
-      dus_[t] = -k_[t];
-      dus_[t].noalias() -= K_[t] * dxs_[t];
-      dxs_[t + 1].noalias() += d->Fu * dus_[t];
-    }
-  }
-}
-
 void SolverFDDP::backwardPass() {
   START_PROFILER("SolverFDDP::backwardPass");
   const std::shared_ptr<ActionDataAbstract>& d_T =
@@ -505,6 +486,9 @@ void SolverFDDP::updateDir() {
   hc_ = d_T->h;
   hc_.noalias() += d_T->Hx * dxs_.back();
   switch (term_solver_) {
+    // For the LuNull and QrNull solvers, we compute terminal multiplier using
+    // nullspace parametrization. Instead of parametrizing Hx, we opt to
+    // equivalent parametrize dHc. This approach is much efficient.
     case LuNull: {
       dHc_lu_.compute(dHc_);
       dHc_rank_ = dHc_lu_.rank();
@@ -629,9 +613,7 @@ void SolverFDDP::computePolicy(const std::size_t t) {
 void SolverFDDP::computeBatchPolicy(const std::size_t t) {
   START_PROFILER("SolverFDDP::computeBatchPolicy");
   Kc_[t] = Quc_[t];
-  const boost::shared_ptr<ActionModelAbstract>& model =
-      problem_->get_runningModels()[t];
-  const std::size_t nu = model->get_nu();
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     Quu_llt_[t].solveInPlace(Kc_[t]);
   }
@@ -669,6 +651,26 @@ void SolverFDDP::computeBatchValueFunction(const std::size_t t) {
   STOP_PROFILER("SolverFDDP::computeBatchValueFunction");
 }
 
+void SolverFDDP::linearRollout() {
+  const std::size_t T = problem_->get_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      problem_->get_runningDatas();
+  dxs_[0] = fs_[0];
+  for (std::size_t t = 0; t < T; ++t) {  // in sequence
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
+    dxs_[t + 1].noalias() = d->Fx * dxs_[t];
+    dxs_[t + 1] += fs_[t + 1];
+    if (m->get_nu() != 0) {
+      dus_[t] = -k_[t];
+      dus_[t].noalias() -= K_[t] * dxs_[t];
+      dxs_[t + 1].noalias() += d->Fu * dus_[t];
+    }
+  }
+}
+
 void SolverFDDP::feasShootForwardPass(const double steplength) {
   START_PROFILER("SolverFDDP::feasShootForwardPass");
   if (steplength > 1. || steplength < 0.) {
@@ -690,7 +692,7 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
     const std::size_t nu = m->get_nu();
     if (nu != 0) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t] = us_[t] - k_[t] * steplength;
+      us_try_[t] = us_[t] - steplength * k_[t];
       us_try_[t].noalias() -= K_[t] * dx_[t];
       m->calc(d, xs_try_[t], us_try_[t]);
     } else {
@@ -798,7 +800,7 @@ void SolverFDDP::hybridShootForwardPass(const double steplength) {
       const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       if (m->get_nu() != 0) {
         m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-        us_try_[t] = us_[t] - k_[t] * steplength;
+        us_try_[t] = us_[t] - steplength * k_[t];
         us_try_[t].noalias() -= K_[t] * dx_[t];
         m->calc(d, xs_try_[t], us_try_[t]);
       } else {
@@ -860,7 +862,7 @@ void SolverFDDP::singleShootForwardPass(const double steplength) {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     if (m->get_nu() != 0) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
-      us_try_[t] = us_[t] - k_[t] * steplength;
+      us_try_[t] = us_[t] - steplength * k_[t];
       us_try_[t].noalias() -= K_[t] * dx_[t];
       m->calc(d, xs_try_[t], us_try_[t]);
     } else {

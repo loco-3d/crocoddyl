@@ -1734,7 +1734,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.setCandidate(
             init_xs, init_us, False
         )  # TODO: update Crocoddyl API (let's remove the feasibility boolean)
-        self.isFeasible = False
         self.preg = regInit if regInit is not None else self.reg_min
         self.dreg = regInit if regInit is not None else self.reg_min
         if self.zero_upsilon:
@@ -1900,7 +1899,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.dfeas = self.ffeas - self.ffeas_try
         self.dfeas += self.gfeas - self.gfeas_try
         self.dfeas += self.hfeas - self.hfeas_try
-        self.dPhiexp = self.dVexp + self.upsilon * stepLength * self.dfeas
+        self.dPhiexp = self.dVexp + stepLength * self.upsilon * self.dfeas
         self.dPhi = self.dV + self.upsilon * self.dfeas
         return self.dV
 
@@ -2013,17 +2012,14 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.dHcY = np.resize(self.Yc, (nh_T, self.dHc_rank))
             self.YdHcY = np.resize(self.Yc, (self.dHc_rank, self.dHc_rank))
             self.YdHcY_inv_YHc = np.resize(self.Yhc, self.dHc_rank)
-            # Compute epsilon using nullspace parametrization. Instead of parametrizing Hx,
+            # Compute terminal multiplier using nullspace parametrization. Instead of parametrizing Hx,
             # we opt to equivalent parametrize dHc. This approach is much efficient.
-            self.Yc[:, :] = scl.orth(self.dHc)
-            self.Yhc[:] = self.Yc.T @ self.hc
-            self.dHcY[:, :] = self.dHc @ self.Yc
-            self.YdHcY[:, :] = self.Yc.T @ self.dHcY
-            self.YdHcY_llt = scl.cho_factor(self.YdHcY)
-            self.YdHcY_inv_YHc[:] = scl.cho_solve(self.YdHcY_llt, self.Yhc)
-            self.beta_plus[:] = self.Yc @ self.YdHcY_inv_YHc
+            self.computeNullTerminalMultiplier()
         else:
-            self.YdHcY_llt = scl.cho_factor(self.dHc)
+            try:
+                self.YdHcY_llt = scl.cho_factor(self.dHc)
+            except scl.LinAlgError:
+                raise ArithmeticError("backward error")
             self.beta_plus[:] = scl.cho_solve(self.YdHcY_llt, self.hc)
         # Finally, we update the feed-forward term and search direction.
         for t in range(self.problem.T):  # in parallel
@@ -2076,7 +2072,9 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     # This is virtual function
     def computeBatchPolicy(self, t):
-        self.Kc[t][:] = scl.cho_solve(self.Quu_llt[t], self.Quc[t])
+        nu = self.problem.runningModels[t].nu
+        if nu > 0:
+            self.Kc[t][:] = scl.cho_solve(self.Quu_llt[t], self.Quc[t])
 
     # This is virtual function
     def computeValueFunction(self, t, model):
@@ -2195,7 +2193,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 d = self.problem.runningDatas[t]
                 if m.nu != 0:
                     self.dx[t] = m.state.diff(xs[t], xtry[t])
-                    utry[t] = us[t] - self.k[t] * stepLength
+                    utry[t] = us[t] - stepLength * self.k[t]
                     utry[t] -= self.K[t] @ self.dx[t]
                     with warnings.catch_warnings():
                         warnings.simplefilter(warning)
@@ -2235,7 +2233,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             xtry[t] = xnext.copy()
             if m.nu != 0:
                 self.dx[t] = m.state.diff(xs[t], xtry[t])
-                utry[t] = us[t] - self.k[t] * stepLength
+                utry[t] = us[t] - stepLength * self.k[t]
                 utry[t] -= self.K[t] @ self.dx[t]
                 with warnings.catch_warnings():
                     warnings.simplefilter(warning)
@@ -2254,6 +2252,18 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.problem.terminalModel.calc(self.problem.terminalData, xtry[-1])
             self.cost_try += self.problem.terminalData.cost
         raiseIfNan(self.cost_try, ArithmeticError("forward error"))
+
+    def computeNullTerminalMultiplier(self):
+        self.Yc[:, :] = scl.orth(self.dHc)
+        self.Yhc[:] = self.Yc.T @ self.hc
+        self.dHcY[:, :] = self.dHc @ self.Yc
+        self.YdHcY[:, :] = self.Yc.T @ self.dHcY
+        try:
+            self.YdHcY_llt = scl.cho_factor(self.YdHcY)
+        except scl.LinAlgError:
+            raise ArithmeticError("backward error")
+        self.YdHcY_inv_YHc[:] = scl.cho_solve(self.YdHcY_llt, self.Yhc)
+        self.beta_plus[:] = self.Yc @ self.YdHcY_inv_YHc
 
     def increaseRegularization(self):
         self.preg *= self.reg_incFactor
