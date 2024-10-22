@@ -1840,10 +1840,14 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             callbacks = self.getCallbacks()
             if callbacks is not None:
                 [c(self) for c in callbacks]
-            if self.stepLength >= self.th_stepDec and self.dImpr > self.th_minImprove:
+            if (
+                self.stepLength >= self.th_stepDec
+                and abs(self.dImpr) > self.th_minImprove
+            ):
                 self.decreaseRegularization()
             if (
-                self.stepLength >= self.th_stepInc and self.dImpr <= self.th_minImprove
+                self.stepLength >= self.th_stepInc
+                and abs(self.dImpr) <= self.th_minImprove
             ) or not self._acceptStep:
                 if self.preg == self.reg_max:
                     return False
@@ -1982,6 +1986,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.computeBatchPolicy(t)
             # Update value function associated with the batch's constraint-to-go conditions
             self.computeBatchValueFunction(t)
+        self.dXc[0][:, :] *= np.zeros((ndx, nh_T))
         for t, (m, d) in enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):  # sequence
