@@ -1780,60 +1780,12 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                     self.tryStep(a)
                 except ArithmeticError:
                     continue
-                # Check if we should accept or not the step. The criterio is as follows.
-                # When expected to decrease the merit function value (dPhiexp > 0), we analyse
-                # if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and define different
-                # criterio. For the first case (dPhi > 0), we use the Armijo condition with the
-                # merit function. Instead, for the second case, we use the Armijo condition with the
-                # cost function as this encourage progress and the possibility of increasing the cost
-                # when expectations are unrealistic. Moreover, when it is expected to increase the
-                # merit function, our strategy is to accept an increment in the merit function if
-                # the feasibility passes our stopping criteria or in the cost function otherwise. This
-                # approach enables our solver to increase both infeasibility and cost in order to
-                # ensure convergence; it increases the algorithm's globalization. Finally, we accept
-                # any improvement for step lengths smaller than th_acceptMinStep. This ensures
-                # any possible progress in the iteration.
-                self.dImpr = max(self.dV, self.dPhi)
-                self._acceptStep = False
-                if (
-                    abs(self.dPhi) <= self.th_noImprovement
-                    and abs(self.dPhiexp) <= self.th_noImprovement
-                ):
-                    self._acceptStep = True
-                elif self.dPhiexp >= 0.0:
-                    if self.dPhi > 0.0:
-                        if (
-                            self.dPhi > self.th_acceptStep * self.dPhiexp
-                            or abs(self.DV[1]) < self.th_grad
-                        ):
-                            self._acceptStep = True
-                    elif (
-                        self.dV > self.th_acceptStep * self.dVexp
-                        or abs(self.DV[1]) < self.th_grad
-                    ):
-                        self._acceptStep = True
-                else:
-                    if self.feas <= self.th_stop:
-                        if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
-                            self._acceptStep = True
-                    elif self.dV > self.th_acceptNegStep * self.dVexp:
-                        self._acceptStep = True
-                # TODO: accept dImpr > 0 when allocated time has been reached (c++)
-                if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
-                    self._acceptStep = True
                 # Set candidate guess, cost and feasibilities if we accept the step
+                self.dImpr = max(self.dV, self.dPhi)
+                self.checkAcceptance()
                 if self._acceptStep:
                     self.setCandidate(self.xs_try, self.us_try, False)
-                    self.cost = copy.deepcopy(self.cost_try)
-                    if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
-                        self.ffeas = 0.0
-                    else:
-                        self.ffeas = copy.deepcopy(self.ffeas_try)
-                    self.gfeas = copy.deepcopy(self.gfeas_try)
-                    self.hfeas = copy.deepcopy(self.hfeas_try)
-                    self.merit = self.cost + self.upsilon * (
-                        self.ffeas + self.gfeas + self.hfeas
-                    )
+                    self.updateCandidate()
                     break
             self.stoppingCriteria()
             callbacks = self.getCallbacks()
@@ -1870,16 +1822,9 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.linearRollout()
 
     def tryStep(self, stepLength=1):
-        if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasShoot:
-            self.feasShootForwardPass(stepLength)
-        elif self.dyn_solver == crocoddyl.DynamicsSolverType.MultiShoot:
-            self.multiShootForwardPass(stepLength)
-        elif self.dyn_solver == crocoddyl.DynamicsSolverType.HybridShoot:
-            self.hybridShootForwardPass(stepLength)
-        elif self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
-            self.singleShootForwardPass(stepLength)
-        else:
-            self.feasShootForwardPass(stepLength)
+        # Update primal, dual and slack variables
+        self.forwardPass(stepLength)
+        self.updateDualsAndSlacks(stepLength)
         # Compute the expected and current value function improvements
         self.dVexp = self.DV[0] + stepLength * (
             self.DV[1] + 0.5 * stepLength * self.DV[2]
@@ -1902,6 +1847,61 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.dPhiexp = self.dVexp + stepLength * self.upsilon * self.dfeas
         self.dPhi = self.dV + self.upsilon * self.dfeas
         return self.dV
+
+    def forwardPass(self, stepLength=1):
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasShoot:
+            self.feasShootForwardPass(stepLength)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.MultiShoot:
+            self.multiShootForwardPass(stepLength)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.HybridShoot:
+            self.hybridShootForwardPass(stepLength)
+        elif self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+            self.singleShootForwardPass(stepLength)
+        else:
+            self.feasShootForwardPass(stepLength)
+
+    # This is a virtual finction
+    def updateDualsAndSlacks(self, stepLength=1):
+        # Update the dual variables and slacks
+        pass
+
+    # This is a virtual function
+    def checkAcceptance(self):
+        # Check if we should accept or not the step. The criterio is as follows.
+        # When expected to decrease the merit function value (dPhiexp > 0), we analyse
+        # if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and define different
+        # criterio. For the first case (dPhi > 0), we use the Armijo condition with the
+        # merit function. Instead, for the second case, we use the Armijo condition with the
+        # cost function as this encourage progress and the possibility of increasing the cost
+        # when expectations are unrealistic. Moreover, when it is expected to increase the
+        # merit function, our strategy is to accept an increment in the merit function if
+        # the feasibility passes our stopping criteria or in the cost function otherwise. This
+        # approach enables our solver to increase both infeasibility and cost in order to
+        # ensure convergence; it increases the algorithm's globalization. Finally, we accept
+        # any improvement for step lengths smaller than th_acceptMinStep. This ensures
+        # any possible progress in the iteration.
+        self._acceptStep = False
+        if self.dPhiexp >= 0.0:
+            if self.dPhi > 0.0:
+                if (
+                    self.dPhi > self.th_acceptStep * self.dPhiexp
+                    or abs(self.DV[1]) < self.th_grad
+                ):
+                    self._acceptStep = True
+            elif (
+                self.dV > self.th_acceptStep * self.dVexp
+                or abs(self.DV[1]) < self.th_grad
+            ):
+                self._acceptStep = True
+        else:
+            if self.feas <= self.th_stop:
+                if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
+                    self._acceptStep = True
+            elif self.dV > self.th_acceptNegStep * self.dVexp:
+                self._acceptStep = True
+        # TODO: accept dImpr > 0 when allocated time has been reached (c++)
+        if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
+            self._acceptStep = True
 
     def stoppingCriteria(self):
         self.feas = self.ffeas + self.gfeas + self.hfeas
@@ -2110,10 +2110,10 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         xs, us = self.xs, self.us
         xtry, utry = self.xs_try, self.us_try
         self.cost_try = 0.0
-        self.fs_try[0] = self.fs[0] * (1 - stepLength)
         xtry[0] = self.problem.runningModels[0].state.integrate(
-            self.problem.x0, -self.fs_try[0]
+            xs[0], stepLength * self.dxs[0]
         )
+        self.fs_try[0] = self.fs[0] * (1 - stepLength)
         for t, (m, d) in enumerate(
             zip(self.problem.runningModels, self.problem.runningDatas)
         ):
@@ -2147,9 +2147,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         xtry[0] = self.problem.runningModels[0].state.integrate(
             xs[0], stepLength * self.dxs[0]
         )
-        self.fs_try[0] = self.problem.runningModels[0].state.diff(
-            xtry[0], self.problem.x0
-        )
+        self.fs_try[0] = self.fs[0] * (1 - stepLength)
         for t, (m) in enumerate(self.problem.runningModels):  # in parallel
             xtry[t + 1] = m.state.integrate(xs[t + 1], stepLength * self.dxs[t + 1])
         for t, (m, d) in enumerate(
@@ -2214,9 +2212,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.cost_try += self.problem.terminalData.cost
         raiseIfNan(self.cost_try, ArithmeticError("forward error"))
         # Update the initial gap of each shooting node
-        self.fs_try[0] = self.problem.runningModels[0].state.diff(
-            xtry[0], self.problem.x0
-        )
+        self.fs_try[0] = self.fs[0] * (1 - stepLength)
         for Ti in self.Ts[1:]:  # in parallel
             m = self.problem.runningModels[Ti - 1]
             d = self.problem.runningDatas[Ti - 1]
@@ -2276,6 +2272,16 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         if self.preg < self.reg_min:
             self.preg = self.reg_min
         self.dreg = self.preg
+
+    def updateCandidate(self):
+        self.cost = copy.deepcopy(self.cost_try)
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+            self.ffeas = 0.0
+        else:
+            self.ffeas = copy.deepcopy(self.ffeas_try)
+        self.gfeas = copy.deepcopy(self.gfeas_try)
+        self.hfeas = copy.deepcopy(self.hfeas_try)
+        self.merit = self.cost + self.upsilon * (self.ffeas + self.gfeas + self.hfeas)
 
     # This is virtual function
     def allocateData(self):

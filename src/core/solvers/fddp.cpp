@@ -133,63 +133,12 @@ bool SolverFDDP::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         continue;
       }
-      // Check if we should accept or not the step. The criterio is as follows.
-      // When expected to decrease the merit function value (dPhiexp > 0), we
-      // analyse if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and
-      // define different criterio. For the first case (dPhi > 0), we use the
-      // Armijo condition with the merit function. Instead, for the second case,
-      // we use the Armijo condition with the cost function as this encourage
-      // progress and the possibility of increasing the cost when expectations
-      // are unrealistic. Moreover, when it is expected to increase the merit if
-      // the feasibility passes our stopping criteria or in the cost function
-      // otherwise. This approach enables our solver to increase both
-      // infeasibility and cost in order to ensure convergence; it increases the
-      // algorithm's globalization. Finally, we accept any improvement for step
-      // lengths smaller than th_acceptMinStep. This ensures any possible
-      // progress in the iteration.
       dImpr_ = std::max(dV_, dPhi_);
-      acceptstep_ = false;
-      if ((std::abs(dPhi_) <= th_noimprovement_) &&
-          (std::abs(dPhiexp_) <= th_noimprovement_)) {
-        acceptstep_ = true;  // we can't make further improvement
-      } else if (dPhiexp_ >= 0.) {
-        if (dPhi_ > 0.) {
-          if (dPhi_ > th_acceptstep_ * dPhiexp_ ||
-              std::abs(DV_[1]) < th_grad_) {
-            acceptstep_ = true;
-          }
-        } else if (dV_ > th_acceptstep_ * dVexp_ ||
-                   std::abs(DV_[1]) < th_grad_) {
-          acceptstep_ = true;
-        }
-      } else {
-        if (feas_ <= th_stop_) {
-          if (dPhi_ > th_acceptnegstep_ * dPhiexp_) {
-            acceptstep_ = true;
-          }
-        } else if (dV_ > th_acceptnegstep_ * dVexp_) {
-          acceptstep_ = true;
-        }
-      }
-      // TODO: accept dPhi > 0 when allocated time has been reached (c++)
-      if (steplength_ <= th_acceptminstep_ && dImpr_ > 0.) {
-        acceptstep_ = true;
-      }
+      checkAcceptance();
       // Set candidate guess, cost and feasibilities if we accept the step
       if (acceptstep_) {
         setCandidate(xs_try_, us_try_, false);
-        cost_ = cost_try_;
-        switch (dyn_solver_) {
-          case SingleShoot:
-            ffeas_ = 0.;
-            break;
-          default:
-            ffeas_ = ffeas_try_;
-            break;
-        }
-        gfeas_ = gfeas_try_;
-        hfeas_ = hfeas_try_;
-        merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
+        updateCandidate();
         break;
       }
     }
@@ -243,23 +192,9 @@ void SolverFDDP::computeDirection(const bool recalc) {
 
 double SolverFDDP::tryStep(const double steplength) {
   START_PROFILER("SolverFDDP::tryStep");
-  switch (dyn_solver_) {
-    case FeasShoot:
-      feasShootForwardPass(steplength);
-      break;
-    case MultiShoot:
-      multiShootForwardPass(steplength);
-      break;
-    case HybridShoot:
-      hybridShootForwardPass(steplength);
-      break;
-    case SingleShoot:
-      singleShootForwardPass(steplength);
-      break;
-    default:
-      feasShootForwardPass(steplength);
-      break;
-  }
+  // Update primal, dual and slack variables
+  forwardPass(steplength);
+  updateDualsAndSlacks(steplength);
   // Compute the expected and current value function improvements
   dVexp_ = DV_[0] + steplength * (DV_[1] + 0.5 * steplength * DV_[2]);
   dV_ = cost_ - cost_try_;
@@ -286,6 +221,73 @@ double SolverFDDP::tryStep(const double steplength) {
   dPhi_ = dV_ + upsilon_ * dfeas_;
   STOP_PROFILER("SolverFDDP::tryStep");
   return dV_;
+}
+
+void SolverFDDP::forwardPass(const double steplength) {
+  START_PROFILER("SolverFDDP::forwardPass");
+  switch (dyn_solver_) {
+    case FeasShoot:
+      feasShootForwardPass(steplength);
+      break;
+    case MultiShoot:
+      multiShootForwardPass(steplength);
+      break;
+    case HybridShoot:
+      hybridShootForwardPass(steplength);
+      break;
+    case SingleShoot:
+      singleShootForwardPass(steplength);
+      break;
+    default:
+      feasShootForwardPass(steplength);
+      break;
+  }
+  STOP_PROFILER("SolverFDDP::forwardPass");
+}
+
+void SolverFDDP::updateDualsAndSlacks(const double /**steplength**/) {}
+
+bool SolverFDDP::checkAcceptance() {
+  // Check if we should accept or not the step. The criterio is as follows.
+  // When expected to decrease the merit function value (dPhiexp > 0), we
+  // analyse if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and
+  // define different criterio. For the first case (dPhi > 0), we use the
+  // Armijo condition with the merit function. Instead, for the second case,
+  // we use the Armijo condition with the cost function as this encourage
+  // progress and the possibility of increasing the cost when expectations
+  // are unrealistic. Moreover, when it is expected to increase the merit if
+  // the feasibility passes our stopping criteria or in the cost function
+  // otherwise. This approach enables our solver to increase both
+  // infeasibility and cost in order to ensure convergence; it increases the
+  // algorithm's globalization. Finally, we accept any improvement for step
+  // lengths smaller than th_acceptMinStep. This ensures any possible
+  // progress in the iteration.
+  acceptstep_ = false;
+  if ((std::abs(dPhi_) <= th_noimprovement_) &&
+      (std::abs(dPhiexp_) <= th_noimprovement_)) {
+    acceptstep_ = true;  // we can't make further improvement
+  } else if (dPhiexp_ >= 0.) {
+    if (dPhi_ > 0.) {
+      if (dPhi_ > th_acceptstep_ * dPhiexp_ || std::abs(DV_[1]) < th_grad_) {
+        acceptstep_ = true;
+      }
+    } else if (dV_ > th_acceptstep_ * dVexp_ || std::abs(DV_[1]) < th_grad_) {
+      acceptstep_ = true;
+    }
+  } else {
+    if (feas_ <= th_stop_) {
+      if (dPhi_ > th_acceptnegstep_ * dPhiexp_) {
+        acceptstep_ = true;
+      }
+    } else if (dV_ > th_acceptnegstep_ * dVexp_) {
+      acceptstep_ = true;
+    }
+  }
+  // TODO: accept dPhi > 0 when allocated time has been reached (c++)
+  if (steplength_ <= th_acceptminstep_ && dImpr_ > 0.) {
+    acceptstep_ = true;
+  }
+  return acceptstep_;
 }
 
 double SolverFDDP::stoppingCriteria() {
@@ -683,9 +685,9 @@ void SolverFDDP::feasShootForwardPass(const double steplength) {
   const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   cost_try_ = 0.;
+
+  models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
   fs_try_[0] = fs_[0] * (1 - steplength);
-  models[0]->get_state()->integrate(problem_->get_x0(), -fs_try_[0],
-                                    xs_try_[0]);
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -731,7 +733,7 @@ void SolverFDDP::multiShootForwardPass(const double steplength) {
       problem_->get_runningDatas();
   // Update the dynamics gap for each node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
-  models[0]->get_state()->diff(xs_try_[0], problem_->get_x0(), fs_try_[0]);
+  fs_try_[0] = fs_[0] * (1 - steplength);
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     m->get_state()->integrate(xs_[t + 1], steplength * dxs_[t + 1],
@@ -833,7 +835,7 @@ void SolverFDDP::hybridShootForwardPass(const double steplength) {
     throw_pretty("forward_error");
   }
   // Update the initial gap of each shooting node
-  models[0]->get_state()->diff(xs_try_[0], problem_->get_x0(), fs_try_[0]);
+  fs_try_[0] = fs_[0] * (1 - steplength);
   for (std::size_t i = 1; i < Ts_.size();
        ++i) {  // this can be executed in parallel
     const std::size_t Ti = Ts_[i];
@@ -920,6 +922,21 @@ void SolverFDDP::decreaseRegularization() {
     preg_ = reg_min_;
   }
   dreg_ = preg_;
+}
+
+void SolverFDDP::updateCandidate() {
+  cost_ = cost_try_;
+  switch (dyn_solver_) {
+    case SingleShoot:
+      ffeas_ = 0.;
+      break;
+    default:
+      ffeas_ = ffeas_try_;
+      break;
+  }
+  gfeas_ = gfeas_try_;
+  hfeas_ = hfeas_try_;
+  merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
 }
 
 void SolverFDDP::allocateData() {

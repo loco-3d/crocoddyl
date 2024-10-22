@@ -23,6 +23,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                        SolverFDDP::computeDirection, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep,
                                        0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
+                                       SolverFDDP::forwardPass, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_updateDualsAndSlacks,
+                                       SolverFDDP::updateDualsAndSlacks, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setDynamicsSolver,
                                        SolverFDDP::set_dynamics_solver, 1, 2)
 
@@ -108,8 +112,33 @@ void exposeSolverFDDP() {
                bp::args("self", "stepLength"),
                "Rollout the system with a predefined step length.\n\n"
                ":param stepLength: step length (default 1)\n"
-               ":param recalc: recomputed part of the step\n"
                ":returns the cost improvement."))
+      .def("forwardPass", &SolverFDDP::forwardPass,
+           SolverFDDP_forwardPass(
+               bp::args("self", "stepLength"),
+               "Perform a forward pass with a predefined step length.\n\n"
+               "Our solver supports fourth type of forward passes: "
+               "feasiblility-driven (FeasShoot), multiple shooting "
+               "(MultiShoot), hybrid shooting (HybridShoot), and single "
+               "shooting (SingleShoot).\n"
+               "The feasibility-driven shooting decreases monotonocally the "
+               "dynamics feasibility based on the applied step length.\n"
+               "The hybrid shooting combines both feasibility-driven and "
+               "multiple shooting approaches.\n"
+               "Instead, the single shooting is the traditional approach "
+               "implemented in DDP.\n"
+               "The type of dynamics solver can be defined via "
+               "setDynamicsSolver.\n"
+               ":param stepLength: step length (default 1)"))
+      .def("updateDualsAndSlacks", &SolverFDDP::updateDualsAndSlacks,
+           SolverFDDP_updateDualsAndSlacks(
+               bp::args("self", "stepLength"),
+               "Update the dual and slack variables with a predefined step "
+               "length.\n\n"
+               ":param stepLength: step length (default 1)"))
+      .def("checkAcceptance", &SolverFDDP::checkAcceptance, bp::args("self"),
+           "Check if we should accept or not the step\n\n"
+           ":return True if we should accept the step. False otherwise.")
       .def("stoppingCriteria", &SolverFDDP::stoppingCriteria, bp::args("self"),
            "Return a sum of positive parameters whose sum quantifies the FDDP "
            "termination.")
@@ -209,6 +238,9 @@ void exposeSolverFDDP() {
            "trajectories of non-linear discrete-time systems`.\n"
            "We can define different step lengths\n"
            ":param stepLength: applied step length (<= 1. and >= 0.)")
+      .def(
+          "updateCandidate", &SolverFDDP::updateCandidate, bp::args("self"),
+          "Update the candidate solution: cost, feasibilities, and merit value")
       .add_property(
           "dyn_solver", bp::make_function(&SolverFDDP::get_dynamics_solver),
           "type of solver used for handling the dynamics constraints.")

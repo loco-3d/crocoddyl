@@ -104,6 +104,36 @@ class SolverFDDP : public SolverAbstract {
   virtual double tryStep(const double steplength = 1);
 
   /**
+   * @brief Perform a forward pass with a predefined step length
+   *
+   * Our solver supports fourth type of forward passes: feasiblility-driven
+   * (FeasShoot), multiple shooting (MultiShoot), hybrid shooting (HybridShoot),
+   * and single shooting (SingleShoot). The feasibility-driven shooting
+   * decreases monotonocally the dynamics feasibility based on the applied step
+   * length. The hybrid shooting combines both feasibility-driven and multiple
+   * shooting approaches. Instead, the single shooting is the traditional
+   * approach implemented in DDP. The type of dynamics solver can be defined via
+   * `set_dynamics_solver`.
+   *
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
+   */
+  void forwardPass(const double steplength = 1);
+
+  /**
+   * @brief Update the dual and slack variables with a predefined step length
+   *
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
+   */
+  virtual void updateDualsAndSlacks(const double stepLength = 1);
+
+  /**
+   * @brief Check if we should accept or not the step
+   *
+   * @return True if we should accept the step. False otherwise
+   */
+  virtual bool checkAcceptance();
+
+  /**
    * @copybrief SolverAbstract::stoppingCriteria
    */
   virtual double stoppingCriteria();
@@ -312,6 +342,11 @@ class SolverFDDP : public SolverAbstract {
    * `regfactor_` factor
    */
   void decreaseRegularization();
+
+  /**
+   * @brief Update the candidate solution: cost, feasibilities, and merit value
+   */
+  void updateCandidate();
 
   /**
    * @brief Return the type of solver used for handling the dynamics constraints
