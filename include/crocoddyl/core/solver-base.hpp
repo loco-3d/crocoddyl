@@ -155,6 +155,21 @@ class SolverAbstract {
   virtual void resizeData();
 
   /**
+   * @brief Compute the feasibility from a given residual vector
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] fs  Vector of residual vectors which we wish to compute the
+   * feasibility
+   * @return  the residuals' feasibility
+   */
+  double computeFeasibility(const std::vector<Eigen::VectorXd>& fs);
+
+  /**
    * @brief Compute the dynamic feasibility
    * \f$\|\mathbf{f}_{\mathbf{s}}\|_{\infty,1}\f$ for the current guess
    * \f$(\mathbf{x}^k,\mathbf{u}^k)\f$

@@ -1043,23 +1043,6 @@ void SolverFDDP::set_terminal_solver(const EqualitySolverType type) {
   term_solver_ = type;
 }
 
-double SolverFDDP::computeFeasibility(const std::vector<Eigen::VectorXd>& fs) {
-  tmp_feas_ = 0.;
-  switch (feasnorm_) {
-    case LInf:
-      for (std::size_t t = 0; t < fs.size(); ++t) {
-        tmp_feas_ = std::max(tmp_feas_, fs[t].lpNorm<Eigen::Infinity>());
-      }
-      break;
-    case L1:
-      for (std::size_t t = 0; t < fs.size(); ++t) {
-        tmp_feas_ += fs_[t].lpNorm<1>();
-      }
-      break;
-  }
-  return tmp_feas_;
-}
-
 DynamicsSolverType SolverFDDP::get_dynamics_solver() const {
   return dyn_solver_;
 }

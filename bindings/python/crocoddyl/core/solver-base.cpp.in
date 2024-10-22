@@ -138,6 +138,20 @@ void exposeSolverAbstract() {
                ":param isFeasible: true if the xs are obtained from "
                "integrating the\n"
                "us (rollout)."))
+      .def("computeFeasibility", &SolverAbstract_wrap::computeFeasibility,
+           bp::args("self"),
+           "Compute the feasibility from a given residual vector.\n\n"
+           "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+           "or computeEqualityFeasibility,\n"
+           "we can compute the feasibility using different norms (e.g, l-infty "
+           "or l-1 norms).\n"
+           "By default we use the l-infty norm; however, we can change the "
+           "type of norm using set_feasnorm.\n"
+           "By default we use the l-inf norm, however, we can use the l-1 norm "
+           "by defining inffeas as False.\n"
+           ":param fs: list of residual vectors which we wish to compute the "
+           "feasibility\n"
+           ":return the residuals' feasibility")
       .def("computeDynamicFeasibility",
            &SolverAbstract_wrap::computeDynamicFeasibility, bp::args("self"),
            "Compute the dynamic feasibility for the current guess.\n\n"

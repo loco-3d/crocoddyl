@@ -779,7 +779,6 @@ class SolverFDDP : public SolverAbstract {
       double dv_;)  //!< Internal data for computing the expected improvement
 
  private:
-  double computeFeasibility(const std::vector<Eigen::VectorXd>& fs);
   bool acceptstep_;
   bool recalcdir_;
 };

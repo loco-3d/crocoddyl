@@ -1883,7 +1883,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         )
         self.dV = self.cost - self.cost_try
         # Compute the expected and current merit function improvements
-        self.ffeas_try = self._computeFeasibility(self.fs_try)
+        self.ffeas_try = self.computeFeasibility(self.fs_try)
         self.gfeas_try = self.computeInequalityFeasibility()
         self.hfeas_try = self.computeEqualityFeasibility()
         # Using the expected reduction in the infeasibilities lead to higher convergence for
@@ -2322,12 +2322,3 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                     self.Ts.append(i + self.Tshoot)
                 else:
                     self.Ts.append(self.problem.T)
-
-    def _computeFeasibility(self, fs):
-        self.tmp_feas = 0.0
-        for f in fs:
-            if self.feasNorm == crocoddyl.FeasibilityNorm.LInf:
-                self.tmp_feas = max(self.tmp_feas, np.linalg.norm(f, np.inf))
-            if self.feasNorm == crocoddyl.FeasibilityNorm.L1:
-                self.tmp_feas += np.linalh.norm(f, 1)
-        return copy.deepcopy(self.tmp_feas)
