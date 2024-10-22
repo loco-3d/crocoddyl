@@ -1717,7 +1717,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.reg_min = 1e-9
         self.th_stepDec = 0.25
         self.th_stepInc = 0.25
-        self.th_minImprove = 1e-5  # [0, 100.]
+        self.th_minImprove = 1e-2  # [0, 100.]
         # Constraint parameters
         self.th_acceptNegStep = 8.0
         self.th_acceptMinStep = 0.01  # [alpha_min, 0.02]
