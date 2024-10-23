@@ -30,6 +30,7 @@ concurrency:
 
 jobs:
   CI:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && !contains(join(github.event.pull_request.labels.*.name, ','), 'no ros'))
     strategy:
       fail-fast: false
       matrix:
