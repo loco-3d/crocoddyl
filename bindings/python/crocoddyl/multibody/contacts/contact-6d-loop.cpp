@@ -165,15 +165,15 @@ void exposeContact6DLoop() {
                     bp::make_getter(&ContactData6DLoop::da0_dq_t3,
                                     bp::return_internal_reference<>()),
                     "Jacobian of the acceleration drift wrt q - part 3")
-      .add_property("j1Xf1",
-                    bp::make_getter(&ContactData6DLoop::j1Xf1,
+      .add_property("f1Xj1",
+                    bp::make_getter(&ContactData6DLoop::f1Xj1,
                                     bp::return_internal_reference<>()),
-                    "Placement of the first contact frame in the joint frame - "
+                    "Inverse of the placement of the first contact frame in the joint frame - "
                     "Action Matrix")
-      .add_property("j2Xf2",
-                    bp::make_getter(&ContactData6DLoop::j2Xf2,
+      .add_property("f2Xj2",
+                    bp::make_getter(&ContactData6DLoop::f2Xj2,
                                     bp::return_internal_reference<>()),
-                    "Placement of the second contact frame in the joint frame "
+                    "Inverse of the placement of the second contact frame in the joint frame "
                     "- Action Matrix")
       .add_property("f1Mf2",
                     bp::make_getter(&ContactData6DLoop::f1Mf2,

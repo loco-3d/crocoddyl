@@ -72,17 +72,12 @@ void ContactModel6DLoopTpl<Scalar>::calc(
     const boost::shared_ptr<ContactDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
-  pinocchio::updateFramePlacements<Scalar>(*state_->get_pinocchio().get(),
-                                           *d->pinocchio);
-  d->j1Xf1.noalias() = joint1_placement_.toActionMatrix();
-  d->j2Xf2.noalias() = joint2_placement_.toActionMatrix();
-
   pinocchio::getJointJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
                               joint1_id_, pinocchio::LOCAL, d->j1Jj1);
   pinocchio::getJointJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
                               joint2_id_, pinocchio::LOCAL, d->j2Jj2);
-  d->f1Jf1.noalias() = d->j1Xf1.inverse() * d->j1Jj1;
-  d->f2Jf2.noalias() = d->j2Xf2.inverse() * d->j2Jj2;
+  d->f1Jf1.noalias() = d->f1Xj1 * d->j1Jj1;
+  d->f2Jf2.noalias() = d->f2Xj2 * d->j2Jj2;
 
   d->oMf1 = d->pinocchio->oMi[joint1_id_].act(joint1_placement_);
   d->oMf2 = d->pinocchio->oMi[joint2_id_].act(joint2_placement_);

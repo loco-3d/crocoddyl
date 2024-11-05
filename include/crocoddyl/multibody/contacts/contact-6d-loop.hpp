@@ -257,8 +257,8 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
         f1Jf2(6, model->get_state()->get_nv()),
         j1Jj1(6, model->get_state()->get_nv()),
         j2Jj2(6, model->get_state()->get_nv()),
-        j1Xf1(SE3ActionMatrix::Identity()),
-        j2Xf2(SE3ActionMatrix::Identity()),
+        f1Xj1(model->get_joint1_placement().inverse()),
+        f2Xj2(model->get_joint2_placement().inverse()),
         f1Mf2(SE3::Identity()),
         f1Xf2(SE3ActionMatrix::Identity()),
         f1vf1(Motion::Zero()),
@@ -333,8 +333,8 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   SE3 oMf2;   // Placement of the second contact frame in the world frame
   SE3 f1Mf2;  // Relative placement of the contact frames in the first contact
               // frame
-  SE3ActionMatrix j1Xf1;
-  SE3ActionMatrix j2Xf2;
+  SE3ActionMatrix f1Xj1;
+  SE3ActionMatrix f2Xj2;
   SE3ActionMatrix f1Xf2;
   // Jacobian related data
   Matrix6xs f1Jf1;
