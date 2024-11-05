@@ -168,12 +168,14 @@ void exposeContact6DLoop() {
       .add_property("f1Xj1",
                     bp::make_getter(&ContactData6DLoop::f1Xj1,
                                     bp::return_internal_reference<>()),
-                    "Inverse of the placement of the first contact frame in the joint frame - "
+                    "Inverse of the placement of the first contact frame in "
+                    "the joint frame - "
                     "Action Matrix")
       .add_property("f2Xj2",
                     bp::make_getter(&ContactData6DLoop::f2Xj2,
                                     bp::return_internal_reference<>()),
-                    "Inverse of the placement of the second contact frame in the joint frame "
+                    "Inverse of the placement of the second contact frame in "
+                    "the joint frame "
                     "- Action Matrix")
       .add_property("f1Mf2",
                     bp::make_getter(&ContactData6DLoop::f1Mf2,
