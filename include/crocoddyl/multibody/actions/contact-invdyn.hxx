@@ -18,8 +18,10 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
         std::shared_ptr<ActuationModelAbstract> actuation,
         std::shared_ptr<ContactModelMultiple> contacts,
         std::shared_ptr<CostModelSum> costs)
-    : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
-           0, state->get_nv() - actuation->get_nu() + contacts->get_nc_total()),
+    : Base(
+          state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(), 0,
+          std::max(0, static_cast<int>(state->get_nv() - actuation->get_nu())) +
+              contacts->get_nc_total()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -37,11 +39,12 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
         std::shared_ptr<ContactModelMultiple> contacts,
         std::shared_ptr<CostModelSum> costs,
         std::shared_ptr<ConstraintModelManager> constraints)
-    : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
-           constraints->get_ng(),
-           state->get_nv() - actuation->get_nu() + contacts->get_nc_total() +
-               constraints->get_nh(),
-           constraints->get_ng_T(), constraints->get_nh_T()),
+    : Base(
+          state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
+          constraints->get_ng(),
+          std::max(0, static_cast<int>(state->get_nv() - actuation->get_nu())) +
+              contacts->get_nc_total() + constraints->get_nh(),
+          constraints->get_ng_T(), constraints->get_nh_T()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
@@ -75,7 +78,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
   Base::set_u_ub(ub);
   contacts_->setComputeAllContacts(true);
 
-  if (state_->get_nv() - actuation_->get_nu() > 0) {
+  if (static_cast<int>(state_->get_nv() - actuation_->get_nu()) > 0) {
     constraints_->addConstraint(
         "tau", std::make_shared<ConstraintModelResidualTpl<Scalar>>(
                    state_,
