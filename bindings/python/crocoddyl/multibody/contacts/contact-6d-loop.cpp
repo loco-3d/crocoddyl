@@ -30,7 +30,7 @@ void exposeContact6DLoop() {
                pinocchio::SE3, pinocchio::ReferenceFrame, std::size_t,
                bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "joint1_id", "joint1_placement",
-                   "joint2_id", "joint2_placement", "ref", "nu", "gains"),
+                   "joint2_id", "joint2_placement", "type", "nu", "gains"),
           "Initialize the contact model.\n\n"
           ":param state: state of the multibody system\n"
           ":param joint1_id: Parent joint id of the first contact frame\n"
@@ -39,7 +39,7 @@ void exposeContact6DLoop() {
           ":param joint2_id: Parent joint id of the second contact frames\n"
           ":param joint2_placement: Placement of the second contact frame with "
           "respect to the parent joint\n"
-          ":param ref: reference frame of contact (must be pinocchio::LOCAL)\n"
+          ":param type: reference frame of contact (must be pinocchio::LOCAL)\n"
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))

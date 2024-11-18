@@ -50,14 +50,14 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] joint2_id         Parent joint id of the second contact
    * @param[in] joint2_placement  Placement of the second contact with
    *                                  respect to the parent joint
-   * @param[in] ref               Reference frame of contact
+   * @param[in] type              Reference frame of contact
    * @param[in] nu                Dimension of the control vector
    * @param[in] gains             Baumgarte stabilization gains
    */
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
                         const int joint2_id, const SE3 &joint2_placement,
-                        const pinocchio::ReferenceFrame ref,
+                        const pinocchio::ReferenceFrame type
                         const std::size_t nu,
                         const Vector2s &gains = Vector2s::Zero());
 
@@ -72,13 +72,13 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] joint2_id         Parent joint id of the second contact
    * @param[in] joint2_placement  Placement of the second contact with
    *                                  respect to the parent joint
-   * @param[in] ref               Reference frame of contact
+   * @param[in] type              Reference frame of contact
    * @param[in] gains             Baumgarte stabilization gains
    */
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
                         const int joint2_id, const SE3 &joint2_placement,
-                        const pinocchio::ReferenceFrame ref,
+                        const pinocchio::ReferenceFrame type
                         const Vector2s &gains = Vector2s::Zero());
 
   virtual ~ContactModel6DLoopTpl();
