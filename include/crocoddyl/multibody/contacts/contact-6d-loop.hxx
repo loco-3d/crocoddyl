@@ -20,15 +20,16 @@ template <typename Scalar>
 ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     boost::shared_ptr<StateMultibody> state, const int joint1_id,
     const SE3 &joint1_placement, const int joint2_id,
-    const SE3 &joint2_placement, const pinocchio::ReferenceFrame type
-    const std::size_t nu, const Vector2s &gains)
+    const SE3 &joint2_placement,
+    const pinocchio::ReferenceFrame type const std::size_t nu,
+    const Vector2s &gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu),
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
       joint2_placement_(joint2_placement),
       gains_(gains) {
-  if (type!= pinocchio::ReferenceFrame::LOCAL) {
+  if (type != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
                  "for 6D loop contacts"
               << std::endl;
@@ -44,15 +45,15 @@ template <typename Scalar>
 ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     boost::shared_ptr<StateMultibody> state, const int joint1_id,
     const SE3 &joint1_placement, const int joint2_id,
-    const SE3 &joint2_placement, const pinocchio::ReferenceFrame type
-    const Vector2s &gains)
+    const SE3 &joint2_placement,
+    const pinocchio::ReferenceFrame type const Vector2s &gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 6),
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
       joint2_placement_(joint2_placement),
       gains_(gains) {
-  if (type!= pinocchio::ReferenceFrame::LOCAL) {
+  if (type != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
                  "for 6D loop contacts"
               << std::endl;

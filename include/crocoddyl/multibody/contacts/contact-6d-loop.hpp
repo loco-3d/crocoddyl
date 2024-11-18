@@ -54,12 +54,12 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu                Dimension of the control vector
    * @param[in] gains             Baumgarte stabilization gains
    */
-  ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
-                        const int joint1_id, const SE3 &joint1_placement,
-                        const int joint2_id, const SE3 &joint2_placement,
-                        const pinocchio::ReferenceFrame type
-                        const std::size_t nu,
-                        const Vector2s &gains = Vector2s::Zero());
+  ContactModel6DLoopTpl(
+      boost::shared_ptr<StateMultibody> state, const int joint1_id,
+      const SE3 &joint1_placement, const int joint2_id,
+      const SE3 &joint2_placement,
+      const pinocchio::ReferenceFrame type const std::size_t nu,
+      const Vector2s &gains = Vector2s::Zero());
 
   /**
    * @brief Initialize the 6d loop-contact model from joint and placements
@@ -78,8 +78,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
                         const int joint2_id, const SE3 &joint2_placement,
-                        const pinocchio::ReferenceFrame type
-                        const Vector2s &gains = Vector2s::Zero());
+                        const pinocchio::ReferenceFrame type const Vector2s
+                            &gains = Vector2s::Zero());
 
   virtual ~ContactModel6DLoopTpl();
 
