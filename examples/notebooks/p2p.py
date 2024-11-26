@@ -30,8 +30,8 @@ cameraTF = [2.0, 2.68, 0.54, 0.2, 0.62, 0.72, 0.22]
 display = crocoddyl.GepettoDisplay(robot, cameraTF=cameraTF, floor=False)
 gv = display.robot.viewer.gui
 for i, p in enumerate(ps):
-    gv.addSphere("world/point%d" % i, 0.05, colors[i])
-    gv.applyConfiguration("world/point%d" % i, [*p.tolist(), 0.0, 0.0, 0.0, 1.0])
+    gv.addSphere(f"world/point{i}", 0.05, colors[i])
+    gv.applyConfiguration(f"world/point{i}", [*p.tolist(), 0.0, 0.0, 0.0, 1.0])
 gv.refresh()
 
 # State and control regularization costs
