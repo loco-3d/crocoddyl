@@ -288,7 +288,7 @@ class ActuationModelFloatingBaseThrustersTpl
       const Vector3s& f_z = p.pose.rotation() * Vector3s::UnitZ();
       W_thrust_.template topRows<3>().col(i) += f_z;
       W_thrust_.template middleRows<3>(3).col(i).noalias() +=
-          p.pose.translation().cross(Vector3s::UnitZ());
+          p.pose.translation().cross(f_z);
       switch (p.type) {
         case CW:
           W_thrust_.template middleRows<3>(3).col(i) += p.ctorque * f_z;
