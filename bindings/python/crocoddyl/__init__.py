@@ -223,7 +223,14 @@ class DisplayAbstract(ABC):
                     model.differential.actuation, ActuationModelFloatingBaseThrusters
                 ):
                     fc = []
-                    ui = solver.us[i]
+                    if isinstance(
+                        model.differential, DifferentialActionModelFreeInvDynamics
+                    ) or isinstance(
+                        model.differential, DifferentialActionModelContactInvDynamics
+                    ):
+                        ui = data.differential.multibody.actuation.u
+                    else:
+                        ui = solver.us[i]
                     for t, thrust in enumerate(model.differential.actuation.thrusters):
                         frameName = self.robot.model.frames[2].name
                         frameId = self.robot.model.getFrameId(frameName)
@@ -433,6 +440,7 @@ class GepettoDisplay(DisplayAbstract):
         key, pose, thrust = f["key"], f["oMf"], f["f"]
         wrench = pose.act(pinocchio.Force(np.array([0, 0, thrust]), np.zeros(3)))
         forceMagnitud = np.linalg.norm(wrench.linear) / self.totalWeight
+        R = rotationMatrixFromTwoVectors(self.y_axis, wrench.linear)
         forcePose = pinocchio.SE3ToXYZQUATtuple(pinocchio.SE3(R, pose.translation))
         thrustName = self.thrustGroup + "/" + key
         self.robot.viewer.gui.applyConfiguration(thrustName, forcePose)
