@@ -248,7 +248,7 @@ class SimpleBipedGaitProblem:
                 )
             ]
         # Action model for the foot switch
-        footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
+        footSwitchModel = self.createFootSwitchModel(swingFootIds, swingFootTask)
         # Updating the current foot position for next step
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
         for p in feetPos0:
