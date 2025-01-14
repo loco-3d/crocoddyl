@@ -1,0 +1,270 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
+
+#include "crocoddyl/multibody/contacts/contact-6d-loop.hpp"
+#include "factory/contact_loop.hpp"
+#include "unittest_common.hpp"
+
+using namespace crocoddyl::unittest;
+using namespace boost::unit_test;
+
+//----------------------------------------------------------------------------//
+
+void test_construct_data(ContactLoopModelTypes::Type contact_type,
+                         PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+                     pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
+
+  // Run the print function
+  std::ostringstream tmp;
+  tmp << *model;
+
+  // create the corresponding data object
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
+      model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+}
+
+void test_calc_fetch_jacobians(ContactLoopModelTypes::Type contact_type,
+                               PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
+
+  // create the corresponding data object
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
+      model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+
+  // Compute the jacobian and check that the impulse model fetch it.
+  Eigen::VectorXd x = model->get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model.get(),
+                                          &pinocchio_data, x);
+
+  // Getting the jacobian from the model
+  model->calc(data, x);
+
+  // Check that only the Jacobian has been filled
+  BOOST_CHECK(!data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!data->a0.isZero());
+  }
+  BOOST_CHECK(data->da0_dx.isZero());
+  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->df_dx.isZero());
+  BOOST_CHECK(data->df_du.isZero());
+}
+
+void test_calc_diff_fetch_derivatives(ContactLoopModelTypes::Type contact_type,
+                                      PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
+
+  // create the corresponding data object
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
+      model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+
+  // Compute the jacobian and check that the impulse model fetch it.
+  Eigen::VectorXd x = model->get_state()->rand();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model.get(),
+                                          &pinocchio_data, x);
+
+  // Getting the jacobian from the model
+  model->calc(data, x);
+  model->calcDiff(data, x);
+
+  // Check that nothing has been computed and that all value are initialized to
+  // 0
+  BOOST_CHECK(!data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!data->a0.isZero());
+    BOOST_CHECK(!data->da0_dx.isZero());
+  }
+  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->df_dx.isZero());
+  BOOST_CHECK(data->df_du.isZero());
+}
+
+void test_update_force(ContactLoopModelTypes::Type contact_type,
+                       PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
+
+  // create the corresponding data object
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
+      model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+
+  // Create a random force and update it
+  Eigen::VectorXd f = Eigen::VectorXd::Random(data->Jc.rows());
+  model->updateForce(data, f);
+
+  // Check that nothing has been computed and that all value are initialized to
+  // 0
+  BOOST_CHECK(data->Jc.isZero());
+  BOOST_CHECK(data->a0.isZero());
+  BOOST_CHECK(data->da0_dx.isZero());
+  BOOST_CHECK(!data->f.toVector().isZero());
+  BOOST_CHECK(!data->fext.toVector().isZero());
+  BOOST_CHECK(data->df_dx.isZero());
+  BOOST_CHECK(data->df_du.isZero());
+}
+
+void test_update_force_diff(ContactLoopModelTypes::Type contact_type,
+                            PinocchioModelTypes::Type model_type) {
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Random(), 2,
+                     pinocchio::SE3::Random(), Eigen::Vector2d::Random());
+
+  // create the corresponding data object
+  const boost::shared_ptr<pinocchio::Model>& pinocchio_model =
+      model->get_state()->get_pinocchio();
+  pinocchio::Data pinocchio_data(*pinocchio_model.get());
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+
+  // Create a random force and update it
+  Eigen::MatrixXd df_dx =
+      Eigen::MatrixXd::Random(data->df_dx.rows(), data->df_dx.cols());
+  Eigen::MatrixXd df_du =
+      Eigen::MatrixXd::Random(data->df_du.rows(), data->df_du.cols());
+  model->updateForceDiff(data, df_dx, df_du);
+
+  // Check that nothing has been computed and that all value are initialized to
+  // 0
+  BOOST_CHECK(data->Jc.isZero());
+  BOOST_CHECK(data->a0.isZero());
+  BOOST_CHECK(data->da0_dx.isZero());
+  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->fext.toVector().isZero());
+  BOOST_CHECK(!data->df_dx.isZero());
+  BOOST_CHECK(!data->df_du.isZero());
+}
+
+void test_partial_derivatives_against_numdiff(
+    ContactLoopModelTypes::Type contact_type,
+    PinocchioModelTypes::Type model_type) {
+  using namespace boost::placeholders;
+
+  // create the model
+  ContactLoopModelFactory factory;
+  boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
+      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+                     pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
+
+  // create the corresponding data object
+  pinocchio::Model& pinocchio_model =
+      *model->get_state()->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(pinocchio_model);
+  boost::shared_ptr<crocoddyl::ContactDataAbstract> data =
+      model->createData(&pinocchio_data);
+
+  // Create the equivalent num diff model and data.
+  crocoddyl::ContactModelNumDiff model_num_diff(model);
+  const boost::shared_ptr<crocoddyl::ContactDataAbstract>& data_num_diff =
+      model_num_diff.createData(&pinocchio_data);
+
+  // Generating random values for the state
+  const Eigen::VectorXd x = model->get_state()->rand();
+
+  // Compute all the pinocchio function needed for the models.
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+
+  // set the function that needs to be called at every step of the numdiff
+  std::vector<crocoddyl::ContactModelNumDiff::ReevaluationFunction> reevals;
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
+                                &pinocchio_model, &pinocchio_data, _1, _2));
+  model_num_diff.set_reevals(reevals);
+
+  // Computing the contact derivatives
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  model_num_diff.calc(data_num_diff, x);
+  model_num_diff.calcDiff(data_num_diff, x);
+  // Tolerance defined as in
+  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
+  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
+}
+
+//----------------------------------------------------------------------------//
+
+void register_contact_model_unit_tests(ContactLoopModelTypes::Type contact_type,
+                                       PinocchioModelTypes::Type model_type) {
+  boost::test_tools::output_test_stream test_name;
+  test_name << "test_" << contact_type << "_" << model_type;
+  std::cout << "Running " << test_name.str() << std::endl;
+  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_construct_data, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_calc_fetch_jacobians, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_calc_diff_fetch_derivatives,
+                                      contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_update_force, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_update_force_diff, contact_type, model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_partial_derivatives_against_numdiff,
+                                      contact_type, model_type)));
+  framework::master_test_suite().add(ts);
+}
+
+bool init_function() {
+  for (size_t contact_type = 0;
+       contact_type < ContactLoopModelTypes::all.size(); ++contact_type) {
+    for (size_t model_type = 0; model_type < PinocchioModelTypes::all.size();
+         ++model_type) {
+      if (model_type == PinocchioModelTypes::Hector) {
+        continue;
+      }
+      register_contact_model_unit_tests(
+          ContactLoopModelTypes::all[contact_type],
+          PinocchioModelTypes::all[model_type]);
+    }
+  }
+  return true;
+}
+
+int main(int argc, char** argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

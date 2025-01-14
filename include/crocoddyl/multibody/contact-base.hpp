@@ -94,8 +94,9 @@ class ContactModelAbstractTpl {
    * @param[in] data   Contact data
    * @param[in] force  Contact force
    */
-  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                       const MatrixXs& df_dx, const MatrixXs& df_du) const;
+  virtual void updateForceDiff(
+      const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
+      const MatrixXs& df_du) const;
 
   /**
    * @brief Set the stack of spatial forces to zero

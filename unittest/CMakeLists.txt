@@ -28,6 +28,7 @@ set(${PROJECT_NAME}_CPP_TESTS
     test_constraints
     test_constraint_manager
     test_contacts
+    test_contacts_loop
     test_controls
     test_impulses
     test_multiple_contacts
