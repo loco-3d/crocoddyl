@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Prevent users to improperly setting residual references in https://github.com/loco-3d/crocoddyl/pull/1332
 * Fixed the inequality constraints' feasibility computation by incorporating bounds into the calculation in https://github.com/loco-3d/crocoddyl/pull/1307
 * Improved the action factory used for unit testing in https://github.com/loco-3d/crocoddyl/pull/1300
 * Ignore ruff issues in ipython notebook files in https://github.com/loco-3d/crocoddyl/pull/1297
