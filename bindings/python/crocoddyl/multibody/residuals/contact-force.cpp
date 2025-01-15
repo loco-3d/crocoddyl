@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -96,8 +96,9 @@ void exposeResidualContactForce() {
                   "Deprecated. Do not use set_id, instead create a new model")),
           "reference frame id")
       .add_property("reference",
-                    bp::make_function(&ResidualModelContactForce::get_reference,
-                                      bp::return_internal_reference<>()),
+                    bp::make_function(
+                        &ResidualModelContactForce::get_reference,
+                        bp::return_value_policy<bp::copy_const_reference>()),
                     &ResidualModelContactForce::set_reference,
                     "reference spatial force")
       .def(CopyableVisitor<ResidualModelContactForce>());

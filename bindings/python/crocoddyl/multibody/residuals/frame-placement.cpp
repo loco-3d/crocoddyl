@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,12 +80,12 @@ void exposeResidualFramePlacement() {
            ":return residual data.")
       .add_property("id", &ResidualModelFramePlacement::get_id,
                     &ResidualModelFramePlacement::set_id, "reference frame id")
-      .add_property(
-          "reference",
-          bp::make_function(&ResidualModelFramePlacement::get_reference,
-                            bp::return_internal_reference<>()),
-          &ResidualModelFramePlacement::set_reference,
-          "reference frame placement")
+      .add_property("reference",
+                    bp::make_function(
+                        &ResidualModelFramePlacement::get_reference,
+                        bp::return_value_policy<bp::copy_const_reference>()),
+                    &ResidualModelFramePlacement::set_reference,
+                    "reference frame placement")
       .def(CopyableVisitor<ResidualModelFramePlacement>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFramePlacement> >();
