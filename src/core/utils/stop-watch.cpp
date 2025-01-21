@@ -104,13 +104,15 @@ long double Stopwatch::take_time() {
   }
 }
 
+Stopwatch::PerformanceData& Stopwatch::get_or_create_perf(const string& perf_name) {
+  const auto it = records_of->insert(make_pair(perf_name, PerformanceData()));
+  return it.first->second;
+}
+
 void Stopwatch::start(const string& perf_name) {
   if (!active) return;
 
-  // Just works if not already present
-  records_of->insert(make_pair(perf_name, PerformanceData()));
-
-  PerformanceData& perf_info = records_of->find(perf_name)->second;
+  PerformanceData& perf_info = get_or_create_perf(perf_name);
 
   // Take ctime
   perf_info.clock_start = take_time();
@@ -133,6 +135,10 @@ void Stopwatch::stop(const string& perf_name) {
 
   PerformanceData& perf_info = records_of->find(perf_name)->second;
 
+  stop_perf(perf_info, clock_end);
+}
+
+void Stopwatch::stop_perf(PerformanceData& perf_info, long double clock_end) {
   // check whether the performance has been reset
   if (perf_info.clock_start == 0) return;
 
@@ -145,8 +151,9 @@ void Stopwatch::stop(const string& perf_name) {
   perf_info.last_time = lapse;
 
   // Update min/max time
-  if (lapse >= perf_info.max_time) perf_info.max_time = lapse;
-  if (lapse <= perf_info.min_time || perf_info.min_time == 0)
+  if (lapse >= perf_info.max_time)
+    perf_info.max_time = lapse;
+  else if (lapse <= perf_info.min_time)
     perf_info.min_time = lapse;
 
   // Update total time
@@ -327,6 +334,34 @@ long double Stopwatch::get_last_time(const string& perf_name) {
   PerformanceData& perf_info = records_of->find(perf_name)->second;
 
   return perf_info.last_time;
+}
+
+Stopwatch::Watcher Stopwatch::watcher(const string& perf_name) {
+  if (!active) return Watcher(*this, perf_name, nullptr);
+
+  const auto it = records_of->insert(make_pair(perf_name, PerformanceData()));
+
+  PerformanceData* perf_info = &(it.first->second);
+
+  return Watcher(*this, perf_name, perf_info);
+}
+
+void Stopwatch::Watcher::start() {
+  if (!w.profiler_active) return;
+
+  if (p == nullptr) {
+    p = &w.get_or_create_perf(n);
+  }
+  
+  p->clock_start = w.take_time();
+  p->paused = false;
+}
+
+void Stopwatch::Watcher::stop() {
+  if (!w.profiler_active || (p == nullptr)) return;
+
+  long double clock_end = w.take_time();
+  w.stop_perf(*p, clock_end);
 }
 
 }  // end namespace crocoddyl
