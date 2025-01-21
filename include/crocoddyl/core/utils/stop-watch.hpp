@@ -27,9 +27,9 @@
 
 #include <ctime>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
-#include <limits>
 
 #ifndef WIN32
 /* The classes below are exported */
@@ -161,7 +161,8 @@ class Stopwatch {
     std::string n;
     PerformanceData *p;
 
-    Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p) : w(_w), n(_n), p(_p) {}
+    Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p)
+        : w(_w), n(_n), p(_p) {}
     void start();
     void stop();
   };
@@ -264,9 +265,9 @@ class Stopwatch {
     int stops;    //!< How many cycles have been this stopwatch executed?
   };
 
-  PerformanceData& get_or_create_perf(const std::string &perf_name);
+  PerformanceData &get_or_create_perf(const std::string &perf_name);
 
-  void stop_perf(PerformanceData& perf_info, long double clock_end);
+  void stop_perf(PerformanceData &perf_info, long double clock_end);
 
   bool active;         //!< Flag to hold the clock's status
   StopwatchMode mode;  //!< Time taking mode

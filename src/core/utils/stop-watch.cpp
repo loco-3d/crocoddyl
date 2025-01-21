@@ -104,7 +104,8 @@ long double Stopwatch::take_time() {
   }
 }
 
-Stopwatch::PerformanceData& Stopwatch::get_or_create_perf(const string& perf_name) {
+Stopwatch::PerformanceData& Stopwatch::get_or_create_perf(
+    const string& perf_name) {
   const auto it = records_of->insert(make_pair(perf_name, PerformanceData()));
   return it.first->second;
 }
@@ -352,7 +353,7 @@ void Stopwatch::Watcher::start() {
   if (p == nullptr) {
     p = &w.get_or_create_perf(n);
   }
-  
+
   p->clock_start = w.take_time();
   p->paused = false;
 }
