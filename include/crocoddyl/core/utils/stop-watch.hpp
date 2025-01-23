@@ -27,6 +27,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
 
@@ -151,7 +152,21 @@ enum StopwatchMode {
 
 */
 class Stopwatch {
+ protected:
+  struct PerformanceData;
+
  public:
+  struct Watcher {
+    Stopwatch &w;
+    std::string n;
+    PerformanceData *p;
+
+    Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p)
+        : w(_w), n(_n), p(_p) {}
+    void start();
+    void stop();
+  };
+
   /** @brief Constructor */
   Stopwatch(StopwatchMode _mode = NONE);
 
@@ -172,6 +187,9 @@ class Stopwatch {
 
   /** @brief Initialize stopwatch to use a certain time taking mode */
   void set_mode(StopwatchMode mode);
+
+  /** @brief create a Start the stopwatch related to a certain piece of code */
+  Watcher watcher(const std::string &perf_name);
 
   /** @brief Start the stopwatch related to a certain piece of code */
   void start(const std::string &perf_name);
@@ -231,8 +249,8 @@ class Stopwatch {
     PerformanceData()
         : clock_start(0),
           total_time(0),
-          min_time(0),
-          max_time(0),
+          min_time(std::numeric_limits<long double>::max()),
+          max_time(std::numeric_limits<long double>::min()),
           last_time(0),
           paused(false),
           stops(0) {}
@@ -246,6 +264,10 @@ class Stopwatch {
                   //!< internal use
     int stops;    //!< How many cycles have been this stopwatch executed?
   };
+
+  PerformanceData &get_or_create_perf(const std::string &perf_name);
+
+  void stop_perf(PerformanceData &perf_info, long double clock_end);
 
   bool active;         //!< Flag to hold the clock's status
   StopwatchMode mode;  //!< Time taking mode
