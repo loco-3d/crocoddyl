@@ -163,8 +163,11 @@ class Stopwatch {
 
     Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p)
         : w(_w), n(_n), p(_p) {}
-    void start();
-    void stop();
+    inline void start() { if (w.profiler_active) _start(); }
+    inline void stop() { if (w.profiler_active) _stop(); }
+   private:
+    void _start();
+    void _stop();
   };
 
   /** @brief Constructor */
@@ -180,7 +183,7 @@ class Stopwatch {
   void disable_profiler();
 
   /** @brief Return if the profiler is enable or disable **/
-  bool profiler_status();
+  inline bool profiler_status() { return profiler_active; }
 
   /** @brief Tells if a performance with a certain ID exists */
   bool performance_exists(std::string perf_name);
