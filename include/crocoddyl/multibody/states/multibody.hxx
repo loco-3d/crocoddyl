@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::StateMultibodyTpl(
-    boost::shared_ptr<PinocchioModel> model)
+    std::shared_ptr<PinocchioModel> model)
     : Base(model->nq + model->nv, 2 * model->nv),
       pinocchio_(model),
       x0_(VectorXs::Zero(model->nq + model->nv)) {
@@ -285,7 +285,7 @@ void StateMultibodyTpl<Scalar>::JintegrateTransport(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >&
+const std::shared_ptr<pinocchio::ModelTpl<Scalar> >&
 StateMultibodyTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
 }

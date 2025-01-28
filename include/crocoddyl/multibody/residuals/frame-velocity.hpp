@@ -61,7 +61,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    * LOCAL_WORLD_ALIGNED)
    * @param[in] nu          Dimension of the control vector
    */
-  ResidualModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelFrameVelocityTpl(std::shared_ptr<StateMultibody> state,
                                 const pinocchio::FrameIndex id,
                                 const Motion& velocity,
                                 const pinocchio::ReferenceFrame type,
@@ -78,7 +78,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] type        Reference type of velocity (WORLD, LOCAL,
    * LOCAL_WORLD_ALIGNED)
    */
-  ResidualModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelFrameVelocityTpl(std::shared_ptr<StateMultibody> state,
                                 const pinocchio::FrameIndex id,
                                 const Motion& velocity,
                                 const pinocchio::ReferenceFrame type);
@@ -91,7 +91,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -102,14 +102,14 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the frame velocity residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -159,7 +159,7 @@ class ResidualModelFrameVelocityTpl : public ResidualModelAbstractTpl<_Scalar> {
   pinocchio::FrameIndex id_;        //!< Reference frame id
   Motion vref_;                     //!< Reference velocity
   pinocchio::ReferenceFrame type_;  //!< Reference type of velocity
-  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+  std::shared_ptr<typename StateMultibody::PinocchioModel>
       pin_model_;  //!< Pinocchio model
 };
 

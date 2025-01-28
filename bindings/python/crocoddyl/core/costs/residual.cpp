@@ -15,28 +15,28 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCostResidual() {
-  bp::register_ptr_to_python<boost::shared_ptr<CostModelResidual> >();
+  bp::register_ptr_to_python<std::shared_ptr<CostModelResidual> >();
 
   bp::class_<CostModelResidual, bp::bases<CostModelAbstract> >(
       "CostModelResidual",
       "This cost function uses a residual vector with a Gauss-Newton "
       "assumption to define a cost term.",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ResidualModelAbstract> >(
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ActivationModelAbstract>,
+               std::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "activation", "residual"),
           "Initialize the residual cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param residual: residual model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ResidualModelAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
           "Initialize the residual cost model.\n\n"
           ":param state: state description\n"
           ":param residual: residual model"))
       .def<void (CostModelResidual::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelResidual::calc, bp::args("self", "data", "x", "u"),
@@ -45,7 +45,7 @@ void exposeCostResidual() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual cost based on state only.\n\n"
@@ -55,7 +55,7 @@ void exposeCostResidual() {
           ":param data: cost data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (CostModelResidual::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelResidual::calcDiff,
@@ -66,7 +66,7 @@ void exposeCostResidual() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (CostModelResidual::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -89,7 +89,7 @@ void exposeCostResidual() {
            ":return cost data.")
       .def(CopyableVisitor<CostModelResidual>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataResidual> >();
+  bp::register_ptr_to_python<std::shared_ptr<CostDataResidual> >();
 
   bp::class_<CostDataResidual, bp::bases<CostDataAbstract> >(
       "CostDataResidual", "Data for residual cost.\n\n",

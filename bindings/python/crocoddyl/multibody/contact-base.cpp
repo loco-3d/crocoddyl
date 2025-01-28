@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeContactAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactModelAbstract> >();
 
   bp::class_<ContactModelAbstract_wrap, boost::noncopyable>(
       "ContactModelAbstract",
@@ -27,7 +27,7 @@ void exposeContactAbstract() {
       "The calc and calcDiff functions compute the contact Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame,
                std::size_t, bp::optional<std::size_t> >(
           bp::args("self", "state", "type", "nc", "nu"),
           "Initialize the contact model.\n\n"
@@ -99,7 +99,7 @@ void exposeContactAbstract() {
       .def(CopyableVisitor<ContactModelAbstract_wrap>())
       .def(PrintableVisitor<ContactModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactDataAbstract> >();
 
   bp::class_<ContactDataAbstract, bp::bases<ForceDataAbstract> >(
       "ContactDataAbstract", "Abstract class for contact datas.\n\n",

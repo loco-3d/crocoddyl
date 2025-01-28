@@ -44,7 +44,7 @@ void exposeActivationQuadraticBarrier() {
       .def(CopyableVisitor<ActivationBounds>());
 
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelQuadraticBarrier> >();
+      std::shared_ptr<ActivationModelQuadraticBarrier> >();
 
   bp::class_<ActivationModelQuadraticBarrier,
              bp::bases<ActivationModelAbstract> >(

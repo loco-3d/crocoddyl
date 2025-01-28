@@ -26,7 +26,7 @@ class SolverIntro : public SolverFDDP {
    * @param[in] reduced  Use the reduced Schur-complement approach (default
    * true)
    */
-  explicit SolverIntro(boost::shared_ptr<ShootingProblem> problem);
+  explicit SolverIntro(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverIntro();
 
   virtual bool solve(
@@ -39,7 +39,7 @@ class SolverIntro : public SolverFDDP {
   virtual void resizeData();
   virtual double calcDiff();
   virtual void computeValueFunction(
-      const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model);
+      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
   virtual void computeGains(const std::size_t t);
 
   /**

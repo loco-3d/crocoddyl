@@ -25,10 +25,10 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::
     DifferentialActionModelFreeFwdDynamicsTpl(
-        boost::shared_ptr<StateMultibody> state,
-        boost::shared_ptr<ActuationModelAbstract> actuation,
-        boost::shared_ptr<CostModelSum> costs,
-        boost::shared_ptr<ConstraintModelManager> constraints)
+        std::shared_ptr<StateMultibody> state,
+        std::shared_ptr<ActuationModelAbstract> actuation,
+        std::shared_ptr<CostModelSum> costs,
+        std::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, actuation->get_nu(), costs->get_nr(),
            constraints != nullptr ? constraints->get_ng() : 0,
            constraints != nullptr ? constraints->get_nh() : 0,
@@ -56,7 +56,7 @@ DifferentialActionModelFreeFwdDynamicsTpl<
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -103,7 +103,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -129,7 +129,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -178,7 +178,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -194,15 +194,15 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::checkData(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<DifferentialActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {
@@ -212,7 +212,7 @@ bool DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::checkData(
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
     const std::size_t, const Scalar) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -319,19 +319,19 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >&
+const std::shared_ptr<CostModelSumTpl<Scalar> >&
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+const std::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
 }

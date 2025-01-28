@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionEuler() {
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelEuler> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionModelEuler> >();
 
   bp::class_<IntegratedActionModelEuler,
              bp::bases<IntegratedActionModelAbstract, ActionModelAbstract> >(
@@ -28,7 +28,7 @@ void exposeIntegratedActionEuler() {
       "semi-implicit\n"
       "integrator) give a differential action model, i.e.:\n"
       "  [q+, v+] = State.integrate([q, v], [v + a * dt, a * dt] * dt).",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+      bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
                bp::optional<double, bool> >(
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),
           "Initialize the sympletic Euler integrator.\n\n"
@@ -36,8 +36,8 @@ void exposeIntegratedActionEuler() {
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and "
           "derivatives (default True)."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
-                    boost::shared_ptr<ControlParametrizationModelAbstract>,
+      .def(bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
+                    std::shared_ptr<ControlParametrizationModelAbstract>,
                     bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime",
                    "withCostResidual"),
@@ -48,7 +48,7 @@ void exposeIntegratedActionEuler() {
           ":param withCostResidual: includes the cost residuals and "
           "derivatives (default True)."))
       .def<void (IntegratedActionModelEuler::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &IntegratedActionModelEuler::calc,
@@ -60,11 +60,11 @@ void exposeIntegratedActionEuler() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelEuler::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (IntegratedActionModelEuler::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelEuler::calcDiff,
@@ -78,7 +78,7 @@ void exposeIntegratedActionEuler() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelEuler::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -86,7 +86,7 @@ void exposeIntegratedActionEuler() {
            bp::args("self"), "Create the Euler integrator data.")
       .def(CopyableVisitor<IntegratedActionModelEuler>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataEuler> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionDataEuler> >();
 
   bp::class_<IntegratedActionDataEuler,
              bp::bases<IntegratedActionDataAbstract> >(

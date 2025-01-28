@@ -17,20 +17,20 @@ namespace python {
 
 void exposeActuationModelMultiCopterBase() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<crocoddyl::ActuationModelMultiCopterBase> >();
+      std::shared_ptr<crocoddyl::ActuationModelMultiCopterBase> >();
 
   bp::class_<ActuationModelMultiCopterBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelMultiCopterBase",
       "Actuation models with base actuated by several propellers (e.g. aerial "
       "manipulators).",
-      bp::init<boost::shared_ptr<StateMultibody>,
+      bp::init<std::shared_ptr<StateMultibody>,
                Eigen::Matrix<double, 6, Eigen::Dynamic> >(
           bp::args("self", "state", "tau_f"),
           "Initialize the full actuation model.\n\n"
           ":param state: state of multibody system\n"
           ":param tau_f: matrix that maps rotors thrust to generalized torque "
           "of the flying base."))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t,
+      .def(bp::init<std::shared_ptr<StateMultibody>, std::size_t,
                     Eigen::Matrix<double, 6, Eigen::Dynamic> >(
           bp::args("self", "state", "nrotors", "tau_f"),
           "Initialize the full actuation model.\n\n"
@@ -39,7 +39,7 @@ void exposeActuationModelMultiCopterBase() {
           ":param tau_f: matrix that maps rotors thrust to generalized torque "
           "of the flying base."))
       .def<void (ActuationModelMultiCopterBase::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActuationModelMultiCopterBase::calc,

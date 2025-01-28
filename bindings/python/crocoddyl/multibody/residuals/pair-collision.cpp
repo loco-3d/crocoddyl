@@ -18,13 +18,13 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualPairCollision() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelPairCollision> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelPairCollision> >();
 
   bp::class_<ResidualModelPairCollision, bp::bases<ResidualModelAbstract> >(
       "ResidualModelPairCollision",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t,
-               boost::shared_ptr<pinocchio::GeometryModel>,
-               pinocchio::PairIndex, pinocchio::JointIndex>(
+      bp::init<std::shared_ptr<StateMultibody>, std::size_t,
+               std::shared_ptr<pinocchio::GeometryModel>, pinocchio::PairIndex,
+               pinocchio::JointIndex>(
           bp::args("self", "state", "nu", "geom_model", "pair_id", "joint_id"),
           "Initialize the pair collision residual model.\n\n"
           ":param state: state of the multibody system\n"
@@ -33,7 +33,7 @@ void exposeResidualPairCollision() {
           ":param pair_id: id of the pair of colliding objects\n"
           ":param joint_id: used to calculate the Jacobian at the joint"))
       .def<void (ResidualModelPairCollision::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelPairCollision::calc,
@@ -43,11 +43,11 @@ void exposeResidualPairCollision() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelPairCollision::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelPairCollision::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelPairCollision::calcDiff,
@@ -58,7 +58,7 @@ void exposeResidualPairCollision() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelPairCollision::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -70,7 +70,7 @@ void exposeResidualPairCollision() {
            ":return residual data.")
       .def(CopyableVisitor<ResidualModelPairCollision>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataPairCollision> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataPairCollision> >();
 
   bp::class_<ResidualDataPairCollision, bp::bases<ResidualDataAbstract> >(
       "ResidualDataPairCollision", "Data for pair collision residual.\n\n",

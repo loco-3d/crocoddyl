@@ -13,7 +13,7 @@
 #define CROCODDYL_CORE_NUMDIFF_CONTROL_HPP_
 
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 #include "crocoddyl/core/control-base.hpp"
@@ -41,7 +41,7 @@ class ControlParametrizationModelNumDiffTpl
    *
    * @param model
    */
-  explicit ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model);
+  explicit ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model);
   virtual ~ControlParametrizationModelNumDiffTpl();
 
   /**
@@ -51,7 +51,7 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
-  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+  void calc(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
             const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
@@ -62,16 +62,15 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  t      Time in [0,1]
    * @param[in]  u      Control parameters
    */
-  void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+  void calcDiff(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+                const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
    * @brief Create the control-parametrization data
    *
    * @return the control-parametrization data
    */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get a value of the control parameters such that the control at the
@@ -81,7 +80,7 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  t      Time in [0,1]
    * @param[in]  w      Control values
    */
-  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+  void params(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
               const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
 
   /**
@@ -110,7 +109,7 @@ class ControlParametrizationModelNumDiffTpl
    * given results
    */
   void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const;
 
@@ -126,7 +125,7 @@ class ControlParametrizationModelNumDiffTpl
    * given results
    */
   void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const;
 
@@ -135,7 +134,7 @@ class ControlParametrizationModelNumDiffTpl
    *
    * @return Base&
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used in the numerical
@@ -150,7 +149,7 @@ class ControlParametrizationModelNumDiffTpl
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base>
+  std::shared_ptr<Base>
       model_;     //!< model we need to compute the numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
@@ -186,8 +185,8 @@ struct ControlParametrizationDataNumDiffTpl
   virtual ~ControlParametrizationDataNumDiffTpl() {}
 
   VectorXs du;  //!< temporary variable used for finite differencing
-  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data that contains the final results
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation
 };
 

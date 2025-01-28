@@ -35,8 +35,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConstraintDataManager_resize_wrap,
 
 void exposeConstraintManager() {
   // Register custom converters between std::map and Python dict
-  typedef boost::shared_ptr<ConstraintItem> ConstraintItemPtr;
-  typedef boost::shared_ptr<ConstraintDataAbstract> ConstraintDataPtr;
+  typedef std::shared_ptr<ConstraintItem> ConstraintItemPtr;
+  typedef std::shared_ptr<ConstraintDataAbstract> ConstraintDataPtr;
   StdMapPythonVisitor<
       std::string, ConstraintItemPtr, std::less<std::string>,
       std::allocator<std::pair<const std::string, ConstraintItemPtr> >,
@@ -46,11 +46,11 @@ void exposeConstraintManager() {
       std::allocator<std::pair<const std::string, ConstraintDataPtr> >,
       true>::expose("StdMap_ConstraintData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintItem> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintItem> >();
 
   bp::class_<ConstraintItem>(
       "ConstraintItem", "Describe a constraint item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ConstraintModelAbstract>,
+      bp::init<std::string, std::shared_ptr<ConstraintModelAbstract>,
                bp::optional<bool> >(
           bp::args("self", "name", "constraint", "active"),
           "Initialize the constraint item.\n\n"
@@ -67,22 +67,22 @@ void exposeConstraintManager() {
       .def(CopyableVisitor<ConstraintItem>())
       .def(PrintableVisitor<ConstraintItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelManager> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintModelManager> >();
 
   bp::class_<ConstraintModelManager>(
       "ConstraintModelManager",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total constraint model.\n\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total constraint model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
           "Initialize the total constraint model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
@@ -107,7 +107,7 @@ void exposeConstraintManager() {
            ":param active: constraint status (true for active and false for "
            "inactive)")
       .def<void (ConstraintModelManager::*)(
-          const boost::shared_ptr<ConstraintDataManager>&,
+          const std::shared_ptr<ConstraintDataManager>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelManager::calc,
@@ -117,7 +117,7 @@ void exposeConstraintManager() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ConstraintModelManager::*)(
-          const boost::shared_ptr<ConstraintDataManager>&,
+          const std::shared_ptr<ConstraintDataManager>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelManager::calc, bp::args("self", "data", "x"),
           "Compute the total constraint value for nodes that depends only on "
@@ -128,7 +128,7 @@ void exposeConstraintManager() {
           ":param data: constraint-manager data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (ConstraintModelManager::*)(
-          const boost::shared_ptr<ConstraintDataManager>&,
+          const std::shared_ptr<ConstraintDataManager>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelManager::calcDiff,
@@ -139,7 +139,7 @@ void exposeConstraintManager() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelManager::*)(
-          const boost::shared_ptr<ConstraintDataManager>&,
+          const std::shared_ptr<ConstraintDataManager>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelManager::calcDiff,
           bp::args("self", "data", "x"),
@@ -204,7 +204,7 @@ void exposeConstraintManager() {
       .def(CopyableVisitor<ConstraintModelManager>())
       .def(PrintableVisitor<ConstraintModelManager>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataManager> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintDataManager> >();
 
   bp::class_<ConstraintDataManager>(
       "ConstraintDataManager", "Class for total constraint data.\n\n",

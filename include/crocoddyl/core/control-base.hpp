@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_CONTROL_BASE_HPP_
 #define CROCODDYL_CORE_CONTROL_BASE_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
@@ -69,7 +69,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  u      Control parameters
    */
   virtual void calc(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
@@ -83,7 +83,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  u      Control parameters
    */
   virtual void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
@@ -91,7 +91,7 @@ class ControlParametrizationModelAbstractTpl {
    *
    * @return the control-parametrization data
    */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Update the control parameters u for a specified time t given the
@@ -102,7 +102,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  w      Control inputs
    */
   virtual void params(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& w) const = 0;
 
   /**
@@ -133,12 +133,12 @@ class ControlParametrizationModelAbstractTpl {
    * given results
    */
   virtual void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const = 0;
 
   virtual MatrixXs multiplyByJacobian_J(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
 
   /**
@@ -156,19 +156,19 @@ class ControlParametrizationModelAbstractTpl {
    * given results
    */
   virtual void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const = 0;
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
   virtual bool checkData(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data);
 
   /**
    * @brief Return the dimension of the control inputs

@@ -13,7 +13,7 @@ namespace crocoddyl {
 template <typename Scalar>
 ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
     : ActionModelAbstractTpl<Scalar>(
-          boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5),
+          std::make_shared<StateVectorTpl<Scalar> >(3), 2, 5),
       dt_(Scalar(0.1)) {
   cost_weights_ << Scalar(10.), Scalar(1.);
 }
@@ -23,7 +23,7 @@ ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -47,7 +47,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -64,7 +64,7 @@ void ActionModelUnicycleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -95,7 +95,7 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -110,15 +110,15 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelUnicycleTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool ActionModelUnicycleTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {

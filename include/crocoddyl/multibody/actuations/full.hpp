@@ -42,7 +42,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    *
    * @param[in] state  State of the dynamical system
    */
-  explicit ActuationModelFullTpl(boost::shared_ptr<StateAbstract> state)
+  explicit ActuationModelFullTpl(std::shared_ptr<StateAbstract> state)
       : Base(state, state->get_nv()) {};
   virtual ~ActuationModelFullTpl() {};
 
@@ -53,7 +53,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<Data>& data,
+  virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -72,11 +72,11 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] u     Joint torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
 #ifndef NDEBUG
-  virtual void calcDiff(const boost::shared_ptr<Data>& data,
+  virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void calcDiff(const boost::shared_ptr<Data>&,
+  virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -87,7 +87,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
                   "dtau_du has wrong value");
   };
 
-  virtual void commands(const boost::shared_ptr<Data>& data,
+  virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>& tau) {
     if (static_cast<std::size_t>(tau.size()) != nu_) {
@@ -99,11 +99,11 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
   }
 
 #ifndef NDEBUG
-  virtual void torqueTransform(const boost::shared_ptr<Data>& data,
+  virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void torqueTransform(const boost::shared_ptr<Data>&,
+  virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -118,9 +118,9 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] data  shared data (it should be of type DataCollectorContactTpl)
    * @return the cost data.
    */
-  virtual boost::shared_ptr<Data> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  virtual std::shared_ptr<Data> createData() {
+    std::shared_ptr<Data> data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal().setOnes();
     data->Mtau.setIdentity();
     return data;

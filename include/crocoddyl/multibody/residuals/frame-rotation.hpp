@@ -57,7 +57,7 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] Rref   Reference frame rotation
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelFrameRotationTpl(std::shared_ptr<StateMultibody> state,
                                 const pinocchio::FrameIndex id,
                                 const Matrix3s& Rref, const std::size_t nu);
 
@@ -70,7 +70,7 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] id     Reference frame id
    * @param[in] Rref   Reference frame rotation
    */
-  ResidualModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelFrameRotationTpl(std::shared_ptr<StateMultibody> state,
                                 const pinocchio::FrameIndex id,
                                 const Matrix3s& Rref);
   virtual ~ResidualModelFrameRotationTpl();
@@ -82,7 +82,7 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -93,14 +93,14 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the frame rotation residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -140,7 +140,7 @@ class ResidualModelFrameRotationTpl : public ResidualModelAbstractTpl<_Scalar> {
   pinocchio::FrameIndex id_;  //!< Reference frame id
   Matrix3s Rref_;             //!< Reference frame rotation
   Matrix3s oRf_inv_;          //!< Inverse reference rotation
-  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+  std::shared_ptr<typename StateMultibody::PinocchioModel>
       pin_model_;  //!< Pinocchio model
 };
 

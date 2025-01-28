@@ -21,7 +21,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                        SolverDDP::computeDirection, 0, 1)
 
 void exposeSolverFDDP() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverFDDP> >();
+  bp::register_ptr_to_python<std::shared_ptr<SolverFDDP> >();
 
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
       "SolverFDDP",
@@ -36,7 +36,7 @@ void exposeSolverFDDP() {
       "along a tuple of optimized control commands U*.\n"
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(
+      bp::init<std::shared_ptr<ShootingProblem> >(
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))

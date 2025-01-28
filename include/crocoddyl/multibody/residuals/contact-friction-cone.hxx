@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelContactFrictionConeTpl<Scalar>::
-    ResidualModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
+    ResidualModelContactFrictionConeTpl(std::shared_ptr<StateMultibody> state,
                                         const pinocchio::FrameIndex id,
                                         const FrictionCone& fref,
                                         const std::size_t nu, const bool fwddyn)
@@ -33,7 +33,7 @@ ResidualModelContactFrictionConeTpl<Scalar>::
 
 template <typename Scalar>
 ResidualModelContactFrictionConeTpl<Scalar>::
-    ResidualModelContactFrictionConeTpl(boost::shared_ptr<StateMultibody> state,
+    ResidualModelContactFrictionConeTpl(std::shared_ptr<StateMultibody> state,
                                         const pinocchio::FrameIndex id,
                                         const FrictionCone& fref)
     : Base(state, fref.get_nf() + 1),
@@ -55,7 +55,7 @@ ResidualModelContactFrictionConeTpl<
 
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -66,14 +66,14 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
@@ -82,17 +82,17 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelContactFrictionConeTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
-      Eigen::aligned_allocator<Data>(), this, data);
+  std::shared_ptr<ResidualDataAbstract> d =
+      std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -101,7 +101,7 @@ ResidualModelContactFrictionConeTpl<Scalar>::createData(
 
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::updateJacobians(
-    const boost::shared_ptr<ResidualDataAbstract>& data) {
+    const std::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -131,8 +131,8 @@ void ResidualModelContactFrictionConeTpl<Scalar>::updateJacobians(
 template <typename Scalar>
 void ResidualModelContactFrictionConeTpl<Scalar>::print(
     std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s =
-      boost::static_pointer_cast<StateMultibody>(state_);
+  std::shared_ptr<StateMultibody> s =
+      std::static_pointer_cast<StateMultibody>(state_);
   os << "ResidualModelContactFrictionCone {frame="
      << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
      << "}";

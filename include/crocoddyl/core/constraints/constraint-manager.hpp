@@ -28,7 +28,7 @@ struct ConstraintItemTpl {
 
   ConstraintItemTpl() {}
   ConstraintItemTpl(const std::string& name,
-                    boost::shared_ptr<ConstraintModelAbstract> constraint,
+                    std::shared_ptr<ConstraintModelAbstract> constraint,
                     bool active = true)
       : name(name), constraint(constraint), active(active) {}
 
@@ -42,7 +42,7 @@ struct ConstraintItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<ConstraintModelAbstract> constraint;
+  std::shared_ptr<ConstraintModelAbstract> constraint;
   bool active;
 };
 
@@ -80,9 +80,9 @@ class ConstraintModelManagerTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ConstraintItem> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintItem> >
       ConstraintModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ConstraintDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintDataAbstract> >
       ConstraintDataContainer;
 
   /**
@@ -91,7 +91,7 @@ class ConstraintModelManagerTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state,
+  ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state,
                             const std::size_t nu);
 
   /**
@@ -101,7 +101,7 @@ class ConstraintModelManagerTpl {
    *
    * @param[in] state  State of the multibody system
    */
-  explicit ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state);
+  explicit ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state);
   ~ConstraintModelManagerTpl();
 
   /**
@@ -113,7 +113,7 @@ class ConstraintModelManagerTpl {
    * @param[in] active      True if the constraint is activated (default true)
    */
   void addConstraint(const std::string& name,
-                     boost::shared_ptr<ConstraintModelAbstract> constraint,
+                     std::shared_ptr<ConstraintModelAbstract> constraint,
                      const bool active = true);
 
   /**
@@ -139,7 +139,7 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calc(const std::shared_ptr<ConstraintDataManager>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
@@ -153,7 +153,7 @@ class ConstraintModelManagerTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calc(const std::shared_ptr<ConstraintDataManager>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -163,7 +163,7 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calcDiff(const std::shared_ptr<ConstraintDataManager>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
@@ -178,7 +178,7 @@ class ConstraintModelManagerTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calcDiff(const std::shared_ptr<ConstraintDataManager>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -192,13 +192,13 @@ class ConstraintModelManagerTpl {
    * @param data  Data collector
    * @return the constraint data
    */
-  boost::shared_ptr<ConstraintDataManager> createData(
+  std::shared_ptr<ConstraintDataManager> createData(
       DataCollectorAbstract* const data);
 
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the stack of constraint models
@@ -265,11 +265,11 @@ class ConstraintModelManagerTpl {
       std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateAbstract> state_;  //!< State description
-  ConstraintModelContainer constraints_;    //!< Stack of constraint items
-  VectorXs lb_;                             //!< Lower bound of the constraint
-  VectorXs ub_;                             //!< Upper bound of the constraint
-  std::size_t nu_;                          //!< Dimension of the control input
+  std::shared_ptr<StateAbstract> state_;  //!< State description
+  ConstraintModelContainer constraints_;  //!< Stack of constraint items
+  VectorXs lb_;                           //!< Lower bound of the constraint
+  VectorXs ub_;                           //!< Upper bound of the constraint
+  std::size_t nu_;                        //!< Dimension of the control input
   std::size_t ng_;    //!< Number of the active inequality constraints
   std::size_t nh_;    //!< Number of the active equality constraints
   std::size_t ng_T_;  //!< Number of the active inequality terminal constraints
@@ -316,7 +316,7 @@ struct ConstraintDataManagerTpl {
              Scalar>::ConstraintModelContainer::const_iterator it =
              model->get_constraints().begin();
          it != model->get_constraints().end(); ++it) {
-      const boost::shared_ptr<ConstraintItem>& item = it->second;
+      const std::shared_ptr<ConstraintItem>& item = it->second;
       constraints.insert(
           std::make_pair(item->name, item->constraint->createData(data)));
     }

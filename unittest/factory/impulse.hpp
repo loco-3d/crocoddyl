@@ -47,13 +47,13 @@ class ImpulseModelFactory {
   explicit ImpulseModelFactory();
   ~ImpulseModelFactory();
 
-  boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create(
+  std::shared_ptr<crocoddyl::ImpulseModelAbstract> create(
       ImpulseModelTypes::Type impulse_type,
       PinocchioModelTypes::Type model_type,
       const std::string frame_name = std::string("")) const;
 };
 
-boost::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();
+std::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse();
 
 }  // namespace unittest
 }  // namespace crocoddyl

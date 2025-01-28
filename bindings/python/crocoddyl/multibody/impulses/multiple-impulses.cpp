@@ -28,8 +28,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ImpulseModelMultiple_addImpulse_wrap,
 
 void exposeImpulseMultiple() {
   // Register custom converters between std::map and Python dict
-  typedef boost::shared_ptr<ImpulseItem> ImpulseItemPtr;
-  typedef boost::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
+  typedef std::shared_ptr<ImpulseItem> ImpulseItemPtr;
+  typedef std::shared_ptr<ImpulseDataAbstract> ImpulseDataPtr;
   StdMapPythonVisitor<
       std::string, ImpulseItemPtr, std::less<std::string>,
       std::allocator<std::pair<const std::string, ImpulseItemPtr>>,
@@ -39,11 +39,11 @@ void exposeImpulseMultiple() {
       std::allocator<std::pair<const std::string, ImpulseDataPtr>>,
       true>::expose("StdMap_ImpulseData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseItem>>();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseItem>>();
 
   bp::class_<ImpulseItem>(
       "ImpulseItem", "Describe a impulse item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ImpulseModelAbstract>,
+      bp::init<std::string, std::shared_ptr<ImpulseModelAbstract>,
                bp::optional<bool>>(
           bp::args("self", "name", "impulse", "active"),
           "Initialize the impulse item.\n\n"
@@ -61,11 +61,11 @@ void exposeImpulseMultiple() {
       .def(PrintableVisitor<ImpulseItem>());
   ;
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelMultiple>>();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseModelMultiple>>();
 
   bp::class_<ImpulseModelMultiple>(
       "ImpulseModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody>>(
+      bp::init<std::shared_ptr<StateMultibody>>(
           bp::args("self", "state"),
           "Initialize the multiple impulse model.\n\n"
           ":param state: state of the multibody system"))
@@ -170,7 +170,7 @@ void exposeImpulseMultiple() {
       .def(CopyableVisitor<ImpulseModelMultiple>())
       .def(PrintableVisitor<ImpulseModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataMultiple>>();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseDataMultiple>>();
 
   bp::class_<ImpulseDataMultiple>(
       "ImpulseDataMultiple", "Data class for multiple impulses.\n\n",

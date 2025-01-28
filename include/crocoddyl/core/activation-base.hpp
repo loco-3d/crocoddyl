@@ -12,7 +12,7 @@
 
 #include <boost/core/demangle.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
@@ -34,12 +34,12 @@ class ActivationModelAbstractTpl {
   explicit ActivationModelAbstractTpl(const std::size_t nr) : nr_(nr) {};
   virtual ~ActivationModelAbstractTpl() {};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) = 0;
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::allocate_shared<ActivationDataAbstract>(
+  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+    return std::allocate_shared<ActivationDataAbstract>(
         Eigen::aligned_allocator<ActivationDataAbstract>(), this);
   };
 

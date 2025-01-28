@@ -48,7 +48,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
    *
    * @param[in] model  Pinocchio model
    */
-  explicit StateMultibodyTpl(boost::shared_ptr<PinocchioModel> model);
+  explicit StateMultibodyTpl(std::shared_ptr<PinocchioModel> model);
   StateMultibodyTpl();
   virtual ~StateMultibodyTpl();
 
@@ -92,7 +92,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   /**
    * @brief Return the Pinocchio model (i.e., model of the rigid body system)
    */
-  const boost::shared_ptr<PinocchioModel>& get_pinocchio() const;
+  const std::shared_ptr<PinocchioModel>& get_pinocchio() const;
 
  protected:
   using Base::has_limits_;
@@ -104,8 +104,8 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
 
  private:
-  boost::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
-  VectorXs x0_;                                  //!< Zero state
+  std::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
+  VectorXs x0_;                                //!< Zero state
 };
 
 }  // namespace crocoddyl

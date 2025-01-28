@@ -61,17 +61,17 @@ class ActuationModelMultiCopterBaseTpl
    */
   DEPRECATED("Use constructor ActuationModelFloatingBaseThrustersTpl",
              ActuationModelMultiCopterBaseTpl(
-                 boost::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<StateMultibody> state,
                  const Eigen::Ref<const Matrix6xs>& tau_f));
 
   DEPRECATED("Use constructor without n_rotors",
              ActuationModelMultiCopterBaseTpl(
-                 boost::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<StateMultibody> state,
                  const std::size_t n_rotors,
                  const Eigen::Ref<const Matrix6xs>& tau_f));
   virtual ~ActuationModelMultiCopterBaseTpl() {}
 
-  virtual void calc(const boost::shared_ptr<Data>& data,
+  virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>&,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -84,11 +84,11 @@ class ActuationModelMultiCopterBaseTpl
   }
 
 #ifndef NDEBUG
-  virtual void calcDiff(const boost::shared_ptr<Data>& data,
+  virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void calcDiff(const boost::shared_ptr<Data>&,
+  virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -97,18 +97,18 @@ class ActuationModelMultiCopterBaseTpl
                   "dtau_du has wrong value");
   }
 
-  virtual void commands(const boost::shared_ptr<Data>& data,
+  virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>& tau) {
     data->u.noalias() = Mtau_ * tau;
   }
 
 #ifndef NDEBUG
-  virtual void torqueTransform(const boost::shared_ptr<Data>& data,
+  virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void torqueTransform(const boost::shared_ptr<Data>&,
+  virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -116,9 +116,9 @@ class ActuationModelMultiCopterBaseTpl
     assert_pretty(MatrixXs(data->Mtau).isApprox(Mtau_), "Mtau has wrong value");
   }
 
-  boost::shared_ptr<Data> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  std::shared_ptr<Data> createData() {
+    std::shared_ptr<Data> data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du = tau_f_;
     data->Mtau = Mtau_;
     for (std::size_t i = 0; i < 2; ++i) {
@@ -148,7 +148,7 @@ class ActuationModelMultiCopterBaseTpl
 
 template <typename Scalar>
 ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
-    boost::shared_ptr<StateMultibody> state,
+    std::shared_ptr<StateMultibody> state,
     const Eigen::Ref<const Matrix6xs>& tau_f)
     : Base(state, state->get_nv() - 6 + tau_f.cols()), n_rotors_(tau_f.cols()) {
   pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;
@@ -172,7 +172,7 @@ ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
 
 template <typename Scalar>
 ActuationModelMultiCopterBaseTpl<Scalar>::ActuationModelMultiCopterBaseTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t n_rotors,
+    std::shared_ptr<StateMultibody> state, const std::size_t n_rotors,
     const Eigen::Ref<const Matrix6xs>& tau_f)
     : Base(state, state->get_nv() - 6 + n_rotors), n_rotors_(n_rotors) {
   pinocchio::JointModelFreeFlyerTpl<Scalar> ff_joint;

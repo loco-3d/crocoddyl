@@ -60,7 +60,7 @@ std::ostream &operator<<(std::ostream &os,
 ContactConstraintModelFactory::ContactConstraintModelFactory() {}
 ContactConstraintModelFactory::~ContactConstraintModelFactory() {}
 
-boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
+std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>
 ContactConstraintModelFactory::create(
     ContactConstraintModelTypes::Type constraint_type,
     PinocchioModelTypes::Type model_type,
@@ -84,21 +84,19 @@ ContactConstraintModelFactory::create(
   }
 
   // Create contact contact diff-action model with standard cost functions
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
-      action;
-  boost::shared_ptr<crocoddyl::StateMultibody> state;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  boost::shared_ptr<crocoddyl::ContactModelMultiple> contact;
-  boost::shared_ptr<crocoddyl::CostModelSum> cost;
-  boost::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
-  state = boost::static_pointer_cast<crocoddyl::StateMultibody>(
+  std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> action;
+  std::shared_ptr<crocoddyl::StateMultibody> state;
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  std::shared_ptr<crocoddyl::ContactModelMultiple> contact;
+  std::shared_ptr<crocoddyl::CostModelSum> cost;
+  std::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
+  state = std::static_pointer_cast<crocoddyl::StateMultibody>(
       StateModelFactory().create(state_type));
   actuation = ActuationModelFactory().create(actuation_type, state_type);
-  contact = boost::make_shared<crocoddyl::ContactModelMultiple>(
+  contact = std::make_shared<crocoddyl::ContactModelMultiple>(
       state, actuation->get_nu());
-  cost =
-      boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-  constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(
+  cost = std::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
+  constraint = std::make_shared<crocoddyl::ConstraintModelManager>(
       state, actuation->get_nu());
   std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
   std::vector<std::string> frame_names = model_factory.get_frame_names();
@@ -153,9 +151,9 @@ ContactConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactForce>(
+                std::make_shared<crocoddyl::ResidualModelContactForce>(
                     state, frame_ids[i], pinocchio::Force::Random(),
                     model_factory.get_contact_nc(), actuation->get_nu())));
       }
@@ -167,9 +165,9 @@ ContactConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
+                std::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
                     state, frame_ids[i], cop_support, actuation->get_nu()),
                 lb, ub));
       }
@@ -181,9 +179,9 @@ ContactConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
+                std::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
                     state, frame_ids[i], friction_cone, actuation->get_nu()),
                 lb, ub),
             true);
@@ -196,9 +194,9 @@ ContactConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
+                std::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
                     state, frame_ids[i], wrench_cone, actuation->get_nu()),
                 lb, ub),
             true);
@@ -210,9 +208,9 @@ ContactConstraintModelFactory::create(
       ub = Eigen::VectorXd::Random(state->get_nv()).cwiseAbs();
       constraint->addConstraint(
           "constraint_0",
-          boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          std::make_shared<crocoddyl::ConstraintModelResidual>(
               state,
-              boost::make_shared<crocoddyl::ResidualModelContactControlGrav>(
+              std::make_shared<crocoddyl::ResidualModelContactControlGrav>(
                   state, actuation->get_nu()),
               lb, ub));
       break;
@@ -222,7 +220,7 @@ ContactConstraintModelFactory::create(
   }
 
   action =
-      boost::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
+      std::make_shared<crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state, actuation, contact, cost, constraint, 0., true);
   return action;
 }

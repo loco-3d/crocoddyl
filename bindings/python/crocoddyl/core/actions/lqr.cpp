@@ -26,7 +26,7 @@ void exposeActionLQR() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-  boost::python::register_ptr_to_python<boost::shared_ptr<ActionModelLQR> >();
+  boost::python::register_ptr_to_python<std::shared_ptr<ActionModelLQR> >();
 
   bp::class_<ActionModelLQR, bp::bases<ActionModelAbstract> >(
       "ActionModelLQR",
@@ -87,10 +87,9 @@ void exposeActionLQR() {
           ":param nu: dimension of the control vector\n"
           ":param driftFree: enable/disable the bias term of the linear "
           "dynamics (default True)"))
-      .def<void (ActionModelLQR::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (ActionModelLQR::*)(const std::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelLQR::calc, bp::args("self", "data", "x", "u"),
           "Compute the next state and cost value.\n\n"
           "It describes the time-discrete evolution of the LQR system. "
@@ -100,14 +99,12 @@ void exposeActionLQR() {
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
-      .def<void (ActionModelLQR::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (ActionModelLQR::*)(const std::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (ActionModelLQR::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (ActionModelLQR::*)(const std::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelLQR::calcDiff,
           bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the LQR dynamics and cost functions.\n\n"
@@ -118,9 +115,8 @@ void exposeActionLQR() {
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
-      .def<void (ActionModelLQR::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
+      .def<void (ActionModelLQR::*)(const std::shared_ptr<ActionDataAbstract>&,
+                                    const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
       .def("createData", &ActionModelLQR::createData, bp::args("self"),
@@ -263,7 +259,7 @@ void exposeActionLQR() {
           "input weight matrix")
       .def(CopyableVisitor<ActionModelLQR>());
 
-  boost::python::register_ptr_to_python<boost::shared_ptr<ActionDataLQR> >();
+  boost::python::register_ptr_to_python<std::shared_ptr<ActionDataLQR> >();
 
   bp::class_<ActionDataLQR, bp::bases<ActionDataAbstract> >(
       "ActionDataLQR", "Action data for the LQR system.",

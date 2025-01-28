@@ -46,7 +46,7 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::us_;
   using SolverAbstract::xs_;
 
-  explicit SolverAbstract_wrap(boost::shared_ptr<ShootingProblem> problem)
+  explicit SolverAbstract_wrap(std::shared_ptr<ShootingProblem> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstract_wrap() {}
 

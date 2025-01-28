@@ -18,14 +18,14 @@ namespace python {
 
 void exposeActionAbstract() {
   // Register custom converters between std::vector and Python list
-  typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
-  typedef boost::shared_ptr<ActionDataAbstract> ActionDataPtr;
+  typedef std::shared_ptr<ActionModelAbstract> ActionModelPtr;
+  typedef std::shared_ptr<ActionDataAbstract> ActionDataPtr;
   StdVectorPythonVisitor<std::vector<ActionModelPtr>, true>::expose(
       "StdVec_ActionModel");
   StdVectorPythonVisitor<std::vector<ActionDataPtr>, true>::expose(
       "StdVec_ActionData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActionModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionModelAbstract> >();
 
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",
@@ -39,7 +39,7 @@ void exposeActionAbstract() {
       "derivatives. These computations are mainly carried out inside calc() "
       "and calcDiff(),\n"
       "respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t,
+      bp::init<std::shared_ptr<StateAbstract>, std::size_t,
                bp::optional<std::size_t, std::size_t, std::size_t, std::size_t,
                             std::size_t> >(
           bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T"),
@@ -62,7 +62,7 @@ void exposeActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ActionModelAbstract::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the "
@@ -85,7 +85,7 @@ void exposeActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ActionModelAbstract::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -172,7 +172,7 @@ void exposeActionAbstract() {
           "indicates whether problem has finite control limits")
       .def(PrintableVisitor<ActionModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataAbstract> >();
 
   bp::class_<ActionDataAbstract>(
       "ActionDataAbstract",

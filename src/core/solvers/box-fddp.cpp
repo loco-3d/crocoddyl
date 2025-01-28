@@ -14,7 +14,7 @@
 
 namespace crocoddyl {
 
-SolverBoxFDDP::SolverBoxFDDP(boost::shared_ptr<ShootingProblem> problem)
+SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem)
     : SolverFDDP(problem),
       qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
@@ -38,10 +38,10 @@ void SolverBoxFDDP::resizeData() {
   SolverFDDP::resizeData();
 
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     Quu_inv_[t].conservativeResize(nu, nu);
     du_lb_[t].conservativeResize(nu);
@@ -57,10 +57,10 @@ void SolverBoxFDDP::allocateData() {
   Quu_inv_.resize(T);
   du_lb_.resize(T);
   du_ub_.resize(T);
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
     du_lb_[t] = Eigen::VectorXd::Zero(nu);
@@ -111,14 +111,14 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t nu = m->get_nu();
 
       xs_try_[t] = xnext_;
@@ -144,10 +144,9 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m =
+    const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d =
-        problem_->get_terminalData();
+    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
     xs_try_.back() = xnext_;
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
@@ -157,8 +156,8 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
     }
   } else {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -183,10 +182,9 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m =
+    const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d =
-        problem_->get_terminalData();
+    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
     m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1),
                               xs_try_.back());
     m->calc(d, xs_try_.back());

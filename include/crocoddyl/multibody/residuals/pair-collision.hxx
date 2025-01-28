@@ -18,8 +18,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelPairCollisionTpl<Scalar>::ResidualModelPairCollisionTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t nu,
-    boost::shared_ptr<GeometryModel> geom_model,
+    std::shared_ptr<StateMultibody> state, const std::size_t nu,
+    std::shared_ptr<GeometryModel> geom_model,
     const pinocchio::PairIndex pair_id, const pinocchio::JointIndex joint_id)
     : Base(state, 3, nu, true, false, false),
       pin_model_(*state->get_pinocchio()),
@@ -45,7 +45,7 @@ ResidualModelPairCollisionTpl<Scalar>::~ResidualModelPairCollisionTpl() {}
 
 template <typename Scalar>
 void ResidualModelPairCollisionTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -64,7 +64,7 @@ void ResidualModelPairCollisionTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelPairCollisionTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &, const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -86,11 +86,11 @@ void ResidualModelPairCollisionTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelPairCollisionTpl<Scalar>::createData(
     DataCollectorAbstract *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

@@ -17,7 +17,7 @@ namespace python {
 void exposeDataCollectorContacts() {
   bp::class_<DataCollectorContact, bp::bases<DataCollectorAbstract> >(
       "DataCollectorContact", "Contact data collector.\n\n",
-      bp::init<boost::shared_ptr<ContactDataMultiple> >(
+      bp::init<std::shared_ptr<ContactDataMultiple> >(
           bp::args("self", "contacts"),
           "Create contact data collection.\n\n"
           ":param contacts: contacts data"))
@@ -32,7 +32,7 @@ void exposeDataCollectorContacts() {
              bp::bases<DataCollectorMultibody, DataCollectorContact> >(
       "DataCollectorMultibodyInContact",
       "Data collector for multibody systems in contact.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ContactDataMultiple> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ContactDataMultiple> >(
           bp::args("self", "pinocchio", "contacts"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"
@@ -45,8 +45,8 @@ void exposeDataCollectorContacts() {
       bp::bases<DataCollectorMultibodyInContact, DataCollectorActuation> >(
       "DataCollectorActMultibodyInContact",
       "Data collector for actuated multibody systems in contact.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ActuationDataAbstract>,
-               boost::shared_ptr<ContactDataMultiple> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ActuationDataAbstract>,
+               std::shared_ptr<ContactDataMultiple> >(
           bp::args("self", "pinocchio", "actuation", "contacts"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"
@@ -60,9 +60,9 @@ void exposeDataCollectorContacts() {
       bp::bases<DataCollectorActMultibodyInContact, DataCollectorJoint> >(
       "DataCollectorJointActMultibodyInContact",
       "Data collector for actuated-joint multibody systems in contact.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ActuationDataAbstract>,
-               boost::shared_ptr<JointDataAbstract>,
-               boost::shared_ptr<ContactDataMultiple> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ActuationDataAbstract>,
+               std::shared_ptr<JointDataAbstract>,
+               std::shared_ptr<ContactDataMultiple> >(
           bp::args("self", "pinocchio", "actuation", "joint", "contacts"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"

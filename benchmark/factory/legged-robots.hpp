@@ -38,8 +38,8 @@ namespace benchmark {
 template <typename Scalar>
 void build_contact_action_models(
     RobotEENames robotNames,
-    boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
-    boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
+    std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
+    std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
         terminalModel) {
   typedef
       typename crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<Scalar>
@@ -78,43 +78,43 @@ void build_contact_action_models(
                                                false);
 
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
-  boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
-      boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
-          boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
+  std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
+      std::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
+          std::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
   VectorXs default_state(model.nq + model.nv);
   default_state << model.referenceConfigurations[robotNames.reference_conf],
       VectorXs::Zero(model.nv);
 
-  boost::shared_ptr<ActuationModelFloatingBase> actuation =
-      boost::make_shared<ActuationModelFloatingBase>(state);
+  std::shared_ptr<ActuationModelFloatingBase> actuation =
+      std::make_shared<ActuationModelFloatingBase>(state);
 
-  boost::shared_ptr<CostModelAbstract> comCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelCoMPosition>(
+  std::shared_ptr<CostModelAbstract> comCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelCoMPosition>(
                      state, Vector3s::Zero(), actuation->get_nu()));
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelFramePlacement>(
+  std::shared_ptr<CostModelAbstract> goalTrackingCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelFramePlacement>(
                      state, model.getFrameId(robotNames.ee_name),
                      pinocchio::SE3Tpl<Scalar>(
                          Matrix3s::Identity(),
                          Vector3s(Scalar(.0), Scalar(.0), Scalar(.4))),
                      actuation->get_nu()));
-  boost::shared_ptr<CostModelAbstract> xRegCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelState>(state, default_state,
-                                                        actuation->get_nu()));
-  boost::shared_ptr<CostModelAbstract> uRegCost =
-      boost::make_shared<CostModelResidual>(
+  std::shared_ptr<CostModelAbstract> xRegCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelState>(state, default_state,
+                                                      actuation->get_nu()));
+  std::shared_ptr<CostModelAbstract> uRegCost =
+      std::make_shared<CostModelResidual>(
           state,
-          boost::make_shared<ResidualModelControl>(state, actuation->get_nu()));
+          std::make_shared<ResidualModelControl>(state, actuation->get_nu()));
 
   // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<CostModelSum> runningCostModel =
-      boost::make_shared<CostModelSum>(state, actuation->get_nu());
-  boost::shared_ptr<CostModelSum> terminalCostModel =
-      boost::make_shared<CostModelSum>(state, actuation->get_nu());
+  std::shared_ptr<CostModelSum> runningCostModel =
+      std::make_shared<CostModelSum>(state, actuation->get_nu());
+  std::shared_ptr<CostModelSum> terminalCostModel =
+      std::make_shared<CostModelSum>(state, actuation->get_nu());
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
@@ -123,14 +123,14 @@ void build_contact_action_models(
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
 
-  boost::shared_ptr<ContactModelMultiple> contact_models =
-      boost::make_shared<ContactModelMultiple>(state, actuation->get_nu());
+  std::shared_ptr<ContactModelMultiple> contact_models =
+      std::make_shared<ContactModelMultiple>(state, actuation->get_nu());
 
   for (std::size_t i = 0; i < robotNames.contact_names.size(); ++i) {
     switch (robotNames.contact_types[i]) {
       case Contact3D: {
-        boost::shared_ptr<ContactModelAbstract> support_contact =
-            boost::make_shared<ContactModel3D>(
+        std::shared_ptr<ContactModelAbstract> support_contact =
+            std::make_shared<ContactModel3D>(
                 state, model.getFrameId(robotNames.contact_names[i]),
                 Eigen::Vector3d::Zero(), pinocchio::LOCAL_WORLD_ALIGNED,
                 actuation->get_nu(), Vector2s(Scalar(0.), Scalar(50.)));
@@ -140,8 +140,8 @@ void build_contact_action_models(
         break;
       }
       case Contact6D: {
-        boost::shared_ptr<ContactModelAbstract> support_contact =
-            boost::make_shared<ContactModel6D>(
+        std::shared_ptr<ContactModelAbstract> support_contact =
+            std::make_shared<ContactModel6D>(
                 state, model.getFrameId(robotNames.contact_names[i]),
                 pinocchio::SE3Tpl<Scalar>::Identity(),
                 pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
@@ -158,17 +158,17 @@ void build_contact_action_models(
   }
 
   // Next, we need to create an action model for running and terminal nodes
-  boost::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
-      boost::make_shared<DifferentialActionModelContactFwdDynamics>(
+  std::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
+      std::make_shared<DifferentialActionModelContactFwdDynamics>(
           state, actuation, contact_models, runningCostModel);
-  boost::shared_ptr<DifferentialActionModelContactFwdDynamics> terminalDAM =
-      boost::make_shared<DifferentialActionModelContactFwdDynamics>(
+  std::shared_ptr<DifferentialActionModelContactFwdDynamics> terminalDAM =
+      std::make_shared<DifferentialActionModelContactFwdDynamics>(
           state, actuation, contact_models, terminalCostModel);
 
   runningModel =
-      boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(5e-3));
+      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(5e-3));
   terminalModel =
-      boost::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(5e-3));
+      std::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(5e-3));
 }
 
 }  // namespace benchmark

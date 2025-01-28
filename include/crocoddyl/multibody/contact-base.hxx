@@ -14,20 +14,19 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
-    boost::shared_ptr<StateMultibody> state,
-    const pinocchio::ReferenceFrame type, const std::size_t nc,
-    const std::size_t nu)
+    std::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+    const std::size_t nc, const std::size_t nu)
     : state_(state), nc_(nc), nu_(nu), id_(0), type_(type) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
-    boost::shared_ptr<StateMultibody> state,
-    const pinocchio::ReferenceFrame type, const std::size_t nc)
+    std::shared_ptr<StateMultibody> state, const pinocchio::ReferenceFrame type,
+    const std::size_t nc)
     : state_(state), nc_(nc), nu_(state->get_nv()), id_(0), type_(type) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t nc,
+    std::shared_ptr<StateMultibody> state, const std::size_t nc,
     const std::size_t nu)
     : state_(state),
       nc_(nc),
@@ -41,7 +40,7 @@ ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t nc)
+    std::shared_ptr<StateMultibody> state, const std::size_t nc)
     : state_(state),
       nc_(nc),
       nu_(state->get_nv()),
@@ -57,7 +56,7 @@ ContactModelAbstractTpl<Scalar>::~ContactModelAbstractTpl() {}
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::updateForceDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
+    const std::shared_ptr<ContactDataAbstract>& data, const MatrixXs& df_dx,
     const MatrixXs& df_du) const {
   if (static_cast<std::size_t>(df_dx.rows()) != nc_ ||
       static_cast<std::size_t>(df_dx.cols()) != state_->get_ndx())
@@ -73,23 +72,23 @@ void ContactModelAbstractTpl<Scalar>::updateForceDiff(
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::setZeroForce(
-    const boost::shared_ptr<ContactDataAbstract>& data) const {
+    const std::shared_ptr<ContactDataAbstract>& data) const {
   data->f.setZero();
   data->fext.setZero();
 }
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::setZeroForceDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data) const {
+    const std::shared_ptr<ContactDataAbstract>& data) const {
   data->df_dx.setZero();
   data->df_du.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<ContactDataAbstract>(
+  return std::allocate_shared<ContactDataAbstract>(
       Eigen::aligned_allocator<ContactDataAbstract>(), this, data);
 }
 
@@ -99,7 +98,7 @@ void ContactModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >&
+const std::shared_ptr<StateMultibodyTpl<Scalar> >&
 ContactModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }

@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeContact3D() {
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModel3D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactModel3D> >();
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
                              // been removed in a future release
@@ -30,7 +30,7 @@ void exposeContact3D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                Eigen::Vector3d, pinocchio::ReferenceFrame,
                bp::optional<std::size_t, Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "nu", "gains"),
@@ -42,7 +42,7 @@ void exposeContact3D() {
           ":param nu: dimension of control vector (default state.nv)\n"
           ":param gains: gains of the contact model (default "
           "np.array([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     Eigen::Vector3d, pinocchio::ReferenceFrame,
                     bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "gains"),
@@ -96,7 +96,7 @@ void exposeContact3D() {
 
 #pragma GCC diagnostic pop
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactData3D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactData3D> >();
 
   bp::class_<ContactData3D, bp::bases<ContactDataAbstract> >(
       "ContactData3D", "Data for 3D contact.\n\n",

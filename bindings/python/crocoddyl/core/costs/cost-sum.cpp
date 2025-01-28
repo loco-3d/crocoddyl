@@ -29,8 +29,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addCost_wrap,
 
 void exposeCostSum() {
   // Register custom converters between std::map and Python dict
-  typedef boost::shared_ptr<CostItem> CostItemPtr;
-  typedef boost::shared_ptr<CostDataAbstract> CostDataPtr;
+  typedef std::shared_ptr<CostItem> CostItemPtr;
+  typedef std::shared_ptr<CostDataAbstract> CostDataPtr;
   StdMapPythonVisitor<std::string, CostItemPtr, std::less<std::string>,
                       std::allocator<std::pair<const std::string, CostItemPtr>>,
                       true>::expose("StdMap_CostItem");
@@ -38,11 +38,11 @@ void exposeCostSum() {
                       std::allocator<std::pair<const std::string, CostDataPtr>>,
                       true>::expose("StdMap_CostData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostItem>>();
+  bp::register_ptr_to_python<std::shared_ptr<CostItem>>();
 
   bp::class_<CostItem>(
       "CostItem", "Describe a cost item.\n\n",
-      bp::init<std::string, boost::shared_ptr<CostModelAbstract>, double,
+      bp::init<std::string, std::shared_ptr<CostModelAbstract>, double,
                bp::optional<bool>>(
           bp::args("self", "name", "cost", "weight", "active"),
           "Initialize the cost item.\n\n"
@@ -61,21 +61,21 @@ void exposeCostSum() {
       .def(CopyableVisitor<CostItem>())
       .def(PrintableVisitor<CostItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostModelSum>>();
+  bp::register_ptr_to_python<std::shared_ptr<CostModelSum>>();
 
   bp::class_<CostModelSum>(
-      "CostModelSum", bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      "CostModelSum", bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
                           bp::args("self", "state", "nu"),
                           "Initialize the total cost model.\n\n"
                           ":param state: state description\n"
                           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>>(
+      .def(bp::init<std::shared_ptr<StateAbstract>>(
           bp::args("self", "state"),
           "Initialize the total cost model.\n\n"
           "For this case the default nu is equals to model.nv.\n"
@@ -97,7 +97,7 @@ void exposeCostSum() {
           "Change the cost status.\n\n"
           ":param name: cost name\n"
           ":param active: cost status (true for active and false for inactive)")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&,
+      .def<void (CostModelSum::*)(const std::shared_ptr<CostDataSum>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelSum::calc, bp::args("self", "data", "x", "u"),
@@ -105,7 +105,7 @@ void exposeCostSum() {
           ":param data: cost-sum data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&,
+      .def<void (CostModelSum::*)(const std::shared_ptr<CostDataSum>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelSum::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the "
@@ -115,7 +115,7 @@ void exposeCostSum() {
           "problem.\n"
           ":param data: cost-sum data\n"
           ":param x: state point (dim. state.nx)")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&,
+      .def<void (CostModelSum::*)(const std::shared_ptr<CostDataSum>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelSum::calcDiff,
@@ -125,7 +125,7 @@ void exposeCostSum() {
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
-      .def<void (CostModelSum::*)(const boost::shared_ptr<CostDataSum>&,
+      .def<void (CostModelSum::*)(const std::shared_ptr<CostDataSum>&,
                                   const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelSum::calcDiff, bp::args("self", "data", "x"),
           "Compute the Jacobian and Hessian of the total cost for nodes that "
@@ -189,7 +189,7 @@ void exposeCostSum() {
       .def(CopyableVisitor<CostModelSum>())
       .def(PrintableVisitor<CostModelSum>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataSum>>();
+  bp::register_ptr_to_python<std::shared_ptr<CostDataSum>>();
 
   bp::class_<CostDataSum>(
       "CostDataSum", "Class for total cost data.\n\n",

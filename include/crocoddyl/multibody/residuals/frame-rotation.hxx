@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Matrix3s& Rref, const std::size_t nu)
     : Base(state, 3, nu, true, false, false),
       id_(id),
@@ -31,7 +31,7 @@ ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(
 
 template <typename Scalar>
 ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Matrix3s& Rref)
     : Base(state, 3, true, false, false),
       id_(id),
@@ -51,7 +51,7 @@ ResidualModelFrameRotationTpl<Scalar>::~ResidualModelFrameRotationTpl() {}
 
 template <typename Scalar>
 void ResidualModelFrameRotationTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -63,7 +63,7 @@ void ResidualModelFrameRotationTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelFrameRotationTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -78,11 +78,11 @@ void ResidualModelFrameRotationTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelFrameRotationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

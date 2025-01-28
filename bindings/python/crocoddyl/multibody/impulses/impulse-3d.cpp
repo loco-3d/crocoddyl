@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeImpulse3D() {
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModel3D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseModel3D> >();
 
   bp::class_<ImpulseModel3D, bp::bases<ImpulseModelAbstract> >(
       "ImpulseModel3D",
@@ -26,7 +26,7 @@ void exposeImpulse3D() {
       "The calc and calcDiff functions compute the impulse Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t,
+      bp::init<std::shared_ptr<StateMultibody>, std::size_t,
                bp::optional<pinocchio::ReferenceFrame> >(
           bp::args("self", "state", "frame", "type"),
           "Initialize the 3D impulse model.\n\n"
@@ -64,7 +64,7 @@ void exposeImpulse3D() {
            ":return impulse data.")
       .def(CopyableVisitor<ImpulseModel3D>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseData3D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseData3D> >();
 
   bp::class_<ImpulseData3D, bp::bases<ImpulseDataAbstract> >(
       "ImpulseData3D", "Data for 3D impulse.\n\n",

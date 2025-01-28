@@ -44,25 +44,25 @@ std::ostream& operator<<(std::ostream& os, IntegratorTypes::Type type) {
 IntegratorFactory::IntegratorFactory() {}
 IntegratorFactory::~IntegratorFactory() {}
 
-boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
+std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
 IntegratorFactory::create(
     IntegratorTypes::Type type,
-    boost::shared_ptr<DifferentialActionModelAbstract> model) const {
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
+    std::shared_ptr<DifferentialActionModelAbstract> model) const {
+  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(model);
+      action = std::make_shared<crocoddyl::IntegratedActionModelEuler>(model);
       break;
     case IntegratorTypes::IntegratorRK2:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, RKType::two);
       break;
     case IntegratorTypes::IntegratorRK3:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, RKType::three);
       break;
     case IntegratorTypes::IntegratorRK4:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, RKType::four);
       break;
     default:
@@ -72,27 +72,27 @@ IntegratorFactory::create(
   return action;
 }
 
-boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
+std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
 IntegratorFactory::create(
     IntegratorTypes::Type type,
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control) const {
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
+    std::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<ControlParametrizationModelAbstract> control) const {
+  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelEuler>(
-          model, control);
+      action = std::make_shared<crocoddyl::IntegratedActionModelEuler>(model,
+                                                                       control);
       break;
     case IntegratorTypes::IntegratorRK2:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, control, RKType::two);
       break;
     case IntegratorTypes::IntegratorRK3:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, control, RKType::three);
       break;
     case IntegratorTypes::IntegratorRK4:
-      action = boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
           model, control, RKType::four);
       break;
     default:

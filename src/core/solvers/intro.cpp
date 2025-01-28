@@ -15,7 +15,7 @@
 
 namespace crocoddyl {
 
-SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
+SolverIntro::SolverIntro(std::shared_ptr<ShootingProblem> problem)
     : SolverFDDP(problem),
       eq_solver_(LuNull),
       th_feas_(1e-4),
@@ -42,10 +42,10 @@ SolverIntro::SolverIntro(boost::shared_ptr<ShootingProblem> problem)
   Hy_lu_.resize(T);
 
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     Hu_rank_[t] = nh;
@@ -204,10 +204,10 @@ void SolverIntro::resizeData() {
 
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     KQuu_tmp_[t].conservativeResize(ndx, nu);
@@ -230,9 +230,9 @@ double SolverIntro::calcDiff() {
   START_PROFILER("SolverIntro::calcDiff");
   SolverFDDP::calcDiff();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   switch (eq_solver_) {
     case LuNull:
@@ -240,9 +240,9 @@ double SolverIntro::calcDiff() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
       for (std::size_t t = 0; t < T; ++t) {
-        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
             models[t];
-        const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
+        const std::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
         if (model->get_nu() > 0 && model->get_nh() > 0) {
           Hu_lu_[t].compute(data->Hu);
           YZ_[t] << Hu_lu_[t].matrixLU().transpose(), Hu_lu_[t].kernel();
@@ -266,9 +266,9 @@ double SolverIntro::calcDiff() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
       for (std::size_t t = 0; t < T; ++t) {
-        const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
             models[t];
-        const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
+        const std::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
         if (model->get_nu() > 0 && model->get_nh() > 0) {
           Hu_qr_[t].compute(data->Hu.transpose());
           YZ_[t] = Hu_qr_[t].householderQ();
@@ -296,7 +296,7 @@ double SolverIntro::calcDiff() {
 }
 
 void SolverIntro::computeValueFunction(
-    const std::size_t t, const boost::shared_ptr<ActionModelAbstract>& model) {
+    const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
   const std::size_t nu = model->get_nu();
   Vx_[t] = Qx_[t];
   Vxx_[t] = Qxx_[t];
@@ -329,9 +329,9 @@ void SolverIntro::computeValueFunction(
 
 void SolverIntro::computeGains(const std::size_t t) {
   START_PROFILER("SolverIntro::computeGains");
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       problem_->get_runningDatas()[t];
 
   const std::size_t nu = model->get_nu();

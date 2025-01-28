@@ -34,7 +34,7 @@ void print_benchmark(RobotEENames robot) {
   unsigned int T = 1e3;  // number of trials
 
   // Building the running and terminal models
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
+  std::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
   } else if (robot.robot_name == "Kinova_arm") {
@@ -46,29 +46,29 @@ void print_benchmark(RobotEENames robot) {
   }
 
   // Get the initial state
-  boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+  std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
           runningModel->get_state());
   std::cout << "NQ: " << state->get_nq() << std::endl;
   std::cout << "Number of nodes: " << N << std::endl << std::endl;
 
   Eigen::VectorXd default_state(state->get_nq() + state->get_nv());
-  boost::shared_ptr<crocoddyl::IntegratedActionModelEulerTpl<double> > rm =
-      boost::static_pointer_cast<
+  std::shared_ptr<crocoddyl::IntegratedActionModelEulerTpl<double> > rm =
+      std::static_pointer_cast<
           crocoddyl::IntegratedActionModelEulerTpl<double> >(runningModel);
   if (robot.robot_name == "Talos_arm" || robot.robot_name == "Kinova_arm") {
-    boost::shared_ptr<
+    std::shared_ptr<
         crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >
-        dm = boost::static_pointer_cast<
+        dm = std::static_pointer_cast<
             crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
             rm->get_differential());
     default_state
         << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
         Eigen::VectorXd::Zero(state->get_nv());
   } else {
-    boost::shared_ptr<
+    std::shared_ptr<
         crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> >
-        dm = boost::static_pointer_cast<
+        dm = std::static_pointer_cast<
             crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> >(
             rm->get_differential());
     default_state
@@ -76,32 +76,32 @@ void print_benchmark(RobotEENames robot) {
         Eigen::VectorXd::Zero(state->get_nv());
   }
   Eigen::VectorXd x0(default_state);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
       N, runningModel);
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels,
-                                                     terminalModel);
+  std::shared_ptr<crocoddyl::ShootingProblem> problem =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModels,
+                                                   terminalModel);
   // Computing the warm-start
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(
       N, Eigen::VectorXd::Zero(runningModel->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
         problem->get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         problem->get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
   crocoddyl::SolverFDDP ddp(problem);
   ddp.setCandidate(xs, us, false);
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningData =
+  std::shared_ptr<crocoddyl::ActionDataAbstract> runningData =
       runningModel->createData();
 
 #ifdef CROCODDYL_WITH_CODEGEN
   // Code generation of the running an terminal models
   typedef CppAD::AD<CppAD::cg::CG<double> > ADScalar;
-  boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> >
-      ad_runningModel, ad_terminalModel;
+  std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > ad_runningModel,
+      ad_terminalModel;
   if (robot.robot_name == "Talos_arm") {
     crocoddyl::benchmark::build_arm_action_models(ad_runningModel,
                                                   ad_terminalModel);
@@ -113,26 +113,26 @@ void print_benchmark(RobotEENames robot) {
                                                       ad_terminalModel);
   }
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
-      boost::make_shared<crocoddyl::ActionModelCodeGen>(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
+      std::make_shared<crocoddyl::ActionModelCodeGen>(
           ad_runningModel, runningModel, robot.robot_name + "_running_cg");
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
-      boost::make_shared<crocoddyl::ActionModelCodeGen>(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
+      std::make_shared<crocoddyl::ActionModelCodeGen>(
           ad_terminalModel, terminalModel, robot.robot_name + "_terminal_cg");
 
   // Defining the shooting problem for both cases: with and without code
   // generation
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> >
       cg_runningModels(N, cg_runningModel);
-  boost::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, cg_runningModels,
-                                                     cg_terminalModel);
+  std::shared_ptr<crocoddyl::ShootingProblem> cg_problem =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, cg_runningModels,
+                                                   cg_terminalModel);
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
   crocoddyl::SolverFDDP cg_ddp(cg_problem);
   cg_ddp.setCandidate(xs, us, false);
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> cg_runningData =
+  std::shared_ptr<crocoddyl::ActionDataAbstract> cg_runningData =
       cg_runningModel->createData();
   Eigen::VectorXd x_rand = cg_runningModel->get_state()->rand();
   Eigen::VectorXd u_rand = Eigen::VectorXd::Random(cg_runningModel->get_nu());

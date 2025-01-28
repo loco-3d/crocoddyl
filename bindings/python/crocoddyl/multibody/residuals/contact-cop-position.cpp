@@ -19,12 +19,12 @@ namespace python {
 
 void exposeResidualContactCoPPosition() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualModelContactCoPPosition> >();
+      std::shared_ptr<ResidualModelContactCoPPosition> >();
 
   bp::class_<ResidualModelContactCoPPosition,
              bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactCoPPosition",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                CoPSupport, std::size_t, bp::optional<bool> >(
           bp::args("self", "state", "id", "cref", "nu", "fwddyn"),
           "Initialize the contact CoP position residual model.\n\n"
@@ -35,7 +35,7 @@ void exposeResidualContactCoPPosition() {
           ":param fwddyn: indicate if we have a forward dynamics problem "
           "(True) or inverse dynamics problem (False) "
           "(default True)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     CoPSupport>(
           bp::args("self", "state", "id", "cref"),
           "Initialize the contact CoP position residual model.\n\n"
@@ -46,7 +46,7 @@ void exposeResidualContactCoPPosition() {
           ":param id: reference frame id\n"
           ":param cref: support region of the CoP"))
       .def<void (ResidualModelContactCoPPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelContactCoPPosition::calc,
@@ -56,7 +56,7 @@ void exposeResidualContactCoPPosition() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactCoPPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelContactCoPPosition::calcDiff,
@@ -91,7 +91,7 @@ void exposeResidualContactCoPPosition() {
       .def(CopyableVisitor<ResidualModelContactCoPPosition>());
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualDataContactCoPPosition> >();
+      std::shared_ptr<ResidualDataContactCoPPosition> >();
 
   bp::class_<ResidualDataContactCoPPosition, bp::bases<ResidualDataAbstract> >(
       "ResidualDataContactCoPPosition",

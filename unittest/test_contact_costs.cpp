@@ -22,16 +22,16 @@ void test_partial_derivatives_against_contact_numdiff(
     ActivationModelTypes::Type activation_type,
     ActuationModelTypes::Type actuation_type) {
   // create the model
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
       ContactCostModelFactory().create(cost_type, model_type, activation_type,
                                        actuation_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
       model->createData();
 
   crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
       data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control

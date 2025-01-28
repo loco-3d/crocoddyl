@@ -20,12 +20,12 @@ namespace python {
 class ActuationModelAbstract_wrap : public ActuationModelAbstract,
                                     public bp::wrapper<ActuationModelAbstract> {
  public:
-  ActuationModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ActuationModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                               const std::size_t nu)
       : ActuationModelAbstract(state, nu),
         bp::wrapper<ActuationModelAbstract>() {}
 
-  void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void calc(const std::shared_ptr<ActuationDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -42,7 +42,7 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract,
                           (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -59,7 +59,7 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract,
                           (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& tau) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -76,7 +76,7 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract,
                           (Eigen::VectorXd)x, (Eigen::VectorXd)tau);
   }
 
-  void torqueTransform(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void torqueTransform(const std::shared_ptr<ActuationDataAbstract>& data,
                        const Eigen::Ref<const VectorXs>& x,
                        const Eigen::Ref<const VectorXs>& u) {
     if (boost::python::override torqueTransform =
@@ -98,22 +98,22 @@ class ActuationModelAbstract_wrap : public ActuationModelAbstract,
   }
 
   void default_torqueTransform(
-      const boost::shared_ptr<ActuationDataAbstract>& data,
+      const std::shared_ptr<ActuationDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) {
     return this->ActuationModelAbstract::torqueTransform(data, x, u);
   }
 
-  boost::shared_ptr<ActuationDataAbstract> createData() {
+  std::shared_ptr<ActuationDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ActuationDataAbstract> >(
+      return bp::call<std::shared_ptr<ActuationDataAbstract> >(
           createData.ptr());
     }
     return ActuationModelAbstract::createData();
   }
 
-  boost::shared_ptr<ActuationDataAbstract> default_createData() {
+  std::shared_ptr<ActuationDataAbstract> default_createData() {
     return this->ActuationModelAbstract::createData();
   }
 };

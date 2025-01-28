@@ -50,7 +50,7 @@ class ImpulseConstraintModelFactory {
   explicit ImpulseConstraintModelFactory();
   ~ImpulseConstraintModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> create(
       ImpulseConstraintModelTypes::Type constraint_type,
       PinocchioModelTypes::Type model_type) const;
 };

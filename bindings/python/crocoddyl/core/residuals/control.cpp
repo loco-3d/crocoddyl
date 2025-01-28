@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualControl() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelControl> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelControl> >();
 
   bp::class_<ResidualModelControl, bp::bases<ResidualModelAbstract> >(
       "ResidualModelControl",
@@ -23,24 +23,24 @@ void exposeResidualControl() {
       "u and uref as the current and "
       "reference\n"
       "control, respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd>(
+      bp::init<std::shared_ptr<StateAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "uref"),
           "Initialize the control residual model.\n\n"
           ":param state: state description\n"
           ":param uref: reference control"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the control residual model.\n\n"
           "The default reference control is obtained from np.zero(nu).\n"
           ":param state: state description\n"
           ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
           "Initialize the control residual model.\n\n"
           "The default reference control is obtained from np.zero(nu).\n"
           ":param state: state description"))
       .def<void (ResidualModelControl::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelControl::calc,
@@ -50,11 +50,11 @@ void exposeResidualControl() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelControl::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelControl::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelControl::calcDiff,
@@ -65,7 +65,7 @@ void exposeResidualControl() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelControl::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))

@@ -21,7 +21,7 @@ class SolverBoxFDDP : public SolverFDDP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit SolverBoxFDDP(boost::shared_ptr<ShootingProblem> problem);
+  explicit SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverBoxFDDP();
 
   virtual void allocateData();

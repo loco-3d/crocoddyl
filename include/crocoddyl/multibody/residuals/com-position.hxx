@@ -13,13 +13,13 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector3s& cref,
+    std::shared_ptr<StateMultibody> state, const Vector3s& cref,
     const std::size_t nu)
     : Base(state, 3, nu, true, false, false), cref_(cref) {}
 
 template <typename Scalar>
 ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector3s& cref)
+    std::shared_ptr<StateMultibody> state, const Vector3s& cref)
     : Base(state, 3, true, false, false), cref_(cref) {}
 
 template <typename Scalar>
@@ -27,7 +27,7 @@ ResidualModelCoMPositionTpl<Scalar>::~ResidualModelCoMPositionTpl() {}
 
 template <typename Scalar>
 void ResidualModelCoMPositionTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the residual residual give the reference CoMPosition position
   Data* d = static_cast<Data*>(data.get());
@@ -36,7 +36,7 @@ void ResidualModelCoMPositionTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelCoMPositionTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -46,11 +46,11 @@ void ResidualModelCoMPositionTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelCoMPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

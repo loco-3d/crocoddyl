@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(
-    boost::shared_ptr<Base> model, const bool with_gauss_approx)
+    std::shared_ptr<Base> model, const bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr(),
            model->get_ng(), model->get_nh(), model->get_ng_T(),
            model->get_nh_T()),
@@ -33,7 +33,7 @@ DifferentialActionModelNumDiffTpl<
 
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -55,7 +55,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -72,7 +72,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // For details about the finite difference formulas see
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
@@ -235,7 +235,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   // For details about the finite difference formulas see
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
@@ -315,14 +315,14 @@ void DifferentialActionModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelNumDiffTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void DifferentialActionModelNumDiffTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
     const std::size_t maxiter, const Scalar tol) {
   Data* d = static_cast<Data*>(data.get());
@@ -330,7 +330,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
+const std::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 DifferentialActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

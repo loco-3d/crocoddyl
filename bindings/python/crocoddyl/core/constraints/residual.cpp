@@ -15,14 +15,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeConstraintResidual() {
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelResidual> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintModelResidual> >();
 
   bp::class_<ConstraintModelResidual, bp::bases<ConstraintModelAbstract> >(
       "ConstraintModelResidual",
       "This defines equality / inequality constraints based on a residual "
       "vector and its bounds.",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ResidualModelAbstract>, Eigen::VectorXd,
                Eigen::VectorXd, bp::optional<bool> >(
           bp::args("self", "state", "residual", "lower", "upper", "T_act"),
           "Initialize the residual constraint model as an inequality "
@@ -33,8 +33,8 @@ void exposeConstraintResidual() {
           ":param upper: upper bound\n"
           ":param T_act: false if we want to deactivate the residual at the "
           "terminal node (default true)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ResidualModelAbstract>,
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ResidualModelAbstract>,
                     bp::optional<bool> >(
           bp::args("self", "state", "residual", "T_act"),
           "Initialize the residual constraint model as an equality "
@@ -44,7 +44,7 @@ void exposeConstraintResidual() {
           ":param T_act: false if we want to deactivate the residual at the "
           "terminal node (default true)"))
       .def<void (ConstraintModelResidual::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelResidual::calc,
@@ -54,7 +54,7 @@ void exposeConstraintResidual() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ConstraintModelResidual::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual constraint based on state only.\n\n"
@@ -64,7 +64,7 @@ void exposeConstraintResidual() {
           ":param data: constraint data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (ConstraintModelResidual::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelResidual::calcDiff,
@@ -75,7 +75,7 @@ void exposeConstraintResidual() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelResidual::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -98,7 +98,7 @@ void exposeConstraintResidual() {
            ":return constraint data.")
       .def(CopyableVisitor<ConstraintModelResidual>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataResidual> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintDataResidual> >();
 
   bp::class_<ConstraintDataResidual, bp::bases<ConstraintDataAbstract> >(
       "ConstraintDataResidual", "Data for residual constraint.\n\n",

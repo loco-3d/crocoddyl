@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActionUnicycle() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActionModelUnicycle> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionModelUnicycle> >();
 
   bp::class_<ActionModelUnicycle, bp::bases<ActionModelAbstract> >(
       "ActionModelUnicycle",
@@ -31,7 +31,7 @@ void exposeActionUnicycle() {
       "control.",
       bp::init<>(bp::args("self"), "Initialize the unicycle action model."))
       .def<void (ActionModelUnicycle::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelUnicycle::calc,
@@ -45,11 +45,11 @@ void exposeActionUnicycle() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ActionModelUnicycle::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ActionModelUnicycle::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelUnicycle::calcDiff,
@@ -64,7 +64,7 @@ void exposeActionUnicycle() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ActionModelUnicycle::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -80,7 +80,7 @@ void exposeActionUnicycle() {
                     "cost weights")
       .def(CopyableVisitor<ActionModelUnicycle>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActionDataUnicycle> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataUnicycle> >();
 
   bp::class_<ActionDataUnicycle, bp::bases<ActionDataAbstract> >(
       "ActionDataUnicycle",

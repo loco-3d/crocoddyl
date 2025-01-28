@@ -21,11 +21,11 @@ void test_construct_data(ActuationModelTypes::Type actuation_type,
                          StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
   if (!data)
     throw std::runtime_error("[test_construct_data] Data pointer is dead.");
@@ -35,11 +35,11 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type,
                            StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
 
   // Generating random state and control vectors
@@ -57,15 +57,15 @@ void test_actuationSet(ActuationModelTypes::Type actuation_type,
                        StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActuationModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -94,15 +94,15 @@ void test_partial_derivatives_against_numdiff(
     StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActuationModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -135,15 +135,15 @@ void test_commands(ActuationModelTypes::Type actuation_type,
                    StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActuationModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -164,15 +164,15 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type,
                           StateModelTypes::Type state_type) {
   // create the model
   ActuationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model =
       factory.create(actuation_type, state_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActuationModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control

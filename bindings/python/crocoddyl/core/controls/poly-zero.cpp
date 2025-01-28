@@ -18,7 +18,7 @@ namespace python {
 
 void exposeControlParametrizationPolyZero() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationModelPolyZero> >();
+      std::shared_ptr<ControlParametrizationModelPolyZero> >();
 
   bp::class_<ControlParametrizationModelPolyZero,
              bp::bases<ControlParametrizationModelAbstract> >(
@@ -32,7 +32,7 @@ void exposeControlParametrizationPolyZero() {
           "Initialize the control dimensions.\n\n"
           ":param nw: dimension of differential control space"))
       .def<void (ControlParametrizationModelPolyZero::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyZero::calc,
           bp::args("self", "data", "t", "u"),
@@ -41,7 +41,7 @@ void exposeControlParametrizationPolyZero() {
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyZero::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calcDiff", &ControlParametrizationModelPolyZero::calcDiff,
           bp::args("self", "data", "t", "u"),
@@ -54,7 +54,7 @@ void exposeControlParametrizationPolyZero() {
       .def("createData", &ControlParametrizationModelPolyZero::createData,
            bp::args("self"), "Create the poly-zero data.")
       .def<void (ControlParametrizationModelPolyZero::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyZero::params,
           bp::args("self", "data", "t", "u"),

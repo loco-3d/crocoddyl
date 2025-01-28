@@ -18,14 +18,14 @@ namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control,
+    std::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<ControlParametrizationModelAbstract> control,
     const Scalar time_step, const bool with_cost_residual)
     : Base(model, control, time_step, with_cost_residual) {}
 
 template <typename Scalar>
 IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<DifferentialActionModelAbstract> model,
     const Scalar time_step, const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual) {}
 
@@ -34,7 +34,7 @@ IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -67,7 +67,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -89,7 +89,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -138,7 +138,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -156,19 +156,19 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 IntegratedActionModelEulerTpl<Scalar>::createData() {
   if (control_->get_nu() > differential_->get_nu())
     std::cerr << "Warning: It is useless to use an Euler integrator with a "
                  "control parametrization larger than PolyZero"
               << std::endl;
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool IntegratedActionModelEulerTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
     return differential_->checkData(d->differential);
   } else {
@@ -178,7 +178,7 @@ bool IntegratedActionModelEulerTpl<Scalar>::checkData(
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const std::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,
     const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -192,7 +192,7 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
                                     std::to_string(state_->get_nx()) + ")");
   }
 
-  const boost::shared_ptr<Data>& d = boost::static_pointer_cast<Data>(data);
+  const std::shared_ptr<Data>& d = std::static_pointer_cast<Data>(data);
 
   d->control->w.setZero();
   differential_->quasiStatic(d->differential, d->control->w, x, maxiter, tol);

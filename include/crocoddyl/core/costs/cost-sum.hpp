@@ -29,9 +29,8 @@ struct CostItemTpl {
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
-  CostItemTpl(const std::string& name,
-              boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
-              const bool active = true)
+  CostItemTpl(const std::string& name, std::shared_ptr<CostModelAbstract> cost,
+              const Scalar weight, const bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
 
   /**
@@ -44,7 +43,7 @@ struct CostItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<CostModelAbstract> cost;
+  std::shared_ptr<CostModelAbstract> cost;
   Scalar weight;
   bool active;
 };
@@ -86,9 +85,8 @@ class CostModelSumTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<CostItem> >
-      CostModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<CostItem> > CostModelContainer;
+  typedef std::map<std::string, std::shared_ptr<CostDataAbstract> >
       CostDataContainer;
 
   /**
@@ -97,7 +95,7 @@ class CostModelSumTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    */
-  CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
+  CostModelSumTpl(std::shared_ptr<StateAbstract> state, const std::size_t nu);
 
   /**
    * @brief Initialize the cost-sum model
@@ -106,7 +104,7 @@ class CostModelSumTpl {
    *
    * @param[in] state  State description
    */
-  explicit CostModelSumTpl(boost::shared_ptr<StateAbstract> state);
+  explicit CostModelSumTpl(std::shared_ptr<StateAbstract> state);
   ~CostModelSumTpl();
 
   /**
@@ -117,9 +115,8 @@ class CostModelSumTpl {
    * @param[in] weight  Cost weight
    * @param[in] active  True if the cost is activated (default true)
    */
-  void addCost(const std::string& name,
-               boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
-               const bool active = true);
+  void addCost(const std::string& name, std::shared_ptr<CostModelAbstract> cost,
+               const Scalar weight, const bool active = true);
 
   /**
    * @brief Remove a cost item
@@ -143,7 +140,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSum>& data,
+  void calc(const std::shared_ptr<CostDataSum>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
@@ -157,7 +154,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSum>& data,
+  void calc(const std::shared_ptr<CostDataSum>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -167,7 +164,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSum>& data,
+  void calcDiff(const std::shared_ptr<CostDataSum>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
@@ -183,7 +180,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSum>& data,
+  void calcDiff(const std::shared_ptr<CostDataSum>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -197,12 +194,12 @@ class CostModelSumTpl {
    * @param data  Data collector
    * @return the cost data
    */
-  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
+  std::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
 
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the stack of cost models
@@ -272,9 +269,9 @@ class CostModelSumTpl {
                                   const CostModelSumTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateAbstract> state_;  //!< State description
-  CostModelContainer costs_;                //!< Stack of cost items
-  std::size_t nu_;                          //!< Dimension of the control input
+  std::shared_ptr<StateAbstract> state_;  //!< State description
+  CostModelContainer costs_;              //!< Stack of cost items
+  std::size_t nu_;                        //!< Dimension of the control input
   std::size_t nr_;        //!< Dimension of the active residual vector
   std::size_t nr_total_;  //!< Dimension of the total residual vector
   std::set<std::string> active_set_;  //!< Names of the active set of cost items
@@ -324,7 +321,7 @@ struct CostDataSumTpl {
     for (typename CostModelSumTpl<Scalar>::CostModelContainer::const_iterator
              it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
-      const boost::shared_ptr<CostItem>& item = it->second;
+      const std::shared_ptr<CostItem>& item = it->second;
       costs.insert(std::make_pair(item->name, item->cost->createData(data)));
     }
   }

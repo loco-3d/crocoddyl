@@ -18,7 +18,7 @@ namespace python {
 
 void exposeControlParametrizationPolyTwoRK() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationModelPolyTwoRK> >();
+      std::shared_ptr<ControlParametrizationModelPolyTwoRK> >();
 
   bp::class_<ControlParametrizationModelPolyTwoRK,
              bp::bases<ControlParametrizationModelAbstract> >(
@@ -38,7 +38,7 @@ void exposeControlParametrizationPolyTwoRK() {
           ":param nw: dimension of differential control space\n"
           ":param rktype: type of RK parametrization"))
       .def<void (ControlParametrizationModelPolyTwoRK::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyTwoRK::calc,
           bp::args("self", "data", "t", "u"),
@@ -47,7 +47,7 @@ void exposeControlParametrizationPolyTwoRK() {
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyTwoRK::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calcDiff", &ControlParametrizationModelPolyTwoRK::calcDiff,
           bp::args("self", "data", "t", "u"),
@@ -60,7 +60,7 @@ void exposeControlParametrizationPolyTwoRK() {
       .def("createData", &ControlParametrizationModelPolyTwoRK::createData,
            bp::args("self"), "Create the poly-two-rk data.")
       .def<void (ControlParametrizationModelPolyTwoRK::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyTwoRK::params,
           bp::args("self", "data", "t", "w"),
@@ -103,7 +103,7 @@ void exposeControlParametrizationPolyTwoRK() {
       .def(CopyableVisitor<ControlParametrizationModelPolyTwoRK>());
 
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationDataPolyTwoRK> >();
+      std::shared_ptr<ControlParametrizationDataPolyTwoRK> >();
 
   bp::class_<ControlParametrizationDataPolyTwoRK,
              bp::bases<ControlParametrizationDataAbstract> >(

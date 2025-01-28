@@ -24,15 +24,15 @@ using namespace crocoddyl::unittest;
 void test_calc(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -57,7 +57,7 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   problem1.calc(xs, us);
   problem2.calc(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK(problem1.get_runningDatas()[i]->cost == data->cost);
@@ -67,7 +67,7 @@ void test_calc(ActionModelTypes::Type action_model_type) {
     BOOST_CHECK(
         (problem2.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
@@ -80,18 +80,18 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
                           IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>&
-      diffModel = factory.create(action_model_type);
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel =
+      factory.create(action_model_type);
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -112,7 +112,7 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
   problem1.calc(xs, us);
   problem2.calc(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK(problem1.get_runningDatas()[i]->cost == data->cost);
@@ -122,7 +122,7 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
     BOOST_CHECK(
         (problem2.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
   }
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
@@ -134,15 +134,15 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
 void test_calcDiff(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -165,7 +165,7 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   problem1.calcDiff(xs, us);
   problem2.calcDiff(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
@@ -184,7 +184,7 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
     BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
     BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
   }
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
@@ -201,18 +201,18 @@ void test_calcDiff_diffAction(
     IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>&
-      diffModel = factory.create(action_model_type);
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel =
+      factory.create(action_model_type);
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -235,7 +235,7 @@ void test_calcDiff_diffAction(
   problem1.calcDiff(xs, us);
   problem2.calcDiff(xs, us);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
@@ -254,7 +254,7 @@ void test_calcDiff_diffAction(
     BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
     BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
   }
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
@@ -269,14 +269,14 @@ void test_calcDiff_diffAction(
 void test_rollout(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
 
   // create the shooting problem
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
   crocoddyl::ShootingProblem problem(x0, models, model);
 
   // create random trajectory
@@ -291,7 +291,7 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
   // check the state and cost in each node
   problem.rollout(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
@@ -303,17 +303,17 @@ void test_rollout_diffAction(
     IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>&
-      diffModel = factory.create(action_model_type);
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel =
+      factory.create(action_model_type);
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory_int.create(integrator_type, diffModel);
 
   // create the shooting problem
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
   crocoddyl::ShootingProblem problem(x0, models, model);
 
   // create random trajectory
@@ -328,7 +328,7 @@ void test_rollout_diffAction(
   // check the state and cost in each node
   problem.rollout(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
@@ -338,15 +338,15 @@ void test_rollout_diffAction(
 void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -366,7 +366,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   // check the state and cost in each node
   problem1.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
@@ -374,7 +374,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
   }
   problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
@@ -387,18 +387,18 @@ void test_quasiStatic_diffAction(
     IntegratorTypes::Type integrator_type) {
   // create the model
   DifferentialActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>&
-      diffModel = factory.create(action_model_type);
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& diffModel =
+      factory.create(action_model_type);
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory_int.create(integrator_type, diffModel);
 
   // create two shooting problems (with and without data allocation)
   std::size_t T = 20;
   const Eigen::VectorXd& x0 = model->get_state()->rand();
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
-                                                                         model);
-  std::vector<boost::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > models(T,
+                                                                       model);
+  std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract> > datas(T);
   for (std::size_t i = 0; i < T; ++i) {
     datas[i] = model->createData();
   }
@@ -418,7 +418,7 @@ void test_quasiStatic_diffAction(
   // check the state and cost in each node
   problem1.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
@@ -426,7 +426,7 @@ void test_quasiStatic_diffAction(
   }
   problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);

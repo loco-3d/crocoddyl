@@ -18,8 +18,8 @@ namespace crocoddyl {
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const VectorXs& x0,
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
-    boost::shared_ptr<ActionModelAbstract> terminal_model)
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+    std::shared_ptr<ActionModelAbstract> terminal_model)
     : cost_(Scalar(0.)),
       T_(running_models.size()),
       x0_(x0),
@@ -31,7 +31,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nthreads_(1),
       is_updated_(false) {
   for (std::size_t i = 1; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
@@ -43,7 +43,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
                                     std::to_string(nx_) + ")");
   }
   for (std::size_t i = 1; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -77,10 +77,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const VectorXs& x0,
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& running_models,
-    boost::shared_ptr<ActionModelAbstract> terminal_model,
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
-    boost::shared_ptr<ActionDataAbstract> terminal_data)
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+    std::shared_ptr<ActionModelAbstract> terminal_model,
+    const std::vector<std::shared_ptr<ActionDataAbstract> >& running_datas,
+    std::shared_ptr<ActionDataAbstract> terminal_data)
     : cost_(Scalar(0.)),
       T_(running_models.size()),
       x0_(x0),
@@ -93,7 +93,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nu_max_(running_models[0]->get_nu()),
       nthreads_(1) {
   for (std::size_t i = 1; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const std::size_t nu = model->get_nu();
     if (nu_max_ < nu) {
       nu_max_ = nu;
@@ -112,8 +112,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
                std::to_string(T_) + " != " + std::to_string(Td) + ")")
   }
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -248,7 +248,7 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us,
 
   xs[0] = x0_;
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    const std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
     running_models_[i]->calc(data, xs[i], us[i]);
     xs[i + 1] = data->xnext;
   }
@@ -301,8 +301,8 @@ ShootingProblemTpl<Scalar>::quasiStatic_xs(const std::vector<VectorXs>& xs) {
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(
-    boost::shared_ptr<ActionModelAbstract> model,
-    boost::shared_ptr<ActionDataAbstract> data) {
+    std::shared_ptr<ActionModelAbstract> model,
+    std::shared_ptr<ActionDataAbstract> data) {
   if (!model->checkData(data)) {
     throw_pretty("Invalid argument: "
                  << "action data is not consistent with the action model")
@@ -326,7 +326,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(
-    boost::shared_ptr<ActionModelAbstract> model) {
+    std::shared_ptr<ActionModelAbstract> model) {
   if (model->get_state()->get_nx() != nx_) {
     throw_pretty(
         "Invalid argument: " << "nx is not consistent with the other nodes")
@@ -346,8 +346,8 @@ void ShootingProblemTpl<Scalar>::circularAppend(
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateNode(
-    const std::size_t i, boost::shared_ptr<ActionModelAbstract> model,
-    boost::shared_ptr<ActionDataAbstract> data) {
+    const std::size_t i, std::shared_ptr<ActionModelAbstract> model,
+    std::shared_ptr<ActionDataAbstract> data) {
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be less "
@@ -378,7 +378,7 @@ void ShootingProblemTpl<Scalar>::updateNode(
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateModel(
-    const std::size_t i, boost::shared_ptr<ActionModelAbstract> model) {
+    const std::size_t i, std::shared_ptr<ActionModelAbstract> model) {
   if (i >= T_ + 1) {
     throw_pretty(
         "Invalid argument: "
@@ -418,34 +418,32 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::allocateData() {
   running_datas_.resize(T_);
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_[i] = model->createData();
   }
   terminal_data_ = terminal_model_->createData();
 }
 
 template <typename Scalar>
-const std::vector<
-    boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
+const std::vector<std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningModels() const {
   return running_models_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
+const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
 ShootingProblemTpl<Scalar>::get_terminalModel() const {
   return terminal_model_;
 }
 
 template <typename Scalar>
-const std::vector<
-    boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >&
+const std::vector<std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > >&
 ShootingProblemTpl<Scalar>::get_runningDatas() const {
   return running_datas_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >&
+const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >&
 ShootingProblemTpl<Scalar>::get_terminalData() const {
   return terminal_data_;
 }
@@ -462,9 +460,9 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models) {
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& models) {
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -481,14 +479,14 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
   running_models_.clear();
   running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
-    const boost::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     running_datas_.push_back(model->createData());
   }
 }
 
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_terminalModel(
-    boost::shared_ptr<ActionModelAbstract> model) {
+    std::shared_ptr<ActionModelAbstract> model) {
   if (model->get_state()->get_nx() != nx_) {
     throw_pretty(
         "Invalid argument: " << "nx is not consistent with the other nodes")
@@ -566,7 +564,7 @@ std::ostream& operator<<(std::ostream& os,
      << ", ndx=" << problem.get_ndx() << ") " << std::endl
      << "  Models:" << std::endl;
   const std::vector<
-      boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
+      std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > >&
       runningModels = problem.get_runningModels();
   for (std::size_t t = 0; t < problem.get_T(); ++t) {
     os << "    " << t << ": " << *runningModels[t] << std::endl;

@@ -15,8 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualJointAcceleration() {
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualModelJointAcceleration>>();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelJointAcceleration>>();
 
   bp::class_<ResidualModelJointAcceleration, bp::bases<ResidualModelAbstract>>(
       "ResidualModelJointAcceleration",
@@ -24,26 +23,26 @@ void exposeResidualJointAcceleration() {
       "a and aref as the current and\n"
       "reference joint acceleration (i.e., generalized acceleration), "
       "respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd, std::size_t>(
+      bp::init<std::shared_ptr<StateAbstract>, Eigen::VectorXd, std::size_t>(
           bp::args("self", "state", "aref", "nu"),
           "Initialize the joint-acceleration residual model.\n\n"
           ":param state: state description\n"
           ":param aref: reference joint acceleration\n"
           ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "aref"),
           "Initialize the joint-acceleration residual model.\n\n"
           "The default nu value is obtained from state.nv.\n"
           ":param state: state description\n"
           ":param aref: reference joint acceleration"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the joint-acceleration residual model.\n\n"
           "The default reference joint-acceleration is obtained from "
           "np.zero(actuation.nu).\n"
           ":param state: state description\n"
           ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>>(
+      .def(bp::init<std::shared_ptr<StateAbstract>>(
           bp::args("self", "state"),
           "Initialize the joint-acceleration residual model.\n\n"
           "The default reference joint-acceleration is obtained from "
@@ -51,7 +50,7 @@ void exposeResidualJointAcceleration() {
           "The default nu value is obtained from state.nv.\n"
           ":param state: state description"))
       .def<void (ResidualModelJointAcceleration::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelJointAcceleration::calc,
@@ -61,11 +60,11 @@ void exposeResidualJointAcceleration() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelJointAcceleration::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelJointAcceleration::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelJointAcceleration::calcDiff,
@@ -76,7 +75,7 @@ void exposeResidualJointAcceleration() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelJointAcceleration::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))

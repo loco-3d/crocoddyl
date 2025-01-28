@@ -27,7 +27,7 @@ void exposeDifferentialActionLQR() {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionModelLQR> >();
+      std::shared_ptr<DifferentialActionModelLQR> >();
 
   bp::class_<DifferentialActionModelLQR,
              bp::bases<DifferentialActionModelAbstract> >(
@@ -99,7 +99,7 @@ void exposeDifferentialActionLQR() {
           ":param driftFree: enable/disable the bias term of the linear "
           "dynamics (default True)"))
       .def<void (DifferentialActionModelLQR::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelLQR::calc,
@@ -113,12 +113,12 @@ void exposeDifferentialActionLQR() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
       .def<void (DifferentialActionModelLQR::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc,
           bp::args("self", "data", "x"))
       .def<void (DifferentialActionModelLQR::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelLQR::calcDiff,
@@ -134,7 +134,7 @@ void exposeDifferentialActionLQR() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n")
       .def<void (DifferentialActionModelLQR::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -289,7 +289,7 @@ void exposeDifferentialActionLQR() {
       .def(CopyableVisitor<DifferentialActionModelLQR>());
 
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataLQR> >();
+      std::shared_ptr<DifferentialActionDataLQR> >();
 
   bp::class_<DifferentialActionDataLQR,
              bp::bases<DifferentialActionDataAbstract> >(
