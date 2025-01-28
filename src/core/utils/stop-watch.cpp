@@ -56,8 +56,6 @@ void Stopwatch::enable_profiler() { profiler_active = true; }
 
 void Stopwatch::disable_profiler() { profiler_active = false; }
 
-bool Stopwatch::profiler_status() { return profiler_active; }
-
 void Stopwatch::set_mode(StopwatchMode new_mode) { mode = new_mode; }
 
 bool Stopwatch::performance_exists(string perf_name) {
@@ -347,7 +345,7 @@ Stopwatch::Watcher Stopwatch::watcher(const string& perf_name) {
   return Watcher(*this, perf_name, perf_info);
 }
 
-void Stopwatch::Watcher::start() {
+void Stopwatch::Watcher::_start() {
   if (!w.profiler_active) return;
 
   if (p == nullptr) {
@@ -358,7 +356,7 @@ void Stopwatch::Watcher::start() {
   p->paused = false;
 }
 
-void Stopwatch::Watcher::stop() {
+void Stopwatch::Watcher::_stop() {
   if (!w.profiler_active || (p == nullptr)) return;
 
   long double clock_end = w.take_time();
