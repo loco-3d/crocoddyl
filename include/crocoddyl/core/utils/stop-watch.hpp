@@ -163,8 +163,13 @@ class Stopwatch {
 
     Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p)
         : w(_w), n(_n), p(_p) {}
-    inline void start() { if (w.profiler_active) _start(); }
-    inline void stop() { if (w.profiler_active) _stop(); }
+    inline void start() {
+      if (w.profiler_active) _start();
+    }
+    inline void stop() {
+      if (w.profiler_active) _stop();
+    }
+
    private:
     void _start();
     void _stop();
