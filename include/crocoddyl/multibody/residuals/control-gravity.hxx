@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t nu)
+    std::shared_ptr<StateMultibody> state, const std::size_t nu)
     : Base(state, state->get_nv(), nu, true, false),
       pin_model_(*state->get_pinocchio()) {
   if (nu_ == 0) {
@@ -25,7 +25,7 @@ ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(
 
 template <typename Scalar>
 ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(
-    boost::shared_ptr<StateMultibody> state)
+    std::shared_ptr<StateMultibody> state)
     : Base(state, state->get_nv(), state->get_nv(), true, false),
       pin_model_(*state->get_pinocchio()) {}
 
@@ -34,7 +34,7 @@ ResidualModelControlGravTpl<Scalar>::~ResidualModelControlGravTpl() {}
 
 template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -46,7 +46,7 @@ void ResidualModelControlGravTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -57,7 +57,7 @@ void ResidualModelControlGravTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -74,7 +74,7 @@ void ResidualModelControlGravTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract> &data,
+    const std::shared_ptr<ResidualDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &x) {
   Data *d = static_cast<Data *>(data.get());
 
@@ -89,11 +89,11 @@ void ResidualModelControlGravTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelControlGravTpl<Scalar>::createData(
     DataCollectorAbstract *const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

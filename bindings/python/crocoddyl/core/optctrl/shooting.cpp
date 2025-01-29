@@ -25,7 +25,7 @@ void exposeShootingProblem() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-  bp::register_ptr_to_python<boost::shared_ptr<ShootingProblem> >();
+  bp::register_ptr_to_python<std::shared_ptr<ShootingProblem> >();
 
   bp::class_<ShootingProblem>(
       "ShootingProblem",
@@ -40,18 +40,18 @@ void exposeShootingProblem() {
       "stacks of actions\n"
       "models.",
       bp::init<Eigen::VectorXd,
-               std::vector<boost::shared_ptr<ActionModelAbstract> >,
-               boost::shared_ptr<ActionModelAbstract> >(
+               std::vector<std::shared_ptr<ActionModelAbstract> >,
+               std::shared_ptr<ActionModelAbstract> >(
           bp::args("self", "x0", "runningModels", "terminalModel"),
           "Initialize the shooting problem and allocate its data.\n\n"
           ":param x0: initial state\n"
           ":param runningModels: running action models (size T)\n"
           ":param terminalModel: terminal action model"))
       .def(bp::init<Eigen::VectorXd,
-                    std::vector<boost::shared_ptr<ActionModelAbstract> >,
-                    boost::shared_ptr<ActionModelAbstract>,
-                    std::vector<boost::shared_ptr<ActionDataAbstract> >,
-                    boost::shared_ptr<ActionDataAbstract> >(
+                    std::vector<std::shared_ptr<ActionModelAbstract> >,
+                    std::shared_ptr<ActionModelAbstract>,
+                    std::vector<std::shared_ptr<ActionDataAbstract> >,
+                    std::shared_ptr<ActionDataAbstract> >(
           bp::args("self", "x0", "runningModels", "terminalModel",
                    "runningDatas", "terminalData"),
           "Initialize the shooting problem (models and datas).\n\n"
@@ -86,8 +86,8 @@ void exposeShootingProblem() {
            "Generally speaking, it uses Newton-Raphson method for computing "
            "the quasi static commands.\n"
            ":param xs: time-discrete state trajectory (size T)")
-      .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>,
-                                     boost::shared_ptr<ActionDataAbstract>)>(
+      .def<void (ShootingProblem::*)(std::shared_ptr<ActionModelAbstract>,
+                                     std::shared_ptr<ActionDataAbstract>)>(
           "circularAppend", &ShootingProblem::circularAppend,
           bp::args("self", "model", "data"),
           "Circular append the model and data onto the end running node.\n\n"
@@ -95,7 +95,7 @@ void exposeShootingProblem() {
           "removed as in a circular buffer.\n"
           ":param model: new model\n"
           ":param data: new data")
-      .def<void (ShootingProblem::*)(boost::shared_ptr<ActionModelAbstract>)>(
+      .def<void (ShootingProblem::*)(std::shared_ptr<ActionModelAbstract>)>(
           "circularAppend", &ShootingProblem::circularAppend,
           bp::args("self", "model"),
           "Circular append the model and data onto the end running node.\n\n"

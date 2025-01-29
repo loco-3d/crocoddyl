@@ -63,8 +63,8 @@ class IntegratedActionModelRKTpl
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelRKTpl(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
-      boost::shared_ptr<ControlParametrizationModelAbstract> control,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<ControlParametrizationModelAbstract> control,
       const RKType rktype, const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
 
@@ -80,7 +80,7 @@ class IntegratedActionModelRKTpl
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelRKTpl(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
       const RKType rktype, const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
   virtual ~IntegratedActionModelRKTpl();
@@ -92,7 +92,7 @@ class IntegratedActionModelRKTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -106,7 +106,7 @@ class IntegratedActionModelRKTpl
    * @param[in] data  RK integrator data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -116,7 +116,7 @@ class IntegratedActionModelRKTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -130,7 +130,7 @@ class IntegratedActionModelRKTpl
    * @param[in] data  RK integrator data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -138,12 +138,12 @@ class IntegratedActionModelRKTpl
    *
    * @return the RK integrator data
    */
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
@@ -158,7 +158,7 @@ class IntegratedActionModelRKTpl
    * @param[in]  maxiter  Maximum allowed number of iterations
    * @param[in]  tol      Tolerance
    */
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
@@ -261,9 +261,9 @@ struct IntegratedActionDataRKTpl
     dx.setZero();
 
     for (std::size_t i = 0; i < model->get_ni(); ++i) {
-      differential.push_back(boost::shared_ptr<DifferentialActionDataAbstract>(
+      differential.push_back(std::shared_ptr<DifferentialActionDataAbstract>(
           model->get_differential()->createData()));
-      control.push_back(boost::shared_ptr<ControlParametrizationDataAbstract>(
+      control.push_back(std::shared_ptr<ControlParametrizationDataAbstract>(
           model->get_control()->createData()));
     }
 
@@ -273,9 +273,9 @@ struct IntegratedActionDataRKTpl
   }
   virtual ~IntegratedActionDataRKTpl() {}
 
-  std::vector<boost::shared_ptr<DifferentialActionDataAbstract> >
+  std::vector<std::shared_ptr<DifferentialActionDataAbstract> >
       differential;  //!< List of differential model data
-  std::vector<boost::shared_ptr<ControlParametrizationDataAbstract> >
+  std::vector<std::shared_ptr<ControlParametrizationDataAbstract> >
       control;  //!< List of control parametrization data
   std::vector<Scalar> integral;
   VectorXs dx;               //!< State rate

@@ -10,7 +10,7 @@
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
@@ -36,12 +36,12 @@ class SquashingModelAbstractTpl {
   };
   virtual ~SquashingModelAbstractTpl() {};
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) = 0;
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<SquashingDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& s) = 0;
-  virtual boost::shared_ptr<SquashingDataAbstract> createData() {
-    return boost::allocate_shared<SquashingDataAbstract>(
+  virtual std::shared_ptr<SquashingDataAbstract> createData() {
+    return std::allocate_shared<SquashingDataAbstract>(
         Eigen::aligned_allocator<SquashingDataAbstract>(), this);
   }
 

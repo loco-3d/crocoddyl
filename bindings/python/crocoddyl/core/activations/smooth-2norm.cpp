@@ -18,7 +18,7 @@ namespace python {
 
 void exposeActivationSmooth2Norm() {
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelSmooth2Norm> >();
+      std::shared_ptr<ActivationModelSmooth2Norm> >();
 
   bp::class_<ActivationModelSmooth2Norm, bp::bases<ActivationModelAbstract> >(
       "ActivationModelSmooth2Norm",

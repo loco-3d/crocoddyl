@@ -17,13 +17,13 @@ namespace crocoddyl {
 namespace python {
 
 void exposeStateNumDiff() {
-  bp::register_ptr_to_python<boost::shared_ptr<StateNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<StateNumDiff> >();
 
   bp::class_<StateNumDiff, bp::bases<StateAbstract> >(
       "StateNumDiff",
       "Abstract class for computing Jdiff and Jintegrate by using numerical "
       "differentiation.\n\n",
-      bp::init<boost::shared_ptr<StateAbstract> >(
+      bp::init<std::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
           "Initialize the state numdiff.\n\n"
           ":param model: state where we compute the derivatives through "

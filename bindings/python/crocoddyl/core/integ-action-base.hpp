@@ -21,20 +21,20 @@ class IntegratedActionModelAbstract_wrap
       public bp::wrapper<IntegratedActionModelAbstract> {
  public:
   IntegratedActionModelAbstract_wrap(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
       const double timestep = 1e-3, const bool with_cost_residual = true)
       : IntegratedActionModelAbstract(model, timestep, with_cost_residual),
         bp::wrapper<IntegratedActionModelAbstract>() {}
 
   IntegratedActionModelAbstract_wrap(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
-      boost::shared_ptr<ControlParametrizationModelAbstract> control,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<ControlParametrizationModelAbstract> control,
       const double timestep = 1e-3, const bool with_cost_residual = true)
       : IntegratedActionModelAbstract(model, control, timestep,
                                       with_cost_residual),
         bp::wrapper<IntegratedActionModelAbstract>() {}
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calc(const std::shared_ptr<ActionDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -51,7 +51,7 @@ class IntegratedActionModelAbstract_wrap
                           (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -68,16 +68,16 @@ class IntegratedActionModelAbstract_wrap
                           (Eigen::VectorXd)x, (Eigen::VectorXd)u);
   }
 
-  boost::shared_ptr<ActionDataAbstract> createData() {
+  std::shared_ptr<ActionDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<IntegratedActionDataAbstract> >(
+      return bp::call<std::shared_ptr<IntegratedActionDataAbstract> >(
           createData.ptr());
     }
     return IntegratedActionModelAbstract::createData();
   }
 
-  boost::shared_ptr<ActionDataAbstract> default_createData() {
+  std::shared_ptr<ActionDataAbstract> default_createData() {
     return this->IntegratedActionModelAbstract::createData();
   }
 };

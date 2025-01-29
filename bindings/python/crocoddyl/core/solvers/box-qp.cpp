@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxQP() {
-  bp::register_ptr_to_python<boost::shared_ptr<BoxQPSolution> >();
+  bp::register_ptr_to_python<std::shared_ptr<BoxQPSolution> >();
 
   bp::class_<BoxQPSolution>(
       "BoxQPSolution", "Solution data of the box QP.\n\n",
@@ -49,7 +49,7 @@ void exposeSolverBoxQP() {
           bp::make_setter(&BoxQPSolution::clamped_idx), "clamped indexes")
       .def(CopyableVisitor<BoxQPSolution>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<BoxQP> >();
+  bp::register_ptr_to_python<std::shared_ptr<BoxQP> >();
 
   bp::class_<BoxQP>(
       "BoxQP",

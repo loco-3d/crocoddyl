@@ -24,16 +24,16 @@ namespace crocoddyl {
 template <typename Scalar>
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::
     DifferentialActionModelContactInvDynamicsTpl(
-        boost::shared_ptr<StateMultibody> state,
-        boost::shared_ptr<ActuationModelAbstract> actuation,
-        boost::shared_ptr<ContactModelMultiple> contacts,
-        boost::shared_ptr<CostModelSum> costs)
+        std::shared_ptr<StateMultibody> state,
+        std::shared_ptr<ActuationModelAbstract> actuation,
+        std::shared_ptr<ContactModelMultiple> contacts,
+        std::shared_ptr<CostModelSum> costs)
     : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
            0, state->get_nv() - actuation->get_nu() + contacts->get_nc_total()),
       actuation_(actuation),
       contacts_(contacts),
       costs_(costs),
-      constraints_(boost::make_shared<ConstraintModelManager>(
+      constraints_(std::make_shared<ConstraintModelManager>(
           state, state->get_nv() + contacts->get_nc_total())),
       pinocchio_(*state->get_pinocchio().get()) {
   init(state);
@@ -42,11 +42,11 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
 template <typename Scalar>
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::
     DifferentialActionModelContactInvDynamicsTpl(
-        boost::shared_ptr<StateMultibody> state,
-        boost::shared_ptr<ActuationModelAbstract> actuation,
-        boost::shared_ptr<ContactModelMultiple> contacts,
-        boost::shared_ptr<CostModelSum> costs,
-        boost::shared_ptr<ConstraintModelManager> constraints)
+        std::shared_ptr<StateMultibody> state,
+        std::shared_ptr<ActuationModelAbstract> actuation,
+        std::shared_ptr<ContactModelMultiple> contacts,
+        std::shared_ptr<CostModelSum> costs,
+        std::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, state->get_nv() + contacts->get_nc_total(), costs->get_nr(),
            constraints->get_ng(),
            state->get_nv() - actuation->get_nu() + contacts->get_nc_total() +
@@ -66,7 +66,7 @@ DifferentialActionModelContactInvDynamicsTpl<
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
-    const boost::shared_ptr<StateMultibody>& state) {
+    const std::shared_ptr<StateMultibody>& state) {
   if (contacts_->get_nu() != nu_) {
     throw_pretty(
         "Invalid argument: "
@@ -91,9 +91,9 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
 
   if (state_->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
-        "tau", boost::make_shared<ConstraintModelResidual>(
+        "tau", std::make_shared<ConstraintModelResidual>(
                    state_,
-                   boost::make_shared<
+                   std::make_shared<
                        typename DifferentialActionModelContactInvDynamicsTpl<
                            Scalar>::ResidualModelActuation>(state, nu, nc),
                    false));
@@ -104,25 +104,25 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
     typename ContactModelMultiple::ContactModelContainer::iterator it_m, end_m;
     for (it_m = contact_list.begin(), end_m = contact_list.end(); it_m != end_m;
          ++it_m) {
-      const boost::shared_ptr<ContactItem>& contact = it_m->second;
+      const std::shared_ptr<ContactItem>& contact = it_m->second;
       const std::string name = contact->name;
       const pinocchio::FrameIndex id = contact->contact->get_id();
       const std::size_t nc_i = contact->contact->get_nc();
       const bool active = contact->active;
       constraints_->addConstraint(
           name + "_acc",
-          boost::make_shared<ConstraintModelResidual>(
+          std::make_shared<ConstraintModelResidual>(
               state_,
-              boost::make_shared<
+              std::make_shared<
                   typename DifferentialActionModelContactInvDynamicsTpl<
                       Scalar>::ResidualModelContact>(state, id, nc_i, nc),
               false),
           active);
       constraints_->addConstraint(
           name + "_force",
-          boost::make_shared<ConstraintModelResidual>(
+          std::make_shared<ConstraintModelResidual>(
               state_,
-              boost::make_shared<ResidualModelContactForceTpl<Scalar> >(
+              std::make_shared<ResidualModelContactForceTpl<Scalar> >(
                   state, id, pinocchio::ForceTpl<Scalar>::Zero(), nc_i, nu_,
                   false),
               false),
@@ -133,7 +133,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -186,7 +186,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -210,7 +210,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -267,7 +267,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -282,14 +282,14 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x, std::size_t,
     Scalar) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -337,7 +337,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator
              it_m = contacts_->get_contacts().begin();
          it_m != contacts_->get_contacts().end(); ++it_m) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
       const std::size_t nc_i = m_i->contact->get_nc();
       if (m_i->active) {
         u.segment(nv + nc, nc_i) = d->tmp_rstatic.segment(nu + nc_r, nc_i);
@@ -353,8 +353,8 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
 
 template <typename Scalar>
 bool DifferentialActionModelContactInvDynamicsTpl<Scalar>::checkData(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<DifferentialActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {
@@ -437,25 +437,25 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_pinocchio() const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ContactModelMultipleTpl<Scalar> >&
+const std::shared_ptr<ContactModelMultipleTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_contacts() const {
   return contacts_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >&
+const std::shared_ptr<CostModelSumTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+const std::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
 }

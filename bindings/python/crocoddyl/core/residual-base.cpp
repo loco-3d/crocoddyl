@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelAbstract> >();
 
   bp::class_<ResidualModelAbstract_wrap, boost::noncopyable>(
       "ResidualModelAbstract",
@@ -27,7 +27,7 @@ void exposeResidualAbstract() {
       "vector and its Jacobians. These computations are mainly carried out "
       "inside calc() and calcDiff(),\n"
       "respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t,
+      bp::init<std::shared_ptr<StateAbstract>, std::size_t, std::size_t,
                bp::optional<bool, bool, bool> >(
           bp::args("self", "state", "nr", "nu", "q_dependent", "v_dependent",
                    "u_dependent"),
@@ -41,7 +41,7 @@ void exposeResidualAbstract() {
           "(default true)\n"
           ":param u_dependent: define if the residual function depends on u "
           "(default true)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t,
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t,
                     bp::optional<bool, bool, bool> >(
           bp::args("self", "state", "nr", "q_dependent", "v_dependent",
                    "u_dependent"),
@@ -61,7 +61,7 @@ void exposeResidualAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the residual vector for nodes that depends only on the "
@@ -78,7 +78,7 @@ void exposeResidualAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ResidualModelAbstract::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -135,7 +135,7 @@ void exposeResidualAbstract() {
       .def(CopyableVisitor<ResidualModelAbstract_wrap>())
       .def(PrintableVisitor<ResidualModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataAbstract> >();
 
   bp::class_<ResidualDataAbstract>(
       "ResidualDataAbstract",

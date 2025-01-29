@@ -17,7 +17,7 @@ namespace python {
 
 void exposeActivationQuadFlatLog() {
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelQuadFlatLog> >();
+      std::shared_ptr<ActivationModelQuadFlatLog> >();
 
   bp::class_<ActivationModelQuadFlatLog, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuadFlatLog",

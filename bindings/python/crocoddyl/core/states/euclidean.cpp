@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeStateEuclidean() {
-  bp::register_ptr_to_python<boost::shared_ptr<StateVector> >();
+  bp::register_ptr_to_python<std::shared_ptr<StateVector> >();
 
   bp::class_<StateVector, bp::bases<StateAbstract> >(
       "StateVector",

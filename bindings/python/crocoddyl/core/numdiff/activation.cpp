@@ -16,13 +16,13 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationNumDiff() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActivationModelNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActivationModelNumDiff> >();
 
   bp::class_<ActivationModelNumDiff, bp::bases<ActivationModelAbstract> >(
       "ActivationModelNumDiff",
       "Abstract class for computing calcDiff by using numerical "
       "differentiation.\n\n",
-      bp::init<boost::shared_ptr<ActivationModelAbstract> >(
+      bp::init<std::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "model"),
           "Initialize the activation model NumDiff.\n\n"
           ":param model: activation model where we compute the derivatives "
@@ -57,7 +57,7 @@ void exposeActivationNumDiff() {
           "disturbance constant used in the numerical differentiation")
       .def(CopyableVisitor<ActivationModelNumDiff>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActivationDataNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActivationDataNumDiff> >();
 
   bp::class_<ActivationDataNumDiff, bp::bases<ActivationDataAbstract> >(
       "ActivationDataNumDiff", "Numerical differentiation activation data.",

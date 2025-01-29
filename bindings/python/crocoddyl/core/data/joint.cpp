@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeDataCollectorJoint() {
-  bp::register_ptr_to_python<boost::shared_ptr<JointDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<JointDataAbstract> >();
 
   bp::class_<JointDataAbstract>(
       "JointDataAbstract",
@@ -24,8 +24,8 @@ void exposeDataCollectorJoint() {
       "and accelerations.\n"
       "The joint data typically is allocated once by running "
       "model.createData().",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ActuationModelAbstract>, std::size_t>(
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ActuationModelAbstract>, std::size_t>(
           bp::args("self", "state", "actuation", "nu"),
           "Create the joint data.\n\n"
           "The joint data uses the model in order to first process it.\n"
@@ -69,7 +69,7 @@ void exposeDataCollectorJoint() {
 
   bp::class_<DataCollectorJoint, bp::bases<DataCollectorAbstract> >(
       "DataCollectorJoint", "Joint data collector.\n\n",
-      bp::init<boost::shared_ptr<JointDataAbstract> >(
+      bp::init<std::shared_ptr<JointDataAbstract> >(
           bp::args("self", "joint"),
           "Create joint data collection.\n\n"
           ":param joint: joint data"))
@@ -82,8 +82,8 @@ void exposeDataCollectorJoint() {
 
   bp::class_<DataCollectorJointActuation, bp::bases<DataCollectorActuation> >(
       "DataCollectorJointActuation", "Joint-actuation data collector.\n\n",
-      bp::init<boost::shared_ptr<ActuationDataAbstract>,
-               boost::shared_ptr<JointDataAbstract> >(
+      bp::init<std::shared_ptr<ActuationDataAbstract>,
+               std::shared_ptr<JointDataAbstract> >(
           bp::args("self", "actuation", "joint"),
           "Create joint-actuation data collection.\n\n"
           ":param actuation: actuation data"

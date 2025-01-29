@@ -43,7 +43,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] type   Type of impulse (default LOCAL)
    */
   ImpulseModel3DTpl(
-      boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+      std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
       const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
   virtual ~ImpulseModel3DTpl();
 
@@ -53,7 +53,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data  6d impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ImpulseDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -62,7 +62,7 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data  6d impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -71,13 +71,13 @@ class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] data   6d impulse data
    * @param[in] force  6d impulse
    */
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ImpulseDataAbstract>& data,
                            const VectorXs& force);
 
   /**
    * @brief Create the 6d impulse data
    */
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(
+  virtual std::shared_ptr<ImpulseDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**

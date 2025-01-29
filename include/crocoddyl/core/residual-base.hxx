@@ -12,7 +12,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nr,
+    std::shared_ptr<StateAbstract> state, const std::size_t nr,
     const std::size_t nu, const bool q_dependent, const bool v_dependent,
     const bool u_dependent)
     : state_(state),
@@ -25,7 +25,7 @@ ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
 
 template <typename Scalar>
 ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nr,
+    std::shared_ptr<StateAbstract> state, const std::size_t nr,
     const bool q_dependent, const bool v_dependent, const bool u_dependent)
     : state_(state),
       nr_(nr),
@@ -40,42 +40,41 @@ ResidualModelAbstractTpl<Scalar>::~ResidualModelAbstractTpl() {}
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>&,
+    const std::shared_ptr<ResidualDataAbstract>&,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {}
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>&,
+    const std::shared_ptr<ResidualDataAbstract>&,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {}
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelAbstractTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<ResidualDataAbstract>(
+  return std::allocate_shared<ResidualDataAbstract>(
       Eigen::aligned_allocator<ResidualDataAbstract>(), this, data);
 }
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calcCostDiff(
-    const boost::shared_ptr<CostDataAbstract>& cdata,
-    const boost::shared_ptr<ResidualDataAbstract>& rdata,
-    const boost::shared_ptr<ActivationDataAbstract>& adata,
-    const bool update_u) {
+    const std::shared_ptr<CostDataAbstract>& cdata,
+    const std::shared_ptr<ResidualDataAbstract>& rdata,
+    const std::shared_ptr<ActivationDataAbstract>& adata, const bool update_u) {
   // This function computes the derivatives of the cost function based on a
   // Gauss-Newton approximation
   const bool is_ru = u_dependent_ && nu_ != 0 && update_u;
@@ -123,7 +122,7 @@ void ResidualModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >&
+const std::shared_ptr<StateAbstractTpl<Scalar> >&
 ResidualModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }

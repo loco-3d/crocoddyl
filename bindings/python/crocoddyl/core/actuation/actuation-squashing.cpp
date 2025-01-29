@@ -17,19 +17,19 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActuationSquashing() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActuationSquashingModel> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActuationSquashingModel> >();
 
   bp::class_<ActuationSquashingModel, bp::bases<ActuationModelAbstract> >(
       "ActuationSquashingModel", "Class for squashing an actuation model.\n\n",
-      bp::init<boost::shared_ptr<ActuationModelAbstract>,
-               boost::shared_ptr<SquashingModelAbstract>, std::size_t>(
+      bp::init<std::shared_ptr<ActuationModelAbstract>,
+               std::shared_ptr<SquashingModelAbstract>, std::size_t>(
           bp::args("self", "actuation", "squashing", "nu"),
           "Initialize the actuation model with squashing function.\n\n"
           ":param actuation: actuation model to be squashed,\n"
           ":param squashing: squashing function,\n"
           ":param nu: number of controls"))
       .def<void (ActuationSquashingModel::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActuationSquashingModel::calc,
@@ -40,7 +40,7 @@ void exposeActuationSquashing() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: squashing function input")
       .def<void (ActuationSquashingModel::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActuationSquashingModel::calcDiff,
@@ -71,7 +71,7 @@ void exposeActuationSquashing() {
           "actuation")
       .def(CopyableVisitor<ActuationSquashingModel>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActuationSquashingData> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActuationSquashingData> >();
 
   bp::class_<ActuationSquashingData, bp::bases<ActuationDataAbstract> >(
       "ActuationSquashingData",

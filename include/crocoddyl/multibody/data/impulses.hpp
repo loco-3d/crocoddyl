@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_DATA_IMPULSES_HPP_
 #define CROCODDYL_CORE_DATA_IMPULSES_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -22,11 +22,11 @@ struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorImpulseTpl(
-      boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
+      std::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
       : DataCollectorAbstractTpl<Scalar>(), impulses(impulses) {}
   virtual ~DataCollectorImpulseTpl() {}
 
-  boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses;
+  std::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses;
 };
 
 template <typename Scalar>
@@ -36,7 +36,7 @@ struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>,
 
   DataCollectorMultibodyInImpulseTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
+      std::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio),
         DataCollectorImpulseTpl<Scalar>(impulses) {}
   virtual ~DataCollectorMultibodyInImpulseTpl() {}

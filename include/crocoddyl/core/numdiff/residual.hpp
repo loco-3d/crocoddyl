@@ -47,7 +47,7 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param model  Residual model that we want to apply the numerical
    * differentiation
    */
-  explicit ResidualModelNumDiffTpl(const boost::shared_ptr<Base>& model);
+  explicit ResidualModelNumDiffTpl(const std::shared_ptr<Base>& model);
 
   /**
    * @brief Initialize the numdiff residual model
@@ -57,42 +57,42 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
    * @brief Return the original residual model
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -134,8 +134,8 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;  //!< Residual model hat we want to apply the
-                                   //!< numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Residual model hat we want to apply the
+                                 //!< numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
   std::vector<ReevaluationFunction>
@@ -201,10 +201,10 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   VectorXs du;  //!< Control disturbance.
   VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
                 //!< \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> >
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation.
 };
 

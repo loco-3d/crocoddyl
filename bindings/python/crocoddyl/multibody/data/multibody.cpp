@@ -31,7 +31,7 @@ void exposeDataCollectorMultibody() {
              bp::bases<DataCollectorMultibody, DataCollectorActuation> >(
       "DataCollectorActMultibody",
       "Data collector for actuated multibody systems.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ActuationDataAbstract> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ActuationDataAbstract> >(
           bp::args("self", "pinocchio", "actuation"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"
@@ -43,8 +43,8 @@ void exposeDataCollectorMultibody() {
              bp::bases<DataCollectorActMultibody, DataCollectorJoint> >(
       "DataCollectorJointActMultibody",
       "Data collector for actuated-joint multibody systems.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ActuationDataAbstract>,
-               boost::shared_ptr<JointDataAbstract> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ActuationDataAbstract>,
+               std::shared_ptr<JointDataAbstract> >(
           bp::args("self", "pinocchio", "actuation", "joint"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"

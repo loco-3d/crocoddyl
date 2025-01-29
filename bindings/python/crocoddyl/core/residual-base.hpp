@@ -23,7 +23,7 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
   using ResidualModelAbstract::nu_;
   using ResidualModelAbstract::unone_;
 
-  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ResidualModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                              const std::size_t nr, const std::size_t nu,
                              const bool q_dependent = true,
                              const bool v_dependent = true,
@@ -34,7 +34,7 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  ResidualModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ResidualModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                              const std::size_t nr,
                              const bool q_dependent = true,
                              const bool v_dependent = true,
@@ -44,7 +44,7 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  void calc(const std::shared_ptr<ResidualDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -66,7 +66,7 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
     }
   }
 
-  void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -88,24 +88,24 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
     }
   }
 
-  boost::shared_ptr<ResidualDataAbstract> createData(
+  std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data) {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ResidualDataAbstract> >(
-          createData.ptr(), boost::ref(data));
+      return bp::call<std::shared_ptr<ResidualDataAbstract> >(createData.ptr(),
+                                                              boost::ref(data));
     }
     return ResidualModelAbstract::createData(data);
   }
 
-  boost::shared_ptr<ResidualDataAbstract> default_createData(
+  std::shared_ptr<ResidualDataAbstract> default_createData(
       DataCollectorAbstract* const data) {
     return this->ResidualModelAbstract::createData(data);
   }
 
-  void calcCostDiff(const boost::shared_ptr<CostDataAbstract>& cdata,
-                    const boost::shared_ptr<ResidualDataAbstract>& rdata,
-                    const boost::shared_ptr<ActivationDataAbstract>& adata,
+  void calcCostDiff(const std::shared_ptr<CostDataAbstract>& cdata,
+                    const std::shared_ptr<ResidualDataAbstract>& rdata,
+                    const std::shared_ptr<ActivationDataAbstract>& adata,
                     const bool update_u = true) {
     if (boost::python::override calcCostDiff =
             this->get_override("calcCostDiff")) {
@@ -116,18 +116,18 @@ class ResidualModelAbstract_wrap : public ResidualModelAbstract,
   }
 
   void default_calcCostDiff(
-      const boost::shared_ptr<CostDataAbstract>& cdata,
-      const boost::shared_ptr<ResidualDataAbstract>& rdata,
-      const boost::shared_ptr<ActivationDataAbstract>& adata,
+      const std::shared_ptr<CostDataAbstract>& cdata,
+      const std::shared_ptr<ResidualDataAbstract>& rdata,
+      const std::shared_ptr<ActivationDataAbstract>& adata,
       const bool update_u) {
     return this->ResidualModelAbstract::calcCostDiff(cdata, rdata, adata,
                                                      update_u);
   }
 
   void default_calcCostDiff_noupdate_u(
-      const boost::shared_ptr<CostDataAbstract>& cdata,
-      const boost::shared_ptr<ResidualDataAbstract>& rdata,
-      const boost::shared_ptr<ActivationDataAbstract>& adata) {
+      const std::shared_ptr<CostDataAbstract>& cdata,
+      const std::shared_ptr<ResidualDataAbstract>& rdata,
+      const std::shared_ptr<ActivationDataAbstract>& adata) {
     return this->ResidualModelAbstract::calcCostDiff(cdata, rdata, adata);
   }
 };

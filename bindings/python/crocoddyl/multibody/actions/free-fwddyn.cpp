@@ -18,7 +18,7 @@ namespace python {
 
 void exposeDifferentialActionFreeFwdDynamics() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> >();
+      std::shared_ptr<DifferentialActionModelFreeFwdDynamics> >();
 
   bp::class_<DifferentialActionModelFreeFwdDynamics,
              bp::bases<DifferentialActionModelAbstract> >(
@@ -32,10 +32,10 @@ void exposeDifferentialActionFreeFwdDynamics() {
       "include the armature, you need to use set_armature(). On the other "
       "hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>,
-               boost::shared_ptr<ActuationModelAbstract>,
-               boost::shared_ptr<CostModelSum>,
-               bp::optional<boost::shared_ptr<ConstraintModelManager> > >(
+      bp::init<std::shared_ptr<StateMultibody>,
+               std::shared_ptr<ActuationModelAbstract>,
+               std::shared_ptr<CostModelSum>,
+               bp::optional<std::shared_ptr<ConstraintModelManager> > >(
           bp::args("self", "state", "actuation", "costs", "constraints"),
           "Initialize the free forward-dynamics action model.\n\n"
           ":param state: multibody state\n"
@@ -43,7 +43,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
           ":param costs: stack of cost functions\n"
           ":param constraints: stack of constraint functions"))
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelFreeFwdDynamics::calc,
@@ -57,12 +57,12 @@ void exposeDifferentialActionFreeFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc,
           bp::args("self", "data", "x"))
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelFreeFwdDynamics::calcDiff,
@@ -79,7 +79,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n")
       .def<void (DifferentialActionModelFreeFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -117,7 +117,7 @@ void exposeDifferentialActionFreeFwdDynamics() {
       .def(CopyableVisitor<DifferentialActionModelFreeFwdDynamics>());
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
+      std::shared_ptr<DifferentialActionDataFreeFwdDynamics> >();
 
   bp::class_<DifferentialActionDataFreeFwdDynamics,
              bp::bases<DifferentialActionDataAbstract> >(

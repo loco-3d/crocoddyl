@@ -17,11 +17,11 @@ namespace python {
 
 void exposeResidualContactWrenchCone() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualModelContactWrenchCone> >();
+      std::shared_ptr<ResidualModelContactWrenchCone> >();
 
   bp::class_<ResidualModelContactWrenchCone, bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactWrenchCone",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                WrenchCone, std::size_t, bp::optional<bool> >(
           bp::args("self", "state", "id", "fref", "nu", "fwddyn"),
           "Initialize the contact wrench cone residual model.\n\n"
@@ -32,7 +32,7 @@ void exposeResidualContactWrenchCone() {
           ":param fwddyn: indicate if we have a forward dynamics problem "
           "(True) or inverse dynamics problem (False) "
           "(default True)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     WrenchCone>(
           bp::args("self", "state", "id", "fref"),
           "Initialize the contact wrench cone residual model.\n\n"
@@ -43,7 +43,7 @@ void exposeResidualContactWrenchCone() {
           ":param id: reference frame id\n"
           ":param fref: contact wrench cone"))
       .def<void (ResidualModelContactWrenchCone::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelContactWrenchCone::calc,
@@ -53,11 +53,11 @@ void exposeResidualContactWrenchCone() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactWrenchCone::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelContactWrenchCone::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelContactWrenchCone::calcDiff,
@@ -68,7 +68,7 @@ void exposeResidualContactWrenchCone() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactWrenchCone::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -96,8 +96,7 @@ void exposeResidualContactWrenchCone() {
           "reference contact wrench cone")
       .def(CopyableVisitor<ResidualModelContactWrenchCone>());
 
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualDataContactWrenchCone> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataContactWrenchCone> >();
 
   bp::class_<ResidualDataContactWrenchCone, bp::bases<ResidualDataAbstract> >(
       "ResidualDataContactWrenchCone",

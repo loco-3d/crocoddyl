@@ -57,7 +57,7 @@ void exposeActuationFloatingBaseThruster() {
       "StdVec_Thruster");
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<crocoddyl::ActuationModelFloatingBaseThrusters>>();
+      std::shared_ptr<crocoddyl::ActuationModelFloatingBaseThrusters>>();
 
   bp::class_<ActuationModelFloatingBaseThrusters,
              bp::bases<ActuationModelAbstract>>(
@@ -65,14 +65,14 @@ void exposeActuationFloatingBaseThruster() {
       "Actuation models for floating base systems actuated with thrusters "
       "(e.g. aerial "
       "manipulators).",
-      bp::init<boost::shared_ptr<StateMultibody>, std::vector<Thruster>>(
+      bp::init<std::shared_ptr<StateMultibody>, std::vector<Thruster>>(
           bp::args("self", "state", "thrusters"),
           "Initialize the floating base actuation model equipped with "
           "thrusters.\n\n"
           ":param state: state of multibody system\n"
           ":param thrusters: vector of thrusters"))
       .def<void (ActuationModelFloatingBaseThrusters::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActuationModelFloatingBaseThrusters::calc,

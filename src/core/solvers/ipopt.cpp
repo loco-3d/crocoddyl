@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
+SolverIpopt::SolverIpopt(std::shared_ptr<crocoddyl::ShootingProblem> problem)
     : SolverAbstract(problem),
       ipopt_iface_(new IpoptInterface(problem)),
       ipopt_app_(IpoptApplicationFactory()) {

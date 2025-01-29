@@ -21,7 +21,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_trySteps, SolverKKT::tryStep,
                                        0, 1)
 
 void exposeSolverKKT() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverKKT> >();
+  bp::register_ptr_to_python<std::shared_ptr<SolverKKT> >();
 
   bp::class_<SolverKKT, bp::bases<SolverAbstract> >(
       "SolverKKT",
@@ -30,7 +30,7 @@ void exposeSolverKKT() {
       "the kkt matrix \n"
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(
+      bp::init<std::shared_ptr<ShootingProblem> >(
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))

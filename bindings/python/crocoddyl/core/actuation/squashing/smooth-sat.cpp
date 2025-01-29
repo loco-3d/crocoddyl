@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSquashingSmoothSat() {
-  bp::register_ptr_to_python<boost::shared_ptr<SquashingModelSmoothSat> >();
+  bp::register_ptr_to_python<std::shared_ptr<SquashingModelSmoothSat> >();
 
   bp::class_<SquashingModelSmoothSat, bp::bases<SquashingModelAbstract> >(
       "SquashingModelSmoothSat", "Smooth Sat squashing model",

@@ -36,7 +36,7 @@ struct DataCollectorActMultibodyTpl : DataCollectorMultibodyTpl<Scalar>,
 
   DataCollectorActMultibodyTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
+      std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio),
         DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyTpl() {}
@@ -49,8 +49,8 @@ struct DataCollectorJointActMultibodyTpl : DataCollectorActMultibodyTpl<Scalar>,
 
   DataCollectorJointActMultibodyTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-      boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint)
+      std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+      std::shared_ptr<JointDataAbstractTpl<Scalar> > joint)
       : DataCollectorActMultibodyTpl<Scalar>(pinocchio, actuation),
         DataCollectorJointTpl<Scalar>(joint) {}
   virtual ~DataCollectorJointActMultibodyTpl() {}

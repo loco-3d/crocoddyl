@@ -24,7 +24,7 @@ class DifferentialActionModelAbstract_wrap
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   using DifferentialActionModelAbstract::unone_;
 
-  DifferentialActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  DifferentialActionModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                                        const std::size_t nu,
                                        const std::size_t nr = 1,
                                        const std::size_t ng = 0,
@@ -36,7 +36,7 @@ class DifferentialActionModelAbstract_wrap
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  void calc(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -58,7 +58,7 @@ class DifferentialActionModelAbstract_wrap
     }
   }
 
-  void calcDiff(const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -80,23 +80,23 @@ class DifferentialActionModelAbstract_wrap
     }
   }
 
-  boost::shared_ptr<DifferentialActionDataAbstract> createData() {
+  std::shared_ptr<DifferentialActionDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<DifferentialActionDataAbstract> >(
+      return bp::call<std::shared_ptr<DifferentialActionDataAbstract> >(
           createData.ptr());
     }
     return DifferentialActionModelAbstract::createData();
   }
 
-  boost::shared_ptr<DifferentialActionDataAbstract> default_createData() {
+  std::shared_ptr<DifferentialActionDataAbstract> default_createData() {
     return this->DifferentialActionModelAbstract::createData();
   }
 
-  void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
-      const std::size_t maxiter, const double tol) {
+  void quasiStatic(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                   Eigen::Ref<Eigen::VectorXd> u,
+                   const Eigen::Ref<const Eigen::VectorXd>& x,
+                   const std::size_t maxiter, const double tol) {
     if (boost::python::override quasiStatic =
             this->get_override("quasiStatic")) {
       u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x,
@@ -113,7 +113,7 @@ class DifferentialActionModelAbstract_wrap
   }
 
   void default_quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
       const std::size_t maxiter, const double tol) {
     return this->DifferentialActionModelAbstract::quasiStatic(data, u, x,

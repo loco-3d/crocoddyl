@@ -15,15 +15,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualFrameTranslation() {
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualModelFrameTranslation> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelFrameTranslation> >();
 
   bp::class_<ResidualModelFrameTranslation, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameTranslation",
       "This residual function defines the the frame translation tracking as as "
       "r = t - tref, with t and tref as the\n"
       "current and reference frame translations, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                Eigen::Vector3d, std::size_t>(
           bp::args("self", "state", "id", "xref", "nu"),
           "Initialize the frame translation residual model.\n\n"
@@ -31,7 +30,7 @@ void exposeResidualFrameTranslation() {
           ":param id: reference frame id\n"
           ":param xref: reference frame translation\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     Eigen::Vector3d>(
           bp::args("self", "state", "id", "xref"),
           "Initialize the frame translation residual model.\n\n"
@@ -40,7 +39,7 @@ void exposeResidualFrameTranslation() {
           ":param id: reference frame id\n"
           ":param xref: reference frame translation"))
       .def<void (ResidualModelFrameTranslation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelFrameTranslation::calc,
@@ -50,11 +49,11 @@ void exposeResidualFrameTranslation() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameTranslation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelFrameTranslation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelFrameTranslation::calcDiff,
@@ -65,7 +64,7 @@ void exposeResidualFrameTranslation() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameTranslation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -89,8 +88,7 @@ void exposeResidualFrameTranslation() {
           "reference frame translation")
       .def(CopyableVisitor<ResidualModelFrameTranslation>());
 
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualDataFrameTranslation> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataFrameTranslation> >();
 
   bp::class_<ResidualDataFrameTranslation, bp::bases<ResidualDataAbstract> >(
       "ResidualDataFrameTranslation",

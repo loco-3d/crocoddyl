@@ -25,7 +25,7 @@ class ControlParametrizationModelAbstract_wrap
       : ControlParametrizationModelAbstract(nw, nu),
         bp::wrapper<ControlParametrizationModelAbstract>() {}
 
-  void calc(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+  void calc(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
             double t, const Eigen::Ref<const Eigen::VectorXd>& u) const {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
@@ -36,9 +36,8 @@ class ControlParametrizationModelAbstract_wrap
                           (Eigen::VectorXd)u);
   }
 
-  void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      double t, const Eigen::Ref<const Eigen::VectorXd>& u) const {
+  void calcDiff(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+                double t, const Eigen::Ref<const Eigen::VectorXd>& u) const {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -48,7 +47,7 @@ class ControlParametrizationModelAbstract_wrap
                           (Eigen::VectorXd)u);
   }
 
-  void params(const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+  void params(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
               double t, const Eigen::Ref<const Eigen::VectorXd>& w) const {
     if (static_cast<std::size_t>(w.size()) != nw_) {
       throw_pretty(
@@ -59,16 +58,16 @@ class ControlParametrizationModelAbstract_wrap
                           (Eigen::VectorXd)w);
   }
 
-  boost::shared_ptr<ControlParametrizationDataAbstract> createData() {
+  std::shared_ptr<ControlParametrizationDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ControlParametrizationDataAbstract> >(
+      return bp::call<std::shared_ptr<ControlParametrizationDataAbstract> >(
           createData.ptr());
     }
     return ControlParametrizationModelAbstract::createData();
   }
 
-  boost::shared_ptr<ControlParametrizationDataAbstract> default_createData() {
+  std::shared_ptr<ControlParametrizationDataAbstract> default_createData() {
     return this->ControlParametrizationModelAbstract::createData();
   }
 
@@ -91,7 +90,7 @@ class ControlParametrizationModelAbstract_wrap
   }
 
   void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const Eigen::MatrixXd>& A,
       Eigen::Ref<Eigen::MatrixXd> out, const AssignmentOp op) const {
     switch (op) {
@@ -116,7 +115,7 @@ class ControlParametrizationModelAbstract_wrap
   }
 
   Eigen::MatrixXd multiplyByJacobian_wrap(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const Eigen::MatrixXd>& A) const {
     return bp::call<Eigen::MatrixXd>(
         this->get_override("multiplyByJacobian").ptr(), data,
@@ -124,7 +123,7 @@ class ControlParametrizationModelAbstract_wrap
   }
 
   void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const Eigen::MatrixXd>& A,
       Eigen::Ref<Eigen::MatrixXd> out, const AssignmentOp op) const {
     switch (op) {
@@ -149,7 +148,7 @@ class ControlParametrizationModelAbstract_wrap
   }
 
   Eigen::MatrixXd multiplyJacobianTransposeBy_wrap(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const Eigen::MatrixXd>& A) const {
     return bp::call<Eigen::MatrixXd>(
         this->get_override("multiplyJacobianTransposeBy").ptr(), data,

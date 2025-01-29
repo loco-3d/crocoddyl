@@ -24,7 +24,7 @@ using namespace crocoddyl::unittest;
 void test_construct_data(ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
       factory.create(activation_type);
 
   // Run the print function
@@ -32,19 +32,17 @@ void test_construct_data(ActivationModelTypes::Type activation_type) {
   tmp << *model;
 
   // create the corresponding data object
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
-      model->createData();
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 }
 
 void test_calc_returns_a_value(ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
       factory.create(activation_type);
 
   // create the corresponding data object
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
-      model->createData();
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
   // Generating random input vector
   const Eigen::VectorXd r = Eigen::VectorXd::Random(model->get_nr());
@@ -61,15 +59,14 @@ void test_partial_derivatives_against_numdiff(
     ActivationModelTypes::Type activation_type) {
   // create the model
   ActivationModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
       factory.create(activation_type);
 
   // create the corresponding data object and set the cost to nan
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
-      model->createData();
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data = model->createData();
 
   crocoddyl::ActivationModelNumDiff model_num_diff(model);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control

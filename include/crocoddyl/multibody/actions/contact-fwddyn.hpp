@@ -107,10 +107,10 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * derivatives (default false)
    */
   DifferentialActionModelContactFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<ContactModelMultiple> contacts,
-      boost::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<ContactModelMultiple> contacts,
+      std::shared_ptr<CostModelSum> costs,
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
 
@@ -132,11 +132,11 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * derivatives (default false)
    */
   DifferentialActionModelContactFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<ContactModelMultiple> contacts,
-      boost::shared_ptr<CostModelSum> costs,
-      boost::shared_ptr<ConstraintModelManager> constraints,
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<ContactModelMultiple> contacts,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints,
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
   virtual ~DifferentialActionModelContactFwdDynamicsTpl();
@@ -150,9 +150,9 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Compute the total cost value for nodes that depends only on the
@@ -166,9 +166,8 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] data  Contact forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
@@ -178,7 +177,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
@@ -193,7 +192,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -201,20 +200,20 @@ class DifferentialActionModelContactFwdDynamicsTpl
    *
    * @return contact forward-dynamics data
    */
-  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
 
   /**
    * @brief Check that the given data belongs to the contact forward-dynamics
    * data
    */
   virtual bool checkData(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data);
 
   /**
    * @brief @copydoc Base::quasiStatic()
    */
   virtual void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
       const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
@@ -251,22 +250,22 @@ class DifferentialActionModelContactFwdDynamicsTpl
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const;
 
   /**
    * @brief Return the contact model
    */
-  const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
+  const std::shared_ptr<ContactModelMultiple>& get_contacts() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const std::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model manager
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -308,11 +307,11 @@ class DifferentialActionModelContactFwdDynamicsTpl
 
  private:
   void init();
-  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
-  boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
-  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
-  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  std::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
   bool with_armature_;      //!< Indicate if we have defined an armature
   VectorXs armature_;       //!< Armature vector
   Scalar JMinvJt_damping_;  //!< Damping factor used in operational space
@@ -341,7 +340,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(
             &pinocchio, model->get_actuation()->createData(),
-            boost::make_shared<JointDataAbstract>(
+            std::make_shared<JointDataAbstract>(
                 model->get_state(), model->get_actuation(), model->get_nu()),
             model->get_contacts()->createData(&pinocchio)),
         costs(model->get_costs()->createData(&multibody)),
@@ -372,8 +371,8 @@ struct DifferentialActionDataContactFwdDynamicsTpl
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorJointActMultibodyInContact multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  std::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  std::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Kinv;
   MatrixXs df_dx;
   MatrixXs df_du;

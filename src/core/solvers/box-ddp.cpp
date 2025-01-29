@@ -14,7 +14,7 @@
 
 namespace crocoddyl {
 
-SolverBoxDDP::SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem)
+SolverBoxDDP::SolverBoxDDP(std::shared_ptr<ShootingProblem> problem)
     : SolverDDP(problem),
       qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
   allocateData();
@@ -38,10 +38,10 @@ void SolverBoxDDP::resizeData() {
   SolverDDP::resizeData();
 
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     Quu_inv_[t].conservativeResize(nu, nu);
     du_lb_[t].conservativeResize(nu);
@@ -57,10 +57,10 @@ void SolverBoxDDP::allocateData() {
   Quu_inv_.resize(T);
   du_lb_.resize(T);
   du_ub_.resize(T);
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
     du_lb_[t] = Eigen::VectorXd::Zero(nu);
@@ -122,13 +122,13 @@ void SolverBoxDDP::forwardPass(double steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     const std::size_t nu = m->get_nu();
 
     xs_try_[t] = xnext_;
@@ -155,9 +155,8 @@ void SolverBoxDDP::forwardPass(double steplength) {
     }
   }
 
-  const boost::shared_ptr<ActionModelAbstract>& m =
-      problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
+  const std::shared_ptr<ActionModelAbstract>& m = problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
   if ((is_feasible_) || (steplength == 1)) {
     xs_try_.back() = xnext_;
   } else {

@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionRK() {
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionModelRK> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionModelRK> >();
 
   bp::enum_<RKType>("RKType")
       .value("two", two)
@@ -31,7 +31,7 @@ void exposeIntegratedActionRK() {
       "RK integrator for differential action models.\n\n"
       "This class implements different RK integrator schemes.\n"
       "The available integrators are: RK2, RK3, and RK4.",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>, RKType,
+      bp::init<std::shared_ptr<DifferentialActionModelAbstract>, RKType,
                bp::optional<double, bool> >(
           bp::args("self", "diffModel", "rktype", "stepTime",
                    "withCostResidual"),
@@ -42,8 +42,8 @@ void exposeIntegratedActionRK() {
           ":param stepTime: step time (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and "
           "derivatives (default True)."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
-                    boost::shared_ptr<ControlParametrizationModelAbstract>,
+      .def(bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
+                    std::shared_ptr<ControlParametrizationModelAbstract>,
                     RKType, bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "rktype", "stepTime",
                    "withCostResidual"),
@@ -56,7 +56,7 @@ void exposeIntegratedActionRK() {
           ":param withCostResidual: includes the cost residuals and "
           "derivatives (default True)."))
       .def<void (IntegratedActionModelRK::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &IntegratedActionModelRK::calc,
@@ -68,11 +68,11 @@ void exposeIntegratedActionRK() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelRK::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (IntegratedActionModelRK::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK::calcDiff,
@@ -86,7 +86,7 @@ void exposeIntegratedActionRK() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelRK::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -99,7 +99,7 @@ void exposeIntegratedActionRK() {
           "number of nodes to be integrated")
       .def(CopyableVisitor<IntegratedActionModelRK>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionDataRK> >();
 
   bp::class_<IntegratedActionDataRK, bp::bases<IntegratedActionDataAbstract> >(
       "IntegratedActionDataRK", "RK integrator data.",

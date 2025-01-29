@@ -22,7 +22,7 @@ void exposeCostAbstract() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<CostModelAbstract> >();
 
   bp::class_<CostModelAbstract_wrap, boost::noncopyable>(
       "CostModelAbstract",
@@ -41,34 +41,34 @@ void exposeCostAbstract() {
       "a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be "
       "specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ActivationModelAbstract>,
-               boost::shared_ptr<ResidualModelAbstract> >(
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ActivationModelAbstract>,
+               std::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "activation", "residual"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param residual: residual model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ActivationModelAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ActivationModelAbstract> >(
           bp::args("self", "state", "activation"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: activation model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ResidualModelAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ResidualModelAbstract> >(
           bp::args("self", "state", "residual"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param residual: residual model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
@@ -76,7 +76,7 @@ void exposeCostAbstract() {
           ":param state: state description\n"
           ":param nr: dimension of residual vector\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. "
@@ -91,7 +91,7 @@ void exposeCostAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &CostModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the total cost value for nodes that depends only on the "
@@ -110,7 +110,7 @@ void exposeCostAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (CostModelAbstract::*)(
-          const boost::shared_ptr<CostDataAbstract>&,
+          const std::shared_ptr<CostDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -152,7 +152,7 @@ void exposeCostAbstract() {
                     "dimension of control vector")
       .def(PrintableVisitor<CostModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<CostDataAbstract> >();
 
   bp::class_<CostDataAbstract>(
       "CostDataAbstract", "Abstract class for cost data.\n\n",

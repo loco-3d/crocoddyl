@@ -18,7 +18,7 @@ namespace python {
 
 void exposeActivationSmooth1Norm() {
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelSmooth1Norm> >();
+      std::shared_ptr<ActivationModelSmooth1Norm> >();
 
   bp::class_<ActivationModelSmooth1Norm, bp::bases<ActivationModelAbstract> >(
       "ActivationModelSmooth1Norm",
@@ -48,7 +48,7 @@ void exposeActivationSmooth1Norm() {
            bp::args("self"), "Create the smooth-abs activation data.\n\n")
       .def(CopyableVisitor<ActivationModelSmooth1Norm>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActivationDataSmooth1Norm> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActivationDataSmooth1Norm> >();
 
   bp::class_<ActivationDataSmooth1Norm, bp::bases<ActivationDataAbstract> >(
       "ActivationDataSmooth1Norm", "Data for smooth-abs activation.\n\n",

@@ -36,7 +36,7 @@ class SolverIpopt : public SolverAbstract {
    *
    * @param[in]  problem solver to be diagnostic
    */
-  SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem);
+  SolverIpopt(std::shared_ptr<crocoddyl::ShootingProblem> problem);
   ~SolverIpopt();
 
   bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,

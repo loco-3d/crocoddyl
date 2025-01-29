@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeConstraintAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintModelAbstract> >();
 
   bp::enum_<ConstraintType>("ConstraintType")
       .value("Inequality", Inequality)
@@ -33,15 +33,15 @@ void exposeConstraintAbstract() {
       "described with a nx-tuple, its velocity xd that belongs to the tangent "
       "space with ndx dimension,\n"
       "and the control input u.",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ResidualModelAbstract>, std::size_t,
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ResidualModelAbstract>, std::size_t,
                std::size_t>(bp::args("self", "state", "residual", "ng", "nh"),
                             "Initialize the constraint model.\n\n"
                             ":param state: state description\n"
                             ":param residual: residual model\n"
                             ":param ng: number of inequality constraints\n"
                             ":param nh: number of equality constraints"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t,
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t, std::size_t,
                     std::size_t, bp::optional<bool> >(
           bp::args("self", "state", "nu", "ng", "nh", "T_const"),
           "Initialize the constraint model.\n\n"
@@ -53,7 +53,7 @@ void exposeConstraintAbstract() {
           "terminal nodes.\n"
           "                False if it is a constraint on running nodes only "
           "(default true)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t,
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t, std::size_t,
                     bp::optional<bool> >(
           bp::args("self", "state", "ng", "nh", "T_const"),
           "Initialize the constraint model.\n\n"
@@ -71,7 +71,7 @@ void exposeConstraintAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (ConstraintModelAbstract::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ConstraintModelAbstract::calc, bp::args("self", "data", "x"),
           "Compute the constraint value for nodes that depends only on the "
@@ -90,7 +90,7 @@ void exposeConstraintAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)\n")
       .def<void (ConstraintModelAbstract::*)(
-          const boost::shared_ptr<ConstraintDataAbstract>&,
+          const std::shared_ptr<ConstraintDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ConstraintModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -156,7 +156,7 @@ void exposeConstraintAbstract() {
           "True if the constraint is imposed in terminal nodes as well")
       .def(PrintableVisitor<ConstraintModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ConstraintDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ConstraintDataAbstract> >();
 
   bp::class_<ConstraintDataAbstract>(
       "ConstraintDataAbstract", "Abstract class for constraint data.\n\n",

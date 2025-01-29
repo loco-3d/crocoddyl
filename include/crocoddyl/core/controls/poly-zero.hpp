@@ -61,7 +61,7 @@ class ControlParametrizationModelPolyZeroTpl
    * @param[in]  u      Control parameters
    */
   virtual void calc(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
@@ -75,7 +75,7 @@ class ControlParametrizationModelPolyZeroTpl
    * @param[in]  u      Control parameters
    */
   virtual void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
 
   /**
@@ -83,7 +83,7 @@ class ControlParametrizationModelPolyZeroTpl
    *
    * @return the control-parametrization data
    */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Get a value of the control parameters such that the control at the
@@ -94,7 +94,7 @@ class ControlParametrizationModelPolyZeroTpl
    * @param[in]  w      Control values
    */
   virtual void params(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
 
   /**
@@ -125,7 +125,7 @@ class ControlParametrizationModelPolyZeroTpl
    * given results
    */
   virtual void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const;
 
@@ -143,7 +143,7 @@ class ControlParametrizationModelPolyZeroTpl
    * given results
    */
   virtual void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
       const AssignmentOp = setto) const;
 

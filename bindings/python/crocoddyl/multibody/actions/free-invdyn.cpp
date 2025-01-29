@@ -20,7 +20,7 @@ void exposeDifferentialActionFreeInvDynamics() {
   bp::scope().attr("no") = 0;
   {
     bp::register_ptr_to_python<
-        boost::shared_ptr<DifferentialActionModelFreeInvDynamics>>();
+        std::shared_ptr<DifferentialActionModelFreeInvDynamics>>();
     bp::scope model_outer =
         bp::class_<DifferentialActionModelFreeInvDynamics,
                    bp::bases<DifferentialActionModelAbstract>>(
@@ -32,10 +32,10 @@ void exposeDifferentialActionFreeInvDynamics() {
             "constraint.\n"
             "The stack of cost and constraint functions are implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
-            bp::init<boost::shared_ptr<StateMultibody>,
-                     boost::shared_ptr<ActuationModelAbstract>,
-                     boost::shared_ptr<CostModelSum>,
-                     bp::optional<boost::shared_ptr<ConstraintModelManager>>>(
+            bp::init<std::shared_ptr<StateMultibody>,
+                     std::shared_ptr<ActuationModelAbstract>,
+                     std::shared_ptr<CostModelSum>,
+                     bp::optional<std::shared_ptr<ConstraintModelManager>>>(
                 bp::args("self", "state", "actuation", "costs", "constraints"),
                 "Initialize the free inverse-dynamics action model.\n\n"
                 "It describes the kinematic evolution of the multibody system "
@@ -46,7 +46,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                 ":param costs: stack of cost functions\n"
                 ":param constraints: stack of constraint functions"))
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelFreeInvDynamics::calc,
@@ -56,12 +56,12 @@ void exposeDifferentialActionFreeInvDynamics() {
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc,
                 bp::args("self", "data", "x"))
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelFreeInvDynamics::calcDiff,
@@ -78,7 +78,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelFreeInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff,
                 bp::args("self", "data", "x"))
@@ -106,7 +106,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                 "constraint model manager")
             .def(CopyableVisitor<DifferentialActionModelFreeInvDynamics>());
 
-    bp::register_ptr_to_python<boost::shared_ptr<
+    bp::register_ptr_to_python<std::shared_ptr<
         DifferentialActionModelFreeInvDynamics::ResidualModelActuation>>();
 
     bp::class_<DifferentialActionModelFreeInvDynamics::ResidualModelActuation,
@@ -117,14 +117,14 @@ void exposeDifferentialActionFreeInvDynamics() {
         "joints) to be zero. We compute these torques and their derivatives "
         "using RNEA inside \n"
         "DifferentialActionModelFreeInvDynamics.",
-        bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+        bp::init<std::shared_ptr<StateMultibody>, std::size_t>(
             bp::args("self", "state", "nu"),
             "Initialize the actuation residual model.\n\n"
             ":param state: state description\n"
             ":param nu: dimension of the joint torques"))
         .def<void (
             DifferentialActionModelFreeInvDynamics::ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc",
@@ -137,12 +137,12 @@ void exposeDifferentialActionFreeInvDynamics() {
             ":param u: control input (dim. nu)")
         .def<void (
             DifferentialActionModelFreeInvDynamics::ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
         .def<void (
             DifferentialActionModelFreeInvDynamics::ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff",
@@ -156,7 +156,7 @@ void exposeDifferentialActionFreeInvDynamics() {
             ":param u: control input (dim. nu)\n")
         .def<void (
             DifferentialActionModelFreeInvDynamics::ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff,
             bp::args("self", "data", "x"))
@@ -176,7 +176,7 @@ void exposeDifferentialActionFreeInvDynamics() {
   }
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataFreeInvDynamics>>();
+      std::shared_ptr<DifferentialActionDataFreeInvDynamics>>();
 
   bp::scope data_outer =
       bp::class_<DifferentialActionDataFreeInvDynamics,
@@ -209,7 +209,7 @@ void exposeDifferentialActionFreeInvDynamics() {
                         "constraint data")
           .def(CopyableVisitor<DifferentialActionDataFreeInvDynamics>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<
+  bp::register_ptr_to_python<std::shared_ptr<
       DifferentialActionDataFreeInvDynamics::ResidualDataActuation>>();
 
   bp::class_<DifferentialActionDataFreeInvDynamics::ResidualDataActuation,

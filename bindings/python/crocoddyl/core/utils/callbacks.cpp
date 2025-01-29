@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCallbacks() {
-  bp::register_ptr_to_python<boost::shared_ptr<CallbackAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<CallbackAbstract> >();
 
   bp::enum_<VerboseLevel>("VerboseLevel")
       .value("_0", _0)

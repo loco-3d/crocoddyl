@@ -61,7 +61,7 @@ std::ostream &operator<<(std::ostream &os,
 ImpulseConstraintModelFactory::ImpulseConstraintModelFactory() {}
 ImpulseConstraintModelFactory::~ImpulseConstraintModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ActionModelAbstract>
+std::shared_ptr<crocoddyl::ActionModelAbstract>
 ImpulseConstraintModelFactory::create(
     ImpulseConstraintModelTypes::Type constraint_type,
     PinocchioModelTypes::Type model_type) const {
@@ -84,17 +84,17 @@ ImpulseConstraintModelFactory::create(
   }
 
   // Create impulse impulse diff-action model with standard cost functions
-  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> action;
-  boost::shared_ptr<crocoddyl::StateMultibody> state;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
-  boost::shared_ptr<crocoddyl::ImpulseModelMultiple> impulse;
-  boost::shared_ptr<crocoddyl::CostModelSum> cost;
-  boost::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
-  state = boost::static_pointer_cast<crocoddyl::StateMultibody>(
+  std::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics> action;
+  std::shared_ptr<crocoddyl::StateMultibody> state;
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation;
+  std::shared_ptr<crocoddyl::ImpulseModelMultiple> impulse;
+  std::shared_ptr<crocoddyl::CostModelSum> cost;
+  std::shared_ptr<crocoddyl::ConstraintModelManager> constraint;
+  state = std::static_pointer_cast<crocoddyl::StateMultibody>(
       StateModelFactory().create(state_type));
-  impulse = boost::make_shared<crocoddyl::ImpulseModelMultiple>(state);
-  cost = boost::make_shared<crocoddyl::CostModelSum>(state, 0);
-  constraint = boost::make_shared<crocoddyl::ConstraintModelManager>(state, 0);
+  impulse = std::make_shared<crocoddyl::ImpulseModelMultiple>(state);
+  cost = std::make_shared<crocoddyl::CostModelSum>(state, 0);
+  constraint = std::make_shared<crocoddyl::ConstraintModelManager>(state, 0);
   std::vector<std::size_t> frame_ids = model_factory.get_frame_ids();
   std::vector<std::string> frame_names = model_factory.get_frame_names();
   // Define the impulse model
@@ -137,17 +137,17 @@ ImpulseConstraintModelFactory::create(
     case ImpulseConstraintModelTypes::CostModelResidualImpulseCoMEquality:
       constraint->addConstraint(
           "constraint",
-          boost::make_shared<crocoddyl::ConstraintModelResidual>(
+          std::make_shared<crocoddyl::ConstraintModelResidual>(
               state,
-              boost::make_shared<crocoddyl::ResidualModelImpulseCoM>(state)));
+              std::make_shared<crocoddyl::ResidualModelImpulseCoM>(state)));
       break;
     case ImpulseConstraintModelTypes::
         ConstraintModelResidualImpulseForceEquality:
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
-                state, boost::make_shared<crocoddyl::ResidualModelContactForce>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
+                state, std::make_shared<crocoddyl::ResidualModelContactForce>(
                            state, frame_ids[i], pinocchio::Force::Random(),
                            model_factory.get_contact_nc(), 0)));
       }
@@ -159,9 +159,9 @@ ImpulseConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
+                std::make_shared<crocoddyl::ResidualModelContactCoPPosition>(
                     state, frame_ids[i], cop_support, 0),
                 lb, ub));
       }
@@ -173,9 +173,9 @@ ImpulseConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
+                std::make_shared<crocoddyl::ResidualModelContactFrictionCone>(
                     state, frame_ids[i], friction_cone, 0),
                 lb, ub));
       }
@@ -187,9 +187,9 @@ ImpulseConstraintModelFactory::create(
       for (std::size_t i = 0; i < frame_ids.size(); ++i) {
         constraint->addConstraint(
             "constraint_" + std::to_string(i),
-            boost::make_shared<crocoddyl::ConstraintModelResidual>(
+            std::make_shared<crocoddyl::ConstraintModelResidual>(
                 state,
-                boost::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
+                std::make_shared<crocoddyl::ResidualModelContactWrenchCone>(
                     state, frame_ids[i], wrench_cone, 0),
                 lb, ub));
       }
@@ -201,7 +201,7 @@ ImpulseConstraintModelFactory::create(
 
   double r_coeff = 0.;  // TODO(cmastall): random_real_in_range(1e-16, 1e-2);
   double damping = 0.;  // TODO(cmastall): random_real_in_range(1e-16, 1e-2);
-  action = boost::make_shared<crocoddyl::ActionModelImpulseFwdDynamics>(
+  action = std::make_shared<crocoddyl::ActionModelImpulseFwdDynamics>(
       state, impulse, cost, constraint, r_coeff, damping, true);
   return action;
 }

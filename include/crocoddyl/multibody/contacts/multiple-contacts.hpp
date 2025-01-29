@@ -30,7 +30,7 @@ struct ContactItemTpl {
 
   ContactItemTpl() {}
   ContactItemTpl(const std::string& name,
-                 boost::shared_ptr<ContactModelAbstract> contact,
+                 std::shared_ptr<ContactModelAbstract> contact,
                  const bool active = true)
       : name(name), contact(contact), active(active) {}
 
@@ -44,7 +44,7 @@ struct ContactItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<ContactModelAbstract> contact;
+  std::shared_ptr<ContactModelAbstract> contact;
   bool active;
 };
 
@@ -75,9 +75,9 @@ class ContactModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ContactItem> >
+  typedef std::map<std::string, std::shared_ptr<ContactItem> >
       ContactModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ContactDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<ContactDataAbstract> >
       ContactDataContainer;
   typedef typename pinocchio::container::aligned_vector<
       pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
@@ -88,7 +88,7 @@ class ContactModelMultipleTpl {
    * @param[in] state  Multibody state
    * @param[in] nu     Dimension of control vector
    */
-  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModelMultipleTpl(std::shared_ptr<StateMultibody> state,
                           const std::size_t nu);
 
   /**
@@ -96,7 +96,7 @@ class ContactModelMultipleTpl {
    *
    * @param[in] state  Multibody state
    */
-  ContactModelMultipleTpl(boost::shared_ptr<StateMultibody> state);
+  ContactModelMultipleTpl(std::shared_ptr<StateMultibody> state);
   ~ContactModelMultipleTpl();
 
   /**
@@ -109,7 +109,7 @@ class ContactModelMultipleTpl {
    * @param[in] active   Contact status (active by default)
    */
   void addContact(const std::string& name,
-                  boost::shared_ptr<ContactModelAbstract> contact,
+                  std::shared_ptr<ContactModelAbstract> contact,
                   const bool active = true);
 
   /**
@@ -133,7 +133,7 @@ class ContactModelMultipleTpl {
    * @param[in] data  Multi-contact data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ContactDataMultiple>& data,
+  void calc(const std::shared_ptr<ContactDataMultiple>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -142,7 +142,7 @@ class ContactModelMultipleTpl {
    * @param[in] data  Multi-contact data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+  void calcDiff(const std::shared_ptr<ContactDataMultiple>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -152,7 +152,7 @@ class ContactModelMultipleTpl {
    * @param[in] dv    Constrained system acceleration
    * \f$\dot{\mathbf{v}}\in\mathbb{R}^{nv}\f$
    */
-  void updateAcceleration(const boost::shared_ptr<ContactDataMultiple>& data,
+  void updateAcceleration(const std::shared_ptr<ContactDataMultiple>& data,
                           const VectorXs& dv) const;
 
   /**
@@ -162,7 +162,7 @@ class ContactModelMultipleTpl {
    * @param[in] force  Spatial force defined in frame coordinate
    * \f${}^o\underline{\boldsymbol{\lambda}}_c\in\mathbb{R}^{nc}\f$
    */
-  void updateForce(const boost::shared_ptr<ContactDataMultiple>& data,
+  void updateForce(const std::shared_ptr<ContactDataMultiple>& data,
                    const VectorXs& force);
 
   /**
@@ -174,9 +174,8 @@ class ContactModelMultipleTpl {
    * \f$\frac{\partial\dot{\mathbf{v}}}{\partial\mathbf{x}}\in\mathbb{R}^{nv\times
    * ndx}\f$
    */
-  void updateAccelerationDiff(
-      const boost::shared_ptr<ContactDataMultiple>& data,
-      const MatrixXs& ddv_dx) const;
+  void updateAccelerationDiff(const std::shared_ptr<ContactDataMultiple>& data,
+                              const MatrixXs& ddv_dx) const;
 
   /**
    * @brief Update the Jacobian of the spatial force defined in frame coordinate
@@ -189,7 +188,7 @@ class ContactModelMultipleTpl {
    * coordinate
    * \f$\frac{\partial{}^o\underline{\boldsymbol{\lambda}}_c}{\partial\mathbf{u}}\in\mathbb{R}^{nc\times{nu}}\f$
    */
-  void updateForceDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+  void updateForceDiff(const std::shared_ptr<ContactDataMultiple>& data,
                        const MatrixXs& df_dx, const MatrixXs& df_du) const;
 
   /**
@@ -202,7 +201,7 @@ class ContactModelMultipleTpl {
    * @param[in] data       Multi-contact data
    * @param[in] pinocchio  Pinocchio data
    */
-  void updateRneaDiff(const boost::shared_ptr<ContactDataMultiple>& data,
+  void updateRneaDiff(const std::shared_ptr<ContactDataMultiple>& data,
                       pinocchio::DataTpl<Scalar>& pinocchio) const;
 
   /**
@@ -211,13 +210,13 @@ class ContactModelMultipleTpl {
    * @param[in] data  Pinocchio data
    * @return the multi-contact data.
    */
-  boost::shared_ptr<ContactDataMultiple> createData(
+  std::shared_ptr<ContactDataMultiple> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the multibody state
    */
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::shared_ptr<StateMultibody>& get_state() const;
 
   /**
    * @brief Return the contact models
@@ -277,7 +276,7 @@ class ContactModelMultipleTpl {
                                   const ContactModelMultipleTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateMultibody> state_;
+  std::shared_ptr<StateMultibody> state_;
   ContactModelContainer contacts_;
   std::size_t nc_;
   std::size_t nc_total_;
@@ -327,7 +326,7 @@ struct ContactDataMultipleTpl {
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator
              it = model->get_contacts().begin();
          it != model->get_contacts().end(); ++it) {
-      const boost::shared_ptr<ContactItem>& item = it->second;
+      const std::shared_ptr<ContactItem>& item = it->second;
       contacts.insert(
           std::make_pair(item->name, item->contact->createData(data)));
     }

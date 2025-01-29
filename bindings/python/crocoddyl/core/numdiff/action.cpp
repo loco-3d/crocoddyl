@@ -17,13 +17,13 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActionNumDiff() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActionModelNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionModelNumDiff> >();
 
   bp::class_<ActionModelNumDiff, bp::bases<ActionModelAbstract> >(
       "ActionModelNumDiff",
       "Abstract class for computing calcDiff by using numerical "
       "differentiation.\n\n",
-      bp::init<boost::shared_ptr<ActionModelAbstract>, bp::optional<bool> >(
+      bp::init<std::shared_ptr<ActionModelAbstract>, bp::optional<bool> >(
           bp::args("self", "model", "gaussApprox"),
           "Initialize the action model NumDiff.\n\n"
           ":param model: action model where we compute the derivatives through "
@@ -31,7 +31,7 @@ void exposeActionNumDiff() {
           ":param gaussApprox: compute the Hessian using Gauss approximation "
           "(default False)"))
       .def<void (ActionModelNumDiff::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelNumDiff::calc, bp::args("self", "data", "x", "u"),
@@ -41,11 +41,11 @@ void exposeActionNumDiff() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ActionModelNumDiff::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ActionModelNumDiff::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelNumDiff::calcDiff,
@@ -58,7 +58,7 @@ void exposeActionNumDiff() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ActionModelNumDiff::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -85,7 +85,7 @@ void exposeActionNumDiff() {
           "Gauss approximation for computing the Hessians")
       .def(CopyableVisitor<ActionModelNumDiff>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActionDataNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataNumDiff> >();
 
   bp::class_<ActionDataNumDiff, bp::bases<ActionDataAbstract> >(
       "ActionDataNumDiff", "Numerical differentiation action data.",

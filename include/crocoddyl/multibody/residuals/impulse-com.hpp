@@ -54,7 +54,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       State of the multibody system
    */
-  ResidualModelImpulseCoMTpl(boost::shared_ptr<StateMultibody> state);
+  ResidualModelImpulseCoMTpl(std::shared_ptr<StateMultibody> state);
   virtual ~ResidualModelImpulseCoMTpl();
 
   /**
@@ -64,7 +64,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -75,14 +75,14 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the impulse CoM residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -98,7 +98,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::u_dependent_;
 
  private:
-  boost::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
+  std::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
 template <typename _Scalar>
@@ -121,8 +121,8 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
         ddv_dv(model->get_state()->get_nv(), model->get_state()->get_nv()) {
     dvc_dq.setZero();
     ddv_dv.setZero();
-    const boost::shared_ptr<StateMultibody>& state =
-        boost::static_pointer_cast<StateMultibody>(model->get_state());
+    const std::shared_ptr<StateMultibody>& state =
+        std::static_pointer_cast<StateMultibody>(model->get_state());
     pinocchio_internal =
         pinocchio::DataTpl<Scalar>(*state->get_pinocchio().get());
     // Check that proper shared data has been passed
@@ -138,7 +138,7 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
   }
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
-  boost::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> >
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> >
       impulses;      //!< Impulses data
   Matrix3xs dvc_dq;  //!< Jacobian of the CoM velocity
   MatrixXs ddv_dv;   //!< Jacobian of the CoM velocity

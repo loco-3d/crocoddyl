@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_DATA_CONTACTS_HPP_
 #define CROCODDYL_CORE_DATA_CONTACTS_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
@@ -22,11 +22,11 @@ struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorContactTpl<Scalar>(
-      boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+      std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
   virtual ~DataCollectorContactTpl() {}
 
-  boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts;
+  std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts;
 };
 
 template <typename Scalar>
@@ -36,7 +36,7 @@ struct DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>,
 
   DataCollectorMultibodyInContactTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+      std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorMultibodyTpl<Scalar>(pinocchio),
         DataCollectorContactTpl<Scalar>(contacts) {}
   virtual ~DataCollectorMultibodyInContactTpl() {}
@@ -50,8 +50,8 @@ struct DataCollectorActMultibodyInContactTpl
 
   DataCollectorActMultibodyInContactTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-      boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+      std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+      std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorMultibodyInContactTpl<Scalar>(pinocchio, contacts),
         DataCollectorActuationTpl<Scalar>(actuation) {}
   virtual ~DataCollectorActMultibodyInContactTpl() {}
@@ -65,9 +65,9 @@ struct DataCollectorJointActMultibodyInContactTpl
 
   DataCollectorJointActMultibodyInContactTpl(
       pinocchio::DataTpl<Scalar>* const pinocchio,
-      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
-      boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint,
-      boost::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
+      std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+      std::shared_ptr<JointDataAbstractTpl<Scalar> > joint,
+      std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorActMultibodyInContactTpl<Scalar>(pinocchio, actuation,
                                                       contacts),
         DataCollectorJointTpl<Scalar>(joint) {}

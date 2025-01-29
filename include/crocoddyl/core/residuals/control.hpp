@@ -52,7 +52,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] uref   Reference control input
    */
-  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+  ResidualModelControlTpl(std::shared_ptr<typename Base::StateAbstract> state,
                           const VectorXs& uref);
 
   /**
@@ -63,7 +63,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
+  ResidualModelControlTpl(std::shared_ptr<typename Base::StateAbstract> state,
                           const std::size_t nu);
 
   /**
@@ -75,7 +75,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    */
   explicit ResidualModelControlTpl(
-      boost::shared_ptr<typename Base::StateAbstract> state);
+      std::shared_ptr<typename Base::StateAbstract> state);
   virtual ~ResidualModelControlTpl();
 
   /**
@@ -85,15 +85,15 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -103,14 +103,14 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the control residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -126,9 +126,9 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    * control if True.
    */
   virtual void calcCostDiff(
-      const boost::shared_ptr<CostDataAbstract>& cdata,
-      const boost::shared_ptr<ResidualDataAbstract>& rdata,
-      const boost::shared_ptr<ActivationDataAbstract>& adata,
+      const std::shared_ptr<CostDataAbstract>& cdata,
+      const std::shared_ptr<ResidualDataAbstract>& rdata,
+      const std::shared_ptr<ActivationDataAbstract>& adata,
       const bool update_u = true);
 
   /**

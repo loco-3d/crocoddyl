@@ -50,8 +50,7 @@ class ActuationModelFloatingBaseTpl
    * @param[in] state  State of a multibody system
    * @param[in] nu     Dimension of joint-torque vector
    */
-  explicit ActuationModelFloatingBaseTpl(
-      boost::shared_ptr<StateMultibody> state)
+  explicit ActuationModelFloatingBaseTpl(std::shared_ptr<StateMultibody> state)
       : Base(state,
              state->get_nv() -
                  state->get_pinocchio()
@@ -70,7 +69,7 @@ class ActuationModelFloatingBaseTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<Data>& data,
+  virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>& /*x*/,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -89,11 +88,11 @@ class ActuationModelFloatingBaseTpl
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
 #ifndef NDEBUG
-  virtual void calcDiff(const boost::shared_ptr<Data>& data,
+  virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
 #else
-  virtual void calcDiff(const boost::shared_ptr<Data>&,
+  virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>& /*x*/,
                         const Eigen::Ref<const VectorXs>& /*u*/) {
 #endif
@@ -103,7 +102,7 @@ class ActuationModelFloatingBaseTpl
                   "dtau_du has wrong value");
   };
 
-  virtual void commands(const boost::shared_ptr<Data>& data,
+  virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>& tau) {
     if (static_cast<std::size_t>(tau.size()) != state_->get_nv()) {
@@ -115,11 +114,11 @@ class ActuationModelFloatingBaseTpl
   }
 
 #ifndef NDEBUG
-  virtual void torqueTransform(const boost::shared_ptr<Data>& data,
+  virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void torqueTransform(const boost::shared_ptr<Data>&,
+  virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -132,12 +131,12 @@ class ActuationModelFloatingBaseTpl
    *
    * @return the actuation data
    */
-  virtual boost::shared_ptr<Data> createData() {
+  virtual std::shared_ptr<Data> createData() {
     typedef StateMultibodyTpl<Scalar> StateMultibody;
-    boost::shared_ptr<StateMultibody> state =
-        boost::static_pointer_cast<StateMultibody>(state_);
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    std::shared_ptr<StateMultibody> state =
+        std::static_pointer_cast<StateMultibody>(state_);
+    std::shared_ptr<Data> data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     const std::size_t root_joint_id =
         state->get_pinocchio()->existJointName("root_joint")
             ? state->get_pinocchio()->getJointId("root_joint")

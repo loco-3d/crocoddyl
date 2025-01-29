@@ -59,7 +59,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelContactControlGravTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelContactControlGravTpl(std::shared_ptr<StateMultibody> state,
                                      const std::size_t nu);
 
   /**
@@ -70,7 +70,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] state  State of the multibody system
    */
   explicit ResidualModelContactControlGravTpl(
-      boost::shared_ptr<StateMultibody> state);
+      std::shared_ptr<StateMultibody> state);
   virtual ~ResidualModelContactControlGravTpl();
 
   /**
@@ -80,7 +80,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -94,7 +94,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -105,7 +105,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -120,13 +120,13 @@ class ResidualModelContactControlGravTpl
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the contact-control-gravity residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -179,7 +179,7 @@ struct ResidualDataContactControlGravTpl
   }
 
   PinocchioData pinocchio;  //!< Pinocchio data
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> >
+  std::shared_ptr<ActuationDataAbstractTpl<Scalar> >
       actuation;  //!< Actuation data
   pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >
       fext;  //!< External spatial forces

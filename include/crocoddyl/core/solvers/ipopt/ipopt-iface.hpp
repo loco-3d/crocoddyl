@@ -69,7 +69,7 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    * @param[in] problem  Crocoddyl shooting problem
    */
-  IpoptInterface(const boost::shared_ptr<crocoddyl::ShootingProblem>& problem);
+  IpoptInterface(const std::shared_ptr<crocoddyl::ShootingProblem>& problem);
 
   virtual ~IpoptInterface();
 
@@ -415,9 +415,9 @@ class IpoptInterface : public Ipopt::TNLP {
    *
    * @return the IpoptInterface Data
    */
-  boost::shared_ptr<IpoptInterfaceData> createData(const std::size_t nx,
-                                                   const std::size_t ndx,
-                                                   const std::size_t nu);
+  std::shared_ptr<IpoptInterfaceData> createData(const std::size_t nx,
+                                                 const std::size_t ndx,
+                                                 const std::size_t nu);
 
   void resizeData();
 
@@ -445,7 +445,7 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * @brief Return the crocoddyl::ShootingProblem to be solved
    */
-  const boost::shared_ptr<crocoddyl::ShootingProblem>& get_problem() const;
+  const std::shared_ptr<crocoddyl::ShootingProblem>& get_problem() const;
 
   double get_cost() const;
 
@@ -460,16 +460,15 @@ class IpoptInterface : public Ipopt::TNLP {
   void set_us(const std::vector<Eigen::VectorXd>& us);
 
  private:
-  boost::shared_ptr<crocoddyl::ShootingProblem>
+  std::shared_ptr<crocoddyl::ShootingProblem>
       problem_;                      //!< Optimal control problem
   std::vector<Eigen::VectorXd> xs_;  //!< Vector of states
   std::vector<Eigen::VectorXd> us_;  //!< Vector of controls
   std::vector<std::size_t> ixu_;     //!< Index of at node i
   std::size_t nvar_;                 //!< Number of NLP variables
   std::size_t nconst_;               //!< Number of the NLP constraints
-  std::vector<boost::shared_ptr<IpoptInterfaceData>>
-      datas_;    //!< Vector of Datas
-  double cost_;  //!< Total cost
+  std::vector<std::shared_ptr<IpoptInterfaceData>> datas_;  //!< Vector of Datas
+  double cost_;                                             //!< Total cost
 
   IpoptInterface(const IpoptInterface&);
 

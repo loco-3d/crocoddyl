@@ -18,14 +18,14 @@ namespace python {
 
 void exposeDifferentialActionNumDiff() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionModelNumDiff> >();
+      std::shared_ptr<DifferentialActionModelNumDiff> >();
 
   bp::class_<DifferentialActionModelNumDiff,
              bp::bases<DifferentialActionModelAbstract> >(
       "DifferentialActionModelNumDiff",
       "Abstract class for computing calcDiff by using numerical "
       "differentiation.\n\n",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+      bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
                bp::optional<bool> >(
           bp::args("self", "model", "gaussApprox"),
           "Initialize the action model NumDiff.\n\n"
@@ -34,7 +34,7 @@ void exposeDifferentialActionNumDiff() {
           ":param gaussApprox: compute the Hessian using Gauss approximation "
           "(default False)"))
       .def<void (DifferentialActionModelNumDiff::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelNumDiff::calc,
@@ -45,12 +45,12 @@ void exposeDifferentialActionNumDiff() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelNumDiff::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc,
           bp::args("self", "data", "x"))
       .def<void (DifferentialActionModelNumDiff::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelNumDiff::calcDiff,
@@ -63,7 +63,7 @@ void exposeDifferentialActionNumDiff() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelNumDiff::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -90,8 +90,7 @@ void exposeDifferentialActionNumDiff() {
                     "Gauss approximation for computing the Hessians")
       .def(CopyableVisitor<DifferentialActionModelNumDiff>());
 
-  bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataNumDiff> >();
+  bp::register_ptr_to_python<std::shared_ptr<DifferentialActionDataNumDiff> >();
 
   bp::class_<DifferentialActionDataNumDiff,
              bp::bases<DifferentialActionDataAbstract> >(

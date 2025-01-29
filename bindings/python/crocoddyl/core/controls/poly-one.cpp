@@ -18,7 +18,7 @@ namespace python {
 
 void exposeControlParametrizationPolyOne() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationModelPolyOne> >();
+      std::shared_ptr<ControlParametrizationModelPolyOne> >();
 
   bp::class_<ControlParametrizationModelPolyOne,
              bp::bases<ControlParametrizationModelAbstract> >(
@@ -33,7 +33,7 @@ void exposeControlParametrizationPolyOne() {
           "Initialize the control dimensions.\n\n"
           ":param nw: dimension of differential control space"))
       .def<void (ControlParametrizationModelPolyOne::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calc", &ControlParametrizationModelPolyOne::calc,
           bp::args("self", "data", "t", "u"),
@@ -42,7 +42,7 @@ void exposeControlParametrizationPolyOne() {
           ":param t: normalized time in [0, 1]\n"
           ":param u: control parameters (dim control.nu)")
       .def<void (ControlParametrizationModelPolyOne::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "calcDiff", &ControlParametrizationModelPolyOne::calcDiff,
           bp::args("self", "data", "t", "u"),
@@ -55,7 +55,7 @@ void exposeControlParametrizationPolyOne() {
       .def("createData", &ControlParametrizationModelPolyOne::createData,
            bp::args("self"), "Create the poly-one data.")
       .def<void (ControlParametrizationModelPolyOne::*)(
-          const boost::shared_ptr<ControlParametrizationDataAbstract>&, double,
+          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
           const Eigen::Ref<const Eigen::VectorXd>&) const>(
           "params", &ControlParametrizationModelPolyOne::params,
           bp::args("self", "data", "t", "w"),
@@ -97,7 +97,7 @@ void exposeControlParametrizationPolyOne() {
       .def(CopyableVisitor<ControlParametrizationModelPolyOne>());
 
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationDataPolyOne> >();
+      std::shared_ptr<ControlParametrizationDataPolyOne> >();
 
   bp::class_<ControlParametrizationDataPolyOne,
              bp::bases<ControlParametrizationDataAbstract> >(

@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeContact2D() {
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModel2D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactModel2D> >();
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
                              // been removed in a future release
@@ -31,7 +31,7 @@ void exposeContact2D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                Eigen::Vector2d, std::size_t, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "nu", "gains"),
           "Initialize the contact model.\n\n"
@@ -41,7 +41,7 @@ void exposeContact2D() {
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     Eigen::Vector2d, bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "gains"),
           "Initialize the contact model.\n\n"
@@ -93,7 +93,7 @@ void exposeContact2D() {
 
 #pragma GCC diagnostic pop
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactData2D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactData2D> >();
 
   bp::class_<ContactData2D, bp::bases<ContactDataAbstract> >(
       "ContactData2D", "Data for 2D contact.\n\n",

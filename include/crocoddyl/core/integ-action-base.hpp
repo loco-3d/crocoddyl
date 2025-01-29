@@ -64,8 +64,8 @@ class IntegratedActionModelAbstractTpl
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelAbstractTpl(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
-      boost::shared_ptr<ControlParametrizationModelAbstract> control,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<ControlParametrizationModelAbstract> control,
       const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
 
@@ -80,7 +80,7 @@ class IntegratedActionModelAbstractTpl
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
   IntegratedActionModelAbstractTpl(
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<DifferentialActionModelAbstract> model,
       const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
   virtual ~IntegratedActionModelAbstractTpl();
@@ -90,7 +90,7 @@ class IntegratedActionModelAbstractTpl
    *
    * @return the sympletic integrator data
    */
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Return the number of inequality constraints
@@ -126,14 +126,14 @@ class IntegratedActionModelAbstractTpl
    * @brief Return the differential action model associated to this integrated
    * action model
    */
-  const boost::shared_ptr<DifferentialActionModelAbstract>& get_differential()
+  const std::shared_ptr<DifferentialActionModelAbstract>& get_differential()
       const;
 
   /**
    * @brief Return the control parametrization model associated to this
    * integrated action model
    */
-  const boost::shared_ptr<ControlParametrizationModelAbstract>& get_control()
+  const std::shared_ptr<ControlParametrizationModelAbstract>& get_control()
       const;
 
   /**
@@ -148,7 +148,7 @@ class IntegratedActionModelAbstractTpl
 
   DEPRECATED("The DifferentialActionModel should be set at construction time",
              void set_differential(
-                 boost::shared_ptr<DifferentialActionModelAbstract> model));
+                 std::shared_ptr<DifferentialActionModelAbstract> model));
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control
@@ -161,9 +161,9 @@ class IntegratedActionModelAbstractTpl
 
   void init();
 
-  boost::shared_ptr<DifferentialActionModelAbstract>
+  std::shared_ptr<DifferentialActionModelAbstract>
       differential_;  //!< Differential action model that is integrated
-  boost::shared_ptr<ControlParametrizationModelAbstract>
+  std::shared_ptr<ControlParametrizationModelAbstract>
       control_;  //!< Model of the control parametrization
 
   Scalar time_step_;   //!< Time step used for integration

@@ -21,15 +21,15 @@ void test_partial_derivatives_against_impulse_numdiff(
     ImpulseCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
     ActivationModelTypes::Type activation_type) {
   // create the model
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       ImpulseCostModelFactory().create(cost_type, model_type, activation_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control

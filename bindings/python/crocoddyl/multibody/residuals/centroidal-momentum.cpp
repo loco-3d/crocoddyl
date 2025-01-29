@@ -19,7 +19,7 @@ void exposeResidualCentroidalMomentum() {
   typedef Eigen::Matrix<double, 6, 1> Vector6d;
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualModelCentroidalMomentum> >();
+      std::shared_ptr<ResidualModelCentroidalMomentum> >();
 
   bp::class_<ResidualModelCentroidalMomentum,
              bp::bases<ResidualModelAbstract> >(
@@ -27,20 +27,20 @@ void exposeResidualCentroidalMomentum() {
       "This residual function defines the centroidal momentum tracking as r = "
       "h - href, with h and href as the\n"
       "current and reference centroidal momenta, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, Vector6d, std::size_t>(
+      bp::init<std::shared_ptr<StateMultibody>, Vector6d, std::size_t>(
           bp::args("self", "state", "href", "nu"),
           "Initialize the centroidal momentum residual model.\n\n"
           ":param state: state of the multibody system\n"
           ":param href: reference centroidal momentum\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, Vector6d>(
+      .def(bp::init<std::shared_ptr<StateMultibody>, Vector6d>(
           bp::args("self", "state", "href"),
           "Initialize the centroidal momentum residual model.\n\n"
           "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param href: reference centroidal momentum"))
       .def<void (ResidualModelCentroidalMomentum::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelCentroidalMomentum::calc,
@@ -50,11 +50,11 @@ void exposeResidualCentroidalMomentum() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelCentroidalMomentum::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelCentroidalMomentum::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelCentroidalMomentum::calcDiff,
@@ -65,7 +65,7 @@ void exposeResidualCentroidalMomentum() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelCentroidalMomentum::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -87,7 +87,7 @@ void exposeResidualCentroidalMomentum() {
       .def(CopyableVisitor<ResidualModelCentroidalMomentum>());
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<ResidualDataCentroidalMomentum> >();
+      std::shared_ptr<ResidualDataCentroidalMomentum> >();
 
   bp::class_<ResidualDataCentroidalMomentum, bp::bases<ResidualDataAbstract> >(
       "ResidualDataCentroidalMomentum",
