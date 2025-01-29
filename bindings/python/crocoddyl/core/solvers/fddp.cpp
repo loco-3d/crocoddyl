@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -68,7 +68,7 @@ void exposeSolverFDDP() {
                ":returns the optimal trajectory xopt, uopt and a boolean that "
                "describes if convergence was reached."))
       .def("updateExpectedImprovement", &SolverFDDP::updateExpectedImprovement,
-           bp::return_value_policy<bp::copy_const_reference>(),
+           bp::return_value_policy<bp::reference_existing_object>(),
            bp::args("self"), "Update the expected improvement model\n\n")
       .add_property("th_acceptNegStep",
                     bp::make_function(&SolverFDDP::get_th_acceptnegstep),

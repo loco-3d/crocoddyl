@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -92,7 +92,7 @@ void exposeSolverDDP() {
            "Return a sum of positive parameters whose sum quantifies the DDP "
            "termination.")
       .def("expectedImprovement", &SolverDDP::expectedImprovement,
-           bp::return_value_policy<bp::copy_const_reference>(),
+           bp::return_value_policy<bp::reference_existing_object>(),
            bp::args("self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
            "For computing the expected improvement, you need to compute first\n"
@@ -131,48 +131,57 @@ void exposeSolverDDP() {
            ":param model: action model in the given time instance")
       .add_property(
           "Vxx",
-          make_function(&SolverDDP::get_Vxx,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Vxx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Vxx")
       .add_property(
           "Vx",
-          make_function(&SolverDDP::get_Vx,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Vx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Vx")
       .add_property(
           "Qxx",
-          make_function(&SolverDDP::get_Qxx,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Qxx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxx")
       .add_property(
           "Qxu",
-          make_function(&SolverDDP::get_Qxu,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Qxu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxu")
       .add_property(
           "Quu",
-          make_function(&SolverDDP::get_Quu,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Quu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Quu")
       .add_property(
           "Qx",
-          make_function(&SolverDDP::get_Qx,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Qx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qx")
       .add_property(
           "Qu",
-          make_function(&SolverDDP::get_Qu,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_Qu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qu")
       .add_property(
           "K",
-          make_function(&SolverDDP::get_K,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_K,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "K")
       .add_property(
           "k",
-          make_function(&SolverDDP::get_k,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverDDP::get_k,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "k")
       .add_property(
           "reg_incFactor", bp::make_function(&SolverDDP::get_reg_incfactor),
@@ -231,12 +240,13 @@ void exposeSolverDDP() {
           bp::make_function(&SolverDDP::set_th_gaptol,
                             deprecated<>("Deprecated. Use th_gapTol")),
           "threshold for accepting a gap as non-zero")
-      .add_property("alphas",
-                    bp::make_function(
-                        &SolverDDP::get_alphas,
-                        bp::return_value_policy<bp::copy_const_reference>()),
-                    bp::make_function(&SolverDDP::set_alphas),
-                    "list of step length (alpha) values")
+      .add_property(
+          "alphas",
+          bp::make_function(
+              &SolverDDP::get_alphas,
+              bp::return_value_policy<bp::reference_existing_object>()),
+          bp::make_function(&SolverDDP::set_alphas),
+          "list of step length (alpha) values")
       .def(CopyableVisitor<SolverDDP>());
 }
 

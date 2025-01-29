@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,10 +26,12 @@ void exposeSolverBoxFDDP() {
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))
-      .add_property("Quu_inv",
-                    make_function(&SolverBoxFDDP::get_Quu_inv,
-                                  bp::return_internal_reference<>()),
-                    "inverse of the Quu computed by the box QP")
+      .add_property(
+          "Quu_inv",
+          make_function(
+              &SolverBoxFDDP::get_Quu_inv,
+              bp::return_value_policy<bp::reference_existing_object>()),
+          "inverse of the Quu computed by the box QP")
       .def(CopyableVisitor<SolverBoxFDDP>());
 }
 
