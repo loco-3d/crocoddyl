@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* :warning: BREAKING: replaced boost shared pointers by std ones in https://github.com/loco-3d/crocoddyl/pull/1339
 * Changed return policy in std::vector of Eigen's vector and matrices to be compliant with Pinocchio in https://github.com/loco-3d/crocoddyl/pull/1338
 * Prevent users to improperly setting residual references in https://github.com/loco-3d/crocoddyl/pull/1332
 * Fixed the inequality constraints' feasibility computation by incorporating bounds into the calculation in https://github.com/loco-3d/crocoddyl/pull/1307
