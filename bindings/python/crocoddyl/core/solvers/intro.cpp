@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,58 +88,69 @@ void exposeSolverIntro() {
                     "zero when solve is called.")
       .add_property(
           "Hu_rank",
-          make_function(&SolverIntro::get_Hu_rank,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Hu_rank,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "rank of Hu")
       .add_property(
           "YZ",
-          make_function(&SolverIntro::get_YZ,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_YZ,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "span and kernel of Hu")
       .add_property(
           "Qzz",
-          make_function(&SolverIntro::get_Qzz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Qzz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qzz")
       .add_property(
           "Qxz",
-          make_function(&SolverIntro::get_Qxz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Qxz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxz")
       .add_property(
           "Quz",
-          make_function(&SolverIntro::get_Quz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Quz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Quz")
       .add_property(
           "Qz",
-          make_function(&SolverIntro::get_Qz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Qz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qz")
       .add_property(
           "Hy",
-          make_function(&SolverIntro::get_Hy,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Hy,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Hy")
       .add_property(
           "Kz",
-          make_function(&SolverIntro::get_Kz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Kz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Kz")
       .add_property(
           "kz",
-          make_function(&SolverIntro::get_kz,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_kz,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "kz")
       .add_property(
           "Ks",
-          make_function(&SolverIntro::get_Ks,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_Ks,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Ks")
       .add_property(
           "ks",
-          make_function(&SolverIntro::get_ks,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_ks,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "ks")
       .def(CopyableVisitor<SolverIntro>());
 }

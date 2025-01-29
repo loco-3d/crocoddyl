@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, Heriot-Watt University
+// Copyright (C) 2020-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void exposeSolverKKT() {
            "Return a sum of positive parameters whose sum quantifies the DDP "
            "termination.")
       .def("expectedImprovement", &SolverKKT::expectedImprovement,
-           bp::return_value_policy<bp::copy_const_reference>(),
+           bp::return_value_policy<bp::reference_existing_object>(),
            bp::args("self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
            "For computing the expected improvement, you need to compute first\n"
@@ -86,33 +86,39 @@ void exposeSolverKKT() {
            "d2*a**2/2.")
       .add_property(
           "kkt",
-          make_function(&SolverKKT::get_kkt,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_kkt,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "kkt")
       .add_property(
           "kktref",
-          make_function(&SolverKKT::get_kktref,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_kktref,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "kktref")
       .add_property(
           "primaldual",
-          make_function(&SolverKKT::get_primaldual,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_primaldual,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "primaldual")
       .add_property(
           "lambdas",
-          make_function(&SolverKKT::get_lambdas,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_lambdas,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "lambdas")
       .add_property(
           "dxs",
-          make_function(&SolverKKT::get_dxs,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_dxs,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "dxs")
       .add_property(
           "dus",
-          make_function(&SolverKKT::get_dus,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverKKT::get_dus,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "dus")
       .def(CopyableVisitor<SolverKKT>());
 }
