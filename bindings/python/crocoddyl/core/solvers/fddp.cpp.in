@@ -144,7 +144,8 @@ void exposeSolverFDDP() {
            "termination.")
       .def(
           "expectedImprovement", &SolverFDDP::expectedImprovement,
-          bp::return_value_policy<bp::reference_existing_object>(), bp::args("self"),
+          bp::return_value_policy<bp::reference_existing_object>(),
+          bp::args("self"),
           "Return two scalars denoting the quadratic improvement model\n\n"
           "For computing the expected improvement, you need to compute first\n"
           "the search direction by running computeDirection. The quadratic\n"
@@ -255,12 +256,13 @@ void exposeSolverFDDP() {
                ":param type: type of dynamics solver\n"
                ":param Tshoot: number of shooting nodes used in the "
                "hybrid-shooting solver (default 0)"))
-      .add_property("alphas",
-                    bp::make_function(
-                        &SolverFDDP::get_alphas,
-                        bp::return_value_policy<bp::reference_existing_object>()),
-                    bp::make_function(&SolverFDDP::set_alphas),
-                    "list of step length (alpha) values")
+      .add_property(
+          "alphas",
+          bp::make_function(
+              &SolverFDDP::get_alphas,
+              bp::return_value_policy<bp::reference_existing_object>()),
+          bp::make_function(&SolverFDDP::set_alphas),
+          "list of step length (alpha) values")
       .add_property(
           "reg_incFactor", bp::make_function(&SolverFDDP::get_reg_incfactor),
           bp::make_function(&SolverFDDP::set_reg_incfactor),
@@ -327,103 +329,123 @@ void exposeSolverFDDP() {
                     "zero when solve is called.")
       .add_property(
           "Vxx",
-          make_function(&SolverFDDP::get_Vxx,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Vxx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Vxx")
       .add_property(
           "Vx",
-          make_function(&SolverFDDP::get_Vx,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Vx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Vx")
       .add_property(
           "Qxx",
-          make_function(&SolverFDDP::get_Qxx,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Qxx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxx")
       .add_property(
           "Qxu",
-          make_function(&SolverFDDP::get_Qxu,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Qxu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxu")
       .add_property(
           "Quu",
-          make_function(&SolverFDDP::get_Quu,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Quu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Quu")
       .add_property(
           "Qx",
-          make_function(&SolverFDDP::get_Qx,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Qx,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qx")
       .add_property(
           "Qu",
-          make_function(&SolverFDDP::get_Qu,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_Qu,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qu")
       .add_property(
           "K",
-          make_function(&SolverFDDP::get_K,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_K,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "K")
       .add_property(
           "k",
-          make_function(&SolverFDDP::get_k,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverFDDP::get_k,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "k")
       .add_property(
           "dxs",
-          make_function(&SolverFDDP::get_dxs,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_dxs,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "linear changes in the state trajectory.")
       .add_property(
           "dus",
-          make_function(&SolverFDDP::get_dus,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_dus,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "linear changes in the control trajectory.")
       .add_property(
           "Vxc",
-          make_function(&SolverFDDP::get_Vxc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_Vxc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Vxc")
       .add_property(
           "Qxc",
-          make_function(&SolverFDDP::get_Qxc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_Qxc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qxc")
       .add_property(
           "Quc",
-          make_function(&SolverFDDP::get_Quc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_Quc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Quc")
       .add_property(
           "dXc",
-          make_function(&SolverFDDP::get_dXc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_dXc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "dXc")
       .add_property(
           "dUc",
-          make_function(&SolverFDDP::get_dUc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_dUc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "dUc")
       .add_property(
           "Kc",
-          make_function(&SolverFDDP::get_Kc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_Kc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Kc")
       .add_property(
           "dHc",
-          make_function(&SolverFDDP::get_dHc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_dHc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "dHc")
       .add_property(
           "hc",
-          make_function(&SolverFDDP::get_hc,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_hc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "hc")
       .add_property(
           "beta_plus",
-          make_function(&SolverFDDP::get_beta_plus,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverFDDP::get_beta_plus,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "beta_plus")
       .def(CopyableVisitor<SolverFDDP>());
 #endif

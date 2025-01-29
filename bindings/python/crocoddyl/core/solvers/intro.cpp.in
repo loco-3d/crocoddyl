@@ -106,8 +106,9 @@ void exposeSolverIntro() {
           "kz")
       .add_property(
           "ks",
-          make_function(&SolverIntro::get_ks,
-                        bp::return_value_policy<bp::copy_const_reference>()),
+          make_function(
+              &SolverIntro::get_ks,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "ks")
       .add_property(
           "Ks",
@@ -117,8 +118,9 @@ void exposeSolverIntro() {
           "Ks")
       .add_property(
           "Qzc",
-          make_function(&SolverIntro::get_Qzc,
-                        bp::return_value_policy<bp::reference_existing_object>()),
+          make_function(
+              &SolverIntro::get_Qzc,
+              bp::return_value_policy<bp::reference_existing_object>()),
           "Qzc")
       .def(CopyableVisitor<SolverIntro>());
 #endif
