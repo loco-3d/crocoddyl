@@ -17,6 +17,13 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+    ControlParametrizationModelAbstract_multiplyByJacobian_J_wrap,
+    ControlParametrizationModelAbstract::multiplyByJacobian_J, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+    ControlParametrizationModelAbstract_multiplyJacobianTransposeBy_J_wrap,
+    ControlParametrizationModelAbstract::multiplyJacobianTransposeBy_J, 2, 3)
+
 class ControlParametrizationModelAbstract_wrap
     : public ControlParametrizationModelAbstract,
       public bp::wrapper<ControlParametrizationModelAbstract> {
