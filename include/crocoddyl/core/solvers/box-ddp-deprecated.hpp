@@ -22,7 +22,7 @@ class SolverBoxDDP : public SolverDDP {
   DEPRECATED(
       "Do not use SolverBoxDDP. Instead, you should use SolverBoxFDDP(problem, "
       "DynamicsSolverType::SingleShoot)",
-      explicit SolverBoxDDP(boost::shared_ptr<ShootingProblem> problem);)
+      explicit SolverBoxDDP(std::shared_ptr<ShootingProblem> problem);)
   virtual ~SolverBoxDDP();
 
   virtual void computePolicy(const std::size_t t);

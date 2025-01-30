@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
   // Formulating the optimal control problem
   std::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
   crocoddyl::SolverFDDP solver(problem,
                                crocoddyl::DynamicsSolverType::MultiShoot);
   if (CALLBACKS) {
