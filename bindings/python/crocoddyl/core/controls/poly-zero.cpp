@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -72,24 +72,28 @@ void exposeControlParametrizationPolyZero() {
            "parameters (dim control.nu)")
       .def("multiplyByJacobian",
            &ControlParametrizationModelPolyZero::multiplyByJacobian_J,
-           bp::args("self", "data", "A"),
+           bp::args("self", "data", "A", "op"),
            "Compute the product between the given matrix A and the derivative "
            "of the control with respect to the "
            "parameters.\n\n"
            "It assumes that calc has been run first.\n"
            ":param data: control-parametrization data\n"
            ":param A: matrix to multiply (dim na x control.nw)\n"
+           ":op assignment operator which sets, adds, or removes the given "
+           "results\n"
            ":return Product between A and the partial derivative of the value "
            "function (dim na x control.nu)")
       .def("multiplyJacobianTransposeBy",
            &ControlParametrizationModelPolyZero::multiplyJacobianTransposeBy_J,
-           bp::args("self", "data", "A"),
+           bp::args("self", "data", "A", "op"),
            "Compute the product between the transpose of the derivative of the "
            "control with respect to the parameters\n"
            "and a given matrix A.\n\n"
            "It assumes that calc has been run first.\n"
            ":param data: control-parametrization data\n"
            ":param A: matrix to multiply (dim control.nw x na)\n"
+           ":op assignment operator which sets, adds, or removes the given "
+           "results\n"
            ":return Product between the partial derivative of the value "
            "function (transposed) and A (dim control.nu x "
            "na)")
