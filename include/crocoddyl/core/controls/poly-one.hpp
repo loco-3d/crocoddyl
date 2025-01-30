@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,7 +133,7 @@ class ControlParametrizationModelPolyOneTpl
   virtual void multiplyByJacobian(
       const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp op = setto) const;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control
@@ -150,7 +151,7 @@ class ControlParametrizationModelPolyOneTpl
   virtual void multiplyJacobianTransposeBy(
       const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp op = setto) const;
 
  protected:
   using Base::nu_;
