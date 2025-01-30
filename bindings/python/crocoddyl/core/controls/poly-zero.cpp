@@ -72,31 +72,37 @@ void exposeControlParametrizationPolyZero() {
            "parameters (dim control.nu)")
       .def("multiplyByJacobian",
            &ControlParametrizationModelPolyZero::multiplyByJacobian_J,
-           bp::args("self", "data", "A", "op"),
-           "Compute the product between the given matrix A and the derivative "
-           "of the control with respect to the "
-           "parameters.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: control-parametrization data\n"
-           ":param A: matrix to multiply (dim na x control.nw)\n"
-           ":op assignment operator which sets, adds, or removes the given "
-           "results\n"
-           ":return Product between A and the partial derivative of the value "
-           "function (dim na x control.nu)")
-      .def("multiplyJacobianTransposeBy",
-           &ControlParametrizationModelPolyZero::multiplyJacobianTransposeBy_J,
-           bp::args("self", "data", "A", "op"),
-           "Compute the product between the transpose of the derivative of the "
-           "control with respect to the parameters\n"
-           "and a given matrix A.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: control-parametrization data\n"
-           ":param A: matrix to multiply (dim control.nw x na)\n"
-           ":op assignment operator which sets, adds, or removes the given "
-           "results\n"
-           ":return Product between the partial derivative of the value "
-           "function (transposed) and A (dim control.nu x "
-           "na)")
+           ControlParametrizationModelAbstract_multiplyByJacobian_J_wrap(
+               bp::args("self", "data", "A", "op"),
+               "Compute the product between the given matrix A and the "
+               "derivative "
+               "of the control with respect to the "
+               "parameters.\n\n"
+               "It assumes that calc has been run first.\n"
+               ":param data: control-parametrization data\n"
+               ":param A: matrix to multiply (dim na x control.nw)\n"
+               ":op assignment operator which sets, adds, or removes the given "
+               "results\n"
+               ":return Product between A and the partial derivative of the "
+               "value "
+               "function (dim na x control.nu)"))
+      .def(
+          "multiplyJacobianTransposeBy",
+          &ControlParametrizationModelPolyZero::multiplyJacobianTransposeBy_J,
+          ControlParametrizationModelAbstract_multiplyJacobianTransposeBy_J_wrap(
+              bp::args("self", "data", "A", "op"),
+              "Compute the product between the transpose of the derivative of "
+              "the "
+              "control with respect to the parameters\n"
+              "and a given matrix A.\n\n"
+              "It assumes that calc has been run first.\n"
+              ":param data: control-parametrization data\n"
+              ":param A: matrix to multiply (dim control.nw x na)\n"
+              ":op assignment operator which sets, adds, or removes the given "
+              "results\n"
+              ":return Product between the partial derivative of the value "
+              "function (transposed) and A (dim control.nu x "
+              "na)"))
       .def(CopyableVisitor<ControlParametrizationModelPolyZero>());
 }
 
