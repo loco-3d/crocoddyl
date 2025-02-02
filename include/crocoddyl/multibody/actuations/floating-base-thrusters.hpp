@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2014-2024, Heriot-Watt University
+// Copyright (C) 2014-2025, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
@@ -74,6 +75,15 @@ struct ThrusterTpl {
         min_thrust(clone.min_thrust),
         max_thrust(clone.max_thrust) {}
 
+  template <typename NewScalar>
+  ThrusterTpl<NewScalar> cast() const {
+    typedef ThrusterTpl<NewScalar> ReturnType;
+    ReturnType ret(
+        pose.template cast<NewScalar>(), static_cast<NewScalar>(ctorque), type,
+        static_cast<NewScalar>(min_thrust), static_cast<NewScalar>(max_thrust));
+    return ret;
+  }
+
   ThrusterTpl& operator=(const ThrusterTpl<Scalar>& other) {
     if (this != &other) {
       pose = other.pose;
@@ -132,6 +142,10 @@ template <typename _Scalar>
 class ActuationModelFloatingBaseThrustersTpl
     : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase,
+                         ActuationModelFloatingBaseThrustersTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -179,7 +193,7 @@ class ActuationModelFloatingBaseThrustersTpl
     // Update the floating base actuation part
     set_thrusters(thrusters_);
   }
-  virtual ~ActuationModelFloatingBaseThrustersTpl() {}
+  virtual ~ActuationModelFloatingBaseThrustersTpl() = default;
 
   /**
    * @brief Compute the actuation signal and actuation set from its thrust
@@ -191,7 +205,7 @@ class ActuationModelFloatingBaseThrustersTpl
    */
   virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>&,
-                    const Eigen::Ref<const VectorXs>& u) {
+                    const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -214,11 +228,11 @@ class ActuationModelFloatingBaseThrustersTpl
 #ifndef NDEBUG
   virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The derivatives has constant values which were set in createData.
     assert_pretty(MatrixXs(data->dtau_du).isApprox(W_thrust_),
@@ -227,18 +241,18 @@ class ActuationModelFloatingBaseThrustersTpl
 
   virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>& tau) {
+                        const Eigen::Ref<const VectorXs>& tau) override {
     data->u.noalias() = data->Mtau * tau;
   }
 
 #ifndef NDEBUG
   virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The torque transform has constant values which were set in createData.
     assert_pretty(MatrixXs(data->Mtau).isApprox(Mtau_), "Mtau has wrong value");
@@ -249,11 +263,23 @@ class ActuationModelFloatingBaseThrustersTpl
    *
    * @return the actuation data
    */
-  virtual std::shared_ptr<Data> createData() {
+  virtual std::shared_ptr<Data> createData() override {
     std::shared_ptr<Data> data =
         std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     updateData(data);
     return data;
+  }
+
+  template <typename NewScalar>
+  ActuationModelFloatingBaseThrustersTpl<NewScalar> cast() const {
+    typedef ActuationModelFloatingBaseThrustersTpl<NewScalar> ReturnType;
+    typedef StateMultibodyTpl<NewScalar> StateType;
+    typedef ThrusterTpl<NewScalar> ThrusterType;
+    std::vector<ThrusterType> thrusters = vector_cast<NewScalar>(thrusters_);
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        thrusters);
+    return ret;
   }
 
   /**
@@ -308,7 +334,7 @@ class ActuationModelFloatingBaseThrustersTpl
 
   const MatrixXs& get_S() const { return S_; }
 
-  void print(std::ostream& os) const {
+  void print(std::ostream& os) const override {
     os << "ActuationModelFloatingBaseThrusters {nu=" << nu_
        << ", nthrusters=" << n_thrusters_ << ", thrusters=" << std::endl;
     for (std::size_t i = 0; i < n_thrusters_; ++i) {

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +10,7 @@
 #ifndef CROCODDYL_CORE_SQUASHING_BASE_HPP_
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
+#include <boost/core/demangle.hpp>
 #include <boost/make_shared.hpp>
 #include <memory>
 #include <stdexcept>
@@ -19,8 +21,15 @@
 
 namespace crocoddyl {
 
+class SquashingModelBase {
+ public:
+  virtual ~SquashingModelBase() = default;
+
+  CROCODDYL_BASE_CAST(SquashingModelBase, SquashingModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class SquashingModelAbstractTpl {
+class SquashingModelAbstractTpl : public SquashingModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -34,7 +43,7 @@ class SquashingModelAbstractTpl {
       throw_pretty("Invalid argument: " << "ns cannot be zero");
     }
   };
-  virtual ~SquashingModelAbstractTpl() {};
+  virtual ~SquashingModelAbstractTpl() = default;
 
   virtual void calc(const std::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) = 0;
@@ -43,6 +52,15 @@ class SquashingModelAbstractTpl {
   virtual std::shared_ptr<SquashingDataAbstract> createData() {
     return std::allocate_shared<SquashingDataAbstract>(
         Eigen::aligned_allocator<SquashingDataAbstract>(), this);
+  }
+
+  /**
+   * @brief Print relevant information of the squashing model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const {
+    os << boost::core::demangle(typeid(*this).name());
   }
 
   std::size_t get_ns() const { return ns_; };
@@ -60,6 +78,7 @@ class SquashingModelAbstractTpl {
       s_ub_;  // Bound for the s variable (to apply using the Quadratic barrier)
   VectorXs
       s_lb_;  // Bound for the s variable (to apply using the Quadratic barrier)
+  SquashingModelAbstractTpl() : ns_(0) {};
 };
 
 template <typename _Scalar>
@@ -77,7 +96,8 @@ struct SquashingDataAbstractTpl {
     u.setZero();
     du_ds.setZero();
   }
-  virtual ~SquashingDataAbstractTpl() {}
+  SquashingDataAbstractTpl() {}
+  virtual ~SquashingDataAbstractTpl() = default;
 
   VectorXs u;
   MatrixXs du_ds;

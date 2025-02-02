@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,10 +17,7 @@ ActuationModelNumDiffTpl<Scalar>::ActuationModelNumDiffTpl(
     std::shared_ptr<Base> model)
     : Base(model->get_state(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ActuationModelNumDiffTpl<Scalar>::~ActuationModelNumDiffTpl() {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::calc(
@@ -76,7 +74,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < model_->get_state()->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -86,7 +84,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
   }
 
   // Computing the d actuation(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
@@ -112,7 +110,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < model_->get_state()->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -165,6 +163,15 @@ template <typename Scalar>
 std::shared_ptr<ActuationDataAbstractTpl<Scalar> >
 ActuationModelNumDiffTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActuationModelNumDiffTpl<NewScalar> ActuationModelNumDiffTpl<Scalar>::cast()
+    const {
+  typedef ActuationModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

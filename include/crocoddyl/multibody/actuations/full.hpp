@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,9 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase, ActuationModelFullTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -44,7 +48,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    */
   explicit ActuationModelFullTpl(std::shared_ptr<StateAbstract> state)
       : Base(state, state->get_nv()) {};
-  virtual ~ActuationModelFullTpl() {};
+  virtual ~ActuationModelFullTpl() = default;
 
   /**
    * @brief Compute the full actuation
@@ -55,7 +59,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>& /*x*/,
-                    const Eigen::Ref<const VectorXs>& u) {
+                    const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -74,11 +78,11 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
 #ifndef NDEBUG
   virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The derivatives has constant values which were set in createData.
     assert_pretty(data->dtau_dx.isZero(), "dtau_dx has wrong value");
@@ -89,7 +93,7 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>& tau) {
+                        const Eigen::Ref<const VectorXs>& tau) override {
     if (static_cast<std::size_t>(tau.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "tau has wrong dimension (it should be " +
@@ -101,11 +105,11 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
 #ifndef NDEBUG
   virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The torque transform has constant values which were set in createData.
     assert_pretty(MatrixXs(data->Mtau).isApprox(MatrixXs::Identity(nu_, nu_)),
@@ -118,13 +122,20 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] data  shared data (it should be of type DataCollectorContactTpl)
    * @return the cost data.
    */
-  virtual std::shared_ptr<Data> createData() {
+  virtual std::shared_ptr<Data> createData() override {
     std::shared_ptr<Data> data =
         std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->dtau_du.diagonal().setOnes();
     data->Mtau.setIdentity();
     return data;
   };
+
+  template <typename NewScalar>
+  ActuationModelFullTpl<NewScalar> cast() const {
+    typedef ActuationModelFullTpl<NewScalar> ReturnType;
+    ReturnType ret(state_->template cast<NewScalar>());
+    return ret;
+  }
 
  protected:
   using Base::nu_;

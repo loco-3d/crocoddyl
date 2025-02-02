@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,6 +24,7 @@ template <typename _Scalar>
 class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(SquashingModelBase, SquashingModelSmoothSatTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -46,10 +48,10 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     a_ = d_.array() * d_.array();
   }
 
-  virtual ~SquashingModelSmoothSatTpl() {};
+  virtual ~SquashingModelSmoothSatTpl() = default;
 
   virtual void calc(const std::shared_ptr<SquashingDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& s) {
+                    const Eigen::Ref<const VectorXs>& s) override {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u -
     // ub)^2))
@@ -60,7 +62,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
   }
 
   virtual void calcDiff(const std::shared_ptr<SquashingDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& s) {
+                        const Eigen::Ref<const VectorXs>& s) override {
     data->du_ds.diagonal() =
         Scalar(0.5) *
         (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2),
@@ -71,6 +73,14 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
                     Scalar(-0.5))
                  .array() *
              (s - u_ub_).array());
+  }
+
+  template <typename NewScalar>
+  SquashingModelSmoothSatTpl<NewScalar> cast() const {
+    typedef SquashingModelSmoothSatTpl<NewScalar> ReturnType;
+    ReturnType ret(u_lb_.template cast<NewScalar>(),
+                   u_ub_.template cast<NewScalar>(), ns_);
+    return ret;
   }
 
   const Scalar get_smooth() const { return smooth_; };
@@ -95,10 +105,9 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
 
   Scalar smooth_;
 
- protected:
+  using Base::ns_;
   using Base::s_lb_;
   using Base::s_ub_;
-
   using Base::u_lb_;
   using Base::u_ub_;
 };

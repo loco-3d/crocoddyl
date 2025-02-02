@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,9 +17,6 @@ template <typename Scalar>
 ActuationModelAbstractTpl<Scalar>::ActuationModelAbstractTpl(
     std::shared_ptr<StateAbstract> state, const std::size_t nu)
     : nu_(nu), state_(state) {}
-
-template <typename Scalar>
-ActuationModelAbstractTpl<Scalar>::~ActuationModelAbstractTpl() {}
 
 template <typename Scalar>
 std::shared_ptr<ActuationDataAbstractTpl<Scalar> >
