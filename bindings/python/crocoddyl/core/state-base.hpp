@@ -22,24 +22,30 @@ namespace python {
 class StateAbstract_wrap : public StateAbstract,
                            public bp::wrapper<StateAbstract> {
  public:
-  using StateAbstract::lb_;
-  using StateAbstract::ndx_;
-  using StateAbstract::nq_;
-  using StateAbstract::nv_;
-  using StateAbstract::nx_;
-  using StateAbstract::ub_;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(StateBase, StateAbstractTpl_wrap)
 
-  StateAbstract_wrap(int nx, int ndx)
-      : StateAbstract(nx, ndx), bp::wrapper<StateAbstract>() {
+  typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
+  typedef typename State::VectorXs VectorXs;
+  typedef typename State::MatrixXs MatrixXs;
+  using State::lb_;
+  using State::ndx_;
+  using State::nq_;
+  using State::nv_;
+  using State::nx_;
+  using State::ub_;
+
+  StateAbstractTpl_wrap(std::size_t nx, std::size_t ndx)
+      : State(nx, ndx), bp::wrapper<State>() {
     enableMultithreading() = false;
   }
 
-  Eigen::VectorXd zero() const {
-    return bp::call<Eigen::VectorXd>(this->get_override("zero").ptr());
+  VectorXs zero() const override {
+    return bp::call<VectorXs>(this->get_override("zero").ptr());
   }
 
-  Eigen::VectorXd rand() const {
-    return bp::call<Eigen::VectorXd>(this->get_override("rand").ptr());
+  VectorXs rand() const override {
+    return bp::call<VectorXs>(this->get_override("rand").ptr());
   }
 
   Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
@@ -58,9 +64,9 @@ class StateAbstract_wrap : public StateAbstract,
                                      (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
   }
 
-  void diff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-            const Eigen::Ref<const Eigen::VectorXd>& x1,
-            Eigen::Ref<Eigen::VectorXd> dxout) const {
+  void diff(const Eigen::Ref<const VectorXs>& x0,
+            const Eigen::Ref<const VectorXs>& x1,
+            Eigen::Ref<VectorXs> dxout) const override {
     dxout = diff_wrap(x0, x1);
   }
 
@@ -81,17 +87,16 @@ class StateAbstract_wrap : public StateAbstract,
                                      (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
   }
 
-  void integrate(const Eigen::Ref<const Eigen::VectorXd>& x,
-                 const Eigen::Ref<const Eigen::VectorXd>& dx,
-                 Eigen::Ref<Eigen::VectorXd> x1out) const {
+  void integrate(const Eigen::Ref<const VectorXs>& x,
+                 const Eigen::Ref<const VectorXs>& dx,
+                 Eigen::Ref<VectorXs> x1out) const override {
     x1out = integrate_wrap(x, dx);
   }
 
-  void Jdiff(const Eigen::Ref<const Eigen::VectorXd>& x0,
-             const Eigen::Ref<const Eigen::VectorXd>& x1,
-             Eigen::Ref<Eigen::MatrixXd> Jfirst,
-             Eigen::Ref<Eigen::MatrixXd> Jsecond,
-             const Jcomponent firstsecond) const {
+  void Jdiff(const Eigen::Ref<const VectorXs>& x0,
+             const Eigen::Ref<const VectorXs>& x1, Eigen::Ref<MatrixXs> Jfirst,
+             Eigen::Ref<MatrixXs> Jsecond,
+             const Jcomponent firstsecond) const override {
     bp::list res = Jdiff_wrap(x0, x1, firstsecond);
     switch (firstsecond) {
       case first: {
@@ -164,11 +169,11 @@ class StateAbstract_wrap : public StateAbstract,
     return Jacs;
   }
 
-  void Jintegrate(const Eigen::Ref<const Eigen::VectorXd>& x,
-                  const Eigen::Ref<const Eigen::VectorXd>& dx,
-                  Eigen::Ref<Eigen::MatrixXd> Jfirst,
-                  Eigen::Ref<Eigen::MatrixXd> Jsecond,
-                  const Jcomponent firstsecond, const AssignmentOp op) const {
+  void Jintegrate(const Eigen::Ref<const VectorXs>& x,
+                  const Eigen::Ref<const VectorXs>& dx,
+                  Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
+                  const Jcomponent firstsecond,
+                  const AssignmentOp op) const override {
     bp::list res = Jintegrate_wrap(x, dx, firstsecond);
     if (firstsecond == first || firstsecond == both) {
       if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
@@ -277,10 +282,10 @@ class StateAbstract_wrap : public StateAbstract,
     return Jacs;
   }
 
-  void JintegrateTransport(const Eigen::Ref<const Eigen::VectorXd>& x,
-                           const Eigen::Ref<const Eigen::VectorXd>& dx,
-                           Eigen::Ref<Eigen::MatrixXd> Jin,
-                           const Jcomponent firstsecond) const {
+  void JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
+                           const Eigen::Ref<const VectorXs>& dx,
+                           Eigen::Ref<MatrixXs> Jin,
+                           const Jcomponent firstsecond) const override {
     Jin = JintegrateTransport_wrap(x, dx, Jin, firstsecond);
   }
 
@@ -304,6 +309,13 @@ class StateAbstract_wrap : public StateAbstract,
     return bp::call<Eigen::MatrixXd>(
         this->get_override("JintegrateTransport").ptr(), (Eigen::VectorXd)x,
         (Eigen::VectorXd)dx, (Eigen::MatrixXd)Jin, firstsecond);
+  }
+
+  template <typename NewScalar>
+  StateAbstractTpl_wrap<NewScalar> cast() const {
+    typedef StateAbstractTpl_wrap<NewScalar> ReturnType;
+    ReturnType ret(nx_, ndx_);
+    return ret;
   }
 };
 

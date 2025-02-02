@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,6 +175,14 @@ void StateVectorTpl<Scalar>::JintegrateTransport(
         "Invalid argument: firstsecond must be either first or second. both "
         "not supported for this operation.");
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateVectorTpl<NewScalar> StateVectorTpl<Scalar>::cast() const {
+  typedef StateVectorTpl<NewScalar> ReturnType;
+  ReturnType res(nx_);
+  return res;
 }
 
 }  // namespace crocoddyl

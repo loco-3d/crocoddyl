@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,6 +107,11 @@ StateAbstractTpl<Scalar>::Jintegrate_Js(const Eigen::Ref<const VectorXs>& x,
       break;
   }
   return Jacs;
+}
+
+template <typename Scalar>
+void StateAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -288,6 +288,16 @@ template <typename Scalar>
 const std::shared_ptr<pinocchio::ModelTpl<Scalar> >&
 StateMultibodyTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateMultibodyTpl<NewScalar> StateMultibodyTpl<Scalar>::cast() const {
+  typedef StateMultibodyTpl<NewScalar> ReturnType;
+  typedef pinocchio::ModelTpl<NewScalar> ModelType;
+  ReturnType res(
+      std::make_shared<ModelType>(pinocchio_->template cast<NewScalar>()));
+  return res;
 }
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, New York
 // University,
 //                          Max Planck Gesellschaft, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -16,7 +16,7 @@ template <typename Scalar>
 StateNumDiffTpl<Scalar>::StateNumDiffTpl(std::shared_ptr<Base> state)
     : Base(state->get_nx(), state->get_ndx()),
       state_(state),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 StateNumDiffTpl<Scalar>::~StateNumDiffTpl() {}
@@ -101,7 +101,7 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0,
   dx_.setZero();
   diff(x0, x1, dx0_);
   if (firstsecond == first || firstsecond == both) {
-    const Scalar x0h_jac = e_jac_ * std::max(1., x0.norm());
+    const Scalar x0h_jac = e_jac_ * std::max(Scalar(1.), x0.norm());
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty(
@@ -120,7 +120,7 @@ void StateNumDiffTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0,
     Jfirst /= x0h_jac;
   }
   if (firstsecond == second || firstsecond == both) {
-    const Scalar x1h_jac = e_jac_ * std::max(1., x1.norm());
+    const Scalar x1h_jac = e_jac_ * std::max(Scalar(1.), x1.norm());
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty(
@@ -169,7 +169,7 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
   integrate(x, dx, x0_);
 
   if (firstsecond == first || firstsecond == both) {
-    const Scalar xh_jac = e_jac_ * std::max(1., x.norm());
+    const Scalar xh_jac = e_jac_ * std::max(Scalar(1.), x.norm());
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
       throw_pretty(
@@ -188,7 +188,7 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
     Jfirst /= xh_jac;
   }
   if (firstsecond == second || firstsecond == both) {
-    const Scalar dxh_jac = e_jac_ * std::max(1., dx.norm());
+    const Scalar dxh_jac = e_jac_ * std::max(Scalar(1.), dx.norm());
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
       throw_pretty(
@@ -205,6 +205,14 @@ void StateNumDiffTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
     }
     Jsecond /= dxh_jac;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateNumDiffTpl<NewScalar> StateNumDiffTpl<Scalar>::cast() const {
+  typedef StateNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(state_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>
